@@ -1,0 +1,354 @@
+[
+  {
+    "name": ".claude",
+    "path": ".claude",
+    "sha": "4d201783ea6d4e7f6f952c96039acadbe988f6a5",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.claude?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/.claude",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/4d201783ea6d4e7f6f952c96039acadbe988f6a5",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.claude?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/4d201783ea6d4e7f6f952c96039acadbe988f6a5",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/.claude"
+    }
+  },
+  {
+    "name": ".editorconfig",
+    "path": ".editorconfig",
+    "sha": "032c8faa1d910696f3209e03efe1bbaea32225e0",
+    "size": 261,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.editorconfig?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/.editorconfig",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/032c8faa1d910696f3209e03efe1bbaea32225e0",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/.editorconfig",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.editorconfig?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/032c8faa1d910696f3209e03efe1bbaea32225e0",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/.editorconfig"
+    }
+  },
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "a7be4f88662333b4ba21bdd097421ccceb2e6c3b",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.github?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/.github",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/a7be4f88662333b4ba21bdd097421ccceb2e6c3b",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.github?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/a7be4f88662333b4ba21bdd097421ccceb2e6c3b",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "ca7ac2b57483c5ef3c24704516bb93fc78847f9e",
+    "size": 7276,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.gitignore?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/.gitignore",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/ca7ac2b57483c5ef3c24704516bb93fc78847f9e",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/.gitignore?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/ca7ac2b57483c5ef3c24704516bb93fc78847f9e",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/.gitignore"
+    }
+  },
+  {
+    "name": "AGENT_ID_FORMAT_FIX.md",
+    "path": "AGENT_ID_FORMAT_FIX.md",
+    "sha": "72c5cbb0f3bcf895ad6011bce5ecc80ede1c801e",
+    "size": 5169,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/AGENT_ID_FORMAT_FIX.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/AGENT_ID_FORMAT_FIX.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/72c5cbb0f3bcf895ad6011bce5ecc80ede1c801e",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/AGENT_ID_FORMAT_FIX.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/AGENT_ID_FORMAT_FIX.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/72c5cbb0f3bcf895ad6011bce5ecc80ede1c801e",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/AGENT_ID_FORMAT_FIX.md"
+    }
+  },
+  {
+    "name": "AGENT_ORCHESTRATOR_IMPLEMENTATION.md",
+    "path": "AGENT_ORCHESTRATOR_IMPLEMENTATION.md",
+    "sha": "bdd862fdd351ac037d99ba93ac418d1acddc623e",
+    "size": 11695,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/AGENT_ORCHESTRATOR_IMPLEMENTATION.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/AGENT_ORCHESTRATOR_IMPLEMENTATION.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/bdd862fdd351ac037d99ba93ac418d1acddc623e",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/AGENT_ORCHESTRATOR_IMPLEMENTATION.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/AGENT_ORCHESTRATOR_IMPLEMENTATION.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/bdd862fdd351ac037d99ba93ac418d1acddc623e",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/AGENT_ORCHESTRATOR_IMPLEMENTATION.md"
+    }
+  },
+  {
+    "name": "DEPLOYMENTS_CONFIG_CHANGES.md",
+    "path": "DEPLOYMENTS_CONFIG_CHANGES.md",
+    "sha": "be242857fad11cb2451b21a5d18e6a4c88fd95aa",
+    "size": 5802,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/DEPLOYMENTS_CONFIG_CHANGES.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/DEPLOYMENTS_CONFIG_CHANGES.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/be242857fad11cb2451b21a5d18e6a4c88fd95aa",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/DEPLOYMENTS_CONFIG_CHANGES.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/DEPLOYMENTS_CONFIG_CHANGES.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/be242857fad11cb2451b21a5d18e6a4c88fd95aa",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/DEPLOYMENTS_CONFIG_CHANGES.md"
+    }
+  },
+  {
+    "name": "Directory.Build.props",
+    "path": "Directory.Build.props",
+    "sha": "128842597bc48524246a8cba52b8ead246438180",
+    "size": 172,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/Directory.Build.props?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/Directory.Build.props",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/128842597bc48524246a8cba52b8ead246438180",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/Directory.Build.props",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/Directory.Build.props?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/128842597bc48524246a8cba52b8ead246438180",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/Directory.Build.props"
+    }
+  },
+  {
+    "name": "IMPLEMENTATION_SUMMARY.md",
+    "path": "IMPLEMENTATION_SUMMARY.md",
+    "sha": "6485132067612987b9d52641e05bc556aceb57a2",
+    "size": 6647,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/IMPLEMENTATION_SUMMARY.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/IMPLEMENTATION_SUMMARY.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/6485132067612987b9d52641e05bc556aceb57a2",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/IMPLEMENTATION_SUMMARY.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/IMPLEMENTATION_SUMMARY.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/6485132067612987b9d52641e05bc556aceb57a2",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/IMPLEMENTATION_SUMMARY.md"
+    }
+  },
+  {
+    "name": "Mystira.StoryGenerator.sln",
+    "path": "Mystira.StoryGenerator.sln",
+    "sha": "9003e522920d02b79b22683cf2a111d263a887df",
+    "size": 23662,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/Mystira.StoryGenerator.sln?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/Mystira.StoryGenerator.sln",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/9003e522920d02b79b22683cf2a111d263a887df",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/Mystira.StoryGenerator.sln",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/Mystira.StoryGenerator.sln?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/9003e522920d02b79b22683cf2a111d263a887df",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/Mystira.StoryGenerator.sln"
+    }
+  },
+  {
+    "name": "QUICKSTART_AGENT_IDS.md",
+    "path": "QUICKSTART_AGENT_IDS.md",
+    "sha": "adb7a4badec7833e4087ad302be916d2f51603c9",
+    "size": 3854,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/QUICKSTART_AGENT_IDS.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/QUICKSTART_AGENT_IDS.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/adb7a4badec7833e4087ad302be916d2f51603c9",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/QUICKSTART_AGENT_IDS.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/QUICKSTART_AGENT_IDS.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/adb7a4badec7833e4087ad302be916d2f51603c9",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/QUICKSTART_AGENT_IDS.md"
+    }
+  },
+  {
+    "name": "RAG_MULTI_INDEX_IMPLEMENTATION.md",
+    "path": "RAG_MULTI_INDEX_IMPLEMENTATION.md",
+    "sha": "4ce75f58e17b0764100b1f81032455e88d639461",
+    "size": 6932,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/RAG_MULTI_INDEX_IMPLEMENTATION.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/RAG_MULTI_INDEX_IMPLEMENTATION.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/4ce75f58e17b0764100b1f81032455e88d639461",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/RAG_MULTI_INDEX_IMPLEMENTATION.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/RAG_MULTI_INDEX_IMPLEMENTATION.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/4ce75f58e17b0764100b1f81032455e88d639461",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/RAG_MULTI_INDEX_IMPLEMENTATION.md"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "2968218defa63670cc33182ac3e20a8d61e71857",
+    "size": 4019,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/README.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/README.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/2968218defa63670cc33182ac3e20a8d61e71857",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/README.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/2968218defa63670cc33182ac3e20a8d61e71857",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/README.md"
+    }
+  },
+  {
+    "name": "SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md",
+    "path": "SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md",
+    "sha": "d05dd4834f9adbfe6a4f0db2a144bc62c0804217",
+    "size": 16466,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/d05dd4834f9adbfe6a4f0db2a144bc62c0804217",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/d05dd4834f9adbfe6a4f0db2a144bc62c0804217",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/SCENARIO_CONSISTENCY_EVALUATION_IMPLEMENTATION.md"
+    }
+  },
+  {
+    "name": "build.ps1",
+    "path": "build.ps1",
+    "sha": "5eee2c1da1d95ab2a557e85a786978d6dbc8c1a3",
+    "size": 191,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/build.ps1?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/build.ps1",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/5eee2c1da1d95ab2a557e85a786978d6dbc8c1a3",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/build.ps1",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/build.ps1?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/5eee2c1da1d95ab2a557e85a786978d6dbc8c1a3",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/build.ps1"
+    }
+  },
+  {
+    "name": "build.sh",
+    "path": "build.sh",
+    "sha": "ef79778748b74ca70dcfca6a2f376a779fc2af8d",
+    "size": 198,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/build.sh?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/build.sh",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/ef79778748b74ca70dcfca6a2f376a779fc2af8d",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/build.sh",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/build.sh?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/ef79778748b74ca70dcfca6a2f376a779fc2af8d",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/build.sh"
+    }
+  },
+  {
+    "name": "docs",
+    "path": "docs",
+    "sha": "4bc4a61198e2a821dfb05c02957d605a29f964e8",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/docs?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/docs",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/4bc4a61198e2a821dfb05c02957d605a29f964e8",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/docs?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/4bc4a61198e2a821dfb05c02957d605a29f964e8",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/docs"
+    }
+  },
+  {
+    "name": "renovate.json",
+    "path": "renovate.json",
+    "sha": "5ee0fff6c8f67f9d9104688dfc52084f0ee44b8b",
+    "size": 424,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/renovate.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/renovate.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/5ee0fff6c8f67f9d9104688dfc52084f0ee44b8b",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.StoryGenerator/dev/renovate.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/renovate.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/blobs/5ee0fff6c8f67f9d9104688dfc52084f0ee44b8b",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/blob/dev/renovate.json"
+    }
+  },
+  {
+    "name": "scripts",
+    "path": "scripts",
+    "sha": "2f4f786517b9d6f9daa681004b6c5183e922fe65",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/scripts?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/scripts",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/2f4f786517b9d6f9daa681004b6c5183e922fe65",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/scripts?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/2f4f786517b9d6f9daa681004b6c5183e922fe65",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/scripts"
+    }
+  },
+  {
+    "name": "src",
+    "path": "src",
+    "sha": "5ef9060bca46dad6d1c5979d11ef0087eb9d520c",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/src?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/src",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/5ef9060bca46dad6d1c5979d11ef0087eb9d520c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/src?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/5ef9060bca46dad6d1c5979d11ef0087eb9d520c",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/src"
+    }
+  },
+  {
+    "name": "test-data",
+    "path": "test-data",
+    "sha": "e34719fa811b54daed155d990fcda05c2f1e6851",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/test-data?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/test-data",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/e34719fa811b54daed155d990fcda05c2f1e6851",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/test-data?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/e34719fa811b54daed155d990fcda05c2f1e6851",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/test-data"
+    }
+  },
+  {
+    "name": "tests",
+    "path": "tests",
+    "sha": "dfc76bbeea3fbe41bd47bf92246eef3862ae368c",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/tests?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/tests",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/dfc76bbeea3fbe41bd47bf92246eef3862ae368c",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/contents/tests?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.StoryGenerator/git/trees/dfc76bbeea3fbe41bd47bf92246eef3862ae368c",
+      "html": "https://github.com/phoenixvc/Mystira.StoryGenerator/tree/dev/tests"
+    }
+  }
+]

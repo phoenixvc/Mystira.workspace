@@ -1,0 +1,226 @@
+{
+  "repo": "Mystira.workspace",
+  "tree": [
+    {
+      "path": "packages/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0dbed0dbdd131857b97a3801298429f69a296dde",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0dbed0dbdd131857b97a3801298429f69a296dde"
+    },
+    {
+      "path": "packages/chain/.dockerignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13b8a23690ffc7863c078617f022ed0e28b1e152",
+      "size": 369,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/13b8a23690ffc7863c078617f022ed0e28b1e152"
+    },
+    {
+      "path": "packages/chain/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f10862a655909e3e17903d31f1aee38006853ee4",
+      "size": 6,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f10862a655909e3e17903d31f1aee38006853ee4"
+    },
+    {
+      "path": "packages/chain/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1ca60b3b3bd089ab435f9b49384f5f9e5766f865",
+      "size": 2089,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1ca60b3b3bd089ab435f9b49384f5f9e5766f865"
+    },
+    {
+      "path": "packages/chain/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "425ad6f510cf13e4cd48c4ca4fbd2efa958abd1e",
+      "size": 6629,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/425ad6f510cf13e4cd48c4ca4fbd2efa958abd1e"
+    },
+    {
+      "path": "packages/chain/client_example.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ef460544dda53e61fd58ce2450e3f34223e8435",
+      "size": 2138,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3ef460544dda53e61fd58ce2450e3f34223e8435"
+    },
+    {
+      "path": "packages/chain/conftest.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c262c84a0124627a21428afe0a4f5f3848d0c6eb",
+      "size": 366,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c262c84a0124627a21428afe0a4f5f3848d0c6eb"
+    },
+    {
+      "path": "packages/chain/package.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34d3be466dac28031f7d0b0420fe89cd7252c895",
+      "size": 350,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/34d3be466dac28031f7d0b0420fe89cd7252c895"
+    },
+    {
+      "path": "packages/chain/protos",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9bf5a1a27473e017042224561ef0f278f710e794",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9bf5a1a27473e017042224561ef0f278f710e794"
+    },
+    {
+      "path": "packages/chain/protos/mystira",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fd8212a34849ce57a591068bf9461bc6abddf90f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fd8212a34849ce57a591068bf9461bc6abddf90f"
+    },
+    {
+      "path": "packages/chain/protos/mystira/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f8f9291cfdb624e3580a2bffb903a0d0c7d7240b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f8f9291cfdb624e3580a2bffb903a0d0c7d7240b"
+    },
+    {
+      "path": "packages/chain/protos/mystira/chain/v1",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6c3c3fa18aa1e3c57d0dd23984a38ee7f8d1490a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6c3c3fa18aa1e3c57d0dd23984a38ee7f8d1490a"
+    },
+    {
+      "path": "packages/chain/protos/mystira/chain/v1/chain_service.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d154c099a720a144a1025e260adbded44f074c97",
+      "size": 4500,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d154c099a720a144a1025e260adbded44f074c97"
+    },
+    {
+      "path": "packages/chain/protos/mystira/chain/v1/types.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3e210bc8549997fde6ec73ba4d7f0fdb87ab445",
+      "size": 1785,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e3e210bc8549997fde6ec73ba4d7f0fdb87ab445"
+    },
+    {
+      "path": "packages/chain/pyproject.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ad7ccdc2a600349fdba0435cf370c3534ba956b",
+      "size": 628,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8ad7ccdc2a600349fdba0435cf370c3534ba956b"
+    },
+    {
+      "path": "packages/chain/requirements-dev.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03de4c5dea52773cc896f6aad177734aa1b907d5",
+      "size": 80,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/03de4c5dea52773cc896f6aad177734aa1b907d5"
+    },
+    {
+      "path": "packages/chain/requirements.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbc43649d0f260fee494120b29ee2980478a0f73",
+      "size": 281,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fbc43649d0f260fee494120b29ee2980478a0f73"
+    },
+    {
+      "path": "packages/chain/ruff.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "03a4425367b82b9055c55bc38bbb8a5198148479",
+      "size": 631,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/03a4425367b82b9055c55bc38bbb8a5198148479"
+    },
+    {
+      "path": "packages/chain/schemas.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d980c5525910d14d906cf373bba2cd6a0f30b82c",
+      "size": 645,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d980c5525910d14d906cf373bba2cd6a0f30b82c"
+    },
+    {
+      "path": "packages/chain/server.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f48c4f80a61e970e718cae59d877253db2bd5953",
+      "size": 4611,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f48c4f80a61e970e718cae59d877253db2bd5953"
+    },
+    {
+      "path": "packages/chain/services.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "45f67104c901737765ba2bedfc7bf4103dcdc97d",
+      "size": 4694,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/45f67104c901737765ba2bedfc7bf4103dcdc97d"
+    },
+    {
+      "path": "packages/chain/story.proto",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "50d5041768dc34d6bbe85018690106bfb3799e7a",
+      "size": 909,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/50d5041768dc34d6bbe85018690106bfb3799e7a"
+    },
+    {
+      "path": "packages/chain/story_pb2.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99dd52671f4864fb8376e528e71c1a73deaae578",
+      "size": 2570,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/99dd52671f4864fb8376e528e71c1a73deaae578"
+    },
+    {
+      "path": "packages/chain/story_pb2.pyi",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7cc2a5f8b055cbe8a1bcb5f3e241dd4a8487d740",
+      "size": 2206,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7cc2a5f8b055cbe8a1bcb5f3e241dd4a8487d740"
+    },
+    {
+      "path": "packages/chain/story_pb2_grpc.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d7111a4af82771a90698c635d067fa2124ef68d",
+      "size": 5142,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4d7111a4af82771a90698c635d067fa2124ef68d"
+    },
+    {
+      "path": "packages/chain/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f99e7bf94b432e9c84dbafedd3500b769ba26e5c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f99e7bf94b432e9c84dbafedd3500b769ba26e5c"
+    },
+    {
+      "path": "packages/chain/tests/__init__.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c1da032c8295b36f5bf87d8b28f6e76d33a9fc52",
+      "size": 39,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c1da032c8295b36f5bf87d8b28f6e76d33a9fc52"
+    },
+    {
+      "path": "packages/chain/tests/test_health.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72b896d26b02b2403627b6f09d6823cf1e55ad47",
+      "size": 932,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/72b896d26b02b2403627b6f09d6823cf1e55ad47"
+    }
+  ],
+  "targetPath": "packages/chain",
+  "sha": "ac8859da6ac3a510253fbace6294a6ba56ac7a8f",
+  "ref": "dev"
+}

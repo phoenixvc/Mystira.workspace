@@ -1,0 +1,3081 @@
+{
+  "repo": "Mystira.workspace",
+  "tree": [
+    {
+      "path": "packages/devhub",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1cf89f3664901d9b2f7273ba1949aaf507ed460d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1cf89f3664901d9b2f7273ba1949aaf507ed460d"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fd8346125973d1e95b098c0eb5785149050eff0e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fd8346125973d1e95b098c0eb5785149050eff0e"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4b04065215324b47166245b022ddfbf439bf639a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4b04065215324b47166245b022ddfbf439bf639a"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Data/CosmosConsoleDbContext.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccf80969a7f89165039b0f4bb5f1bf72420484ac",
+      "size": 9307,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ccf80969a7f89165039b0f4bb5f1bf72420484ac"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Extensions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "43d11ef1df94af21311aea7198dfd67f3a15b1c6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/43d11ef1df94af21311aea7198dfd67f3a15b1c6"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Extensions/DataTableExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd67afe1f32abb66bb507c013c79574f63f13740",
+      "size": 1557,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fd67afe1f32abb66bb507c013c79574f63f13740"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Mystira.App.CosmosConsole.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77f15a1dffdc687de14bfd714e7b0fd19d86475d",
+      "size": 1289,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/77f15a1dffdc687de14bfd714e7b0fd19d86475d"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "479c9fe57f99a663d739e61b45e01486ca2ef390",
+      "size": 26078,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/479c9fe57f99a663d739e61b45e01486ca2ef390"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1efe23ef8f99de551e5a6be36907105be0bc022",
+      "size": 9870,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e1efe23ef8f99de551e5a6be36907105be0bc022"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5cb44f80fe54a0eb89773bf21c087d12ab8a71cb",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/5cb44f80fe54a0eb89773bf21c087d12ab8a71cb"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Services/CosmosReportingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b12b2f12987baa69e0146ebdbc0ecc017445772e",
+      "size": 7715,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b12b2f12987baa69e0146ebdbc0ecc017445772e"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Services/ICosmosReportingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5e67c1e295ac960327ee310e9b5cb79fbe30f657",
+      "size": 1043,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5e67c1e295ac960327ee310e9b5cb79fbe30f657"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Services/IMigrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa7af23702d447846f017042036e82c34aca6336",
+      "size": 1542,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fa7af23702d447846f017042036e82c34aca6336"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/Services/MigrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e89b346b390c88fb9392e35da308dc1872d76c06",
+      "size": 12338,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e89b346b390c88fb9392e35da308dc1872d76c06"
+    },
+    {
+      "path": "packages/devhub/Mystira.App.CosmosConsole/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "97786521f92922085d3f6a0cad3bdfb6bd782111",
+      "size": 272,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/97786521f92922085d3f6a0cad3bdfb6bd782111"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "19da0ef7b91618c98ede3b6ecba2ce42fc48983f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/19da0ef7b91618c98ede3b6ecba2ce42fc48983f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Commands",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "71c12aa8ee1dc35b1de495b1e8c0c681874e540d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/71c12aa8ee1dc35b1de495b1e8c0c681874e540d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Commands/MigrationCommands.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a29810492c3fa3a743a9e5c2b39d62a88a9b853",
+      "size": 12571,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1a29810492c3fa3a743a9e5c2b39d62a88a9b853"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Models",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "010ba5e1df3614f0b90f5052b10ff99a9cdd5d4a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/010ba5e1df3614f0b90f5052b10ff99a9cdd5d4a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Models/CommandRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e50d96e85d518208eaf17ac760fe27951b2fbd5b",
+      "size": 2441,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e50d96e85d518208eaf17ac760fe27951b2fbd5b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Models/CommandResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b894ee956fa0bb83bac802c792064eda1095261",
+      "size": 701,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4b894ee956fa0bb83bac802c792064eda1095261"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Mystira.DevHub.CLI.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d1eb539a30a29f1379adcb92b9eb2ef99367fa4",
+      "size": 1123,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5d1eb539a30a29f1379adcb92b9eb2ef99367fa4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a09e840bf3175f74408547caf7533362fe287d26",
+      "size": 4264,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a09e840bf3175f74408547caf7533362fe287d26"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25c8edad615354d3bb95ee69dfc9ce8e9b1eb65b",
+      "size": 6139,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/25c8edad615354d3bb95ee69dfc9ce8e9b1eb65b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.CLI/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cd72083410db69b70ace046bbdf922e7a485e8f5",
+      "size": 475,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cd72083410db69b70ace046bbdf922e7a485e8f5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "182cd8fe6e9296d9bb96abc7129fe89dd4ae5375",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/182cd8fe6e9296d9bb96abc7129fe89dd4ae5375"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.Services/Migration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "17ccf13bf2ec200fe18be4df211c84481abe917b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/17ccf13bf2ec200fe18be4df211c84481abe917b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.Services/Migration/IMigrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a19f8e3da920f153100a9a79d53314eabd50e2c",
+      "size": 1861,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8a19f8e3da920f153100a9a79d53314eabd50e2c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.Services/Migration/MigrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3fb004990fd494ba45fdad6125b01b07b6f937af",
+      "size": 28947,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3fb004990fd494ba45fdad6125b01b07b6f937af"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub.Services/Mystira.DevHub.Services.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc78e1cbbc761d20d58326de67b1f5cd8e1d879e",
+      "size": 689,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc78e1cbbc761d20d58326de67b1f5cd8e1d879e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "51ad1c08181cb06815cf21bdf5377fadda063711",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/51ad1c08181cb06815cf21bdf5377fadda063711"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24858190bf37733bf38373033a3e56f5ec00de38",
+      "size": 612,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/24858190bf37733bf38373033a3e56f5ec00de38"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eaf0c5eb20be4a10be11fce6a65eeb5fd8acf7b4",
+      "size": 23305,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eaf0c5eb20be4a10be11fce6a65eeb5fd8acf7b4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/architecture.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d64f998de526624d9b778090ae67fceac93662aa",
+      "size": 24333,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d64f998de526624d9b778090ae67fceac93662aa"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/configuration.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "85782f1b001e3529b25d29175a5f5258d32b05c3",
+      "size": 9743,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/85782f1b001e3529b25d29175a5f5258d32b05c3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/index.html",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a2922ce53416e62158890b859240b0a75fc8ee3",
+      "size": 363,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a2922ce53416e62158890b859240b0a75fc8ee3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/package-lock.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3df4bcbe43aa26448df8e8f9f78432c5ca43f96a",
+      "size": 213345,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3df4bcbe43aa26448df8e8f9f78432c5ca43f96a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/package.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4333108172cb89a008d0f735a08fd62fcdcdf58a",
+      "size": 1461,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4333108172cb89a008d0f735a08fd62fcdcdf58a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/postcss.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e7af2b7f1a6f391da1631d93968a9d487ba977d",
+      "size": 80,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2e7af2b7f1a6f391da1631d93968a9d487ba977d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/quickstart.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a33bcbfd17fed5cc70a1b1cd96fb34c54836460",
+      "size": 3660,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a33bcbfd17fed5cc70a1b1cd96fb34c54836460"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/security.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5960f84b510658f3bd27925547a787c33562958a",
+      "size": 7160,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5960f84b510658f3bd27925547a787c33562958a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "44d0fe6fcdd0dc7db11154cceb992fa56589c55c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/44d0fe6fcdd0dc7db11154cceb992fa56589c55c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/Cargo.lock",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cfb10658e38c7b23b7913b4124e178bd663595f",
+      "size": 142125,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cfb10658e38c7b23b7913b4124e178bd663595f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/Cargo.toml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "603b2c93f066411e37a9afe395d7598a30aa937c",
+      "size": 992,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/603b2c93f066411e37a9afe395d7598a30aa937c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/build.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d860e1e6a7cac333c3cc0bc9cb67faf286b07d69",
+      "size": 39,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d860e1e6a7cac333c3cc0bc9cb67faf286b07d69"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/capabilities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7b8eb9696d3eb165fe08c425ba63b78d4ce2c935",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7b8eb9696d3eb165fe08c425ba63b78d4ce2c935"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/capabilities/default.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b8b1efedcc9c934f2e1fa5b0328e7f2ef564a991",
+      "size": 301,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b8b1efedcc9c934f2e1fa5b0328e7f2ef564a991"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/generate-icon.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "666d8100f6768c7e19d775a0fe88ea170e26d1b8",
+      "size": 2043,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/666d8100f6768c7e19d775a0fe88ea170e26d1b8"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "56b0cba25fc9c1b6a59446bd4ea8e5f4a95c9a7d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/56b0cba25fc9c1b6a59446bd4ea8e5f4a95c9a7d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/128x128.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4df0de63814ffba26d7a4a015f3d599bdf28c75",
+      "size": 10105,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d4df0de63814ffba26d7a4a015f3d599bdf28c75"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/128x128@2x.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1f8c48d7175c899e5d14f58474256686cfcceea",
+      "size": 8689,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e1f8c48d7175c899e5d14f58474256686cfcceea"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/32x32.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f20490fe52ba15e1c373747d7386a85aa0250a6b",
+      "size": 2163,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f20490fe52ba15e1c373747d7386a85aa0250a6b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square107x107Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c27bad949aedb87c90bd7dda34a0a4c2ccdd90c3",
+      "size": 8539,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c27bad949aedb87c90bd7dda34a0a4c2ccdd90c3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square142x142Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c306eba113d1c42600b396ebc1a36579d6ccfc8c",
+      "size": 11493,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c306eba113d1c42600b396ebc1a36579d6ccfc8c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square150x150Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "769c6a5b23ff578cd3f0a935c5df847c250937ab",
+      "size": 12404,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/769c6a5b23ff578cd3f0a935c5df847c250937ab"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square284x284Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9321ed2396643ab16134fb0435bc84c7d1223b3c",
+      "size": 26957,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9321ed2396643ab16134fb0435bc84c7d1223b3c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square30x30Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5655ee3e1778876dab00bc556ed5d0338fccf0d3",
+      "size": 2026,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5655ee3e1778876dab00bc556ed5d0338fccf0d3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square310x310Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "18cb2d2d6f148d799815ac5b15af70ea4cfb77e6",
+      "size": 31300,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/18cb2d2d6f148d799815ac5b15af70ea4cfb77e6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square44x44Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4649571aac3b4c088fc88412595445a94569d001",
+      "size": 3210,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4649571aac3b4c088fc88412595445a94569d001"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square71x71Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e733162ce6c21f69f57d4d2a864c356e04d28ca1",
+      "size": 5414,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e733162ce6c21f69f57d4d2a864c356e04d28ca1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/Square89x89Logo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a3bc7425aa4377fd3ac13870a7e47ea2d350d50",
+      "size": 6980,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6a3bc7425aa4377fd3ac13870a7e47ea2d350d50"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/StoreLogo.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4ddff60f587a66938a3bb6275a3f0b8bd1bbad8",
+      "size": 3644,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e4ddff60f587a66938a3bb6275a3f0b8bd1bbad8"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/app-icon.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c4eb19cab0eed30fba5fa94a879ddca0ee7c273",
+      "size": 8205,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1c4eb19cab0eed30fba5fa94a879ddca0ee7c273"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/icon.icns",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d2928982b32beeefd7e0037fd11c63d8a9e062b",
+      "size": 370341,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8d2928982b32beeefd7e0037fd11c63d8a9e062b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/icon.ico",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a7f45c559a74d4390fbea647423116f779bb4e1",
+      "size": 23396,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a7f45c559a74d4390fbea647423116f779bb4e1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/icons/icon.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3dd0fb665500ef8de0853fd8602e8657017ae58d",
+      "size": 61013,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3dd0fb665500ef8de0853fd8602e8657017ae58d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "72de6f691dd6d9f251a2e2f14d78ed645ef51fa9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/72de6f691dd6d9f251a2e2f14d78ed645ef51fa9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fa84f5e7a5bf1cffd42d172494c81178452d7da5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fa84f5e7a5bf1cffd42d172494c81178452d7da5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/cli.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf1ac7520c6f0049f6238f505dde7723ded5041e",
+      "size": 3194,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cf1ac7520c6f0049f6238f505dde7723ded5041e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deploy_now.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4cf24215d50fcf550657c903abffe6400f06e308",
+      "size": 31067,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4cf24215d50fcf550657c903abffe6400f06e308"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aeeb293db12155434a3523e9e6d8193977509b06",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/aeeb293db12155434a3523e9e6d8193977509b06"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/deploy.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb89dcdd7001d85a5ffbc4e827c23a8ca205557d",
+      "size": 12355,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fb89dcdd7001d85a5ffbc4e827c23a8ca205557d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/helpers.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "482536abb2cd90514ae7c1aafdcf0887833b596a",
+      "size": 7017,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/482536abb2cd90514ae7c1aafdcf0887833b596a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d44b57f0c0e734cdc11f8e7bb45454d9340fe2cb",
+      "size": 922,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d44b57f0c0e734cdc11f8e7bb45454d9340fe2cb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/preview.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bed26a5953f5ae324a48ea1c73d3d0efec0f7813",
+      "size": 8292,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bed26a5953f5ae324a48ea1c73d3d0efec0f7813"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/status.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea1466e90a2480cddee353d07a9b22c27ff7834c",
+      "size": 18487,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ea1466e90a2480cddee353d07a9b22c27ff7834c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/deployment/validate.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8248a04c418a431e901aae3fc92518a191e6927",
+      "size": 6646,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f8248a04c418a431e901aae3fc92518a191e6927"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48fc884849ef42f91bc5dab2d8d65a38b5262a43",
+      "size": 913,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48fc884849ef42f91bc5dab2d8d65a38b5262a43"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/azure/resources.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a9206fa6d3ad9fdc7a58c21078d991d4f624630",
+      "size": 18469,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a9206fa6d3ad9fdc7a58c21078d991d4f624630"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/cache.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "82f3e68f1790f6187a982f856a3cb104d170a9f9",
+      "size": 3246,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/82f3e68f1790f6187a982f856a3cb104d170a9f9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/cli.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5decffb9324d49b728c765b060335fa83929734",
+      "size": 4150,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f5decffb9324d49b728c765b060335fa83929734"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/config.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ef9485210ceb20abd33028af41cdf5744dbe36a",
+      "size": 10202,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7ef9485210ceb20abd33028af41cdf5744dbe36a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/cosmos.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c91b16530cfd008b4b993619623b60d804094987",
+      "size": 10101,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c91b16530cfd008b4b993619623b60d804094987"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/github.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5e707757821f679020e408813774d4f71b6e69b",
+      "size": 7533,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c5e707757821f679020e408813774d4f71b6e69b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/helpers.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20bbdf01f92d1a5d903fe23aa11fc36925c28b00",
+      "size": 5458,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/20bbdf01f92d1a5d903fe23aa11fc36925c28b00"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/infrastructure.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07e392002821a9d02d7861294144d6a7841db7b7",
+      "size": 2471,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/07e392002821a9d02d7861294144d6a7841db7b7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/main.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a9b66b877f86d335de31d0a7388d0c33ace7ead6",
+      "size": 4770,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a9b66b877f86d335de31d0a7388d0c33ace7ead6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/rate_limit.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a0349f6a28672036dedd25dff2d22443d54c8d61",
+      "size": 4160,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a0349f6a28672036dedd25dff2d22443d54c8d61"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/retry.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a75b850dc46070932b5d50e29c6190e89d7d480e",
+      "size": 4933,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a75b850dc46070932b5d50e29c6190e89d7d480e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d44dc30664ca8028cdf64c41d994191dd9f3478e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d44dc30664ca8028cdf64c41d994191dd9f3478e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services/helpers.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0dc26dc9deeb6dbf6d38e036145c7f098665f5ce",
+      "size": 7106,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0dc26dc9deeb6dbf6d38e036145c7f098665f5ce"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services/lifecycle.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3c9ea1337d5394316aa3355186b2ff955b31a69b",
+      "size": 7518,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3c9ea1337d5394316aa3355186b2ff955b31a69b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services/mod.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ffc0123bfd3ecf224622d003a1c3aeb83308184",
+      "size": 512,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0ffc0123bfd3ecf224622d003a1c3aeb83308184"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services/ports.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd21c0570665998a8726810b0e427514d4c5eb34",
+      "size": 5708,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bd21c0570665998a8726810b0e427514d4c5eb34"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/services/status.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "448f175b2c244a9e975e796e6ddb8f50c340cf14",
+      "size": 1613,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/448f175b2c244a9e975e796e6ddb8f50c340cf14"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/types.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ac71146283d2197778d8b9c2c56b8844700ef30",
+      "size": 4215,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7ac71146283d2197778d8b9c2c56b8844700ef30"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/src/utils.rs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0750d302134a554e6f1c42dca26b2210d7b4298e",
+      "size": 15692,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0750d302134a554e6f1c42dca26b2210d7b4298e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src-tauri/tauri.conf.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "97c56061d385e05c30c3a9ef240001bade1bb8e8",
+      "size": 1347,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/97c56061d385e05c30c3a9ef240001bade1bb8e8"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5f6bdb0a98634f54701be844cc97774ede20f93c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/5f6bdb0a98634f54701be844cc97774ede20f93c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/App.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e11c90d525545050a0f88364a14dc568c14e9f24",
+      "size": 37,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e11c90d525545050a0f88364a14dc568c14e9f24"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/App.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9564216bef2d3e7acff2e7b8b7cd5c347cf811d3",
+      "size": 5169,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9564216bef2d3e7acff2e7b8b7cd5c347cf811d3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0b5dab5681b6892763c602f59778b4e17db5812c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0b5dab5681b6892763c602f59778b4e17db5812c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/BicepViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff75ec3649645b4600981aaf6d7edbf013368568",
+      "size": 11451,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ff75ec3649645b4600981aaf6d7edbf013368568"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ConfirmDialog.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3f3346252bfa42247fa86601a0e32a50e3fe4ef",
+      "size": 3023,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d3f3346252bfa42247fa86601a0e32a50e3fe4ef"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/DestroyButton.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4db1479c1a9aa34382a11b76fcc421ae89f08db",
+      "size": 8091,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e4db1479c1a9aa34382a11b76fcc421ae89f08db"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ErrorBoundary.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b0489bdbc5d002eded87c9daf3893b6aadef1f23",
+      "size": 4037,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b0489bdbc5d002eded87c9daf3893b6aadef1f23"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ExportPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5185cb9e3f32f4db375f8d5971365f82956a2ade",
+      "size": 8076,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5185cb9e3f32f4db375f8d5971365f82956a2ade"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/JsonViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "495b8460b3a1452b333d7b744c2645327720bda7",
+      "size": 7532,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/495b8460b3a1452b333d7b744c2645327720bda7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/LiveRegion.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3092ec9ff32941126c6d56adfdd50925e5c0995",
+      "size": 718,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f3092ec9ff32941126c6d56adfdd50925e5c0995"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/TruncatedId.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8d285ce3057ee42c6845c66d118d8450256a9596",
+      "size": 4373,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8d285ce3057ee42c6845c66d118d8450256a9596"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/VisuallyHidden.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54ed88b4dccd9a50ab6066a863c21c003a588cd5",
+      "size": 711,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54ed88b4dccd9a50ab6066a863c21c003a588cd5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/WebViewPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93b47bc13a5180f5b9808730eec7e28b2999c306",
+      "size": 1343,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/93b47bc13a5180f5b9808730eec7e28b2999c306"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/__tests__",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cce59885228f31529ca006c48d8eddfadcfcf66f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/cce59885228f31529ca006c48d8eddfadcfcf66f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/__tests__/Dashboard.test.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e3d72270a8a1979699972a8f60e40850318cc0a",
+      "size": 4311,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8e3d72270a8a1979699972a8f60e40850318cc0a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be58e20091005a260d3ecd6b13e68e24531b47ea",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/be58e20091005a260d3ecd6b13e68e24531b47ea"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app/AppBottomPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9b84d1fba742f6467a2105131787e0eb967ce69",
+      "size": 1719,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e9b84d1fba742f6467a2105131787e0eb967ce69"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app/AppContent.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d92bb20abf536f3b4c52108d3005bde55d6f842",
+      "size": 1162,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4d92bb20abf536f3b4c52108d3005bde55d6f842"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app/AppSidebar.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "53c219fff1c6ee2362e27a8ea02c589cc9393267",
+      "size": 5740,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/53c219fff1c6ee2362e27a8ea02c589cc9393267"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app/VSCodeLayout.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c8d0aaaccda0ae2a8a1d2017fafa16d6caa3a52e",
+      "size": 3950,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c8d0aaaccda0ae2a8a1d2017fafa16d6caa3a52e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/app/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6de7f47dfac2f67831bf18939b81ace76437756e",
+      "size": 350,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6de7f47dfac2f67831bf18939b81ace76437756e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/cosmos",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "696a5716d58c20e259b57abb703b6d55c1d590dc",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/696a5716d58c20e259b57abb703b6d55c1d590dc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/cosmos/CosmosDbPreviewWarning.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "170a7984230fd02f589ecec8a09e30a7bc4cecfa",
+      "size": 2581,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/170a7984230fd02f589ecec8a09e30a7bc4cecfa"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/cosmos/CosmosExplorer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b79eccb1bea1192d338eadee3054b81ca8202669",
+      "size": 2117,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b79eccb1bea1192d338eadee3054b81ca8202669"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/cosmos/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "451286af5726d1cae295fedd66fafb4f6b1401af",
+      "size": 140,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/451286af5726d1cae295fedd66fafb4f6b1401af"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/dashboard",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "80b9b6e29f953f35499ba1a4555051661df6dae2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/80b9b6e29f953f35499ba1a4555051661df6dae2"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/dashboard/Dashboard.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f678cf8499ec847fd08425356813ae7e168c2065",
+      "size": 13451,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f678cf8499ec847fd08425356813ae7e168c2065"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/dashboard/StatisticsPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60396ab82366e687b5baf81604cddfb500067e4f",
+      "size": 13292,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/60396ab82366e687b5baf81604cddfb500067e4f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/dashboard/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3bf4b9af18233bc4b82ccbf8cb23d8438b732176",
+      "size": 116,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3bf4b9af18233bc4b82ccbf8cb23d8438b732176"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "74081625f3379a41077f9fa9c7de27688f8a1f16",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/74081625f3379a41077f9fa9c7de27688f8a1f16"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/InfrastructurePanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26b9d3b1056ff74af4bd1168a4f6263ef8eb0f26",
+      "size": 12952,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/26b9d3b1056ff74af4bd1168a4f6263ef8eb0f26"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/InfrastructureStatus.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a23443c1f7d478b9581911777508ff4e64a344e7",
+      "size": 14992,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a23443c1f7d478b9581911777508ff4e64a344e7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/ResourceGroupConfig.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bb8d5c86083ee5ed9f166e77d8833818c9652b0",
+      "size": 16430,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7bb8d5c86083ee5ed9f166e77d8833818c9652b0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b02c41b7756e2f2427d90a123b1dfb6bf1a717ac",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b02c41b7756e2f2427d90a123b1dfb6bf1a717ac"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/ActionButtons.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "018fcef9e9098fc1243491873811121f06ee25db",
+      "size": 1773,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/018fcef9e9098fc1243491873811121f06ee25db"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/CliBuildLogsViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d4fe7b5f9d06c8767952edc1cdb7d9239f5d04e",
+      "size": 1891,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6d4fe7b5f9d06c8767952edc1cdb7d9239f5d04e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/DeploymentProgress.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a6c1d4f1d6cdb3b0c9bb80bc279e35442f806b0",
+      "size": 605,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a6c1d4f1d6cdb3b0c9bb80bc279e35442f806b0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/InfrastructureActionButtons.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc1781390f0c581895f2fab9414690daaacbde4b",
+      "size": 5124,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc1781390f0c581895f2fab9414690daaacbde4b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/InfrastructureConfirmDialogs.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7bdad019c025f223319bc3f816bbbf0f8144acc9",
+      "size": 6397,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7bdad019c025f223319bc3f816bbbf0f8144acc9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/InfrastructurePanelHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6fcb1dd70e282b5a4445643d9bbc0328a723b20",
+      "size": 9542,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f6fcb1dd70e282b5a4445643d9bbc0328a723b20"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/InfrastructureProgressStepper.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6d629e8427a92c8e3f45c09fe7aea597c4de31d",
+      "size": 3894,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c6d629e8427a92c8e3f45c09fe7aea597c4de31d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/SmartDeploymentPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e4076af96652dd35bb780ac2bbd194ed72dc2bd",
+      "size": 23706,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3e4076af96652dd35bb780ac2bbd194ed72dc2bd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/StepSeparator.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00bd0b5f58a4296f67ccc8a09c82cb3b0be6457e",
+      "size": 611,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/00bd0b5f58a4296f67ccc8a09c82cb3b0be6457e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/WhatIfViewerSection.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5592696a3ba005faa0d2186a77fc6ce2c641ba7",
+      "size": 2195,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a5592696a3ba005faa0d2186a77fc6ce2c641ba7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "14ce93c8de7e6627211f82198e9c1b6b10a62281",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/14ce93c8de7e6627211f82198e9c1b6b10a62281"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/ConfigurationPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc58b1a7065dc07d18b6e124de6ca7ea5dd28e1a",
+      "size": 14675,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cc58b1a7065dc07d18b6e124de6ca7ea5dd28e1a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/GitOperationsPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6a3392a02c18262c69d171fd29181e67a3e6172",
+      "size": 14218,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c6a3392a02c18262c69d171fd29181e67a3e6172"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/PrerequisitesCheckPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ba18b7d5eb05e51dd653dd25846bffc5f04c12e",
+      "size": 12210,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8ba18b7d5eb05e51dd653dd25846bffc5f04c12e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/ResourceDiscoveryPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a860d168fb6be6f064b2da167fb0124826c312dd",
+      "size": 12675,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a860d168fb6be6f064b2da167fb0124826c312dd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/SmartDeployDecision.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7154222de992decf85161f0f74150e22e55fe878",
+      "size": 8763,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7154222de992decf85161f0f74150e22e55fe878"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/deploy-now/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67721dac8af8cae8cb6587b5315cca9243935ba6",
+      "size": 477,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/67721dac8af8cae8cb6587b5315cca9243935ba6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "79a3a571ce174bfb9e64d64b9061ee3a821351ee",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/79a3a571ce174bfb9e64d64b9061ee3a821351ee"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/InfrastructureOutputPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f247b6a09ccd61dd41b5818ee5786062a8ea105",
+      "size": 4498,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6f247b6a09ccd61dd41b5818ee5786062a8ea105"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/InfrastructureResponseDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2d35ec134ea418f1939d11e2b905ef5a035505d0",
+      "size": 13418,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2d35ec134ea418f1939d11e2b905ef5a035505d0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/ReadyToDeployBanner.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db534b40ce8b2564af9c964caf293f610318a7c4",
+      "size": 1374,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/db534b40ce8b2564af9c964caf293f610318a7c4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/ResponseDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7cb3e36a78c13a64d163001eb7ff78809c37eb3a",
+      "size": 3226,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7cb3e36a78c13a64d163001eb7ff78809c37eb3a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/WorkflowStatusDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e4499b581aab8263783c89c6dc91f4bdb121abc",
+      "size": 1796,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9e4499b581aab8263783c89c6dc91f4bdb121abc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/display/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b45d6b89d8cdde822c3d77269a6222a1645f9687",
+      "size": 344,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b45d6b89d8cdde822c3d77269a6222a1645f9687"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f3d09c16389b079808ad3e79cb56d3f0edd856ce",
+      "size": 773,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f3d09c16389b079808ad3e79cb56d3f0edd856ce"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a0d13be8947f763be5c3ab56c0bf1c5dca860013",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a0d13be8947f763be5c3ab56c0bf1c5dca860013"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureActionsTab.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3561b99193f9a4c9a1d21fe1b0bfbddb536d49da",
+      "size": 8557,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3561b99193f9a4c9a1d21fe1b0bfbddb536d49da"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureHistoryTab.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "67d186d8f870418449f4e0d64730fb3526c6098e",
+      "size": 3158,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/67d186d8f870418449f4e0d64730fb3526c6098e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureRecommendedFixesTab.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92ec0cb404c849e40fe8ea12cbd83d6496f297c9",
+      "size": 7237,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/92ec0cb404c849e40fe8ea12cbd83d6496f297c9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureResourcesTab.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca18bf8801ba677307b64cce92e82b4e3bfce4dc",
+      "size": 5073,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca18bf8801ba677307b64cce92e82b4e3bfce4dc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureTabs.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54e870177427eb0f58ed54ab116d4e0cc232cc23",
+      "size": 3101,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54e870177427eb0f58ed54ab116d4e0cc232cc23"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/InfrastructureTemplatesTab.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d5a2621377c895e364f081448c965fc4035984f",
+      "size": 345,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3d5a2621377c895e364f081448c965fc4035984f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/components/tabs/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ab51fa8f57342ed8275a6c71a7ed0738e5b771c1",
+      "size": 495,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ab51fa8f57342ed8275a6c71a7ed0738e5b771c1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "034e012b15a205f521bc90308119da6c0fa7b6d7",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/034e012b15a205f521bc90308119da6c0fa7b6d7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a98df3daabfbe04e5a9b213a2514fc03b30755be",
+      "size": 366,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a98df3daabfbe04e5a9b213a2514fc03b30755be"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useCliBuild.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "686e369df855861d01efb28d610749c473474749",
+      "size": 2732,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/686e369df855861d01efb28d610749c473474749"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useInfrastructureActions.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2f871960c4c432e99319247ed7c88a7d4f8b8be",
+      "size": 41789,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f2f871960c4c432e99319247ed7c88a7d4f8b8be"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useInfrastructureEnvironment.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abf2bcfe17beca23cb8ed81718950af6066f69ed",
+      "size": 2446,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/abf2bcfe17beca23cb8ed81718950af6066f69ed"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useResourceGroupConfig.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ad0a349b9f201116e7c66dae0693ce9c02acee4",
+      "size": 1057,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8ad0a349b9f201116e7c66dae0693ce9c02acee4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useTemplates.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "620f296f744032263c1d8675752d0b9137e716bc",
+      "size": 1700,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/620f296f744032263c1d8675752d0b9137e716bc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/hooks/useWorkflowStatus.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca9933619407a77e9c7b0043f076c9ad298e3b4e",
+      "size": 874,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca9933619407a77e9c7b0043f076c9ad298e3b4e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f0c385b1a6578ffb9dc8a70d10735fdecd81606a",
+      "size": 273,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f0c385b1a6578ffb9dc8a70d10735fdecd81606a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60bb4d88ca62aba8701533aaa9ec388aed224144",
+      "size": 443,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/60bb4d88ca62aba8701533aaa9ec388aed224144"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b6fe98cae3ffd27f912fd9e9a40930bc7a85f147",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b6fe98cae3ffd27f912fd9e9a40930bc7a85f147"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/__tests__",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "94908dbc9051b49285cd84d2611774d59525ec3b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/94908dbc9051b49285cd84d2611774d59525ec3b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/__tests__/storageAccountUtils.test.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "738b9f06c3c62026907b26fb5942965b485dce6c",
+      "size": 6215,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/738b9f06c3c62026907b26fb5942965b485dce6c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/getModuleFromResourceType.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd742c501bd15e3bba6ac46fee36effaa1f88fcb",
+      "size": 1532,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dd742c501bd15e3bba6ac46fee36effaa1f88fcb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5de9c5225481e8ca3acf37cb440e3d8f9caf9ada",
+      "size": 130,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5de9c5225481e8ca3acf37cb440e3d8f9caf9ada"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/parseWhatIfOutput.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95fc53db407d47c2f48d3cf0d4cbbe168aa446da",
+      "size": 4431,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/95fc53db407d47c2f48d3cf0d4cbbe168aa446da"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/infrastructure/utils/storageAccountUtils.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9aac4115f102c1e032efa3f2c27c68eb4b1ce7bb",
+      "size": 2680,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9aac4115f102c1e032efa3f2c27c68eb4b1ce7bb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "953f3b1ad1d391a467db52ea0c17c6e7bc8549e9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/953f3b1ad1d391a467db52ea0c17c6e7bc8549e9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/EnvironmentSelector.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f271220d71e747d65490a7a19837f1406e819b4",
+      "size": 12852,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0f271220d71e747d65490a7a19837f1406e819b4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/MigrationConfigForm.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8c9f04caa06e2e71fcfc85758036dc28401a43d",
+      "size": 9807,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a8c9f04caa06e2e71fcfc85758036dc28401a43d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/MigrationManager.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6d4d7ab9dc7d8d8bc7218affd1e49ddfbaab025",
+      "size": 5941,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b6d4d7ab9dc7d8d8bc7218affd1e49ddfbaab025"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/MigrationProgress.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd91e3debbfcca269dd52cebc99ea81ed405c93c",
+      "size": 1250,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dd91e3debbfcca269dd52cebc99ea81ed405c93c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/MigrationResults.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60f2a76a4187fb2b425493291db947408f5092f6",
+      "size": 4683,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/60f2a76a4187fb2b425493291db947408f5092f6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/MigrationStepIndicator.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4052dd45901526bcb5e8686ef291130f4ba3b16e",
+      "size": 2416,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4052dd45901526bcb5e8686ef291130f4ba3b16e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/ResourceSelectionForm.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a0a292827910edcf81c18a71242ee692cbb27b6e",
+      "size": 9084,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a0a292827910edcf81c18a71242ee692cbb27b6e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cf3a516d10c076aeeec0b286d1c88b32217b28bc",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/cf3a516d10c076aeeec0b286d1c88b32217b28bc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/hooks/useMigration.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "287101a5659698b8033d5c6da834224490b0ba90",
+      "size": 15153,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/287101a5659698b8033d5c6da834224490b0ba90"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eac1ac9e1537e69acacf973f357e69128cb1ade6",
+      "size": 449,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eac1ac9e1537e69acacf973f357e69128cb1ade6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/migration/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6548ea34cc8d8b76cfb7dc7696ae5f953454b056",
+      "size": 3313,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6548ea34cc8d8b76cfb7dc7696ae5f953454b056"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "05e648f38c9b4dec08acfb6785aff9279b9cccce",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/05e648f38c9b4dec08acfb6785aff9279b9cccce"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/ProjectDeployment.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf8b567c5d3847641ec3617b40b700a3ee52170c",
+      "size": 10841,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cf8b567c5d3847641ec3617b40b700a3ee52170c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/ProjectDeploymentPlanner.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2506dd97db924c024cdeaf4c2207e914d495352",
+      "size": 4265,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a2506dd97db924c024cdeaf4c2207e914d495352"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "952e49a030a009a27171a76a02248fe1eb3114a3",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/952e49a030a009a27171a76a02248fe1eb3114a3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/DeploymentHistory.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed525179624ccfd8e616afffddd52efeb5a89a3d",
+      "size": 8742,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ed525179624ccfd8e616afffddd52efeb5a89a3d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ProjectCard.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fd2afeabf4b2c029fb83faeca966d3cb015f693",
+      "size": 7431,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1fd2afeabf4b2c029fb83faeca966d3cb015f693"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ProjectDeploymentCard.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4eba58d1a9d930739c59066805279a0d922517c",
+      "size": 7717,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f4eba58d1a9d930739c59066805279a0d922517c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ProjectDeploymentHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cfa122283f41ce2cb7ea56da1d13accd0bebe36b",
+      "size": 3839,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cfa122283f41ce2cb7ea56da1d13accd0bebe36b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ProjectDeploymentPlannerHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4476ca10437f16f9b6eb06eab83598572042f957",
+      "size": 4357,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4476ca10437f16f9b6eb06eab83598572042f957"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ProjectDeploymentSummary.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a4cdd21c3b917a1e9c564d49ac1ab332a2f1e1d6",
+      "size": 6718,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a4cdd21c3b917a1e9c564d49ac1ab332a2f1e1d6"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/ResourceCheckbox.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54c0c54d62a350d121f8b16572b58d714501c274",
+      "size": 2511,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54c0c54d62a350d121f8b16572b58d714501c274"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/WorkflowLogsViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be9db7632b2bb7ba73f7fc35eb3765de0abb18c5",
+      "size": 7404,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/be9db7632b2bb7ba73f7fc35eb3765de0abb18c5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f2846ba6212bcf34e7920e71f74b980a53c1cf18",
+      "size": 515,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f2846ba6212bcf34e7920e71f74b980a53c1cf18"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6f25da9426c1b83d566abb3305133ea6391fef62",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6f25da9426c1b83d566abb3305133ea6391fef62"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/hooks/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "670a01e0d2534336bad1dbab500c428768a57e1a",
+      "size": 124,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/670a01e0d2534336bad1dbab500c428768a57e1a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/hooks/useDeploymentStatus.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f0d11fb32a38ebb388ddfc3bc84f0618a4cdf6a",
+      "size": 4149,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7f0d11fb32a38ebb388ddfc3bc84f0618a4cdf6a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/hooks/useProjectDeployment.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5c0d514b1c13fb6ddcdcbb6299ff3a15ef52844",
+      "size": 13683,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d5c0d514b1c13fb6ddcdcbb6299ff3a15ef52844"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b82e0d873a3021fcdda8488d4ed50b04735944f4",
+      "size": 255,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b82e0d873a3021fcdda8488d4ed50b04735944f4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b161720a7e084982216805c5c0d31ea4b1cc149d",
+      "size": 739,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b161720a7e084982216805c5c0d31ea4b1cc149d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/project-deployment/utils.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e5e796dcef2f4f576c34f700ed0efced24376cdf",
+      "size": 2126,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e5e796dcef2f4f576c34f700ed0efced24376cdf"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "af7900401ac3b42e83c18d76800dd2244e5afe77",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/af7900401ac3b42e83c18d76800dd2244e5afe77"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/ResourceGrid.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a446174bd5027c15c99359c03b0a84ba47704a2f",
+      "size": 4244,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a446174bd5027c15c99359c03b0a84ba47704a2f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "820919dfc6c0afc26243b64d1bdf9ad468afccb8",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/820919dfc6c0afc26243b64d1bdf9ad468afccb8"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceCard.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "393fbdefa9cfba225a2d0c4ea9d110ebb857732d",
+      "size": 5061,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/393fbdefa9cfba225a2d0c4ea9d110ebb857732d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceGridHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "938eee33402fad5d74d33f87aaca2c8f9ee2c2dc",
+      "size": 3957,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/938eee33402fad5d74d33f87aaca2c8f9ee2c2dc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceGridSummary.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6d0306ef34ab59fa6784c04bba16bc6fff0ff5ac",
+      "size": 1896,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6d0306ef34ab59fa6784c04bba16bc6fff0ff5ac"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceGridView.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4bf8c274b982db4bbcec8d66466ed4e2e35785fb",
+      "size": 1048,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4bf8c274b982db4bbcec8d66466ed4e2e35785fb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceGroupedView.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f5d6c9aabeeb207e7321303a5d6a68bed9ec482",
+      "size": 5032,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f5d6c9aabeeb207e7321303a5d6a68bed9ec482"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/ResourceTableView.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5f5c35ad3eff9c00b339c61c23b5b4a0c261fb9",
+      "size": 4551,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c5f5c35ad3eff9c00b339c61c23b5b4a0c261fb9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2437e06640052c6afa43c741d5048aceb594a2e5",
+      "size": 340,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2437e06640052c6afa43c741d5048aceb594a2e5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4db3d3fad61b47a5cb32dc32155067a0524d31ae",
+      "size": 113,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4db3d3fad61b47a5cb32dc32155067a0524d31ae"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "38cc5fe61f68b3614a77b8f209ff80128397460d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/38cc5fe61f68b3614a77b8f209ff80128397460d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/utils/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a9a2605570daa49d105b5c1ff0eb3beda9f8141",
+      "size": 119,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6a9a2605570daa49d105b5c1ff0eb3beda9f8141"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/resource-grid/utils/resourceUtils.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e11ded232838ebfbc85bbfd8864b8f8d2f7a930",
+      "size": 1520,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3e11ded232838ebfbc85bbfd8864b8f8d2f7a930"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b6e0dbceae069de139327bca58d8fa7991f51ccd",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b6e0dbceae069de139327bca58d8fa7991f51ccd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/ServiceManager.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56f5039ee708e56e798a67dc1dbfd53b93f0cc66",
+      "size": 11183,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/56f5039ee708e56e798a67dc1dbfd53b93f0cc66"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bb01cb6aa59557f47ed0a6cb1ae9b092f8c695bf",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bb01cb6aa59557f47ed0a6cb1ae9b092f8c695bf"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/components/InfrastructureStatusIndicator.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9cc9a53b6a1732126ad3f8603412b3bee0f192a",
+      "size": 2726,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c9cc9a53b6a1732126ad3f8603412b3bee0f192a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/components/RepositoryConfig.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8c09055d5ece30b8abae5a2b45584610ffc7ad2",
+      "size": 2774,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e8c09055d5ece30b8abae5a2b45584610ffc7ad2"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/components/ServiceManagerHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "975b0d9b75c7ad437bd3ae142567bd043fa1dc95",
+      "size": 3509,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/975b0d9b75c7ad437bd3ae142567bd043fa1dc95"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5de6d85dd8120fc0d7058089942142998c75a87b",
+      "size": 199,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5de6d85dd8120fc0d7058089942142998c75a87b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f2edb473d27331f323d5d1ebc30cf3b18a600048",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f2edb473d27331f323d5d1ebc30cf3b18a600048"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/hooks/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79c6d5205b28368bf05596fca4d8a677a986dcf7",
+      "size": 130,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/79c6d5205b28368bf05596fca4d8a677a986dcf7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/hooks/useInfrastructureStatus.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aee2ce91cf9533442a587b6c6fe9c63be0bbfeb5",
+      "size": 1813,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aee2ce91cf9533442a587b6c6fe9c63be0bbfeb5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/hooks/useServiceLifecycle.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "684e15e0967c12a8ea28c01131cdafd4f7f0ead5",
+      "size": 12436,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/684e15e0967c12a8ea28c01131cdafd4f7f0ead5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/service-manager/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "085031d89c8b34c5316c67b78e7db7f9207b2991",
+      "size": 117,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/085031d89c8b34c5316c67b78e7db7f9207b2991"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "24c3d8eb2e99ca607f05f09d8d2bc85fdcf53981",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/24c3d8eb2e99ca607f05f09d8d2bc85fdcf53981"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/LogsViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0598a578104905d1bf6af437e7cbbca1e6e27665",
+      "size": 14511,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0598a578104905d1bf6af437e7cbbca1e6e27665"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/ServiceCard.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b900e488173d8c8b6237378a073cd2c9c3675099",
+      "size": 14148,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b900e488173d8c8b6237378a073cd2c9c3675099"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/ServiceControls.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "403f0aed193e47e9ae2a72db958fcd8db4fc11b5",
+      "size": 4153,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/403f0aed193e47e9ae2a72db958fcd8db4fc11b5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/ServiceList.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "04e40614662193711c1eab4a0206a44290050f6f",
+      "size": 7307,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/04e40614662193711c1eab4a0206a44290050f6f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "eb9ccff66d98fbae2fb8d69a83f8d7442d91b04b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/eb9ccff66d98fbae2fb8d69a83f8d7442d91b04b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardCollapsedView.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "202c08d1e3efb568d9f5aedb9891f9133e096734",
+      "size": 3708,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/202c08d1e3efb568d9f5aedb9891f9133e096734"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardControls.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "594361d028bb01574c58090b548c2b5429677f50",
+      "size": 1986,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/594361d028bb01574c58090b548c2b5429677f50"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardDeploymentInfo.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c73b794e202ba8b81ce8e1ef4904cf12f654a783",
+      "size": 2084,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c73b794e202ba8b81ce8e1ef4904cf12f654a783"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "91cfed776cba4ce7b354190671cd9672aa4bbe9b",
+      "size": 2589,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/91cfed776cba4ce7b354190671cd9672aa4bbe9b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardStatusRow.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fe5c9b652e3d3f437c90c2a06549cb4c255fbd7",
+      "size": 3941,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6fe5c9b652e3d3f437c90c2a06549cb4c255fbd7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/ServiceCardViewContent.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d15225903f27d64c0848d145b11e09fbba459147",
+      "size": 2709,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d15225903f27d64c0848d145b11e09fbba459147"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fca8b12932fbf12f26ed7b138c36f18d2a9281e",
+      "size": 384,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6fca8b12932fbf12f26ed7b138c36f18d2a9281e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/card/useServiceCardResize.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9eca82c23f928fdb876181f17280c72babc1e6cf",
+      "size": 1686,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9eca82c23f928fdb876181f17280c72babc1e6cf"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f54c247547fcd81f56e0c45ae85f9e2384200600",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f54c247547fcd81f56e0c45ae85f9e2384200600"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/BuildStatusIndicator.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f09fe0f83cbb36fd6d198e7f655ba0191e8d8365",
+      "size": 3298,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f09fe0f83cbb36fd6d198e7f655ba0191e8d8365"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/DeploymentInfo.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d7c2f266194776accec32373733ffc8c8c6a00c4",
+      "size": 2385,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d7c2f266194776accec32373733ffc8c8c6a00c4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/RepositoryConfig.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e55c5c02b700d6af4274ab2247a885deebc32d35",
+      "size": 2987,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e55c5c02b700d6af4274ab2247a885deebc32d35"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/ServiceManagerHeader.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b2a43c9dd1468745da2f04ccf9bef9647d2db91",
+      "size": 9566,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2b2a43c9dd1468745da2f04ccf9bef9647d2db91"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/ViewModeSelector.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8eb2049417ef1cdd87fbd1ec7104794522d74f17",
+      "size": 4265,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8eb2049417ef1cdd87fbd1ec7104794522d74f17"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/WebviewView.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4109c7bbdcde6f1e24462a33bd75c5a9a803d9b3",
+      "size": 3999,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4109c7bbdcde6f1e24462a33bd75c5a9a803d9b3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "89367fb4a54adf34c53410a815238227bd6afcb0",
+      "size": 359,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/89367fb4a54adf34c53410a815238227bd6afcb0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "076290389e5bdfc568b5a55190b873d6cb244b5d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/076290389e5bdfc568b5a55190b873d6cb244b5d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/EnvironmentBanner.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0e74ad1e3dd6fa3e0059e7b2f5b738a98d03ec14",
+      "size": 6920,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0e74ad1e3dd6fa3e0059e7b2f5b738a98d03ec14"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/EnvironmentContextWarning.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c16fdb023ba1550bc2b37307a46eb77e752d83d4",
+      "size": 2586,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c16fdb023ba1550bc2b37307a46eb77e752d83d4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/EnvironmentPresetSelector.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e959aad8a4df096f4c5000bce8f39ed258879ae1",
+      "size": 8376,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e959aad8a4df096f4c5000bce8f39ed258879ae1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/EnvironmentPresets.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d0362138ffc7c0b3a401834325418ae7a4e4f72",
+      "size": 1759,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3d0362138ffc7c0b3a401834325418ae7a4e4f72"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/EnvironmentSwitcher.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b2ec43ec920b4cfc94c5374c6f66afcd72318fd",
+      "size": 5945,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4b2ec43ec920b4cfc94c5374c6f66afcd72318fd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d757d4fc662bd2cdadb4775f97e51f42b2e84d1d",
+      "size": 3515,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d757d4fc662bd2cdadb4775f97e51f42b2e84d1d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/environment/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c0be7c11f33cc83b9b89a9e908670e0728520fe4",
+      "size": 2714,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c0be7c11f33cc83b9b89a9e908670e0728520fe4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "569f82cd6dc6a8a6bb39bc5dcf016343b4360d19",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/569f82cd6dc6a8a6bb39bc5dcf016343b4360d19"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42bc1c481326ec017d6535c2d66e79a9887fce4b",
+      "size": 796,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/42bc1c481326ec017d6535c2d66e79a9887fce4b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useBuildManagement.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cfa5a24b9165c4c8b31dfa9e6bdb6bcf4fa4d4dd",
+      "size": 3772,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cfa5a24b9165c4c8b31dfa9e6bdb6bcf4fa4d4dd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useEnvironmentManagement.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99f1bf7f94bbf011241ceaa4b81d4ed2b5f51bcc",
+      "size": 6157,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/99f1bf7f94bbf011241ceaa4b81d4ed2b5f51bcc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useInfrastructureStatus.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "deb429b44cde395994da6830e4d95a11c2de891b",
+      "size": 2233,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/deb429b44cde395994da6830e4d95a11c2de891b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/usePortManagement.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5f00e04fd54c47ce6e290c1b3649912687f3c3ed",
+      "size": 4665,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5f00e04fd54c47ce6e290c1b3649912687f3c3ed"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useRepositoryConfig.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed57c792d8657c46b7d04c481688c3355bfa63cd",
+      "size": 1418,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ed57c792d8657c46b7d04c481688c3355bfa63cd"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceEnvironment.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35ee83f65fb9ee3b0eec68daddee19216c848a55",
+      "size": 5848,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/35ee83f65fb9ee3b0eec68daddee19216c848a55"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceLifecycle.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c92b810288e59a337c2b4d35e76ec3003a31d35d",
+      "size": 4901,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c92b810288e59a337c2b4d35e76ec3003a31d35d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceLogs.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d759849c2a75ed3a5085eda04466483ea4a3556d",
+      "size": 6619,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d759849c2a75ed3a5085eda04466483ea4a3556d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceOperations.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90e578b1a98b8734f366acf05b77bbc9b6a13139",
+      "size": 14899,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/90e578b1a98b8734f366acf05b77bbc9b6a13139"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceOrder.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "338d11e9e5571d8d328fc52258d61ba17af8ed29",
+      "size": 2089,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/338d11e9e5571d8d328fc52258d61ba17af8ed29"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useServiceRefresh.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b2966e248f86aacfbd095ba493b98959d878912",
+      "size": 2279,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0b2966e248f86aacfbd095ba493b98959d878912"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/hooks/useViewManagement.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "572391d14744bc8444448690883beb73292328d9",
+      "size": 1008,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/572391d14744bc8444448690883beb73292328d9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "515f7e6374a0d9fa097bd59d24233bb7a9baa712",
+      "size": 831,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/515f7e6374a0d9fa097bd59d24233bb7a9baa712"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ff70deb4edbc6d7a538bd035279ff700ab60c736",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ff70deb4edbc6d7a538bd035279ff700ab60c736"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/LogDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cbd8eebf0bc4953ec63f9a4ef9cfefd6a9a52c5",
+      "size": 4593,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cbd8eebf0bc4953ec63f9a4ef9cfefd6a9a52c5"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/LogFilterBar.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7efd2a2dee34da305b3f1bbc9bd4526c0e0126db",
+      "size": 16821,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7efd2a2dee34da305b3f1bbc9bd4526c0e0126db"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/LogGroup.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e157354f21faaac137b48cf92442722aed19b99b",
+      "size": 3284,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e157354f21faaac137b48cf92442722aed19b99b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/LogLine.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62ed55c2aa34adf65654bac18cfc312b384a4eac",
+      "size": 2579,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/62ed55c2aa34adf65654bac18cfc312b384a4eac"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e97d758284eb44970fe81bf5db0e07c1c36d31d4",
+      "size": 126,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e97d758284eb44970fe81bf5db0e07c1c36d31d4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/logUtils.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5a4d1626aa444ae4901c585bc4b86106c6b37c1",
+      "size": 4059,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a5a4d1626aa444ae4901c585bc4b86106c6b37c1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/logs/useLogGrouping.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c428963bedfab13b22961cbff91b12d8618f5a7c",
+      "size": 1718,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c428963bedfab13b22961cbff91b12d8618f5a7c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48a957d29cf2ce4d7479ac31ad5e9fccd892d4b4",
+      "size": 1897,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48a957d29cf2ce4d7479ac31ad5e9fccd892d4b4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b47f515046c0a86e5a2be19e36a8d37362246242",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b47f515046c0a86e5a2be19e36a8d37362246242"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/services/utils/serviceUtils.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc1c0730a4dca482533249352aeecc132eec2d48",
+      "size": 2085,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc1c0730a4dca482533249352aeecc132eec2d48"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/templates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "705544c96ff6d5e84b75ed0a7404e8e0beb50a3d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/705544c96ff6d5e84b75ed0a7404e8e0beb50a3d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/templates/TemplateEditor.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11bd8b8fbf0c194e53d80c7c6c5cf864f9a1b8a2",
+      "size": 7129,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/11bd8b8fbf0c194e53d80c7c6c5cf864f9a1b8a2"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/templates/TemplateInspector.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4dab1cbbcacf7816517bcca669939fff5344568",
+      "size": 8236,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c4dab1cbbcacf7816517bcca669939fff5344568"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/templates/TemplateSelector.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb2c1ed940f398d8c3f10dd5e9427f7ccb15136d",
+      "size": 9261,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fb2c1ed940f398d8c3f10dd5e9427f7ccb15136d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/templates/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "296844ceb21bdb849f30782c8452ad99451e0702",
+      "size": 196,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/296844ceb21bdb849f30782c8452ad99451e0702"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c4061d5702227c25287a3427c0d1a70f801fdac9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c4061d5702227c25287a3427c0d1a70f801fdac9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/Button.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "105a80c28e75899609b238aad1e0ca0c2f2c1a38",
+      "size": 7638,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/105a80c28e75899609b238aad1e0ca0c2f2c1a38"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/Feedback.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c423a7f95560ddbe4bb9bdacb1e1f203913f56db",
+      "size": 1215,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c423a7f95560ddbe4bb9bdacb1e1f203913f56db"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/Loading.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc26159061f6f7bdf3216f19e71eb9a23baa63fb",
+      "size": 9037,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bc26159061f6f7bdf3216f19e71eb9a23baa63fb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/TabbedPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb7bb3d5480028e4ec2c11aac5ae5acbc6f08a7a",
+      "size": 10865,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eb7bb3d5480028e4ec2c11aac5ae5acbc6f08a7a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "99fa7f70bd90bd025ae9bbc84caff419f7237829",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/99fa7f70bd90bd025ae9bbc84caff419f7237829"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "87ec677de14d0d5a3c03482e610a0e1a0619b68e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/87ec677de14d0d5a3c03482e610a0e1a0619b68e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/Alert.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff6b7eeee547746a6efb5c1623b11eede0c175ee",
+      "size": 2340,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ff6b7eeee547746a6efb5c1623b11eede0c175ee"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/ErrorDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f464a8e0b8459b73f552684c67ce26f2e036424",
+      "size": 1967,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6f464a8e0b8459b73f552684c67ce26f2e036424"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/OperationStatusBadge.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8409431e6757423c7d2337317cb024accbe2249a",
+      "size": 1881,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8409431e6757423c7d2337317cb024accbe2249a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/ProgressBar.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2a06ede9463d7233f58e8cdf12b7d39a154955ba",
+      "size": 1264,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2a06ede9463d7233f58e8cdf12b7d39a154955ba"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/StatusBadge.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f0045ff82235f93421be7153122f820007438edc",
+      "size": 1796,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f0045ff82235f93421be7153122f820007438edc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/StatusIndicator.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4ae952cd343ca4d0e1aee1bb244ce6396bb9d94",
+      "size": 1372,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e4ae952cd343ca4d0e1aee1bb244ce6396bb9d94"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/SuccessDisplay.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48f101cbdc0c076a80b8b94fb9b6739efe36b993",
+      "size": 1169,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48f101cbdc0c076a80b8b94fb9b6739efe36b993"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/ToastContainer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f64705771f0f00d717d8e2ddc0352b5050692d7",
+      "size": 824,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f64705771f0f00d717d8e2ddc0352b5050692d7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/ToastItem.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9044584aaefc24456e44c47b4cc8edf16141274e",
+      "size": 1846,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9044584aaefc24456e44c47b4cc8edf16141274e"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e71bf9cef2b794b6be5312a146c9cac6166f1e0",
+      "size": 492,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7e71bf9cef2b794b6be5312a146c9cac6166f1e0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9ab4637a138d7c42428cce4e5e62c7ee3255b02b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9ab4637a138d7c42428cce4e5e62c7ee3255b02b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/hooks/useToast.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdf4194615d0fc10ae1beca665073170cc14b2f3",
+      "size": 1226,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bdf4194615d0fc10ae1beca665073170cc14b2f3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/feedback/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ceed0b6e29be016c047c866a172ed0394e871579",
+      "size": 386,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ceed0b6e29be016c047c866a172ed0394e871579"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/ui/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5da1b961faf6e2769da686349fc771c193ce3e4",
+      "size": 1310,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f5da1b961faf6e2769da686349fc771c193ce3e4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0963b1742ee01ee6a25c1ce0cffd10826048b3ed",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0963b1742ee01ee6a25c1ce0cffd10826048b3ed"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0f4c26a88e26e7af89f4c86763fa4a927b9ba648",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0f4c26a88e26e7af89f4c86763fa4a927b9ba648"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/ActivityBar.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "85b6a05cfc5c162b25d9e3c3410415ee5c78afe8",
+      "size": 3117,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/85b6a05cfc5c162b25d9e3c3410415ee5c78afe8"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/BottomPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "901116152edb4183cd6d0b8b64aef34d4335eb22",
+      "size": 2876,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/901116152edb4183cd6d0b8b64aef34d4335eb22"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/OutputPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80d8f630758a965254b7904ae3492a029992cebc",
+      "size": 994,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/80d8f630758a965254b7904ae3492a029992cebc"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/Sidebar.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f17f38756002ae088d180664f69e3303bf17284",
+      "size": 1993,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f17f38756002ae088d180664f69e3303bf17284"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/SidebarPanel.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a05c29aca9a7dc81a83fa594c444b9fb4db93fb",
+      "size": 1168,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9a05c29aca9a7dc81a83fa594c444b9fb4db93fb"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/TreeItem.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef7b19ff8a543383cf4476c01a7f022d1be58761",
+      "size": 1170,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ef7b19ff8a543383cf4476c01a7f022d1be58761"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7414f84cc13307acc117adfc8a81c1b23e78e469",
+      "size": 131,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7414f84cc13307acc117adfc8a81c1b23e78e469"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/constants.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3456776620d82a55f78985ae935023a6f737634",
+      "size": 536,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c3456776620d82a55f78985ae935023a6f737634"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "60b531b0c8d86fc9efe11bbb0b65ace4def2898b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/60b531b0c8d86fc9efe11bbb0b65ace4def2898b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/hooks/useVSCodeLayout.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86f951853509277cb80a815482187ab2b1a99081",
+      "size": 4046,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/86f951853509277cb80a815482187ab2b1a99081"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/vscode-layout/types.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "273cf3f50b081cdf4f22be6187456d60fb14a27c",
+      "size": 1200,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/273cf3f50b081cdf4f22be6187456d60fb14a27c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dbb04067f410ff01a66be44098ece8c313033aee",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/dbb04067f410ff01a66be44098ece8c313033aee"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/WhatIfViewer.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7df1cce4e61128c9c1327ba3b45c7a0d33a7f51",
+      "size": 7189,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b7df1cce4e61128c9c1327ba3b45c7a0d33a7f51"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ef329a71281f4a5b8c871f1e6487f53d925fea1c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ef329a71281f4a5b8c871f1e6487f53d925fea1c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/components/WhatIfChangeItem.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b688c5f55dc1654fb4db5747c01c8010829ce204",
+      "size": 7666,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b688c5f55dc1654fb4db5747c01c8010829ce204"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/components/WhatIfSummary.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9dd3f2ffe3db81ee20c9621f4b1da4d0d24d336a",
+      "size": 2888,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9dd3f2ffe3db81ee20c9621f4b1da4d0d24d336a"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/components/WhatIfWarnings.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9f0c3e249d681c814bd74823f00578e159d2350",
+      "size": 3073,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b9f0c3e249d681c814bd74823f00578e159d2350"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/components/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ff79be68b6890e273c7eadede1e52b67063533b",
+      "size": 155,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3ff79be68b6890e273c7eadede1e52b67063533b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19ee5ab43e7a4b8ecfd9b2c1157be348427efbb3",
+      "size": 113,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/19ee5ab43e7a4b8ecfd9b2c1157be348427efbb3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/utils",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0dc235a8617e4cc81830b12b9c560eb127a70776",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0dc235a8617e4cc81830b12b9c560eb127a70776"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/utils/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a643802a4404841ee23c063c656352345906c4c1",
+      "size": 71,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a643802a4404841ee23c063c656352345906c4c1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/components/what-if/utils/whatIfUtils.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4b115f23d78cee9e597f2d540d6245fc258e10ba",
+      "size": 636,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4b115f23d78cee9e597f2d540d6245fc258e10ba"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d1f98dbd2a1c1d12bf755b4f582cda93398b5c26",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d1f98dbd2a1c1d12bf755b4f582cda93398b5c26"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cce9c10c5cbb4f620a0f76940b9c7356e2a2f320",
+      "size": 349,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cce9c10c5cbb4f620a0f76940b9c7356e2a2f320"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/useAppLogs.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "20133749c2386c3985b130892dcb20ed87e7a48c",
+      "size": 2922,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/20133749c2386c3985b130892dcb20ed87e7a48c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/useDarkMode.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce4deef5d27bf498327a771da701645c8ec20af9",
+      "size": 795,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ce4deef5d27bf498327a771da701645c8ec20af9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/useEnvironmentSummary.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d623f84048a052faadd1b85da3cc33174c54ce14",
+      "size": 679,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d623f84048a052faadd1b85da3cc33174c54ce14"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/useKeyboardShortcut.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7063d3262f6817e353a8b1948bf1bb39dc7c11cf",
+      "size": 1034,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7063d3262f6817e353a8b1948bf1bb39dc7c11cf"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/useLogConversion.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "efe901a03ff6221056706552a6b3838bef933170",
+      "size": 3686,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/efe901a03ff6221056706552a6b3838bef933170"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/hooks/usePerformance.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cdb215b472d59974c4d19c4d185dddf734ef3be3",
+      "size": 2933,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cdb215b472d59974c4d19c4d185dddf734ef3be3"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/index.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3bf71a82a6d9c36e5adce9ae65241df67803e162",
+      "size": 19822,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3bf71a82a6d9c36e5adce9ae65241df67803e162"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/main.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "27481e022f7bf95da4dd73cd7514fd96067120d9",
+      "size": 237,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/27481e022f7bf95da4dd73cd7514fd96067120d9"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0055ce362f9b53aa6653654b5b673640020bcc6b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0055ce362f9b53aa6653654b5b673640020bcc6b"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/__tests__",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e1aa84b7716dc4a36da72a2f05aecff7fe545b71",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e1aa84b7716dc4a36da72a2f05aecff7fe545b71"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/__tests__/connectionStore.test.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f8bcf8a5ce8387941448b51bbca7d053cc91a6c",
+      "size": 5516,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1f8bcf8a5ce8387941448b51bbca7d053cc91a6c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/__tests__/resourcesStore.test.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0801369aece6fa593eac1a5c104ae1d5da697749",
+      "size": 4866,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0801369aece6fa593eac1a5c104ae1d5da697749"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/connectionStore.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2df00cd6e8eae01feb7cfa60cc578a0201d36e4",
+      "size": 3478,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d2df00cd6e8eae01feb7cfa60cc578a0201d36e4"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/deploymentsStore.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "924fa75d2a72af2d63209143fc8f370ef87526f1",
+      "size": 5048,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/924fa75d2a72af2d63209143fc8f370ef87526f1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f47b01a00ad9558cbd065ac0be978edeed4a986d",
+      "size": 220,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f47b01a00ad9558cbd065ac0be978edeed4a986d"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/resourcesStore.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd800c570d06b049336782e4c070f2a8f30b3947",
+      "size": 4845,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fd800c570d06b049336782e4c070f2a8f30b3947"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/settingsStore.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55b9f7db9917f113bd1546b774d0591a9ae5d7df",
+      "size": 2070,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/55b9f7db9917f113bd1546b774d0591a9ae5d7df"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/stores/smartDeploymentStore.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62783fcb507f1c8a226bbc6a900bde3b636b1a26",
+      "size": 12584,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/62783fcb507f1c8a226bbc6a900bde3b636b1a26"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/styles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "35aa8092e076af598ef9057dd81d98059149f26f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/35aa8092e076af598ef9057dd81d98059149f26f"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/styles/accessibility.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d2be1508713b445b00cb49fb61ecebdb25590e0",
+      "size": 1879,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9d2be1508713b445b00cb49fb61ecebdb25590e0"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/test",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "465bd23fcf4703080346a86cef936883737cc620",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/465bd23fcf4703080346a86cef936883737cc620"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/test/setup.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "230d3304592cd4efdab76d49fb5a5f9df6e79cf7",
+      "size": 981,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/230d3304592cd4efdab76d49fb5a5f9df6e79cf7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/test/utils.tsx",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28ed857a024a5a8c475a033a3e91c6b39f8bda2c",
+      "size": 2845,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/28ed857a024a5a8c475a033a3e91c6b39f8bda2c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/test/vitest-jest-dom.d.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "65d9d8af558f65f5486ca919b9efb693163d0330",
+      "size": 281,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/65d9d8af558f65f5486ca919b9efb693163d0330"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/types",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7bbce7c4fa81f67eb318c545df85b3c044a89a50",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7bbce7c4fa81f67eb318c545df85b3c044a89a50"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/types/constants.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1f2aa8f11bd60b796dfa80561d3ba4147735f9af",
+      "size": 3969,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1f2aa8f11bd60b796dfa80561d3ba4147735f9af"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/src/types/index.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "370af389eb0850db7e0fea52518954958061cfd1",
+      "size": 6061,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/370af389eb0850db7e0fea52518954958061cfd1"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/start.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e18117e5b35de2d55f41d02e787b4ee818ef2ea7",
+      "size": 2659,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e18117e5b35de2d55f41d02e787b4ee818ef2ea7"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/tailwind.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa4c2b78fa7531667d17580448b609433e7bbbea",
+      "size": 548,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fa4c2b78fa7531667d17580448b609433e7bbbea"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/tsconfig.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a7fc6fbf23de2a53e36754bc4a2c306d0291d7b2",
+      "size": 605,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a7fc6fbf23de2a53e36754bc4a2c306d0291d7b2"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/tsconfig.node.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42872c59f5b01c9155864572bc2fbd5833a7406c",
+      "size": 213,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/42872c59f5b01c9155864572bc2fbd5833a7406c"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/vite.config.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cbecd220652c1a79a49f04fdde1deb6b7ebd4400",
+      "size": 859,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cbecd220652c1a79a49f04fdde1deb6b7ebd4400"
+    },
+    {
+      "path": "packages/devhub/Mystira.DevHub/vitest.config.ts",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a13c8a6ea7121b53ea384d8feab9853befa044c",
+      "size": 582,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9a13c8a6ea7121b53ea384d8feab9853befa044c"
+    },
+    {
+      "path": "packages/devhub/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6e945c28c381c7f4d5f91d350a0b6a3cc9f725f",
+      "size": 24072,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a6e945c28c381c7f4d5f91d350a0b6a3cc9f725f"
+    },
+    {
+      "path": "packages/devhub/docs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c721f85c1f3aedf57e42ea19aaba689e9d7dd54a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c721f85c1f3aedf57e42ea19aaba689e9d7dd54a"
+    },
+    {
+      "path": "packages/devhub/docs/guides",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ebd7b7fd0690622622fc39fb62376f3a03e460c6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ebd7b7fd0690622622fc39fb62376f3a03e460c6"
+    },
+    {
+      "path": "packages/devhub/docs/guides/cosmos-db-migration.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "000e7a89b099effa1ecc8b59e3eed9020bfd10dd",
+      "size": 9161,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/000e7a89b099effa1ecc8b59e3eed9020bfd10dd"
+    },
+    {
+      "path": "packages/devhub/nuget.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55fae6f006bed47e71a867b368f8a31756f8f627",
+      "size": 508,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/55fae6f006bed47e71a867b368f8a31756f8f627"
+    },
+    {
+      "path": "packages/devhub/scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e86f52d933dacc1e40a71c4a5b5f3b1d4294e836",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e86f52d933dacc1e40a71c4a5b5f3b1d4294e836"
+    },
+    {
+      "path": "packages/devhub/scripts/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f23de636bc023a7eb0a04924b442cc1cc01ce0ce",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f23de636bc023a7eb0a04924b442cc1cc01ce0ce"
+    },
+    {
+      "path": "packages/devhub/scripts/environments/dev.env",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "39205e180d695ee214ceb2f8eac3759204ce6e38",
+      "size": 778,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/39205e180d695ee214ceb2f8eac3759204ce6e38"
+    },
+    {
+      "path": "packages/devhub/scripts/environments/prod.env",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b68204f375cca9fa583e9f0b625a1b42f783e582",
+      "size": 810,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b68204f375cca9fa583e9f0b625a1b42f783e582"
+    },
+    {
+      "path": "packages/devhub/scripts/migrate-cosmos-db.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc3da902b4fcd23420425b752490002afa6f192c",
+      "size": 7492,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc3da902b4fcd23420425b752490002afa6f192c"
+    },
+    {
+      "path": "packages/devhub/scripts/migrate-cosmos-db.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "4591a120c7bab1d19f79e473e0874bb8f7678dab",
+      "size": 9766,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4591a120c7bab1d19f79e473e0874bb8f7678dab"
+    }
+  ],
+  "targetPath": "packages/devhub",
+  "sha": "ac8859da6ac3a510253fbace6294a6ba56ac7a8f",
+  "ref": "dev"
+}
