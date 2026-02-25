@@ -2,7 +2,7 @@
 # Multi-stage build for Mystira blockchain/gRPC service (Python)
 
 # Build stage
-FROM python:3.14-slim@sha256:486b8092bfb12997e10d4920897213a06563449c951c5506c2a2cfaf591c599f AS builder
+FROM python:3.14-slim@sha256:9006fc63e3eaedc00ebc81193c99528575a2f9b9e3fb36d95e94814c23f31f47 AS builder
 
 WORKDIR /app
 
@@ -25,7 +25,7 @@ RUN if [ ! -f requirements.txt ]; then \
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Production stage
-FROM python:3.14-slim@sha256:486b8092bfb12997e10d4920897213a06563449c951c5506c2a2cfaf591c599f AS production
+FROM python:3.14-slim@sha256:9006fc63e3eaedc00ebc81193c99528575a2f9b9e3fb36d95e94814c23f31f47 AS production
 
 WORKDIR /app
 
