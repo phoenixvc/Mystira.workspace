@@ -10,8 +10,8 @@
   <ItemGroup>
     <!-- gRPC client for communicating with Mystira.Chain Python service -->
     <PackageReference Include="Grpc.Net.Client" Version="2.76.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.30.2" />
-    <PackageReference Include="Grpc.Tools" Version="2.76.0" PrivateAssets="All" />
+    <PackageReference Include="Google.Protobuf" Version="3.33.5" />
+    <PackageReference Include="Grpc.Tools" Version="2.78.0" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup>
