@@ -5,6 +5,35 @@
 # NOTE: Front Door CNAME and TXT validation records are managed in the dev
 # environment terraform since the shared non-prod Front Door is defined there.
 
+# =============================================================================
+# ⚠️  SECURITY WARNING: Subscription ID Configuration
+# =============================================================================
+# The import blocks below reference Azure subscription IDs.
+# These must match your target Azure subscription.
+#
+# Before running terraform:
+#   1. Ensure the subscription_id variable matches your Azure subscription
+#   2. Or create terraform.tfvars with: subscription_id = "your-sub-id"
+#
+# To find your subscription ID: az account show --query id -o tsv
+# =============================================================================
+
+variable "subscription_id" {
+  description = "Azure Subscription ID for DNS zone resources. Must match the subscription where the DNS zone exists."
+  type        = string
+  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe"  # ⚠️ Update this to match your subscription
+
+  validation {
+    condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.subscription_id))
+    error_message = "Subscription ID must be a valid GUID format (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)."
+  }
+}
+
+locals {
+  # Build the subscription ID path for reuse in import blocks
+  subscription_path = "/subscriptions/${var.subscription_id}"
+}
+
 variable "bind_custom_domains" {
   description = "Set to true to bind custom domains (run after DNS propagates)"
   type        = bool
@@ -26,41 +55,14 @@ variable "create_dns_records" {
 # =============================================================================
 # Import blocks for existing DNS records
 # These records were created by previous runs and need to be imported
+# ⚠️  SECURITY NOTE: These import blocks derive from local.subscription_path.
+# If moving to a different subscription, update subscription_path in locals above
+# and regenerate these import statements as needed.
 # =============================================================================
 
 import {
   to = azurerm_dns_cname_record.staging_api
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.api"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_story_swa[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_publisher_fd[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_chain_fd[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_admin_api_fd[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_admin_ui_fd[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
-}
-
-import {
-  to = azurerm_dns_cname_record.staging_story_api_fd[0]
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.api"
 }
 
 # Move hostname binding from module to dns-records.tf (transfers state without destroy/recreate)

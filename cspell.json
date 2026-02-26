@@ -1,0 +1,22 @@
+{
+  "version": "0.2",
+  "ignorePaths": [],
+  "dictionaryDefinitions": [],
+  "dictionaries": [],
+  "words": [
+    "appuser",
+    "aspnet",
+    "ASPNETCORE",
+    "asuid",
+    "CREDS",
+    "dnsauth",
+    "frontdoor",
+    "hostnames",
+    "Infracost",
+    "Mystira",
+    "nonprod",
+    "subshell"
+  ],
+  "ignoreWords": [],
+  "import": []
+}

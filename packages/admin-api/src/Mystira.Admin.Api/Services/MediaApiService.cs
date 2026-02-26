@@ -40,14 +40,14 @@ public class MediaApiService : IMediaApiService
         { ".aac", "audio/aac" },
         { ".m4a", "audio/mp4" },
         { ".waptt", "audio/ogg" },
-        
+
         // Video
         { ".mp4", "video/mp4" },
         { ".avi", "video/x-msvideo" },
         { ".mov", "video/quicktime" },
         { ".wmv", "video/x-ms-wmv" },
         { ".mkv", "video/x-matroska" },
-        
+
         // Images
         { ".jpg", "image/jpeg" },
         { ".jpeg", "image/jpeg" },
@@ -332,6 +332,18 @@ public class MediaApiService : IMediaApiService
         if (file == null || file.Length == 0)
         {
             throw new ValidationException("File", "File is required");
+        }
+
+        // Path traversal protection - reject filenames with directory traversal sequences
+        var fileName = file.FileName;
+        if (string.IsNullOrWhiteSpace(fileName) ||
+            fileName.Contains("..") ||
+            fileName.Contains('/') ||
+            fileName.Contains('\\') ||
+            fileName.StartsWith('.') ||
+            Path.GetFileName(fileName) != fileName)
+        {
+            throw new ValidationException("File", "Invalid filename. Filenames cannot contain path traversal characters or be empty.");
         }
 
         var maxSizeBytes = mediaType switch

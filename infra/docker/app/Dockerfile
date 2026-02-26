@@ -59,6 +59,9 @@ RUN dotnet publish "Mystira.App.Api.csproj" \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aec87aa74ddf129da573fa69f42f229a23c953a1c6fdecedea1aa6b1fe147d76 AS final
 WORKDIR /app
 
+# Install curl for healthcheck (aspnet base image doesn't include it)
+RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+
 # Create non-root user for security
 RUN groupadd -r appuser && useradd -r -g appuser appuser
 

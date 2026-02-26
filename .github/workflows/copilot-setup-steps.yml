@@ -50,7 +50,6 @@ jobs:
 
       - name: Restore .NET dependencies
         run: dotnet restore Mystira.sln
-        continue-on-error: true
         env:
           DOTNET_NOLOGO: true
           DOTNET_CLI_TELEMETRY_OPTOUT: true

@@ -108,5 +108,13 @@
   "git.confirmSync": false,
   "git.enableSmartCommit": true,
 
-  "turbo.useLocalTurbo": true
+  "dotnet.defaultSolution": "Mystira.sln",
+
+  "turbo.useLocalTurbo": true,
+  "[csharp]": {
+    "editor.defaultFormatter": "ms-dotnettools.csharp"
+  },
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform"
+  }
 }

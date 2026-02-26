@@ -63,9 +63,34 @@ public class GameSessionsController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+        catch (InvalidOperationException ex)
+        {
+            // 409 used here because this indicates a resource conflict (e.g., session already exists)
+            _logger.LogWarning(ex, "Invalid operation starting session");
+            return Conflict(new ErrorResponse
+            {
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+        catch (TimeoutException ex)
+        {
+            _logger.LogError(ex, "Timeout starting session");
+            return StatusCode(504, new ErrorResponse
+            {
+                Message = "Request timed out while starting session",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+        catch (OperationCanceledException ex)
+        {
+            // Client disconnected - let ASP.NET Core handle gracefully
+            _logger.LogWarning(ex, "Session start was cancelled");
+            throw;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error starting session");
+            _logger.LogError(ex, "Unexpected error starting session");
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while starting session",
@@ -318,9 +343,27 @@ public class GameSessionsController : ControllerBase
 
             return Ok(session);
         }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation ending session {SessionId}", id);
+            return BadRequest(new ErrorResponse
+            {
+                Message = ex.Message,
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+        catch (TimeoutException ex)
+        {
+            _logger.LogError(ex, "Timeout ending session {SessionId}", id);
+            return StatusCode(504, new ErrorResponse
+            {
+                Message = "Request timed out while ending session",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error ending session {SessionId}", id);
+            _logger.LogError(ex, "Unexpected error ending session {SessionId}", id);
             return StatusCode(500, new ErrorResponse
             {
                 Message = "Internal server error while ending session",

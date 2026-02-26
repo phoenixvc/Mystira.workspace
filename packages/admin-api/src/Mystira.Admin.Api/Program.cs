@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 using Mystira.Admin.Api.Adapters;
@@ -697,6 +698,14 @@ try
             options.Configuration = redisConnectionString;
             options.InstanceName = builder.Configuration["Redis:InstanceName"] ?? "mystira-admin:";
         });
+
+        // Register IConnectionMultiplexer for direct Redis access (e.g., SCAN operations)
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var configuration = ConfigurationOptions.Parse(redisConnectionString);
+            configuration.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(configuration);
+        });
     }
 
     // Configure CORS for frontend integration (Best Practices)
@@ -1050,8 +1059,8 @@ try
 
             // Don't fail fast for model configuration errors (e.g., entity constructor binding issues)
             // These are typically package-level issues that should be fixed in the packages
-            var isModelConfigurationError = ex is InvalidOperationException && 
-                (ex.Message.Contains("No suitable constructor was found") || 
+            var isModelConfigurationError = ex is InvalidOperationException &&
+                (ex.Message.Contains("No suitable constructor was found") ||
                  ex.Message.Contains("Cannot bind"));
 
             // Only fail fast in development/local environments for non-model-configuration errors

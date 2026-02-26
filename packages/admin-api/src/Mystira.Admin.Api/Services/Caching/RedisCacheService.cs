@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Mystira.Admin.Api.Configuration;
+using StackExchange.Redis;
 
 namespace Mystira.Admin.Api.Services.Caching;
 
@@ -12,16 +13,19 @@ namespace Mystira.Admin.Api.Services.Caching;
 public class RedisCacheService : ICacheService
 {
     private readonly IDistributedCache _cache;
+    private readonly IConnectionMultiplexer? _redis;
     private readonly RedisCacheOptions _options;
     private readonly ILogger<RedisCacheService> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
 
     public RedisCacheService(
         IDistributedCache cache,
+        IConnectionMultiplexer? redis,
         IOptions<RedisCacheOptions> options,
         ILogger<RedisCacheService> logger)
     {
         _cache = cache;
+        _redis = redis;
         _options = options.Value;
         _logger = logger;
         _jsonOptions = new JsonSerializerOptions
@@ -84,34 +88,129 @@ public class RedisCacheService : ICacheService
         }
     }
 
+    /// <summary>
+    /// Removes keys matching the provided pattern from Redis.
+    /// </summary>
+    /// <param name="pattern">The pattern to match keys against (e.g., "scenario", "character").</param>
+    /// <param name="cancellationToken">Cancellation token for the operation.</param>
+    /// <returns>A completed task.</returns>
+    /// <remarks>
+    /// Uses Redis SCAN for efficient key iteration in large datasets.
+    /// Falls back to known key invalidation if Redis is unavailable.
+    /// </remarks>
     public async Task RemoveByPatternAsync(string pattern, CancellationToken cancellationToken = default)
     {
-        // Note: Pattern-based removal requires Redis SCAN command
-        // IDistributedCache doesn't support this natively
-        // For now, log a warning - full implementation requires StackExchange.Redis directly
-        _logger.LogWarning(
-            "Pattern-based cache invalidation requested for pattern: {Pattern}. " +
-            "This requires direct Redis access. Consider invalidating specific keys.",
-            pattern);
+        if (_redis == null || !_redis.IsConnected)
+        {
+            _logger.LogWarning(
+                "Pattern-based cache invalidation requested for pattern: {Pattern}. " +
+                "Redis connection not available. Falling back to known key invalidation.",
+                pattern);
+
+            // Fallback to known key invalidation when Redis is not available
+            await InvalidateKnownPatternKeysAsync(pattern, cancellationToken);
+            return;
+        }
+
+        try
+        {
+            var database = _redis.GetDatabase();
+            var servers = _redis.GetServers().ToList();
+
+            if (servers.Count == 0)
+            {
+                _logger.LogWarning("No Redis servers available for SCAN operation");
+                await InvalidateKnownPatternKeysAsync(pattern, cancellationToken);
+                return;
+            }
+
+            // Convert simple wildcard pattern to Redis pattern
+            // Cache keys typically use ":" as separator, so we need to match accordingly
+            var redisPattern = $"*{pattern}*";
+
+            var keysToRemove = new List<RedisKey>();
+            var totalKeys = 0;
+
+            // Iterate through all servers to ensure we catch keys in clustered setups
+            foreach (var server in servers)
+            {
+                await foreach (var key in server.KeysAsync(database: database.Database, pattern: redisPattern))
+                {
+                    keysToRemove.Add(key);
+                    totalKeys++;
+                }
+            }
+
+            _logger.LogDebug("SCAN completed, total keys found: {Count}", totalKeys);
+
+            if (keysToRemove.Count == 0)
+            {
+                _logger.LogInformation(
+                    "No cache keys found matching pattern: {Pattern}",
+                    pattern);
+                return;
+            }
+
+            // Remove all matching keys in batches
+            const int batchSize = 100;
+            var removedCount = 0;
+
+            for (var i = 0; i < keysToRemove.Count; i += batchSize)
+            {
+                var batch = keysToRemove.Skip(i).Take(batchSize).ToArray();
+                await database.KeyDeleteAsync(batch);
+                removedCount += batch.Length;
+
+                _logger.LogDebug(
+                    "Removed batch of {BatchSize} keys for pattern: {Pattern}",
+                    batch.Length,
+                    pattern);
+            }
+
+            _logger.LogInformation(
+                "Pattern-based cache invalidation complete: {Pattern}. Removed {Count} keys.",
+                pattern,
+                removedCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "Error during pattern-based cache invalidation for pattern: {Pattern}. " +
+                "Falling back to known key invalidation.",
+                pattern);
+
+            // Fallback to known key invalidation on error
+            await InvalidateKnownPatternKeysAsync(pattern, cancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Fallback method that invalidates known list keys based on common patterns.
+    /// Used when Redis SCAN is not available or fails.
+    /// </summary>
+    private async Task InvalidateKnownPatternKeysAsync(string pattern, CancellationToken cancellationToken)
+    {
+        _logger.LogDebug("Invalidating known keys for pattern: {Pattern}", pattern);
 
         // Invalidate known list keys that match common patterns
-        if (pattern.Contains("scenario"))
+        if (pattern.Contains("scenario", StringComparison.OrdinalIgnoreCase))
         {
             await RemoveAsync(CacheKeys.ScenariosList, cancellationToken);
         }
-        if (pattern.Contains("character"))
+        if (pattern.Contains("character", StringComparison.OrdinalIgnoreCase))
         {
             await RemoveAsync(CacheKeys.CharacterMapsList, cancellationToken);
         }
-        if (pattern.Contains("bundle"))
+        if (pattern.Contains("bundle", StringComparison.OrdinalIgnoreCase))
         {
             await RemoveAsync(CacheKeys.BundlesList, cancellationToken);
         }
-        if (pattern.Contains("badge"))
+        if (pattern.Contains("badge", StringComparison.OrdinalIgnoreCase))
         {
             await RemoveAsync(CacheKeys.BadgesList, cancellationToken);
         }
-        if (pattern.Contains("master"))
+        if (pattern.Contains("master", StringComparison.OrdinalIgnoreCase))
         {
             await RemoveAsync(CacheKeys.CompassAxes, cancellationToken);
             await RemoveAsync(CacheKeys.Archetypes, cancellationToken);
@@ -146,11 +245,12 @@ public class RedisCacheService : ICacheService
     private TimeSpan GetDefaultExpiration(string key)
     {
         // Use different expirations based on key type
-        if (key.Contains(":master:"))
+        if (key.Contains(":master:", StringComparison.OrdinalIgnoreCase))
         {
             return TimeSpan.FromMinutes(_options.MasterDataCacheMinutes);
         }
-        if (key.Contains(":account:") || key.Contains(":profile:"))
+        if (key.Contains(":account:", StringComparison.OrdinalIgnoreCase) ||
+            key.Contains(":profile:", StringComparison.OrdinalIgnoreCase))
         {
             return TimeSpan.FromMinutes(_options.UserCacheMinutes);
         }

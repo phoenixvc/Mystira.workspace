@@ -8,116 +8,152 @@
 # =============================================================================
 
 # =============================================================================
+# ⚠️  SECURITY WARNING: Subscription ID Configuration
+# =============================================================================
+# Subscription IDs are now provided via local.subscription_path which derives from
+# the subscription_id variable (defaults to terraform.tfvars value).
+#
+# Before running terraform:
+#   1. Ensure the subscription_id variable matches your Azure subscription
+#   2. Or create terraform.tfvars with: subscription_id = "your-sub-id"
+#   3. Or override at runtime: terraform apply -var="subscription_id=your-sub-id"
+#
+# To find your subscription ID: az account show --query id -o tsv
+# =============================================================================
+
+variable "subscription_id" {
+  description = "Azure Subscription ID for DNS zone resources. Must match the subscription where the DNS zone exists."
+  type        = string
+  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe"  # ⚠️ Update this to match your subscription
+
+  validation {
+    condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.subscription_id))
+    error_message = "Subscription ID must be a valid GUID format (e.g., xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx)."
+  }
+}
+
+locals {
+  dns_resource_group = "mys-shared-terraform-rg-san"
+  dns_zone_name      = "mystira.app"
+  # Build the subscription ID path for reuse in import blocks
+  # Import block id may use expressions (locals/vars are allowed) — update manually if subscription changes
+  subscription_path = "/subscriptions/${var.subscription_id}"
+}
+
+# =============================================================================
 # Import blocks for existing DNS records
 # These records were created by previous CI/CD runs and need to be imported
+# ⚠️  SECURITY NOTE: These import blocks contain hardcoded subscription IDs.
+# If moving to a different subscription, update the subscription_id variable above
+# and regenerate these import statements.
 # =============================================================================
 
 import {
   to = azurerm_dns_cname_record.dev_app_swa
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_api
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.api"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_story_swa
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story"
 }
 
 # Import existing Front Door CNAME records
 import {
   to = azurerm_dns_cname_record.dev_publisher_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.publisher"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.publisher"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_chain_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.chain"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.chain"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_story_api_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.story-api"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_admin_api_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin-api"
 }
 
 import {
   to = azurerm_dns_cname_record.dev_admin_ui_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/dev.admin"
 }
 
 # Import existing staging CNAME records
 import {
   to = azurerm_dns_cname_record.staging_publisher_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.publisher"
 }
 
 import {
   to = azurerm_dns_cname_record.staging_chain_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.chain"
 }
 
 import {
   to = azurerm_dns_cname_record.staging_admin_api_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin-api"
 }
 
 import {
   to = azurerm_dns_cname_record.staging_admin_ui_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.admin"
 }
 
 import {
   to = azurerm_dns_cname_record.staging_story_api_fd
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.story-api"
 }
 
 # Import existing staging TXT validation records
 import {
   to = azurerm_dns_txt_record.fd_staging_publisher
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.publisher"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.publisher"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_chain
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.chain"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.chain"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_admin_api
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin-api"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_admin_ui
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.admin"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_story_api
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story-api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story-api"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_story_swa
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.story"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_api
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.api"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.api"
 }
 
 import {
   to = azurerm_dns_txt_record.fd_staging_app
-  id = "/subscriptions/22f9eb18-6553-4b7d-9451-47d0195085fe/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.app"
+  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/TXT/_dnsauth.staging.app"
 }
 
 variable "bind_custom_domains" {
