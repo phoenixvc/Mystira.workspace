@@ -43,7 +43,7 @@
   <ItemGroup>
     <!-- NOTE: Mystira.Contracts dependency is added by consuming projects that need both packages.
          This avoids circular dependency issues during package publishing. -->
-    <PackageReference Include="Microsoft.ApplicationInsights" Version="2.23.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Microsoft.Identity.Web" Version="4.3.0" />
     <!-- Microsoft.Extensions.Logging.Abstractions and Microsoft.Extensions.Options are now part of .NET 10.0 shared framework -->
@@ -51,7 +51,7 @@
     <PackageReference Include="OpenTelemetry.Api" Version="1.15.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     <!-- Middleware and Telemetry dependencies -->
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.0.0" />
     <!-- Note: Microsoft.AspNetCore.Http.Abstractions is provided by the shared framework in .NET 10.0 -->
     <PackageReference Include="Serilog" Version="4.3.1" />
     <!-- Azure Key Vault configuration -->
