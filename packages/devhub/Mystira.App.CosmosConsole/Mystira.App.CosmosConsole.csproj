@@ -5,6 +5,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AzureCosmosDisableNewtonsoftJsonCheck>true</AzureCosmosDisableNewtonsoftJsonCheck>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mystira.App.Domain\Mystira.App.Domain.csproj" />
+    <ProjectReference Include="..\..\..\app\src\Mystira.App.Domain\Mystira.App.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
