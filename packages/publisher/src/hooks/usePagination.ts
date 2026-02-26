@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from "react";
 
 interface UsePaginationOptions {
   initialPage?: number;
@@ -32,13 +32,13 @@ export function usePagination({
 
   const nextPage = useCallback(() => {
     if (hasNextPage) {
-      setPage(p => p + 1);
+      setPage((p) => p + 1);
     }
   }, [hasNextPage]);
 
   const previousPage = useCallback(() => {
     if (hasPreviousPage) {
-      setPage(p => p - 1);
+      setPage((p) => p - 1);
     }
   }, [hasPreviousPage]);
 

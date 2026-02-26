@@ -7,6 +7,7 @@ The **Application Layer** containing use cases, business workflows, and port int
 **Layer**: **Application Layer (Use Cases)**
 
 The Application layer is the **core orchestration layer** in our hexagonal architecture:
+
 - **Defines** port interfaces that infrastructure must implement
 - **Orchestrates** business workflows using domain entities
 - **Validates** input and enforces application-level rules
@@ -14,6 +15,7 @@ The Application layer is the **core orchestration layer** in our hexagonal archi
 - **ZERO infrastructure dependencies** ✅
 
 **Dependency Flow** (Correct):
+
 ```
 ┌────────────────────────────┐
 │  API/UI Layer (Adapters)   │
@@ -37,6 +39,7 @@ The Application layer is the **core orchestration layer** in our hexagonal archi
 ```
 
 **Key Principles**:
+
 - ✅ **Use Case Driven** - Each use case represents a single business operation
 - ✅ **Technology Agnostic** - No knowledge of HTTP, databases, or UI frameworks
 - ✅ **Port Interfaces** - Defines ALL ports for infrastructure adapters
@@ -139,6 +142,7 @@ Mystira.App.Application/
 **Ports** are interfaces defined by the Application layer that specify what it needs from the outside world. Infrastructure adapters implement these ports.
 
 **Benefits:**
+
 - ✅ Application doesn't depend on infrastructure
 - ✅ Can swap implementations (Azure → AWS, Discord → Slack)
 - ✅ Easy to test with mocks
@@ -149,7 +153,9 @@ Mystira.App.Application/
 ### Data Ports (`Ports/Data/`)
 
 #### IRepository<T>
+
 Base repository interface for all entities:
+
 ```csharp
 public interface IRepository<T> where T : class
 {
@@ -163,7 +169,9 @@ public interface IRepository<T> where T : class
 ```
 
 #### IScenarioRepository
+
 Scenario-specific queries:
+
 ```csharp
 public interface IScenarioRepository : IRepository<Scenario>
 {
@@ -174,7 +182,9 @@ public interface IScenarioRepository : IRepository<Scenario>
 ```
 
 #### IUnitOfWork
+
 Transaction management:
+
 ```csharp
 public interface IUnitOfWork : IDisposable
 {
@@ -186,6 +196,7 @@ public interface IUnitOfWork : IDisposable
 ```
 
 **Implementations:**
+
 - `Infrastructure.Data` provides EF Core implementations
 
 ---
@@ -193,7 +204,9 @@ public interface IUnitOfWork : IDisposable
 ### Storage Ports (`Ports/Storage/`)
 
 #### IBlobService
+
 Platform-agnostic blob storage (can use Azure, AWS S3, local storage):
+
 ```csharp
 public interface IBlobService
 {
@@ -206,6 +219,7 @@ public interface IBlobService
 ```
 
 **Implementations:**
+
 - `Infrastructure.Azure.AzureBlobService` (Azure Blob Storage)
 - Can add: `S3BlobService` (AWS), `LocalBlobService` (file system)
 
@@ -214,7 +228,9 @@ public interface IBlobService
 ### Media Ports (`Ports/Media/`)
 
 #### IAudioTranscodingService
+
 Audio format conversion:
+
 ```csharp
 public interface IAudioTranscodingService
 {
@@ -231,6 +247,7 @@ public sealed record AudioTranscodingResult(
 ```
 
 **Implementations:**
+
 - `Infrastructure.Azure.FfmpegAudioTranscodingService` (FFmpeg)
 
 ---
@@ -238,7 +255,9 @@ public sealed record AudioTranscodingResult(
 ### Messaging Ports (`Ports/Messaging/`)
 
 #### IMessagingService
+
 Platform-agnostic messaging (can use Discord, Slack, Teams):
+
 ```csharp
 public interface IMessagingService
 {
@@ -251,6 +270,7 @@ public interface IMessagingService
 ```
 
 **Implementations:**
+
 - `Infrastructure.Discord.DiscordBotService` (Discord)
 - Can add: `SlackService`, `TeamsService`, `EmailService`
 
@@ -261,6 +281,7 @@ public interface IMessagingService
 Each use case represents a **single business operation**:
 
 ### Example: CreateAccountUseCase
+
 ```csharp
 public class CreateAccountUseCase
 {
@@ -305,6 +326,7 @@ public class CreateAccountUseCase
 ```
 
 **Key Points:**
+
 - ✅ Depends only on port interfaces
 - ✅ No infrastructure knowledge
 - ✅ 100% testable with mocks
@@ -319,6 +341,7 @@ public class CreateAccountUseCase
 CQRS separates **read operations** (Queries) from **write operations** (Commands), providing clear separation of concerns and enabling independent optimization of each path.
 
 **Benefits:**
+
 - ✅ **Clear Intent** - Commands modify state, Queries retrieve data
 - ✅ **Scalability** - Read and write paths can be optimized separately
 - ✅ **Maintainability** - Single responsibility for each handler
@@ -353,6 +376,7 @@ CQRS separates **read operations** (Queries) from **write operations** (Commands
 Commands modify state and should be **idempotent** when possible.
 
 **Structure:**
+
 ```
 Application/CQRS/Scenarios/Commands/
 ├── CreateScenarioCommand.cs          # Command definition (record)
@@ -360,6 +384,7 @@ Application/CQRS/Scenarios/Commands/
 ```
 
 **Example - CreateScenarioCommand:**
+
 ```csharp
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.App.Domain.Models;
@@ -373,6 +398,7 @@ public record CreateScenarioCommand(CreateScenarioRequest Request) : ICommand<Sc
 ```
 
 **Example - CreateScenarioCommandHandler (Wolverine static handler):**
+
 ```csharp
 public static class CreateScenarioCommandHandler
 {
@@ -396,6 +422,7 @@ public static class CreateScenarioCommandHandler
 Queries retrieve data and should **NOT modify state**. They can be cached for performance.
 
 **Structure:**
+
 ```
 Application/CQRS/Scenarios/Queries/
 ├── GetScenarioQuery.cs               # Query definition (record)
@@ -403,6 +430,7 @@ Application/CQRS/Scenarios/Queries/
 ```
 
 **Example - GetScenarioQuery:**
+
 ```csharp
 using Mystira.App.Domain.Models;
 
@@ -415,6 +443,7 @@ public record GetScenarioQuery(string ScenarioId) : IQuery<Scenario?>;
 ```
 
 **Example - GetScenarioQueryHandler (Wolverine static handler):**
+
 ```csharp
 public static class GetScenarioQueryHandler
 {
@@ -467,21 +496,25 @@ public class ScenariosController : ControllerBase
 ### CQRS Base Interfaces
 
 **ICommand<TResponse>** - Commands that return a result (marker interface for Wolverine):
+
 ```csharp
 public interface ICommand<out TResponse> { }
 ```
 
 **ICommand** - Commands with no result:
+
 ```csharp
 public interface ICommand { }
 ```
 
 **IQuery<TResponse>** - Queries (always return data):
+
 ```csharp
 public interface IQuery<out TResponse> { }
 ```
 
 **Wolverine Handlers** - Convention-based static methods:
+
 ```csharp
 // Wolverine discovers handlers by convention - no interfaces needed
 public static class CreateScenarioCommandHandler
@@ -500,12 +533,14 @@ public static class CreateScenarioCommandHandler
 ### Overview
 
 The Specification Pattern encapsulates **query logic** into reusable, composable objects. This allows complex queries to be:
+
 - **Defined once** and reused across use cases
 - **Composed** to build complex filters
 - **Tested** independently of infrastructure
 - **Maintained** in a single location
 
 **Benefits:**
+
 - ✅ **Reusability** - Define query logic once, use everywhere
 - ✅ **Composability** - Combine specifications for complex queries
 - ✅ **Testability** - Test query logic independently
@@ -545,6 +580,7 @@ The Specification Pattern encapsulates **query logic** into reusable, composable
 Specifications are defined in the **Domain layer** (`Domain/Specifications/`):
 
 **Example - ScenariosByAgeGroupSpecification:**
+
 ```csharp
 using Mystira.App.Domain.Models;
 
@@ -561,6 +597,7 @@ public class ScenariosByAgeGroupSpecification : BaseSpecification<Scenario>
 ```
 
 **Example - PaginatedScenariosSpecification:**
+
 ```csharp
 public class PaginatedScenariosSpecification : BaseSpecification<Scenario>
 {
@@ -574,6 +611,7 @@ public class PaginatedScenariosSpecification : BaseSpecification<Scenario>
 ```
 
 **Example - FeaturedScenariosSpecification (Composite):**
+
 ```csharp
 public class FeaturedScenariosSpecification : BaseSpecification<Scenario>
 {
@@ -591,6 +629,7 @@ public class FeaturedScenariosSpecification : BaseSpecification<Scenario>
 ### Using Specifications in Queries
 
 **Example - GetScenariosByAgeGroupQuery:**
+
 ```csharp
 public class GetScenariosByAgeGroupQueryHandler : IQueryHandler<GetScenariosByAgeGroupQuery, IEnumerable<Scenario>>
 {
@@ -626,6 +665,7 @@ public interface IRepository<TEntity> where TEntity : class
 ```
 
 **Implementation (Infrastructure.Data):**
+
 ```csharp
 public class Repository<TEntity> : IRepository<TEntity>
 {
@@ -644,28 +684,33 @@ public class Repository<TEntity> : IRepository<TEntity>
 ### BaseSpecification Features
 
 **Criteria** - WHERE clause:
+
 ```csharp
 base(s => s.AgeGroup == "Ages7to9")
 ```
 
 **Includes** - Eager loading:
+
 ```csharp
 AddInclude(s => s.Scenes);
 AddInclude("Scenes.Choices");  // ThenInclude
 ```
 
 **OrderBy** - Sorting:
+
 ```csharp
 ApplyOrderBy(s => s.Title);              // ASC
 ApplyOrderByDescending(s => s.CreatedAt); // DESC
 ```
 
 **Paging** - Pagination:
+
 ```csharp
 ApplyPaging(skip: 20, take: 10);  // Page 3, size 10
 ```
 
 **GroupBy** - Grouping:
+
 ```csharp
 ApplyGroupBy(s => s.AgeGroup);
 ```
@@ -719,6 +764,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 ```
 
 **Result:**
+
 - ✅ Clear separation: Query (CQRS) + Specification (Domain) + Repository (Infrastructure)
 - ✅ Reusable: `PaginatedScenariosSpecification` can be used in multiple queries
 - ✅ Testable: Each layer can be tested independently
@@ -740,6 +786,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 **NO Infrastructure Dependencies!** ✅
 
 ### NuGet Packages
+
 ```xml
 <PackageReference Include="Wolverine" Version="3.8.3" />
 <PackageReference Include="FluentValidation" Version="11.11.0" />
@@ -753,6 +800,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 ## Use Case Categories
 
 ### Account Management
+
 - `CreateAccountUseCase` - Register new accounts
 - `GetAccountUseCase` - Retrieve account by ID
 - `GetAccountByEmailUseCase` - Retrieve by email
@@ -762,6 +810,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 - `RemoveUserProfileFromAccountUseCase` - Unlink profiles
 
 ### Scenario Management
+
 - `CreateScenarioUseCase` - Author new stories
 - `GetScenarioUseCase` - Retrieve scenario by ID
 - `GetScenariosUseCase` - List/filter scenarios
@@ -770,6 +819,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 - `ValidateScenarioUseCase` - Validate structure
 
 ### Game Session Management
+
 - `CreateGameSessionUseCase` - Start new game
 - `GetGameSessionUseCase` - Retrieve session
 - `MakeChoiceUseCase` - Process player choice
@@ -783,6 +833,7 @@ public async Task<IActionResult> GetScenarios([FromQuery] int page = 1, [FromQue
 - `DeleteGameSessionUseCase` - Remove session
 
 ### Media Management
+
 - `UploadMediaUseCase` - Upload files to blob storage
 - `DeleteMediaUseCase` - Remove media files
 - `GetMediaUseCase` - Retrieve media by ID
@@ -914,6 +965,7 @@ public class AccountsController : ControllerBase
 - ✅ **Infrastructure Agnostic** - Can swap any implementation
 
 **Verification:**
+
 ```bash
 # No infrastructure references in csproj ✅
 grep "Infrastructure" Mystira.App.Application.csproj

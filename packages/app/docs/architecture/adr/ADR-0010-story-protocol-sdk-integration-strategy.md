@@ -14,17 +14,18 @@
 
 ## Approvals
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Tech Lead | | | ⏳ Pending |
-| Backend Dev | | | ⏳ Pending |
-| DevOps | | | ⏳ Pending |
+| Role        | Name | Date | Status     |
+| ----------- | ---- | ---- | ---------- |
+| Tech Lead   |      |      | ⏳ Pending |
+| Backend Dev |      |      | ⏳ Pending |
+| DevOps      |      |      | ⏳ Pending |
 
 ---
 
 ## Context
 
 Mystira.App requires blockchain integration with Story Protocol to enable:
+
 - Registration of stories (scenarios) as IP Assets on-chain
 - Automatic royalty distribution to contributors (publishers, curators)
 - Transparent attribution and ownership tracking
@@ -32,6 +33,7 @@ Mystira.App requires blockchain integration with Story Protocol to enable:
 ### Current State
 
 The codebase already has a comprehensive Story Protocol integration:
+
 - **Port Interface**: `IStoryProtocolService` defined in Application layer (7 operations)
 - **Domain Models**: `StoryProtocolMetadata`, `Contributor`, `RoyaltyPaymentResult`, `RoyaltyBalance`
 - **Mock Implementation**: Fully functional for development/testing
@@ -68,6 +70,7 @@ Based on team discussion and technical evaluation:
 ### Royalty Distribution Requirements
 
 From business requirements:
+
 - Story publisher receives configurable percentage (default: 10%)
 - Story curator receives configurable percentage (default: 10%)
 - Percentages adjustable via admin portal
@@ -92,12 +95,14 @@ From business requirements:
 **Description**: Keep the existing `StoryProtocolService` using Nethereum for direct smart contract interactions.
 
 **Pros**:
+
 - ✅ Already implemented and partially working
 - ✅ No additional infrastructure required
 - ✅ Pure .NET solution, consistent tech stack
 - ✅ Full control over contract interactions
 
 **Cons**:
+
 - ❌ Must maintain ABI compatibility manually as Story Protocol evolves
 - ❌ Missing SDK-specific helper functions (e.g., combined mint+register operations)
 - ❌ Higher risk of subtle bugs in contract encoding/decoding
@@ -115,6 +120,7 @@ From business requirements:
 ```
 
 **Pros**:
+
 - ✅ Uses official Story Protocol Python SDK
 - ✅ SDK handles protocol upgrades and ABI changes
 - ✅ Clean separation of concerns (blockchain logic isolated)
@@ -125,6 +131,7 @@ From business requirements:
 - ✅ Python has excellent blockchain/web3 ecosystem (web3.py)
 
 **Cons**:
+
 - ⚠️ Additional service to deploy and maintain
 - ⚠️ Network latency between services (minimal for same-region)
 - ⚠️ New repository/project to manage
@@ -135,12 +142,14 @@ From business requirements:
 **Description**: Create Azure Functions (TypeScript) for each blockchain operation. .NET API invokes functions via HTTP triggers.
 
 **Pros**:
+
 - ✅ Uses official TypeScript SDK
 - ✅ Serverless - scales automatically, pay-per-use
 - ✅ No infrastructure to manage
 - ✅ Quick to implement for MVP
 
 **Cons**:
+
 - ❌ Cold start latency for blockchain operations
 - ❌ Harder to debug function-to-function flows
 - ❌ Complex retry/timeout handling across function boundaries
@@ -152,11 +161,13 @@ From business requirements:
 **Description**: Create a standalone TypeScript background worker that polls Cosmos DB for pending blockchain operations and processes them.
 
 **Pros**:
+
 - ✅ Fully decouples API from blockchain timing
 - ✅ Natural queue-like behavior
 - ✅ Resilient to API restarts
 
 **Cons**:
+
 - ❌ Polling introduces latency (vs event-driven)
 - ❌ Complex state machine for operation tracking
 - ❌ Requires careful handling of concurrent processing
@@ -167,10 +178,12 @@ From business requirements:
 **Description**: Keep Nethereum for simple read operations, add TypeScript sidecar only for complex write operations.
 
 **Pros**:
+
 - ✅ Minimal new code for reads
 - ✅ SDK benefits for complex writes
 
 **Cons**:
+
 - ❌ Split logic across two implementations
 - ❌ Inconsistent patterns
 - ❌ Harder to maintain
@@ -452,14 +465,15 @@ public class ChainServiceAdapter : IStoryProtocolService
 
 For immediate delivery, implement minimal endpoints:
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/ip-assets/register` | POST | Register story as IP Asset |
-| `/ip-assets/{content_id}/status` | GET | Check registration status |
-| `/royalties/pay` | POST | Pay royalties to IP Asset |
-| `/health` | GET | Health check endpoint |
+| Endpoint                         | Method | Description                |
+| -------------------------------- | ------ | -------------------------- |
+| `/ip-assets/register`            | POST   | Register story as IP Asset |
+| `/ip-assets/{content_id}/status` | GET    | Check registration status  |
+| `/royalties/pay`                 | POST   | Pay royalties to IP Asset  |
+| `/health`                        | GET    | Health check endpoint      |
 
 Defer to Phase 2:
+
 - Royalty claiming (`/royalties/{ip_asset_id}/claim`)
 - Advanced license terms
 - Derivative works
@@ -467,6 +481,7 @@ Defer to Phase 2:
 ### Security & Authentication
 
 Service-to-service communication secured via:
+
 1. **API Key**: Shared secret in `X-API-Key` header
 2. **Network Isolation**: Both services in same Azure VNet (production)
 3. **HTTPS Only**: TLS 1.2+ required
@@ -510,6 +525,7 @@ All errors return consistent format:
 ### Fallback Strategy
 
 Keep `MockStoryProtocolService` as fallback when:
+
 - Chain service is unavailable
 - Running in development/test mode
 - Feature flag disabled
@@ -579,12 +595,12 @@ services.AddScoped<IStoryProtocolService>(sp =>
 
 ### Mitigation Strategies
 
-| Risk | Mitigation |
-|------|------------|
-| Service unavailability | Feature flag to fall back to mock; health checks; alerts |
-| Network latency | Same-region deployment; connection pooling; caching reads |
-| Version drift | Semantic versioning; integration tests; contract testing |
-| Debugging complexity | Correlation IDs; distributed tracing (App Insights) |
+| Risk                   | Mitigation                                                |
+| ---------------------- | --------------------------------------------------------- |
+| Service unavailability | Feature flag to fall back to mock; health checks; alerts  |
+| Network latency        | Same-region deployment; connection pooling; caching reads |
+| Version drift          | Semantic versioning; integration tests; contract testing  |
+| Debugging complexity   | Correlation IDs; distributed tracing (App Insights)       |
 
 ---
 
@@ -618,17 +634,20 @@ services.AddScoped<IStoryProtocolService>(sp =>
 ## Alternatives Not Chosen
 
 ### TypeScript SDK
+
 - Originally considered due to type safety benefits
 - However, partner/team member is less familiar with TypeScript
 - Python SDK provides equivalent functionality
 - TypeScript would add Node.js complexity to infrastructure
 
 ### Embedded WebAssembly
+
 - TypeScript SDK compiled to WASM and run in .NET
 - Too experimental; not worth the risk
 - Debugging would be extremely difficult
 
 ### gRPC Communication
+
 - Higher performance but more complex setup
 - REST is sufficient for current throughput needs
 - REST easier to debug and test

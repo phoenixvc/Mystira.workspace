@@ -80,6 +80,7 @@ Use descriptive branch names with prefixes:
 - `chore/` - Maintenance tasks
 
 **Examples:**
+
 - `feature/add-user-settings`
 - `fix/scenario-validation-error`
 - `refactor/extract-validation-hook`
@@ -118,6 +119,7 @@ pnpm test
 - **Avoid type assertions**: Use type guards instead
 
 **Good:**
+
 ```tsx
 interface UserProps {
   name: string;
@@ -131,6 +133,7 @@ function User({ name, age, email }: UserProps) {
 ```
 
 **Bad:**
+
 ```tsx
 function User(props: any) {
   // Avoid any types
@@ -145,6 +148,7 @@ function User(props: any) {
 - **Hooks order**: Follow React hooks rules
 
 **Good:**
+
 ```tsx
 interface ButtonProps {
   label: string;
@@ -169,6 +173,7 @@ export function Button({ label, onClick, disabled = false }: ButtonProps) {
 - **Use index files**: Export multiple items from directories
 
 **Structure:**
+
 ```
 components/
 ├── Button/
@@ -200,14 +205,15 @@ components/
 - **Log for debugging**: Console log errors in development
 
 **Example:**
+
 ```tsx
-import { handleApiError } from '../utils/errorHandler';
+import { handleApiError } from "../utils/errorHandler";
 
 try {
   await api.createScenario(data);
-  showToast.success('Scenario created successfully');
+  showToast.success("Scenario created successfully");
 } catch (error) {
-  handleApiError(error, 'Failed to create scenario');
+  handleApiError(error, "Failed to create scenario");
 }
 ```
 
@@ -314,28 +320,34 @@ feat(scenarios): add schema validation for scenario imports
 
 ```markdown
 ## Description
+
 Brief description of changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
 - [ ] Documentation update
 
 ## Changes Made
+
 - Change 1
 - Change 2
 - Change 3
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Manual testing completed
 - [ ] All tests passing
 
 ## Screenshots (if applicable)
+
 Add screenshots here
 
 ## Related Issues
+
 Closes #123
 ```
 
@@ -366,27 +378,27 @@ Closes #123
 Use React Testing Library and Vitest:
 
 ```tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect, vi } from 'vitest';
-import { Button } from './Button';
+import { render, screen, fireEvent } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { Button } from "./Button";
 
-describe('Button', () => {
-  it('renders with label', () => {
+describe("Button", () => {
+  it("renders with label", () => {
     render(<Button label="Click me" onClick={() => {}} />);
-    expect(screen.getByText('Click me')).toBeInTheDocument();
+    expect(screen.getByText("Click me")).toBeInTheDocument();
   });
 
-  it('calls onClick when clicked', () => {
+  it("calls onClick when clicked", () => {
     const handleClick = vi.fn();
     render(<Button label="Click me" onClick={handleClick} />);
-    
-    fireEvent.click(screen.getByText('Click me'));
+
+    fireEvent.click(screen.getByText("Click me"));
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  it('is disabled when disabled prop is true', () => {
+  it("is disabled when disabled prop is true", () => {
     render(<Button label="Click me" onClick={() => {}} disabled />);
-    expect(screen.getByText('Click me')).toBeDisabled();
+    expect(screen.getByText("Click me")).toBeDisabled();
   });
 });
 ```

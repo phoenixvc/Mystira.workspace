@@ -31,15 +31,19 @@ Each ADR follows this structure:
 **Tags**: [Relevant tags]
 
 ## Context
+
 [What is the issue we're facing?]
 
 ## Decision
+
 [What did we decide to do?]
 
 ## Consequences
+
 [What becomes easier or harder as a result?]
 
 ## References
+
 [Links to supporting documentation]
 ```
 
@@ -54,22 +58,22 @@ Each ADR follows this structure:
 
 ## Current ADRs
 
-| ADR | Title | Status | Date | Tags |
-|-----|-------|--------|------|------|
-| [ADR-0001](ADR-0001-adopt-cqrs-pattern.md) | Adopt CQRS Pattern | ✅ Accepted | 2025-11-24 | architecture, cqrs, patterns, application-layer |
-| [ADR-0002](ADR-0002-adopt-specification-pattern.md) | Adopt Specification Pattern | ✅ Accepted | 2025-11-24 | architecture, specification, patterns, domain-layer |
-| [ADR-0003](ADR-0003-adopt-hexagonal-architecture.md) | Adopt Hexagonal Architecture | ✅ Accepted | 2025-11-24 | architecture, hexagonal, ports-and-adapters, clean-architecture |
-| [ADR-0004](ADR-0004-use-mediatr-for-cqrs.md) | Use MediatR for Request/Response Handling | ✅ Accepted | 2025-11-24 | technology, mediatr, cqrs, request-response |
-| [ADR-0005](ADR-0005-separate-api-and-admin-api.md) | Separate API and Admin API | ✅ Accepted | 2025-11-24 | architecture, api, security, separation-of-concerns |
-| [ADR-0006](ADR-0006-phase-5-cqrs-migration.md) | Phase 5 - Complete CQRS Migration | ✅ Implemented | 2025-11-24 | migration, cqrs, implementation, phase-5 |
-| [ADR-0007](ADR-0007-implement-azure-front-door.md) | Implement Azure Front Door for Edge Security | 💭 Proposed | 2025-12-07 | infrastructure, security, azure, front-door, waf |
-| [ADR-0008](ADR-0008-separate-staging-environment.md) | Implement Separate Staging Environment | 💭 Proposed | 2025-12-07 | infrastructure, environments, staging, devops |
-| [ADR-0009](ADR-0009-staging-pwa-deployment-strategy.md) | Use App Service for Staging PWA Deployment | ✅ Accepted | 2025-12-08 | infrastructure, deployment, pwa, staging, azure, static-web-apps, app-service |
-| [ADR-0010](ADR-0010-story-protocol-sdk-integration-strategy.md) | Story Protocol SDK Integration Strategy | 💭 Proposed | 2025-12-10 | architecture, blockchain, story-protocol, sdk-integration, infrastructure |
-| [ADR-0011](ADR-0011-unified-workspace-orchestration.md) | Unified Workspace Orchestration | 💭 Proposed | 2025-12-10 | infrastructure, workspace, orchestration |
-| [ADR-0012](ADR-0012-infrastructure-as-code.md) | Infrastructure as Code | 💭 Proposed | 2025-12-10 | infrastructure, iac, bicep, azure |
-| [ADR-0013](ADR-0013-grpc-for-csharp-python-integration.md) | Adopt gRPC for C# to Python Integration | 💭 Proposed | 2025-12-11 | architecture, grpc, python, microservices, performance |
-| [ADR-0014](ADR-0014-implementation-roadmap.md) | Mystira.App Implementation Roadmap | ✅ Accepted | 2025-12-22 | planning, roadmap, implementation, strategy, polyglot |
+| ADR                                                             | Title                                        | Status         | Date       | Tags                                                                          |
+| --------------------------------------------------------------- | -------------------------------------------- | -------------- | ---------- | ----------------------------------------------------------------------------- |
+| [ADR-0001](ADR-0001-adopt-cqrs-pattern.md)                      | Adopt CQRS Pattern                           | ✅ Accepted    | 2025-11-24 | architecture, cqrs, patterns, application-layer                               |
+| [ADR-0002](ADR-0002-adopt-specification-pattern.md)             | Adopt Specification Pattern                  | ✅ Accepted    | 2025-11-24 | architecture, specification, patterns, domain-layer                           |
+| [ADR-0003](ADR-0003-adopt-hexagonal-architecture.md)            | Adopt Hexagonal Architecture                 | ✅ Accepted    | 2025-11-24 | architecture, hexagonal, ports-and-adapters, clean-architecture               |
+| [ADR-0004](ADR-0004-use-mediatr-for-cqrs.md)                    | Use MediatR for Request/Response Handling    | ✅ Accepted    | 2025-11-24 | technology, mediatr, cqrs, request-response                                   |
+| [ADR-0005](ADR-0005-separate-api-and-admin-api.md)              | Separate API and Admin API                   | ✅ Accepted    | 2025-11-24 | architecture, api, security, separation-of-concerns                           |
+| [ADR-0006](ADR-0006-phase-5-cqrs-migration.md)                  | Phase 5 - Complete CQRS Migration            | ✅ Implemented | 2025-11-24 | migration, cqrs, implementation, phase-5                                      |
+| [ADR-0007](ADR-0007-implement-azure-front-door.md)              | Implement Azure Front Door for Edge Security | 💭 Proposed    | 2025-12-07 | infrastructure, security, azure, front-door, waf                              |
+| [ADR-0008](ADR-0008-separate-staging-environment.md)            | Implement Separate Staging Environment       | 💭 Proposed    | 2025-12-07 | infrastructure, environments, staging, devops                                 |
+| [ADR-0009](ADR-0009-staging-pwa-deployment-strategy.md)         | Use App Service for Staging PWA Deployment   | ✅ Accepted    | 2025-12-08 | infrastructure, deployment, pwa, staging, azure, static-web-apps, app-service |
+| [ADR-0010](ADR-0010-story-protocol-sdk-integration-strategy.md) | Story Protocol SDK Integration Strategy      | 💭 Proposed    | 2025-12-10 | architecture, blockchain, story-protocol, sdk-integration, infrastructure     |
+| [ADR-0011](ADR-0011-unified-workspace-orchestration.md)         | Unified Workspace Orchestration              | 💭 Proposed    | 2025-12-10 | infrastructure, workspace, orchestration                                      |
+| [ADR-0012](ADR-0012-infrastructure-as-code.md)                  | Infrastructure as Code                       | 💭 Proposed    | 2025-12-10 | infrastructure, iac, bicep, azure                                             |
+| [ADR-0013](ADR-0013-grpc-for-csharp-python-integration.md)      | Adopt gRPC for C# to Python Integration      | 💭 Proposed    | 2025-12-11 | architecture, grpc, python, microservices, performance                        |
+| [ADR-0014](ADR-0014-implementation-roadmap.md)                  | Mystira.App Implementation Roadmap           | ✅ Accepted    | 2025-12-22 | planning, roadmap, implementation, strategy, polyglot                         |
 
 ---
 
@@ -103,6 +107,7 @@ touch ADR-XXXX-short-title.md
 ```
 
 **Naming Convention**:
+
 - Use sequential numbering: `ADR-0001`, `ADR-0002`, etc.
 - Use kebab-case for title: `adopt-cqrs-pattern`
 - Example: `ADR-0003-adopt-event-sourcing.md`
@@ -205,6 +210,7 @@ Proposed → Accepted → [Implemented] → [Evaluated]
 ### Evaluation
 
 After 3-6 months of implementation:
+
 - Review the decision's impact
 - Update the ADR with lessons learned
 - Consider whether to continue, modify, or deprecate

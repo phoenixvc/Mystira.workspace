@@ -49,7 +49,7 @@ export interface ValueObject {
  * Database target for polyglot persistence.
  * Mirrors Mystira.Shared.Data.Polyglot.DatabaseTarget in C#.
  */
-export type DatabaseTarget = 'cosmosdb' | 'postgresql' | 'redis';
+export type DatabaseTarget = "cosmosdb" | "postgresql" | "redis";
 
 /**
  * Entity metadata for polyglot routing.

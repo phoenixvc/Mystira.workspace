@@ -6,40 +6,40 @@ This document describes our continuous integration and continuous deployment (CI
 
 > **Important**: These terms are used interchangeably but mean the same thing.
 
-| Term | Also Known As | What It Actually Is |
-|------|---------------|---------------------|
+| Term    | Also Known As              | What It Actually Is                                                                    |
+| ------- | -------------------------- | -------------------------------------------------------------------------------------- |
 | **PWA** | SWA, Frontend, Blazor WASM | The Blazor WebAssembly frontend (`Mystira.App.PWA`). Deployed to Azure Static Web App. |
-| **SWA** | PWA, Frontend | Azure Static Web App - the hosting service for the PWA |
-| **API** | Backend | The .NET API (`Mystira.App.Api`). Deployed to Azure App Service. |
+| **SWA** | PWA, Frontend              | Azure Static Web App - the hosting service for the PWA                                 |
+| **API** | Backend                    | The .NET API (`Mystira.App.Api`). Deployed to Azure App Service.                       |
 
 ## Quick Reference: How to Deploy to Dev
 
 ### API Deployment (App Service)
 
-| Method | How |
-|--------|-----|
+| Method        | How                                                                              |
+| ------------- | -------------------------------------------------------------------------------- |
 | **Automatic** | Push to `dev` branch (triggers `[Deploy] Trigger Workspace` → full build/deploy) |
-| **Manual** | Run `[Deploy] Trigger Workspace` → select `api` |
+| **Manual**    | Run `[Deploy] Trigger Workspace` → select `api`                                  |
 
 This triggers a full build and deploy to Azure App Service via the workspace repo.
 
 ### SWA/PWA Deployment (Static Web App)
 
-| Method | How |
-|--------|-----|
+| Method        | How                                                             |
+| ------------- | --------------------------------------------------------------- |
 | **Automatic** | Push to `dev` branch → `[PWA] Deploy to Dev` builds and deploys |
-| **Manual** | Run `[PWA] Deploy to Dev` workflow |
+| **Manual**    | Run `[PWA] Deploy to Dev` workflow                              |
 
 Deployment happens directly from this repo via Azure Static Web Apps.
 
 ### Workspace Event Types Reference
 
-| Event Type | What It Does |
-|------------|--------------|
-| `app-deploy` | Full API deployment (build + deploy to App Service) |
-| `app-swa-deploy` | Just updates submodule ref (SWA deploys itself via Azure) |
-| `devhub-deploy` | Just updates submodule ref |
-| `story-generator-swa-deploy` | Just updates submodule ref |
+| Event Type                   | What It Does                                              |
+| ---------------------------- | --------------------------------------------------------- |
+| `app-deploy`                 | Full API deployment (build + deploy to App Service)       |
+| `app-swa-deploy`             | Just updates submodule ref (SWA deploys itself via Azure) |
+| `devhub-deploy`              | Just updates submodule ref                                |
+| `story-generator-swa-deploy` | Just updates submodule ref                                |
 
 ## Overview
 
@@ -102,38 +102,41 @@ Deployment happens directly from this repo via Azure Static Web Apps.
 
 ### Development Environment
 
-| Trigger | Action |
-|---------|--------|
-| Push to `dev` | Auto-deploy |
-| PR to `dev` | Preview only |
+| Trigger                  | Action           |
+| ------------------------ | ---------------- |
+| Push to `dev`            | Auto-deploy      |
+| PR to `dev`              | Preview only     |
 | Manual workflow dispatch | Deploy on-demand |
 
 **Configuration**:
+
 - Resource Group: `mys-dev-mystira-rg-san`
 - Infrastructure: [Mystira.workspace Terraform](https://github.com/phoenixvc/Mystira.workspace)
 - SKU: Free/Basic tiers
 
 ### Staging Environment
 
-| Trigger | Action |
-|---------|--------|
-| Push to `staging` | Auto-deploy |
-| PR to `staging` | Preview only |
+| Trigger                  | Action           |
+| ------------------------ | ---------------- |
+| Push to `staging`        | Auto-deploy      |
+| PR to `staging`          | Preview only     |
 | Manual workflow dispatch | Deploy on-demand |
 
 **Configuration**:
+
 - Resource Group: `mys-staging-mystira-rg-san`
 - Infrastructure: [Mystira.workspace Terraform](https://github.com/phoenixvc/Mystira.workspace)
 - SKU: Standard tiers
 
 ### Production Environment
 
-| Trigger | Action |
-|---------|--------|
-| Tag `v*.*.*` | Auto-deploy (with approval gate) |
+| Trigger                  | Action                                |
+| ------------------------ | ------------------------------------- |
+| Tag `v*.*.*`             | Auto-deploy (with approval gate)      |
 | Manual workflow dispatch | Deploy on-demand (with approval gate) |
 
 **Configuration**:
+
 - Resource Group: `mys-prod-mystira-rg-san`
 - Infrastructure: [Mystira.workspace Terraform](https://github.com/phoenixvc/Mystira.workspace)
 - SKU: Premium tiers
@@ -145,33 +148,33 @@ Deployment happens directly from this repo via Azure Static Web Apps.
 
 These workflows run tests but **do NOT deploy**:
 
-| Workflow | File | Triggers On |
-|----------|------|-------------|
+| Workflow                   | File             | Triggers On                       |
+| -------------------------- | ---------------- | --------------------------------- |
 | `[API] Build & Test (Dev)` | `api-ci-dev.yml` | Push/PR to `dev` with API changes |
 | `[PWA] Build & Test (Dev)` | `pwa-ci-dev.yml` | Push/PR to `dev` with PWA changes |
-| `[CI] Tests & Coverage` | `ci-tests.yml` | All PRs |
+| `[CI] Tests & Coverage`    | `ci-tests.yml`   | All PRs                           |
 
 ### Deployment Workflows
 
-| Workflow | File | What It Does |
-|----------|------|--------------|
-| `[PWA] Deploy to Dev` | `pwa-deploy-dev.yml` | Builds and deploys PWA to dev SWA |
-| `[Deploy] Trigger Workspace` | `deploy-trigger-workspace.yml` | Sends deploy event to `Mystira.workspace` (API only) |
-| `[API] Rollback (Production)` | `api-rollback-prod.yml` | Rollback API to previous version |
+| Workflow                      | File                           | What It Does                                         |
+| ----------------------------- | ------------------------------ | ---------------------------------------------------- |
+| `[PWA] Deploy to Dev`         | `pwa-deploy-dev.yml`           | Builds and deploys PWA to dev SWA                    |
+| `[Deploy] Trigger Workspace`  | `deploy-trigger-workspace.yml` | Sends deploy event to `Mystira.workspace` (API only) |
+| `[API] Rollback (Production)` | `api-rollback-prod.yml`        | Rollback API to previous version                     |
 
 ### Supporting Workflows
 
-| Workflow | File | Purpose |
-|----------|------|---------|
+| Workflow                             | File                      | Purpose                          |
+| ------------------------------------ | ------------------------- | -------------------------------- |
 | `[PWA] Cleanup Preview Environments` | `pwa-cleanup-preview.yml` | Cleans up PR preview deployments |
-| `[PWA] Smoke Tests [Preview]` | `pwa-smoke-tests.yml` | Runs smoke tests on preview URLs |
-| Security Scanning | `security-scanning.yml` | CodeQL and dependency scanning |
+| `[PWA] Smoke Tests [Preview]`        | `pwa-smoke-tests.yml`     | Runs smoke tests on preview URLs |
+| Security Scanning                    | `security-scanning.yml`   | CodeQL and dependency scanning   |
 
 ### Where Actual Deployment Happens
 
-| Component | Deployed By |
-|-----------|-------------|
-| **API** | `Mystira.workspace` repo (via `repository_dispatch`) |
+| Component   | Deployed By                                             |
+| ----------- | ------------------------------------------------------- |
+| **API**     | `Mystira.workspace` repo (via `repository_dispatch`)    |
 | **SWA/PWA** | This repo (`pwa-deploy-dev.yml`) → Azure Static Web App |
 
 ### Infrastructure Workflows
@@ -198,6 +201,7 @@ These workflows run tests but **do NOT deploy**:
 ### How SWA/PWA Actually Deploys
 
 The `[PWA] Deploy to Dev` workflow:
+
 1. Builds the Blazor WASM app (`dotnet publish`)
 2. Deploys to Azure Static Web App using `Azure/static-web-apps-deploy@v1`
 
@@ -242,11 +246,11 @@ Applications deploy using Azure App Service deployment slots:
 
 ### Required Secrets
 
-| Secret | Description | Used In |
-|--------|-------------|---------|
-| `AZURE_CREDENTIALS` | Service principal credentials | All Azure deployments |
-| `AZURE_SUBSCRIPTION_ID` | Target subscription | All Azure deployments |
-| `JWT_SECRET_KEY` | JWT signing key | App configuration |
+| Secret                  | Description                   | Used In               |
+| ----------------------- | ----------------------------- | --------------------- |
+| `AZURE_CREDENTIALS`     | Service principal credentials | All Azure deployments |
+| `AZURE_SUBSCRIPTION_ID` | Target subscription           | All Azure deployments |
+| `JWT_SECRET_KEY`        | JWT signing key               | App configuration     |
 
 ### Secret Configuration
 
@@ -260,11 +264,11 @@ Secrets are configured per environment in GitHub:
 
 ### Required Checks for PRs
 
-| Check | Description |
-|-------|-------------|
-| `build` | .NET build succeeds |
-| `test` | All tests pass |
-| `lint` | Code style validation |
+| Check   | Description           |
+| ------- | --------------------- |
+| `build` | .NET build succeeds   |
+| `test`  | All tests pass        |
+| `lint`  | Code style validation |
 
 ## Monitoring & Notifications
 
@@ -276,6 +280,7 @@ Secrets are configured per environment in GitHub:
 ### Monitoring Integration
 
 All environments send telemetry to:
+
 - Application Insights (per environment)
 - Log Analytics Workspace (per environment)
 
@@ -303,17 +308,17 @@ az webapp deployment slot swap \
 
 ```yaml
 env:
-  DOTNET_VERSION: '9.0.x'
-  NODE_VERSION: '20.x'
-  AZURE_LOCATION: 'southafricanorth'
+  DOTNET_VERSION: "9.0.x"
+  NODE_VERSION: "20.x"
+  AZURE_LOCATION: "southafricanorth"
 ```
 
 ### Environment-Specific Variables
 
-| Variable | Dev | Staging | Prod |
-|----------|-----|---------|------|
-| `RESOURCE_GROUP` | mys-dev-mystira-rg-san | mys-staging-mystira-rg-san | mys-prod-mystira-rg-san |
-| `APP_NAME` | mys-dev-mystira-api-san | mys-staging-mystira-api-san | mys-prod-mystira-api-san |
+| Variable         | Dev                     | Staging                     | Prod                     |
+| ---------------- | ----------------------- | --------------------------- | ------------------------ |
+| `RESOURCE_GROUP` | mys-dev-mystira-rg-san  | mys-staging-mystira-rg-san  | mys-prod-mystira-rg-san  |
+| `APP_NAME`       | mys-dev-mystira-api-san | mys-staging-mystira-api-san | mys-prod-mystira-api-san |
 
 ## Security Considerations
 

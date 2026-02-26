@@ -9,6 +9,7 @@ This guide explains how to securely manage secrets and sensitive configuration v
 ## ⚠️ CRITICAL: Never Commit Secrets to Version Control
 
 **NEVER** commit the following to Git:
+
 - Connection strings (Cosmos DB, Azure Storage, etc.)
 - JWT signing keys
 - API keys and tokens
@@ -22,6 +23,7 @@ For production and staging environments, use Azure Key Vault to store all secret
 ### Setup Steps
 
 1. **Create an Azure Key Vault** (if not already created):
+
    ```bash
    az keyvault create \
      --name mystira-app-keyvault \
@@ -30,6 +32,7 @@ For production and staging environments, use Azure Key Vault to store all secret
    ```
 
 2. **Add secrets to Key Vault**:
+
    ```bash
    # Cosmos DB connection string
    az keyvault secret set \
@@ -51,6 +54,7 @@ For production and staging environments, use Azure Key Vault to store all secret
    ```
 
 3. **Grant access to your App Service**:
+
    ```bash
    # Enable managed identity for your App Service
    az webapp identity assign \
@@ -65,6 +69,7 @@ For production and staging environments, use Azure Key Vault to store all secret
    ```
 
 4. **Update appsettings.json to reference Key Vault**:
+
    ```json
    {
      "ConnectionStrings": {
@@ -94,6 +99,7 @@ For local development, use .NET User Secrets to store sensitive values outside o
 ### Setup Steps
 
 1. **Initialize User Secrets** for each project:
+
    ```bash
    cd src/Mystira.App.Api
    dotnet user-secrets init
@@ -103,6 +109,7 @@ For local development, use .NET User Secrets to store sensitive values outside o
    ```
 
 2. **Add secrets**:
+
    ```bash
    # For Mystira.App.Api
    cd src/Mystira.App.Api
@@ -128,6 +135,7 @@ For local development, use .NET User Secrets to store sensitive values outside o
 ### Where Are User Secrets Stored?
 
 User secrets are stored in your user profile directory, completely outside the project:
+
 - **Windows**: `%APPDATA%\Microsoft\UserSecrets\<user_secrets_id>\secrets.json`
 - **macOS/Linux**: `~/.microsoft/usersecrets/<user_secrets_id>/secrets.json`
 
@@ -142,17 +150,20 @@ For GitHub Actions or Azure DevOps pipelines, use environment variables or pipel
 For comprehensive GitHub Actions secrets configuration including all three environments (Development, Staging, Production), see the **[GitHub Secrets and Variables Guide](GITHUB_SECRETS_VARIABLES.md)**.
 
 **Quick Reference:**
+
 - Development environment: `dev` branch
-- Staging environment: `staging` branch  
+- Staging environment: `staging` branch
 - Production environment: `main` branch
 
 Each environment requires specific secrets for:
+
 - Azure credentials and publish profiles
 - JWT RSA key pairs (environment-specific)
 - Azure Communication Services (Development only)
 - Static Web Apps deployment tokens
 
 **Example workflow reference**:
+
 ```yaml
 - name: Run tests
   env:
@@ -170,18 +181,19 @@ Each environment requires specific secrets for:
    - Add variables and mark them as secret
 
 2. **Reference in pipeline**:
+
    ```yaml
    variables:
-   - group: Mystira-Secrets
+     - group: Mystira-Secrets
 
    steps:
-   - task: DotNetCoreCLI@2
-     inputs:
-       command: 'test'
-     env:
-       ConnectionStrings__CosmosDb: $(CosmosDbConnectionString)
-       ConnectionStrings__AzureStorage: $(AzureStorageConnectionString)
-       Jwt__Key: $(JwtSigningKey)
+     - task: DotNetCoreCLI@2
+       inputs:
+         command: "test"
+       env:
+         ConnectionStrings__CosmosDb: $(CosmosDbConnectionString)
+         ConnectionStrings__AzureStorage: $(AzureStorageConnectionString)
+         Jwt__Key: $(JwtSigningKey)
    ```
 
 ## Secret Rotation
@@ -253,11 +265,13 @@ Store this in Key Vault or User Secrets, never in appsettings.json.
 ### "Unable to retrieve secret from Key Vault"
 
 1. Verify managed identity is enabled:
+
    ```bash
    az webapp identity show --name mystira-app-api --resource-group mystira-app-rg
    ```
 
 2. Check Key Vault access policies:
+
    ```bash
    az keyvault show --name mystira-app-keyvault --query properties.accessPolicies
    ```
@@ -270,11 +284,13 @@ Store this in Key Vault or User Secrets, never in appsettings.json.
 ### "Configuration value is empty"
 
 1. Check User Secrets are initialized:
+
    ```bash
    dotnet user-secrets list
    ```
 
 2. Verify .csproj has UserSecretsId:
+
    ```xml
    <PropertyGroup>
      <UserSecretsId>your-unique-id</UserSecretsId>
@@ -295,6 +311,7 @@ Store this in Key Vault or User Secrets, never in appsettings.json.
 ## Support
 
 For questions or issues with secrets management:
+
 1. Check this documentation first
 2. Review Azure Key Vault logs in Azure Portal
 3. Contact the DevOps team for Key Vault access issues

@@ -13,6 +13,7 @@ This runbook guides you through responding to elevated error rates in the applic
 ## Alert Triggers
 
 This runbook is triggered when:
+
 - Error rate > 5% for 5 minutes
 - Specific error types spike suddenly
 - 50x errors > 1% of requests
@@ -41,18 +42,21 @@ curl https://api.mystira.app/health/ready
 Assess impact:
 
 **Critical** (immediate action required):
+
 - Error rate > 50%
 - Authentication completely broken
 - Data loss occurring
 - All API endpoints failing
 
 **High** (urgent action required):
+
 - Error rate 10-50%
 - Core functionality broken
 - Significant user impact
 - Payment processing failing
 
 **Medium** (prompt action required):
+
 - Error rate 5-10%
 - Some features broken
 - Moderate user impact
@@ -229,6 +233,7 @@ curl https://api.mystira.app/[affected-endpoint]
 ### Step 10: Create Incident Report
 
 Document:
+
 - **Timeline**: When error started, actions taken, resolution time
 - **Root Cause**: What caused the errors
 - **Impact**: Users affected, duration, severity
@@ -248,6 +253,7 @@ Document:
 ### Issue: Error rate not decreasing
 
 **Resolution**:
+
 1. Verify fix was applied correctly
 2. Check if multiple issues present
 3. Review dependency health
@@ -256,6 +262,7 @@ Document:
 ### Issue: Errors intermittent
 
 **Resolution**:
+
 1. Check for rate limiting issues
 2. Review load balancer behavior
 3. Check database connection pool
@@ -264,6 +271,7 @@ Document:
 ### Issue: Cannot identify root cause
 
 **Resolution**:
+
 1. Increase logging verbosity temporarily
 2. Enable Application Insights profiler
 3. Review correlation IDs for request tracing

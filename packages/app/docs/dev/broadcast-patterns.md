@@ -115,12 +115,12 @@ public class ResponseEvent
 
 ## Platform Support
 
-| Feature | Discord | Teams | WhatsApp |
-|---------|---------|-------|----------|
-| Real-time response | Yes | No | No |
-| First responder | Yes | Messages only | Messages only |
-| Response handler | Yes | No | No |
-| Direct reply detection | Yes | No | No |
+| Feature                | Discord | Teams         | WhatsApp      |
+| ---------------------- | ------- | ------------- | ------------- |
+| Real-time response     | Yes     | No            | No            |
+| First responder        | Yes     | Messages only | Messages only |
+| Response handler       | Yes     | No            | No            |
+| Direct reply detection | Yes     | No            | No            |
 
 ### Discord
 

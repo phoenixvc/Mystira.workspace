@@ -9,6 +9,7 @@ This directory contains configuration examples and documentation for the Mystira
 Complete example configuration file showing all available settings:
 
 #### Cache Options (`Caching` section)
+
 - **Enabled**: Enable/disable distributed caching (Redis)
 - **ConnectionString**: Redis connection string (from Azure Key Vault)
 - **InstanceName**: Redis instance name prefix
@@ -19,6 +20,7 @@ Complete example configuration file showing all available settings:
 - **EnableInvalidationOnChange**: Invalidate cache on entity changes
 
 **Example Usage:**
+
 ```json
 {
   "Caching": {
@@ -48,6 +50,7 @@ Used for gradual database migration from Cosmos DB to PostgreSQL (per ADR-0013/0
 - **EnableConsistencyValidation**: Validate data consistency between backends
 
 **Example Usage:**
+
 ```json
 {
   "Migration": {
@@ -60,6 +63,7 @@ Used for gradual database migration from Cosmos DB to PostgreSQL (per ADR-0013/0
 ```
 
 **Note**: During migration, the `Phase` should be updated through these stages:
+
 1. `CosmosOnly` (current state)
 2. `DualWriteCosmosRead` (write to both, read from Cosmos)
 3. `DualWritePostgresRead` (write to both, read from Postgres)
@@ -71,31 +75,31 @@ Most sensitive configuration values are stored in Azure Key Vault and loaded at 
 
 ### Key Vault Secret Names
 
-| Setting | Key Vault Secret Name |
-|---------|----------------------|
-| Cosmos DB Connection | `CosmosDb--ConnectionString` |
-| Redis Connection | `Redis--ConnectionString` |
-| JWT RSA Public Key | `JwtSettings--RsaPublicKey` |
-| JWT RSA Private Key | `JwtSettings--RsaPrivateKey` |
-| Blob Storage Connection | `AzureBlobStorage--ConnectionString` |
+| Setting                      | Key Vault Secret Name                          |
+| ---------------------------- | ---------------------------------------------- |
+| Cosmos DB Connection         | `CosmosDb--ConnectionString`                   |
+| Redis Connection             | `Redis--ConnectionString`                      |
+| JWT RSA Public Key           | `JwtSettings--RsaPublicKey`                    |
+| JWT RSA Private Key          | `JwtSettings--RsaPrivateKey`                   |
+| Blob Storage Connection      | `AzureBlobStorage--ConnectionString`           |
 | Azure Communication Services | `AzureCommunicationServices--ConnectionString` |
-| Discord Bot Token | `Discord--BotToken` |
-| Chain Service API Key | `ChainService--ApiKey` |
+| Discord Bot Token            | `Discord--BotToken`                            |
+| Chain Service API Key        | `ChainService--ApiKey`                         |
 
 ### GitHub Secrets for CI/CD
 
 The following secrets must be configured in GitHub repository secrets for deployment pipelines:
 
-| Secret Name | Purpose | Used By |
-|-------------|---------|---------|
-| `AZURE_CREDENTIALS` | Azure service principal credentials | All deployment workflows |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV` | App Service publish profile for dev | Dev API deployment |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` | App Service publish profile for staging | Staging API deployment |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD` | App Service publish profile for production (blue slot) | Production API deployment |
+| Secret Name                                 | Purpose                                                         | Used By                                   |
+| ------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------- |
+| `AZURE_CREDENTIALS`                         | Azure service principal credentials                             | All deployment workflows                  |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`          | App Service publish profile for dev                             | Dev API deployment                        |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING`      | App Service publish profile for staging                         | Staging API deployment                    |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`         | App Service publish profile for production (blue slot)          | Production API deployment                 |
 | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_STAGING` | App Service publish profile for production staging slot (green) | Production API deployment with blue/green |
-| `COSMOS_CONNECTION_STRING_DEV` | Cosmos DB connection for dev | Dev deployment |
-| `COSMOS_CONNECTION_STRING_STAGING` | Cosmos DB connection for staging | Staging deployment |
-| `COSMOS_CONNECTION_STRING_PROD` | Cosmos DB connection for production | Production deployment |
+| `COSMOS_CONNECTION_STRING_DEV`              | Cosmos DB connection for dev                                    | Dev deployment                            |
+| `COSMOS_CONNECTION_STRING_STAGING`          | Cosmos DB connection for staging                                | Staging deployment                        |
+| `COSMOS_CONNECTION_STRING_PROD`             | Cosmos DB connection for production                             | Production deployment                     |
 
 #### AZURE_WEBAPP_PUBLISH_PROFILE_PROD_STAGING
 
@@ -104,6 +108,7 @@ This secret contains the Azure App Service publish profile for the **production 
 **Purpose**: Used in blue/green deployments to deploy new versions to the staging slot first, allowing testing before swapping to production.
 
 **How to Obtain**:
+
 ```bash
 # Get publish profile for staging slot
 az webapp deployment list-publishing-profiles \
@@ -114,6 +119,7 @@ az webapp deployment list-publishing-profiles \
 ```
 
 **Deployment Flow**:
+
 1. Deploy to staging slot using `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_STAGING`
 2. Run smoke tests against staging slot
 3. Swap staging slot with production slot if tests pass
@@ -124,12 +130,14 @@ az webapp deployment list-publishing-profiles \
 ## Environment-Specific Configuration
 
 ### Development (Local)
+
 - Use `appsettings.Development.json`
 - In-memory database or local Cosmos DB emulator
 - Local Redis or in-memory cache
 - Application Insights optional
 
 ### Staging
+
 - Use `appsettings.Staging.json`
 - Azure Cosmos DB (staging account)
 - Azure Redis Cache
@@ -137,6 +145,7 @@ az webapp deployment list-publishing-profiles \
 - SendGrid sandbox mode
 
 ### Production
+
 - Use `appsettings.Production.json`
 - Azure Cosmos DB (production account with backup)
 - Azure Redis Cache with persistence

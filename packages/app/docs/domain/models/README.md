@@ -384,7 +384,7 @@ public class CharacterMapApiService
 public class CharacterMapApiService
 {
     private readonly CreateCharacterMapUseCase _createUseCase;
-    
+
     public async Task<CharacterMap> CreateCharacterMapAsync(CreateCharacterMapRequest request)
     {
         return await _createUseCase.ExecuteAsync(request);
@@ -399,7 +399,7 @@ public class CreateCharacterMapUseCase
 {
     private readonly ICharacterMapRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
-    
+
     public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request)
     {
         // Business logic here

@@ -24,11 +24,11 @@ Mystyra.Publisher serves a diverse set of stakeholders in the publishing ecosyst
 
 ## Demographics
 
-| Segment | Age Range | Gender | Occupation | Location | Income Level |
-|---------|-----------|--------|------------|----------|--------------|
-| Creative Contributors | 24-45 | All | Writers, Editors, Artists | Urban/Remote | $30-70k |
-| Publishers | 27-55 | All | Publisher/Owner, Manager | Urban, Semi-urban | $50-120k |
-| Platform Admins | 30-50 | All | Admin, Tech Lead | Global | $60-150k |
+| Segment               | Age Range | Gender | Occupation                | Location          | Income Level |
+| --------------------- | --------- | ------ | ------------------------- | ----------------- | ------------ |
+| Creative Contributors | 24-45     | All    | Writers, Editors, Artists | Urban/Remote      | $30-70k      |
+| Publishers            | 27-55     | All    | Publisher/Owner, Manager  | Urban, Semi-urban | $50-120k     |
+| Platform Admins       | 30-50     | All    | Admin, Tech Lead          | Global            | $60-150k     |
 
 **Diversity:** Users span gender, backgrounds, and regions. Many are digital natives or digital-first professionals.
 
@@ -73,43 +73,43 @@ Mystyra.Publisher serves a diverse set of stakeholders in the publishing ecosyst
 
 ### Awareness Stage
 
-| Actions | Emotions | Touchpoints | Channels |
-|---------|----------|-------------|----------|
-| Search for solutions | Curious, Cautious | Social media, referrals, blog posts | LinkedIn, Twitter, Web |
-| Attend webinars or demos | Interested | Live events, YouTube videos | Webinars, YouTube |
-| Review testimonials | Open, Evaluative | Reviews, community discussions | Company site, Forums |
+| Actions                  | Emotions          | Touchpoints                         | Channels               |
+| ------------------------ | ----------------- | ----------------------------------- | ---------------------- |
+| Search for solutions     | Curious, Cautious | Social media, referrals, blog posts | LinkedIn, Twitter, Web |
+| Attend webinars or demos | Interested        | Live events, YouTube videos         | Webinars, YouTube      |
+| Review testimonials      | Open, Evaluative  | Reviews, community discussions      | Company site, Forums   |
 
 ### Consideration Stage
 
-| Actions | Emotions | Touchpoints | Channels |
-|---------|----------|-------------|----------|
-| Compare feature sets | Analytical | Product pages, trial account | Website, Trials |
-| Test sample workflows | Hopeful, Cautious | Sandbox, documentation | In-app, Docs |
-| Solicit feedback from team | Collaborative | Team discussions, forums | Slack, Email, Forums |
+| Actions                    | Emotions          | Touchpoints                  | Channels             |
+| -------------------------- | ----------------- | ---------------------------- | -------------------- |
+| Compare feature sets       | Analytical        | Product pages, trial account | Website, Trials      |
+| Test sample workflows      | Hopeful, Cautious | Sandbox, documentation       | In-app, Docs         |
+| Solicit feedback from team | Collaborative     | Team discussions, forums     | Slack, Email, Forums |
 
 ### Decision Stage
 
-| Actions | Emotions | Touchpoints | Channels |
-|---------|----------|-------------|----------|
-| Register for service/upgrade account | Optimistic | Onboarding module, support | In-app, Email |
-| Confirm pricing and compliance steps | Businesslike | Pricing calculator, policy docs | Web, Docs |
-| Secure consensus on platform adoption | Empowered | Leadership meetings, reporting | In-person, Email |
+| Actions                               | Emotions     | Touchpoints                     | Channels         |
+| ------------------------------------- | ------------ | ------------------------------- | ---------------- |
+| Register for service/upgrade account  | Optimistic   | Onboarding module, support      | In-app, Email    |
+| Confirm pricing and compliance steps  | Businesslike | Pricing calculator, policy docs | Web, Docs        |
+| Secure consensus on platform adoption | Empowered    | Leadership meetings, reporting  | In-person, Email |
 
 ### Retention Stage
 
-| Actions | Emotions | Touchpoints | Channels |
-|---------|----------|-------------|----------|
-| Regular publishing, team syncs | Confident | Dashboard, notifications | In-app, Email |
-| Request support or enhancements | Supported | Support portal, feedback flow | In-app, Forums |
-| Engage in training, upgrades | Curious | Learning modules, webinars | Email, Webinars |
+| Actions                         | Emotions  | Touchpoints                   | Channels        |
+| ------------------------------- | --------- | ----------------------------- | --------------- |
+| Regular publishing, team syncs  | Confident | Dashboard, notifications      | In-app, Email   |
+| Request support or enhancements | Supported | Support portal, feedback flow | In-app, Forums  |
+| Engage in training, upgrades    | Curious   | Learning modules, webinars    | Email, Webinars |
 
 ### Advocacy Stage
 
-| Actions | Emotions | Touchpoints | Channels |
-|---------|----------|-------------|----------|
+| Actions                          | Emotions     | Touchpoints               | Channels              |
+| -------------------------------- | ------------ | ------------------------- | --------------------- |
 | Refer peers to Mystyra.Publisher | Enthusiastic | Referral program, reviews | Email, Social, Forums |
-| Share case studies | Proud | Blog posts, webinars | Website, Webinars |
-| Present at industry events | Recognized | Conference booths | In-person, Video |
+| Share case studies               | Proud        | Blog posts, webinars      | Website, Webinars     |
+| Present at industry events       | Recognized   | Conference booths         | In-person, Video      |
 
 ---
 
@@ -124,13 +124,13 @@ Mystyra.Publisher serves a diverse set of stakeholders in the publishing ecosyst
 
 ## Pain Points
 
-| Pain Point | Priority |
-|------------|----------|
-| Slow consensus due to manual steps | High |
-| Friction from unclear UI/UX | High |
-| Attribution errors | Medium |
-| Limited onboarding for new users | Medium |
-| Reporting and compliance gaps | Medium/High |
+| Pain Point                         | Priority    |
+| ---------------------------------- | ----------- |
+| Slow consensus due to manual steps | High        |
+| Friction from unclear UI/UX        | High        |
+| Attribution errors                 | Medium      |
+| Limited onboarding for new users   | Medium      |
+| Reporting and compliance gaps      | Medium/High |
 
 ---
 
@@ -198,14 +198,14 @@ Mystyra.Publisher serves a diverse set of stakeholders in the publishing ecosyst
 
 ## Timeline and Milestones
 
-| Milestone | Target Completion |
-|-----------|-------------------|
-| Consensus Workflow Pilot Launch | Month 1 |
-| Attribution Module Rollout | Month 2 |
-| Onboarding Overhaul | Month 3 |
-| Compliance Toolkit Beta | Month 4 |
-| Analytics & Dashboard Release | Month 5 |
-| Feedback Integration Review | Ongoing, Quarterly |
+| Milestone                       | Target Completion  |
+| ------------------------------- | ------------------ |
+| Consensus Workflow Pilot Launch | Month 1            |
+| Attribution Module Rollout      | Month 2            |
+| Onboarding Overhaul             | Month 3            |
+| Compliance Toolkit Beta         | Month 4            |
+| Analytics & Dashboard Release   | Month 5            |
+| Feedback Integration Review     | Ongoing, Quarterly |
 
 ---
 

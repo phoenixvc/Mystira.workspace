@@ -7,6 +7,7 @@ Data persistence infrastructure implementing the repository pattern and unit of 
 **Layer**: **Infrastructure - Data Adapter (Secondary/Driven)**
 
 The Infrastructure.Data layer is a **secondary adapter** (driven adapter) that:
+
 - **Implements** repository port interfaces defined in `Application.Ports.Data`
 - **Translates** domain entities to/from database representations
 - **Manages** data persistence using Entity Framework Core
@@ -15,6 +16,7 @@ The Infrastructure.Data layer is a **secondary adapter** (driven adapter) that:
 - **ZERO reverse dependencies** - Application never references Infrastructure
 
 **Dependency Flow** (Correct ✅):
+
 ```
 Domain Layer (Core)
     ↓ references
@@ -28,6 +30,7 @@ Entity Framework Core / Cosmos DB
 ```
 
 **Key Principles**:
+
 - ✅ **Port Implementation** - Implements repository interfaces from `Application.Ports.Data`
 - ✅ **Persistence Ignorance** - Domain models don't know about EF Core
 - ✅ **Technology Adapter** - Adapts EF Core to application needs
@@ -61,6 +64,7 @@ Mystira.App.Infrastructure.Data/
 ```
 
 **Port Interfaces** (defined in Application layer):
+
 - All `I*Repository` interfaces live in `Application/Ports/Data/`
 - `IUnitOfWork` lives in `Application/Ports/Data/`
 - Infrastructure.Data references Application to implement these ports
@@ -72,6 +76,7 @@ Mystira.App.Infrastructure.Data/
 The repository pattern abstracts data access, allowing the application to work with domain entities without knowing about database details.
 
 #### Port Interface (defined in Application.Ports.Data)
+
 ```csharp
 // Location: Application/Ports/Data/IRepository.cs
 namespace Mystira.App.Application.Ports.Data;
@@ -88,6 +93,7 @@ public interface IRepository<T> where T : class
 ```
 
 #### Implementation (in Infrastructure.Data)
+
 ```csharp
 // Location: Infrastructure.Data/Repositories/ScenarioRepository.cs
 using Mystira.App.Application.Ports.Data;  // Port interface ✅
@@ -130,6 +136,7 @@ public class ScenarioRepository : IScenarioRepository
 Coordinates multiple repository operations into a single transaction.
 
 #### Port Interface (Application.Ports.Data)
+
 ```csharp
 // Location: Application/Ports/Data/IUnitOfWork.cs
 namespace Mystira.App.Application.Ports.Data;
@@ -144,6 +151,7 @@ public interface IUnitOfWork : IDisposable
 ```
 
 #### Implementation (Infrastructure.Data)
+
 ```csharp
 // Location: Infrastructure.Data/UnitOfWork/UnitOfWork.cs
 using Mystira.App.Application.Ports.Data;  // Port interface ✅
@@ -192,47 +200,63 @@ public class UnitOfWork : IUnitOfWork
 ## Repository Implementations
 
 ### AccountRepository
+
 Manages user accounts:
+
 - `GetByIdAsync(string id)`: Get account by ID
 - `GetByEmailAsync(string email)`: Find by email
 - `AddAsync(Account)`: Create new account
 - `UpdateAsync(Account)`: Update existing account
 
 ### ScenarioRepository
+
 Manages interactive story scenarios:
+
 - `GetByAgeGroupAsync(string)`: Filter by age group
 - `GetAllAsync()`: Get all scenarios
 - Includes navigation properties (Scenes, CharacterArchetypes)
 
 ### GameSessionRepository
+
 Manages active game sessions:
+
 - `GetActiveSessionsByUserIdAsync(string userId)`: User's active sessions
 - `GetByScenarioIdAsync(string scenarioId)`: Sessions for a scenario
 - Tracks choice history and compass values
 
 ### MediaAssetRepository
+
 Manages media file metadata:
+
 - `GetByBlobNameAsync(string blobName)`: Find by blob name
 - `GetByScenarioIdAsync(string scenarioId)`: Media for scenario
 - Links to Azure Blob Storage
 
 ### BadgeConfigurationRepository
+
 Manages achievement badge definitions:
+
 - `GetByAxisAsync(string axis)`: Badges for compass axis
 - Badge configuration lookup
 
 ### CharacterMapRepository
+
 Maps characters to media assets:
+
 - `GetByCharacterIdAsync(string characterId)`: Maps for character
 - `GetByMediaIdAsync(string mediaId)`: Maps using media
 
 ### UserBadgeRepository
+
 Tracks user-earned badges:
+
 - `GetByUserIdAsync(string userId)`: User's earned badges
 - `HasBadgeAsync(string userId, string badgeId)`: Check if earned
 
 ### UserProfileRepository
+
 Manages user profiles:
+
 - `GetByIdAsync(string id)`: Get profile
 - `GetNonGuestProfilesAsync()`: Non-guest profiles
 - `GetGuestProfilesAsync()`: Guest profiles
@@ -248,6 +272,7 @@ Entity Framework Core with Cosmos DB provider:
 ```
 
 **Benefits**:
+
 - Global distribution
 - Automatic scaling
 - Serverless pricing model
@@ -255,6 +280,7 @@ Entity Framework Core with Cosmos DB provider:
 - Optimized for read-heavy workloads
 
 **Configuration** (in API layer):
+
 ```csharp
 services.AddDbContext<MystiraAppDbContext>(options =>
     options.UseCosmos(
@@ -273,6 +299,7 @@ For local development and testing:
 ```
 
 **Configuration**:
+
 ```csharp
 services.AddDbContext<MystiraAppDbContext>(options =>
     options.UseInMemoryDatabase("MystiraAppTestDb")
@@ -396,6 +423,7 @@ public class GetScenarioUseCase
 ```
 
 **Benefits**:
+
 - ✅ Application never references Infrastructure.Data
 - ✅ Can swap implementations without changing Application
 - ✅ Easy to mock for testing
@@ -583,6 +611,7 @@ grep -r "using Mystira.App.Infrastructure" .
 ```
 
 **Results**:
+
 - ✅ Infrastructure.Data references Application (correct direction)
 - ✅ Repositories implement Application.Ports.Data interfaces
 - ✅ Application has ZERO Infrastructure references
@@ -593,6 +622,7 @@ grep -r "using Mystira.App.Infrastructure" .
 ### Indexing
 
 Ensure proper indexing for common queries:
+
 - `Scenario.AgeGroup` - Frequent filtering
 - `GameSession.UserId` - User session lookups
 - `MediaAsset.BlobName` - Blob name lookups
@@ -601,12 +631,14 @@ Ensure proper indexing for common queries:
 ### Caching
 
 Consider caching for read-heavy entities:
+
 - Badge configurations (rarely change)
 - Scenario metadata (frequently read)
 
 ### Batch Operations
 
 Use batch operations for bulk inserts/updates:
+
 ```csharp
 await _context.Scenarios.AddRangeAsync(scenarios);
 await _context.SaveChangesAsync();
@@ -630,6 +662,7 @@ await _context.SaveChangesAsync();
 ## Summary
 
 **What This Layer Does**:
+
 - ✅ Implements data access port interfaces from Application.Ports.Data
 - ✅ Provides EF Core-based repository implementations
 - ✅ Manages Cosmos DB / InMemory database access
@@ -637,11 +670,13 @@ await _context.SaveChangesAsync();
 - ✅ Maintains clean hexagonal architecture
 
 **What This Layer Does NOT Do**:
+
 - ❌ Define port interfaces (Application does that)
 - ❌ Contain business logic (Application/Domain does that)
 - ❌ Make decisions about what to persist (Application decides)
 
 **Key Success Metrics**:
+
 - ✅ **Zero reverse dependencies** - Application never references Infrastructure
 - ✅ **Clean interfaces** - All ports defined in Application layer
 - ✅ **Testability** - Use cases can mock repositories

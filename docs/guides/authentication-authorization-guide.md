@@ -47,13 +47,14 @@ Mystira uses a multi-tier authentication strategy:
 
 For internal admin users with enterprise SSO, MFA, and conditional access.
 
-| Component | Authentication Method | Identity Provider |
-|-----------|----------------------|-------------------|
-| Admin API | JWT Bearer Token | Microsoft Entra ID |
-| Admin UI | MSAL (Browser) | Microsoft Entra ID |
-| DevHub | JWT Bearer Token | Microsoft Entra ID |
+| Component | Authentication Method | Identity Provider  |
+| --------- | --------------------- | ------------------ |
+| Admin API | JWT Bearer Token      | Microsoft Entra ID |
+| Admin UI  | MSAL (Browser)        | Microsoft Entra ID |
+| DevHub    | JWT Bearer Token      | Microsoft Entra ID |
 
 **Key Files:**
+
 - Terraform: [`infra/terraform/modules/entra-id/`](../../infra/terraform/modules/entra-id/)
 - ADR: [`docs/architecture/adr/0011-entra-id-authentication-integration.md`](../architecture/adr/0011-entra-id-authentication-integration.md)
 
@@ -61,12 +62,13 @@ For internal admin users with enterprise SSO, MFA, and conditional access.
 
 For end users with social login (Google, Discord) and self-service registration.
 
-| Component | Authentication Method | Identity Provider |
-|-----------|----------------------|-------------------|
-| PWA | MSAL (Browser) | Microsoft Entra External ID |
-| Public API | JWT Bearer Token | Microsoft Entra External ID |
+| Component  | Authentication Method | Identity Provider           |
+| ---------- | --------------------- | --------------------------- |
+| PWA        | MSAL (Browser)        | Microsoft Entra External ID |
+| Public API | JWT Bearer Token      | Microsoft Entra External ID |
 
 **Key Files:**
+
 - Terraform: [`infra/terraform/modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/)
 - ADR: [`docs/architecture/adr/0010-authentication-and-authorization-strategy.md`](../architecture/adr/0010-authentication-and-authorization-strategy.md)
 
@@ -74,14 +76,15 @@ For end users with social login (Google, Discord) and self-service registration.
 
 For service-to-service and service-to-Azure-resource authentication.
 
-| Service | Authentication Method | Target Resources |
-|---------|----------------------|------------------|
-| Admin API | Managed Identity | PostgreSQL, Key Vault |
-| Story Generator | Managed Identity | PostgreSQL, Key Vault, Redis |
-| Publisher | Managed Identity | Key Vault, Service Bus |
-| Chain | Managed Identity | Key Vault |
+| Service         | Authentication Method | Target Resources             |
+| --------------- | --------------------- | ---------------------------- |
+| Admin API       | Managed Identity      | PostgreSQL, Key Vault        |
+| Story Generator | Managed Identity      | PostgreSQL, Key Vault, Redis |
+| Publisher       | Managed Identity      | Key Vault, Service Bus       |
+| Chain           | Managed Identity      | Key Vault                    |
 
 **Key Files:**
+
 - Terraform: [`infra/terraform/modules/shared/identity/`](../../infra/terraform/modules/shared/identity/)
 - Kubernetes: [`infra/kubernetes/base/service-accounts.yaml`](../../infra/kubernetes/base/service-accounts.yaml)
 
@@ -89,21 +92,21 @@ For service-to-service and service-to-Azure-resource authentication.
 
 ### Terraform Modules
 
-| Module | Purpose | Location |
-|--------|---------|----------|
-| `entra-id` | Admin app registrations, scopes, roles | [`modules/entra-id/`](../../infra/terraform/modules/entra-id/) |
-| `entra-external-id` | Consumer auth with social login | [`modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/) |
-| `admin-api` | Admin API managed identity | [`modules/admin-api/`](../../infra/terraform/modules/admin-api/) |
-| `shared/identity` | RBAC, workload identity federation | [`modules/shared/identity/`](../../infra/terraform/modules/shared/identity/) |
-| `shared/postgresql` | Database with Azure AD auth | [`modules/shared/postgresql/`](../../infra/terraform/modules/shared/postgresql/) |
-| `front-door` | TLS/SSL certificates, WAF | [`modules/front-door/`](../../infra/terraform/modules/front-door/) |
-| `dns` | DNS records for custom domains | [`modules/dns/`](../../infra/terraform/modules/dns/) |
+| Module              | Purpose                                | Location                                                                         |
+| ------------------- | -------------------------------------- | -------------------------------------------------------------------------------- |
+| `entra-id`          | Admin app registrations, scopes, roles | [`modules/entra-id/`](../../infra/terraform/modules/entra-id/)                   |
+| `entra-external-id` | Consumer auth with social login        | [`modules/entra-external-id/`](../../infra/terraform/modules/entra-external-id/) |
+| `admin-api`         | Admin API managed identity             | [`modules/admin-api/`](../../infra/terraform/modules/admin-api/)                 |
+| `shared/identity`   | RBAC, workload identity federation     | [`modules/shared/identity/`](../../infra/terraform/modules/shared/identity/)     |
+| `shared/postgresql` | Database with Azure AD auth            | [`modules/shared/postgresql/`](../../infra/terraform/modules/shared/postgresql/) |
+| `front-door`        | TLS/SSL certificates, WAF              | [`modules/front-door/`](../../infra/terraform/modules/front-door/)               |
+| `dns`               | DNS records for custom domains         | [`modules/dns/`](../../infra/terraform/modules/dns/)                             |
 
 ### Kubernetes Resources
 
-| Resource | Purpose | Location |
-|----------|---------|----------|
-| Namespace | `mystira` namespace | [`kubernetes/base/namespace.yaml`](../../infra/kubernetes/base/namespace.yaml) |
+| Resource        | Purpose                    | Location                                                                                     |
+| --------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| Namespace       | `mystira` namespace        | [`kubernetes/base/namespace.yaml`](../../infra/kubernetes/base/namespace.yaml)               |
 | ServiceAccounts | Workload identity for pods | [`kubernetes/base/service-accounts.yaml`](../../infra/kubernetes/base/service-accounts.yaml) |
 
 ## Service Configuration
@@ -111,6 +114,7 @@ For service-to-service and service-to-Azure-resource authentication.
 ### Admin API (.NET)
 
 **appsettings.json:**
+
 ```json
 {
   "AzureAd": {
@@ -126,6 +130,7 @@ For service-to-service and service-to-Azure-resource authentication.
 ```
 
 **Program.cs:**
+
 ```csharp
 // Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -151,6 +156,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 ```
 
 **Required NuGet Packages:**
+
 ```xml
 <PackageReference Include="Microsoft.Identity.Web" Version="2.x" />
 <PackageReference Include="Azure.Identity" Version="1.x" />
@@ -160,8 +166,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 ### Admin UI (React)
 
 **authConfig.ts:**
+
 ```typescript
-import { Configuration } from '@azure/msal-browser';
+import { Configuration } from "@azure/msal-browser";
 
 export const msalConfig: Configuration = {
   auth: {
@@ -170,16 +177,17 @@ export const msalConfig: Configuration = {
     redirectUri: import.meta.env.VITE_REDIRECT_URI,
   },
   cache: {
-    cacheLocation: 'sessionStorage',
+    cacheLocation: "sessionStorage",
   },
 };
 
 export const loginRequest = {
-  scopes: ['api://mystira-admin-api-dev/Admin.Read'],
+  scopes: ["api://mystira-admin-api-dev/Admin.Read"],
 };
 ```
 
 **Environment Variables:**
+
 ```bash
 VITE_AZURE_CLIENT_ID=<admin-ui-client-id>
 VITE_AZURE_TENANT_ID=<tenant-id>
@@ -189,12 +197,13 @@ VITE_REDIRECT_URI=https://dev.admin.mystira.app/auth/callback
 ### PWA (Consumer App)
 
 **External ID Configuration:**
+
 ```typescript
 export const externalIdConfig = {
   auth: {
     clientId: import.meta.env.VITE_EXTERNAL_ID_CLIENT_ID,
-    authority: 'https://mystiradev.ciamlogin.com/<tenant-id>/v2.0',
-    knownAuthorities: ['mystiradev.ciamlogin.com'],
+    authority: "https://mystiradev.ciamlogin.com/<tenant-id>/v2.0",
+    knownAuthorities: ["mystiradev.ciamlogin.com"],
     redirectUri: import.meta.env.VITE_REDIRECT_URI,
   },
 };
@@ -222,6 +231,7 @@ Mystira uses Azure AD authentication for PostgreSQL, eliminating the need for pa
 4. Npgsql uses token to authenticate (no password!)
 
 **Terraform Configuration:**
+
 ```hcl
 module "shared_postgresql" {
   source = "../../modules/shared/postgresql"
@@ -239,11 +249,13 @@ module "shared_postgresql" {
 ```
 
 **Connection String (no password):**
+
 ```
 Host=mys-dev-core-db.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require
 ```
 
 **Key Files:**
+
 - PostgreSQL Module: [`modules/shared/postgresql/`](../../infra/terraform/modules/shared/postgresql/)
 - PostgreSQL README: [`modules/shared/postgresql/README.md`](../../infra/terraform/modules/shared/postgresql/README.md)
 
@@ -289,14 +301,15 @@ spec:
 
 ### Available ServiceAccounts
 
-| ServiceAccount | Service | Managed Identity |
-|----------------|---------|------------------|
-| `admin-api-sa` | Admin API | `mys-dev-admin-api-identity-san` |
-| `story-generator-sa` | Story Generator | `mys-dev-story-identity-san` |
-| `publisher-sa` | Publisher | `mys-dev-publisher-identity` |
-| `chain-sa` | Chain | `mys-dev-chain-identity-san` |
+| ServiceAccount       | Service         | Managed Identity                 |
+| -------------------- | --------------- | -------------------------------- |
+| `admin-api-sa`       | Admin API       | `mys-dev-admin-api-identity-san` |
+| `story-generator-sa` | Story Generator | `mys-dev-story-identity-san`     |
+| `publisher-sa`       | Publisher       | `mys-dev-publisher-identity`     |
+| `chain-sa`           | Chain           | `mys-dev-chain-identity-san`     |
 
 **Key Files:**
+
 - ServiceAccounts: [`kubernetes/base/service-accounts.yaml`](../../infra/kubernetes/base/service-accounts.yaml)
 - Kubernetes README: [`kubernetes/README.md`](../../infra/kubernetes/README.md)
 
@@ -336,6 +349,7 @@ envsubst < infra/kubernetes/base/service-accounts.yaml | kubectl apply -f -
 ### Testing Authentication
 
 **Admin API (get token):**
+
 ```bash
 # Using Azure CLI
 az account get-access-token --resource api://mystira-admin-api-dev
@@ -345,6 +359,7 @@ curl -H "Authorization: Bearer $TOKEN" https://dev.admin-api.mystira.app/api/hea
 ```
 
 **PostgreSQL (Azure AD):**
+
 ```bash
 # Get token for PostgreSQL
 TOKEN=$(az account get-access-token --resource https://ossrdbms-aad.database.windows.net --query accessToken -o tsv)
@@ -358,11 +373,13 @@ PGPASSWORD=$TOKEN psql "host=mys-dev-core-db.postgres.database.azure.com dbname=
 ### Token Not Injected in Pod
 
 1. Verify OIDC issuer is enabled:
+
    ```bash
    az aks show -n <cluster> -g <rg> --query "oidcIssuerProfile"
    ```
 
 2. Verify federated credential:
+
    ```bash
    az identity federated-credential list --identity-name <identity> -g <rg>
    ```
@@ -375,6 +392,7 @@ PGPASSWORD=$TOKEN psql "host=mys-dev-core-db.postgres.database.azure.com dbname=
 ### PostgreSQL Authentication Fails
 
 1. Verify identity is an AD admin:
+
    ```bash
    az postgres flexible-server ad-admin list --resource-group <rg> --server-name <server>
    ```

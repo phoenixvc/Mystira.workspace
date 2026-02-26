@@ -112,19 +112,23 @@ curl -s -o /dev/null -w "%{http_code}" \
 After rollback, verify the following:
 
 ### Health Checks
+
 - [ ] `/health` returns 200
 - [ ] `/health/ready` returns 200
 
 ### Error Rates
+
 - [ ] 5xx error rate < 0.5%
 - [ ] No new exceptions in App Insights
 
 ### User Impact
+
 - [ ] Users can log in
 - [ ] Game sessions can be started
 - [ ] No customer complaints
 
 ### Monitoring
+
 - [ ] Check Application Insights for improvement
 - [ ] Review deployment annotation in App Insights
 
@@ -163,16 +167,19 @@ dotnet publish -c Release
 ## Post-Rollback
 
 ### Immediate Actions
+
 - [ ] Notify team in #incident channel
 - [ ] Update status page if applicable
 - [ ] Create incident ticket
 
 ### Within 1 Hour
+
 - [ ] Root cause analysis started
 - [ ] Identify what changed in failed deployment
 - [ ] Plan fix for underlying issue
 
 ### Within 24 Hours
+
 - [ ] Incident report drafted
 - [ ] Fix deployed to staging for testing
 - [ ] Post-mortem scheduled if major incident
@@ -181,11 +188,11 @@ dotnet publish -c Release
 
 ## Escalation
 
-| Escalation Level | Condition | Contact |
-|-----------------|-----------|---------|
-| L1 | Standard rollback needed | On-call engineer |
-| L2 | Rollback fails or issue persists | Engineering lead |
-| L3 | Extended outage > 30 min | CTO + Status page update |
+| Escalation Level | Condition                        | Contact                  |
+| ---------------- | -------------------------------- | ------------------------ |
+| L1               | Standard rollback needed         | On-call engineer         |
+| L2               | Rollback fails or issue persists | Engineering lead         |
+| L3               | Extended outage > 30 min         | CTO + Status page update |
 
 ---
 

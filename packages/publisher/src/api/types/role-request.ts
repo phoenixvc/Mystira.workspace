@@ -1,8 +1,12 @@
 // Role Request types for open roles/tender system
 
-import type { ContributorRole } from './story';
+import type { ContributorRole } from "./story";
 
-export type RoleRequestStatus = 'pending' | 'accepted' | 'rejected' | 'withdrawn';
+export type RoleRequestStatus =
+  | "pending"
+  | "accepted"
+  | "rejected"
+  | "withdrawn";
 
 export interface OpenRole {
   id: string;
@@ -70,4 +74,3 @@ export interface RoleRequestListParams {
   page?: number;
   pageSize?: number;
 }
-

@@ -13,11 +13,13 @@ The original `Mystira.App.Admin.Api/Dockerfile` had incorrect project references
 ### Admin API Dockerfile (`src/Mystira.App.Admin.Api/Dockerfile`)
 
 The Dockerfile now correctly references:
+
 - Project: `Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj`
 - Working Directory: `/src/Mystira.App.Admin.Api`
 - Entry Point DLL: `Mystira.App.Admin.Api.dll`
 
 All project dependencies are properly copied:
+
 ```dockerfile
 COPY ["Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj", "Mystira.App.Admin.Api/"]
 COPY ["Mystira.App.Domain/Mystira.App.Domain.csproj", "Mystira.App.Domain/"]
@@ -64,6 +66,7 @@ ls ./publish/Mystira.App.Admin.Api.dll
 ## Azure App Service Deployment
 
 Azure App Service on Linux uses Oryx to detect and run .NET applications. The system:
+
 1. Detects the .NET 9.0 runtime requirement
 2. Finds the startup DLL (`Mystira.App.Admin.Api.dll` or `Mystira.App.Api.dll`)
 3. Runs: `dotnet "AppName.dll"`

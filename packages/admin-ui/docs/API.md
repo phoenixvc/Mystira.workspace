@@ -13,26 +13,26 @@ The Mystira Admin UI communicates with the Mystira Admin API via RESTful HTTP re
 All API clients share a common Axios instance configured in `src/api/axios.ts`:
 
 ```typescript
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true, // Include cookies for authentication
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor for adding auth tokens
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   // Add any custom headers here
   return config;
 });
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     // Handle errors globally
     return Promise.reject(error);
   }
@@ -64,24 +64,25 @@ src/api/
 Authenticate a user and receive a session cookie.
 
 ```typescript
-import { login } from './api/auth';
+import { login } from "./api/auth";
 
 const credentials = {
-  username: 'admin',
-  password: 'password123',
+  username: "admin",
+  password: "password123",
 };
 
 try {
   const user = await login(credentials);
-  console.log('Logged in as:', user.username);
+  console.log("Logged in as:", user.username);
 } catch (error) {
-  console.error('Login failed:', error);
+  console.error("Login failed:", error);
 }
 ```
 
 **Endpoint**: `POST /api/auth/login`
 
 **Request Body**:
+
 ```json
 {
   "username": "string",
@@ -90,6 +91,7 @@ try {
 ```
 
 **Response**:
+
 ```json
 {
   "id": "string",
@@ -104,7 +106,7 @@ try {
 End the current session.
 
 ```typescript
-import { logout } from './api/auth';
+import { logout } from "./api/auth";
 
 await logout();
 ```
@@ -116,7 +118,7 @@ await logout();
 Retrieve information about the currently authenticated user.
 
 ```typescript
-import { getCurrentUser } from './api/auth';
+import { getCurrentUser } from "./api/auth";
 
 const user = await getCurrentUser();
 ```
@@ -130,27 +132,29 @@ const user = await getCurrentUser();
 Retrieve a paginated list of scenarios with optional search.
 
 ```typescript
-import { getScenarios } from './api/scenarios';
+import { getScenarios } from "./api/scenarios";
 
 const params = {
   page: 1,
   pageSize: 20,
-  search: 'adventure',
+  search: "adventure",
 };
 
 const result = await getScenarios(params);
-console.log('Total:', result.total);
-console.log('Scenarios:', result.items);
+console.log("Total:", result.total);
+console.log("Scenarios:", result.items);
 ```
 
 **Endpoint**: `GET /api/admin/scenarios`
 
 **Query Parameters**:
+
 - `page` (number): Page number (1-indexed)
 - `pageSize` (number): Items per page
 - `search` (string, optional): Search query
 
 **Response**:
+
 ```json
 {
   "items": [
@@ -174,9 +178,9 @@ console.log('Scenarios:', result.items);
 Retrieve a single scenario by its ID.
 
 ```typescript
-import { getScenarioById } from './api/scenarios';
+import { getScenarioById } from "./api/scenarios";
 
-const scenario = await getScenarioById('scenario-id');
+const scenario = await getScenarioById("scenario-id");
 ```
 
 **Endpoint**: `GET /api/admin/scenarios/:id`
@@ -186,12 +190,12 @@ const scenario = await getScenarioById('scenario-id');
 Create a new scenario.
 
 ```typescript
-import { createScenario } from './api/scenarios';
+import { createScenario } from "./api/scenarios";
 
 const data = {
-  name: 'New Adventure',
-  description: 'An exciting adventure',
-  version: '1.0.0',
+  name: "New Adventure",
+  description: "An exciting adventure",
+  version: "1.0.0",
   // ... other scenario fields
 };
 
@@ -205,14 +209,14 @@ const scenario = await createScenario(data);
 Update an existing scenario.
 
 ```typescript
-import { updateScenario } from './api/scenarios';
+import { updateScenario } from "./api/scenarios";
 
 const updates = {
-  name: 'Updated Adventure',
-  description: 'An even more exciting adventure',
+  name: "Updated Adventure",
+  description: "An even more exciting adventure",
 };
 
-const scenario = await updateScenario('scenario-id', updates);
+const scenario = await updateScenario("scenario-id", updates);
 ```
 
 **Endpoint**: `PUT /api/admin/scenarios/:id`
@@ -222,9 +226,9 @@ const scenario = await updateScenario('scenario-id', updates);
 Delete a scenario.
 
 ```typescript
-import { deleteScenario } from './api/scenarios';
+import { deleteScenario } from "./api/scenarios";
 
-await deleteScenario('scenario-id');
+await deleteScenario("scenario-id");
 ```
 
 **Endpoint**: `DELETE /api/admin/scenarios/:id`
@@ -234,9 +238,9 @@ await deleteScenario('scenario-id');
 Import a scenario from a YAML or JSON file.
 
 ```typescript
-import { importScenario } from './api/scenarios';
+import { importScenario } from "./api/scenarios";
 
-const file = new File([content], 'scenario.yaml', { type: 'text/yaml' });
+const file = new File([content], "scenario.yaml", { type: "text/yaml" });
 const scenario = await importScenario(file);
 ```
 
@@ -249,15 +253,15 @@ const scenario = await importScenario(file);
 Validate all media references in scenarios.
 
 ```typescript
-import { validateScenarios } from './api/scenarios';
+import { validateScenarios } from "./api/scenarios";
 
-const scenarioIds = ['id1', 'id2', 'id3'];
+const scenarioIds = ["id1", "id2", "id3"];
 const results = await validateScenarios(scenarioIds);
 
 results.forEach(result => {
-  console.log(`Scenario ${result.scenarioId}: ${result.valid ? 'Valid' : 'Invalid'}`);
+  console.log(`Scenario ${result.scenarioId}: ${result.valid ? "Valid" : "Invalid"}`);
   if (!result.valid) {
-    console.log('Errors:', result.errors);
+    console.log("Errors:", result.errors);
   }
 });
 ```
@@ -265,6 +269,7 @@ results.forEach(result => {
 **Endpoint**: `POST /api/admin/scenarios/validate`
 
 **Request Body**:
+
 ```json
 {
   "scenarioIds": ["string"]
@@ -278,12 +283,12 @@ results.forEach(result => {
 Retrieve a paginated list of media items.
 
 ```typescript
-import { getMedia } from './api/media';
+import { getMedia } from "./api/media";
 
 const params = {
   page: 1,
   pageSize: 20,
-  type: 'image', // 'image', 'audio', 'video'
+  type: "image", // 'image', 'audio', 'video'
 };
 
 const result = await getMedia(params);
@@ -296,13 +301,13 @@ const result = await getMedia(params);
 Upload a single media file.
 
 ```typescript
-import { uploadMedia } from './api/media';
+import { uploadMedia } from "./api/media";
 
-const file = new File([blob], 'image.png', { type: 'image/png' });
+const file = new File([blob], "image.png", { type: "image/png" });
 const metadata = {
-  title: 'My Image',
-  description: 'A beautiful image',
-  tags: ['nature', 'landscape'],
+  title: "My Image",
+  description: "A beautiful image",
+  tags: ["nature", "landscape"],
 };
 
 const media = await uploadMedia(file, metadata);
@@ -317,17 +322,17 @@ const media = await uploadMedia(file, metadata);
 Upload multiple media files with metadata from a ZIP file.
 
 ```typescript
-import { uploadMediaZip } from './api/media';
+import { uploadMediaZip } from "./api/media";
 
-const zipFile = new File([zipBlob], 'media.zip', { type: 'application/zip' });
+const zipFile = new File([zipBlob], "media.zip", { type: "application/zip" });
 const options = {
   overwriteMetadata: true,
   overwriteMedia: false,
 };
 
 const result = await uploadMediaZip(zipFile, options);
-console.log('Uploaded:', result.uploaded);
-console.log('Failed:', result.failed);
+console.log("Uploaded:", result.uploaded);
+console.log("Failed:", result.failed);
 ```
 
 **Endpoint**: `POST /api/admin/media/upload-zip`
@@ -335,6 +340,7 @@ console.log('Failed:', result.failed);
 **Content-Type**: `multipart/form-data`
 
 **ZIP Structure**:
+
 ```
 media.zip
 ├── media-metadata.json
@@ -344,6 +350,7 @@ media.zip
 ```
 
 **media-metadata.json Format**:
+
 ```json
 {
   "media-id-1": {
@@ -366,7 +373,7 @@ media.zip
 Retrieve a paginated list of badges.
 
 ```typescript
-import { getBadges } from './api/badges';
+import { getBadges } from "./api/badges";
 
 const result = await getBadges({ page: 1, pageSize: 20 });
 ```
@@ -378,12 +385,12 @@ const result = await getBadges({ page: 1, pageSize: 20 });
 Create a new badge.
 
 ```typescript
-import { createBadge } from './api/badges';
+import { createBadge } from "./api/badges";
 
 const data = {
-  name: 'Achievement',
-  description: 'Complete 10 scenarios',
-  imageId: 'media-id',
+  name: "Achievement",
+  description: "Complete 10 scenarios",
+  imageId: "media-id",
 };
 
 const badge = await createBadge(data);
@@ -396,14 +403,14 @@ const badge = await createBadge(data);
 Update an existing badge.
 
 ```typescript
-import { updateBadge } from './api/badges';
+import { updateBadge } from "./api/badges";
 
 const updates = {
-  name: 'Updated Achievement',
-  description: 'Complete 20 scenarios',
+  name: "Updated Achievement",
+  description: "Complete 20 scenarios",
 };
 
-const badge = await updateBadge('badge-id', updates);
+const badge = await updateBadge("badge-id", updates);
 ```
 
 **Endpoint**: `PUT /api/admin/badges/:id`
@@ -413,9 +420,9 @@ const badge = await updateBadge('badge-id', updates);
 Delete a badge.
 
 ```typescript
-import { deleteBadge } from './api/badges';
+import { deleteBadge } from "./api/badges";
 
-await deleteBadge('badge-id');
+await deleteBadge("badge-id");
 ```
 
 **Endpoint**: `DELETE /api/admin/badges/:id`
@@ -427,7 +434,7 @@ await deleteBadge('badge-id');
 Retrieve a paginated list of bundles.
 
 ```typescript
-import { getBundles } from './api/bundles';
+import { getBundles } from "./api/bundles";
 
 const result = await getBundles({ page: 1, pageSize: 20 });
 ```
@@ -439,12 +446,12 @@ const result = await getBundles({ page: 1, pageSize: 20 });
 Create a new bundle.
 
 ```typescript
-import { createBundle } from './api/bundles';
+import { createBundle } from "./api/bundles";
 
 const data = {
-  name: 'Adventure Pack',
-  description: 'Collection of adventure scenarios',
-  version: '1.0.0',
+  name: "Adventure Pack",
+  description: "Collection of adventure scenarios",
+  version: "1.0.0",
 };
 
 const bundle = await createBundle(data);
@@ -457,14 +464,14 @@ const bundle = await createBundle(data);
 Update an existing bundle.
 
 ```typescript
-import { updateBundle } from './api/bundles';
+import { updateBundle } from "./api/bundles";
 
 const updates = {
-  name: 'Updated Adventure Pack',
-  version: '1.1.0',
+  name: "Updated Adventure Pack",
+  version: "1.1.0",
 };
 
-const bundle = await updateBundle('bundle-id', updates);
+const bundle = await updateBundle("bundle-id", updates);
 ```
 
 **Endpoint**: `PUT /api/admin/bundles/:id`
@@ -474,9 +481,9 @@ const bundle = await updateBundle('bundle-id', updates);
 Delete a bundle.
 
 ```typescript
-import { deleteBundle } from './api/bundles';
+import { deleteBundle } from "./api/bundles";
 
-await deleteBundle('bundle-id');
+await deleteBundle("bundle-id");
 ```
 
 **Endpoint**: `DELETE /api/admin/bundles/:id`
@@ -488,9 +495,9 @@ await deleteBundle('bundle-id');
 Retrieve avatars for a specific age group.
 
 ```typescript
-import { getAvatarsByAgeGroup } from './api/avatars';
+import { getAvatarsByAgeGroup } from "./api/avatars";
 
-const avatars = await getAvatarsByAgeGroup('teen');
+const avatars = await getAvatarsByAgeGroup("teen");
 // Returns array of media IDs
 ```
 
@@ -501,15 +508,16 @@ const avatars = await getAvatarsByAgeGroup('teen');
 Update the list of avatars for an age group.
 
 ```typescript
-import { updateAvatarsForAgeGroup } from './api/avatars';
+import { updateAvatarsForAgeGroup } from "./api/avatars";
 
-const mediaIds = ['media-id-1', 'media-id-2', 'media-id-3'];
-await updateAvatarsForAgeGroup('teen', mediaIds);
+const mediaIds = ["media-id-1", "media-id-2", "media-id-3"];
+await updateAvatarsForAgeGroup("teen", mediaIds);
 ```
 
 **Endpoint**: `PUT /api/admin/avatars/:ageGroup`
 
 **Request Body**:
+
 ```json
 {
   "mediaIds": ["string"]
@@ -538,27 +546,27 @@ All API errors follow a consistent format:
 Use the error handler utility for consistent error handling:
 
 ```typescript
-import { handleApiError } from '../utils/errorHandler';
+import { handleApiError } from "../utils/errorHandler";
 
 try {
   await createScenario(data);
-  showToast.success('Scenario created successfully');
+  showToast.success("Scenario created successfully");
 } catch (error) {
-  handleApiError(error, 'Failed to create scenario');
+  handleApiError(error, "Failed to create scenario");
 }
 ```
 
 ### Common Error Codes
 
-| Status | Code | Description |
-|--------|------|-------------|
-| 400 | BAD_REQUEST | Invalid request data |
-| 401 | UNAUTHORIZED | Authentication required |
-| 403 | FORBIDDEN | Insufficient permissions |
-| 404 | NOT_FOUND | Resource not found |
-| 409 | CONFLICT | Resource already exists |
-| 422 | VALIDATION_ERROR | Validation failed |
-| 500 | INTERNAL_ERROR | Server error |
+| Status | Code             | Description              |
+| ------ | ---------------- | ------------------------ |
+| 400    | BAD_REQUEST      | Invalid request data     |
+| 401    | UNAUTHORIZED     | Authentication required  |
+| 403    | FORBIDDEN        | Insufficient permissions |
+| 404    | NOT_FOUND        | Resource not found       |
+| 409    | CONFLICT         | Resource already exists  |
+| 422    | VALIDATION_ERROR | Validation failed        |
+| 500    | INTERNAL_ERROR   | Server error             |
 
 ## Best Practices
 
@@ -567,12 +575,12 @@ try {
 Wrap API calls in React Query hooks for automatic caching and state management:
 
 ```typescript
-import { useQuery } from '@tanstack/react-query';
-import { getScenarios } from '../api/scenarios';
+import { useQuery } from "@tanstack/react-query";
+import { getScenarios } from "../api/scenarios";
 
 function useScenarios(params) {
   return useQuery({
-    queryKey: ['scenarios', params],
+    queryKey: ["scenarios", params],
     queryFn: () => getScenarios(params),
   });
 }
@@ -596,8 +604,8 @@ return <ScenarioList scenarios={data.items} />;
 Invalidate queries after mutations:
 
 ```typescript
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createScenario } from '../api/scenarios';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createScenario } from "../api/scenarios";
 
 function useCreateScenario() {
   const queryClient = useQueryClient();
@@ -605,7 +613,7 @@ function useCreateScenario() {
   return useMutation({
     mutationFn: createScenario,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['scenarios'] });
+      queryClient.invalidateQueries({ queryKey: ["scenarios"] });
     },
   });
 }
@@ -633,7 +641,7 @@ interface PaginatedResponse<T> {
 }
 
 async function getScenarios(params): Promise<PaginatedResponse<Scenario>> {
-  const response = await api.get('/api/admin/scenarios', { params });
+  const response = await api.get("/api/admin/scenarios", { params });
   return response.data;
 }
 ```
@@ -645,14 +653,14 @@ async function getScenarios(params): Promise<PaginatedResponse<Scenario>> {
 Use MSW (Mock Service Worker) for testing:
 
 ```typescript
-import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { rest } from "msw";
+import { setupServer } from "msw/node";
 
 const server = setupServer(
-  rest.get('/api/admin/scenarios', (req, res, ctx) => {
+  rest.get("/api/admin/scenarios", (req, res, ctx) => {
     return res(
       ctx.json({
-        items: [{ id: '1', name: 'Test Scenario' }],
+        items: [{ id: "1", name: "Test Scenario" }],
         total: 1,
         page: 1,
         pageSize: 20,
@@ -671,10 +679,10 @@ afterAll(() => server.close());
 Verify that errors are handled correctly:
 
 ```typescript
-it('handles API errors', async () => {
+it("handles API errors", async () => {
   server.use(
-    rest.get('/api/admin/scenarios', (req, res, ctx) => {
-      return res(ctx.status(500), ctx.json({ message: 'Server error' }));
+    rest.get("/api/admin/scenarios", (req, res, ctx) => {
+      return res(ctx.status(500), ctx.json({ message: "Server error" }));
     })
   );
 

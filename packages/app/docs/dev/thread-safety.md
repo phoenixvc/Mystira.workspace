@@ -105,21 +105,21 @@ finally
 
 ### Guaranteed Thread-Safe
 
-| Operation | Guarantee |
-|-----------|-----------|
-| `SendMessageAsync` | Multiple concurrent calls safe |
-| `SendEmbedAsync` | Multiple concurrent calls safe |
-| `ReplyToMessageAsync` | Multiple concurrent calls safe |
-| `GetStatus()` | Always safe, returns snapshot |
-| `AddOrUpdateConversationReference` | Safe for concurrent updates |
+| Operation                          | Guarantee                      |
+| ---------------------------------- | ------------------------------ |
+| `SendMessageAsync`                 | Multiple concurrent calls safe |
+| `SendEmbedAsync`                   | Multiple concurrent calls safe |
+| `ReplyToMessageAsync`              | Multiple concurrent calls safe |
+| `GetStatus()`                      | Always safe, returns snapshot  |
+| `AddOrUpdateConversationReference` | Safe for concurrent updates    |
 
 ### Requires Care
 
-| Operation | Notes |
-|-----------|-------|
-| `StartAsync/StopAsync` | Call once per service lifecycle |
-| `Dispose` | Idempotent but call only once |
-| Broadcast methods | Event handlers may run concurrently |
+| Operation              | Notes                               |
+| ---------------------- | ----------------------------------- |
+| `StartAsync/StopAsync` | Call once per service lifecycle     |
+| `Dispose`              | Idempotent but call only once       |
+| Broadcast methods      | Event handlers may run concurrently |
 
 ## Event Handler Safety
 

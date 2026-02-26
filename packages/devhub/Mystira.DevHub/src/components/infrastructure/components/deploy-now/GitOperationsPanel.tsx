@@ -116,12 +116,12 @@ export function GitOperationsPanel({
           {
             repoRoot,
             message: commitMessage || "Trigger deployment",
-          },
+          }
         );
 
         if (!emptyCommitResponse.success) {
           setError(
-            emptyCommitResponse.error || "Failed to create empty commit",
+            emptyCommitResponse.error || "Failed to create empty commit"
           );
           setIsPushing(false);
           return;

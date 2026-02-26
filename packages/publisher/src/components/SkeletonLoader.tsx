@@ -1,13 +1,16 @@
-import { Skeleton } from './Skeleton';
+import { Skeleton } from "./Skeleton";
 
 interface SkeletonLoaderProps {
-  type?: 'list' | 'card' | 'table' | 'form';
+  type?: "list" | "card" | "table" | "form";
   count?: number;
 }
 
-export function SkeletonLoader({ type = 'list', count = 3 }: SkeletonLoaderProps) {
+export function SkeletonLoader({
+  type = "list",
+  count = 3,
+}: SkeletonLoaderProps) {
   switch (type) {
-    case 'list':
+    case "list":
       return (
         <div className="skeleton-loader skeleton-loader--list">
           {Array.from({ length: count }).map((_, i) => (
@@ -22,7 +25,7 @@ export function SkeletonLoader({ type = 'list', count = 3 }: SkeletonLoaderProps
         </div>
       );
 
-    case 'card':
+    case "card":
       return (
         <div className="skeleton-loader skeleton-loader--card">
           {Array.from({ length: count }).map((_, i) => (
@@ -37,7 +40,7 @@ export function SkeletonLoader({ type = 'list', count = 3 }: SkeletonLoaderProps
         </div>
       );
 
-    case 'table':
+    case "table":
       return (
         <div className="skeleton-loader skeleton-loader--table">
           <Skeleton height={40} />
@@ -47,7 +50,7 @@ export function SkeletonLoader({ type = 'list', count = 3 }: SkeletonLoaderProps
         </div>
       );
 
-    case 'form':
+    case "form":
       return (
         <div className="skeleton-loader skeleton-loader--form">
           <Skeleton width="100%" height={40} />
@@ -61,4 +64,3 @@ export function SkeletonLoader({ type = 'list', count = 3 }: SkeletonLoaderProps
       return <Skeleton />;
   }
 }
-

@@ -423,6 +423,7 @@ public class SlackBotServiceTests
 ### Channel ID Mapping
 
 Each platform has different ID formats:
+
 - **Discord**: Native ulong IDs
 - **Teams**: String conversation IDs
 - **WhatsApp**: Phone numbers
@@ -445,6 +446,7 @@ Use `ConcurrentDictionary` for shared state and `Interlocked` for flags.
 ### Rate Limiting
 
 Handle rate limits gracefully:
+
 1. Check for rate limit errors
 2. Parse retry-after headers if available
 3. Implement backoff

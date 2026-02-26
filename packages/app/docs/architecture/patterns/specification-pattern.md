@@ -11,7 +11,7 @@
 
 The Specification Pattern encapsulates **query logic** into reusable, composable objects. Instead of scattering query logic across repositories and services, specifications centralize and standardize how entities are queried.
 
-**Key Principle**: *"Encapsulate business rules in specifications that can be combined and reused."* - Eric Evans & Martin Fowler
+**Key Principle**: _"Encapsulate business rules in specifications that can be combined and reused."_ - Eric Evans & Martin Fowler
 
 ---
 
@@ -259,6 +259,7 @@ public class ScenariosByAgeGroupSpecification : BaseSpecification<Scenario>
 ```
 
 **Generated SQL**:
+
 ```sql
 SELECT * FROM Scenarios
 WHERE AgeGroup = 'Ages7to9'
@@ -284,6 +285,7 @@ public class FeaturedScenariosSpecification : BaseSpecification<Scenario>
 ```
 
 **Generated SQL**:
+
 ```sql
 SELECT * FROM Scenarios
 WHERE IsDeleted = 0
@@ -309,6 +311,7 @@ public class ScenarioWithScenesSpecification : BaseSpecification<Scenario>
 ```
 
 **Generated SQL**:
+
 ```sql
 SELECT s.*, sc.*, c.*
 FROM Scenarios s
@@ -334,6 +337,7 @@ public class PaginatedScenariosSpecification : BaseSpecification<Scenario>
 ```
 
 **Generated SQL**:
+
 ```sql
 SELECT * FROM Scenarios
 WHERE IsDeleted = 0

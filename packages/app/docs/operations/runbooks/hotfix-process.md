@@ -22,12 +22,14 @@ This runbook guides you through deploying an urgent fix to production outside th
 ## When to Use This Process
 
 Use hotfix process for:
+
 - **Critical bugs**: Production outages, data corruption
 - **Security vulnerabilities**: Authentication bypass, data exposure
 - **Data loss risks**: Issues that could cause data deletion or corruption
 - **Regulatory compliance**: Issues that could result in compliance violations (e.g., COPPA)
 
 Do NOT use for:
+
 - Feature requests
 - Minor bugs
 - Performance improvements (unless causing outage)
@@ -59,6 +61,7 @@ Fixes #[issue-number]
 ### Step 2: Fast-Track Code Review
 
 Get urgent code review:
+
 - Tag reviewers in PR with "URGENT HOTFIX" label
 - Include:
   - Description of the bug
@@ -103,6 +106,7 @@ curl https://api.staging.mystira.app/health
 ### Step 6: Get Approval
 
 Obtain emergency approval for production deployment:
+
 - [ ] Technical lead approval
 - [ ] Product owner notification
 - [ ] Security review (if applicable)
@@ -172,6 +176,7 @@ git push origin develop
 ### Step 12: Create Incident Report
 
 Document the incident:
+
 - Bug description
 - Impact (users affected, duration)
 - Root cause
@@ -181,6 +186,7 @@ Document the incident:
 ### Step 13: Notify Stakeholders
 
 Send hotfix completion notification:
+
 - Bug fixed in production
 - Hotfix version deployed
 - Impact summary
@@ -199,6 +205,7 @@ Send hotfix completion notification:
 ### Monitoring
 
 Monitor for next 2-4 hours:
+
 - [ ] Application Insights errors
 - [ ] User feedback
 - [ ] Related metrics
@@ -223,6 +230,7 @@ See [Emergency Rollback](./emergency-rollback.md) for full rollback procedure.
 ### Issue: Hotfix didn't resolve the bug
 
 **Resolution**:
+
 1. Verify the root cause analysis was correct
 2. Check if there are multiple instances of the bug
 3. Review logs for additional context
@@ -231,6 +239,7 @@ See [Emergency Rollback](./emergency-rollback.md) for full rollback procedure.
 ### Issue: Hotfix caused regressions
 
 **Resolution**:
+
 1. Assess severity of regression
 2. If critical: immediate rollback
 3. If minor: monitor and plan fix

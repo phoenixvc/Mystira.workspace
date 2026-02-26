@@ -52,11 +52,11 @@ export function LogsViewer({
 
   const { groupedLogs, collapsedGroups, toggleGroup } = useLogGrouping(
     filteredLogs,
-    collapseSimilar,
+    collapseSimilar
   );
   const errorIndices = useMemo(
     () => findErrorIndices(filteredLogs),
-    [filteredLogs],
+    [filteredLogs]
   );
 
   // Format timestamp helper
@@ -195,7 +195,7 @@ export function LogsViewer({
       | "runtime-warnings"
       | "all-errors"
       | "build-only"
-      | "runtime-only",
+      | "runtime-only"
   ) => {
     switch (preset) {
       case "build-errors":

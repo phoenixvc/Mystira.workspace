@@ -24,7 +24,7 @@ export function useAppLogs() {
   // Listen for global log events
   useEffect(() => {
     const handleGlobalLog = (
-      event: CustomEvent<{ message: string; type: "info" | "error" | "warn" }>,
+      event: CustomEvent<{ message: string; type: "info" | "error" | "warn" }>
     ) => {
       setGlobalLogs((prev) => [
         ...prev.slice(-500),
@@ -46,12 +46,12 @@ export function useAppLogs() {
 
     window.addEventListener(
       EVENTS.DEPLOYMENT_LOGS as any,
-      handleDeploymentLogs,
+      handleDeploymentLogs
     );
     return () => {
       window.removeEventListener(
         EVENTS.DEPLOYMENT_LOGS as any,
-        handleDeploymentLogs,
+        handleDeploymentLogs
       );
     };
   }, []);
@@ -65,7 +65,7 @@ export function useAppLogs() {
         source?: string;
         details?: string;
         clear?: boolean;
-      }>,
+      }>
     ) => {
       if (event.detail.clear) {
         setProblems([]);
@@ -88,12 +88,12 @@ export function useAppLogs() {
 
     window.addEventListener(
       EVENTS.INFRASTRUCTURE_PROBLEM as any,
-      handleInfrastructureProblem,
+      handleInfrastructureProblem
     );
     return () => {
       window.removeEventListener(
         EVENTS.INFRASTRUCTURE_PROBLEM as any,
-        handleInfrastructureProblem,
+        handleInfrastructureProblem
       );
     };
   }, []);

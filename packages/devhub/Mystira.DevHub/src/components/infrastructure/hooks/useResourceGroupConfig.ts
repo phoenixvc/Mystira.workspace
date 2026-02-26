@@ -27,7 +27,7 @@ export function useResourceGroupConfig(environment: string) {
     setConfig(newConfig);
     localStorage.setItem(
       `resourceGroupConfig_${environment}`,
-      JSON.stringify(newConfig),
+      JSON.stringify(newConfig)
     );
   };
 

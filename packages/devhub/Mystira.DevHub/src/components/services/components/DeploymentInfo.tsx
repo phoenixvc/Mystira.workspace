@@ -13,7 +13,7 @@ export interface DeploymentInfo {
 // In a real implementation, this would call a Tauri command that queries GitHub API
 export async function fetchDeploymentInfo(
   _serviceName: string,
-  _environment: "dev" | "prod",
+  _environment: "dev" | "prod"
 ): Promise<DeploymentInfo | null> {
   // TODO: Implement actual GitHub Actions API integration
   // For now, return null to indicate no deployment info available

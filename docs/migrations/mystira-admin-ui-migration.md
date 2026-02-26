@@ -24,20 +24,20 @@ Admin.UI is a React/TypeScript admin dashboard. Migration focuses on:
 
 ### Technology Stack
 
-| Component | Current | Target |
-|-----------|---------|--------|
-| Node.js | 20.x | 22.x LTS |
-| React | 18.x | 18.x (latest) |
-| TypeScript | 5.x | 5.x (latest) |
-| pnpm | 9.x | 9.15+ |
+| Component  | Current | Target        |
+| ---------- | ------- | ------------- |
+| Node.js    | 20.x    | 22.x LTS      |
+| React      | 18.x    | 18.x (latest) |
+| TypeScript | 5.x     | 5.x (latest)  |
+| pnpm       | 9.x     | 9.15+         |
 
 ### Package Dependencies
 
-| Current | Action | Replacement |
-|---------|--------|-------------|
-| Custom design tokens | Replace | `@mystira/design-tokens` |
-| Custom utilities | Replace | `@mystira/shared-utils` |
-| @azure/msal-react | Update | Latest for Entra External ID |
+| Current              | Action  | Replacement                  |
+| -------------------- | ------- | ---------------------------- |
+| Custom design tokens | Replace | `@mystira/design-tokens`     |
+| Custom utilities     | Replace | `@mystira/shared-utils`      |
+| @azure/msal-react    | Update  | Latest for Entra External ID |
 
 ---
 
@@ -90,20 +90,20 @@ pnpm add @mystira/design-tokens@0.2.0 @mystira/shared-utils@0.2.0
 
 ```css
 /* src/index.css or styles/globals.css */
-@import '@mystira/design-tokens/css/variables.css';
-@import '@mystira/design-tokens/css/dark-mode.css';
+@import "@mystira/design-tokens/css/variables.css";
+@import "@mystira/design-tokens/css/dark-mode.css";
 ```
 
 ### 3.2 Update Tailwind Config
 
 ```javascript
 // tailwind.config.js
-const mystiraPreset = require('@mystira/design-tokens/tailwind/preset');
+const mystiraPreset = require("@mystira/design-tokens/tailwind/preset");
 
 module.exports = {
   presets: [mystiraPreset],
-  content: ['./src/**/*.{ts,tsx}', './index.html'],
-  darkMode: 'class',
+  content: ["./src/**/*.{ts,tsx}", "./index.html"],
+  darkMode: "class",
   theme: {
     extend: {
       // Admin-specific overrides if needed
@@ -116,10 +116,10 @@ module.exports = {
 
 ```tsx
 // Before
-const buttonClass = 'bg-blue-500 hover:bg-blue-600';
+const buttonClass = "bg-blue-500 hover:bg-blue-600";
 
 // After (using design token classes)
-const buttonClass = 'bg-primary-500 hover:bg-primary-600';
+const buttonClass = "bg-primary-500 hover:bg-primary-600";
 ```
 
 ---
@@ -130,18 +130,18 @@ const buttonClass = 'bg-primary-500 hover:bg-primary-600';
 
 ```typescript
 // Before
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: "/api",
   headers: { Authorization: `Bearer ${token}` },
 });
 
 // After
-import { httpClient } from '@mystira/shared-utils';
+import { httpClient } from "@mystira/shared-utils";
 
 const api = httpClient.create({
-  baseURL: '/api',
+  baseURL: "/api",
   authProvider: async () => getAccessToken(),
 });
 ```
@@ -155,8 +155,8 @@ function validateEmail(email: string) {
 }
 
 // After
-import { validateSchema } from '@mystira/shared-utils';
-import { z } from 'zod';
+import { validateSchema } from "@mystira/shared-utils";
+import { z } from "zod";
 
 const emailSchema = z.string().email();
 const result = validateSchema(emailSchema, email);
@@ -167,18 +167,18 @@ const result = validateSchema(emailSchema, email);
 ```typescript
 // Before
 try {
-  await api.post('/content', data);
+  await api.post("/content", data);
 } catch (error) {
-  console.error('Failed to save', error);
+  console.error("Failed to save", error);
 }
 
 // After
-import { logger } from '@mystira/shared-utils';
+import { logger } from "@mystira/shared-utils";
 
 try {
-  await api.post('/content', data);
+  await api.post("/content", data);
 } catch (error) {
-  logger.error('Failed to save content', { error, contentId: data.id });
+  logger.error("Failed to save content", { error, contentId: data.id });
 }
 ```
 
@@ -190,29 +190,30 @@ try {
 
 ```tsx
 // contexts/ThemeContext.tsx
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = "light" | "dark" | "system";
 
 const ThemeContext = createContext<{
   theme: Theme;
   setTheme: (theme: Theme) => void;
-}>({ theme: 'system', setTheme: () => {} });
+}>({ theme: "system", setTheme: () => {} });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(() => {
-    const stored = localStorage.getItem('admin-theme') as Theme;
-    return stored || 'system';
+    const stored = localStorage.getItem("admin-theme") as Theme;
+    return stored || "system";
   });
 
   useEffect(() => {
     const root = document.documentElement;
     const isDark =
-      theme === 'dark' ||
-      (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
 
-    root.classList.toggle('dark', isDark);
-    localStorage.setItem('admin-theme', theme);
+    root.classList.toggle("dark", isDark);
+    localStorage.setItem("admin-theme", theme);
   }, [theme]);
 
   return (
@@ -229,7 +230,7 @@ export const useTheme = () => useContext(ThemeContext);
 
 ```tsx
 // components/ThemeSelector.tsx
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from "../contexts/ThemeContext";
 
 export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
@@ -254,7 +255,7 @@ If Admin.Api migrates to Microsoft Entra External ID:
 
 ```typescript
 // authConfig.ts
-import { Configuration } from '@azure/msal-browser';
+import { Configuration } from "@azure/msal-browser";
 
 export const msalConfig: Configuration = {
   auth: {
@@ -263,13 +264,13 @@ export const msalConfig: Configuration = {
     redirectUri: window.location.origin,
   },
   cache: {
-    cacheLocation: 'localStorage',
+    cacheLocation: "localStorage",
     storeAuthStateInCookie: false,
   },
 };
 
 export const loginRequest = {
-  scopes: ['openid', 'profile', 'api://admin-api/.default'],
+  scopes: ["openid", "profile", "api://admin-api/.default"],
 };
 ```
 
@@ -277,7 +278,10 @@ export const loginRequest = {
 
 ```typescript
 // After Entra External ID migration
-const apiScopes = ['api://admin-api/Content.Read', 'api://admin-api/Content.Write'];
+const apiScopes = [
+  "api://admin-api/Content.Read",
+  "api://admin-api/Content.Write",
+];
 ```
 
 ---
@@ -285,19 +289,23 @@ const apiScopes = ['api://admin-api/Content.Read', 'api://admin-api/Content.Writ
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Review current color usage
 - [ ] Identify custom utility functions
 - [ ] Document MSAL configuration
 
 ### Phase 1: Runtime
+
 - [ ] Update Node.js version
 - [ ] Update dependencies
 
 ### Phase 2: Packages
+
 - [ ] Install @mystira/design-tokens
 - [ ] Install @mystira/shared-utils
 
 ### Phase 3: Design Tokens
+
 - [ ] Import CSS variables
 - [ ] Import dark mode CSS
 - [ ] Update Tailwind config
@@ -305,21 +313,25 @@ const apiScopes = ['api://admin-api/Content.Read', 'api://admin-api/Content.Writ
 - [ ] Test color consistency
 
 ### Phase 4: Shared Utils
+
 - [ ] Replace custom HTTP client
 - [ ] Replace validation utilities
 - [ ] Replace logging
 
 ### Phase 5: Dark Mode
+
 - [ ] Add ThemeProvider
 - [ ] Add theme selector
 - [ ] Test dark mode styling
 
 ### Phase 6: Entra External ID (Optional)
+
 - [ ] Update MSAL configuration
 - [ ] Update API scopes
 - [ ] Test authentication flow
 
 ### Post-Migration
+
 - [ ] Run all tests
 - [ ] Visual regression testing
 - [ ] Cross-browser testing
@@ -329,12 +341,12 @@ const apiScopes = ['api://admin-api/Content.Read', 'api://admin-api/Content.Writ
 
 ## Breaking Changes
 
-| Change | Impact | Mitigation |
-|--------|--------|------------|
-| Node.js 20 → 22 | Runtime upgrade | Test in CI first |
-| CSS variable names | Possible style breaks | Audit usage |
-| Custom utils removal | Import path changes | Find/replace |
-| Entra External ID | Auth flow changes | Gradual rollout |
+| Change               | Impact                | Mitigation       |
+| -------------------- | --------------------- | ---------------- |
+| Node.js 20 → 22      | Runtime upgrade       | Test in CI first |
+| CSS variable names   | Possible style breaks | Audit usage      |
+| Custom utils removal | Import path changes   | Find/replace     |
+| Entra External ID    | Auth flow changes     | Gradual rollout  |
 
 ---
 

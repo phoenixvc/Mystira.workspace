@@ -85,7 +85,7 @@ function ResourceGroupConfig({
     preview = preview.replace(/{region}/g, config.region || "san");
     preview = preview.replace(
       /{project}/g,
-      config.projectName || "mystira-app",
+      config.projectName || "mystira-app"
     );
     preview = preview.replace(/{resource}/g, "storage");
     preview = preview.replace(/{rg}/g, "rg");
@@ -98,12 +98,12 @@ function ResourceGroupConfig({
       let defaultRG = config.pattern;
       defaultRG = defaultRG.replace(
         /{env}/g,
-        config.environment || environment,
+        config.environment || environment
       );
       defaultRG = defaultRG.replace(/{region}/g, config.region || "san");
       defaultRG = defaultRG.replace(
         /{project}/g,
-        config.projectName || "mystira-app",
+        config.projectName || "mystira-app"
       );
       defaultRG = defaultRG.replace(/{resource}/g, "mystira-app");
       defaultRG = defaultRG.replace(/{rg}/g, "rg");
@@ -122,7 +122,7 @@ function ResourceGroupConfig({
   const handleSave = () => {
     localStorage.setItem(
       `resourceGroupConfig_${environment}`,
-      JSON.stringify(config),
+      JSON.stringify(config)
     );
     onSave(config);
     onClose();
@@ -153,7 +153,7 @@ function ResourceGroupConfig({
 
   const updateResourceTypeMapping = (
     resourceType: string,
-    resourceGroup: string,
+    resourceGroup: string
   ) => {
     setConfig({
       ...config,
@@ -378,7 +378,7 @@ function ResourceGroupConfig({
                       </>
                     )}
                   </div>
-                ),
+                )
               )}
             </div>
 

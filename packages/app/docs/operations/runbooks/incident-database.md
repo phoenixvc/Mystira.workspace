@@ -175,6 +175,7 @@ dependencies
 ```
 
 **Mitigation**:
+
 1. Review partition key strategy
 2. Consider synthetic partition keys
 3. Redistribute data if needed
@@ -220,7 +221,7 @@ If write operations are problematic:
 dependencies
 | where timestamp > ago(5m)
 | where type == "Azure DocumentDB"
-| summarize 
+| summarize
     SuccessRate = 100.0 * countif(success == true) / count(),
     AvgDuration = avg(duration),
     P95Duration = percentile(duration, 95)
@@ -231,6 +232,7 @@ dependencies
 ### Step 1: Document Root Cause
 
 Create detailed incident report:
+
 - What caused the issue
 - When it started
 - Impact assessment
@@ -240,6 +242,7 @@ Create detailed incident report:
 ### Step 2: Optimize Queries
 
 Review and optimize problematic queries:
+
 - Add missing indexes
 - Optimize cross-partition queries
 - Implement caching where appropriate
@@ -261,6 +264,7 @@ az cosmosdb sql database throughput show \
 ```
 
 Consider:
+
 - Switching to serverless vs provisioned throughput
 - Enabling autoscale
 - Partitioning strategy improvements
@@ -270,6 +274,7 @@ Consider:
 ### Issue: Cannot connect via Azure Portal
 
 **Resolution**:
+
 1. Check network connectivity
 2. Verify firewall rules include Azure Portal IPs
 3. Use private endpoint if configured
@@ -277,6 +282,7 @@ Consider:
 ### Issue: Consistent high RU usage
 
 **Resolution**:
+
 1. Review query execution plans
 2. Check for missing indexes
 3. Implement query result caching
@@ -285,6 +291,7 @@ Consider:
 ### Issue: Slow writes
 
 **Resolution**:
+
 1. Check indexing policy (too many indexes slow writes)
 2. Review document size (large documents take longer)
 3. Check for conflicts in multi-region setup

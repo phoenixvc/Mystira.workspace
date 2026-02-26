@@ -4,9 +4,9 @@
 
 We actively support security updates for the following versions:
 
-| Version | Supported          |
-| ------- | ------------------ |
-| Latest  | :white_check_mark: |
+| Version  | Supported          |
+| -------- | ------------------ |
+| Latest   | :white_check_mark: |
 | < Latest | :x:                |
 
 ## Reporting a Vulnerability
@@ -47,23 +47,23 @@ For detailed authentication architecture, see:
 
 #### Summary
 
-| Component | Auth Method | Provider |
-|-----------|-------------|----------|
-| Admin UI | Cookie + OIDC | Microsoft Entra ID |
-| Admin API | JWT Bearer | Microsoft Entra ID |
-| Public API | JWT Bearer | Entra External ID / Internal |
-| Service-to-Service | Managed Identity | Azure |
+| Component          | Auth Method      | Provider                     |
+| ------------------ | ---------------- | ---------------------------- |
+| Admin UI           | Cookie + OIDC    | Microsoft Entra ID           |
+| Admin API          | JWT Bearer       | Microsoft Entra ID           |
+| Public API         | JWT Bearer       | Entra External ID / Internal |
+| Service-to-Service | Managed Identity | Azure                        |
 
 ### Secret Management
 
 #### Required Secrets
 
-| Secret | Storage | Access |
-|--------|---------|--------|
-| JWT Signing Key | Azure Key Vault | App Service Managed Identity |
-| Database Connection | Azure Key Vault | App Service Managed Identity |
+| Secret               | Storage         | Access                       |
+| -------------------- | --------------- | ---------------------------- |
+| JWT Signing Key      | Azure Key Vault | App Service Managed Identity |
+| Database Connection  | Azure Key Vault | App Service Managed Identity |
 | AI Provider API Keys | Azure Key Vault | App Service Managed Identity |
-| Discord Bot Token | Azure Key Vault | App Service Managed Identity |
+| Discord Bot Token    | Azure Key Vault | App Service Managed Identity |
 
 #### Local Development
 
@@ -81,35 +81,37 @@ For detailed authentication architecture, see:
 
 #### Public Endpoints
 
-| Endpoint | Protection |
-|----------|------------|
-| Public API | HTTPS, WAF, Rate Limiting |
-| Admin API | HTTPS, VPN/Private Endpoint (recommended) |
-| PWA | HTTPS, CDN |
+| Endpoint   | Protection                                |
+| ---------- | ----------------------------------------- |
+| Public API | HTTPS, WAF, Rate Limiting                 |
+| Admin API  | HTTPS, VPN/Private Endpoint (recommended) |
+| PWA        | HTTPS, CDN                                |
 
 #### Internal Services
 
-| Service | Network |
-|---------|---------|
+| Service             | Network                   |
+| ------------------- | ------------------------- |
 | Kubernetes Services | ClusterIP (internal only) |
-| Cosmos DB | Private Endpoint |
-| Redis | Private Endpoint |
+| Cosmos DB           | Private Endpoint          |
+| Redis               | Private Endpoint          |
 
 #### Internal Service-to-Service Security
 
-| Service                   | Current              | Target                |
-| ------------------------- | -------------------- | --------------------- |
-| Chain RPC (8545)          | HTTP + NetworkPolicy | mTLS via service mesh |
-| Chain WebSocket (8546)    | HTTP + NetworkPolicy | mTLS via service mesh |
-| Inter-service API calls   | HTTP + NetworkPolicy | mTLS via service mesh |
+| Service                 | Current              | Target                |
+| ----------------------- | -------------------- | --------------------- |
+| Chain RPC (8545)        | HTTP + NetworkPolicy | mTLS via service mesh |
+| Chain WebSocket (8546)  | HTTP + NetworkPolicy | mTLS via service mesh |
+| Inter-service API calls | HTTP + NetworkPolicy | mTLS via service mesh |
 
 **Current Protections:**
+
 - Kubernetes NetworkPolicies restrict pod-to-pod communication
 - Services use ClusterIP (not exposed externally)
 - External traffic uses TLS via Ingress
 
 **mTLS Roadmap:**
 For production deployments requiring zero-trust internal networking:
+
 1. Deploy Istio or Linkerd service mesh
 2. Enable automatic mTLS injection
 3. Set `PeerAuthentication` to STRICT mode
@@ -119,6 +121,7 @@ For production deployments requiring zero-trust internal networking:
 If mTLS causes service connectivity issues:
 
 1. **Immediate Relief**: Set PeerAuthentication to PERMISSIVE mode to allow both plain and mTLS traffic:
+
    ```bash
    kubectl patch peerauthentication default -n <namespace> --type='merge' \
      -p '{"spec":{"mtls":{"mode":"PERMISSIVE"}}}'
@@ -127,6 +130,7 @@ If mTLS causes service connectivity issues:
 2. **Verify Connectivity**: Test service-to-service communication is restored
 
 3. **Investigate**: Check Istio/Linkerd sidecar logs for certificate or injection issues:
+
    ```bash
    kubectl logs <pod-name> -c istio-proxy -n <namespace>
    istioctl analyze -n <namespace>
@@ -153,18 +157,18 @@ If mTLS causes service connectivity issues:
 
 ### OWASP Top 10 Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Injection | Parameterized queries, input validation |
-| Broken Auth | Entra ID, MFA, session management |
-| Sensitive Data | Encryption, Key Vault, no logging of secrets |
-| XXE | Disable external entities in parsers |
-| Broken Access | RBAC, policy-based authorization |
-| Misconfig | IaC, security baselines, automated scanning |
-| XSS | Content Security Policy, output encoding |
-| Insecure Deserialization | Type-safe JSON handling |
-| Vulnerable Components | Dependabot, regular updates |
-| Logging/Monitoring | Application Insights, audit logs |
+| Risk                     | Mitigation                                   |
+| ------------------------ | -------------------------------------------- |
+| Injection                | Parameterized queries, input validation      |
+| Broken Auth              | Entra ID, MFA, session management            |
+| Sensitive Data           | Encryption, Key Vault, no logging of secrets |
+| XXE                      | Disable external entities in parsers         |
+| Broken Access            | RBAC, policy-based authorization             |
+| Misconfig                | IaC, security baselines, automated scanning  |
+| XSS                      | Content Security Policy, output encoding     |
+| Insecure Deserialization | Type-safe JSON handling                      |
+| Vulnerable Components    | Dependabot, regular updates                  |
+| Logging/Monitoring       | Application Insights, audit logs             |
 
 ---
 

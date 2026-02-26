@@ -7,6 +7,7 @@ The Mystira Story Generator now includes a YAML import feature that allows users
 ## Features
 
 ### 1. Import from Clipboard
+
 - Click the import button (📥) in the sidebar header
 - Select "From Clipboard" from the dropdown menu
 - The application reads YAML content from your system clipboard
@@ -14,6 +15,7 @@ The Mystira Story Generator now includes a YAML import feature that allows users
 - Shows an error message if the YAML is invalid
 
 ### 2. Import from File
+
 - Click the import button (📥) in the sidebar header
 - Select "From File" from the dropdown menu
 - Browse and select a `.yaml` or `.yml` file from your computer
@@ -29,6 +31,7 @@ For a story YAML to be valid, it must include these required fields:
 - **description**: A detailed description of the story
 
 Optional fields that will be included in the summary:
+
 - **difficulty**: Story difficulty level (e.g., "Easy", "Medium", "Hard")
 - **age_group**: Target age group (e.g., "6-9", "10-12")
 - **session_length**: Recommended session duration (e.g., "Short", "Medium", "Long")
@@ -66,7 +69,7 @@ scenes:
 
 1. **Import YAML**: User clicks the import button and chooses source (clipboard or file)
 2. **Validation**: System validates the YAML structure against required fields
-3. **Display Results**: 
+3. **Display Results**:
    - If valid: Shows story summary with title, description, and other details
    - If invalid: Shows specific error messages about missing required fields
 4. **Create Chat Session**: User clicks "Continue to Chat" to create a new chat session
@@ -93,11 +96,13 @@ scenes:
 ### JavaScript Functions
 
 Added to `wwwroot/js/clipboard.js`:
+
 - `mystiraClipboard.readText()`: Reads text from system clipboard
 
 ## Error Handling
 
 The import feature includes comprehensive error handling for:
+
 - Empty clipboard or file content
 - Clipboard permission issues
 - Invalid YAML syntax
@@ -123,6 +128,7 @@ The import feature includes comprehensive error handling for:
 ## Future Enhancements
 
 Potential improvements for future versions:
+
 - More sophisticated YAML parsing with nested structures
 - Batch import of multiple stories
 - YAML template generator

@@ -109,6 +109,7 @@ Based on Phase 5 experience:
 ### Files Created Per Entity
 
 **Average entity migration creates:**
+
 - 3-4 Command files + handlers (6-8 files)
 - 2-6 Query files + handlers (4-12 files)
 - 1-8 Specification classes
@@ -138,14 +139,14 @@ find src/Mystira.App.Api/Controllers -name "*Controller.cs"
 
 Create a table like this:
 
-| Operation | Type | Complexity | Notes |
-|-----------|------|------------|-------|
-| CreateEntity | Command | Simple | Standard CRUD |
-| UpdateEntity | Command | Simple | Standard CRUD |
-| DeleteEntity | Command | Simple | Standard CRUD |
-| GetById | Query | Simple | Single entity lookup |
-| GetByAccount | Query | Medium | Uses specification |
-| GetStatistics | Query | Complex | May need service layer |
+| Operation     | Type    | Complexity | Notes                  |
+| ------------- | ------- | ---------- | ---------------------- |
+| CreateEntity  | Command | Simple     | Standard CRUD          |
+| UpdateEntity  | Command | Simple     | Standard CRUD          |
+| DeleteEntity  | Command | Simple     | Standard CRUD          |
+| GetById       | Query   | Simple     | Single entity lookup   |
+| GetByAccount  | Query   | Medium     | Uses specification     |
+| GetStatistics | Query   | Complex    | May need service layer |
 
 #### 1.3 Check for Edge Cases
 
@@ -532,12 +533,14 @@ public class InProgressSessionsSpecification : BaseSpecification<GameSession>
 #### 4.2 Specification Best Practices
 
 **✅ DO:**
+
 - Use descriptive names: `ActiveSessionsSpecification`, not `SessionSpec1`
 - Keep specifications focused on a single query purpose
 - Use ordering to make results predictable
 - Reuse specifications across multiple handlers
 
 **❌ DON'T:**
+
 - Make specifications too generic (hard to understand)
 - Include business logic (keep it pure query filtering)
 - Fetch unnecessary related entities (performance hit)
@@ -834,6 +837,7 @@ grep -r "IEntityService" src/
 #### 7.3 Remove Service Files
 
 **Only remove if:**
+
 - ✅ All controller endpoints migrated to MediatR
 - ✅ No other services depend on it
 - ✅ Tests have been updated
@@ -927,8 +931,6 @@ var existing = await _repository.GetByEmailAsync(command.Email);
 if (existing != null)
     throw new InvalidOperationException($"Entity with email '{command.Email}' already exists");
 ```
-
-
 
 ```csharp
 // ✅ CORRECT
@@ -1498,18 +1500,23 @@ public class EntitiesController : ControllerBase
 Use CQRS for operations that:
 
 ✅ **Operate on a single domain entity**
+
 - CreateScenario, UpdateScenario, GetScenarioById
 
 ✅ **Have clear read or write semantics**
+
 - Commands modify state, Queries read state
 
 ✅ **Benefit from separation of concerns**
+
 - Different scaling for reads vs. writes
 
 ✅ **Use repository pattern**
+
 - Operations that call repository methods
 
 ✅ **Are simple to medium complexity**
+
 - Standard CRUD, filtered lists, simple validations
 
 ### When to Keep Service Layer
@@ -1517,52 +1524,57 @@ Use CQRS for operations that:
 Keep service layer for operations that:
 
 ❌ **Span multiple entities/aggregates**
+
 - LinkProfilesToAccount (affects Account AND UserProfiles)
 - ValidateAccount (checks Account, Subscription, Profiles)
 
 ❌ **Return non-domain objects**
+
 - GetMediaFile (returns binary stream, not MediaAsset entity)
 - GeneratePDF (returns file, not domain object)
 
 ❌ **Have complex orchestration**
+
 - Multi-step workflows with conditional branching
 - Operations requiring multiple transactions
 
 ❌ **Perform complex calculations/aggregations**
+
 - GetBadgeStatistics (aggregates across UserBadge, BadgeConfiguration, UserProfile)
 - GetReportData (joins multiple entities with calculations)
 
 ❌ **Are inherently cross-cutting**
+
 - Audit logging that touches multiple entities
 - Batch operations across different entity types
 
 ### Decision Matrix
 
-| Operation Type | Example | Use CQRS? | Reason |
-|----------------|---------|-----------|---------|
-| Create single entity | CreateUserProfile | ✅ Yes | Standard command |
-| Update single entity | UpdateScenario | ✅ Yes | Standard command |
-| Delete single entity | DeleteGameSession | ✅ Yes | Standard command |
-| Get by ID | GetAccountById | ✅ Yes | Simple query |
-| Get by filter | GetSessionsByAccount | ✅ Yes | Query with specification |
-| List all (small set) | GetAllBadgeConfigurations | ✅ Yes | Query (if < 1000 records) |
-| Complex aggregation | GetBadgeStatistics | ❌ No | Multi-entity calculation |
-| Cross-entity operation | LinkProfilesToAccount | ❌ No | Affects multiple aggregates |
-| File/stream operation | GetMediaFile (binary) | ❌ No | Non-domain return type |
-| Workflow orchestration | ProcessPaymentAndUpgrade | ❌ No | Multi-step transaction |
+| Operation Type         | Example                   | Use CQRS? | Reason                      |
+| ---------------------- | ------------------------- | --------- | --------------------------- |
+| Create single entity   | CreateUserProfile         | ✅ Yes    | Standard command            |
+| Update single entity   | UpdateScenario            | ✅ Yes    | Standard command            |
+| Delete single entity   | DeleteGameSession         | ✅ Yes    | Standard command            |
+| Get by ID              | GetAccountById            | ✅ Yes    | Simple query                |
+| Get by filter          | GetSessionsByAccount      | ✅ Yes    | Query with specification    |
+| List all (small set)   | GetAllBadgeConfigurations | ✅ Yes    | Query (if < 1000 records)   |
+| Complex aggregation    | GetBadgeStatistics        | ❌ No     | Multi-entity calculation    |
+| Cross-entity operation | LinkProfilesToAccount     | ❌ No     | Affects multiple aggregates |
+| File/stream operation  | GetMediaFile (binary)     | ❌ No     | Non-domain return type      |
+| Workflow orchestration | ProcessPaymentAndUpgrade  | ❌ No     | Multi-step transaction      |
 
 ### Real Examples from Phase 5
 
-| Entity | Operation | Decision | Reason |
-|--------|-----------|----------|---------|
-| MediaAsset | GetMediaById | ✅ CQRS | Returns metadata (domain object) |
-| MediaAsset | GetMediaFile | ❌ Service | Returns binary stream |
-| Account | CreateAccount | ✅ CQRS | Single entity create |
-| Account | LinkProfilesToAccount | ❌ Service | Affects Account + UserProfiles |
-| UserBadge | AwardBadge | ✅ CQRS | Single entity create |
-| UserBadge | GetBadgeStatistics | ❌ Service | Complex multi-entity aggregation |
-| GameSession | StartGameSession | ✅ CQRS | Single entity create with validation |
-| GameSession | GetSessionStats | ❌ Service | Aggregates session data with calculations |
+| Entity      | Operation             | Decision   | Reason                                    |
+| ----------- | --------------------- | ---------- | ----------------------------------------- |
+| MediaAsset  | GetMediaById          | ✅ CQRS    | Returns metadata (domain object)          |
+| MediaAsset  | GetMediaFile          | ❌ Service | Returns binary stream                     |
+| Account     | CreateAccount         | ✅ CQRS    | Single entity create                      |
+| Account     | LinkProfilesToAccount | ❌ Service | Affects Account + UserProfiles            |
+| UserBadge   | AwardBadge            | ✅ CQRS    | Single entity create                      |
+| UserBadge   | GetBadgeStatistics    | ❌ Service | Complex multi-entity aggregation          |
+| GameSession | StartGameSession      | ✅ CQRS    | Single entity create with validation      |
+| GameSession | GetSessionStats       | ❌ Service | Aggregates session data with calculations |
 
 ---
 
@@ -1642,6 +1654,7 @@ Use this checklist for each entity migration:
 #### 1. Incremental Migration
 
 **Lesson:** Migrating one entity at a time allowed for:
+
 - Immediate validation of each migration
 - Clear commit history
 - Easy rollback if needed
@@ -1668,6 +1681,7 @@ Application/CQRS/{EntityName}/
 #### 3. Specification Pattern for Queries
 
 **Lesson:** Specifications made query logic reusable and testable:
+
 - `UserBadgesByProfileSpecification` used in multiple handlers
 - Easy to add new filter combinations
 - Database-level filtering (not in-memory)
@@ -1716,6 +1730,7 @@ PreferredFantasyThemes = request.PreferredFantasyThemes?
 **Challenge:** Phase 5 created 104 new files, which can feel overwhelming.
 
 **Solution:**
+
 - Consistent naming helped IDE search
 - Folder grouping by entity kept related files together
 - Clear naming (`CreateUserProfileCommand` is self-documenting)
@@ -1732,26 +1747,28 @@ PreferredFantasyThemes = request.PreferredFantasyThemes?
 
 ### Metrics from Phase 5
 
-| Metric | Value |
-|--------|-------|
-| Entities migrated | 8 |
-| Commands created | 16 |
-| Queries created | 20 |
-| Specifications created | 32 |
-| Controllers updated | 8 |
-| Files created | 104 |
-| Total LOC added | ~1,917 |
-| Time per entity (avg) | 3-6 hours |
-| Commits | 4 major commits |
+| Metric                 | Value           |
+| ---------------------- | --------------- |
+| Entities migrated      | 8               |
+| Commands created       | 16              |
+| Queries created        | 20              |
+| Specifications created | 32              |
+| Controllers updated    | 8               |
+| Files created          | 104             |
+| Total LOC added        | ~1,917          |
+| Time per entity (avg)  | 3-6 hours       |
+| Commits                | 4 major commits |
 
 ### Performance Observations
 
 **No significant performance degradation:**
+
 - MediatR adds minimal overhead (<1ms per request)
 - Specification pattern pushed filtering to database (better than in-memory)
 - Separation of concerns allows future optimization (caching, read replicas)
 
 **Potential optimizations:**
+
 - Add caching to frequently-accessed queries
 - Implement query result snapshots for expensive aggregations
 - Use read replicas for query handlers
@@ -1810,6 +1827,7 @@ public interface IUserBadgeService
 ```
 
 **Decision:**
+
 - ✅ `AwardBadgeAsync` → `AwardBadgeCommand` (simple create)
 - ✅ `GetUserBadgesAsync` → `GetUserBadgesQuery` (simple list)
 - ❌ `GetBadgeStatisticsAsync` → Keep in service (complex aggregation)

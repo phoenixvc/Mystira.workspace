@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface FocusTrapProps {
   children: React.ReactNode;
@@ -20,7 +20,7 @@ export function FocusTrap({ children, active = true }: FocusTrapProps) {
     const lastElement = focusableElements[focusableElements.length - 1];
 
     const handleTabKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return;
+      if (e.key !== "Tab") return;
 
       if (e.shiftKey) {
         // Shift + Tab
@@ -41,13 +41,12 @@ export function FocusTrap({ children, active = true }: FocusTrapProps) {
     firstElement?.focus();
 
     // Add event listener
-    container.addEventListener('keydown', handleTabKey);
+    container.addEventListener("keydown", handleTabKey);
 
     return () => {
-      container.removeEventListener('keydown', handleTabKey);
+      container.removeEventListener("keydown", handleTabKey);
     };
   }, [active]);
 
   return <div ref={containerRef}>{children}</div>;
 }
-

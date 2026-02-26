@@ -1,6 +1,11 @@
 // User types that mirror backend API contracts
 
-export type UserRole = 'author' | 'illustrator' | 'publisher' | 'admin' | 'legal';
+export type UserRole =
+  | "author"
+  | "illustrator"
+  | "publisher"
+  | "admin"
+  | "legal";
 
 export interface User {
   id: string;

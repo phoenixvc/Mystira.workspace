@@ -109,12 +109,14 @@ We will adopt **Hexagonal Architecture** (also known as Ports and Adapters) to d
 ### Implementation Strategy
 
 **Phase 1: Repository Interface Migration** ✅ Complete
+
 - Move all repository interfaces from Infrastructure.Data to Application/Ports/Data
 - Create Application/Ports/Data/ directory structure
 - 27 repository interfaces migrated
 - All Infrastructure implementations updated
 
 **Phase 2: Azure & Discord Port Interfaces** ✅ Complete
+
 - Create infrastructure-agnostic port interfaces:
   - `IAzureBlobService` → `IBlobService` (storage-agnostic)
   - `IDiscordBotService` → `IMessagingService` (platform-agnostic)
@@ -123,17 +125,20 @@ We will adopt **Hexagonal Architecture** (also known as Ports and Adapters) to d
 - Update Application use cases to depend on ports
 
 **Phase 3: Fix Remaining Application → Infrastructure Dependencies** ✅ Complete
+
 - Remove direct Infrastructure references from Application
 - Create ports for all infrastructure services
 - Update DI registrations
 
 **Phase 4: Update API/Admin.Api Services** ✅ Complete
+
 - Remove Infrastructure namespace imports from controllers
 - Inject only Application layer interfaces
 - **47 API services** cleaned
 - **14 Admin.Api services** cleaned
 
 **Phase 5: Validation and Documentation** ✅ Complete
+
 - Verify zero Application → Infrastructure dependencies
 - Document architectural rules
 - Create [ARCHITECTURAL_RULES.md](../ARCHITECTURAL_RULES.md)
@@ -260,11 +265,13 @@ Mystira.App/
 ### Naming Conventions
 
 **Ports (Interfaces)**:
+
 - Prefix with `I`: `IBlobService`, `IMessagingService`
 - Platform-agnostic names (not `IAzureBlobService`)
 - Describe "what" not "how"
 
 **Adapters (Implementations)**:
+
 - Specific names: `AzureBlobService`, `DiscordBotService`
 - Describe "how" and "with what technology"
 - Live in Infrastructure projects
@@ -292,25 +299,25 @@ Domain → Infrastructure
 
 ### Before (Layered Architecture)
 
-| Metric | Count |
-|--------|-------|
-| Application → Infrastructure dependencies | 138 |
-| API services with Infrastructure imports | 47 |
-| Admin.Api services with Infrastructure imports | 14 |
-| Repository interfaces in wrong layer | 27 |
-| Infrastructure-specific interfaces in Application | 3 |
-| **Total architectural violations** | **229** |
+| Metric                                            | Count   |
+| ------------------------------------------------- | ------- |
+| Application → Infrastructure dependencies         | 138     |
+| API services with Infrastructure imports          | 47      |
+| Admin.Api services with Infrastructure imports    | 14      |
+| Repository interfaces in wrong layer              | 27      |
+| Infrastructure-specific interfaces in Application | 3       |
+| **Total architectural violations**                | **229** |
 
 ### After (Hexagonal Architecture)
 
-| Metric | Count |
-|--------|-------|
-| Application → Infrastructure dependencies | **0** ✅ |
-| API services with Infrastructure imports | **0** ✅ |
-| Admin.Api services with Infrastructure imports | **0** ✅ |
-| Repository interfaces in wrong layer | **0** ✅ |
+| Metric                                            | Count    |
+| ------------------------------------------------- | -------- |
+| Application → Infrastructure dependencies         | **0** ✅ |
+| API services with Infrastructure imports          | **0** ✅ |
+| Admin.Api services with Infrastructure imports    | **0** ✅ |
+| Repository interfaces in wrong layer              | **0** ✅ |
 | Infrastructure-specific interfaces in Application | **0** ✅ |
-| **Total architectural violations** | **0** ✅ |
+| **Total architectural violations**                | **0** ✅ |
 
 ### Files Refactored
 

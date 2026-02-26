@@ -57,7 +57,7 @@ function ProjectDeploymentPlanner({
     if (!hasSelectedTemplates) {
       onReadyToProceed?.(
         false,
-        "Please select at least one infrastructure template to deploy.",
+        "Please select at least one infrastructure template to deploy."
       );
       return;
     }
@@ -65,7 +65,7 @@ function ProjectDeploymentPlanner({
     if (infrastructureLoading || loadingStatus) {
       onReadyToProceed?.(
         false,
-        "Please wait for infrastructure status to finish loading...",
+        "Please wait for infrastructure status to finish loading..."
       );
       return;
     }

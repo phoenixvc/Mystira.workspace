@@ -40,7 +40,7 @@ function InfrastructurePanel() {
     "validate" | "preview" | "deploy" | "destroy" | null
   >(null);
   const [lastResponse, setLastResponse] = useState<CommandResponse | null>(
-    null,
+    null
   );
   const [whatIfChanges, setWhatIfChanges] = useState<WhatIfChange[]>([]);
   const [showDestroyConfirm, setShowDestroyConfirm] = useState(false);
@@ -53,7 +53,7 @@ function InfrastructurePanel() {
   const [showDeployConfirm, setShowDeployConfirm] = useState(false);
   const [showOutputPanel, setShowOutputPanel] = useState(false);
   const [deploymentProgress, setDeploymentProgress] = useState<string | null>(
-    null,
+    null
   );
   const [showResourceGroupConfirm, setShowResourceGroupConfirm] =
     useState(false);
@@ -67,7 +67,7 @@ function InfrastructurePanel() {
   const [showStep2, setShowStep2] = useState(false);
   const [infrastructureLoading, setInfrastructureLoading] = useState(true);
   const [cosmosWarning, setCosmosWarning] = useState<CosmosWarning | null>(
-    null,
+    null
   );
 
   const workflowFile = ".start-infrastructure-deploy-dev.yml";
@@ -175,7 +175,7 @@ function InfrastructurePanel() {
     onSetShowResourceGroupConfirm: (
       show: boolean,
       resourceGroup?: string,
-      location?: string,
+      location?: string
     ) => {
       if (show && resourceGroup && location) {
         setPendingResourceGroup({ resourceGroup, location });
@@ -188,7 +188,7 @@ function InfrastructurePanel() {
   });
 
   const handleAction = async (
-    action: "validate" | "preview" | "deploy" | "destroy",
+    action: "validate" | "preview" | "deploy" | "destroy"
   ) => {
     await handleActionFromHook(action);
   };
@@ -204,7 +204,7 @@ function InfrastructurePanel() {
           {
             environment,
             resourceGroup,
-          },
+          }
         );
         if (statusResponse.success && statusResponse.result) {
           const status = statusResponse.result as InfrastructureStatusType;

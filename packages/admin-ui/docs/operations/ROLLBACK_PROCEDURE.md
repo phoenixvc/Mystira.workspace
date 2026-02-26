@@ -11,13 +11,13 @@ This document provides rollback procedures for the Mystira Admin UI application.
 
 ## Rollback Decision Matrix
 
-| Issue Type | Severity | Action |
-|------------|----------|--------|
-| UI bug (minor) | Low | Fix forward |
-| UI bug (major) | Medium | Evaluate rollback |
-| API integration broken | High | Rollback immediately |
+| Issue Type             | Severity | Action               |
+| ---------------------- | -------- | -------------------- |
+| UI bug (minor)         | Low      | Fix forward          |
+| UI bug (major)         | Medium   | Evaluate rollback    |
+| API integration broken | High     | Rollback immediately |
 | Security vulnerability | Critical | Rollback immediately |
-| Complete app failure | Critical | Rollback immediately |
+| Complete app failure   | Critical | Rollback immediately |
 
 ## Rollback Criteria
 
@@ -112,8 +112,8 @@ az staticwebapp deploy \
 ### Step 1: Identify the Issue
 
 ```markdown
-- [ ] Issue identified at: ___:___ (time)
-- [ ] Issue description: _________________
+- [ ] Issue identified at: **_:_** (time)
+- [ ] Issue description: **\*\*\*\***\_**\*\*\*\***
 - [ ] Severity: Critical / High / Medium
 - [ ] Users impacted: All / Some / Few
 ```
@@ -121,14 +121,15 @@ az staticwebapp deploy \
 ### Step 2: Decide on Rollback
 
 ```markdown
-- [ ] Rollback decision made by: _______________
-- [ ] Decision time: ___:___
+- [ ] Rollback decision made by: **\*\***\_\_\_**\*\***
+- [ ] Decision time: **_:_**
 - [ ] Rollback method chosen: GitHub Actions / Azure Portal / Git Revert
 ```
 
 ### Step 3: Execute Rollback
 
 **For GitHub Actions method**:
+
 1. Open GitHub Actions
 2. Select previous successful workflow
 3. Click "Re-run all jobs"
@@ -151,12 +152,14 @@ Rollback Notification
 Subject: [Mystira Admin UI] Production Rollback Completed
 
 Details:
-- Issue: _______________
-- Rollback time: ___:___
+
+- Issue: **\*\***\_\_\_**\*\***
+- Rollback time: **_:_**
 - Previous version restored
 - Current status: Stable
 
 Next steps:
+
 - Root cause analysis
 - Fix implementation
 - Re-deployment plan
@@ -205,6 +208,7 @@ After rollback, users may need to clear browser cache:
 ### Feature Flags
 
 If using feature flags, consider:
+
 - Disabling problematic features via flags
 - Instead of full rollback
 
@@ -227,19 +231,19 @@ After any rollback, verify:
 ```markdown
 # Rollback Post-Mortem - Mystira Admin UI
 
-**Date**: ___________
-**Rollback Method Used**: ___________
-**Time to Rollback**: ___ minutes
+**Date**: \***\*\_\_\_\*\***
+**Rollback Method Used**: \***\*\_\_\_\*\***
+**Time to Rollback**: \_\_\_ minutes
 
 ## Timeline
 
-| Time | Event |
-|------|-------|
-| __:__ | Issue detected |
-| __:__ | Rollback decision made |
-| __:__ | Rollback initiated |
-| __:__ | Rollback completed |
-| __:__ | Verification complete |
+| Time  | Event                  |
+| ----- | ---------------------- |
+| **:** | Issue detected         |
+| **:** | Rollback decision made |
+| **:** | Rollback initiated     |
+| **:** | Rollback completed     |
+| **:** | Verification complete  |
 
 ## Root Cause
 
@@ -247,9 +251,9 @@ After any rollback, verify:
 
 ## Impact
 
-- **Users Affected**: ___
-- **Duration**: ___ minutes
-- **Features Affected**: ___
+- **Users Affected**: \_\_\_
+- **Duration**: \_\_\_ minutes
+- **Features Affected**: \_\_\_
 
 ## What Went Well
 
@@ -264,25 +268,23 @@ After any rollback, verify:
 ## Action Items
 
 | Action | Owner | Due Date |
-|--------|-------|----------|
+| ------ | ----- | -------- |
 |        |       |          |
 
 ## Prevention
 
-How to prevent this in the future:
--
--
+## How to prevent this in the future:
 
-**Completed By**: _______________
-**Date**: _______________
+- **Completed By**: **\*\***\_\_\_**\*\***
+  **Date**: **\*\***\_\_\_**\*\***
 ```
 
 ## Emergency Contacts
 
-- **On-Call Engineer**: _______________
-- **DevOps Lead**: _______________
-- **Product Owner**: _______________
-- **API Team Lead**: _______________
+- **On-Call Engineer**: **\*\***\_\_\_**\*\***
+- **DevOps Lead**: **\*\***\_\_\_**\*\***
+- **Product Owner**: **\*\***\_\_\_**\*\***
+- **API Team Lead**: **\*\***\_\_\_**\*\***
 
 ## References
 

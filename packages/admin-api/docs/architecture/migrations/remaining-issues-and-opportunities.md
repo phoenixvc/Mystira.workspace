@@ -8,13 +8,13 @@ This document catalogs all identified issues, incomplete implementations, and im
 
 ## Issue Categories
 
-| Category | Count | Severity |
-|----------|-------|----------|
-| 🔴 Critical Bugs (Must Fix) | 3 | High |
-| 🟠 Medium Bugs (Should Fix) | 8 | Medium |
-| 🟡 Incomplete Features | 12 | Medium |
-| 🔵 Missing Documentation | 7 | Low |
-| 🟢 Enhancement Opportunities | 15 | Low |
+| Category                     | Count | Severity |
+| ---------------------------- | ----- | -------- |
+| 🔴 Critical Bugs (Must Fix)  | 3     | High     |
+| 🟠 Medium Bugs (Should Fix)  | 8     | Medium   |
+| 🟡 Incomplete Features       | 12    | Medium   |
+| 🔵 Missing Documentation     | 7     | Low      |
+| 🟢 Enhancement Opportunities | 15    | Low      |
 
 ---
 
@@ -25,6 +25,7 @@ This document catalogs all identified issues, incomplete implementations, and im
 **Location**: Multiple migration docs using `FindAsync([id], ct)`
 
 **Issue**: Cosmos DB EF Core provider has different `FindAsync` signature than SQL Server:
+
 ```csharp
 // This works for SQL Server EF Core:
 await _dbSet.FindAsync([id], ct);
@@ -34,6 +35,7 @@ await _dbSet.FindAsync(id, ct);  // No array, requires WithPartitionKey() config
 ```
 
 **Fix Required**:
+
 ```csharp
 // For Cosmos - configure partition key in OnModelCreating
 entity.HasPartitionKey(a => a.Id);
@@ -43,6 +45,7 @@ return await _dbSet.FirstOrDefaultAsync(e => e.Id == id, ct);
 ```
 
 **Affected Files**:
+
 - `mystira-app-infrastructure-data-migration.md`
 - `repository-architecture.md`
 
@@ -53,6 +56,7 @@ return await _dbSet.FirstOrDefaultAsync(e => e.Id == id, ct);
 **Location**: `mystira-app-infrastructure-data-migration.md` - AccountConfiguration
 
 **Issue**: PostgreSQL `jsonb` columns require explicit JSON serializer configuration for EF Core:
+
 ```csharp
 // Current (incomplete):
 builder.Property(a => a.Settings)
@@ -62,6 +66,7 @@ builder.Property(a => a.Settings)
 ```
 
 **Fix Required**:
+
 ```csharp
 // Add in DbContext OnConfiguring or via NpgsqlDataSource:
 protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -90,6 +95,7 @@ builder.Property(a => a.Settings)
 **Location**: `repository-architecture.md` - DualWriteAccountRepository
 
 **Issue**: Dual-write operations don't use transactions, risking partial writes:
+
 ```csharp
 // Current (no transaction):
 var result = await _cosmosRepo.AddAsync(entity, ct);
@@ -97,6 +103,7 @@ await QueueSecondaryWriteAsync(entity.Id, SyncOperation.Insert, ct);
 ```
 
 **Fix Required**:
+
 ```csharp
 // Use TransactionScope or explicit transactions:
 public async Task<Account> AddAsync(Account entity, CancellationToken ct = default)
@@ -128,6 +135,7 @@ public async Task<Account> AddAsync(Account entity, CancellationToken ct = defau
 **Location**: `repository-architecture.md` - SyncItem
 
 **Issue**: Record uses `set` on mutable properties, breaking immutability:
+
 ```csharp
 public record SyncItem
 {
@@ -138,6 +146,7 @@ public record SyncItem
 ```
 
 **Fix**:
+
 ```csharp
 public record SyncItem
 {
@@ -158,6 +167,7 @@ public record SyncItem
 **Location**: `mystira-app-infrastructure-data-migration.md` - AccountConfiguration
 
 **Issue**: Email index created without case-insensitive collation:
+
 ```csharp
 // Current:
 builder.HasIndex(a => a.Email);
@@ -166,6 +176,7 @@ builder.HasIndex(a => a.Email);
 ```
 
 **Fix**:
+
 ```csharp
 // Use citext extension or create expression index:
 builder.HasIndex(a => a.Email)
@@ -184,11 +195,13 @@ migrationBuilder.Sql(
 **Location**: `repository-architecture.md` - InMemorySyncQueue
 
 **Issue**: `ConcurrentBag<T>` doesn't preserve order, failed items may be retried in wrong order:
+
 ```csharp
 private readonly ConcurrentBag<SyncItem> _failed = [];
 ```
 
 **Fix**:
+
 ```csharp
 private readonly ConcurrentQueue<SyncItem> _failed = new();
 
@@ -205,6 +218,7 @@ public void MoveToFailed(SyncItem item)
 **Location**: `repository-architecture.md` - CachedAccountRepository
 
 **Issue**: Classic cache stampede problem - multiple requests can hit database simultaneously:
+
 ```csharp
 // Multiple concurrent requests for same key:
 // 1. Request A: cache miss → starts DB query
@@ -214,6 +228,7 @@ public void MoveToFailed(SyncItem item)
 ```
 
 **Fix** (use lock or probabilistic early expiration):
+
 ```csharp
 // Option 1: Distributed lock
 public async Task<Account?> GetByIdAsync(string id, CancellationToken ct)
@@ -245,11 +260,13 @@ public async Task<Account?> GetByIdAsync(string id, CancellationToken ct)
 **Location**: Multiple repository interfaces
 
 **Issue**: `ListAsync()` methods return all entities without pagination:
+
 ```csharp
 Task<IReadOnlyList<TEntity>> ListAsync(CancellationToken ct = default);  // No limit!
 ```
 
 **Fix**:
+
 ```csharp
 // Add pagination parameters
 Task<IReadOnlyList<TEntity>> ListAsync(
@@ -274,11 +291,13 @@ public class PaginatedSpec<T> : Specification<T>
 **Location**: `mystira-app-admin-api-migration.md` - PostgresAccountQueryService
 
 **Issue**: Direct string interpolation in LIKE pattern:
+
 ```csharp
 .Where(a => EF.Functions.ILike(a.Email, $"%{query}%"))  // query could contain % or _
 ```
 
 **Fix**:
+
 ```csharp
 // Escape special characters
 private static string EscapeLikePattern(string input)
@@ -294,11 +313,13 @@ private static string EscapeLikePattern(string input)
 **Location**: `mystira-app-domain-migration.md` - Entity base class
 
 **Issue**: Using `DateTimeOffset.UtcNow` directly makes testing difficult:
+
 ```csharp
 public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 ```
 
 **Fix**:
+
 ```csharp
 // Inject TimeProvider (or set in SaveChanges interceptor)
 public class AuditInterceptor : SaveChangesInterceptor
@@ -326,6 +347,7 @@ public class AuditInterceptor : SaveChangesInterceptor
 **Location**: All entity definitions
 
 **Issue**: No `RowVersion`/`ETag` for concurrency control:
+
 ```csharp
 public class Account : Entity
 {
@@ -334,6 +356,7 @@ public class Account : Entity
 ```
 
 **Fix**:
+
 ```csharp
 public abstract class Entity
 {
@@ -360,6 +383,7 @@ builder.Property(a => a.RowVersion)
 **Description**: Only `InMemorySyncQueue` is implemented. Production requires Redis-backed queue.
 
 **Required Implementation**:
+
 ```csharp
 public class RedisSyncQueue : ISyncQueue
 {
@@ -392,6 +416,7 @@ public class RedisSyncQueue : ISyncQueue
 **Location**: `repository-architecture.md`
 
 **Missing**:
+
 - Graceful shutdown handling
 - Dead letter queue implementation
 - Metrics and alerting integration
@@ -404,6 +429,7 @@ public class RedisSyncQueue : ISyncQueue
 **Location**: Referenced but not defined
 
 **Required**:
+
 ```csharp
 public interface IMigrationPhaseManager
 {
@@ -487,15 +513,15 @@ public interface IMigrationPhaseManager
 
 # 🔵 MISSING DOCUMENTATION
 
-| ID | Document | Description |
-|----|----------|-------------|
-| DOC-1 | Rollback Procedures | Step-by-step rollback for each migration phase |
-| DOC-2 | Runbook | Operational procedures for common issues |
-| DOC-3 | Performance Baseline | Expected latency/throughput metrics |
-| DOC-4 | Security Considerations | Encryption, access control, audit logging |
-| DOC-5 | Disaster Recovery | RTO/RPO, backup/restore procedures |
-| DOC-6 | Developer Onboarding | How to work with the new architecture |
-| DOC-7 | API Contract Changes | Breaking changes for consumers |
+| ID    | Document                | Description                                    |
+| ----- | ----------------------- | ---------------------------------------------- |
+| DOC-1 | Rollback Procedures     | Step-by-step rollback for each migration phase |
+| DOC-2 | Runbook                 | Operational procedures for common issues       |
+| DOC-3 | Performance Baseline    | Expected latency/throughput metrics            |
+| DOC-4 | Security Considerations | Encryption, access control, audit logging      |
+| DOC-5 | Disaster Recovery       | RTO/RPO, backup/restore procedures             |
+| DOC-6 | Developer Onboarding    | How to work with the new architecture          |
+| DOC-7 | API Contract Changes    | Breaking changes for consumers                 |
 
 ---
 
@@ -503,33 +529,33 @@ public interface IMigrationPhaseManager
 
 ## Modern C# Features Not Fully Applied
 
-| ID | Feature | Where to Apply |
-|----|---------|----------------|
-| ENH-1 | File-scoped namespaces | All new files |
-| ENH-2 | Global usings | New projects |
-| ENH-3 | Nullable enable | All projects |
-| ENH-4 | Raw string literals | SQL queries, JSON |
-| ENH-5 | Pattern matching | Switch expressions |
-| ENH-6 | Records for DTOs | All API contracts |
+| ID    | Feature                | Where to Apply     |
+| ----- | ---------------------- | ------------------ |
+| ENH-1 | File-scoped namespaces | All new files      |
+| ENH-2 | Global usings          | New projects       |
+| ENH-3 | Nullable enable        | All projects       |
+| ENH-4 | Raw string literals    | SQL queries, JSON  |
+| ENH-5 | Pattern matching       | Switch expressions |
+| ENH-6 | Records for DTOs       | All API contracts  |
 
 ## Architectural Enhancements
 
-| ID | Enhancement | Benefit |
-|----|-------------|---------|
-| ENH-7 | Source generators for repositories | Reduce boilerplate |
-| ENH-8 | Result<T, Error> pattern | Better error handling |
-| ENH-9 | Strongly-typed IDs | Compile-time safety |
-| ENH-10 | Generic host for sync service | Better lifecycle management |
-| ENH-11 | OpenTelemetry integration | Distributed tracing |
-| ENH-12 | Feature flags (Azure App Config) | Runtime phase control |
+| ID     | Enhancement                        | Benefit                     |
+| ------ | ---------------------------------- | --------------------------- |
+| ENH-7  | Source generators for repositories | Reduce boilerplate          |
+| ENH-8  | Result<T, Error> pattern           | Better error handling       |
+| ENH-9  | Strongly-typed IDs                 | Compile-time safety         |
+| ENH-10 | Generic host for sync service      | Better lifecycle management |
+| ENH-11 | OpenTelemetry integration          | Distributed tracing         |
+| ENH-12 | Feature flags (Azure App Config)   | Runtime phase control       |
 
 ## Performance Enhancements
 
-| ID | Enhancement | Benefit |
-|----|-------------|---------|
-| ENH-13 | Connection pooling config | Better resource usage |
-| ENH-14 | Read replicas | Scale reads |
-| ENH-15 | Query plan caching | Faster repeated queries |
+| ID     | Enhancement               | Benefit                 |
+| ------ | ------------------------- | ----------------------- |
+| ENH-13 | Connection pooling config | Better resource usage   |
+| ENH-14 | Read replicas             | Scale reads             |
+| ENH-15 | Query plan caching        | Faster repeated queries |
 
 ---
 
@@ -555,7 +581,7 @@ public interface IMigrationPhaseManager
 - [ ] MED-3: ConcurrentBag ordering
 - [ ] MED-7: TimeProvider injection
 - [ ] MED-8: Optimistic concurrency
-- [ ] All INC-* items
+- [ ] All INC-\* items
 
 ---
 

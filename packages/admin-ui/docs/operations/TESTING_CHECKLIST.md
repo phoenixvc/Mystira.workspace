@@ -16,22 +16,26 @@ This checklist ensures comprehensive testing of the Mystira Admin UI before depl
 ### Build Validation
 
 - [ ] **npm install**: All dependencies install without errors
+
   ```bash
   rm -rf node_modules package-lock.json
   npm install
   ```
 
 - [ ] **npm run build**: Production build succeeds
+
   ```bash
   npm run build
   ```
 
 - [ ] **npm run lint**: No linting errors
+
   ```bash
   npm run lint
   ```
 
 - [ ] **TypeScript**: No type errors
+
   ```bash
   npx tsc --noEmit
   ```
@@ -46,6 +50,7 @@ This checklist ensures comprehensive testing of the Mystira Admin UI before depl
 ### Environment Configuration
 
 - [ ] **Environment Variables**: All required variables set
+
   ```bash
   # Required:
   VITE_API_BASE_URL=<admin-api-url>
@@ -215,12 +220,12 @@ For each type (Age Groups, Archetypes, Compass Axes, Echo Types, Fantasy Themes)
 
 ### Metrics to Capture
 
-| Metric | Target | Actual |
-|--------|--------|--------|
-| First Contentful Paint | < 1.5s | _____ |
-| Time to Interactive | < 3.0s | _____ |
-| Lighthouse Performance | > 80 | _____ |
-| Bundle Size (gzip) | < 500KB | _____ |
+| Metric                 | Target  | Actual |
+| ---------------------- | ------- | ------ |
+| First Contentful Paint | < 1.5s  | **\_** |
+| Time to Interactive    | < 3.0s  | **\_** |
+| Lighthouse Performance | > 80    | **\_** |
+| Bundle Size (gzip)     | < 500KB | **\_** |
 
 ---
 
@@ -272,13 +277,16 @@ For each type (Age Groups, Archetypes, Compass Axes, Echo Types, Fantasy Themes)
 ## Test Environments
 
 ### Development
+
 - [ ] All tests pass in local development
 
 ### Staging
+
 - [ ] All tests pass against staging API
 - [ ] Real data scenarios tested
 
 ### Production (Smoke Tests)
+
 - [ ] Login works
 - [ ] Dashboard loads
 - [ ] Navigation works
@@ -290,15 +298,15 @@ For each type (Age Groups, Archetypes, Compass Axes, Echo Types, Fantasy Themes)
 
 ### Pre-Production Sign-Off
 
-**Tested By**: _________________
-**Date**: _________________
-**Signature**: _________________
+**Tested By**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
 
 ### Production Release Sign-Off
 
-**Approved By**: _________________
-**Date**: _________________
-**Signature**: _________________
+**Approved By**: **\*\*\*\***\_**\*\*\*\***
+**Date**: **\*\*\*\***\_**\*\*\*\***
+**Signature**: **\*\*\*\***\_**\*\*\*\***
 
 ---
 

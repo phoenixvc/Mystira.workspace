@@ -14,7 +14,7 @@ export interface PaginationRequest {
   /** Sort field */
   sortBy?: string;
   /** Sort direction */
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
 /**
@@ -91,7 +91,9 @@ export const DEFAULT_PAGINATION = {
 /**
  * Normalize pagination request with defaults and limits.
  */
-export function normalizePagination(request: PaginationRequest): Required<Pick<PaginationRequest, 'page' | 'pageSize'>> {
+export function normalizePagination(
+  request: PaginationRequest
+): Required<Pick<PaginationRequest, "page" | "pageSize">> {
   const page = Math.max(1, request.page ?? DEFAULT_PAGINATION.page);
   const pageSize = Math.min(
     DEFAULT_PAGINATION.maxPageSize,

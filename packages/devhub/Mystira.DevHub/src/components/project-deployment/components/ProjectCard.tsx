@@ -26,7 +26,7 @@ export function ProjectCard({
   const hasAnyDeployed =
     status &&
     Object.values(status.resources).some(
-      (r: { deployed: boolean }) => r.deployed,
+      (r: { deployed: boolean }) => r.deployed
     );
 
   // Check if any template is selected for this project

@@ -243,7 +243,7 @@ export function PrerequisitesCheckPanel({
   const requiredCount = prerequisites.filter(
     (p) =>
       (p.name === "Azure CLI" || p.name === "Azure Login") &&
-      p.status === "available",
+      p.status === "available"
   ).length;
   const totalRequired = 2;
   const allRequiredMet = requiredCount === totalRequired;

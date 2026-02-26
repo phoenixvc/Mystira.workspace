@@ -1,4 +1,4 @@
-import { storiesApi } from '@/api';
+import { storiesApi } from "@/api";
 import {
   Alert,
   Badge,
@@ -9,17 +9,17 @@ import {
   FeatureErrorBoundary,
   SkeletonLoader,
   Spinner,
-} from '@/components';
-import { AuditLogList, useAuditLogs } from '@/features/AuditTrail';
+} from "@/components";
+import { AuditLogList, useAuditLogs } from "@/features/AuditTrail";
 import {
   ApprovalPanel,
   ContributorList,
   OpenRoleManager,
   RoleRequestList,
-} from '@/features/Contributor';
-import { useAuth } from '@/hooks';
-import { useQuery } from '@tanstack/react-query';
-import { Link, useParams } from 'react-router-dom';
+} from "@/features/Contributor";
+import { useAuth } from "@/hooks";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useParams } from "react-router-dom";
 
 export function StoryDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,7 +30,7 @@ export function StoryDetailPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['story', id],
+    queryKey: ["story", id],
     queryFn: () => storiesApi.get(id!),
     enabled: !!id,
   });
@@ -70,7 +70,7 @@ export function StoryDetailPage() {
             {story.status}
           </Badge>
         </div>
-        {story.status === 'draft' && (
+        {story.status === "draft" && (
           <Link to={`/register?story=${story.id}`}>
             <Button>Continue Registration</Button>
           </Link>
@@ -146,7 +146,7 @@ export function StoryDetailPage() {
             </>
           )}
 
-          {user && story.status === 'pending_approval' && (
+          {user && story.status === "pending_approval" && (
             <ApprovalPanel story={story} currentUserId={user.id} />
           )}
         </div>
@@ -157,7 +157,11 @@ export function StoryDetailPage() {
               <h2>Activity</h2>
             </CardHeader>
             <CardBody>
-              {isLoadingLogs ? <Spinner /> : <AuditLogList logs={auditLogs.slice(0, 10)} />}
+              {isLoadingLogs ? (
+                <Spinner />
+              ) : (
+                <AuditLogList logs={auditLogs.slice(0, 10)} />
+              )}
             </CardBody>
           </Card>
         </aside>
@@ -168,13 +172,13 @@ export function StoryDetailPage() {
 
 function getStatusVariant(status: string) {
   switch (status) {
-    case 'registered':
-      return 'success' as const;
-    case 'pending_approval':
-      return 'warning' as const;
-    case 'rejected':
-      return 'danger' as const;
+    case "registered":
+      return "success" as const;
+    case "pending_approval":
+      return "warning" as const;
+    case "rejected":
+      return "danger" as const;
     default:
-      return 'default' as const;
+      return "default" as const;
   }
 }

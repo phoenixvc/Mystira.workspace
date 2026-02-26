@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions/{id}/pause
     Controller->>Service: PauseSessionAsync(sessionId)
-    
+
     Note over Service: Step 1: Get Session
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
@@ -39,19 +39,19 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Step 2: Validate Status
     alt Session Not InProgress
         Service-->>Service: Throw InvalidOperationException<br/>("Can only pause sessions in progress")
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over Service: Step 3: Pause Session
     Service->>Service: session.Status = Paused
     Service->>Service: session.IsPaused = true
     Service->>Service: session.PausedAt = Now
-    
+
     Note over Service: Step 4: Persist Changes
     Service->>Repo: UpdateAsync(session)
     Repo->>DB: Update entity
@@ -60,7 +60,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>Service: Success
     Repo-->>Service: GameSession (updated)
-    
+
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)
 ```
@@ -90,7 +90,7 @@ sequenceDiagram
 
 ## State Transitions
 
-``` text
+```text
 InProgress → Paused
 ```
 
@@ -124,4 +124,3 @@ When paused, elapsed time calculation accounts for pause duration:
 - [Resume Game Session Use Case](./resume-game-session.md)
 - [End Game Session Use Case](./end-game-session.md)
 - [Game Session Domain Model](../../domain/models/game-session.md)
-

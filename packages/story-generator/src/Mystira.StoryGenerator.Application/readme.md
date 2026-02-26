@@ -1,4 +1,5 @@
 # Mystira Story Consistency Engine
+
 ### Prefix Summaries • Must-Sets • SRL • Issue Detection
 
 ---
@@ -30,17 +31,17 @@ The results are combined to detect issues across every frontier node in the stor
 ## 1.1 The Problem: Branching Explosion
 
 A branching story graph can explode combinatorially.  
-If each branch node has *b* outgoing edges and the depth is *d*, the total number of root→leaf paths can be as high as:
+If each branch node has _b_ outgoing edges and the depth is _d_, the total number of root→leaf paths can be as high as:
 
 **bᵈ**
 
-Enumerating *all* unique paths is often unnecessary and too expensive.
+Enumerating _all_ unique paths is often unnecessary and too expensive.
 
 ---
 
 ## 1.2 The Solution: Prefix Paths
 
-A **prefix path** is the sequence of scenes from the root up to a *frontier point* where multiple branches converge.
+A **prefix path** is the sequence of scenes from the root up to a _frontier point_ where multiple branches converge.
 
 Mystira does **not** enumerate every full path through the graph.  
 Instead, it enumerates only:
@@ -58,7 +59,7 @@ Two key reasons:
 
 ### 1. Frontier Merging
 
-If many different story branches eventually reach the same scene *with the same effective world-state*, we only keep one prefix.
+If many different story branches eventually reach the same scene _with the same effective world-state_, we only keep one prefix.
 
 Example:  
 Five different ways to reach `scene_bridge` → **1 prefix summary**, not 5 paths.
@@ -127,9 +128,9 @@ Smaller models tend to miss entities, over-trigger introductions, or violate the
 
 After generating prefix summaries for all frontier prefixes, Mystira merges them to compute:
 
-- **Must-active sets** – entities present in *every* prefix to a scene
-- **Maybe-active sets** – entities present in *some but not all* prefixes
-- **Definitely-absent sets** – entities removed in *all* prefixes
+- **Must-active sets** – entities present in _every_ prefix to a scene
+- **Maybe-active sets** – entities present in _some but not all_ prefixes
+- **Definitely-absent sets** – entities removed in _all_ prefixes
 
 Merging is performed by the `PrefixSummaryAggregator`.
 
@@ -155,7 +156,7 @@ These entities:
 
 An entity is **maybe-active** at `v` if:
 
-- It appears in *some but not all* prefixes.
+- It appears in _some but not all_ prefixes.
 
 Computed as:
 
@@ -167,7 +168,7 @@ These entities are candidates for local SRL evaluation.
 
 ## 3.3 Definitely-Absent Set
 
-An entity is **definitely absent** if *all* prefixes classify it as removed/unavailable.
+An entity is **definitely absent** if _all_ prefixes classify it as removed/unavailable.
 
 This supports:
 
@@ -191,8 +192,8 @@ SRL evaluates:
 
 ## 4.1 Purpose
 
-Prefix summaries provide *global* truth.  
-SRL provides *local* truth.
+Prefix summaries provide _global_ truth.  
+SRL provides _local_ truth.
 
 The combination enables highly accurate issue detection.
 
@@ -207,10 +208,10 @@ The SRL prompt includes:
 - The definitely-absent set
 - The full candidate set
 - Very strict rules for:
-    - Introduction vs already-known vs reintroduced
-    - Disallowing contradictory labels for known entities
-    - Style-based proper noun detection
-    - Local usage style categorization
+  - Introduction vs already-known vs reintroduced
+  - Disallowing contradictory labels for known entities
+  - Style-based proper noun detection
+  - Local usage style categorization
 
 The LLM must output structured JSON matching the `SemanticRoleLabellingClassification` schema.
 
@@ -227,18 +228,23 @@ After SRL classification, the system compares:
 The `SceneContinuityAnalyzer` detects issues such as:
 
 ### • Used but not introduced
+
 Entity is treated as `"already_known"` in SRL, but not guaranteed to be active.
 
 ### • Reintroduced but already guaranteed
+
 Entity appears as `"new"` but must-active says it has always been known.
 
 ### • Entity disappears then reappears
+
 Removed earlier, then treated as known with no reintroduction.
 
 ### • Roll/choice contradictions
+
 Outcome text disagrees with roll instructions.
 
 ### • Improper introduction style
+
 Scene uses descriptive scaffolding inconsistent with knowledge state.
 
 This multi-level analysis provides robust and child-safe consistency validation.
@@ -248,13 +254,16 @@ This multi-level analysis provides robust and child-safe consistency validation.
 # 6. Why the System Works
 
 ## 6.1 Prefix Summaries Reduce Complexity
+
 Only frontier prefixes are analyzed.  
 Convergent paths collapse.
 
 ## 6.2 SRL Adds Local Precision
+
 Even subtle misuse (“the sad turtle”) is caught.
 
 ## 6.3 Global + Local = Consistency
+
 By merging global constraints with local classification:
 
 - Errors cannot slip through
@@ -287,7 +296,7 @@ High reasoning depth and stable JSON output.
 
 ## 7.2 SRL Prompts (Local)
 
-Purpose: Evaluate *one scene* with minimal context.
+Purpose: Evaluate _one scene_ with minimal context.
 
 Characteristics:
 

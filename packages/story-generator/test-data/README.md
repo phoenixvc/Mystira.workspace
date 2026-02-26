@@ -41,6 +41,7 @@ cd /path/to/Mystira.StoryGenerator
 ### Testing YAML Import Feature
 
 1. Start the API and Web applications:
+
    ```bash
    dotnet run --project src/Mystira.StoryGenerator.Api &
    dotnet run --project src/Mystira.StoryGenerator.Web
@@ -55,6 +56,7 @@ cd /path/to/Mystira.StoryGenerator
 ### Manual Validation Testing
 
 Test the validation API directly:
+
 ```bash
 curl -X POST http://localhost:5000/api/stories/validate \
   -H "Content-Type: application/json" \

@@ -1,6 +1,6 @@
 // gRPC client for Mystira.Chain blockchain interactions
 
-import { env } from '@/config/env';
+import { env } from "@/config/env";
 
 const GRPC_ENDPOINT = env.grpcEndpoint;
 
@@ -26,12 +26,12 @@ export interface RegistrationResponse {
   transactionId: string;
   blockNumber: number;
   timestamp: string;
-  status: 'pending' | 'confirmed' | 'failed';
+  status: "pending" | "confirmed" | "failed";
 }
 
 export interface RegistrationStatus {
   transactionId: string;
-  status: 'pending' | 'confirmed' | 'failed';
+  status: "pending" | "confirmed" | "failed";
   confirmations: number;
   blockNumber?: number;
   errorMessage?: string;
@@ -41,47 +41,59 @@ export interface RegistrationStatus {
 // For now, we provide a REST-like interface that wraps the gRPC calls
 export const chainApi = {
   // Register story on-chain
-  registerStory: async (data: RegistrationRequest): Promise<RegistrationResponse> => {
-    const endpoint = GRPC_ENDPOINT.startsWith('http') ? GRPC_ENDPOINT : `https://${GRPC_ENDPOINT}`;
+  registerStory: async (
+    data: RegistrationRequest
+  ): Promise<RegistrationResponse> => {
+    const endpoint = GRPC_ENDPOINT.startsWith("http")
+      ? GRPC_ENDPOINT
+      : `https://${GRPC_ENDPOINT}`;
     const response = await fetch(`${endpoint}/chain/register`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
       body: JSON.stringify(data),
     });
 
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Failed to register on chain');
+      throw new Error(error.message || "Failed to register on chain");
     }
 
     return response.json();
   },
 
   // Check registration status
-  getRegistrationStatus: async (transactionId: string): Promise<RegistrationStatus> => {
-    const endpoint = GRPC_ENDPOINT.startsWith('http') ? GRPC_ENDPOINT : `https://${GRPC_ENDPOINT}`;
+  getRegistrationStatus: async (
+    transactionId: string
+  ): Promise<RegistrationStatus> => {
+    const endpoint = GRPC_ENDPOINT.startsWith("http")
+      ? GRPC_ENDPOINT
+      : `https://${GRPC_ENDPOINT}`;
     const response = await fetch(`${endpoint}/chain/status/${transactionId}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     });
 
     if (!response.ok) {
-      throw new Error('Failed to fetch registration status');
+      throw new Error("Failed to fetch registration status");
     }
 
     return response.json();
   },
 
   // Get on-chain record for a story
-  getOnChainRecord: async (storyId: string): Promise<RegistrationResponse | null> => {
-    const endpoint = GRPC_ENDPOINT.startsWith('http') ? GRPC_ENDPOINT : `https://${GRPC_ENDPOINT}`;
+  getOnChainRecord: async (
+    storyId: string
+  ): Promise<RegistrationResponse | null> => {
+    const endpoint = GRPC_ENDPOINT.startsWith("http")
+      ? GRPC_ENDPOINT
+      : `https://${GRPC_ENDPOINT}`;
     const response = await fetch(`${endpoint}/chain/record/${storyId}`, {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
       },
     });
 
@@ -90,7 +102,7 @@ export const chainApi = {
     }
 
     if (!response.ok) {
-      throw new Error('Failed to fetch on-chain record');
+      throw new Error("Failed to fetch on-chain record");
     }
 
     return response.json();

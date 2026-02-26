@@ -66,13 +66,13 @@ The Mystira.App application currently has its APIs directly exposed to the publi
 
 ### Security Risk Assessment
 
-| Risk | Current State | Likelihood | Impact | Severity |
-|------|--------------|------------|--------|----------|
-| DDoS Attack | No L7 protection | Medium | High | Critical |
-| SQL Injection | No WAF | Medium | Critical | Critical |
-| XSS Attacks | No WAF | Medium | High | Critical |
-| Data Breach | Exposed APIs | Low | Critical | High |
-| Service Unavailability | No edge protection | Medium | High | Critical |
+| Risk                   | Current State      | Likelihood | Impact   | Severity |
+| ---------------------- | ------------------ | ---------- | -------- | -------- |
+| DDoS Attack            | No L7 protection   | Medium     | High     | Critical |
+| SQL Injection          | No WAF             | Medium     | Critical | Critical |
+| XSS Attacks            | No WAF             | Medium     | High     | Critical |
+| Data Breach            | Exposed APIs       | Low        | Critical | High     |
+| Service Unavailability | No edge protection | Medium     | High     | Critical |
 
 ### Considered Alternatives
 
@@ -184,6 +184,7 @@ We will implement **Azure Front Door Standard** as the centralized entry point f
 ### Phase 2 Considerations (Future)
 
 When any of these triggers occur, implement API Management:
+
 - First external partner integration request
 - Mobile app development begins
 - API monetization strategy approved
@@ -249,24 +250,28 @@ When any of these triggers occur, implement API Management:
 ## Implementation Plan
 
 ### Week 1: Foundation
+
 - [ ] Create Azure Key Vault for secrets
 - [ ] Migrate connection strings from appsettings
 - [ ] Fix environment detection issues
 - [ ] Create Bicep templates for Front Door
 
 ### Week 2: Staging Deployment
+
 - [ ] Deploy Front Door to staging
 - [ ] Configure WAF policy with OWASP rules
 - [ ] Set up routing rules
 - [ ] Test all endpoints through Front Door
 
 ### Week 3: Production Migration
+
 - [ ] Deploy Front Door to production
 - [ ] Update DNS records
 - [ ] Configure monitoring and alerts
 - [ ] Update PWA configuration
 
 ### Week 4: Optimization
+
 - [ ] Tune WAF rules based on traffic
 - [ ] Optimize caching policies
 - [ ] Document incident response procedures
@@ -276,22 +281,22 @@ When any of these triggers occur, implement API Management:
 
 ## Cost Analysis
 
-| Current State | Monthly Cost (ZAR) |
-|--------------|-------------------|
-| Static Web Apps (2x) | R0 |
-| App Service Plan (B1) | R700 |
-| Cosmos DB (Serverless) | R800 |
-| Storage Account | R100 |
-| Application Insights | R200 |
-| **Total** | **R1,800** |
+| Current State          | Monthly Cost (ZAR) |
+| ---------------------- | ------------------ |
+| Static Web Apps (2x)   | R0                 |
+| App Service Plan (B1)  | R700               |
+| Cosmos DB (Serverless) | R800               |
+| Storage Account        | R100               |
+| Application Insights   | R200               |
+| **Total**              | **R1,800**         |
 
-| With Front Door | Monthly Cost (ZAR) |
-|----------------|-------------------|
-| Current services | R1,800 |
-| Azure Front Door (Standard) | R800 |
-| Azure Key Vault | R50 |
-| DNS Zone | R40 |
-| **Total** | **R2,690** |
+| With Front Door             | Monthly Cost (ZAR) |
+| --------------------------- | ------------------ |
+| Current services            | R1,800             |
+| Azure Front Door (Standard) | R800               |
+| Azure Key Vault             | R50                |
+| DNS Zone                    | R40                |
+| **Total**                   | **R2,690**         |
 
 **Increase**: +R890/month (+49%)
 
@@ -300,18 +305,21 @@ When any of these triggers occur, implement API Management:
 ## Success Metrics
 
 ### Security
+
 - [ ] Zero direct API access (all through Front Door)
 - [ ] WAF blocking >95% of malicious requests
 - [ ] No secrets in source control
 - [ ] SSL/TLS A+ rating
 
 ### Performance
+
 - [ ] API response time <500ms (p95)
 - [ ] Front Door adds <50ms latency
 - [ ] 99.9% uptime SLA met
 - [ ] Cache hit ratio >80% for static assets
 
 ### Operational
+
 - [ ] Centralized logging operational
 - [ ] Alerts configured for anomalies
 - [ ] Incident response procedures documented

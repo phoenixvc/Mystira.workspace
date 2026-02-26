@@ -25,9 +25,9 @@ sequenceDiagram
 
     Client->>Controller: GET /api/userprofiles/{id}
     Controller->>Service: GetProfileAsync(id)
-    
+
     Service->>UseCase: ExecuteAsync(id)
-    
+
     UseCase->>Repo: GetByIdAsync(id)
     Repo->>DB: Query profile by ID
     alt Profile Not Found

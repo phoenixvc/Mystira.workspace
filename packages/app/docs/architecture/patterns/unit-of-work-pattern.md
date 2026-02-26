@@ -5,6 +5,7 @@
 The Unit of Work pattern maintains a list of objects affected by a business transaction and coordinates writing out changes and resolving concurrency problems. It ensures that all changes are committed together or rolled back together.
 
 **Key Points**:
+
 - ✅ **Used in Commands** - Write operations that modify state
 - ❌ **NOT used in Queries** - Read operations don't need transactions
 - 🔒 **Transactional Consistency** - All changes succeed or fail together
@@ -73,14 +74,14 @@ public interface IUnitOfWork : IDisposable
 
 ## When to Use Unit of Work
 
-| Scenario | Use UnitOfWork? | Reason |
-|----------|-----------------|--------|
-| **Command Handler** (Create) | ✅ Yes | Persisting new entities |
-| **Command Handler** (Update) | ✅ Yes | Modifying existing entities |
-| **Command Handler** (Delete) | ✅ Yes | Removing entities |
-| **Query Handler** | ❌ No | Read-only, no changes to persist |
-| **Multiple Repository Operations** | ✅ Yes | Coordinate changes atomically |
-| **Single Repository Operation** | ✅ Yes | Still need to persist changes |
+| Scenario                           | Use UnitOfWork? | Reason                           |
+| ---------------------------------- | --------------- | -------------------------------- |
+| **Command Handler** (Create)       | ✅ Yes          | Persisting new entities          |
+| **Command Handler** (Update)       | ✅ Yes          | Modifying existing entities      |
+| **Command Handler** (Delete)       | ✅ Yes          | Removing entities                |
+| **Query Handler**                  | ❌ No           | Read-only, no changes to persist |
+| **Multiple Repository Operations** | ✅ Yes          | Coordinate changes atomically    |
+| **Single Repository Operation**    | ✅ Yes          | Still need to persist changes    |
 
 **Rule of Thumb**: If you're using a **Command Handler**, you need `IUnitOfWork`. If you're using a **Query Handler**, you don't.
 
@@ -146,6 +147,7 @@ public class CreateContentBundleCommandHandler
 ```
 
 **Key Points**:
+
 - ✅ Repository adds entity to context
 - ✅ UnitOfWork persists changes
 - ✅ Try-catch for error handling
@@ -205,6 +207,7 @@ public class UpdateScenarioCommandHandler
 ```
 
 **Key Points**:
+
 - ✅ Multiple repository operations
 - ✅ Single `SaveChangesAsync()` call
 - ✅ All changes committed atomically
@@ -325,6 +328,7 @@ public class TransferPurchaseCommandHandler
 ```
 
 **Key Points**:
+
 - ✅ Explicit transaction for complex multi-step operations
 - ✅ All changes committed together
 - ✅ Rollback on any failure
@@ -337,21 +341,25 @@ public class TransferPurchaseCommandHandler
 ## Benefits
 
 ### 1. Atomicity ⚛️
+
 - All changes succeed or fail together
 - No partial updates
 - Database remains consistent
 
 ### 2. Consistency ✅
+
 - Maintains data integrity
 - Related changes coordinated
 - Prevents orphaned data
 
 ### 3. Performance ⚡
+
 - Single database round-trip for multiple changes
 - Batch updates more efficient
 - Reduces database load
 
 ### 4. Error Handling 🛡️
+
 - Automatic rollback on errors
 - Clear error boundaries
 - Simplified error recovery
@@ -411,26 +419,31 @@ public class TransferPurchaseCommandHandler
 ## Common Mistakes to Avoid
 
 ❌ **Using UnitOfWork in Query Handlers**
+
 - Queries are read-only
 - No changes to persist
 - Wastes resources
 
 ❌ **Calling SaveChangesAsync multiple times**
+
 - Defeats the purpose of Unit of Work
 - Creates multiple database round-trips
 - Potential for partial updates
 
 ❌ **Not wrapping SaveChangesAsync in try-catch**
+
 - Database errors are common
 - No logging of failures
 - Hard to debug
 
 ❌ **Forgetting to inject UnitOfWork in Command Handlers**
+
 - Changes won't be persisted
 - Silent failures
 - Data loss
 
 ❌ **Using explicit transactions for simple commands**
+
 - Unnecessary complexity
 - `SaveChangesAsync()` is sufficient for most cases
 - Performance overhead
@@ -453,14 +466,14 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 ## Command vs Query Comparison
 
-| Aspect | **Command Handler** | **Query Handler** |
-|--------|---------------------|-------------------|
-| **Purpose** | Modify data | Read data |
-| **Uses IUnitOfWork** | ✅ Yes | ❌ No |
-| **Calls SaveChangesAsync** | ✅ Yes | ❌ No |
-| **Transactional** | ✅ Yes | ❌ No |
-| **Error Handling** | Try-catch required | Optional |
-| **Example** | `CreateContentBundleCommand` | `GetContentBundlesQuery` |
+| Aspect                     | **Command Handler**          | **Query Handler**        |
+| -------------------------- | ---------------------------- | ------------------------ |
+| **Purpose**                | Modify data                  | Read data                |
+| **Uses IUnitOfWork**       | ✅ Yes                       | ❌ No                    |
+| **Calls SaveChangesAsync** | ✅ Yes                       | ❌ No                    |
+| **Transactional**          | ✅ Yes                       | ❌ No                    |
+| **Error Handling**         | Try-catch required           | Optional                 |
+| **Example**                | `CreateContentBundleCommand` | `GetContentBundlesQuery` |
 
 ---
 
@@ -491,4 +504,3 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 ## License
 
 Copyright (c) 2025 Mystira. All rights reserved.
-

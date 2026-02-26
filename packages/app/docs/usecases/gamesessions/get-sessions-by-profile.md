@@ -26,15 +26,15 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/profile/{profileId}
     Controller->>Service: GetSessionsByProfileAsync(profileId)
-    
+
     Service->>Repo: GetByProfileIdAsync(profileId)
     Repo->>DB: Query sessions by profile ID
     DB-->>Repo: List<GameSession>
     Repo-->>Service: sessions
-    
+
     Note over Service: Map to DTOs
     Service->>Service: Select(s => new GameSessionResponse {<br/>  Id, ScenarioId, AccountId,<br/>  ProfileId, PlayerNames, Status,<br/>  CurrentSceneId, ChoiceCount,<br/>  EchoCount, AchievementCount,<br/>  StartTime, EndTime, ElapsedTime,<br/>  IsPaused, SceneCount, TargetAgeGroup<br/>})
-    
+
     Service-->>Controller: List<GameSessionResponse>
     Controller-->>Client: 200 OK<br/>(List<GameSessionResponse>)
 ```
@@ -57,6 +57,7 @@ sequenceDiagram
 **Current**: No explicit authorization check
 
 **Future Enhancement**: Should verify:
+
 - Requesting user owns the account that contains the profile
 - Parent users can view child profile sessions (COPPA compliance)
 - Profile belongs to requesting account
@@ -77,4 +78,3 @@ sequenceDiagram
 - [Get Game Sessions by Account Use Case](./get-sessions-by-account.md)
 - [Get In Progress Sessions Use Case](./get-in-progress-sessions.md)
 - [Game Session Domain Model](../../domain/models/game-session.md)
-

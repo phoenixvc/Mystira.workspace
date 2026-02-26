@@ -45,7 +45,7 @@ public class GameSessionsController : ControllerBase
 
         // Call use case (no business logic here)
         var result = await _createUseCase.ExecuteAsync(input);
-        
+
         // Map result to DTO
         return Ok(new GameSessionResponse { /* ... */ });
     }
@@ -94,7 +94,7 @@ public class ScenariosAdminController : ControllerBase
 
 **Structure:**
 
-``` text
+```text
 Mystira.App.Application/
 ├── UseCases/
 │   ├── GameSessions/
@@ -132,7 +132,7 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
 
         await _repository.AddAsync(session);
         await _unitOfWork.SaveChangesAsync();
-        
+
         return session;
     }
 }
@@ -149,7 +149,7 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
 
 **Structure:**
 
-``` text
+```text
 Mystira.App.Domain/
 ├── Models/
 │   ├── GameSession.cs
@@ -177,7 +177,7 @@ public class GameSession
     {
         if (Status == GameSessionStatus.Ended)
             throw new InvalidOperationException("Session already ended");
-        
+
         Status = GameSessionStatus.Ended;
         EndedAt = DateTime.UtcNow;
     }
@@ -186,14 +186,14 @@ public class GameSession
 
 ### Infrastructure Layer
 
-#### Repository implementations, External API adapters, File storage adapters, EF Core mappings**
+#### Repository implementations, External API adapters, File storage adapters, EF Core mappings\*\*
 
 - **No business rules**
 - **Location**: `src/Mystira.App.Infrastructure.*/`
 
 **Structure:**
 
-``` text
+```text
 Mystira.App.Infrastructure.Data/
 ├── Repositories/
 │   ├── GameSessionRepository.cs
@@ -258,7 +258,7 @@ Use simple deterministic rules:
 
 ### Decision Tree
 
-``` text
+```text
 Is the user acting on their own resources?
 ├─ YES → /api
 └─ NO → Is it system-level or other users' data?
@@ -280,7 +280,7 @@ DTOs belong in a separate contracts project.
 
 **Structure:**
 
-``` text
+```text
 Mystira.Contracts.App/
 ├── Requests/
 │   ├── GameSessions/
@@ -318,10 +318,10 @@ public class CreateGameSessionRequest
 {
     [Required]
     public string AccountId { get; set; } = string.Empty;
-    
+
     [Required]
     public string ScenarioId { get; set; } = string.Empty;
-    
+
     // No business logic - just data
 }
 ```
@@ -381,7 +381,7 @@ public class CreateGameSessionUseCase  // ✅ Use case in Application layer
 
 **Enforce this strict flow:**
 
-``` text
+```text
 API/AdminAPI Controller
         ↓ maps DTO → input model
 Application Use Case / Service
@@ -404,7 +404,7 @@ Infrastructure Adapters (repos, storage, external APIs)
 
 3. **Dependency Direction**
 
-   ``` text
+   ```text
    API → Application → Domain ← Infrastructure
    ```
 
@@ -421,10 +421,10 @@ public async Task<ActionResult> Create([FromBody] CreateGameSessionRequest dto)
         AccountId = dto.AccountId,
         ScenarioId = dto.ScenarioId
     };
-    
+
     // Call use case
     var result = await _createUseCase.ExecuteAsync(input);
-    
+
     // Map result to DTO
     return Ok(new GameSessionResponse { /* ... */ });
 }
@@ -438,14 +438,14 @@ public async Task<GameSession> ExecuteAsync(CreateGameSessionInput input)
         AccountId = input.AccountId,
         ScenarioId = input.ScenarioId
     };
-    
+
     // Call domain method
     session.Start(); // Domain logic
-    
+
     // Use repository (infrastructure)
     await _repository.AddAsync(session);
     await _unitOfWork.SaveChangesAsync();
-    
+
     return session;
 }
 
@@ -455,7 +455,7 @@ public void Start()
     // Business invariant
     if (Status != GameSessionStatus.Pending)
         throw new InvalidOperationException("Cannot start non-pending session");
-    
+
     Status = GameSessionStatus.Active;
     StartedAt = DateTime.UtcNow;
 }

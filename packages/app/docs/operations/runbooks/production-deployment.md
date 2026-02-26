@@ -49,6 +49,7 @@ echo "Backup timestamp: $BACKUP_TIMESTAMP"
 ### Step 3: Review Release Notes
 
 Review the release notes and ensure all changes are documented:
+
 - Feature changes
 - Bug fixes
 - Breaking changes (should be avoided in production)
@@ -175,6 +176,7 @@ az webapp log tail --name mys-prod-mystira-api-san --resource-group rg-mystira-p
 ### Step 13: Notify Stakeholders
 
 Send deployment completion notification:
+
 - Deployment completed successfully
 - New version deployed: [version]
 - Release notes link
@@ -194,6 +196,7 @@ Send deployment completion notification:
 ### Monitoring Checklist
 
 Monitor for the next 24 hours:
+
 - [ ] Application Insights alerts
 - [ ] Error rates
 - [ ] Performance degradation
@@ -220,6 +223,7 @@ gh workflow run mystira-app-api-rollback.yml \
 **Symptoms**: `/health` endpoint returns non-200 status
 
 **Resolution**:
+
 1. Check Application Insights for errors
 2. Verify database connectivity
 3. Check blob storage connectivity
@@ -230,6 +234,7 @@ gh workflow run mystira-app-api-rollback.yml \
 **Symptoms**: > 5% error rate in Application Insights
 
 **Resolution**:
+
 1. Check Application Insights for specific error types
 2. Review recent code changes
 3. Consider immediate rollback if critical
@@ -239,6 +244,7 @@ gh workflow run mystira-app-api-rollback.yml \
 **Symptoms**: p95 response time > 1000ms
 
 **Resolution**:
+
 1. Check database query performance
 2. Verify cache is working
 3. Check external service dependencies

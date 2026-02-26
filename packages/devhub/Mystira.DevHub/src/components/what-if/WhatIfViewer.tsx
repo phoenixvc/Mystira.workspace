@@ -22,10 +22,10 @@ function WhatIfViewer({
   resourceGroupMappings = {},
 }: WhatIfViewerProps) {
   const [expandedResources, setExpandedResources] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [localChanges, setLocalChanges] = useState<WhatIfChange[]>(
-    changes || [],
+    changes || []
   );
   const [editingResourceGroup, setEditingResourceGroup] = useState<
     string | null
@@ -49,7 +49,7 @@ function WhatIfViewer({
     const updated = localChanges.map((change) =>
       change.resourceName === resourceName
         ? { ...change, selected: !change.selected }
-        : change,
+        : change
     );
     setLocalChanges(updated);
     if (onSelectionChange) {
@@ -61,7 +61,7 @@ function WhatIfViewer({
     const updated = localChanges.map((change) =>
       change.resourceName === resourceName
         ? { ...change, resourceGroup }
-        : change,
+        : change
     );
     setLocalChanges(updated);
     setEditingResourceGroup(null);
@@ -106,16 +106,16 @@ function WhatIfViewer({
 
   const selectedCount = localChanges.filter((c) => c.selected).length;
   const createCount = localChanges.filter(
-    (c) => c.changeType === "create",
+    (c) => c.changeType === "create"
   ).length;
   const modifyCount = localChanges.filter(
-    (c) => c.changeType === "modify",
+    (c) => c.changeType === "modify"
   ).length;
   const deleteCount = localChanges.filter(
-    (c) => c.changeType === "delete",
+    (c) => c.changeType === "delete"
   ).length;
   const noChangeCount = localChanges.filter(
-    (c) => c.changeType === "noChange",
+    (c) => c.changeType === "noChange"
   ).length;
 
   if (loading) {

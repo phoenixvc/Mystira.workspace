@@ -26,9 +26,9 @@ sequenceDiagram
 
     Client->>Controller: PUT /api/userprofiles/{id}<br/>(UpdateUserProfileRequest)
     Controller->>Service: UpdateProfileAsync(id, request)
-    
+
     Service->>UseCase: ExecuteAsync(id, request)
-    
+
     Note over UseCase: Step 1: Find Existing Profile
     UseCase->>Repo: GetByIdAsync(id)
     Repo->>DB: Query profile
@@ -41,7 +41,7 @@ sequenceDiagram
     end
     DB-->>Repo: UserProfile
     Repo-->>UseCase: existingProfile
-    
+
     Note over UseCase: Step 2: Apply Partial Updates
     alt PreferredFantasyThemes Provided
         UseCase->>UseCase: Validate themes<br/>(FantasyTheme.Parse)
@@ -52,7 +52,7 @@ sequenceDiagram
         end
         UseCase->>UseCase: profile.PreferredFantasyThemes =<br/>  (parsed themes)
     end
-    
+
     alt AgeGroup Provided
         UseCase->>UseCase: Validate age group<br/>(in AllAgeGroups)
         alt Invalid Age Group
@@ -62,18 +62,18 @@ sequenceDiagram
         end
         UseCase->>UseCase: profile.AgeGroupName =<br/>  request.AgeGroup
     end
-    
+
     alt DateOfBirth Provided
         UseCase->>UseCase: profile.DateOfBirth =<br/>  request.DateOfBirth
         UseCase->>UseCase: profile.UpdateAgeGroupFromBirthDate()
     end
-    
+
     alt Other Fields Provided
         UseCase->>UseCase: Update HasCompletedOnboarding,<br/>IsGuest, IsNpc, AccountId,<br/>Pronouns, Bio (if provided)
     end
-    
+
     UseCase->>UseCase: profile.UpdatedAt = Now
-    
+
     Note over UseCase: Step 3: Persist Changes
     UseCase->>Repo: UpdateAsync(profile)
     Repo->>DB: Update entity
@@ -82,7 +82,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     Repo-->>UseCase: UserProfile (updated)
-    
+
     UseCase-->>Service: UserProfile
     Service-->>Controller: UserProfile
     Controller-->>Client: 200 OK<br/>(UserProfile)

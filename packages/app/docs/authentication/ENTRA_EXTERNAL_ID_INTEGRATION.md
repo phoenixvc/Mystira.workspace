@@ -83,7 +83,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddMsalAuthentication(options =>
 {
     builder.Configuration.Bind("MicrosoftEntraExternalId", options.ProviderOptions.Authentication);
-    
+
     // Add API scopes
     var apiScopes = builder.Configuration.GetSection("MystiraApi:Scopes").Get<string[]>();
     if (apiScopes != null)
@@ -213,9 +213,11 @@ Add External ID configuration to the API's `appsettings.json`:
 ### Common Issues
 
 **Issue**: "CORS error when authenticating"
+
 - **Solution**: Add PWA origin to allowed CORS origins in API configuration.
 
 **Issue**: "Token validation failed"
+
 - **Solution**: Verify API Client ID and Tenant ID match the ones in Entra External ID.
 
 ### Debug Logging

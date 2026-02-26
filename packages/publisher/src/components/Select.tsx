@@ -1,5 +1,5 @@
-import { forwardRef, type SelectHTMLAttributes } from 'react';
-import clsx from 'clsx';
+import { forwardRef, type SelectHTMLAttributes } from "react";
+import clsx from "clsx";
 
 export interface SelectOption {
   value: string;
@@ -16,10 +16,10 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, options, placeholder, className, id, ...props }, ref) => {
-    const selectId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
-      <div className={clsx('select-wrapper', className)}>
+      <div className={clsx("select-wrapper", className)}>
         {label && (
           <label htmlFor={selectId} className="select-label">
             {label}
@@ -28,7 +28,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={selectId}
-          className={clsx('select', error && 'select--error')}
+          className={clsx("select", error && "select--error")}
           aria-invalid={!!error}
           aria-describedby={error ? `${selectId}-error` : undefined}
           {...props}
@@ -38,8 +38,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
               {placeholder}
             </option>
           )}
-          {options.map(option => (
-            <option key={option.value} value={option.value} disabled={option.disabled}>
+          {options.map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+              disabled={option.disabled}
+            >
               {option.label}
             </option>
           ))}
@@ -54,4 +58,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 
-Select.displayName = 'Select';
+Select.displayName = "Select";

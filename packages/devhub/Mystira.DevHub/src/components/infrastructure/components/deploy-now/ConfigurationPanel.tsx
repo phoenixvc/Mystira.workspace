@@ -168,7 +168,7 @@ export function ConfigurationPanel({
         {
           resourceGroup,
           swaName,
-        },
+        }
       );
 
       if (response.success && response.result) {

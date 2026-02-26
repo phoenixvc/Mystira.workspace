@@ -64,16 +64,16 @@ This guide explains the clean, nested configuration structure for the Mystira St
 ```json
 {
   "FoundryAgent": {
-    "WriterAgentId": "asst_writer_abc123",        // Required: Writer agent ID
-    "JudgeAgentId": "asst_judge_def456",          // Required: Judge agent ID
-    "RefinerAgentId": "asst_refiner_ghi789",      // Optional: Refiner agent ID
-    "RubricSummaryAgentId": "asst_summary_jkl012",// Optional: Summary agent ID
-    "Endpoint": "https://...",                     // Required: Azure AI Foundry endpoint
-    "ApiKey": "your-api-key",                      // Required: Foundry API key
-    "ProjectId": "your-project-id",                // Required: Foundry project ID
-    "MaxIterations": 5,                            // Default: 5 refinement loops
-    "RunTimeout": "00:05:00",                      // Default: 5 minutes per agent run
-    "KnowledgeMode": "FileSearch"                  // Required: "FileSearch" or "AISearch"
+    "WriterAgentId": "asst_writer_abc123", // Required: Writer agent ID
+    "JudgeAgentId": "asst_judge_def456", // Required: Judge agent ID
+    "RefinerAgentId": "asst_refiner_ghi789", // Optional: Refiner agent ID
+    "RubricSummaryAgentId": "asst_summary_jkl012", // Optional: Summary agent ID
+    "Endpoint": "https://...", // Required: Azure AI Foundry endpoint
+    "ApiKey": "your-api-key", // Required: Foundry API key
+    "ProjectId": "your-project-id", // Required: Foundry project ID
+    "MaxIterations": 5, // Default: 5 refinement loops
+    "RunTimeout": "00:05:00", // Default: 5 minutes per agent run
+    "KnowledgeMode": "FileSearch" // Required: "FileSearch" or "AISearch"
   }
 }
 ```
@@ -85,26 +85,29 @@ This guide explains the clean, nested configuration structure for the Mystira St
 ```json
 {
   "FileSearch": {
-    "DefaultVectorStoreId": "vs_mystira_default",  // Fallback vector store ID
-    "VectorStoresByAgeGroup": {                    // Age-specific vector stores
+    "DefaultVectorStoreId": "vs_mystira_default", // Fallback vector store ID
+    "VectorStoresByAgeGroup": {
+      // Age-specific vector stores
       "1-2": "vs_toddler_abc123",
       "3-5": "vs_preschool_def456",
       "6-9": "vs_elementary_ghi789",
       "10-12": "vs_preteen_jkl012"
     },
-    "MaxFiles": 20,                                // Optional: Max files per search
-    "MaxTokens": 4000                              // Optional: Max tokens for results
+    "MaxFiles": 20, // Optional: Max files per search
+    "MaxTokens": 4000 // Optional: Max tokens for results
   }
 }
 ```
 
 **Fields:**
+
 - **`DefaultVectorStoreId`** - Used when age group not in `VectorStoresByAgeGroup` or for general knowledge
 - **`VectorStoresByAgeGroup`** - Dictionary mapping age groups to vector store IDs (enables age-specific content)
 - **`MaxFiles`** - Limits number of files retrieved per search (performance tuning)
 - **`MaxTokens`** - Limits token usage for search results (cost control)
 
 **Behavior:**
+
 1. When user requests story for age `"6-9"`, system looks up `VectorStoresByAgeGroup["6-9"]`
 2. If found, uses `"vs_elementary_ghi789"`
 3. If not found, uses `DefaultVectorStoreId` as fallback
@@ -118,17 +121,18 @@ This guide explains the clean, nested configuration structure for the Mystira St
 ```json
 {
   "AISearch": {
-    "Endpoint": "https://your-search.search.windows.net",  // Azure AI Search endpoint
-    "ApiKey": "your-search-api-key",                        // Search service API key
-    "IndexName": "mystira-instructions",                    // Index containing guidelines
-    "AgeGroupFieldName": "age_group",                       // Metadata field for age filtering
-    "ContentFieldName": "content",                          // Optional: Override content field
-    "TopK": 5                                               // Number of results to retrieve
+    "Endpoint": "https://your-search.search.windows.net", // Azure AI Search endpoint
+    "ApiKey": "your-search-api-key", // Search service API key
+    "IndexName": "mystira-instructions", // Index containing guidelines
+    "AgeGroupFieldName": "age_group", // Metadata field for age filtering
+    "ContentFieldName": "content", // Optional: Override content field
+    "TopK": 5 // Number of results to retrieve
   }
 }
 ```
 
 **Fields:**
+
 - **`Endpoint`** - Your Azure AI Search service URL
 - **`ApiKey`** - Search service admin or query API key
 - **`IndexName`** - Name of index containing story guidelines (e.g., "mystira-instructions")
@@ -137,6 +141,7 @@ This guide explains the clean, nested configuration structure for the Mystira St
 - **`TopK`** - Number of documents to retrieve per search (default: 5)
 
 **Behavior:**
+
 1. When user requests story for age `"6-9"`, agent receives prompt:
    ```
    "Always include filter 'age_group eq 6-9' in your searches"
@@ -169,6 +174,7 @@ This guide explains the clean, nested configuration structure for the Mystira St
 ```
 
 **Request:**
+
 ```http
 POST /api/story-agent/sessions/start
 {
@@ -178,6 +184,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **What happens:**
+
 1. System looks up `VectorStoresByAgeGroup["6-9"]` → `"vs_elementary"`
 2. Creates thread with `vs_elementary` attached
 3. Agent can ONLY search elementary-age documents
@@ -201,6 +208,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Behavior:**
+
 - All story requests use `vs_all_ages` regardless of age group
 - Age-appropriateness controlled via prompts, not vector store isolation
 
@@ -226,6 +234,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Index structure:**
+
 ```json
 [
   {
@@ -242,6 +251,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Request for age 6-9:**
+
 1. Agent searches with filter: `age_group eq '6-9'`
 2. Only doc2 is returned
 3. Agent uses 6-9 appropriate guidelines
@@ -253,6 +263,7 @@ POST /api/story-agent/sessions/start
 ### FileSearch → AISearch
 
 **Before (FileSearch):**
+
 ```json
 {
   "KnowledgeMode": "FileSearch",
@@ -263,6 +274,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **After (AISearch):**
+
 ```json
 {
   "KnowledgeMode": "AISearch",
@@ -275,6 +287,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Migration steps:**
+
 1. Create AI Search index
 2. Upload documents from vector store to index (add `age_group` metadata)
 3. Update `KnowledgeMode` to `"AISearch"`
@@ -290,9 +303,10 @@ POST /api/story-agent/sessions/start
 {
   "FoundryAgent": {
     "KnowledgeMode": "FileSearch",
-    "VectorStoreName": "vs_mystira_default",        // DEPRECATED
-    "SearchIndexName": "mystira-instructions",      // DEPRECATED
-    "VectorStoresByAgeGroup": {                     // DEPRECATED
+    "VectorStoreName": "vs_mystira_default", // DEPRECATED
+    "SearchIndexName": "mystira-instructions", // DEPRECATED
+    "VectorStoresByAgeGroup": {
+      // DEPRECATED
       "6-9": "vs_elementary"
     }
   }
@@ -300,6 +314,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **What happens:**
+
 - System detects legacy flat config
 - Maps `VectorStoreName` → `FileSearch.DefaultVectorStoreId`
 - Maps `SearchIndexName` → `AISearch.IndexName`
@@ -313,6 +328,7 @@ POST /api/story-agent/sessions/start
 3. **Phase 3: Remove old config** - Clean config, no deprecated fields
 
 **Example migration:**
+
 ```json
 {
   "FoundryAgent": {
@@ -340,6 +356,7 @@ POST /api/story-agent/sessions/start
 #### Issue 1: KnowledgeMode = "FileSearch" but no FileSearch section
 
 **Error:**
+
 ```
 InvalidOperationException: No vector store configured.
 Set either FoundryAgent:FileSearch:DefaultVectorStoreId or FoundryAgent:VectorStoreName
@@ -347,6 +364,7 @@ Set either FoundryAgent:FileSearch:DefaultVectorStoreId or FoundryAgent:VectorSt
 
 **Solution:**
 Add FileSearch section:
+
 ```json
 {
   "FileSearch": {
@@ -360,6 +378,7 @@ Add FileSearch section:
 #### Issue 2: KnowledgeMode = "AISearch" but no AISearch section
 
 **Error:**
+
 ```
 InvalidOperationException: AISearch endpoint is required.
 Set FoundryAgent:AISearch:Endpoint
@@ -367,6 +386,7 @@ Set FoundryAgent:AISearch:Endpoint
 
 **Solution:**
 Add AISearch section:
+
 ```json
 {
   "AISearch": {
@@ -382,26 +402,30 @@ Add AISearch section:
 #### Issue 3: Age group not found in VectorStoresByAgeGroup
 
 **Log warning:**
+
 ```
 [WARN] No vector store configured for age group '13-15', using default
 ```
 
 **Behavior:**
+
 - System falls back to `DefaultVectorStoreId`
 - Story generation continues
 
 **Solution (if intentional):**
+
 - This is expected for age groups without dedicated stores
 - Default vector store should contain general guidelines
 
 **Solution (if unintentional):**
 Add missing age group:
+
 ```json
 {
   "FileSearch": {
     "VectorStoresByAgeGroup": {
       "6-9": "vs_elementary",
-      "13-15": "vs_teen"  // Add this
+      "13-15": "vs_teen" // Add this
     }
   }
 }
@@ -414,6 +438,7 @@ Add missing age group:
 ### 1. **Use Nested Config for New Deployments**
 
 ✅ **Do:**
+
 ```json
 {
   "KnowledgeMode": "FileSearch",
@@ -422,10 +447,11 @@ Add missing age group:
 ```
 
 ❌ **Don't:**
+
 ```json
 {
   "KnowledgeMode": "FileSearch",
-  "VectorStoreName": "..."  // Legacy flat config
+  "VectorStoreName": "..." // Legacy flat config
 }
 ```
 
@@ -435,12 +461,12 @@ Add missing age group:
 
 ```json
 {
-  "KnowledgeMode": "FileSearch",  // Currently using FileSearch
+  "KnowledgeMode": "FileSearch", // Currently using FileSearch
   "FileSearch": {
     "DefaultVectorStoreId": "vs_default"
   },
   "AISearch": {
-    "Endpoint": "...",  // Pre-configured for easy switch
+    "Endpoint": "...", // Pre-configured for easy switch
     "ApiKey": "...",
     "IndexName": "guidelines"
   }
@@ -457,18 +483,19 @@ Add missing age group:
 {
   "FoundryAgent": {
     "FileSearch": {
-      "DefaultVectorStoreId": "vs_prod_default"  // Production
+      "DefaultVectorStoreId": "vs_prod_default" // Production
     }
   }
 }
 ```
 
 **Development:**
+
 ```json
 {
   "FoundryAgent": {
     "FileSearch": {
-      "DefaultVectorStoreId": "vs_dev_default"  // Development
+      "DefaultVectorStoreId": "vs_dev_default" // Development
     }
   }
 }
@@ -479,6 +506,7 @@ Add missing age group:
 ### 4. **Validate Configuration on Startup**
 
 Add to `Program.cs`:
+
 ```csharp
 var foundryConfig = builder.Configuration
     .GetSection("FoundryAgent")
@@ -501,33 +529,34 @@ if (foundryConfig.KnowledgeMode == "FileSearch")
 
 ### Complete FileSearchConfig
 
-| Property | Type | Required | Default | Description |
-|----------|------|----------|---------|-------------|
-| `DefaultVectorStoreId` | string | No* | - | Fallback vector store ID |
-| `VectorStoresByAgeGroup` | Dictionary<string, string> | No* | - | Age-specific vector stores |
-| `MaxFiles` | int? | No | - | Max files per search |
-| `MaxTokens` | int? | No | - | Max tokens for results |
+| Property                 | Type                       | Required | Default | Description                |
+| ------------------------ | -------------------------- | -------- | ------- | -------------------------- |
+| `DefaultVectorStoreId`   | string                     | No\*     | -       | Fallback vector store ID   |
+| `VectorStoresByAgeGroup` | Dictionary<string, string> | No\*     | -       | Age-specific vector stores |
+| `MaxFiles`               | int?                       | No       | -       | Max files per search       |
+| `MaxTokens`              | int?                       | No       | -       | Max tokens for results     |
 
-*At least one of `DefaultVectorStoreId` or `VectorStoresByAgeGroup` required
+\*At least one of `DefaultVectorStoreId` or `VectorStoresByAgeGroup` required
 
 ---
 
 ### Complete AISearchConfig
 
-| Property | Type | Required | Default | Description |
-|----------|------|----------|---------|-------------|
-| `Endpoint` | string | Yes | - | Azure AI Search endpoint |
-| `ApiKey` | string | Yes | - | Search service API key |
-| `IndexName` | string | Yes | "mystira-instructions" | Index name |
-| `AgeGroupFieldName` | string | No | "age_group" | Age metadata field |
-| `ContentFieldName` | string | No | - | Content field override |
-| `TopK` | int | No | 5 | Results per search |
+| Property            | Type   | Required | Default                | Description              |
+| ------------------- | ------ | -------- | ---------------------- | ------------------------ |
+| `Endpoint`          | string | Yes      | -                      | Azure AI Search endpoint |
+| `ApiKey`            | string | Yes      | -                      | Search service API key   |
+| `IndexName`         | string | Yes      | "mystira-instructions" | Index name               |
+| `AgeGroupFieldName` | string | No       | "age_group"            | Age metadata field       |
+| `ContentFieldName`  | string | No       | -                      | Content field override   |
+| `TopK`              | int    | No       | 5                      | Results per search       |
 
 ---
 
 ## Summary
 
 ### Old Config (Deprecated but Supported)
+
 ```json
 {
   "KnowledgeMode": "FileSearch",
@@ -537,6 +566,7 @@ if (foundryConfig.KnowledgeMode == "FileSearch")
 ```
 
 ### New Config (Recommended)
+
 ```json
 {
   "KnowledgeMode": "FileSearch",
@@ -552,6 +582,7 @@ if (foundryConfig.KnowledgeMode == "FileSearch")
 ```
 
 ### Key Improvements
+
 ✅ Clear separation of FileSearch vs AISearch settings
 ✅ Self-documenting structure
 ✅ Easy mode switching

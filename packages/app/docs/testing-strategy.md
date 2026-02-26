@@ -32,11 +32,13 @@ This document outlines the comprehensive testing strategy for the Mystira.App pr
 - **Safety**: High coverage for domain logic, COPPA compliance, and user data
 
 **Current Status:**
+
 - Test coverage: ~3.7% (22 test files / 591 source files)
 - Test projects: 7 (API, Application, Domain, Infrastructure)
 - Framework: xUnit + FluentAssertions + Moq + In-Memory EF Core
 
 **Target Status (Q1 2026):**
+
 - Test coverage: 60%+ overall
 - Critical path coverage: 80%+
 - Domain layer coverage: 90%+
@@ -62,12 +64,14 @@ tests/
 ### Test Patterns in Use
 
 ✅ **Working Well:**
+
 - `CqrsIntegrationTestBase` - Comprehensive base class for CQRS tests
 - FluentAssertions for readable assertions
 - In-memory database for fast integration tests
 - AutoFixture for test data generation
 
 ❌ **Needs Improvement:**
+
 - No Blazor component tests (PWA layer untested)
 - Inconsistent use of mocking (some tests mock too much, others too little)
 - Missing tests for new UX components (LoadingIndicator, ErrorBoundaryWrapper, ToastService)
@@ -136,14 +140,14 @@ tests/
 
 ### Overall Targets
 
-| Layer | Current | Target Q1 2026 | Target Q2 2026 |
-|-------|---------|----------------|----------------|
-| **Domain** | ~15% | 90% | 95% |
-| **Application (CQRS)** | ~10% | 80% | 90% |
-| **API Controllers** | ~5% | 60% | 70% |
-| **PWA Components** | 0% | 40% | 60% |
-| **Infrastructure** | ~5% | 50% | 60% |
-| **Overall** | ~3.7% | 60% | 75% |
+| Layer                  | Current | Target Q1 2026 | Target Q2 2026 |
+| ---------------------- | ------- | -------------- | -------------- |
+| **Domain**             | ~15%    | 90%            | 95%            |
+| **Application (CQRS)** | ~10%    | 80%            | 90%            |
+| **API Controllers**    | ~5%     | 60%            | 70%            |
+| **PWA Components**     | 0%      | 40%            | 60%            |
+| **Infrastructure**     | ~5%     | 50%            | 60%            |
+| **Overall**            | ~3.7%   | 60%            | 75%            |
 
 ### Critical Paths (80%+ Coverage Required)
 
@@ -180,6 +184,7 @@ tests/
 ### 1. Domain Model Tests
 
 **What to test:**
+
 - Constructor initialization
 - Property setters/getters
 - Domain logic methods
@@ -187,6 +192,7 @@ tests/
 - Invariants
 
 **Example:**
+
 ```csharp
 public class GameSessionTests
 {
@@ -212,12 +218,14 @@ public class GameSessionTests
 ### 2. CQRS Command Tests
 
 **What to test:**
+
 - Command creates/updates entities correctly
 - Validation errors throw exceptions
 - Data persists to database
 - Side effects occur (events, notifications)
 
 **Example:**
+
 ```csharp
 public class AwardBadgeCommandTests : CqrsIntegrationTestBase
 {
@@ -251,12 +259,14 @@ public class AwardBadgeCommandTests : CqrsIntegrationTestBase
 ### 3. CQRS Query Tests
 
 **What to test:**
+
 - Query returns correct data
 - Filtering/sorting works
 - Caching behavior
 - Cache invalidation
 
 **Example:**
+
 ```csharp
 [Fact]
 public async Task GetUserBadgesQuery_ReturnsCachedResults_OnSecondCall()
@@ -280,6 +290,7 @@ public async Task GetUserBadgesQuery_ReturnsCachedResults_OnSecondCall()
 ### 4. API Controller Tests
 
 **What to test:**
+
 - HTTP status codes
 - Response shapes
 - Authorization attributes
@@ -287,6 +298,7 @@ public async Task GetUserBadgesQuery_ReturnsCachedResults_OnSecondCall()
 - Error handling
 
 **Example:**
+
 ```csharp
 [Fact]
 public async Task GetMediaById_WhenMediaExists_ReturnsOk()
@@ -308,12 +320,14 @@ public async Task GetMediaById_WhenMediaExists_ReturnsOk()
 ### 5. Service Tests
 
 **What to test:**
+
 - Service orchestrates dependencies correctly
 - Error handling and retries
 - External API calls
 - Business logic coordination
 
 **Example:**
+
 ```csharp
 [Fact]
 public async Task ToastService_ShowSuccess_RaisesOnShowEvent()
@@ -336,6 +350,7 @@ public async Task ToastService_ShowSuccess_RaisesOnShowEvent()
 ### 6. Blazor Component Tests (bUnit)
 
 **What to test:**
+
 - Component renders correctly
 - User interactions (clicks, input)
 - Event callbacks
@@ -343,6 +358,7 @@ public async Task ToastService_ShowSuccess_RaisesOnShowEvent()
 - Lifecycle methods
 
 **Example:**
+
 ```csharp
 [Fact]
 public void LoadingIndicator_WithMessage_RendersMessage()
@@ -665,6 +681,7 @@ public class {ComponentName}Tests
 **Test Coverage Required:** 90%+
 
 **Test Cases:**
+
 1. User enters valid email and password → Account created
 2. User enters duplicate email → Error displayed
 3. User under 13 without parental consent → Blocked
@@ -672,6 +689,7 @@ public class {ComponentName}Tests
 5. Profile name validation → Special characters blocked
 
 **Files to Test:**
+
 - `SignUpCommand.cs`
 - `CreateUserProfileCommand.cs`
 - `AuthService.cs`
@@ -686,6 +704,7 @@ public class {ComponentName}Tests
 **Test Coverage Required:** 85%+
 
 **Test Cases:**
+
 1. User starts new session → Session created, first scene loaded
 2. User makes choice → Compass values updated, next scene loaded
 3. User earns badge → Badge awarded, notification shown
@@ -693,6 +712,7 @@ public class {ComponentName}Tests
 5. User pauses session → IsPaused = true, elapsed time calculated
 
 **Files to Test:**
+
 - `StartGameSessionCommand.cs`
 - `ProcessChoiceCommand.cs`
 - `AwardBadgeCommand.cs`
@@ -707,12 +727,14 @@ public class {ComponentName}Tests
 **Test Coverage Required:** 75%+
 
 **Test Cases:**
+
 1. Admin creates scenario → Scenario saved with all scenes
 2. Admin uploads media → Media stored in Azure Blob, URL returned
 3. Admin creates bundle → Bundle contains multiple scenarios
 4. Admin updates scenario → Version incremented, changes saved
 
 **Files to Test:**
+
 - `CreateScenarioCommand.cs`
 - `UploadMediaCommand.cs`
 - `CreateContentBundleCommand.cs`
@@ -724,14 +746,14 @@ public class {ComponentName}Tests
 
 ### Testing Frameworks
 
-| Tool | Purpose | Version |
-|------|---------|---------|
-| **xUnit** | Test runner | 2.6.0+ |
-| **FluentAssertions** | Readable assertions | 6.12.0+ |
-| **Moq** | Mocking framework | 4.20.0+ |
-| **AutoFixture** | Test data generation | 4.18.0+ |
-| **bUnit** | Blazor component testing | 1.25.0+ (NEW) |
-| **Testcontainers** | Integration testing | 3.6.0+ (FUTURE) |
+| Tool                 | Purpose                  | Version         |
+| -------------------- | ------------------------ | --------------- |
+| **xUnit**            | Test runner              | 2.6.0+          |
+| **FluentAssertions** | Readable assertions      | 6.12.0+         |
+| **Moq**              | Mocking framework        | 4.20.0+         |
+| **AutoFixture**      | Test data generation     | 4.18.0+         |
+| **bUnit**            | Blazor component testing | 1.25.0+ (NEW)   |
+| **Testcontainers**   | Integration testing      | 3.6.0+ (FUTURE) |
 
 ### Coverage Tools
 
@@ -771,44 +793,44 @@ trigger:
   - develop
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: "ubuntu-latest"
 
 steps:
-- task: UseDotNet@2
-  inputs:
-    version: '9.0.x'
+  - task: UseDotNet@2
+    inputs:
+      version: "9.0.x"
 
-- task: DotNetCoreCLI@2
-  displayName: 'Restore dependencies'
-  inputs:
-    command: 'restore'
+  - task: DotNetCoreCLI@2
+    displayName: "Restore dependencies"
+    inputs:
+      command: "restore"
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build solution'
-  inputs:
-    command: 'build'
-    arguments: '--configuration Release --no-restore'
+  - task: DotNetCoreCLI@2
+    displayName: "Build solution"
+    inputs:
+      command: "build"
+      arguments: "--configuration Release --no-restore"
 
-- task: DotNetCoreCLI@2
-  displayName: 'Run tests with coverage'
-  inputs:
-    command: 'test'
-    arguments: '--configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura'
-    publishTestResults: true
+  - task: DotNetCoreCLI@2
+    displayName: "Run tests with coverage"
+    inputs:
+      command: "test"
+      arguments: "--configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+      publishTestResults: true
 
-- task: PublishCodeCoverageResults@1
-  displayName: 'Publish coverage report'
-  inputs:
-    codeCoverageTool: 'Cobertura'
-    summaryFileLocation: '**/coverage.cobertura.xml'
-    reportDirectory: '**/coverage-report'
+  - task: PublishCodeCoverageResults@1
+    displayName: "Publish coverage report"
+    inputs:
+      codeCoverageTool: "Cobertura"
+      summaryFileLocation: "**/coverage.cobertura.xml"
+      reportDirectory: "**/coverage-report"
 
-- task: BuildQualityChecks@8
-  displayName: 'Check coverage thresholds'
-  inputs:
-    checkCoverage: true
-    coverageFailOption: 'fixed'
-    coverageThreshold: '60'
+  - task: BuildQualityChecks@8
+    displayName: "Check coverage thresholds"
+    inputs:
+      checkCoverage: true
+      coverageFailOption: "fixed"
+      coverageThreshold: "60"
 ```
 
 ### Quality Gates
@@ -853,18 +875,21 @@ steps:
 ## Next Steps
 
 ### Phase 1 (Current - Q4 2025)
+
 - ✅ Create testing strategy document
 - ⏳ Add bUnit for Blazor component tests
 - ⏳ Write tests for new UX components (ToastService, LoadingIndicator, ErrorBoundaryWrapper)
 - ⏳ Increase domain layer coverage to 50%
 
 ### Phase 2 (Q1 2026)
+
 - Add tests for critical paths (auth, game session, badges)
 - Reach 60% overall coverage
 - Integrate coverage reports in Azure DevOps
 - Create test data builders for common entities
 
 ### Phase 3 (Q2 2026)
+
 - Add E2E tests with Playwright
 - Reach 75% overall coverage
 - Add performance/load tests for API endpoints

@@ -52,21 +52,21 @@ export function useVSCodeLayout({
         const delta = e.clientX - startPos;
         const newWidth = Math.max(
           MIN_SIZES.primarySidebar,
-          Math.min(MAX_SIZES.primarySidebar, startSize + delta),
+          Math.min(MAX_SIZES.primarySidebar, startSize + delta)
         );
         setLayout((prev) => ({ ...prev, primarySidebarWidth: newWidth }));
       } else if (type === "secondary") {
         const delta = startPos - e.clientX;
         const newWidth = Math.max(
           MIN_SIZES.secondarySidebar,
-          Math.min(MAX_SIZES.secondarySidebar, startSize + delta),
+          Math.min(MAX_SIZES.secondarySidebar, startSize + delta)
         );
         setLayout((prev) => ({ ...prev, secondarySidebarWidth: newWidth }));
       } else if (type === "bottom") {
         const delta = startPos - e.clientY;
         const newHeight = Math.max(
           MIN_SIZES.bottomPanel,
-          Math.min(MAX_SIZES.bottomPanel, startSize + delta),
+          Math.min(MAX_SIZES.bottomPanel, startSize + delta)
         );
         setLayout((prev) => ({ ...prev, bottomPanelHeight: newHeight }));
       }
@@ -97,7 +97,7 @@ export function useVSCodeLayout({
             : layout.bottomPanelHeight;
       setResizing({ type, startPos, startSize });
     },
-    [layout],
+    [layout]
   );
 
   const togglePrimarySidebar = useCallback(() => {

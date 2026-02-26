@@ -15,13 +15,13 @@ This roadmap implements a transition from Cosmos DB-only architecture to a hybri
 
 ## Current State
 
-| Component | Current Database | Status |
-|-----------|-----------------|--------|
-| Mystira.App | Cosmos DB | Active |
-| Mystira.Admin.Api | Cosmos DB (shared) | Active |
-| Mystira.Publisher | Cosmos DB | Active |
-| Mystira.Chain | PostgreSQL | Active |
-| Mystira.StoryGenerator | Cosmos DB | Active |
+| Component              | Current Database   | Status |
+| ---------------------- | ------------------ | ------ |
+| Mystira.App            | Cosmos DB          | Active |
+| Mystira.Admin.Api      | Cosmos DB (shared) | Active |
+| Mystira.Publisher      | Cosmos DB          | Active |
+| Mystira.Chain          | PostgreSQL         | Active |
+| Mystira.StoryGenerator | Cosmos DB          | Active |
 
 ---
 
@@ -46,11 +46,11 @@ This roadmap implements a transition from Cosmos DB-only architecture to a hybri
 
 ### Database Roles
 
-| Database | Purpose | Data Types |
-|----------|---------|------------|
+| Database       | Purpose                    | Data Types                                  |
+| -------------- | -------------------------- | ------------------------------------------- |
 | **PostgreSQL** | Primary transactional data | Accounts, Sessions, Royalties, Transactions |
-| **Cosmos DB** | Document storage | Scenarios, ContentBundles, UserProfiles |
-| **Redis** | Caching & real-time | Session cache, Leaderboards, Rate limiting |
+| **Cosmos DB**  | Document storage           | Scenarios, ContentBundles, UserProfiles     |
+| **Redis**      | Caching & real-time        | Session cache, Leaderboards, Rate limiting  |
 
 ---
 
@@ -109,14 +109,14 @@ src/
 
 ### 2.2 Entity Migration Order
 
-| Priority | Entity | Complexity | Notes |
-|----------|--------|------------|-------|
-| 1 | Accounts | Low | User data, critical path |
-| 2 | Sessions | Low | Transactional data |
-| 3 | Royalties | Medium | Financial data, audit trail |
-| 4 | Transactions | Medium | High volume |
-| 5 | Scenarios | High | Complex documents, keep in Cosmos |
-| 6 | ContentBundles | High | Large documents, keep in Cosmos |
+| Priority | Entity         | Complexity | Notes                             |
+| -------- | -------------- | ---------- | --------------------------------- |
+| 1        | Accounts       | Low        | User data, critical path          |
+| 2        | Sessions       | Low        | Transactional data                |
+| 3        | Royalties      | Medium     | Financial data, audit trail       |
+| 4        | Transactions   | Medium     | High volume                       |
+| 5        | Scenarios      | High       | Complex documents, keep in Cosmos |
+| 6        | ContentBundles | High       | Large documents, keep in Cosmos   |
 
 ### 2.3 Rollout Strategy
 
@@ -148,12 +148,12 @@ public record SessionCompletedEvent(Guid SessionId, Guid AccountId);
 
 ### 3.2 Service Integration
 
-| Service | Events Published | Events Consumed |
-|---------|------------------|-----------------|
-| Mystira.App | Account*, Session*, Royalty* | Chain*, Publisher* |
-| Mystira.Chain | IpAsset*, Transaction* | Royalty* |
-| Mystira.Publisher | Purchase*, Content* | Account*, Session* |
-| Mystira.StoryGenerator | Story* | Session*, Content* |
+| Service                | Events Published              | Events Consumed    |
+| ---------------------- | ----------------------------- | ------------------ |
+| Mystira.App            | Account*, Session*, Royalty\* | Chain*, Publisher* |
+| Mystira.Chain          | IpAsset*, Transaction*        | Royalty\*          |
+| Mystira.Publisher      | Purchase*, Content*           | Account*, Session* |
+| Mystira.StoryGenerator | Story\*                       | Session*, Content* |
 
 ### 3.3 Cache Strategy
 
@@ -236,13 +236,13 @@ public interface ICacheService
 
 ## Success Metrics
 
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Data Loss | 0 | Migration validation |
-| Read Latency Impact | < 5ms | P99 latency |
-| Data Reconciliation | 100% | Daily reports |
-| Event Delivery | 99.9% | Message tracking |
-| Cost Reduction | 30% | Azure billing |
+| Metric              | Target | Measurement          |
+| ------------------- | ------ | -------------------- |
+| Data Loss           | 0      | Migration validation |
+| Read Latency Impact | < 5ms  | P99 latency          |
+| Data Reconciliation | 100%   | Daily reports        |
+| Event Delivery      | 99.9%  | Message tracking     |
+| Cost Reduction      | 30%    | Azure billing        |
 
 ---
 
@@ -265,12 +265,12 @@ Mystira.Infra (Terraform)
 
 ## Risk Register
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Data inconsistency | Medium | Critical | Dual-write, reconciliation |
-| Migration downtime | Low | High | Phased rollout, feature flags |
-| Performance regression | Medium | Medium | Load testing, monitoring |
-| Cost overrun | Low | Medium | Budget alerts, optimization |
+| Risk                   | Likelihood | Impact   | Mitigation                    |
+| ---------------------- | ---------- | -------- | ----------------------------- |
+| Data inconsistency     | Medium     | Critical | Dual-write, reconciliation    |
+| Migration downtime     | Low        | High     | Phased rollout, feature flags |
+| Performance regression | Medium     | Medium   | Load testing, monitoring      |
+| Cost overrun           | Low        | Medium   | Budget alerts, optimization   |
 
 ---
 

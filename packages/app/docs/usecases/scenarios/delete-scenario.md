@@ -26,9 +26,9 @@ sequenceDiagram
 
     Client->>Controller: DELETE /api/scenarios/{id}
     Controller->>Service: DeleteScenarioAsync(id)
-    
+
     Service->>UseCase: ExecuteAsync(id)
-    
+
     Note over UseCase: Step 1: Find Scenario
     UseCase->>Repo: GetByIdAsync(id)
     Repo->>DB: Query scenario
@@ -41,7 +41,7 @@ sequenceDiagram
     end
     DB-->>Repo: Scenario
     Repo-->>UseCase: scenario
-    
+
     Note over UseCase: Step 2: Delete Scenario
     UseCase->>Repo: DeleteAsync(id)
     Repo->>DB: Remove entity from DbSet
@@ -49,7 +49,7 @@ sequenceDiagram
     UoW->>DB: Commit transaction
     DB-->>UoW: Success
     UoW-->>UseCase: Success
-    
+
     UseCase-->>Service: true
     Service-->>Controller: true
     Controller-->>Client: 200 OK<br/>(Success)

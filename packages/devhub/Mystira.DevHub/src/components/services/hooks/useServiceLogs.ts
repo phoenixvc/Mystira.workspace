@@ -56,7 +56,7 @@ export function useServiceLogs() {
           const isDuplicate = recentLogs.some(
             (log) =>
               log.message === message &&
-              Math.abs(log.timestamp - newLog.timestamp) < 500,
+              Math.abs(log.timestamp - newLog.timestamp) < 500
           );
 
           if (isDuplicate) {

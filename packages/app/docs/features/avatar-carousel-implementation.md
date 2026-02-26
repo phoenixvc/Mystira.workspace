@@ -1,11 +1,13 @@
 # Avatar Carousel System - Implementation Summary
 
 ## Overview
+
 The Avatar Carousel system has been successfully implemented to allow PWA users to select avatars when creating or editing profiles. The system is age-group aware and provides an admin interface for managing avatar configurations.
 
 ## Key Features
 
 ### 1. Avatar Domain Model
+
 **Location**: `src/Mystira.App.Domain/Models/AvatarConfiguration.cs`
 
 ```csharp
@@ -26,10 +28,12 @@ Structure: `{ "1-2": ["media-id-1", "media-id-2"], "3-5": ["media-id-3"], ... }`
 **File**: `src/Mystira.App.Api/Controllers/AvatarsController.cs`
 
 Endpoints:
+
 - `GET /api/avatars` - Get all avatars grouped by age group
 - `GET /api/avatars/{ageGroup}` - Get avatars for specific age group (e.g., `/api/avatars/3-5`)
 
 Response Format:
+
 ```json
 {
   "ageGroupAvatars": {
@@ -46,6 +50,7 @@ Response Format:
 **File**: `src/Mystira.App.Admin.Api/Controllers/AvatarAdminController.cs`
 
 Endpoints:
+
 - `GET /api/admin/avataradmin` - Get all avatar configurations
 - `GET /api/admin/avataradmin/{ageGroup}` - Get avatars for specific age group
 - `POST /api/admin/avataradmin/{ageGroup}` - Set avatars for age group (bulk replace)
@@ -57,6 +62,7 @@ Endpoints:
 **File**: `src/Mystira.App.Admin.Api/Views/Admin/AvatarManagement.cshtml`
 
 Features:
+
 - Age group selector dropdown (6 age groups)
 - Display current avatars for selected age group with images
 - Search available media files
@@ -71,9 +77,11 @@ Dashboard Link: Added to `/admin` dashboard under "Manage Avatars"
 ### 5. PWA Components
 
 #### AvatarCarousel Component
+
 **File**: `src/Mystira.App.PWA/Components/AvatarCarousel.razor`
 
 Features:
+
 - Displays carousel with large avatar preview
 - Previous/Next navigation buttons (smart disabled state)
 - Avatar counter (e.g., "2 / 5")
@@ -84,13 +92,16 @@ Features:
 - Uses `CachedMystiraImage` component for image display
 
 Props:
+
 - `AgeGroup` (string) - Age group to load avatars for
 - `OnAvatarSelected` (EventCallback<string>) - Called with selected media ID
 
 #### Character Assignment Integration
+
 **File**: `src/Mystira.App.PWA/Pages/CharacterAssignmentPage.razor`
 
 Updated "New Profile" tab:
+
 1. Profile Name input
 2. Age Group dropdown with `@bind:after="OnAgeGroupChanged"` event
 3. Avatar Carousel (displayed when age group is selected)
@@ -102,12 +113,14 @@ Updated "New Profile" tab:
 **File**: `src/Mystira.App.PWA/Services/ApiClient.cs`
 
 New Methods:
+
 - `GetAvatarsAsync()` - Fetch all avatars at app startup
 - `GetAvatarsByAgeGroupAsync(string ageGroup)` - Fetch avatars for specific age group
 
 ### 7. Data Model Updates
 
 **Files**:
+
 - `src/Mystira.App.PWA/Models/CharacterAssignment.cs` - Added `SelectedAvatarMediaId` field
 - `src/Mystira.App.PWA/Models/Avatar.cs` - Response DTOs
 - `src/Mystira.App.Api/Models/ApiModels.cs` - Response models
@@ -126,21 +139,24 @@ _context.Entry(existingFile).Property(e => e.AgeGroupAvatars).IsModified = true;
 ```
 
 **Files Modified**:
+
 - `src/Mystira.App.Api/Services/AvatarApiService.cs`
 - `src/Mystira.App.Admin.Api/Services/AvatarApiService.cs`
 
 ## Database Configuration
 
 **DbContext Files**:
+
 - `src/Mystira.App.Api/Data/MystiraAppDbContext.cs`
 - `src/Mystira.App.Admin.Api/Data/MystiraAppDbContext.cs`
 
 Configuration:
+
 ```csharp
 modelBuilder.Entity<AvatarConfigurationFile>(entity =>
 {
     entity.HasKey(e => e.Id);
-    
+
     if (!isInMemoryDatabase)
     {
         entity.ToContainer("AvatarConfigurationFiles")
@@ -159,6 +175,7 @@ modelBuilder.Entity<AvatarConfigurationFile>(entity =>
 ## Workflow
 
 ### Admin Setup
+
 1. Admin navigates to `/admin/avatars`
 2. Selects an age group from dropdown
 3. Searches for and views available media files (images only)
@@ -167,6 +184,7 @@ modelBuilder.Entity<AvatarConfigurationFile>(entity =>
 6. Admin can remove avatars with the "Remove" button
 
 ### User Experience
+
 1. User goes to character assignment page
 2. Selects "New Profile" tab
 3. Enters profile name
@@ -180,6 +198,7 @@ modelBuilder.Entity<AvatarConfigurationFile>(entity =>
 8. Avatar ID is stored with the profile assignment
 
 ## Age Groups
+
 - "1-2" - Ages 1-2 (Toddlers)
 - "3-5" - Ages 3-5 (Preschoolers)
 - "6-9" - Ages 6-9 (School Age)
@@ -253,6 +272,7 @@ If avatars aren't saving to the database:
 ## Files Modified/Created
 
 ### Created Files (10)
+
 - `src/Mystira.App.Domain/Models/AvatarConfiguration.cs`
 - `src/Mystira.App.Api/Services/IAvatarApiService.cs`
 - `src/Mystira.App.Api/Services/AvatarApiService.cs`
@@ -265,6 +285,7 @@ If avatars aren't saving to the database:
 - `src/Mystira.App.PWA/Components/AvatarCarousel.razor`
 
 ### Modified Files (10)
+
 - `src/Mystira.App.Api/Data/MystiraAppDbContext.cs` (Added DbSet)
 - `src/Mystira.App.Admin.Api/Data/MystiraAppDbContext.cs` (Added DbSet)
 - `src/Mystira.App.Api/Models/ApiModels.cs` (Added response models)
@@ -277,4 +298,5 @@ If avatars aren't saving to the database:
 - `src/Mystira.App.Admin.Api/Views/Admin/Dashboard.cshtml` (Added navigation link)
 
 ## Build Status
+
 ✅ All changes compile successfully with 0 errors and 22 warnings (pre-existing)

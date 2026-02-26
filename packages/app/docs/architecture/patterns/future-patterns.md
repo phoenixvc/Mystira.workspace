@@ -22,6 +22,7 @@ The following patterns have been successfully implemented:
 **Status**: ✅ **IMPLEMENTED** - See [CQRS_PATTERN.md](CQRS_PATTERN.md)
 
 **Implementation Details**:
+
 - MediatR (v12.4.1) for request/response handling
 - Separate Commands (write) and Queries (read)
 - Example implementations in `Application/CQRS/Scenarios/`
@@ -32,6 +33,7 @@ The following patterns have been successfully implemented:
 **Status**: ✅ **IMPLEMENTED** - Part of CQRS implementation
 
 **Implementation Details**:
+
 - Implemented via `ICommandHandler<TCommand, TResponse>` interface
 - Each command has a dedicated handler class
 - Supports both commands with results and void commands
@@ -64,6 +66,7 @@ The following patterns have been successfully implemented:
 **Status**: ✅ **IMPLEMENTED** - MediatR library integrated
 
 **Implementation Details**:
+
 - MediatR (v12.4.1) handles request routing
 - Controllers use `IMediator.Send()` to dispatch commands/queries
 - Decouples controllers from handler implementations
@@ -74,6 +77,7 @@ The following patterns have been successfully implemented:
 **Status**: ✅ **IMPLEMENTED** - See [SPECIFICATION_PATTERN.md](SPECIFICATION_PATTERN.md)
 
 **Implementation Details**:
+
 - `ISpecification<T>` and `BaseSpecification<T>` in Domain layer
 - `SpecificationEvaluator<T>` in Infrastructure.Data
 - Repository support via `ListAsync(spec)`, `GetBySpecAsync(spec)`, `CountAsync(spec)`
@@ -155,24 +159,20 @@ public class PaidPricingStrategy : IPricingStrategy { }
 ## Migration Priority
 
 1. **✅ Completed**:
-
    - ✅ **Command Handler Pattern** - Implemented via MediatR
    - ✅ **Mediator Pattern** - MediatR integrated
    - ✅ **Specification Pattern** - Fully implemented with 8 example specs
    - ✅ **CQRS** - Implemented with Commands and Queries
 
 2. **High Priority**:
-
    - Factory Pattern - For complex domain object creation
    - Domain Events - For event-driven domain logic
 
 3. **Medium Priority**:
-
    - Observer Pattern - When event-driven architecture is needed
    - Strategy Pattern - For algorithm selection
 
 4. **Low Priority**:
-
    - Event Sourcing - When audit requirements become critical
    - Full Event-Driven Architecture - When distributed events are needed
 

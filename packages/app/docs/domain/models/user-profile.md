@@ -52,6 +52,7 @@ Gets the appropriate age group based on current age.
 Gets badges earned for a specific compass axis.
 
 **Parameters**:
+
 - `axis` - The compass axis name
 
 **Returns**: `List<UserBadge>` - List of badges for the axis, ordered by most recent
@@ -61,6 +62,7 @@ Gets badges earned for a specific compass axis.
 Checks if a badge has already been earned.
 
 **Parameters**:
+
 - `badgeConfigurationId` - The badge configuration ID
 
 **Returns**: `bool` - True if badge has been earned
@@ -70,6 +72,7 @@ Checks if a badge has already been earned.
 Adds a new earned badge to the profile.
 
 **Parameters**:
+
 - `badge` - The badge to add
 
 **Returns**: `void`

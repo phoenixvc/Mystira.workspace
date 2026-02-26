@@ -161,7 +161,7 @@ export const useSmartDeploymentStore = create<SmartDeploymentState>(
           regionPriority.map((r) => [
             r,
             { regionId: r, status: "pending" as const },
-          ]),
+          ])
         ),
         deploymentResult: null,
         allAttemptsFailed: false,
@@ -206,7 +206,7 @@ export const useSmartDeploymentStore = create<SmartDeploymentState>(
             {
               resourceGroup,
               location: regionId,
-            },
+            }
           );
 
           if (
@@ -214,7 +214,7 @@ export const useSmartDeploymentStore = create<SmartDeploymentState>(
             !rgResponse.message?.includes("already exists")
           ) {
             throw new Error(
-              rgResponse.error || "Failed to create resource group",
+              rgResponse.error || "Failed to create resource group"
             );
           }
 
@@ -236,7 +236,7 @@ export const useSmartDeploymentStore = create<SmartDeploymentState>(
               deployStorage: true,
               deployCosmos: true,
               deployAppService: true,
-            },
+            }
           );
 
           if (deployResponse.success) {
@@ -385,7 +385,7 @@ export const useSmartDeploymentStore = create<SmartDeploymentState>(
       addLog("Retry requested for current region...");
       // The deployment loop will handle this naturally
     },
-  }),
+  })
 );
 
 // Helper to determine if an error is a region/capacity issue (retryable)
@@ -404,6 +404,6 @@ function isRegionError(error: string): boolean {
 
   const lowerError = error.toLowerCase();
   return retryablePatterns.some((pattern) =>
-    lowerError.includes(pattern.toLowerCase()),
+    lowerError.includes(pattern.toLowerCase())
   );
 }

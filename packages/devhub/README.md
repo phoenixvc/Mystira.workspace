@@ -51,18 +51,15 @@ Once DevHub is running:
 1. **Navigate to Services Tab**: Click "Services" in the sidebar
 
 2. **Configure Repository Root**:
-
    - Repository root auto-detects from current path
    - Click "Browse..." to manually select a different location
    - Optionally enable "Use current branch directory" to run from branch-specific paths
 
 3. **Start Services**:
-
    - Click "Start All" to start all services at once
    - Or start individual services with their "Start" buttons
 
 4. **View Services**:
-
    - Click "Open in Webview" to view in embedded Chromium window
    - Click "Open in External Browser" for system browser
    - Click "Show Logs" to see real-time console output
@@ -97,7 +94,6 @@ Once DevHub is running:
 
 - **Export Sessions**: Export game sessions to CSV with native file dialog
 - **Statistics Panel**:
-  
   - Visual analytics with color-coded completion rates
   - Scenario-by-scenario breakdown
   - Per-account statistics
@@ -107,11 +103,11 @@ Once DevHub is running:
 ### 🔄 Migration Manager
 
 - **Multi-Step Wizard**:
-
   - Step 1: Configure source/destination connection strings
   - Step 2: Select resources (Scenarios, Content Bundles, Media Metadata, Blob Storage)
   - Step 3: Real-time migration progress
   - Step 4: Detailed success/failure results
+
 - **Resource Selection**: Granular control over what to migrate
 - **Error Handling**: Comprehensive error reporting and recovery guidance
 - **Validation**: Pre-migration validation of connection strings
@@ -119,7 +115,6 @@ Once DevHub is running:
 ### ⚙️ Infrastructure Control Panel
 
 - **Tabbed Interface**:
-
   - **Actions**: Validate, Preview, Deploy, and Destroy infrastructure
   - **Bicep Templates**: Monaco Editor with file tree navigation
   - **Azure Resources**: Resource grid with health status and cost tracking
@@ -161,7 +156,7 @@ Once DevHub is running:
 
 ## 🏗️ Architecture
 
-``` text
+```text
 ┌─────────────────────────────────────────┐
 │     React Frontend (TypeScript)         │
 │  - Dashboard                             │
@@ -328,7 +323,7 @@ npm run tauri:build
 
 ## 📂 Project Structure
 
-``` text
+```text
 Mystira.DevHub/
 ├── src/                              # React frontend
 │   ├── components/
@@ -469,6 +464,7 @@ Mystira.DevHub/
 For one-time migrations or CI/CD integration, use the command-line scripts:
 
 **Linux/macOS:**
+
 ```bash
 # Dry-run migration to dev environment
 ./scripts/migrate-cosmos-db.sh --environment dev --dry-run
@@ -481,6 +477,7 @@ For one-time migrations or CI/CD integration, use the command-line scripts:
 ```
 
 **Windows (PowerShell):**
+
 ```powershell
 # Dry-run migration to dev environment
 .\scripts\migrate-cosmos-db.ps1 -Environment dev -DryRun
@@ -692,7 +689,7 @@ public async Task<CommandResponse> MyFeatureAsync(JsonElement args) {
 **5. Call from React**:
 
 ```typescript
-const response = await invoke('my_feature', { param: 'value' });
+const response = await invoke("my_feature", { param: "value" });
 ```
 
 ### Code Style

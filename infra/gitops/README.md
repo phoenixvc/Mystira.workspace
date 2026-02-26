@@ -116,11 +116,13 @@ See `.github/workflows/gitops-apps.yml` for an example workflow that validates m
 To remove and reinstall the GitOps agent:
 
 1. **Delete the agent manifest**:
+
    ```bash
    kubectl delete -f infra/gitops/harness-agent.yaml -n harness-gitops
    ```
 
 2. **Or delete the entire namespace** (removes all GitOps resources):
+
    ```bash
    kubectl delete namespace harness-gitops
    ```
@@ -135,6 +137,7 @@ To remove and reinstall the GitOps agent:
 To roll back an application to a previous state:
 
 1. **Revert the Git commit** for the affected application:
+
    ```bash
    git log --oneline infra/gitops/applications/
    git checkout <previous-commit> -- infra/gitops/applications/<app>.yaml

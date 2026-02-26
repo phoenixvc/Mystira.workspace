@@ -15,6 +15,7 @@ This PRD defines the requirements for full compliance with the Children's Online
 **Current Status:** COPPA compliance features are **NOT IMPLEMENTED**. A prominent banner has been added to the PWA alerting stakeholders.
 
 **Critical Path Items:**
+
 1. Age gate before any data collection
 2. Parental consent mechanism with verifiable methods
 3. Parent dashboard for oversight and control
@@ -26,13 +27,17 @@ This PRD defines the requirements for full compliance with the Children's Online
 ## Background & Problem Statement
 
 ### **Business Context**
+
 Mystira is a dynamic storytelling platform designed for children, featuring character progression, developmental tracking, and interactive narratives. Under COPPA:
+
 - **Children under 13** require verifiable parental consent before personal information collection
 - **Parents** must have controls to review, delete, and manage their child's data
 - **Platform** must minimize data collection and implement strong privacy protections
 
 ### **Regulatory Requirements**
+
 COPPA mandates:
+
 - **Notice:** Clear privacy policy explaining data practices
 - **Verifiable Parental Consent:** Multiple acceptable methods (credit card, government ID, video call, etc.)
 - **Parent Access:** Ability to review child's personal information
@@ -42,6 +47,7 @@ COPPA mandates:
 - **Prohibition:** No conditioning participation on disclosing more information than necessary
 
 ### **Current State**
+
 - ❌ No age gate
 - ❌ No parental consent system
 - ❌ No parent dashboard
@@ -57,26 +63,29 @@ COPPA mandates:
 ## Goals & Success Metrics
 
 ### **Business Goals**
+
 1. **Legal Compliance:** Achieve 100% COPPA compliance
 2. **Parent Trust:** Build confidence through transparency and control
 3. **User Experience:** Minimize friction while ensuring safety
 4. **Operational Excellence:** Scalable, auditable consent and data management
 
 ### **Success Metrics**
-| Metric | Target | Measurement |
-|--------|--------|-------------|
-| Parental Consent Approval Rate | 95%+ | % of consent requests approved |
-| Consent Verification Time | < 24 hours | Time from request to verification |
-| Parent Dashboard Adoption | 80%+ | % of parents who use dashboard |
-| Data Deletion Response Time | < 7 days | Time to fulfill deletion requests |
-| Zero FTC Violations | 100% | No compliance failures |
-| Parent Satisfaction (NPS) | 70+ | Survey score |
+
+| Metric                         | Target     | Measurement                       |
+| ------------------------------ | ---------- | --------------------------------- |
+| Parental Consent Approval Rate | 95%+       | % of consent requests approved    |
+| Consent Verification Time      | < 24 hours | Time from request to verification |
+| Parent Dashboard Adoption      | 80%+       | % of parents who use dashboard    |
+| Data Deletion Response Time    | < 7 days   | Time to fulfill deletion requests |
+| Zero FTC Violations            | 100%       | No compliance failures            |
+| Parent Satisfaction (NPS)      | 70+        | Survey score                      |
 
 ---
 
 ## User Personas
 
 ### **Primary: Parents/Guardians**
+
 - **Age:** 25-45
 - **Tech Savviness:** Varies (design for low to high)
 - **Motivations:** Child's safety, development, entertainment
@@ -88,6 +97,7 @@ COPPA mandates:
   - Trust signals (certifications, transparency)
 
 ### **Secondary: Children (Under 13)**
+
 - **Age:** 5-12 (varies by family)
 - **Tech Savviness:** Growing, requires guidance
 - **Motivations:** Fun stories, character progression, achievements
@@ -97,6 +107,7 @@ COPPA mandates:
   - No exposure to personal data flows
 
 ### **Tertiary: Platform Administrators**
+
 - **Role:** Support, compliance, operations
 - **Needs:**
   - Consent audit trails
@@ -109,12 +120,14 @@ COPPA mandates:
 ## Functional Requirements
 
 ### **FR-1: Age Gate**
+
 **Priority:** 🔴 Critical
 **Status:** Not Implemented
 
 **Description:** Implement age verification before ANY data collection or account creation.
 
 **Requirements:**
+
 - **FR-1.1:** Display age gate on first visit (before signup/signin)
 - **FR-1.2:** Ask for birth date or age
 - **FR-1.3:** If under 13, redirect to parental consent flow
@@ -123,12 +136,14 @@ COPPA mandates:
 - **FR-1.6:** Block all personal data collection until parental consent obtained
 
 **Acceptance Criteria:**
+
 - ✅ Age gate appears before signup/signin
 - ✅ Under-13 users cannot create accounts without parental consent
 - ✅ Age determination does not store birth dates (COPPA-compliant)
 - ✅ Clear messaging explains why parental consent is required
 
 **Edge Cases:**
+
 - User lies about age → Detected via behavior patterns, account review
 - User refreshes page → Age gate reappears until consent obtained
 - Multiple children in household → Parent dashboard handles multiple child profiles
@@ -136,12 +151,14 @@ COPPA mandates:
 ---
 
 ### **FR-2: Parental Consent Request**
+
 **Priority:** 🔴 Critical
 **Status:** Not Implemented
 
 **Description:** Implement verifiable parental consent mechanism before collecting children's personal information.
 
 **Requirements:**
+
 - **FR-2.1:** Collect parent email (separate from child profile)
 - **FR-2.2:** Send consent request email with:
   - Clear explanation of data practices
@@ -163,6 +180,7 @@ COPPA mandates:
 - **FR-2.6:** Consent expiration: None (or re-verify annually)
 
 **Acceptance Criteria:**
+
 - ✅ Parent receives clear consent request email
 - ✅ At least one verification method available
 - ✅ Consent audit trail maintained
@@ -170,6 +188,7 @@ COPPA mandates:
 - ✅ FTC-compliant consent process
 
 **Edge Cases:**
+
 - Parent doesn't respond → Reminder emails (3x over 30 days), then expire request
 - Invalid parent email → Request retry with validation
 - Verification fails → Offer alternative methods
@@ -184,6 +203,7 @@ COPPA mandates:
 **Description:** Provide parents with oversight and control over their child's data and activity.
 
 **Requirements:**
+
 - **FR-3.1:** Parent login (separate from child account)
 - **FR-3.2:** Dashboard Features:
   - **Activity Log:** View child's game sessions, choices, progress (sanitized)
@@ -204,6 +224,7 @@ COPPA mandates:
 - **FR-3.4:** Multi-child support: One parent can manage multiple child accounts
 
 **Acceptance Criteria:**
+
 - ✅ Parent can log in securely
 - ✅ All child data is viewable
 - ✅ Export functionality works (JSON + PDF)
@@ -212,6 +233,7 @@ COPPA mandates:
 - ✅ Clear, non-technical language
 
 **Edge Cases:**
+
 - Multiple parents per child → Primary + secondary parent roles
 - Parent forgets password → Secure recovery via email + verification
 - Child tries to access parent dashboard → Separate auth system prevents access
@@ -219,12 +241,14 @@ COPPA mandates:
 ---
 
 ### **FR-4: Data Minimization**
+
 **Priority:** 🔴 Critical
 **Status:** Partially Implemented
 
 **Description:** Collect only the minimum necessary personal information from children.
 
 **Requirements:**
+
 - **FR-4.1:** Required Fields Only:
   - **Required:** Display name (pseudonymous encouraged)
   - **Optional:** Age range (not exact birth date)
@@ -235,6 +259,7 @@ COPPA mandates:
 - **FR-4.5:** Anonymous usage analytics only (no cross-session tracking)
 
 **Acceptance Criteria:**
+
 - ✅ Signup form requests minimal fields
 - ✅ No PII in server logs
 - ✅ No tracking cookies without consent
@@ -243,12 +268,14 @@ COPPA mandates:
 ---
 
 ### **FR-5: Data Deletion & Retention**
+
 **Priority:** 🔴 Critical
 **Status:** Not Implemented
 
 **Description:** Implement data deletion workflows and retention policies.
 
 **Requirements:**
+
 - **FR-5.1:** Data Retention Policy:
   - Active accounts: Indefinite (with parent consent)
   - Inactive accounts: 180 days warning → 365 days deletion
@@ -270,6 +297,7 @@ COPPA mandates:
   - Compliance report generation
 
 **Acceptance Criteria:**
+
 - ✅ Parent can request deletion from dashboard
 - ✅ Deletion completes within 7 days
 - ✅ All child data removed from all systems
@@ -279,12 +307,14 @@ COPPA mandates:
 ---
 
 ### **FR-6: Privacy Policy & Notice**
+
 **Priority:** 🔴 Critical
 **Status:** Not Implemented
 
 **Description:** Provide clear, COPPA-compliant privacy notice.
 
 **Requirements:**
+
 - **FR-6.1:** Privacy Policy Document:
   - Types of information collected
   - How information is used
@@ -300,6 +330,7 @@ COPPA mandates:
 - **FR-6.4:** Available before any data collection
 
 **Acceptance Criteria:**
+
 - ✅ Privacy policy published and accessible
 - ✅ FTC-compliant content
 - ✅ Legal review completed
@@ -308,12 +339,14 @@ COPPA mandates:
 ---
 
 ### **FR-7: Data Security**
+
 **Priority:** 🔴 Critical
 **Status:** Partially Implemented
 
 **Description:** Implement reasonable security measures to protect children's data.
 
 **Requirements:**
+
 - **FR-7.1:** Encryption:
   - HTTPS for all connections (✅ Implemented)
   - At-rest encryption for database (✅ Azure Cosmos DB default)
@@ -332,6 +365,7 @@ COPPA mandates:
   - Incident response procedures
 
 **Acceptance Criteria:**
+
 - ✅ All data encrypted in transit and at rest
 - ✅ Access controls enforced
 - ✅ Secrets managed securely
@@ -343,30 +377,35 @@ COPPA mandates:
 ## Non-Functional Requirements
 
 ### **NFR-1: Performance**
+
 - Consent request email delivery: < 60 seconds
 - Parent dashboard load time: < 2 seconds (P99)
 - Data export generation: < 5 minutes
 - Data deletion completion: < 7 days (soft delete immediate)
 
 ### **NFR-2: Scalability**
+
 - Support 100,000+ parent accounts
 - Support 500,000+ child accounts
 - Handle 1,000+ concurrent parent dashboard users
 - Consent verification: 10,000+ requests/day
 
 ### **NFR-3: Reliability**
+
 - Parent dashboard uptime: 99.9%
 - Consent system uptime: 99.95%
 - Data deletion SLA: 100% within 7 days
 - Zero data loss
 
 ### **NFR-4: Usability**
+
 - Parent dashboard mobile-responsive
 - Consent flow completable in < 5 minutes
 - Privacy policy readable by 8th grade level
 - Multilingual support (initially: English, Spanish)
 
 ### **NFR-5: Compliance**
+
 - 100% COPPA adherence
 - Regular FTC compliance audits
 - Incident response plan (< 1 hour notification)
@@ -539,34 +578,37 @@ COPPA mandates:
 
 ### **API Endpoints**
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/coppa/age-gate` | Submit age verification | None |
-| POST | `/api/coppa/consent/request` | Request parental consent | None |
-| POST | `/api/coppa/consent/verify` | Verify consent (callback) | Signed token |
-| GET | `/api/parent/dashboard` | Get parent dashboard data | Parent auth |
-| POST | `/api/parent/data-export` | Export child data | Parent auth |
-| POST | `/api/parent/data-delete` | Request account deletion | Parent auth |
-| GET | `/api/parent/activity-log` | Get child activity | Parent auth |
-| PUT | `/api/parent/content-controls` | Update content filters | Parent auth |
+| Method | Endpoint                       | Description               | Auth         |
+| ------ | ------------------------------ | ------------------------- | ------------ |
+| POST   | `/api/coppa/age-gate`          | Submit age verification   | None         |
+| POST   | `/api/coppa/consent/request`   | Request parental consent  | None         |
+| POST   | `/api/coppa/consent/verify`    | Verify consent (callback) | Signed token |
+| GET    | `/api/parent/dashboard`        | Get parent dashboard data | Parent auth  |
+| POST   | `/api/parent/data-export`      | Export child data         | Parent auth  |
+| POST   | `/api/parent/data-delete`      | Request account deletion  | Parent auth  |
+| GET    | `/api/parent/activity-log`     | Get child activity        | Parent auth  |
+| PUT    | `/api/parent/content-controls` | Update content filters    | Parent auth  |
 
 ---
 
 ## Dependencies & Integration Points
 
 ### **Internal Dependencies**
+
 - **Authentication System:** Parent authentication separate from child accounts
 - **Email Service:** Azure Communication Services for consent emails
 - **User Profile System:** Extend to include age, consent status
 - **Game Session System:** Sanitize activity logs for parent viewing
 
 ### **External Dependencies**
+
 - **Credit Card Verification:** Stripe, PayPal, or similar (micro-transaction)
 - **ID Verification:** Persona, Onfido, or Jumio for government ID
 - **Video Call Scheduling:** Calendly or custom scheduling (for video verification)
 - **Legal Review:** External counsel for privacy policy and compliance attestation
 
 ### **Third-Party Services (Potential)**
+
 - **Privo:** COPPA-compliant consent platform (turnkey solution)
 - **SuperAwesome:** Kid-safe technology platform
 - **Kidoz:** Parental consent and kid-safe SDK
@@ -576,6 +618,7 @@ COPPA mandates:
 ## Rollout Plan
 
 ### **Phase 1: Foundation (Weeks 1-2)**
+
 - ✅ Remove hardcoded secrets (completed in this PR)
 - ✅ Add PII redaction (completed in this PR)
 - ✅ Add security headers (completed in this PR)
@@ -583,6 +626,7 @@ COPPA mandates:
 - Set up parent authentication system
 
 ### **Phase 2: Age Gate & Consent Request (Weeks 3-4)**
+
 - Implement age gate component
 - Build parental consent request flow
 - Integrate email service for consent requests
@@ -590,6 +634,7 @@ COPPA mandates:
 - Create consent audit logging
 
 ### **Phase 3: Parent Dashboard (Weeks 5-6)**
+
 - Build parent login/dashboard UI
 - Implement activity log viewing
 - Add data export functionality
@@ -597,12 +642,14 @@ COPPA mandates:
 - Mobile responsiveness
 
 ### **Phase 4: Data Lifecycle (Week 7)**
+
 - Implement data deletion jobs
 - Set up data retention policies
 - Build audit trail reporting
 - Create compliance dashboard (admin)
 
 ### **Phase 5: Testing & Compliance (Week 8)**
+
 - End-to-end testing of all flows
 - Security audit and penetration testing
 - Legal compliance review
@@ -610,6 +657,7 @@ COPPA mandates:
 - User acceptance testing (parents)
 
 ### **Phase 6: Launch (Week 9)**
+
 - Deploy to production
 - Monitor consent request success rates
 - Parent onboarding support
@@ -620,6 +668,7 @@ COPPA mandates:
 ## Success Criteria
 
 ### **Go-Live Checklist**
+
 - [ ] Age gate implemented and tested
 - [ ] At least one consent verification method working
 - [ ] Parental consent records stored securely
@@ -633,6 +682,7 @@ COPPA mandates:
 - [ ] Support team trained
 
 ### **Post-Launch Monitoring**
+
 - Daily: Consent request success rate
 - Daily: Data deletion request fulfillment rate
 - Weekly: Parent dashboard adoption rate
@@ -644,15 +694,15 @@ COPPA mandates:
 
 ## Risks & Mitigation
 
-| Risk | Impact | Probability | Mitigation |
-|------|--------|-------------|------------|
-| Low parent consent approval rate | High | Medium | Streamline verification, offer multiple methods |
-| FTC audit failure | Critical | Low | Pre-launch legal review, regular compliance checks |
-| Data deletion not complete | Critical | Low | Automated testing, audit trails, 7-day SLA buffer |
-| Parent dashboard poor UX | Medium | Medium | User testing, iterative design, clear documentation |
-| Credit card verification friction | Medium | High | Offer alternative methods, explain necessity |
-| Consent email not delivered | Medium | Medium | Email deliverability testing, retry logic, parent support |
-| Data breach during implementation | Critical | Low | Security audit, encryption, access controls |
+| Risk                              | Impact   | Probability | Mitigation                                                |
+| --------------------------------- | -------- | ----------- | --------------------------------------------------------- |
+| Low parent consent approval rate  | High     | Medium      | Streamline verification, offer multiple methods           |
+| FTC audit failure                 | Critical | Low         | Pre-launch legal review, regular compliance checks        |
+| Data deletion not complete        | Critical | Low         | Automated testing, audit trails, 7-day SLA buffer         |
+| Parent dashboard poor UX          | Medium   | Medium      | User testing, iterative design, clear documentation       |
+| Credit card verification friction | Medium   | High        | Offer alternative methods, explain necessity              |
+| Consent email not delivered       | Medium   | Medium      | Email deliverability testing, retry logic, parent support |
+| Data breach during implementation | Critical | Low         | Security audit, encryption, access controls               |
 
 ---
 
@@ -670,16 +720,19 @@ COPPA mandates:
 ## Resources & References
 
 ### **FTC COPPA Resources**
+
 - [COPPA Rule Overview](https://www.ftc.gov/business-guidance/privacy-security/childrens-privacy)
 - [Complying with COPPA: Frequently Asked Questions](https://www.ftc.gov/business-guidance/resources/complying-coppa-frequently-asked-questions)
 - [COPPA Safe Harbor Programs](https://www.ftc.gov/business-guidance/privacy-security/childrens-privacy/coppa-safe-harbor-programs)
 
 ### **Technical References**
+
 - Age gate best practices: [Common Sense Media](https://www.commonsensemedia.org/)
 - Parental consent UX: [Privo Case Studies](https://www.privo.com/)
 - Data minimization: [Privacy by Design Principles](https://www.ipc.on.ca/wp-content/uploads/resources/7foundationalprinciples.pdf)
 
 ### **Internal Documents**
+
 - `docs/best-practices.md` - Security and privacy standards
 - `PRODUCTION_REVIEW_REPORT.md` - BUG-1 (secrets), BUG-4 (PII logging), FEAT-INC-1 (this PRD)
 - `docs/POTENTIAL_ENHANCEMENTS_ROADMAP.md` - Section 10 (COPPA implementation roadmap)
@@ -689,17 +742,19 @@ COPPA mandates:
 ## Approval & Sign-Off
 
 **Required Approvals:**
+
 - [ ] Product Owner
 - [ ] Engineering Lead
 - [ ] Legal Counsel
 - [ ] Privacy Officer (if applicable)
 - [ ] Executive Sponsor
 
-**Approval Date:** _________________
+**Approval Date:** **\*\*\*\***\_**\*\*\*\***
 
 **Notes:**
-_____________________________________________________________________________
 
 ---
 
-*This PRD is a living document and will be updated as implementation progresses and requirements evolve.*
+---
+
+_This PRD is a living document and will be updated as implementation progresses and requirements evolve._

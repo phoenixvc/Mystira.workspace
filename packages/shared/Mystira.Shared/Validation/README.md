@@ -76,15 +76,15 @@ When validation fails, a `ValidationException` is thrown and converted by `Globa
 
 ```json
 {
-    "type": "https://tools.ietf.org/html/rfc7807",
-    "title": "Validation Error",
-    "status": 400,
-    "detail": "One or more validation errors occurred.",
-    "errors": {
-        "Name": ["Name is required"],
-        "Email": ["Invalid email format", "Email already in use"],
-        "Age": ["Age must be between 0 and 150"]
-    }
+  "type": "https://tools.ietf.org/html/rfc7807",
+  "title": "Validation Error",
+  "status": 400,
+  "detail": "One or more validation errors occurred.",
+  "errors": {
+    "Name": ["Name is required"],
+    "Email": ["Invalid email format", "Email already in use"],
+    "Age": ["Age must be between 0 and 150"]
+  }
 }
 ```
 

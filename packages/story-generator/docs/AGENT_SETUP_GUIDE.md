@@ -43,6 +43,7 @@ cd Mystira.StoryGenerator
 ```
 
 Replace:
+
 - `your-project.azure.com/api/projects/your-project` with your actual Azure AI Foundry endpoint
 - `gpt-4.1` with your model deployment name
 
@@ -121,7 +122,6 @@ If you prefer to create agents manually or the script doesn't work in your envir
 
 1. Click **+ New Agent**
 2. Fill in the details:
-
    - **Name**: `mystira-writer-v01`
    - **Model**: Select your deployment (e.g., `gpt-4.1`)
    - **Description**: `Writer Agent - Generates initial story content based on prompts and age-appropriate guidelines`
@@ -376,6 +376,7 @@ dotnet build
 ```
 
 Should complete without errors. If you see a validation error about agent IDs, double-check:
+
 - Agent IDs start with `asst`
 - No placeholder values like `mystira-writer-v01`
 - Proper JSON formatting (no trailing commas)
@@ -413,6 +414,7 @@ Should return a session ID without errors about invalid assistant IDs.
 **Cause**: Configuration still has placeholder values.
 
 **Solution**:
+
 1. Check `appsettings.json` - all agent IDs must start with `asst`
 2. Run the setup script or create agents manually
 3. Update configuration with actual agent IDs
@@ -422,6 +424,7 @@ Should return a session ID without errors about invalid assistant IDs.
 **Cause**: Invalid Azure credentials or endpoint.
 
 **Solution**:
+
 1. Verify you're logged in: `az login`
 2. Check endpoint URL is correct
 3. Verify you have permissions on the Azure AI project
@@ -431,6 +434,7 @@ Should return a session ID without errors about invalid assistant IDs.
 **Cause**: The model specified doesn't exist in your Azure AI project.
 
 **Solution**:
+
 1. Go to Azure AI Foundry → Deployments
 2. Note the exact deployment name (case-sensitive)
 3. Use that name in the setup script or agent configuration

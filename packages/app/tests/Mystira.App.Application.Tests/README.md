@@ -5,6 +5,7 @@ Integration tests for CQRS command and query handlers in the Mystira.App applica
 ## Overview
 
 This test project contains comprehensive integration tests for the CQRS implementation, including:
+
 - Command handler tests (create, update, delete operations)
 - Query handler tests (read operations)
 - Caching behavior tests
@@ -304,6 +305,7 @@ public async Task Query_VariousScenarios()
 ### 4. Use Descriptive Test Names
 
 Test names should describe:
+
 - **What** is being tested
 - **Under what conditions**
 - **What the expected outcome is**
@@ -425,7 +427,7 @@ These tests are designed to run in CI/CD pipelines:
   uses: EnricoMi/publish-unit-test-result-action@v2
   if: always()
   with:
-    files: '**/test-results.trx'
+    files: "**/test-results.trx"
 ```
 
 ---

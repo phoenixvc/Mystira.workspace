@@ -94,6 +94,7 @@ We will create two separate API projects:
 ### Routing Convention
 
 **User API** (`/api/`):
+
 ```
 POST   /api/gamesessions          - Create session for self
 GET    /api/gamesessions/{id}     - Get own session
@@ -101,6 +102,7 @@ PUT    /api/userprofiles/me       - Update own profile
 ```
 
 **Admin API** (`/adminapi/`):
+
 ```
 DELETE /adminapi/scenarios/{id}   - Delete any scenario (admin only)
 GET    /adminapi/users             - List all users (admin only)
@@ -110,12 +112,14 @@ PUT    /adminapi/badges/{id}       - Update badge config (admin only)
 ### Decision Criteria
 
 An operation belongs in **Admin API** if it:
+
 - Affects other users' resources
 - Modifies system configuration
 - Requires elevated permissions
 - Is system-level (not user-specific)
 
 An operation belongs in **User API** if it:
+
 - Affects only the current user's resources
 - Is self-service
 - Requires only user authentication
@@ -208,6 +212,7 @@ Mystira.App/
 ### Example Controller Comparison
 
 **User API** - Self-Service:
+
 ```csharp
 // Api/Controllers/UserProfilesController.cs
 [ApiController]
@@ -228,6 +233,7 @@ public class UserProfilesController : ControllerBase
 ```
 
 **Admin API** - System-Level:
+
 ```csharp
 // Admin.Api/Controllers/UsersAdminController.cs
 [ApiController]
@@ -258,11 +264,13 @@ public class UsersAdminController : ControllerBase
 ### Authorization Strategy
 
 **User API**:
+
 - `[Authorize]` - Standard user authentication
 - User can only access own resources
 - Validate user ID from JWT claims
 
 **Admin API**:
+
 - `[Authorize(Roles = "Admin")]` - Admin role required
 - Admin can access any resources
 - Additional audit logging for all operations
@@ -270,12 +278,14 @@ public class UsersAdminController : ControllerBase
 ### Deployment Configuration
 
 **User API**:
+
 - Deploy to public-facing load balancer
 - High availability (multiple instances)
 - CDN for static assets
 - Rate limiting for public access
 
 **Admin API**:
+
 - Deploy to internal network (VPN required)
 - Single instance sufficient
 - No public internet access

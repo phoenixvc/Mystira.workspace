@@ -32,12 +32,12 @@ The frontend does not implement or duplicate domain/business rules; instead, it 
 
 ### Primary Personas
 
-| Persona | Needs | Pain Points Addressed |
-|---------|-------|----------------------|
-| Authors/Illustrators | User-friendly, modern interface for collaboration, recognition | Difficult interfaces, confusion |
-| Publishers | Visibility into contributor history, streamlined registration | Manual input, fragmented tools |
-| Legal Administrators | Audit-friendly UI, quick search and record export | Tedious review, lack of transparency |
-| Platform Operators | Efficient user onboarding, low support overhead | Onboarding friction, UX inconsistencies |
+| Persona              | Needs                                                          | Pain Points Addressed                   |
+| -------------------- | -------------------------------------------------------------- | --------------------------------------- |
+| Authors/Illustrators | User-friendly, modern interface for collaboration, recognition | Difficult interfaces, confusion         |
+| Publishers           | Visibility into contributor history, streamlined registration  | Manual input, fragmented tools          |
+| Legal Administrators | Audit-friendly UI, quick search and record export              | Tedious review, lack of transparency    |
+| Platform Operators   | Efficient user onboarding, low support overhead                | Onboarding friction, UX inconsistencies |
 
 The UI is designed to serve these groups by presenting and orchestrating backend-driven flows and data.
 
@@ -91,12 +91,12 @@ There is no hexagonal/domain layering within the frontend; all contracts and bus
 
 ### Core Architecture
 
-| Component | Responsibility | Technology |
-|-----------|---------------|------------|
-| React SPA | UX/UI, state, API data-fetch/presentation, error handling | React, React Router, Hooks |
-| API Clients | Fetch/mutate via REST/gRPC, handle auth, parse errors | Axios/grpc-web, JWT OAuth |
-| State | Represents user and workflow state as mirrored from backend | React Context/Redux/Zustand |
-| Backend APIs | Full business logic, validation, consensus | .NET REST APIs, gRPC |
+| Component    | Responsibility                                              | Technology                  |
+| ------------ | ----------------------------------------------------------- | --------------------------- |
+| React SPA    | UX/UI, state, API data-fetch/presentation, error handling   | React, React Router, Hooks  |
+| API Clients  | Fetch/mutate via REST/gRPC, handle auth, parse errors       | Axios/grpc-web, JWT OAuth   |
+| State        | Represents user and workflow state as mirrored from backend | React Context/Redux/Zustand |
+| Backend APIs | Full business logic, validation, consensus                  | .NET REST APIs, gRPC        |
 
 - React is concerned solely with user interaction and API consumption.
 - All workflows, data validation, and state transitions occur server-side.
@@ -121,12 +121,12 @@ All responses (successes, failures, updated resource states) are rendered in the
 
 The frontend uses only lightweight data models that exactly reflect backend contracts, for display and input purposes. No local domain logic.
 
-| Model | Description (from Backend) | Fields (as consumed by frontend) |
-|-------|---------------------------|----------------------------------|
-| Story | Project metadata and attribution/state | id, title, summary, contributors[], status, timestamps |
-| User | Authenticated user info, project role | id, name, email, roles |
-| Attribution | Contributor's split, role, approval state | storyId, userId, role, split, approvalStatus |
-| AuditLog | Immutable event log entry, from backend | eventType, actor, timestamp, details |
+| Model       | Description (from Backend)                | Fields (as consumed by frontend)                       |
+| ----------- | ----------------------------------------- | ------------------------------------------------------ |
+| Story       | Project metadata and attribution/state    | id, title, summary, contributors[], status, timestamps |
+| User        | Authenticated user info, project role     | id, name, email, roles                                 |
+| Attribution | Contributor's split, role, approval state | storyId, userId, role, split, approvalStatus           |
+| AuditLog    | Immutable event log entry, from backend   | eventType, actor, timestamp, details                   |
 
 Frontend models are strictly for typing, rendering, and form handling—not enforcing or duplicating business logic.
 
@@ -187,12 +187,12 @@ Frontend testing prioritizes API contract validation, UI/UX flows, accessibility
 - **Integration Tests:** Simulate API responses to verify all UI edge cases, error handling, and state transitions.
 - **E2E Scenarios:** Cypress-driven tests mimic real user behavior, covering full workflow paths.
 
-| Tool/Framework | Use Case | Justification |
-|----------------|----------|---------------|
-| Jest/React Testing Library | Unit/component tests, UI logic | Leading React test solutions |
-| Cypress | End-to-end, cross-browser test flows | Widely adopted, robust selector support |
-| msw.js/Mock Service Worker | API mocking/stubbing for development and CI | Accurate contract mocking, ease of use |
-| axe-core/jest-axe | Accessibility audits and linting | Automated, comprehensive a11y coverage |
+| Tool/Framework             | Use Case                                    | Justification                           |
+| -------------------------- | ------------------------------------------- | --------------------------------------- |
+| Jest/React Testing Library | Unit/component tests, UI logic              | Leading React test solutions            |
+| Cypress                    | End-to-end, cross-browser test flows        | Widely adopted, robust selector support |
+| msw.js/Mock Service Worker | API mocking/stubbing for development and CI | Accurate contract mocking, ease of use  |
+| axe-core/jest-axe          | Accessibility audits and linting            | Automated, comprehensive a11y coverage  |
 
 ### Testing Environments
 
@@ -203,14 +203,14 @@ Frontend testing prioritizes API contract validation, UI/UX flows, accessibility
 
 ### Test Cases
 
-| Test Case | Coverage | Expected Outcome |
-|-----------|----------|------------------|
-| Project Creation from UI | Auth → form input → POST API | Project appears in user dashboard |
-| Attribution Form Submission | Valid/invalid input, error display | Accurate error messages, valid post |
-| Consensus Approval Flow | Approve/reject paths, state updates | Workflow reflects backend consensus |
-| API Error Handling | Empty, 4xx, 5xx, offline, slow API | User sees actionable UI errors |
-| Audit Log Browsing | Fetch paged logs, filter, edge cases | Correct ordering, empty states shown |
-| Accessibility (a11y) Navigation | Tab, screen reader, mobile input | WCAG compliance, no accessibility regressions |
+| Test Case                       | Coverage                             | Expected Outcome                              |
+| ------------------------------- | ------------------------------------ | --------------------------------------------- |
+| Project Creation from UI        | Auth → form input → POST API         | Project appears in user dashboard             |
+| Attribution Form Submission     | Valid/invalid input, error display   | Accurate error messages, valid post           |
+| Consensus Approval Flow         | Approve/reject paths, state updates  | Workflow reflects backend consensus           |
+| API Error Handling              | Empty, 4xx, 5xx, offline, slow API   | User sees actionable UI errors                |
+| Audit Log Browsing              | Fetch paged logs, filter, edge cases | Correct ordering, empty states shown          |
+| Accessibility (a11y) Navigation | Tab, screen reader, mobile input     | WCAG compliance, no accessibility regressions |
 
 ### Reporting & Metrics
 
@@ -240,11 +240,11 @@ Deployment focuses on robust, repeatable React app delivery and CI/CD hygiene.
 - Rollout health checks and canary deploys
 - Real-time error and usage monitoring
 
-| Tool/Framework | Purpose | Rationale |
-|----------------|---------|-----------|
-| GitHub Actions | Automated CI/CD | Fast setup, wide integration |
-| Netlify/Vercel | Static hosting | Seamless SPA/CDN deploys, SSL |
-| Docker | Containerization | Build-time reproducibility |
+| Tool/Framework   | Purpose              | Rationale                           |
+| ---------------- | -------------------- | ----------------------------------- |
+| GitHub Actions   | Automated CI/CD      | Fast setup, wide integration        |
+| Netlify/Vercel   | Static hosting       | Seamless SPA/CDN deploys, SSL       |
+| Docker           | Containerization     | Build-time reproducibility          |
 | Sentry/LogRocket | Error/usage tracking | Deep frontend telemetry, actionable |
 
 ### Deployment Steps

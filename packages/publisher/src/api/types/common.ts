@@ -28,7 +28,7 @@ export interface PaginationParams {
 
 export interface SortParams {
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
 }
 
-export type RequestStatus = 'idle' | 'loading' | 'success' | 'error';
+export type RequestStatus = "idle" | "loading" | "success" | "error";

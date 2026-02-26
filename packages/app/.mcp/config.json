@@ -3,11 +3,7 @@
   "mcpServers": {
     "filesystem": {
       "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-filesystem",
-        "."
-      ],
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
       "description": "Access to repository files and directories"
     },
     "github": {
@@ -218,17 +214,29 @@
     },
     "run-api": {
       "command": "dotnet",
-      "args": ["run", "--project", "src/Mystira.App.Api/Mystira.App.Api.csproj"],
+      "args": [
+        "run",
+        "--project",
+        "src/Mystira.App.Api/Mystira.App.Api.csproj"
+      ],
       "description": "Run the public API"
     },
     "run-admin-api": {
       "command": "dotnet",
-      "args": ["run", "--project", "src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj"],
+      "args": [
+        "run",
+        "--project",
+        "src/Mystira.App.Admin.Api/Mystira.App.Admin.Api.csproj"
+      ],
       "description": "Run the admin API"
     },
     "run-pwa": {
       "command": "dotnet",
-      "args": ["run", "--project", "src/Mystira.App.PWA/Mystira.App.PWA.csproj"],
+      "args": [
+        "run",
+        "--project",
+        "src/Mystira.App.PWA/Mystira.App.PWA.csproj"
+      ],
       "description": "Run the Blazor PWA"
     }
   },

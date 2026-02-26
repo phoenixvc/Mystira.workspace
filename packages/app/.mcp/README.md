@@ -5,6 +5,7 @@ This directory contains the Model Context Protocol (MCP) configuration for the M
 ## What is MCP?
 
 Model Context Protocol (MCP) is an open protocol that enables AI assistants to:
+
 - Access repository files and directories
 - Execute build, test, and development commands
 - Query GitHub issues and pull requests
@@ -35,6 +36,7 @@ The `.github/mcp.json` file is automatically picked up by GitHub Copilot's codin
 **Adding MCP Secrets:**
 
 For servers that require authentication (like the GitHub server), add secrets in your repository settings:
+
 1. Go to Settings → Secrets and variables → Copilot
 2. Add secrets prefixed with `COPILOT_MCP_` (e.g., `COPILOT_MCP_GITHUB_TOKEN`)
 
@@ -96,16 +98,19 @@ The configuration exposes these important resources:
 Pre-defined prompts for common development tasks:
 
 ### `architecture-check`
+
 Verify that code follows Hexagonal/Clean Architecture principles.
 
 **Usage**: "Check if this code follows our architecture rules: [paste code]"
 
 ### `create-api-endpoint`
+
 Generate a new API endpoint following project patterns.
 
 **Usage**: "Create an API endpoint for [entity] with [action] action"
 
 ### `create-use-case`
+
 Generate a new use case in the Application layer.
 
 **Usage**: "Create a use case for [name] that [description]"

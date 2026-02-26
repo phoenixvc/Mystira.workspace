@@ -13,12 +13,12 @@ This guide covers migrating from the `Mystira.App.Infrastructure.*` packages (pr
 
 ### Package Mapping
 
-| Old Package | New Package | Version |
-|-------------|-------------|---------|
-| `Mystira.App.Infrastructure.Data` | `Mystira.Infrastructure.Data` | 0.5.0-alpha |
-| `Mystira.App.Infrastructure.Azure` | `Mystira.Infrastructure.Azure` | 0.5.0-alpha |
-| `Mystira.App.Infrastructure.Discord` | `Mystira.Infrastructure.Discord` | 0.5.0-alpha |
-| `Mystira.App.Infrastructure.Teams` | `Mystira.Infrastructure.Teams` | 0.5.0-alpha |
+| Old Package                           | New Package                       | Version     |
+| ------------------------------------- | --------------------------------- | ----------- |
+| `Mystira.App.Infrastructure.Data`     | `Mystira.Infrastructure.Data`     | 0.5.0-alpha |
+| `Mystira.App.Infrastructure.Azure`    | `Mystira.Infrastructure.Azure`    | 0.5.0-alpha |
+| `Mystira.App.Infrastructure.Discord`  | `Mystira.Infrastructure.Discord`  | 0.5.0-alpha |
+| `Mystira.App.Infrastructure.Teams`    | `Mystira.Infrastructure.Teams`    | 0.5.0-alpha |
 | `Mystira.App.Infrastructure.WhatsApp` | `Mystira.Infrastructure.WhatsApp` | 0.5.0-alpha |
 | `Mystira.App.Infrastructure.Payments` | `Mystira.Infrastructure.Payments` | 0.5.0-alpha |
 
@@ -96,20 +96,21 @@ using Mystira.Infrastructure.Azure;
 Provides polyglot persistence with support for Cosmos DB and PostgreSQL.
 
 **Dependencies:**
+
 - `Mystira.Domain` (0.5.0-alpha)
 - `Mystira.Application` (0.5.0-alpha)
-- `Mystira.Shared` (0.4.*)
+- `Mystira.Shared` (0.4.\*)
 - `Microsoft.EntityFrameworkCore.Cosmos` (9.0.0)
 - `Npgsql.EntityFrameworkCore.PostgreSQL` (9.0.2)
 - `Ardalis.Specification.EntityFrameworkCore` (9.0.0)
 
 **Key Components:**
 
-| Component | Namespace |
-|-----------|-----------|
-| `PolyglotRepository<T>` | `Mystira.Infrastructure.Data.Polyglot` |
-| `CosmosDbContext` | `Mystira.Infrastructure.Data.Cosmos` |
-| `PostgresDbContext` | `Mystira.Infrastructure.Data.Postgres` |
+| Component                  | Namespace                              |
+| -------------------------- | -------------------------------------- |
+| `PolyglotRepository<T>`    | `Mystira.Infrastructure.Data.Polyglot` |
+| `CosmosDbContext`          | `Mystira.Infrastructure.Data.Cosmos`   |
+| `PostgresDbContext`        | `Mystira.Infrastructure.Data.Postgres` |
 | `PolyglotDbContextFactory` | `Mystira.Infrastructure.Data.Polyglot` |
 
 **Registration:**
@@ -147,6 +148,7 @@ builder.Services.AddPolyglotRepository<Account>();
 Azure service integrations including Blob Storage, Queue Storage, and Key Vault.
 
 **Dependencies:**
+
 - `Mystira.Application` (0.5.0-alpha)
 - `Azure.Storage.Blobs` (12.23.0)
 - `Azure.Storage.Queues` (12.21.0)
@@ -154,11 +156,11 @@ Azure service integrations including Blob Storage, Queue Storage, and Key Vault.
 
 **Key Components:**
 
-| Component | Interface | Description |
-|-----------|-----------|-------------|
+| Component                 | Interface             | Description             |
+| ------------------------- | --------------------- | ----------------------- |
 | `AzureBlobStorageService` | `IBlobStorageService` | Blob storage operations |
-| `AzureQueueService` | `IQueueService` | Queue messaging |
-| `AzureKeyVaultService` | `ISecretService` | Secret management |
+| `AzureQueueService`       | `IQueueService`       | Queue messaging         |
+| `AzureKeyVaultService`    | `ISecretService`      | Secret management       |
 
 **Registration:**
 
@@ -173,15 +175,16 @@ builder.Services.AddAzureInfrastructure(builder.Configuration);
 Discord bot integration for notifications and commands.
 
 **Dependencies:**
+
 - `Mystira.Application` (0.5.0-alpha)
 - `Discord.Net` (3.17.0)
 
 **Key Components:**
 
-| Component | Interface |
-|-----------|-----------|
+| Component                    | Interface                     |
+| ---------------------------- | ----------------------------- |
 | `DiscordNotificationService` | `IDiscordNotificationService` |
-| `DiscordBotClient` | `IDiscordClient` |
+| `DiscordBotClient`           | `IDiscordClient`              |
 
 **Registration:**
 
@@ -196,6 +199,7 @@ builder.Services.AddDiscordIntegration(builder.Configuration);
 Microsoft Teams integration for notifications.
 
 **Dependencies:**
+
 - `Mystira.Application` (0.5.0-alpha)
 - `Microsoft.Bot.Builder` (4.24.0)
 
@@ -212,6 +216,7 @@ builder.Services.AddTeamsIntegration(builder.Configuration);
 WhatsApp Business API integration.
 
 **Dependencies:**
+
 - `Mystira.Application` (0.5.0-alpha)
 - `Twilio` (7.7.1)
 
@@ -228,14 +233,15 @@ builder.Services.AddWhatsAppIntegration(builder.Configuration);
 Payment processing with Stripe and PayFast.
 
 **Dependencies:**
+
 - `Mystira.Application` (0.5.0-alpha)
 - `Stripe.net` (47.2.0)
 
 **Key Components:**
 
-| Component | Interface |
-|-----------|-----------|
-| `StripePaymentService` | `IPaymentService` |
+| Component               | Interface         |
+| ----------------------- | ----------------- |
+| `StripePaymentService`  | `IPaymentService` |
 | `PayFastPaymentService` | `IPaymentService` |
 
 **Registration:**
@@ -267,10 +273,12 @@ using Mystira.Infrastructure.Discord;
 ### Domain/Application References
 
 Infrastructure packages now reference:
+
 - `Mystira.Domain` instead of `Mystira.App.Domain`
 - `Mystira.Application` instead of `Mystira.App.Application`
 
 Ensure you've migrated to these packages first. See:
+
 - [Mystira.Domain Migration](./mystira-domain-migration.md)
 - [Mystira.Application Migration](./mystira-application-migration.md)
 
@@ -278,9 +286,9 @@ Ensure you've migrated to these packages first. See:
 
 The polyglot interfaces in `Mystira.Shared.Data.Polyglot` are now **deprecated**. Use:
 
-| Deprecated | Replacement |
-|------------|-------------|
-| `Mystira.Shared.Data.Polyglot.IPolyglotRepository<T>` | `Mystira.Application.Ports.Data.IPolyglotRepository<T>` |
+| Deprecated                                             | Replacement                                              |
+| ------------------------------------------------------ | -------------------------------------------------------- |
+| `Mystira.Shared.Data.Polyglot.IPolyglotRepository<T>`  | `Mystira.Application.Ports.Data.IPolyglotRepository<T>`  |
 | `Mystira.Shared.Data.Polyglot.DatabaseTargetAttribute` | `Mystira.Application.Ports.Data.DatabaseTargetAttribute` |
 
 **Implementation**: Use `Mystira.Infrastructure.Data.Polyglot.PolyglotRepository<T>`.

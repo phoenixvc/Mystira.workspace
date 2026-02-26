@@ -26,15 +26,15 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/account/{accountId}
     Controller->>Service: GetSessionsByAccountAsync(accountId)
-    
+
     Service->>Repo: GetByAccountIdAsync(accountId)
     Repo->>DB: Query sessions by account ID
     DB-->>Repo: List<GameSession>
     Repo-->>Service: sessions
-    
+
     Note over Service: Map to DTOs
     Service->>Service: Select(s => new GameSessionResponse {<br/>  Id, ScenarioId, AccountId,<br/>  ProfileId, PlayerNames, Status,<br/>  CurrentSceneId, ChoiceCount,<br/>  EchoCount, AchievementCount,<br/>  StartTime, EndTime, ElapsedTime,<br/>  IsPaused, SceneCount, TargetAgeGroup<br/>})
-    
+
     Service-->>Controller: List<GameSessionResponse>
     Controller-->>Client: 200 OK<br/>(List<GameSessionResponse>)
 ```
@@ -67,6 +67,7 @@ sequenceDiagram
 **Current**: No explicit authorization check
 
 **Future Enhancement**: Should verify:
+
 - Requesting user owns the account
 - Admin users can view any account's sessions
 
@@ -86,4 +87,3 @@ sequenceDiagram
 - [Get Game Sessions by Profile Use Case](./get-sessions-by-profile.md)
 - [Get In Progress Sessions Use Case](./get-in-progress-sessions.md)
 - [Game Session Domain Model](../../domain/models/game-session.md)
-

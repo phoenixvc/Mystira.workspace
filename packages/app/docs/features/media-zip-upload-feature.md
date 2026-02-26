@@ -1,9 +1,11 @@
 # Media Zip Upload Feature Documentation
 
 ## Overview
+
 The Media Zip Upload feature allows administrators to upload media assets and their metadata in a single operation using a zip file. This feature implements a **metadata-first approach**, ensuring that metadata is validated and processed before any media files are uploaded.
 
 ## Features
+
 - ✅ Metadata-first processing (prevents incomplete uploads)
 - ✅ Single zip file containing all metadata and media
 - ✅ Override options for both metadata and media files
@@ -20,6 +22,7 @@ The Media Zip Upload feature allows administrators to upload media assets and th
 Requires authentication (Admin)
 
 #### Request Parameters
+
 - **zipFile** (form file, required): The zip file containing media-metadata.json and media files
 - **overwriteMetadata** (boolean, optional, default: false): Whether to overwrite existing metadata entries
 - **overwriteMedia** (boolean, optional, default: false): Whether to overwrite existing media files
@@ -27,6 +30,7 @@ Requires authentication (Admin)
 #### Response
 
 **Success Response (200 OK):**
+
 ```json
 {
   "success": true,
@@ -40,13 +44,20 @@ Requires authentication (Admin)
   },
   "uploadedMediaCount": 5,
   "failedMediaCount": 0,
-  "successfulMediaUploads": ["media-id-1", "media-id-2", "media-id-3", "media-id-4", "media-id-5"],
+  "successfulMediaUploads": [
+    "media-id-1",
+    "media-id-2",
+    "media-id-3",
+    "media-id-4",
+    "media-id-5"
+  ],
   "mediaErrors": [],
   "allErrors": []
 }
 ```
 
 **Partial Success Response (400 Bad Request):**
+
 ```json
 {
   "success": false,
@@ -73,6 +84,7 @@ Requires authentication (Admin)
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "success": false,
@@ -95,6 +107,7 @@ Requires authentication (Admin)
 ## Zip File Structure
 
 ### Required Structure
+
 ```
 media-upload.zip
 ├── media-metadata.json          (REQUIRED)
@@ -196,17 +209,20 @@ The `media-metadata.json` file should contain an array of media metadata entries
 The feature provides detailed error information for various failure scenarios:
 
 ### Metadata-Related Errors
+
 - Missing `media-metadata.json` file
 - Invalid JSON format in metadata file
 - Duplicate media IDs in metadata
 
 ### Media Upload Errors
+
 - No metadata entry found for a file
 - Media with same ID already exists (when overwrite is disabled)
 - File too large or format not supported
 - Blob storage upload failure
 
 ### Response Behavior
+
 - **Metadata import failure**: Returns immediately without uploading any media files
 - **Media upload partial failure**: Uploads successful files, returns error details for failed ones
 - **All media files fail**: Returns 400 Bad Request with details
@@ -214,21 +230,25 @@ The feature provides detailed error information for various failure scenarios:
 ## Override Options
 
 ### overwriteMetadata=false (Default)
+
 - Existing metadata entries are preserved
 - New metadata entries are added
 - Duplicate IDs are skipped with a warning
 
 ### overwriteMetadata=true
+
 - Existing metadata entries are replaced with new values
 - New metadata entries are added
 - All metadata from the JSON file is applied
 
 ### overwriteMedia=false (Default)
+
 - Existing media files are preserved
 - New media files are uploaded
 - Duplicate media IDs are skipped
 
 ### overwriteMedia=true
+
 - Existing media files are deleted and replaced with new versions
 - New media files are uploaded
 - All media files from the zip are applied (if metadata exists)
@@ -236,6 +256,7 @@ The feature provides detailed error information for various failure scenarios:
 ## Usage Examples
 
 ### cURL Example: Basic Upload
+
 ```bash
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -244,6 +265,7 @@ curl -X POST \
 ```
 
 ### cURL Example: With Override Options
+
 ```bash
 curl -X POST \
   -H "Authorization: Bearer YOUR_TOKEN" \
@@ -254,12 +276,13 @@ curl -X POST \
 ```
 
 ### C# HttpClient Example
+
 ```csharp
 using (var client = new HttpClient())
 {
-    client.DefaultRequestHeaders.Authorization = 
+    client.DefaultRequestHeaders.Authorization =
         new AuthenticationHeaderValue("Bearer", token);
-    
+
     using (var form = new MultipartFormDataContent())
     {
         using (var fileStream = System.IO.File.OpenRead("media-upload.zip"))
@@ -267,11 +290,11 @@ using (var client = new HttpClient())
             form.Add(new StreamContent(fileStream), "zipFile", "media-upload.zip");
             form.Add(new StringContent("true"), "overwriteMetadata");
             form.Add(new StringContent("false"), "overwriteMedia");
-            
+
             var response = await client.PostAsync(
-                "http://localhost:7001/api/admin/mediaadmin/upload-zip", 
+                "http://localhost:7001/api/admin/mediaadmin/upload-zip",
                 form);
-            
+
             var json = await response.Content.ReadAsStringAsync();
         }
     }
@@ -281,6 +304,7 @@ using (var client = new HttpClient())
 ## Implementation Details
 
 ### Files Modified
+
 1. **src/Mystira.App.Admin.Api/Models/MediaModels.cs**
    - Added `MetadataImportResult` class
    - Added `ZipUploadResult` class
@@ -297,6 +321,7 @@ using (var client = new HttpClient())
    - Added `UploadMediaZip` endpoint
 
 ### Key Technical Decisions
+
 - **In-Memory Processing**: All zip extraction and processing happens in memory to avoid disk I/O
 - **Metadata-First Validation**: Prevents partial failures by validating metadata before any media upload
 - **Comprehensive Logging**: All operations are logged for debugging and audit purposes
@@ -306,24 +331,29 @@ using (var client = new HttpClient())
 ## Troubleshooting
 
 ### "No media-metadata.json file found in the zip"
+
 - Ensure the zip file contains a file named exactly `media-metadata.json` at the root level
 - Check that the filename casing is correct
 
 ### "Invalid JSON format"
+
 - Validate your JSON syntax using a JSON validator
 - Ensure all required fields are present in metadata entries
 - Check for proper string escaping in descriptions
 
 ### "No metadata entry found for file: filename.mp3"
+
 - Verify that `media-metadata.json` contains an entry with a `fileName` field matching the file
 - Ensure the filename casing matches exactly
 
 ### "Metadata imported successfully but media uploads failed"
+
 - Check that media files referenced in metadata are actually included in the zip
 - Verify file permissions in blob storage
 - Check blob storage connection settings in appsettings.json
 
 ### Media files uploaded but metadata didn't persist
+
 - This should not happen due to metadata-first processing
 - If it does, check database transaction logs
 - Verify database connection and permissions

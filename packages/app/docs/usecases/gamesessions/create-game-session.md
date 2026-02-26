@@ -27,9 +27,9 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions<br/>(StartGameSessionRequest)
     Controller->>Service: StartGameSessionAsync(request)
-    
+
     Service->>UseCase: ExecuteAsync(request)
-    
+
     Note over UseCase: Step 1: Validate Scenario
     UseCase->>ScenarioRepo: GetByIdAsync(scenarioId)
     ScenarioRepo->>DB: Query scenario
@@ -42,7 +42,7 @@ sequenceDiagram
     end
     DB-->>ScenarioRepo: Scenario
     ScenarioRepo-->>UseCase: Scenario
-    
+
     Note over UseCase: Step 2: Validate Age Compatibility
     UseCase->>UseCase: IsAgeGroupCompatible(<br/>  scenario.MinimumAge,<br/>  request.TargetAgeGroup<br/>)
     alt Age Incompatible
@@ -50,13 +50,13 @@ sequenceDiagram
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 3: Handle Existing Sessions
     UseCase->>SessionRepo: GetActiveSessionsByScenarioAndAccountAsync(<br/>  scenarioId, accountId<br/>)
     SessionRepo->>DB: Query active sessions
     DB-->>SessionRepo: List<GameSession>
     SessionRepo-->>UseCase: existingActiveSessions
-    
+
     alt Existing Active Sessions Found
         loop For each existing session
             UseCase->>UseCase: Mark as Completed<br/>(Status = Completed,<br/>EndTime = Now)
@@ -68,7 +68,7 @@ sequenceDiagram
         DB-->>UoW: Success
         UoW-->>UseCase: Success
     end
-    
+
     alt Existing InProgress Session Found
         UseCase->>UseCase: Pause existing session<br/>(Status = Paused,<br/>IsPaused = true,<br/>PausedAt = Now)
         UseCase->>SessionRepo: UpdateAsync(pausedSession)
@@ -76,15 +76,15 @@ sequenceDiagram
         UseCase->>UoW: SaveChangesAsync()
         UoW->>DB: Commit transaction
     end
-    
+
     Note over UseCase: Step 4: Create New Session
     UseCase->>UseCase: new GameSession {<br/>  Id = Guid.NewGuid(),<br/>  ScenarioId, AccountId,<br/>  ProfileId, PlayerNames,<br/>  Status = InProgress,<br/>  CurrentSceneId = first scene,<br/>  StartTime = Now,<br/>  TargetAgeGroupName,<br/>  SceneCount<br/>}
-    
+
     Note over UseCase: Step 5: Initialize Compass Tracking
     loop For each core axis in scenario
         UseCase->>UseCase: session.CompassValues[axis] =<br/>  new CompassTracking {<br/>    Axis = axis.Value,<br/>    CurrentValue = 0.0,<br/>    History = [],<br/>    LastUpdated = Now<br/>  }
     end
-    
+
     Note over UseCase: Step 6: Persist Session
     UseCase->>SessionRepo: AddAsync(session)
     SessionRepo->>DB: Add entity to DbSet
@@ -93,7 +93,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     SessionRepo-->>UseCase: GameSession (with ID)
-    
+
     UseCase-->>Service: GameSession
     Service-->>Controller: GameSession
     Controller-->>Client: 201 Created<br/>(GameSession)
@@ -110,9 +110,9 @@ sequenceDiagram
 
     UseCase->>AgeGroup: Parse(targetAgeGroup)
     AgeGroup-->>UseCase: AgeGroup object
-    
+
     UseCase->>UseCase: Compare:<br/>scenario.MinimumAge <=<br/>targetAgeGroup.MinimumAge
-    
+
     alt Compatible
         UseCase-->>UseCase: Continue
     else Incompatible

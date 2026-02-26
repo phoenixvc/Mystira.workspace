@@ -38,17 +38,17 @@ This Terraform module deploys the infrastructure for [Mystira.App](https://githu
 
 ## Resources Created
 
-| Resource                   | Purpose                      | Notes                                             |
-| -------------------------- | ---------------------------- | ------------------------------------------------- |
-| **Cosmos DB**              | Document database            | Serverless mode, 7 containers                     |
+| Resource                   | Purpose                      | Notes                                                        |
+| -------------------------- | ---------------------------- | ------------------------------------------------------------ |
+| **Cosmos DB**              | Document database            | Serverless mode, 7 containers                                |
 | **App Service**            | API backend                  | Linux, .NET 9.0, System Managed Identity, WebSockets enabled |
-| **Static Web App**         | Blazor WASM PWA              | Deployed to fallback region (not available in ZA) |
-| **Storage Account**        | Media blobs                  | With CORS support                                 |
-| **Key Vault**              | Secrets management           | Stores connection strings, JWT keys               |
-| **Application Insights**   | APM & monitoring             | Connected to Log Analytics                        |
-| **Log Analytics**          | Centralized logging          | 30-day retention (configurable)                   |
-| **Communication Services** | Email (optional)             | Azure-managed email                               |
-| **Azure Bot**              | Teams integration (optional) | For Teams channel                                 |
+| **Static Web App**         | Blazor WASM PWA              | Deployed to fallback region (not available in ZA)            |
+| **Storage Account**        | Media blobs                  | With CORS support                                            |
+| **Key Vault**              | Secrets management           | Stores connection strings, JWT keys                          |
+| **Application Insights**   | APM & monitoring             | Connected to Log Analytics                                   |
+| **Log Analytics**          | Centralized logging          | 30-day retention (configurable)                              |
+| **Communication Services** | Email (optional)             | Azure-managed email                                          |
+| **Azure Bot**              | Teams integration (optional) | For Teams channel                                            |
 
 ## Usage
 

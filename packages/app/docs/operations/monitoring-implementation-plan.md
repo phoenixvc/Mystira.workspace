@@ -13,6 +13,7 @@ This document outlines the implementation plan for comprehensive monitoring and 
 ## Current State
 
 ### Implemented
+
 - ✅ Application Insights integration
 - ✅ Health check endpoints (`/health`, `/health/ready`, `/health/live`)
 - ✅ Custom metrics tracking (business KPIs)
@@ -22,12 +23,14 @@ This document outlines the implementation plan for comprehensive monitoring and 
 - ✅ Serilog structured logging
 
 ### In Progress
+
 - 🔄 SLO-based alerting rules
 - 🔄 Operational dashboards
 - 🔄 Log Analytics workbook definitions
 - 🔄 Availability tests via Terraform
 
 ### Not Started
+
 - ⏳ Cost monitoring alerts
 - ⏳ Application Map optimization
 - ⏳ Profiling for performance bottlenecks
@@ -38,12 +41,14 @@ This document outlines the implementation plan for comprehensive monitoring and 
 ## Phase 1: Foundation (Complete)
 
 ### Application Insights Setup
+
 - [x] Configure Application Insights for all services
 - [x] Enable adaptive sampling in production
 - [x] Configure cloud role names for Application Map
 - [x] Set up custom dimensions for filtering
 
 ### Health Checks
+
 - [x] Implement health check endpoints
 - [x] Add database health checks
 - [x] Add blob storage health checks
@@ -51,6 +56,7 @@ This document outlines the implementation plan for comprehensive monitoring and 
 - [x] Add Discord bot health checks (optional)
 
 ### Structured Logging
+
 - [x] Configure Serilog
 - [x] Add correlation IDs
 - [x] Implement request logging middleware
@@ -63,6 +69,7 @@ This document outlines the implementation plan for comprehensive monitoring and 
 ### Custom Metrics Implementation
 
 **Business Metrics:**
+
 ```csharp
 // Track via ICustomMetrics
 - Game sessions started/completed
@@ -73,6 +80,7 @@ This document outlines the implementation plan for comprehensive monitoring and 
 ```
 
 **Technical Metrics:**
+
 ```csharp
 // Track via ICustomMetrics
 - Cache hit/miss rates
@@ -85,11 +93,12 @@ This document outlines the implementation plan for comprehensive monitoring and 
 ### Alert Rules (KQL Queries)
 
 #### 1. High Error Rate Alert
+
 ```kql
 // Alert when error rate > 5% for 5 minutes
 requests
 | where timestamp > ago(5m)
-| summarize 
+| summarize
     TotalRequests = count(),
     FailedRequests = countif(success == false)
 | extend ErrorRate = 100.0 * FailedRequests / TotalRequests
@@ -97,6 +106,7 @@ requests
 ```
 
 #### 2. Slow Response Time Alert
+
 ```kql
 // Alert when p95 response time > 1000ms
 requests
@@ -106,6 +116,7 @@ requests
 ```
 
 #### 3. Database Throttling Alert
+
 ```kql
 // Alert on Cosmos DB 429 errors
 dependencies
@@ -117,6 +128,7 @@ dependencies
 ```
 
 #### 4. Authentication Failures Alert
+
 ```kql
 // Alert on auth endpoint failures
 customEvents
@@ -127,6 +139,7 @@ customEvents
 ```
 
 #### 5. Dual-Write Failures Alert
+
 ```kql
 // Alert on polyglot persistence failures
 customEvents
@@ -168,8 +181,10 @@ resource "azurerm_monitor_metric_alert" "high_error_rate" {
 ## Phase 3: Dashboards (Planned)
 
 ### 1. Executive Dashboard
+
 **Purpose**: High-level business metrics  
 **Widgets**:
+
 - Active users (daily/monthly)
 - Game sessions created/completed
 - Content engagement rates
@@ -177,8 +192,10 @@ resource "azurerm_monitor_metric_alert" "high_error_rate" {
 - Platform availability (SLO)
 
 ### 2. Operations Dashboard
+
 **Purpose**: Technical health monitoring  
 **Widgets**:
+
 - Request volume and latency
 - Error rate by endpoint
 - Database performance (RU/s, latency)
@@ -186,8 +203,10 @@ resource "azurerm_monitor_metric_alert" "high_error_rate" {
 - API instance health
 
 ### 3. Security Dashboard
+
 **Purpose**: Security event monitoring  
 **Widgets**:
+
 - Failed authentication attempts
 - Rate limiting violations
 - Token validation failures
@@ -195,8 +214,10 @@ resource "azurerm_monitor_metric_alert" "high_error_rate" {
 - COPPA compliance events
 
 ### 4. Cost Management Dashboard
+
 **Purpose**: Resource cost tracking  
 **Widgets**:
+
 - Cost by service (daily/monthly)
 - Cosmos DB RU consumption
 - Blob storage usage
@@ -265,7 +286,7 @@ resource "azurerm_application_insights_web_test" "user_signin" {
 <WebTest Name="UserSignIn" Enabled="True" Timeout="30">
   <Items>
     <Request Method="POST" Url="https://api.mystira.app/api/auth/signin"
-             Headers="Content-Type: application/json" 
+             Headers="Content-Type: application/json"
              Body='{"email":"test@example.com","method":"passwordless"}' />
   </Items>
   <ValidationRules>
@@ -316,16 +337,19 @@ AzureDiagnostics
 ## Phase 6: Advanced Observability (Future)
 
 ### Distributed Tracing Enhancement
+
 - Full OpenTelemetry integration
 - Cross-service trace correlation
 - Performance profiling integration
 
 ### Predictive Analytics
+
 - ML-based anomaly detection
 - Capacity forecasting
 - User behavior prediction
 
 ### Chaos Engineering
+
 - Automated resilience testing
 - Failure injection experiments
 - Recovery time measurement
@@ -334,14 +358,14 @@ AzureDiagnostics
 
 ## Implementation Timeline
 
-| Phase | Start Date | Target Completion | Status |
-|-------|-----------|-------------------|---------|
-| Phase 1: Foundation | 2025-Q3 | 2025-Q4 | ✅ Complete |
-| Phase 2: Metrics & Alerting | 2025-Q4 | 2026-Q1 | 🔄 In Progress |
-| Phase 3: Dashboards | 2026-Q1 | 2026-Q1 | ⏳ Planned |
-| Phase 4: Availability Tests | 2026-Q1 | 2026-Q2 | ⏳ Planned |
-| Phase 5: Cost Monitoring | 2026-Q2 | 2026-Q2 | ⏳ Planned |
-| Phase 6: Advanced Observability | 2026-Q3 | 2026-Q4 | ⏳ Future |
+| Phase                           | Start Date | Target Completion | Status         |
+| ------------------------------- | ---------- | ----------------- | -------------- |
+| Phase 1: Foundation             | 2025-Q3    | 2025-Q4           | ✅ Complete    |
+| Phase 2: Metrics & Alerting     | 2025-Q4    | 2026-Q1           | 🔄 In Progress |
+| Phase 3: Dashboards             | 2026-Q1    | 2026-Q1           | ⏳ Planned     |
+| Phase 4: Availability Tests     | 2026-Q1    | 2026-Q2           | ⏳ Planned     |
+| Phase 5: Cost Monitoring        | 2026-Q2    | 2026-Q2           | ⏳ Planned     |
+| Phase 6: Advanced Observability | 2026-Q3    | 2026-Q4           | ⏳ Future      |
 
 ---
 

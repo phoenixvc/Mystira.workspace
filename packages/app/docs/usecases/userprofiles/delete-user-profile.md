@@ -27,9 +27,9 @@ sequenceDiagram
 
     Client->>Controller: DELETE /api/userprofiles/{id}
     Controller->>Service: DeleteProfileAsync(id)
-    
+
     Service->>UseCase: ExecuteAsync(id)
-    
+
     Note over UseCase: Step 1: Find Profile
     UseCase->>ProfileRepo: GetByIdAsync(id)
     ProfileRepo->>DB: Query profile
@@ -42,28 +42,28 @@ sequenceDiagram
     end
     DB-->>ProfileRepo: UserProfile
     ProfileRepo-->>UseCase: profile
-    
+
     Note over UseCase: Step 2: Delete Associated Sessions<br/>(COPPA Compliance)
     UseCase->>SessionRepo: GetByProfileIdAsync(profileId)
     SessionRepo->>DB: Query sessions by profile ID
     DB-->>SessionRepo: List<GameSession>
     SessionRepo-->>UseCase: sessions
-    
+
     loop For each session
         UseCase->>SessionRepo: DeleteAsync(session.Id)
         SessionRepo->>DB: Remove session entity
     end
-    
+
     Note over UseCase: Step 3: Delete Profile
     UseCase->>ProfileRepo: DeleteAsync(profileId)
     ProfileRepo->>DB: Remove profile entity
-    
+
     Note over UseCase: Step 4: Commit Transaction
     UseCase->>UoW: SaveChangesAsync()
     UoW->>DB: Commit transaction<br/>(sessions + profile)
     DB-->>UoW: Success
     UoW-->>UseCase: Success
-    
+
     UseCase-->>Service: true
     Service-->>Controller: true
     Controller-->>Client: 200 OK<br/>(Success)

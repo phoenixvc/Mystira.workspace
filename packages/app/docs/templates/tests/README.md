@@ -5,9 +5,11 @@ This directory contains example test files demonstrating best practices for test
 ## Templates
 
 ### 1. DomainModelTest.cs
+
 **Purpose:** Testing domain entities and business logic
 
 **Key Patterns:**
+
 - Constructor validation
 - Property setters/getters
 - Domain methods
@@ -19,9 +21,11 @@ This directory contains example test files demonstrating best practices for test
 ---
 
 ### 2. CqrsCommandTest.cs
+
 **Purpose:** Testing CQRS command handlers
 
 **Key Patterns:**
+
 - Inherits from `CqrsIntegrationTestBase`
 - Uses in-memory database
 - Seeds test data
@@ -34,9 +38,11 @@ This directory contains example test files demonstrating best practices for test
 ---
 
 ### 3. CqrsQueryTest.cs
+
 **Purpose:** Testing CQRS query handlers
 
 **Key Patterns:**
+
 - Inherits from `CqrsIntegrationTestBase`
 - Tests filtering and sorting
 - Verifies caching behavior
@@ -48,9 +54,11 @@ This directory contains example test files demonstrating best practices for test
 ---
 
 ### 4. ApiControllerTest.cs
+
 **Purpose:** Testing API controllers
 
 **Key Patterns:**
+
 - Uses Moq to mock dependencies
 - Tests HTTP status codes (200, 404, 400, 500)
 - Tests response shapes
@@ -63,9 +71,11 @@ This directory contains example test files demonstrating best practices for test
 ---
 
 ### 5. ServiceTest.cs
+
 **Purpose:** Testing application services
 
 **Key Patterns:**
+
 - Mocks external dependencies
 - Tests service orchestration
 - Tests event-based services
@@ -77,9 +87,11 @@ This directory contains example test files demonstrating best practices for test
 ---
 
 ### 6. BlazorComponentTest.cs
+
 **Purpose:** Testing Blazor components (using bUnit)
 
 **Key Patterns:**
+
 - Uses `TestContext` from bUnit
 - Tests component rendering
 - Tests parameter binding
@@ -95,6 +107,7 @@ This directory contains example test files demonstrating best practices for test
 ## Quick Start
 
 ### Copy a template
+
 ```bash
 # Domain model test
 cp docs/templates/tests/DomainModelTest.cs tests/Mystira.App.Domain.Tests/Models/YourEntityTests.cs
@@ -110,6 +123,7 @@ cp docs/templates/tests/BlazorComponentTest.cs tests/Mystira.App.PWA.Tests/Compo
 ```
 
 ### Find and replace placeholders
+
 - `{EntityName}` → Your entity name (e.g., `Scenario`, `GameSession`)
 - `{Feature}` → Your feature area (e.g., `Scenarios`, `GameSessions`)
 - `{CommandName}` → Your command name (e.g., `CreateScenarioCommand`)
@@ -118,6 +132,7 @@ cp docs/templates/tests/BlazorComponentTest.cs tests/Mystira.App.PWA.Tests/Compo
 - `{ComponentName}` → Your component name (e.g., `LoadingIndicator`)
 
 ### Run your tests
+
 ```bash
 # Run all tests in a project
 dotnet test tests/Mystira.App.Domain.Tests/
@@ -134,6 +149,7 @@ dotnet test --filter "FullyQualifiedName~YourEntityTests.YourTestMethod"
 ## Testing Patterns
 
 ### Arrange-Act-Assert (AAA)
+
 All tests follow the AAA pattern:
 
 ```csharp
@@ -152,6 +168,7 @@ public void Method_WhenCondition_ExpectedOutcome()
 ```
 
 ### Test Naming Convention
+
 - **Pattern:** `Method_WhenCondition_ExpectedOutcome`
 - **Examples:**
   - `CreateScenario_WithValidRequest_CreatesScenario`
@@ -159,6 +176,7 @@ public void Method_WhenCondition_ExpectedOutcome()
   - `ShowSuccess_RaisesOnShowEvent`
 
 ### FluentAssertions
+
 Use FluentAssertions for readable, maintainable assertions:
 
 ```csharp
@@ -180,20 +198,24 @@ Assert.Equal(3, result.Scenes.Count);
 ### Required NuGet Packages
 
 **All Test Projects:**
+
 - `xunit` (2.6.0+)
 - `xunit.runner.visualstudio` (2.5.0+)
 - `FluentAssertions` (6.12.0+)
 - `Microsoft.NET.Test.Sdk` (17.8.0+)
 
 **API/Application Tests:**
+
 - `Moq` (4.20.0+)
 - `Microsoft.EntityFrameworkCore.InMemory` (9.0.0+)
 
 **Blazor Component Tests:**
+
 - `bUnit` (1.25.0+)
 - `bUnit.web` (1.25.0+)
 
 **Optional:**
+
 - `AutoFixture.Xunit2` (4.18.0+) - For test data generation
 - `Coverlet.Collector` (6.0.0+) - For code coverage
 
@@ -202,6 +224,7 @@ Assert.Equal(3, result.Scenes.Count);
 ## Best Practices
 
 ### DO ✅
+
 1. Test one thing per test
 2. Use descriptive test names
 3. Keep tests simple and focused
@@ -211,6 +234,7 @@ Assert.Equal(3, result.Scenes.Count);
 7. Make tests independent (no shared state)
 
 ### DON'T ❌
+
 1. Don't test implementation details
 2. Don't use `Thread.Sleep` (use async/await)
 3. Don't share state between tests

@@ -45,7 +45,7 @@ function MigrationManager() {
       masterData: false,
       // Storage
       blobStorage: false,
-    },
+    }
   );
 
   const { progress, migrationResults, validateConfig, runMigration } =
@@ -53,7 +53,7 @@ function MigrationManager() {
 
   const handleConfigChange = (
     field: keyof MigrationConfig,
-    value: string | boolean,
+    value: string | boolean
   ) => {
     setConfig((prev) => ({ ...prev, [field]: value }));
   };

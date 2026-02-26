@@ -11,6 +11,7 @@ Admin API backend for the Mystira platform. This is a pure REST/gRPC API for con
 See [Migration Phases Documentation](../../docs/MIGRATION_PHASES.md) for overall migration status.
 
 The Admin API was separated from the `Mystira.App` monorepo to enable:
+
 - Independent deployment and versioning
 - Separate development workflows
 - Pure API service without UI dependencies
@@ -30,13 +31,13 @@ This repository contains the Admin API extracted from the `Mystira.App` monorepo
 
 ### Migration Status
 
-| Phase | Status | Description |
-|-------|--------|-------------|
-| Phase 1: Extraction | ✅ Complete | Repository created, NuGet packages configured |
-| Phase 2: CI/CD | ✅ Complete | GitHub Actions workflows in place |
-| Phase 3: PostgreSQL Setup | 🔄 In Progress | Adding dual-write infrastructure |
-| Phase 4: Wolverine Events | ⏳ Pending | Event-driven architecture |
-| Phase 5: Production Cutover | ⏳ Pending | Full PostgreSQL migration |
+| Phase                       | Status         | Description                                   |
+| --------------------------- | -------------- | --------------------------------------------- |
+| Phase 1: Extraction         | ✅ Complete    | Repository created, NuGet packages configured |
+| Phase 2: CI/CD              | ✅ Complete    | GitHub Actions workflows in place             |
+| Phase 3: PostgreSQL Setup   | 🔄 In Progress | Adding dual-write infrastructure              |
+| Phase 4: Wolverine Events   | ⏳ Pending     | Event-driven architecture                     |
+| Phase 5: Production Cutover | ⏳ Pending     | Full PostgreSQL migration                     |
 
 ## Documentation
 
@@ -53,16 +54,16 @@ See [docs/README.md](docs/README.md) for the complete documentation index.
 
 This project depends on NuGet packages published from shared Mystira repositories:
 
-| Package | Version | Purpose |
-|---------|---------|---------|
-| `Mystira.Domain` | 0.5.0-alpha | Domain models and entities |
-| `Mystira.Application` | 0.5.0-alpha | CQRS handlers and use cases |
-| `Mystira.Contracts` | 0.5.0-alpha | API contracts and DTOs |
-| `Mystira.Infrastructure.Azure` | 0.5.0-alpha | Azure Cosmos DB, Blob Storage |
-| `Mystira.Infrastructure.Data` | 0.5.0-alpha | Repository implementations |
-| `Mystira.Infrastructure.Discord` | 0.5.0-alpha | Discord bot integration |
+| Package                                | Version     | Purpose                                  |
+| -------------------------------------- | ----------- | ---------------------------------------- |
+| `Mystira.Domain`                       | 0.5.0-alpha | Domain models and entities               |
+| `Mystira.Application`                  | 0.5.0-alpha | CQRS handlers and use cases              |
+| `Mystira.Contracts`                    | 0.5.0-alpha | API contracts and DTOs                   |
+| `Mystira.Infrastructure.Azure`         | 0.5.0-alpha | Azure Cosmos DB, Blob Storage            |
+| `Mystira.Infrastructure.Data`          | 0.5.0-alpha | Repository implementations               |
+| `Mystira.Infrastructure.Discord`       | 0.5.0-alpha | Discord bot integration                  |
 | `Mystira.Infrastructure.StoryProtocol` | 0.5.0-alpha | Story Protocol blockchain/IP integration |
-| `Mystira.Shared` | 0.5.0-alpha | Shared services and middleware |
+| `Mystira.Shared`                       | 0.5.0-alpha | Shared services and middleware           |
 
 ## Setup
 
@@ -76,15 +77,16 @@ This project depends on NuGet packages published from shared Mystira repositorie
 ### Local Development
 
 1. **Configure GitHub Packages authentication**:
-   
+
    Set up a Personal Access Token (PAT) with `read:packages` scope:
-   
+
    **Create a GitHub PAT:**
    - Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
    - Generate new token with `read:packages` scope
    - Copy the token
-   
+
    **Configure the token:**
+
    ```bash
    # Set environment variable (required for NuGet restore)
    export GITHUB_TOKEN="your-github-pat-here"  # macOS/Linux
@@ -92,16 +94,19 @@ This project depends on NuGet packages published from shared Mystira repositorie
    ```
 
 2. **Restore packages**:
+
    ```bash
    dotnet restore
    ```
 
 3. **Build**:
+
    ```bash
    dotnet build
    ```
 
 4. **Run** (uses in-memory database by default):
+
    ```bash
    dotnet run --project src/Mystira.Admin.Api
    ```
@@ -114,15 +119,15 @@ This project depends on NuGet packages published from shared Mystira repositorie
 
 Configuration is managed through `appsettings.json` and environment-specific overrides:
 
-| Setting | Description |
-|---------|-------------|
-| `ConnectionStrings:CosmosDb` | Azure Cosmos DB connection string |
+| Setting                        | Description                             |
+| ------------------------------ | --------------------------------------- |
+| `ConnectionStrings:CosmosDb`   | Azure Cosmos DB connection string       |
 | `ConnectionStrings:PostgreSQL` | PostgreSQL connection string (Phase 2+) |
-| `ConnectionStrings:Redis` | Redis cache connection string |
-| `DataMigration:Phase` | Current migration phase (0-3) |
-| `DataMigration:Enabled` | Enable migration features |
-| `AzureAd:TenantId` | Microsoft Entra ID tenant ID |
-| `AzureAd:ClientId` | App registration client ID |
+| `ConnectionStrings:Redis`      | Redis cache connection string           |
+| `DataMigration:Phase`          | Current migration phase (0-3)           |
+| `DataMigration:Enabled`        | Enable migration features               |
+| `AzureAd:TenantId`             | Microsoft Entra ID tenant ID            |
+| `AzureAd:ClientId`             | App registration client ID              |
 
 ### Authentication
 
@@ -145,6 +150,7 @@ dotnet user-secrets set "AzureAd:ClientId" "your-app-client-id-guid"
 When both `TenantId` and `ClientId` are configured, the API automatically enables Entra ID authentication with the "AzureAd" scheme.
 
 **Exposed API Scopes** (configure in Azure App Registration):
+
 - `Admin.Read` - Read access to admin data
 - `Admin.Write` - Write access to admin data
 - `Users.Manage` - User management operations
@@ -175,13 +181,13 @@ When both `TenantId` and `ClientId` are configured, the API automatically enable
 
 ### Key Differences from App API
 
-| Aspect | Public API | Admin API |
-|--------|------------|-----------|
-| User Data | Read/Write | **Read-Only** |
-| Content Data | Read-Only | **Read/Write** |
+| Aspect          | Public API      | Admin API                 |
+| --------------- | --------------- | ------------------------- |
+| User Data       | Read/Write      | **Read-Only**             |
+| Content Data    | Read-Only       | **Read/Write**            |
 | Migration Phase | Full dual-write | Read-only from PostgreSQL |
-| Redis Caching | User sessions | Content caching |
-| Security | Public auth | Admin/SuperAdmin roles |
+| Redis Caching   | User sessions   | Content caching           |
+| Security        | Public auth     | Admin/SuperAdmin roles    |
 
 ### Data Migration Strategy
 
@@ -207,6 +213,7 @@ GitHub Actions workflows are configured for:
 The project uses GitHub Packages for internal Mystira NuGet packages. The CI workflow automatically authenticates using the `GITHUB_TOKEN` secret that is automatically available in GitHub Actions.
 
 **No additional configuration is needed for CI/CD** - the workflow includes:
+
 - Automatic authentication with `GITHUB_TOKEN`
 - `packages: read` permission to access packages
 - Configuration of the GitHub Packages feed
@@ -248,11 +255,11 @@ Update CORS settings in `Program.cs` or via `CorsSettings:AllowedOrigins` config
 
 ## Related Repositories
 
-| Repository | Description |
-|------------|-------------|
-| [Mystira.App](https://github.com/phoenixvc/Mystira.App) | Source of shared NuGet packages |
-| [Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI) | Admin frontend application |
-| [mystira.workspace](https://github.com/phoenixvc/mystira.workspace) | Mono-repo workspace |
+| Repository                                                          | Description                     |
+| ------------------------------------------------------------------- | ------------------------------- |
+| [Mystira.App](https://github.com/phoenixvc/Mystira.App)             | Source of shared NuGet packages |
+| [Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI)   | Admin frontend application      |
+| [mystira.workspace](https://github.com/phoenixvc/mystira.workspace) | Mono-repo workspace             |
 
 ## License
 

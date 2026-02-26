@@ -7,7 +7,7 @@ interface InfrastructureStatus {
 }
 
 export function useInfrastructureStatus(
-  serviceEnvironments: Record<string, "local" | "dev" | "prod">,
+  serviceEnvironments: Record<string, "local" | "dev" | "prod">
 ) {
   const [status, setStatus] = useState<InfrastructureStatus>({
     dev: { exists: false, checking: false },

@@ -1,17 +1,21 @@
 # Media Zip Upload Frontend UI Changes
 
 ## Overview
+
 Added a comprehensive user interface for uploading media via zip files to the Mystira.App.Admin.Api media import view. The new UI provides a streamlined experience for uploading media metadata and files together.
 
 ## Files Modified
+
 - `src/Mystira.App.Admin.Api/Views/Admin/ImportMedia.cshtml`
 
 ## UI Changes
 
 ### New Zip Upload Card
+
 Added a new upload card titled "Step 2: Zip Upload (Recommended)" with the following features:
 
 #### Form Elements
+
 1. **Zip File Input**
    - Accepts only `.zip` files
    - Required field with clear file format requirement
@@ -31,6 +35,7 @@ Added a new upload card titled "Step 2: Zip Upload (Recommended)" with the follo
    - Only enabled after successful metadata import
 
 #### Visual Design
+
 - **Header**: Info-colored header (blue background with white text) to distinguish from other upload methods
 - **Alert**: Info alert explaining this is the recommended method
 - **Icon**: File archive icon (fas fa-file-archive) to represent zip files
@@ -39,7 +44,9 @@ Added a new upload card titled "Step 2: Zip Upload (Recommended)" with the follo
 ### JavaScript Functions Added
 
 #### `uploadZipFile()`
+
 Handles the zip file upload process:
+
 - Validates file selection
 - Checks that file is a valid zip file
 - Shows progress indicator with appropriate messaging
@@ -55,18 +62,22 @@ Handles the zip file upload process:
 - Resets form on completion
 
 #### `showZipResults(data)`
+
 Displays comprehensive upload results with three sections:
 
 **1. Zip Upload Summary Header**
+
 - Main title for the results section
 
 **2. Metadata Import Card**
+
 - Shows success or failure status with colored header
 - Displays metadata import message
 - Shows any errors encountered during import
 - Color-coded: green for success, red for failure
 
 **3. Media Upload Card**
+
 - Shows count of successful and failed uploads
 - Lists all successfully uploaded media IDs with ✅ checkmarks
 - Lists all failed uploads with ❌ indicators and error messages
@@ -75,21 +86,26 @@ Displays comprehensive upload results with three sections:
 ### Updated Functions
 
 #### `updateMetadataStatus()`
+
 Enhanced to support zip upload card:
+
 - Shows/hides zip upload card based on metadata availability
 - Enables/disables zip upload button based on metadata status
 - Same visibility logic as single and bulk upload options
 
 #### Event Listeners
+
 - Added submit listener to `zipUploadForm` element
 - Calls `uploadZipFile()` on form submission
 
 ## API Integration
 
 ### Endpoint
+
 The UI communicates with: `POST /api/admin/MediaAdmin/upload-zip`
 
 ### Request Format
+
 ```
 FormData:
 - zipFile: File (required) - The zip archive
@@ -98,7 +114,9 @@ FormData:
 ```
 
 ### Response Format
+
 The UI expects the following response structure:
+
 ```json
 {
   "success": boolean,
@@ -144,6 +162,7 @@ The UI expects the following response structure:
 ## Styling and Layout
 
 ### CSS Classes Used
+
 - `card` - Container cards
 - `card-header` - Card titles
 - `bg-info` / `text-white` - Zip card header styling
@@ -156,6 +175,7 @@ The UI expects the following response structure:
 - `text-success` / `text-danger` - Color-coded text
 
 ### Responsive Design
+
 - Uses Bootstrap grid system
 - Works on all screen sizes
 - Sidebar layout maintained
@@ -196,12 +216,14 @@ The UI expects the following response structure:
    - Verify failure results display errors clearly
 
 ## Browser Compatibility
+
 - Chrome/Edge 90+
 - Firefox 88+
 - Safari 14+
 - Mobile browsers (iOS Safari, Chrome Mobile)
 
 ## Performance Considerations
+
 - Large zip files may take time to process
 - Progress indicator provides user feedback
 - File size limits configured on backend

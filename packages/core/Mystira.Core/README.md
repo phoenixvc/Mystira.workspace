@@ -77,11 +77,13 @@ dotnet add package Mystira.Core
 ## When to Use
 
 Use `Mystira.Core` for:
+
 - Internal error handling with `Result<T>`
 - Domain entities and value objects
 - Foundational types not exposed via APIs
 
 Use `Mystira.Contracts` (generated from OpenAPI) for:
+
 - API request/response types
 - DTOs exposed to clients
 - Types that need to be serialized to JSON

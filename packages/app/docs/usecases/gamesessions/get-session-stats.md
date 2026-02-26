@@ -26,7 +26,7 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/{id}/stats
     Controller->>Service: GetSessionStatsAsync(sessionId)
-    
+
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
     alt Session Not Found
@@ -37,16 +37,16 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Calculate Statistics
     Service->>Service: Extract compass values:<br/>  CompassValues.ToDictionary(<br/>    axis => axis.Key,<br/>    axis => axis.Value.CurrentValue<br/>  )
     Service->>Service: Get recent echoes:<br/>  EchoHistory.OrderByDescending(<br/>    e => e.Timestamp<br/>  ).Take(5)
     Service->>Service: Calculate session duration:<br/>  EndTime - StartTime<br/>  OR Now - StartTime
     Service->>Service: Get choice count:<br/>  ChoiceHistory.Count
-    
+
     Note over Service: Build Response
     Service->>Service: new SessionStatsResponse {<br/>  CompassValues,<br/>  RecentEchoes,<br/>  Achievements,<br/>  TotalChoices,<br/>  SessionDuration<br/>}
-    
+
     Service-->>Controller: SessionStatsResponse
     Controller-->>Client: 200 OK<br/>(SessionStatsResponse)
 ```
@@ -86,6 +86,7 @@ sequenceDiagram
 ### Session Summary Display
 
 Used to show session progress and statistics:
+
 - Display compass values
 - Show recent echoes
 - Display achievements earned
@@ -94,6 +95,7 @@ Used to show session progress and statistics:
 ### Analytics
 
 Used for:
+
 - Player progress tracking
 - Session analytics
 - Performance metrics
@@ -103,6 +105,7 @@ Used for:
 **Current**: No explicit authorization check
 
 **Future Enhancement**: Should verify:
+
 - Requesting user owns the account that owns the session
 - Parent users can view child profile session stats (COPPA compliance)
 
@@ -122,4 +125,3 @@ Used for:
 - [Get Game Session Use Case](./get-game-session.md)
 - [Make Choice Use Case](./make-choice.md)
 - [Compass Domain Model](../../domain/models/compass.md)
-

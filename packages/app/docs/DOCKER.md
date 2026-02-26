@@ -13,6 +13,7 @@ This document explains how to build and run the Mystira.App APIs using Docker.
 ### Using Docker Compose (Recommended)
 
 1. **Copy the environment template:**
+
    ```bash
    cp .env.example .env
    ```
@@ -23,6 +24,7 @@ This document explains how to build and run the Mystira.App APIs using Docker.
    - Generate a JWT secret key (minimum 32 characters)
 
 3. **Build and run all services:**
+
    ```bash
    docker-compose up --build
    ```
@@ -71,24 +73,29 @@ docker run -d \
 The Docker containers can be configured using environment variables:
 
 #### Database Configuration
+
 - `ConnectionStrings__CosmosDb` - Azure Cosmos DB connection string (empty = use in-memory DB)
 - `Azure__CosmosDb__DatabaseName` - Cosmos DB database name (default: MystiraAppDb)
 
 #### Azure Storage
+
 - `ConnectionStrings__AzureStorage` - Azure Blob Storage connection string
 - `Azure__BlobStorage__ContainerName` - Blob container name (default: mystira-app-media)
 
 #### JWT Authentication
+
 - `JwtSettings__Issuer` - JWT token issuer
 - `JwtSettings__Audience` - JWT token audience
 - `JwtSettings__SecretKey` - JWT signing key (minimum 32 characters)
 
 #### Discord Bot (Main API only)
+
 - `Discord__Enabled` - Enable/disable Discord bot (true/false)
 - `Discord__BotToken` - Discord bot token from Discord Developer Portal
 - `Discord__GuildId` - Discord server ID for command registration
 
 #### Database Initialization
+
 - `InitializeDatabaseOnStartup` - Create database on startup (default: false)
 - `SeedMasterDataOnStartup` - Seed master data on startup (default: false)
 
@@ -113,6 +120,7 @@ docker run -d \
 ### Discord API Deserialization Errors
 
 If you see Discord API deserialization errors:
+
 1. Ensure Discord.Net package version is 3.17.1 or higher
 2. Verify `Discord__Enabled=false` if not using Discord bot
 3. Check that `DISCORD_BOT_TOKEN` is valid if Discord is enabled
@@ -120,6 +128,7 @@ If you see Discord API deserialization errors:
 ### Volume Mount Errors
 
 If you see volume mount errors:
+
 1. Ensure you're building from the **repository root**, not the project directory
 2. Check that `.dockerignore` is in the repository root
 3. Verify appsettings.json files exist in the source projects
@@ -127,6 +136,7 @@ If you see volume mount errors:
 ### Configuration Not Found
 
 If the container can't find configuration:
+
 1. Check that appsettings files are copied in the final stage of the Dockerfile (look for explicit COPY of appsettings.json)
 2. Verify environment variables are set correctly
 3. Use `docker logs <container-name>` to see detailed error messages
@@ -134,6 +144,7 @@ If the container can't find configuration:
 ### Permission Errors
 
 The containers run as a non-root user (`appuser`) for security:
+
 1. Ensure mounted volumes have correct permissions
 2. For logs, create the directory first: `mkdir -p ./logs/api`
 

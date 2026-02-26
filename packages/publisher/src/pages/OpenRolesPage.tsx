@@ -1,4 +1,4 @@
-import { OpenRolesBrowser } from '@/features/Contributor/components/OpenRolesBrowser';
+import { OpenRolesBrowser } from "@/features/Contributor/components/OpenRolesBrowser";
 
 export function OpenRolesPage() {
   return (
@@ -7,4 +7,3 @@ export function OpenRolesPage() {
     </div>
   );
 }
-

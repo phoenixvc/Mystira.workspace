@@ -10,11 +10,13 @@ This guide shows how to use the newly implemented UX components to improve user 
 ## 1. LoadingIndicator Component
 
 ### Purpose
+
 Provides consistent loading states with spinner or skeleton placeholders.
 
 ### Usage Examples
 
 #### Basic Spinner
+
 ```razor
 @if (isLoading)
 {
@@ -26,7 +28,8 @@ else
 }
 ```
 
-####  Skeleton Loading
+#### Skeleton Loading
+
 ```razor
 @if (isLoading)
 {
@@ -42,6 +45,7 @@ else
 ```
 
 #### Custom Styling
+
 ```razor
 <LoadingIndicator
     ShowSpinner="true"
@@ -51,24 +55,26 @@ else
 
 ### Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `ShowSpinner` | bool | true | Show rotating spinner |
-| `ShowSkeleton` | bool | false | Show skeleton placeholders |
-| `SkeletonCount` | int | 3 | Number of skeleton items |
-| `Message` | string? | null | Optional message below spinner |
-| `CssClass` | string? | null | Custom CSS class |
+| Parameter       | Type    | Default | Description                    |
+| --------------- | ------- | ------- | ------------------------------ |
+| `ShowSpinner`   | bool    | true    | Show rotating spinner          |
+| `ShowSkeleton`  | bool    | false   | Show skeleton placeholders     |
+| `SkeletonCount` | int     | 3       | Number of skeleton items       |
+| `Message`       | string? | null    | Optional message below spinner |
+| `CssClass`      | string? | null    | Custom CSS class               |
 
 ---
 
 ## 2. ErrorBoundaryWrapper Component
 
 ### Purpose
+
 Gracefully handle errors and prevent full app crashes with recovery options.
 
 ### Usage Examples
 
 #### Basic Error Boundary
+
 ```razor
 <ErrorBoundaryWrapper>
     <ChildContent>
@@ -79,6 +85,7 @@ Gracefully handle errors and prevent full app crashes with recovery options.
 ```
 
 #### Custom Error Messages
+
 ```razor
 <ErrorBoundaryWrapper
     ErrorTitle="Oops! Adventure failed to load"
@@ -92,6 +99,7 @@ Gracefully handle errors and prevent full app crashes with recovery options.
 ```
 
 #### Show Technical Details (Development)
+
 ```razor
 <ErrorBoundaryWrapper ShowDetails="true" ShowReloadButton="true">
     <ChildContent>
@@ -102,21 +110,22 @@ Gracefully handle errors and prevent full app crashes with recovery options.
 
 ### Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `ChildContent` | RenderFragment | - | Content to wrap with error boundary |
-| `ErrorTitle` | string | "Something went wrong" | Custom error title |
-| `ErrorMessage` | string | Default message | Custom error message |
-| `RecoverButtonText` | string | "Try Again" | Text for recover button |
-| `ShowDetails` | bool | false | Show technical error details |
-| `ShowReloadButton` | bool | true | Show page reload button |
-| `OnRecover` | EventCallback | - | Callback when user clicks recover |
+| Parameter           | Type           | Default                | Description                         |
+| ------------------- | -------------- | ---------------------- | ----------------------------------- |
+| `ChildContent`      | RenderFragment | -                      | Content to wrap with error boundary |
+| `ErrorTitle`        | string         | "Something went wrong" | Custom error title                  |
+| `ErrorMessage`      | string         | Default message        | Custom error message                |
+| `RecoverButtonText` | string         | "Try Again"            | Text for recover button             |
+| `ShowDetails`       | bool           | false                  | Show technical error details        |
+| `ShowReloadButton`  | bool           | true                   | Show page reload button             |
+| `OnRecover`         | EventCallback  | -                      | Callback when user clicks recover   |
 
 ---
 
 ## 3. ToastService & ToastContainer
 
 ### Purpose
+
 Display temporary notifications for user feedback on actions (success, error, warning, info).
 
 ### Setup (Already Done)
@@ -126,6 +135,7 @@ The `ToastContainer` is already added to `MainLayout.razor`, and `ToastService` 
 ### Usage Examples
 
 #### Success Notification
+
 ```razor
 @inject ToastService ToastService
 
@@ -148,41 +158,46 @@ The `ToastContainer` is already added to `MainLayout.razor`, and `ToastService` 
 ```
 
 #### Error Notification
+
 ```razor
 ToastService.ShowError("Failed to load scenarios. Please try again.");
 ```
 
 #### Warning Notification
+
 ```razor
 ToastService.ShowWarning("Your session will expire in 5 minutes.");
 ```
 
 #### Info Notification
+
 ```razor
 ToastService.ShowInfo("New adventure available!");
 ```
 
 #### Custom Duration
+
 ```razor
 // Show for 10 seconds instead of default
 ToastService.ShowSuccess("Achievement unlocked!", durationMs: 10000);
 ```
 
 #### Clear All Toasts
+
 ```razor
 ToastService.Clear();
 ```
 
 ### Methods
 
-| Method | Parameters | Default Duration | Description |
-|--------|------------|------------------|-------------|
-| `ShowSuccess` | message, durationMs | 3000ms | Green success toast |
-| `ShowError` | message, durationMs | 5000ms | Red error toast |
-| `ShowWarning` | message, durationMs | 4000ms | Amber warning toast |
-| `ShowInfo` | message, durationMs | 3000ms | Blue info toast |
-| `Show` | message, type, durationMs | 3000ms | Custom type toast |
-| `Clear` | - | - | Clear all toasts |
+| Method        | Parameters                | Default Duration | Description         |
+| ------------- | ------------------------- | ---------------- | ------------------- |
+| `ShowSuccess` | message, durationMs       | 3000ms           | Green success toast |
+| `ShowError`   | message, durationMs       | 5000ms           | Red error toast     |
+| `ShowWarning` | message, durationMs       | 4000ms           | Amber warning toast |
+| `ShowInfo`    | message, durationMs       | 3000ms           | Blue info toast     |
+| `Show`        | message, type, durationMs | 3000ms           | Custom type toast   |
+| `Clear`       | -                         | -                | Clear all toasts    |
 
 ---
 
@@ -401,17 +416,20 @@ ToastService.Clear();
 All components are built with accessibility in mind:
 
 ### LoadingIndicator
+
 - `role="status"` for screen readers
 - `aria-live="polite"` for status updates
 - Reduced motion support (slower animations)
 
 ### ErrorBoundaryWrapper
+
 - `role="alert"` for errors
 - `aria-live="assertive"` for critical errors
 - Keyboard accessible recovery buttons
 - Focus management on error state
 
 ### ToastContainer
+
 - `aria-live="polite"` for non-intrusive notifications
 - `aria-atomic="true"` for complete message reading
 - Close button with `aria-label`
@@ -424,12 +442,14 @@ All components are built with accessibility in mind:
 ### When to use LoadingIndicator
 
 ✅ **Use for:**
+
 - Initial page loads
 - Data fetching operations
 - Form submissions
 - File uploads
 
 ❌ **Don't use for:**
+
 - Instant operations (< 100ms)
 - Background sync operations
 - Micro-interactions (button clicks without data)
@@ -437,12 +457,14 @@ All components are built with accessibility in mind:
 ### When to use ErrorBoundaryWrapper
 
 ✅ **Use for:**
+
 - Complex components that might fail
 - Third-party integrations
 - Data-heavy pages
 - Critical user flows (game sessions, payments)
 
 ❌ **Don't use for:**
+
 - Every single component (too granular)
 - Simple static content
 - Already-handled errors (try-catch is sufficient)
@@ -450,12 +472,14 @@ All components are built with accessibility in mind:
 ### When to use ToastService
 
 ✅ **Use for:**
+
 - Success confirmations
 - Non-critical errors
 - Warnings and info messages
 - Temporary feedback
 
 ❌ **Don't use for:**
+
 - Critical errors (use modals or ErrorBoundary)
 - Persistent messages (use alerts or banners)
 - Form validation errors (use inline validation)
@@ -465,17 +489,20 @@ All components are built with accessibility in mind:
 ## 7. Performance Considerations
 
 ### LoadingIndicator
+
 - Lightweight (~2KB CSS)
 - No JavaScript dependencies
 - Uses CSS animations (GPU-accelerated)
 - Supports reduced motion preferences
 
 ### ErrorBoundaryWrapper
+
 - Negligible overhead when no error
 - Lazy-loads error UI only when needed
 - Cleans up resources on disposal
 
 ### ToastService
+
 - Efficient event-based system
 - Auto-cleanup with timers
 - Maximum 5 concurrent toasts recommended
@@ -530,6 +557,7 @@ public class ToastServiceTests
 ## 9. Migration Guide
 
 ### Before (Old Pattern)
+
 ```razor
 @if (loading)
 {
@@ -539,6 +567,7 @@ public class ToastServiceTests
 ```
 
 ### After (New Pattern)
+
 ```razor
 @if (loading)
 {
@@ -551,16 +580,19 @@ public class ToastServiceTests
 ## 10. Troubleshooting
 
 ### Toast not showing?
+
 - ✅ Verify `ToastService` is injected: `@inject ToastService ToastService`
 - ✅ Check `ToastContainer` is in `MainLayout.razor`
 - ✅ Ensure service is registered in `Program.cs`
 
 ### Error boundary not catching errors?
+
 - ✅ Error must be thrown during render (not in `OnInitializedAsync` unless rethrown)
 - ✅ Wrap the component that throws, not the parent
 - ✅ Check browser console for unhandled errors
 
 ### Loading indicator not animating?
+
 - ✅ Check for `prefers-reduced-motion` setting in browser
 - ✅ Verify CSS is loaded (check browser DevTools)
 - ✅ Ensure scoped CSS is not being stripped by build

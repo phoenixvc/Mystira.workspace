@@ -14,11 +14,11 @@
 
 ## Approvals
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Tech Lead | | | ⏳ Pending |
-| Backend Dev | | | ⏳ Pending |
-| DevOps | | | ⏳ Pending |
+| Role        | Name | Date | Status     |
+| ----------- | ---- | ---- | ---------- |
+| Tech Lead   |      |      | ⏳ Pending |
+| Backend Dev |      |      | ⏳ Pending |
+| DevOps      |      |      | ⏳ Pending |
 
 ---
 
@@ -56,27 +56,27 @@ While REST was initially chosen for simplicity, the following factors now warran
 
 ### Technical Limitations of REST
 
-| Aspect | REST Limitation | Impact |
-|--------|----------------|--------|
-| Serialization | JSON text-based | 5-10x larger payloads vs binary |
-| Connection | HTTP/1.1 per-request overhead | Connection setup latency |
-| Streaming | Requires WebSockets/SSE workarounds | Complex bidirectional communication |
-| Type Safety | Schema validation at runtime | Integration errors discovered late |
-| Code Generation | Manual DTO synchronization | Maintenance burden |
+| Aspect          | REST Limitation                     | Impact                              |
+| --------------- | ----------------------------------- | ----------------------------------- |
+| Serialization   | JSON text-based                     | 5-10x larger payloads vs binary     |
+| Connection      | HTTP/1.1 per-request overhead       | Connection setup latency            |
+| Streaming       | Requires WebSockets/SSE workarounds | Complex bidirectional communication |
+| Type Safety     | Schema validation at runtime        | Integration errors discovered late  |
+| Code Generation | Manual DTO synchronization          | Maintenance burden                  |
 
 ### Industry Benchmarks
 
 Performance comparisons between gRPC and REST for similar workloads:
 
-| Metric | REST/JSON | gRPC/Protobuf | Improvement |
-|--------|-----------|---------------|-------------|
-| Latency (p50) | 45ms | 12ms | 3.75x faster |
-| Latency (p99) | 180ms | 35ms | 5.1x faster |
-| Throughput | 1,200 req/s | 5,800 req/s | 4.8x higher |
-| Payload Size | 2.4 KB | 480 bytes | 5x smaller |
-| CPU Usage | 100% baseline | 40% baseline | 60% reduction |
+| Metric        | REST/JSON     | gRPC/Protobuf | Improvement   |
+| ------------- | ------------- | ------------- | ------------- |
+| Latency (p50) | 45ms          | 12ms          | 3.75x faster  |
+| Latency (p99) | 180ms         | 35ms          | 5.1x faster   |
+| Throughput    | 1,200 req/s   | 5,800 req/s   | 4.8x higher   |
+| Payload Size  | 2.4 KB        | 480 bytes     | 5x smaller    |
+| CPU Usage     | 100% baseline | 40% baseline  | 60% reduction |
 
-*Source: Industry benchmarks for microservice communication patterns*
+_Source: Industry benchmarks for microservice communication patterns_
 
 ---
 
@@ -98,6 +98,7 @@ Performance comparisons between gRPC and REST for similar workloads:
 **Description**: Maintain HTTP/REST with JSON serialization for all Python service communication.
 
 **Pros**:
+
 - ✅ Already implemented in ADR-0010 design
 - ✅ Human-readable payloads for debugging
 - ✅ Browser-native support (useful for testing)
@@ -105,6 +106,7 @@ Performance comparisons between gRPC and REST for similar workloads:
 - ✅ FastAPI provides automatic OpenAPI docs
 
 **Cons**:
+
 - ❌ Higher latency due to text serialization
 - ❌ Larger payload sizes increase network costs
 - ❌ No native streaming support
@@ -125,6 +127,7 @@ Performance comparisons between gRPC and REST for similar workloads:
 ```
 
 **Pros**:
+
 - ✅ Binary serialization (Protocol Buffers) - 5-10x smaller payloads
 - ✅ HTTP/2 multiplexing - concurrent requests on single connection
 - ✅ Native bidirectional streaming - real-time features
@@ -134,6 +137,7 @@ Performance comparisons between gRPC and REST for similar workloads:
 - ✅ Already have `Grpc.AspNetCore` v2.65.0 installed
 
 **Cons**:
+
 - ⚠️ Binary payloads harder to debug (mitigated by tooling)
 - ⚠️ Learning curve for Protocol Buffers syntax
 - ⚠️ Browser support requires gRPC-Web proxy
@@ -143,10 +147,12 @@ Performance comparisons between gRPC and REST for similar workloads:
 **Description**: Use REST for simple operations, gRPC for high-throughput paths.
 
 **Pros**:
+
 - ✅ Best of both worlds
 - ✅ Gradual migration path
 
 **Cons**:
+
 - ❌ Inconsistent patterns across services
 - ❌ Dual maintenance burden
 - ❌ Complex routing decisions
@@ -156,10 +162,12 @@ Performance comparisons between gRPC and REST for similar workloads:
 **Description**: Keep HTTP but use MessagePack binary serialization instead of JSON.
 
 **Pros**:
+
 - ✅ Smaller payloads than JSON
 - ✅ Keep existing HTTP infrastructure
 
 **Cons**:
+
 - ❌ No streaming support
 - ❌ Still has HTTP/1.1 overhead
 - ❌ Less tooling support than gRPC or JSON
@@ -788,30 +796,33 @@ var channel = GrpcChannel.ForAddress(options.GrpcEndpoint, new GrpcChannelOption
 
 ### Migration Strategy
 
-| Phase | Description | Duration |
-|-------|-------------|----------|
-| Phase 1 | Define proto files, generate code | - |
-| Phase 2 | Implement gRPC server in Python alongside existing FastAPI | - |
-| Phase 3 | Create GrpcChainServiceAdapter in .NET | - |
-| Phase 4 | Feature flag to switch between REST and gRPC | - |
-| Phase 5 | Validate performance in staging | - |
-| Phase 6 | Gradual rollout to production | - |
-| Phase 7 | Deprecate REST endpoints | - |
+| Phase   | Description                                                | Duration |
+| ------- | ---------------------------------------------------------- | -------- |
+| Phase 1 | Define proto files, generate code                          | -        |
+| Phase 2 | Implement gRPC server in Python alongside existing FastAPI | -        |
+| Phase 3 | Create GrpcChainServiceAdapter in .NET                     | -        |
+| Phase 4 | Feature flag to switch between REST and gRPC               | -        |
+| Phase 5 | Validate performance in staging                            | -        |
+| Phase 6 | Gradual rollout to production                              | -        |
+| Phase 7 | Deprecate REST endpoints                                   | -        |
 
 ---
 
 ## Alternatives Not Chosen
 
 ### MessagePack over HTTP
+
 - Better than JSON but lacks streaming and strong typing
 - Would require custom serialization libraries
 
 ### Apache Thrift
+
 - Similar benefits to gRPC
 - Less ecosystem support and tooling
 - Not as widely adopted in cloud-native environments
 
 ### GraphQL
+
 - Designed for flexible queries, not service-to-service RPC
 - Overkill for internal microservice communication
 - Higher complexity than needed

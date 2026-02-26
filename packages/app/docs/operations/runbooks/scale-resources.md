@@ -15,6 +15,7 @@ This runbook guides you through scaling Azure resources up or down based on perf
 ### Scale Up (Increase Resources)
 
 When you observe:
+
 - CPU utilization consistently > 70%
 - Memory utilization consistently > 80%
 - Response times increasing (p95 > 1000ms)
@@ -24,6 +25,7 @@ When you observe:
 ### Scale Down (Decrease Resources)
 
 When you observe:
+
 - CPU utilization consistently < 30%
 - Memory utilization consistently < 40%
 - Over-provisioned for current load
@@ -49,6 +51,7 @@ az appservice plan update \
 ```
 
 SKU Recommendations:
+
 - **Development**: B1 (1 core, 1.75 GB RAM)
 - **Staging**: P1V2 (2 cores, 3.5 GB RAM)
 - **Production**: P2V2 (4 cores, 7 GB RAM) or higher
@@ -71,6 +74,7 @@ az appservice plan update \
 ```
 
 Instance Recommendations:
+
 - **Development**: 1 instance
 - **Staging**: 1-2 instances
 - **Production**: 2-3 instances (minimum for HA)
@@ -123,6 +127,7 @@ az cosmosdb sql database throughput update \
 ```
 
 Throughput Recommendations:
+
 - **Development**: 400 RU/s (minimum)
 - **Staging**: 1000-2000 RU/s
 - **Production**: 4000-10000 RU/s
@@ -164,6 +169,7 @@ az redis update \
 ```
 
 Cache SKU Recommendations:
+
 - **Development**: Basic C0 (250 MB)
 - **Staging**: Standard C1 (1 GB)
 - **Production**: Standard C2 (2.5 GB) or Premium P1 (6 GB)
@@ -191,6 +197,7 @@ performanceCounters
 ```
 
 Success Criteria:
+
 - [ ] CPU utilization < 70%
 - [ ] Memory utilization < 80%
 - [ ] Response times improved (p95 < 500ms)
@@ -236,11 +243,13 @@ az cosmosdb sql database throughput update \
 ### Estimate Cost Changes
 
 Before scaling, review pricing:
+
 - App Service: https://azure.microsoft.com/pricing/details/app-service/
 - Cosmos DB: https://azure.microsoft.com/pricing/details/cosmos-db/
 - Redis Cache: https://azure.microsoft.com/pricing/details/cache/
 
 Example cost changes:
+
 - P1V2 → P2V2: ~$146/month → ~$292/month
 - 2 instances → 3 instances: 1.5x cost
 - Cosmos 4000 RU/s → 10000 RU/s: ~2.5x cost
@@ -259,6 +268,7 @@ Example cost changes:
 ### Issue: Scaling not improving performance
 
 **Resolution**:
+
 1. Check if bottleneck is elsewhere (database, external services)
 2. Review code for inefficiencies
 3. Enable Application Insights profiler
@@ -267,6 +277,7 @@ Example cost changes:
 ### Issue: Scaling causing errors
 
 **Resolution**:
+
 1. Check application logs for connection issues
 2. Verify connection strings and configurations
 3. Review stateful operations that may not scale horizontally

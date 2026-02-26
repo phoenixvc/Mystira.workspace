@@ -16,6 +16,7 @@ After migrating Staging to Azure Static Web Apps, proper monitoring ensures depl
 ### Step 1: Create Application Insights Resource
 
 **Azure Portal**:
+
 1. Go to Azure Portal → Create a resource
 2. Search "Application Insights" → Create
 3. Configure:
@@ -28,6 +29,7 @@ After migrating Staging to Azure Static Web Apps, proper monitoring ensures depl
 4. Click "Review + Create" → "Create"
 
 **Azure CLI**:
+
 ```bash
 # Set variables
 RESOURCE_GROUP="rg-mystira-app"
@@ -53,6 +55,7 @@ echo "Instrumentation Key: $INSTRUMENTATION_KEY"
 ### Step 2: Link SWA to Application Insights
 
 **Azure Portal**:
+
 1. Open your Static Web App resource
 2. Go to Settings → Application Insights
 3. Click "Enable"
@@ -60,6 +63,7 @@ echo "Instrumentation Key: $INSTRUMENTATION_KEY"
 5. Click "Save"
 
 **Azure CLI**:
+
 ```bash
 SWA_NAME="mystira-app-staging-swa"
 
@@ -89,6 +93,7 @@ az staticwebapp appsettings set \
 **Purpose**: Notify when GitHub Actions deployment fails
 
 **GitHub Actions Integration**:
+
 ```yaml
 # Add to .github/workflows/azure-static-web-apps-staging.yml
 
@@ -106,6 +111,7 @@ az staticwebapp appsettings set \
 ```
 
 **Or Create via Portal**:
+
 1. Application Insights → Alerts → New alert rule
 2. Condition: Custom log search
 3. Query: `requests | where success == false | count`
@@ -232,6 +238,7 @@ echo "   View at: https://portal.azure.com/#@/dashboard/private/$DASHBOARD_NAME"
 ### Key Metrics to Monitor
 
 **Dashboard Tiles**:
+
 1. **Request Rate** - Requests per minute
 2. **Response Time** - Average/P95/P99
 3. **Error Rate** - 4xx and 5xx errors
@@ -263,6 +270,7 @@ az consumption budget create \
 SWA Free tier includes 100GB bandwidth/month. Monitor usage:
 
 **Azure Portal**:
+
 1. Static Web App → Monitoring → Metrics
 2. Select: "Data Out" metric
 3. Set: Monthly aggregation
@@ -277,6 +285,7 @@ SWA Free tier includes 100GB bandwidth/month. Monitor usage:
 Create availability test in Application Insights:
 
 **Portal**:
+
 1. Application Insights → Availability
 2. Add test:
    ```
@@ -289,6 +298,7 @@ Create availability test in Application Insights:
    ```
 
 **CLI**:
+
 ```bash
 az monitor app-insights web-test create \
   --resource-group $RESOURCE_GROUP \
@@ -303,6 +313,7 @@ az monitor app-insights web-test create \
 ### Test Key Routes
 
 Create availability tests for:
+
 - `/` - Home page
 - `/adventures` - Adventures page
 - `/profile` - Profile page
@@ -318,6 +329,7 @@ Create availability tests for:
 Save useful KQL queries in Application Insights:
 
 **Query 1: Failed Requests**
+
 ```kql
 requests
 | where success == false
@@ -326,6 +338,7 @@ requests
 ```
 
 **Query 2: Slow Pages**
+
 ```kql
 pageViews
 | where duration > 3000
@@ -334,6 +347,7 @@ pageViews
 ```
 
 **Query 3: User Agents**
+
 ```kql
 requests
 | summarize count() by client_Browser
@@ -364,6 +378,7 @@ After setup, verify:
 **Access**: https://portal.azure.com/#@/dashboard
 
 **Key Metrics**:
+
 - ✅ Request rate: < 10,000/day (free tier)
 - ✅ Response time: < 3 seconds (P95)
 - ✅ Error rate: < 1%
@@ -399,17 +414,20 @@ After setup, verify:
 ## Post-Migration Monitoring Plan
 
 **Week 1**: Daily monitoring
+
 - Check dashboard every day
 - Review error logs
 - Validate alert configuration
 - Compare performance with old Staging
 
 **Week 2-4**: Weekly monitoring
+
 - Review weekly performance trends
 - Adjust alert thresholds if needed
 - Optimize based on patterns
 
 **Ongoing**: Monthly reviews
+
 - Cost analysis
 - Performance trends
 - Capacity planning

@@ -29,7 +29,7 @@ interface InfrastructureConfirmDialogsProps {
   onSetDeploymentProgress: (progress: string | null) => void;
   onSetLastResponse: (response: CommandResponse | null) => void;
   onSetPendingResourceGroup: (
-    rg: { resourceGroup: string; location: string } | null,
+    rg: { resourceGroup: string; location: string } | null
   ) => void;
 }
 
@@ -64,7 +64,7 @@ export function InfrastructureConfirmDialogs({
     onSetLoading(true);
     onSetCurrentAction("deploy");
     onSetDeploymentProgress(
-      `Creating resource group '${pendingResourceGroup.resourceGroup}'...`,
+      `Creating resource group '${pendingResourceGroup.resourceGroup}'...`
     );
 
     try {
@@ -73,7 +73,7 @@ export function InfrastructureConfirmDialogs({
         {
           resourceGroup: pendingResourceGroup.resourceGroup,
           location: pendingResourceGroup.location,
-        },
+        }
       );
 
       if (!createRgResponse.success) {
@@ -90,7 +90,7 @@ export function InfrastructureConfirmDialogs({
       }
 
       onSetDeploymentProgress(
-        `Deploying to ${pendingResourceGroup.resourceGroup}...`,
+        `Deploying to ${pendingResourceGroup.resourceGroup}...`
       );
       await onResourceGroupConfirm();
     } catch (error) {
@@ -107,8 +107,7 @@ export function InfrastructureConfirmDialogs({
 
   const selectedDestroyResources = whatIfChanges.filter(
     (c) =>
-      c.selected !== false &&
-      (c.changeType === "delete" || c.selected === true),
+      c.selected !== false && (c.changeType === "delete" || c.selected === true)
   );
 
   const deployCount =

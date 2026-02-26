@@ -1,7 +1,7 @@
 /**
  * Retry utilities with exponential backoff
  */
-import { setTimeout } from 'node:timers/promises';
+import { setTimeout } from "node:timers/promises";
 
 export interface RetryOptions {
   /** Maximum number of retry attempts */
@@ -18,7 +18,7 @@ export interface RetryOptions {
   onRetry?: (attempt: number, error: unknown, nextDelayMs: number) => void;
 }
 
-const DEFAULT_OPTIONS: Required<Omit<RetryOptions, 'onRetry'>> = {
+const DEFAULT_OPTIONS: Required<Omit<RetryOptions, "onRetry">> = {
   maxAttempts: 3,
   initialDelayMs: 1000,
   maxDelayMs: 30000,

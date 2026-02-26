@@ -83,11 +83,7 @@ Enum values are loaded from JSON files:
 ### Example JSON File
 
 ```json
-[
-  { "Value": "guardian" },
-  { "Value": "the listener" },
-  { "Value": "trickster" }
-]
+[{ "Value": "guardian" }, { "Value": "the listener" }, { "Value": "trickster" }]
 ```
 
 ## Derived Classes

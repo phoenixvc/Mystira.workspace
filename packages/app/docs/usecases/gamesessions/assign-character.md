@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions/{id}/character<br/>{ characterId }
     Controller->>Service: SelectCharacterAsync(sessionId, characterId)
-    
+
     Note over Service: Step 1: Get Session
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
@@ -39,10 +39,10 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Step 2: Assign Character
     Service->>Service: session.SelectedCharacterId = characterId
-    
+
     Note over Service: Step 3: Persist Changes
     Service->>Repo: UpdateAsync(session)
     Repo->>DB: Update entity
@@ -51,7 +51,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>Service: Success
     Repo-->>Service: GameSession (updated)
-    
+
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)
 ```

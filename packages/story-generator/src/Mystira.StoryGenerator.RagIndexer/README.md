@@ -45,6 +45,7 @@ Update `appsettings.json` with your Azure service details:
 ### Age Group Support
 
 The indexer now supports indexing instructions for multiple age groups. Each age group has a dedicated index:
+
 - `1-2`: Toddler stories
 - `3-5`: Preschool stories
 - `6-9`: School-age stories
@@ -58,6 +59,7 @@ dotnet run -- <json-file-path>
 ```
 
 Examples:
+
 ```bash
 # Index instructions for school-age (6-9)
 dotnet run -- ./data/sample_instructions_6-9.json
@@ -106,12 +108,15 @@ The input JSON should follow this structure:
 The indexer creates an index with the following fields:
 
 ### Primary Key
+
 - `id` (key): Unique identifier for each chunk
 
 ### Content
+
 - `content`: Full text content (searchable) with standard.lucene analyzer
 
 ### Instruction Categorization
+
 - `category`: High-level pipeline step (filterable, facetable)
 - `subcategory`: Topic/area of the rule (filterable, facetable)
 - `instructionType`: Type of instruction (filterable, facetable)
@@ -121,20 +126,24 @@ The indexer creates an index with the following fields:
 - `tags`: List of descriptive tags (filterable, facetable)
 
 ### Context and Relationships
+
 - `title`: Section title (searchable, filterable)
 - `section`: Section number (searchable, filterable)
 - `keywords`: List of keywords (filterable, facetable)
 
 ### Metadata
+
 - `source`: Source of instruction (filterable)
 - `version`: Instruction version (filterable)
 - `createdAt`: Creation timestamp (filterable, sortable)
 - `updatedAt`: Last update timestamp (filterable, sortable)
 
 ### Legacy Fields (for backward compatibility)
+
 - `chunk_id`: Legacy chunk identifier (filterable)
 - `dataset`: Dataset name (filterable, facetable)
 - `version`: Dataset version (filterable)
 
 ### Vector Search
+
 - `embedding`: Vector embedding (1536 dimensions, searchable) with vector search profile

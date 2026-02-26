@@ -5,21 +5,25 @@ This document outlines the design system for the Mystira application, as reverse
 ## Color Palette
 
 ### Primary Colors
+
 - **Primary:** `#7c3aed`
 - **Primary Hover:** `#6d28d9`
 - **Secondary:** `#1F2937`
 
 ### Semantic Colors
+
 - **Success:** `#10B981`
 - **Danger:** `#EF4444`
 - **Warning:** `#F59E0B`
 - **Info:** `#3B82F6`
 
 ### Neutral Colors
+
 - **Light:** `#F9FAFB`
 - **Dark:** `#111827`
 
 ### Theme Colors (Light/Dark)
+
 - **Background (Light):** `#f8fafc`
 - **Foreground (Light):** `#111827`
 - **Muted (Light):** `#6b7280`
@@ -47,6 +51,7 @@ The project does not use a formal spacing system (e.g., 4px grid), but common sp
 ## UI Components
 
 The application uses a set of custom-styled UI components, including:
+
 - Buttons
 - Cards
 - Modals

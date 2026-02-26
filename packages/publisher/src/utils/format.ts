@@ -1,28 +1,31 @@
 // Formatting utilities
 
-export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOptions): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+export function formatDate(
+  date: string | Date,
+  options?: Intl.DateTimeFormatOptions
+): string {
+  const d = typeof date === "string" ? new Date(date) : date;
   return d.toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
     ...options,
   });
 }
 
 export function formatDateTime(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === "string" ? new Date(date) : date;
   return d.toLocaleString(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
 export function formatRelativeTime(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
+  const d = typeof date === "string" ? new Date(date) : date;
   const now = new Date();
   const diff = now.getTime() - d.getTime();
 
@@ -34,13 +37,13 @@ export function formatRelativeTime(date: string | Date): string {
   if (days > 30) {
     return formatDate(d);
   } else if (days > 0) {
-    return `${days} day${days === 1 ? '' : 's'} ago`;
+    return `${days} day${days === 1 ? "" : "s"} ago`;
   } else if (hours > 0) {
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+    return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   } else if (minutes > 0) {
-    return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+    return `${minutes} minute${minutes === 1 ? "" : "s"} ago`;
   } else {
-    return 'Just now';
+    return "Just now";
   }
 }
 
@@ -50,9 +53,9 @@ export function formatPercentage(value: number, decimals: number = 0): string {
 
 export function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 export function truncate(str: string, maxLength: number): string {

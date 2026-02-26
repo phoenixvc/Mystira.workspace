@@ -1,5 +1,5 @@
-import type { AuditLog } from '@/api/types';
-import { Modal, Badge } from '@/components';
+import type { AuditLog } from "@/api/types";
+import { Modal, Badge } from "@/components";
 
 interface AuditLogDetailProps {
   log: AuditLog | null;
@@ -22,20 +22,28 @@ export function AuditLogDetail({ log, onClose }: AuditLogDetailProps) {
           <dd>{new Date(log.timestamp).toLocaleString()}</dd>
 
           <dt>Actor</dt>
-          <dd>{log.actorName} ({log.actorId})</dd>
+          <dd>
+            {log.actorName} ({log.actorId})
+          </dd>
 
           {log.targetName && (
             <>
               <dt>Target</dt>
-              <dd>{log.targetName} ({log.targetId})</dd>
+              <dd>
+                {log.targetName} ({log.targetId})
+              </dd>
             </>
           )}
 
           <dt>Story ID</dt>
-          <dd><code>{log.storyId}</code></dd>
+          <dd>
+            <code>{log.storyId}</code>
+          </dd>
 
           <dt>Log ID</dt>
-          <dd><code>{log.id}</code></dd>
+          <dd>
+            <code>{log.id}</code>
+          </dd>
         </dl>
 
         {Object.keys(log.details).length > 0 && (
@@ -53,7 +61,7 @@ export function AuditLogDetail({ log, onClose }: AuditLogDetailProps) {
 
 function formatEventType(eventType: string): string {
   return eventType
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

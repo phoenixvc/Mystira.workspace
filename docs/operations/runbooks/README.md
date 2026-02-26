@@ -12,37 +12,37 @@ This directory contains operational runbooks for the Mystira platform. Each runb
 
 ### Emergency Procedures
 
-| Scenario | Runbook | Estimated Time | Approval Required |
-|----------|---------|----------------|-------------------|
-| Production rollback | [emergency-rollback.md](./emergency-rollback.md) | 5-15 minutes | On-call lead |
-| Disaster recovery | [disaster-recovery.md](./disaster-recovery.md) | 30-120 minutes | Engineering Manager |
-| Database failover | [database-failover.md](./database-failover.md) | 15-30 minutes | DBA + On-call lead |
-| Security incident | [security-incident.md](./security-incident.md) | Varies | Security Team |
+| Scenario            | Runbook                                          | Estimated Time | Approval Required   |
+| ------------------- | ------------------------------------------------ | -------------- | ------------------- |
+| Production rollback | [emergency-rollback.md](./emergency-rollback.md) | 5-15 minutes   | On-call lead        |
+| Disaster recovery   | [disaster-recovery.md](./disaster-recovery.md)   | 30-120 minutes | Engineering Manager |
+| Database failover   | [database-failover.md](./database-failover.md)   | 15-30 minutes  | DBA + On-call lead  |
+| Security incident   | [security-incident.md](./security-incident.md)   | Varies         | Security Team       |
 
 ### Routine Operations
 
-| Scenario | Runbook | Estimated Time | Approval Required |
-|----------|---------|----------------|-------------------|
-| Planned maintenance | [planned-maintenance.md](./planned-maintenance.md) | Varies | Change Advisory Board |
-| Certificate renewal | [certificate-renewal.md](./certificate-renewal.md) | 15-30 minutes | None |
-| Scaling operations | [scaling-operations.md](./scaling-operations.md) | 10-20 minutes | On-call lead |
-| Log rotation | [log-management.md](./log-management.md) | 5-10 minutes | None |
+| Scenario            | Runbook                                            | Estimated Time | Approval Required     |
+| ------------------- | -------------------------------------------------- | -------------- | --------------------- |
+| Planned maintenance | [planned-maintenance.md](./planned-maintenance.md) | Varies         | Change Advisory Board |
+| Certificate renewal | [certificate-renewal.md](./certificate-renewal.md) | 15-30 minutes  | None                  |
+| Scaling operations  | [scaling-operations.md](./scaling-operations.md)   | 10-20 minutes  | On-call lead          |
+| Log rotation        | [log-management.md](./log-management.md)           | 5-10 minutes   | None                  |
 
 ### Infrastructure Maintenance
 
-| Scenario | Runbook | Estimated Time | Approval Required |
-|----------|---------|----------------|-------------------|
-| Terraform state cleanup | [terraform-state-cleanup.md](./terraform-state-cleanup.md) | 30-60 minutes | Engineering Lead |
-| Fix workflow naming | [workflow-naming-fix.md](./workflow-naming-fix.md) | 5 min/submodule | None |
+| Scenario                | Runbook                                                    | Estimated Time  | Approval Required |
+| ----------------------- | ---------------------------------------------------------- | --------------- | ----------------- |
+| Terraform state cleanup | [terraform-state-cleanup.md](./terraform-state-cleanup.md) | 30-60 minutes   | Engineering Lead  |
+| Fix workflow naming     | [workflow-naming-fix.md](./workflow-naming-fix.md)         | 5 min/submodule | None              |
 
 ### Troubleshooting
 
-| Scenario | Runbook | Priority |
-|----------|---------|----------|
-| High latency investigation | [troubleshooting-latency.md](./troubleshooting-latency.md) | P1/P2 |
-| Error rate spike | [troubleshooting-errors.md](./troubleshooting-errors.md) | P1/P2 |
-| Memory issues | [troubleshooting-memory.md](./troubleshooting-memory.md) | P2/P3 |
-| Connection issues | [troubleshooting-connections.md](./troubleshooting-connections.md) | P1/P2 |
+| Scenario                   | Runbook                                                            | Priority |
+| -------------------------- | ------------------------------------------------------------------ | -------- |
+| High latency investigation | [troubleshooting-latency.md](./troubleshooting-latency.md)         | P1/P2    |
+| Error rate spike           | [troubleshooting-errors.md](./troubleshooting-errors.md)           | P1/P2    |
+| Memory issues              | [troubleshooting-memory.md](./troubleshooting-memory.md)           | P2/P3    |
+| Connection issues          | [troubleshooting-connections.md](./troubleshooting-connections.md) | P1/P2    |
 
 ---
 
@@ -90,12 +90,12 @@ Procedures for investigating and resolving monitoring alerts.
 
 ### Priority Definitions
 
-| Priority | Response Time | Example Scenarios |
-|----------|---------------|-------------------|
-| **P0** | 15 minutes | Complete service outage, data loss |
-| **P1** | 30 minutes | Partial outage, major feature broken |
-| **P2** | 2 hours | Performance degradation, non-critical feature broken |
-| **P3** | 8 hours | Minor issues, cosmetic bugs |
+| Priority | Response Time | Example Scenarios                                    |
+| -------- | ------------- | ---------------------------------------------------- |
+| **P0**   | 15 minutes    | Complete service outage, data loss                   |
+| **P1**   | 30 minutes    | Partial outage, major feature broken                 |
+| **P2**   | 2 hours       | Performance degradation, non-critical feature broken |
+| **P3**   | 8 hours       | Minor issues, cosmetic bugs                          |
 
 ### Escalation Path
 
@@ -121,10 +121,10 @@ Procedures for investigating and resolving monitoring alerts.
 
 ### Contact Information
 
-| Role | Primary | Backup | Method |
-|------|---------|--------|--------|
-| Technical Lead | jurie@phoenixvc.tech | eben@phoenixvc.tech | Email |
-| Founder/Business | eben@phoenixvc.tech | jurie@phoenixvc.tech | Email |
+| Role             | Primary              | Backup               | Method |
+| ---------------- | -------------------- | -------------------- | ------ |
+| Technical Lead   | jurie@phoenixvc.tech | eben@phoenixvc.tech  | Email  |
+| Founder/Business | eben@phoenixvc.tech  | jurie@phoenixvc.tech | Email  |
 
 ---
 
@@ -176,7 +176,9 @@ Every runbook must include:
 [Description]
 
 \`\`\`bash
+
 # Command to execute
+
 \`\`\`
 
 **Expected Output:**
@@ -185,6 +187,7 @@ Every runbook must include:
 \`\`\`
 
 ### Step 2: [Step Title]
+
 ...
 
 ## Verification
@@ -262,6 +265,6 @@ gh run list --workflow=mystira-app-api-cicd-prod.yml
 
 ## Revision History
 
-| Version | Date | Author | Changes |
-|---------|------|--------|---------|
-| 1.0 | 2025-12-22 | Platform Team | Initial runbook index |
+| Version | Date       | Author        | Changes               |
+| ------- | ---------- | ------------- | --------------------- |
+| 1.0     | 2025-12-22 | Platform Team | Initial runbook index |

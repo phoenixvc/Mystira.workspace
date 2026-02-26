@@ -1,6 +1,6 @@
-import type { OpenRole } from '@/api/types';
-import { Badge, EmptyState, Spinner } from '@/components';
-import { formatDate } from '@/utils/format';
+import type { OpenRole } from "@/api/types";
+import { Badge, EmptyState, Spinner } from "@/components";
+import { formatDate } from "@/utils/format";
 
 interface OpenRoleListProps {
   roles: OpenRole[];
@@ -11,12 +11,17 @@ interface OpenRoleListProps {
 
 function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
-export function OpenRoleList({ roles, isLoading, onEdit, onDelete }: OpenRoleListProps) {
+export function OpenRoleList({
+  roles,
+  isLoading,
+  onEdit,
+  onDelete,
+}: OpenRoleListProps) {
   if (isLoading) {
     return <Spinner />;
   }
@@ -32,14 +37,16 @@ export function OpenRoleList({ roles, isLoading, onEdit, onDelete }: OpenRoleLis
 
   return (
     <div className="open-role-list">
-      {roles.map(role => (
+      {roles.map((role) => (
         <div key={role.id} className="open-role-list__item">
           <div className="open-role-list__content">
             <div className="open-role-list__header">
               <h4>{formatRole(role.role)}</h4>
               <Badge variant="info">{role.splitPercentage}% split</Badge>
             </div>
-            {role.description && <p className="open-role-list__description">{role.description}</p>}
+            {role.description && (
+              <p className="open-role-list__description">{role.description}</p>
+            )}
             {role.requirements && (
               <div className="open-role-list__requirements">
                 <strong>Requirements:</strong> {role.requirements}

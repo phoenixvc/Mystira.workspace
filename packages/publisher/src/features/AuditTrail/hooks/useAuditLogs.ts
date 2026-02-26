@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { auditApi } from '@/api';
-import type { AuditLogParams } from '@/api/types';
-import { logger } from '@/utils/logger';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { auditApi } from "@/api";
+import type { AuditLogParams } from "@/api/types";
+import { logger } from "@/utils/logger";
 
 export function useAuditLogs(storyId?: string) {
   const [filters, setFilters] = useState<AuditLogParams>({});
@@ -10,7 +10,7 @@ export function useAuditLogs(storyId?: string) {
   const queryParams = { ...filters, storyId };
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['audit-logs', queryParams],
+    queryKey: ["audit-logs", queryParams],
     queryFn: () =>
       storyId
         ? auditApi.getByStory(storyId, filters)
@@ -21,15 +21,15 @@ export function useAuditLogs(storyId?: string) {
     try {
       const blob = await auditApi.exportCsv(queryParams);
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `audit-logs-${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `audit-logs-${new Date().toISOString().split("T")[0]}.csv`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     } catch (err) {
-      logger.error('Failed to export audit logs:', err);
+      logger.error("Failed to export audit logs:", err);
     }
   };
 

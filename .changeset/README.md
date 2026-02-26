@@ -11,6 +11,7 @@ pnpm changeset
 ```
 
 This will prompt you to:
+
 1. Select which packages are affected
 2. Choose the type of change (major, minor, patch)
 3. Write a summary of the change
@@ -28,4 +29,3 @@ pnpm changeset version
 # Publish (if you have npm publish permissions)
 pnpm changeset publish
 ```
-

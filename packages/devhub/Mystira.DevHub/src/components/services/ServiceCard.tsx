@@ -139,7 +139,7 @@ export function ServiceCard({
     const newState = !isCollapsed;
     if (newState && !isCollapsed) {
       const logContainer = logContainerRef.current?.querySelector(
-        ".overflow-y-auto",
+        ".overflow-y-auto"
       ) as HTMLElement;
       if (logContainer) {
         scrollPositionRef.current = logContainer.scrollTop;
@@ -150,7 +150,7 @@ export function ServiceCard({
     if (!newState && isCollapsed && scrollPositionRef.current > 0) {
       setTimeout(() => {
         const logContainer = logContainerRef.current?.querySelector(
-          ".overflow-y-auto",
+          ".overflow-y-auto"
         ) as HTMLElement;
         if (logContainer) {
           logContainer.scrollTop = scrollPositionRef.current;

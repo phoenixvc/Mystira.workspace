@@ -9,6 +9,7 @@
 ## What You'll Build
 
 By the end of this guide, you'll have created a complete query that:
+
 - ✅ Retrieves content bundles by age group
 - ✅ Uses the Specification Pattern for filtering
 - ✅ Returns filtered, sorted results
@@ -140,6 +141,7 @@ public class ContentBundlesByAgeGroupSpecification : BaseSpecification<ContentBu
 ```
 
 **What this does**:
+
 - **Filters**: Only bundles matching the age group
 - **Excludes deleted**: Soft-delete filtering
 - **Sorts**: Alphabetically by title
@@ -287,22 +289,26 @@ public class GetContentBundlesByAgeGroupQueryHandlerTests
 ## Complete Example Flow
 
 **1. User makes HTTP GET request**:
+
 ```http
 GET /api/content-bundles/age-group/Ages7to9
 ```
 
 **2. Controller receives request**:
+
 ```csharp
 var query = new GetContentBundlesByAgeGroupQuery(ageGroup);
 var bundles = await _mediator.Send(query);
 ```
 
 **3. MediatR routes to handler**:
+
 ```
 IMediator.Send() → GetContentBundlesByAgeGroupQueryHandler.Handle()
 ```
 
 **4. Handler executes**:
+
 ```csharp
 // Validate
 // Create specification
@@ -311,6 +317,7 @@ IMediator.Send() → GetContentBundlesByAgeGroupQueryHandler.Handle()
 ```
 
 **5. Controller returns response**:
+
 ```http
 HTTP/1.1 200 OK
 Content-Type: application/json
@@ -383,6 +390,7 @@ public async Task<IActionResult> GetBundles([FromQuery] int page = 1, [FromQuery
 ```
 
 **Usage**:
+
 ```http
 GET /api/content-bundles?page=2&size=20
 ```
@@ -416,15 +424,15 @@ Before moving on, make sure you have:
 
 ## Query vs Command Quick Reference
 
-| Aspect | **Query** | **Command** |
-|--------|-----------|-------------|
-| **Purpose** | Read data | Write/modify data |
-| **Returns** | Data (entities, DTOs) | Entity or void |
-| **Modifies State** | ❌ No | ✅ Yes |
-| **Cacheable** | ✅ Yes | ❌ No |
-| **Needs UnitOfWork** | ❌ No | ✅ Yes |
-| **HTTP Method** | GET | POST, PUT, DELETE |
-| **Example** | `GetContentBundlesQuery` | `CreateContentBundleCommand` |
+| Aspect               | **Query**                | **Command**                  |
+| -------------------- | ------------------------ | ---------------------------- |
+| **Purpose**          | Read data                | Write/modify data            |
+| **Returns**          | Data (entities, DTOs)    | Entity or void               |
+| **Modifies State**   | ❌ No                    | ✅ Yes                       |
+| **Cacheable**        | ✅ Yes                   | ❌ No                        |
+| **Needs UnitOfWork** | ❌ No                    | ✅ Yes                       |
+| **HTTP Method**      | GET                      | POST, PUT, DELETE            |
+| **Example**          | `GetContentBundlesQuery` | `CreateContentBundleCommand` |
 
 ---
 
@@ -452,6 +460,7 @@ If you're stuck:
 ## Summary
 
 You've learned how to:
+
 - ✅ Create a query using `record` syntax
 - ✅ Implement a query handler for read operations
 - ✅ Use specifications for filtering

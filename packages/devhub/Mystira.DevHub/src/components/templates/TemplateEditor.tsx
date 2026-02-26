@@ -9,7 +9,7 @@ interface TemplateEditorProps {
 
 function TemplateEditor({ template, onSave, onClose }: TemplateEditorProps) {
   const [editedTemplate, setEditedTemplate] = useState<TemplateConfig | null>(
-    null,
+    null
   );
   const [saveAsNew, setSaveAsNew] = useState(false);
 

@@ -131,7 +131,7 @@ function DeploymentHistory({ events, loading }: DeploymentHistoryProps) {
               {filterOption !== "all" &&
                 ` (${events.filter((e) => e.action === filterOption).length})`}
             </button>
-          ),
+          )
         )}
       </div>
 

@@ -50,7 +50,7 @@ export function InfrastructurePanelHeader({
   onBuildCli,
 }: InfrastructurePanelHeaderProps) {
   const handleEnvironmentChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLSelectElement>
   ) => {
     const newEnv = e.target.value;
     await onEnvironmentChange(newEnv);
@@ -136,7 +136,7 @@ export function InfrastructurePanelHeader({
                   <span className="w-2 h-2 rounded-full bg-amber-500" />
                 )}
                 {formatTimeSince(
-                  new Date(workflowStatus.updatedAt).getTime(),
+                  new Date(workflowStatus.updatedAt).getTime()
                 ) || "Unknown"}
               </div>
             </div>

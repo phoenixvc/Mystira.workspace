@@ -63,11 +63,11 @@ export default function InfrastructureResourcesTab({
                       await invoke<CommandResponse>("install_azure_cli");
                     if (response.success) {
                       alert(
-                        "Azure CLI installation started. Please restart the application after installation completes.",
+                        "Azure CLI installation started. Please restart the application after installation completes."
                       );
                     } else {
                       alert(
-                        `Failed to install Azure CLI: ${response.error || "Unknown error"}`,
+                        `Failed to install Azure CLI: ${response.error || "Unknown error"}`
                       );
                     }
                   } catch (error) {
@@ -111,7 +111,7 @@ export default function InfrastructureResourcesTab({
                 "delete_azure_resource",
                 {
                   resourceId,
-                },
+                }
               );
               if (response.success) {
                 onFetchResources(true, environment);

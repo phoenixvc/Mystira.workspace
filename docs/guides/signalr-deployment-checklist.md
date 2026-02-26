@@ -88,6 +88,7 @@ npm install @microsoft/signalr
 ### 3. Replace Polling with SignalR
 
 Before:
+
 ```typescript
 // ❌ Remove polling
 useEffect(() => {
@@ -97,10 +98,11 @@ useEffect(() => {
 ```
 
 After:
+
 ```typescript
 // ✅ Use SignalR
 useEventListener({
-  eventName: 'DataUpdated',
+  eventName: "DataUpdated",
   onEvent: (data) => setData(data),
 });
 ```
@@ -121,7 +123,7 @@ Edit `infra/terraform/environments/dev/front-door.tf`:
 ```hcl
 module "front_door" {
   # ... other config ...
-  
+
   enable_admin_services     = true  # ✅ Enable this
   admin_api_backend_address = "dev.admin-api.mystira.app"
   admin_ui_backend_address  = "dev.admin.mystira.app"
@@ -233,7 +235,7 @@ wscat -c wss://dev.admin-api.mystira.app/hubs/events
 ```javascript
 const connection = new signalR.HubConnectionBuilder()
   .withUrl("https://dev.admin-api.mystira.app/hubs/events", {
-    transport: signalR.HttpTransportType.WebSockets
+    transport: signalR.HttpTransportType.WebSockets,
   })
   .build();
 
@@ -337,6 +339,7 @@ artillery run artillery.yml
 If issues occur:
 
 1. **Immediate**: Revert DNS CNAME to direct AKS ingress
+
    ```bash
    az network dns record-set cname set-record \
      --resource-group mys-shared-dns-rg \
@@ -346,9 +349,10 @@ If issues occur:
    ```
 
 2. **Backend**: Disable SignalR, revert to polling
+
    ```typescript
    // Temporarily disable SignalR
-   const useSignalR = false;  // Feature flag
+   const useSignalR = false; // Feature flag
    ```
 
 3. **Terraform**: Set `enable_admin_services = false`

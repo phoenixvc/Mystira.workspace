@@ -1,10 +1,10 @@
-import { useSearchParams } from 'react-router-dom';
-import { RoleRequestList } from '@/features/Contributor/components/RoleRequestList';
-import { Card, CardBody, CardHeader } from '@/components';
+import { useSearchParams } from "react-router-dom";
+import { RoleRequestList } from "@/features/Contributor/components/RoleRequestList";
+import { Card, CardBody, CardHeader } from "@/components";
 
 export function RoleRequestsPage() {
   const [searchParams] = useSearchParams();
-  const storyId = searchParams.get('storyId') || undefined;
+  const storyId = searchParams.get("storyId") || undefined;
 
   return (
     <div className="page page--role-requests">
@@ -20,4 +20,3 @@ export function RoleRequestsPage() {
     </div>
   );
 }
-

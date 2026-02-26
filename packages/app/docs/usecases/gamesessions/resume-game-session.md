@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions/{id}/resume
     Controller->>Service: ResumeSessionAsync(sessionId)
-    
+
     Note over Service: Step 1: Get Session
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
@@ -39,19 +39,19 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Step 2: Validate Status
     alt Session Not Paused
         Service-->>Service: Throw InvalidOperationException<br/>("Can only resume paused sessions")
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over Service: Step 3: Resume Session
     Service->>Service: session.Status = InProgress
     Service->>Service: session.IsPaused = false
     Service->>Service: session.PausedAt = null
-    
+
     Note over Service: Step 4: Persist Changes
     Service->>Repo: UpdateAsync(session)
     Repo->>DB: Update entity
@@ -60,7 +60,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>Service: Success
     Repo-->>Service: GameSession (updated)
-    
+
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)
 ```
@@ -98,7 +98,7 @@ This use case is typically called when:
 
 ## State Transitions
 
-``` text
+```text
 Paused → InProgress
 ```
 

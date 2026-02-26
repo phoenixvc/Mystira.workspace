@@ -71,6 +71,7 @@ graph LR
 ### Step-by-Step Process
 
 1. **Create Feature Branch**
+
    ```bash
    git checkout dev
    git pull origin dev
@@ -78,6 +79,7 @@ graph LR
    ```
 
 2. **Develop and Commit**
+
    ```bash
    git add .
    git commit -m "feat: add user authentication flow"
@@ -108,11 +110,11 @@ graph LR
 
 ## Environment Mapping
 
-| Branch/Tag | Environment | Auto-Deploy |
-|------------|-------------|-------------|
-| `dev` | Development | Yes |
-| `main` | Staging | Yes |
-| `v*.*.*` tags | Production | Yes |
+| Branch/Tag    | Environment | Auto-Deploy |
+| ------------- | ----------- | ----------- |
+| `dev`         | Development | Yes         |
+| `main`        | Staging     | Yes         |
+| `v*.*.*` tags | Production  | Yes         |
 
 ## Commit Message Convention
 
@@ -128,17 +130,17 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 
 ### Types
 
-| Type | Description |
-|------|-------------|
-| `feat` | New feature |
-| `fix` | Bug fix |
-| `docs` | Documentation only |
-| `style` | Code style (formatting, etc.) |
-| `refactor` | Code refactoring |
-| `perf` | Performance improvement |
-| `test` | Adding/fixing tests |
-| `chore` | Maintenance tasks |
-| `ci` | CI/CD changes |
+| Type       | Description                   |
+| ---------- | ----------------------------- |
+| `feat`     | New feature                   |
+| `fix`      | Bug fix                       |
+| `docs`     | Documentation only            |
+| `style`    | Code style (formatting, etc.) |
+| `refactor` | Code refactoring              |
+| `perf`     | Performance improvement       |
+| `test`     | Adding/fixing tests           |
+| `chore`    | Maintenance tasks             |
+| `ci`       | CI/CD changes                 |
 
 ### Examples
 
@@ -154,6 +156,7 @@ ci(workflow): add staging deployment pipeline
 For critical production issues:
 
 1. Create hotfix branch from `main`:
+
    ```bash
    git checkout main
    git checkout -b bugfix/critical-security-fix
@@ -162,6 +165,7 @@ For critical production issues:
 2. Fix the issue and create PR to `main`
 
 3. After merge to `main`, create patch release tag:
+
    ```bash
    git tag -a v1.2.1 -m "Hotfix: Critical security fix"
    git push origin v1.2.1

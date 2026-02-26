@@ -22,13 +22,13 @@ Mystira is a narrative-driven gaming platform for choice-based storytelling with
 
 ## Deployments
 
-| Environment | Service | URL |
-|---|---|---|
-| Production | PWA | [mystira.app](https://mystira.app) |
-| Production | PWA (Azure) | [blue-water-0eab7991e.3.azurestaticapps.net](https://blue-water-0eab7991e.3.azurestaticapps.net) |
-| Production | API | [prod-wus-app-mystira-api.azurewebsites.net](https://prod-wus-app-mystira-api.azurewebsites.net) |
-| Development | PWA | [mango-water-04fdb1c03.3.azurestaticapps.net](https://mango-water-04fdb1c03.3.azurestaticapps.net) |
-| Development | API | [dev-san-app-mystira-api.azurewebsites.net/swagger](https://dev-san-app-mystira-api.azurewebsites.net/swagger) |
+| Environment | Service     | URL                                                                                                            |
+| ----------- | ----------- | -------------------------------------------------------------------------------------------------------------- |
+| Production  | PWA         | [mystira.app](https://mystira.app)                                                                             |
+| Production  | PWA (Azure) | [blue-water-0eab7991e.3.azurestaticapps.net](https://blue-water-0eab7991e.3.azurestaticapps.net)               |
+| Production  | API         | [prod-wus-app-mystira-api.azurewebsites.net](https://prod-wus-app-mystira-api.azurewebsites.net)               |
+| Development | PWA         | [mango-water-04fdb1c03.3.azurestaticapps.net](https://mango-water-04fdb1c03.3.azurestaticapps.net)             |
+| Development | API         | [dev-san-app-mystira-api.azurewebsites.net/swagger](https://dev-san-app-mystira-api.azurewebsites.net/swagger) |
 
 ## Repository Structure
 
@@ -64,23 +64,23 @@ docs/
 
 ## Technology Stack
 
-| Category | Technologies |
-|---|---|
-| Runtime | .NET 9 (C# 13), SDK 9.0.310 |
-| API Framework | ASP.NET Core 9.0, Swagger/OpenAPI |
-| Messaging & CQRS | [Wolverine](https://wolverine.netlify.app/) v5.13.0 (event-driven messaging) |
-| Frontend | Blazor WebAssembly PWA with offline support, IndexedDB, service workers |
-| Primary Database | Azure Cosmos DB (EF Core provider) |
-| Secondary Database | PostgreSQL (Npgsql EF Core provider) |
-| Object Storage | Azure Blob Storage |
-| Validation | FluentValidation |
-| Object Mapping | Riok.Mapperly (compile-time) |
-| Resilience | Polly v8 |
-| Logging | Serilog + Application Insights |
-| Query Patterns | Ardalis Specification pattern, in-memory query caching |
-| Testing | xUnit, Moq, FluentAssertions, AutoFixture, Coverlet |
-| CI/CD | GitHub Actions (tests, deployments, security scanning, SLA monitoring) |
-| Dependency Management | Renovate (automated updates) |
+| Category              | Technologies                                                                 |
+| --------------------- | ---------------------------------------------------------------------------- |
+| Runtime               | .NET 9 (C# 13), SDK 9.0.310                                                  |
+| API Framework         | ASP.NET Core 9.0, Swagger/OpenAPI                                            |
+| Messaging & CQRS      | [Wolverine](https://wolverine.netlify.app/) v5.13.0 (event-driven messaging) |
+| Frontend              | Blazor WebAssembly PWA with offline support, IndexedDB, service workers      |
+| Primary Database      | Azure Cosmos DB (EF Core provider)                                           |
+| Secondary Database    | PostgreSQL (Npgsql EF Core provider)                                         |
+| Object Storage        | Azure Blob Storage                                                           |
+| Validation            | FluentValidation                                                             |
+| Object Mapping        | Riok.Mapperly (compile-time)                                                 |
+| Resilience            | Polly v8                                                                     |
+| Logging               | Serilog + Application Insights                                               |
+| Query Patterns        | Ardalis Specification pattern, in-memory query caching                       |
+| Testing               | xUnit, Moq, FluentAssertions, AutoFixture, Coverlet                          |
+| CI/CD                 | GitHub Actions (tests, deployments, security scanning, SLA monitoring)       |
+| Dependency Management | Renovate (automated updates)                                                 |
 
 ## Getting Started
 
@@ -156,17 +156,17 @@ dotnet format Mystira.App.sln
 
 **Test projects cover all layers:**
 
-| Test Project | Scope |
-|---|---|
-| `Api.Tests` | Controller and endpoint tests |
-| `Application.Tests` | CQRS handlers, caching, Wolverine pipeline |
-| `Domain.Tests` | Domain model validation |
-| `Infrastructure.Data.Tests` | Repository and EF Core |
-| `Infrastructure.Discord.Tests` | Discord bot integration |
-| `Infrastructure.Payments.Tests` | Payment processing |
-| `Infrastructure.Teams.Tests` | Teams integration |
-| `Infrastructure.WhatsApp.Tests` | WhatsApp integration |
-| `PWA.Tests` | Frontend component tests |
+| Test Project                    | Scope                                      |
+| ------------------------------- | ------------------------------------------ |
+| `Api.Tests`                     | Controller and endpoint tests              |
+| `Application.Tests`             | CQRS handlers, caching, Wolverine pipeline |
+| `Domain.Tests`                  | Domain model validation                    |
+| `Infrastructure.Data.Tests`     | Repository and EF Core                     |
+| `Infrastructure.Discord.Tests`  | Discord bot integration                    |
+| `Infrastructure.Payments.Tests` | Payment processing                         |
+| `Infrastructure.Teams.Tests`    | Teams integration                          |
+| `Infrastructure.WhatsApp.Tests` | WhatsApp integration                       |
+| `PWA.Tests`                     | Frontend component tests                   |
 
 CI runs tests, security scanning, and smoke tests automatically via GitHub Actions. See `.github/workflows/` for the full pipeline configuration.
 
@@ -199,14 +199,14 @@ For detailed architecture documentation, see:
 
 ## Documentation
 
-| Topic | Link |
-|---|---|
-| Setup guides | [docs/setup/](docs/setup/) |
-| Architecture decisions | [docs/architecture/adr/](docs/architecture/adr/) |
-| Badge system | [docs/domain/badge-system-v2.md](docs/domain/badge-system-v2.md) |
-| Chat bot setup | [docs/setup/multi-platform-chat-bot-setup.md](docs/setup/multi-platform-chat-bot-setup.md) |
+| Topic                  | Link                                                                                           |
+| ---------------------- | ---------------------------------------------------------------------------------------------- |
+| Setup guides           | [docs/setup/](docs/setup/)                                                                     |
+| Architecture decisions | [docs/architecture/adr/](docs/architecture/adr/)                                               |
+| Badge system           | [docs/domain/badge-system-v2.md](docs/domain/badge-system-v2.md)                               |
+| Chat bot setup         | [docs/setup/multi-platform-chat-bot-setup.md](docs/setup/multi-platform-chat-bot-setup.md)     |
 | Integration test guide | [tests/Mystira.App.Application.Tests/README.md](tests/Mystira.App.Application.Tests/README.md) |
-| PR template | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md) |
+| PR template            | [.github/PULL_REQUEST_TEMPLATE.md](.github/PULL_REQUEST_TEMPLATE.md)                           |
 
 ## Contributing
 

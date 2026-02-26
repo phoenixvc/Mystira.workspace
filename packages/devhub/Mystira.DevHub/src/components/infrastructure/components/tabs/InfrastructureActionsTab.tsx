@@ -87,7 +87,7 @@ export default function InfrastructureActionsTab({
 }: InfrastructureActionsTabProps) {
   const [showResourceGroupConfig, setShowResourceGroupConfig] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<TemplateConfig | null>(
-    null,
+    null
   );
   const hasSelectedTemplates = templates.some((t) => t.selected);
 
@@ -237,7 +237,7 @@ export default function InfrastructureActionsTab({
             } else {
               // Update existing template
               const updated = templates.map((t) =>
-                t.id === template.id ? template : t,
+                t.id === template.id ? template : t
               );
               onTemplatesChange(updated);
             }

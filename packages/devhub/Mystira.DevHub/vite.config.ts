@@ -1,5 +1,5 @@
-import react from '@vitejs/plugin-react';
-import { defineConfig } from 'vite';
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -17,13 +17,13 @@ export default defineConfig({
 
   // To make use of `TAURI_ENV_DEBUG` and other env variables
   // https://v2.tauri.app/reference/config/
-  envPrefix: ['VITE_', 'TAURI_ENV_'],
+  envPrefix: ["VITE_", "TAURI_ENV_"],
 
   build: {
     // Tauri v2 supports es2021
-    target: ['es2021', 'chrome100', 'safari13'],
+    target: ["es2021", "chrome100", "safari13"],
     // Don't minify for debug builds
-    minify: !process.env.TAURI_ENV_DEBUG ? 'esbuild' : false,
+    minify: !process.env.TAURI_ENV_DEBUG ? "esbuild" : false,
     // Produce sourcemaps for debug builds
     sourcemap: !!process.env.TAURI_ENV_DEBUG,
   },

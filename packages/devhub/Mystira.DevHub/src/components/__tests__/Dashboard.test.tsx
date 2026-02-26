@@ -23,8 +23,8 @@ describe("Dashboard", () => {
     expect(screen.getByText("Welcome to Mystira DevHub")).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Your central hub for development operations and data management",
-      ),
+        "Your central hub for development operations and data management"
+      )
     ).toBeInTheDocument();
   });
 
@@ -32,7 +32,7 @@ describe("Dashboard", () => {
     renderWithProviders(<Dashboard onNavigate={mockNavigate} />);
 
     expect(
-      screen.getByRole("heading", { name: "Connection Status" }),
+      screen.getByRole("heading", { name: "Connection Status" })
     ).toBeInTheDocument();
     expect(screen.getByText("Cosmos DB")).toBeInTheDocument();
     expect(screen.getByText("Azure CLI")).toBeInTheDocument();
@@ -44,19 +44,19 @@ describe("Dashboard", () => {
     renderWithProviders(<Dashboard onNavigate={mockNavigate} />);
 
     expect(
-      screen.getByRole("heading", { name: "Quick Actions" }),
+      screen.getByRole("heading", { name: "Quick Actions" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Export Sessions/i }),
+      screen.getByRole("button", { name: /Export Sessions/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /View Statistics/i }),
+      screen.getByRole("button", { name: /View Statistics/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Run Migration/i }),
+      screen.getByRole("button", { name: /Run Migration/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Validate Infrastructure/i }),
+      screen.getByRole("button", { name: /Validate Infrastructure/i })
     ).toBeInTheDocument();
   });
 
@@ -87,7 +87,7 @@ describe("Dashboard", () => {
     renderWithProviders(<Dashboard onNavigate={mockNavigate} />);
 
     expect(
-      screen.getByRole("heading", { name: "Recent Operations" }),
+      screen.getByRole("heading", { name: "Recent Operations" })
     ).toBeInTheDocument();
     expect(screen.getByText("Export Game Sessions")).toBeInTheDocument();
     expect(screen.getByText("Scenario Statistics")).toBeInTheDocument();

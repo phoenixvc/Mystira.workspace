@@ -36,6 +36,7 @@ This document outlines the architecture for a standalone React/Tauri desktop app
 ## Technology Stack
 
 ### Frontend
+
 - **React 18** - UI framework
 - **TypeScript** - Type safety
 - **TanStack Query (React Query)** - API state management
@@ -45,12 +46,14 @@ This document outlines the architecture for a standalone React/Tauri desktop app
 - **React Router** - Navigation
 
 ### Backend (Tauri)
+
 - **Tauri 1.5+** - Desktop app framework
 - **Rust** - Backend runtime for Tauri
 - **tokio** - Async runtime
 - **reqwest** - HTTP client for API calls
 
 ### Build & Development
+
 - **Vite** - Build tool and dev server
 - **pnpm** - Package manager
 - **ESLint & Prettier** - Code quality
@@ -178,10 +181,10 @@ pub fn delete_auth_token() -> Result<(), String> {
 
 ```typescript
 // src/services/api.ts
-import axios, { AxiosInstance } from 'axios';
-import { invoke } from '@tauri-apps/api/tauri';
+import axios, { AxiosInstance } from "axios";
+import { invoke } from "@tauri-apps/api/tauri";
 
-const API_BASE_URL = 'https://dev-euw-app-mystora-admin-api.azurewebsites.net';  // Note: "mystora" is the actual Azure resource name
+const API_BASE_URL = "https://dev-euw-app-mystora-admin-api.azurewebsites.net"; // Note: "mystora" is the actual Azure resource name
 
 class ApiClient {
   private client: AxiosInstance;
@@ -191,19 +194,19 @@ class ApiClient {
       baseURL: API_BASE_URL,
       timeout: 30000,
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
 
     // Request interceptor - Add auth token
     this.client.interceptors.request.use(async (config) => {
       try {
-        const token = await invoke<string>('get_auth_token');
+        const token = await invoke<string>("get_auth_token");
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
       } catch (error) {
-        console.error('Failed to get auth token:', error);
+        console.error("Failed to get auth token:", error);
       }
       return config;
     });
@@ -214,8 +217,8 @@ class ApiClient {
       async (error) => {
         if (error.response?.status === 401) {
           // Token expired - redirect to login
-          await invoke('delete_auth_token');
-          window.location.href = '/login';
+          await invoke("delete_auth_token");
+          window.location.href = "/login";
         }
         return Promise.reject(error);
       }
@@ -234,8 +237,8 @@ export const apiClient = new ApiClient().getClient();
 
 ```typescript
 // src/services/infrastructure.ts
-import { apiClient } from './api';
-import { invoke } from '@tauri-apps/api/tauri';
+import { apiClient } from "./api";
+import { invoke } from "@tauri-apps/api/tauri";
 
 export interface InfrastructureValidationResult {
   isValid: boolean;
@@ -245,7 +248,7 @@ export interface InfrastructureValidationResult {
 
 export interface DeploymentStatus {
   id: string;
-  status: 'pending' | 'running' | 'succeeded' | 'failed';
+  status: "pending" | "running" | "succeeded" | "failed";
   startedAt: string;
   completedAt?: string;
   logs: string[];
@@ -254,31 +257,35 @@ export interface DeploymentStatus {
 export const infrastructureService = {
   // Validate Bicep templates
   async validate(): Promise<InfrastructureValidationResult> {
-    const { data } = await apiClient.post('/adminapi/infrastructure/validate');
+    const { data } = await apiClient.post("/adminapi/infrastructure/validate");
     return data;
   },
 
   // Preview infrastructure changes (what-if)
   async preview(): Promise<any> {
-    const { data } = await apiClient.post('/adminapi/infrastructure/preview');
+    const { data } = await apiClient.post("/adminapi/infrastructure/preview");
     return data;
   },
 
   // Deploy infrastructure
   async deploy(): Promise<DeploymentStatus> {
-    const { data } = await apiClient.post('/adminapi/infrastructure/deploy');
+    const { data } = await apiClient.post("/adminapi/infrastructure/deploy");
     return data;
   },
 
   // Get deployment status
   async getDeploymentStatus(deploymentId: string): Promise<DeploymentStatus> {
-    const { data } = await apiClient.get(`/adminapi/infrastructure/deployments/${deploymentId}`);
+    const { data } = await apiClient.get(
+      `/adminapi/infrastructure/deployments/${deploymentId}`
+    );
     return data;
   },
 
   // Alternatively: Use GitHub CLI via Tauri command
-  async triggerGitHubWorkflow(action: 'validate' | 'preview' | 'deploy'): Promise<string> {
-    return await invoke('trigger_github_workflow', { action });
+  async triggerGitHubWorkflow(
+    action: "validate" | "preview" | "deploy"
+  ): Promise<string> {
+    return await invoke("trigger_github_workflow", { action });
   },
 };
 ```
@@ -287,14 +294,14 @@ export const infrastructureService = {
 
 ```typescript
 // src/services/migration.ts
-import { apiClient } from './api';
+import { apiClient } from "./api";
 
 export interface MigrationProgress {
-  type: 'scenarios' | 'bundles' | 'media' | 'blobs';
+  type: "scenarios" | "bundles" | "media" | "blobs";
   total: number;
   completed: number;
   failed: number;
-  status: 'running' | 'completed' | 'failed';
+  status: "running" | "completed" | "failed";
 }
 
 export const migrationService = {
@@ -304,7 +311,7 @@ export const migrationService = {
     sourceConfig: any,
     destConfig: any
   ): Promise<string> {
-    const { data } = await apiClient.post('/adminapi/migrations/start', {
+    const { data } = await apiClient.post("/adminapi/migrations/start", {
       types,
       sourceConfig,
       destConfig,
@@ -313,14 +320,20 @@ export const migrationService = {
   },
 
   // Get migration progress
-  async getMigrationProgress(migrationId: string): Promise<MigrationProgress[]> {
-    const { data } = await apiClient.get(`/adminapi/migrations/${migrationId}/progress`);
+  async getMigrationProgress(
+    migrationId: string
+  ): Promise<MigrationProgress[]> {
+    const { data } = await apiClient.get(
+      `/adminapi/migrations/${migrationId}/progress`
+    );
     return data;
   },
 
   // Get migration logs
   async getMigrationLogs(migrationId: string): Promise<string[]> {
-    const { data } = await apiClient.get(`/adminapi/migrations/${migrationId}/logs`);
+    const { data } = await apiClient.get(
+      `/adminapi/migrations/${migrationId}/logs`
+    );
     return data;
   },
 };
@@ -349,7 +362,7 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="p-6 space-y-6">
       <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
@@ -691,18 +704,21 @@ pnpm tauri build
 ## Security Considerations
 
 ### Authentication Security
+
 - JWT tokens stored in OS keychain (Windows Credential Manager, macOS Keychain, Linux Secret Service)
 - Never store tokens in localStorage or plain text files
 - Implement automatic token refresh
 - Clear tokens on logout
 
 ### API Communication
+
 - All API calls over HTTPS only
 - Validate SSL certificates
 - Implement request timeout and retry logic
 - Sanitize all user inputs
 
 ### Desktop Security
+
 - Content Security Policy (CSP) restricts inline scripts
 - HTTP scope limits API calls to approved domains
 - File system access restricted to app config directory
@@ -722,6 +738,7 @@ pnpm tauri build
 ## Development Setup
 
 ### Prerequisites
+
 - Node.js 18+
 - pnpm 8+
 - Rust 1.70+
@@ -752,25 +769,30 @@ pnpm tauri build
 The Admin API must expose the following endpoints for the desktop app to function:
 
 ### Authentication
+
 - `POST /adminapi/auth/login` - User login
 - `POST /adminapi/auth/refresh` - Token refresh
 - `POST /adminapi/auth/logout` - User logout
 
 ### Infrastructure
+
 - `POST /adminapi/infrastructure/validate` - Validate templates
 - `POST /adminapi/infrastructure/preview` - What-if analysis
 - `POST /adminapi/infrastructure/deploy` - Deploy infrastructure
 - `GET /adminapi/infrastructure/deployments/{id}` - Get deployment status
 
 ### Migration
+
 - `POST /adminapi/migrations/start` - Start migration
 - `GET /adminapi/migrations/{id}/progress` - Get progress
 - `GET /adminapi/migrations/{id}/logs` - Get logs
 
 ### Dashboard
+
 - `GET /adminapi/dashboard/stats` - Get statistics
 
 ### Scenarios
+
 - `GET /adminapi/scenarios` - List scenarios
 - `POST /adminapi/scenarios` - Create scenario
 - `PUT /adminapi/scenarios/{id}` - Update scenario

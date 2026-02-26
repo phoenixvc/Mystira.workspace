@@ -34,7 +34,7 @@ interface EnvironmentSelectorProps {
   onDestChange: (envId: string) => void;
   onConnectionsFetched: (
     source: { cosmos: string; storage: string; databaseName: string },
-    dest: { cosmos: string; storage: string; databaseName: string },
+    dest: { cosmos: string; storage: string; databaseName: string }
   ) => void;
 }
 
@@ -60,7 +60,7 @@ export function EnvironmentSelector({
   >({});
 
   const sourcePreset = ENVIRONMENT_PRESETS.find(
-    (p) => p.id === sourceEnvironment,
+    (p) => p.id === sourceEnvironment
   );
   const destPreset = ENVIRONMENT_PRESETS.find((p) => p.id === destEnvironment);
 
@@ -96,7 +96,7 @@ export function EnvironmentSelector({
 
     if (!azureStatus?.logged_in) {
       setFetchError(
-        'Please log in to Azure CLI first. Run "az login" in your terminal.',
+        'Please log in to Azure CLI first. Run "az login" in your terminal.'
       );
       return;
     }
@@ -110,7 +110,7 @@ export function EnvironmentSelector({
         "fetch_environment_connections",
         {
           cosmosAccountName: sourcePreset.cosmosAccountName,
-        },
+        }
       );
 
       // Fetch destination connections
@@ -118,7 +118,7 @@ export function EnvironmentSelector({
         "fetch_environment_connections",
         {
           cosmosAccountName: destPreset.cosmosAccountName,
-        },
+        }
       );
 
       // Store discovered info for display
@@ -158,7 +158,7 @@ export function EnvironmentSelector({
           cosmos: destConns.cosmos_connection || "",
           storage: destConns.storage_connection || "",
           databaseName: destPreset.defaultDatabaseName || "MystiraAppDb",
-        },
+        }
       );
 
       setFetchedEnvs(new Set([sourceEnvironment, destEnvironment]));
@@ -173,7 +173,7 @@ export function EnvironmentSelector({
     preset: EnvironmentPreset | undefined,
     type: "source" | "dest",
     value: string,
-    onChange: (id: string) => void,
+    onChange: (id: string) => void
   ) => {
     const isFetched = fetchedEnvs.has(value);
     const discovered = discoveredInfo[value];
@@ -205,7 +205,7 @@ export function EnvironmentSelector({
           </optgroup>
           <optgroup label="Current Environments">
             {ENVIRONMENT_PRESETS.filter(
-              (p) => !p.isLegacy && p.id !== "custom",
+              (p) => !p.isLegacy && p.id !== "custom"
             ).map((preset) => (
               <option key={preset.id} value={preset.id}>
                 {preset.name}
@@ -317,7 +317,7 @@ export function EnvironmentSelector({
           sourcePreset,
           "source",
           sourceEnvironment,
-          onSourceChange,
+          onSourceChange
         )}
 
         <div className="flex items-center justify-center pt-8">
@@ -328,7 +328,7 @@ export function EnvironmentSelector({
           destPreset,
           "dest",
           destEnvironment,
-          onDestChange,
+          onDestChange
         )}
       </div>
 

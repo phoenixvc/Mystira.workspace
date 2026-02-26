@@ -13,6 +13,7 @@ The system now supports dynamically fetching available AI models from providers 
 Returns a list of available models grouped by provider.
 
 **Response Format:**
+
 ```json
 {
   "providers": [
@@ -108,6 +109,7 @@ Returns a list of available models grouped by provider.
 ## Testing
 
 Unit tests have been added for:
+
 - `LLMServiceFactory.GetAvailableModels()`
 - `ChatController.GetModels()` endpoint
 - Error handling and fallback scenarios

@@ -36,7 +36,7 @@ function ResourceGrid({
   onDelete,
 }: ResourceGridProps) {
   const [localViewMode, setLocalViewMode] = useState<"grid" | "table">(
-    viewMode,
+    viewMode
   );
   const [groupByType, setGroupByType] = useState(false);
   const [deletingResource, setDeletingResource] = useState<string | null>(null);
@@ -47,7 +47,7 @@ function ResourceGrid({
         `Are you sure you want to delete this resource?\n\n` +
         `Name: ${resourceName}\n` +
         `ID: ${resourceId}\n\n` +
-        `This action cannot be undone!`,
+        `This action cannot be undone!`
     );
 
     if (!confirmDelete || !onDelete) return;

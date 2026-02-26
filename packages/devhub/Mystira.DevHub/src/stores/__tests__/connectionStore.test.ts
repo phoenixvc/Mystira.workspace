@@ -40,7 +40,7 @@ describe("connectionStore", () => {
         "test_connection",
         mockConnectionTestSuccess("azurecli", {
           user: "test@example.com",
-        }),
+        })
       );
 
       await useConnectionStore.getState().testConnection("azurecli");
@@ -56,7 +56,7 @@ describe("connectionStore", () => {
     it("should update connection status on failure", async () => {
       await mockTauriInvoke(
         "test_connection",
-        mockConnectionTestError("Connection refused"),
+        mockConnectionTestError("Connection refused")
       );
 
       await useConnectionStore.getState().testConnection("azurecli");

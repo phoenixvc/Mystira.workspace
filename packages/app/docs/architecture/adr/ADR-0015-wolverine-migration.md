@@ -16,23 +16,23 @@ MediatR (ADR-0004) has served well for in-process CQRS, but Mystira's evolution 
 
 ### Current State (MediatR)
 
-| Aspect | MediatR | Limitation |
-|--------|---------|------------|
-| Messaging | In-process only | No cross-service communication |
-| Durability | None | Messages lost on failure |
-| Retries | Manual | Complex to implement |
-| Transactions | Separate | No outbox pattern |
-| Performance | ~2-5ms overhead | Higher than alternatives |
+| Aspect       | MediatR         | Limitation                     |
+| ------------ | --------------- | ------------------------------ |
+| Messaging    | In-process only | No cross-service communication |
+| Durability   | None            | Messages lost on failure       |
+| Retries      | Manual          | Complex to implement           |
+| Transactions | Separate        | No outbox pattern              |
+| Performance  | ~2-5ms overhead | Higher than alternatives       |
 
 ### Target State (Wolverine)
 
-| Aspect | Wolverine | Benefit |
-|--------|-----------|---------|
-| Messaging | In-process + Distributed | Cross-service events |
-| Durability | Outbox/Inbox | Guaranteed delivery |
-| Retries | Built-in | Automatic with backoff |
-| Transactions | Integrated | Transactional outbox |
-| Performance | ~0.5-1ms overhead | 4x faster |
+| Aspect       | Wolverine                | Benefit                |
+| ------------ | ------------------------ | ---------------------- |
+| Messaging    | In-process + Distributed | Cross-service events   |
+| Durability   | Outbox/Inbox             | Guaranteed delivery    |
+| Retries      | Built-in                 | Automatic with backoff |
+| Transactions | Integrated               | Transactional outbox   |
+| Performance  | ~0.5-1ms overhead        | 4x faster              |
 
 ### Key Drivers
 
@@ -52,6 +52,7 @@ We will **migrate from MediatR to Wolverine** as the unified messaging framework
 **Phase 1: Infrastructure Setup (Weeks 1-2)**
 
 1. Add Wolverine packages:
+
    ```xml
    <ItemGroup>
      <PackageReference Include="WolverineFx" Version="5.9.1" />
@@ -61,6 +62,7 @@ We will **migrate from MediatR to Wolverine** as the unified messaging framework
    ```
 
 2. Configure Wolverine (Program.cs):
+
    ```csharp
    builder.Host.UseWolverine(opts =>
    {
@@ -81,6 +83,7 @@ We will **migrate from MediatR to Wolverine** as the unified messaging framework
    ```
 
 3. Add envelope tables for durability:
+
    ```sql
    CREATE TABLE wolverine_incoming_envelopes (
        id UUID PRIMARY KEY,
@@ -103,6 +106,7 @@ We will **migrate from MediatR to Wolverine** as the unified messaging framework
 **Phase 2: Handler Migration (Weeks 3-8)**
 
 Before (MediatR):
+
 ```csharp
 public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, AccountResponse>
 {
@@ -114,6 +118,7 @@ public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, AccountRe
 ```
 
 After (Wolverine):
+
 ```csharp
 public static class GetAccountQueryHandler
 {
@@ -130,6 +135,7 @@ public static class GetAccountQueryHandler
 **Phase 3: Controller Updates**
 
 Before:
+
 ```csharp
 private readonly ISender _mediator;
 
@@ -141,6 +147,7 @@ public async Task<ActionResult<AccountResponse>> Get(Guid id)
 ```
 
 After:
+
 ```csharp
 private readonly IMessageBus _bus;
 
@@ -154,6 +161,7 @@ public async Task<ActionResult<AccountResponse>> Get(Guid id)
 **Phase 4: Pipeline Behavior Migration**
 
 Before (MediatR Pipeline):
+
 ```csharp
 public class ValidationBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
@@ -163,6 +171,7 @@ public class ValidationBehavior<TRequest, TResponse>
 ```
 
 After (Wolverine Middleware):
+
 ```csharp
 public class ValidationMiddleware
 {
@@ -234,25 +243,25 @@ public class ValidationMiddleware
 
 ## Migration Timeline
 
-| Phase | Focus | Duration |
-|-------|-------|----------|
-| Phase 1 | Infrastructure Setup | Weeks 1-2 |
-| Phase 2 | Domain Events | Weeks 3-4 |
-| Phase 3 | Handler Migration | Weeks 5-8 |
-| Phase 4 | Cross-Service Events | Weeks 9-10 |
-| Phase 5 | MediatR Removal | Weeks 11-12 |
+| Phase   | Focus                | Duration    |
+| ------- | -------------------- | ----------- |
+| Phase 1 | Infrastructure Setup | Weeks 1-2   |
+| Phase 2 | Domain Events        | Weeks 3-4   |
+| Phase 3 | Handler Migration    | Weeks 5-8   |
+| Phase 4 | Cross-Service Events | Weeks 9-10  |
+| Phase 5 | MediatR Removal      | Weeks 11-12 |
 
 ---
 
 ## Success Criteria
 
-| Metric | Target | Verification |
-|--------|--------|--------------|
-| MediatR References | 0 | Code search |
-| Handler Conversion | 100% | Audit |
-| Cross-Service Events | Operational | Integration tests |
-| Message Latency (P95) | < 100ms | Monitoring |
-| Message Loss | 0 | Outbox verification |
+| Metric                | Target      | Verification        |
+| --------------------- | ----------- | ------------------- |
+| MediatR References    | 0           | Code search         |
+| Handler Conversion    | 100%        | Audit               |
+| Cross-Service Events  | Operational | Integration tests   |
+| Message Latency (P95) | < 100ms     | Monitoring          |
+| Message Loss          | 0           | Outbox verification |
 
 ---
 

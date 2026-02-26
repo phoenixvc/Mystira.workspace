@@ -25,7 +25,7 @@ export function InfrastructureResponseDisplay({
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [pendingResourceId, setPendingResourceId] = useState<string | null>(
-    null,
+    null
   );
   // Send errors to Problems tab
   useEffect(() => {
@@ -61,19 +61,19 @@ export function InfrastructureResponseDisplay({
 
   // Extract resource ID and name from error message for failed provisioning state
   const getFailedResourceInfo = (
-    error: string,
+    error: string
   ): { resourceId: string; resourceName: string } | null => {
     // Try to extract from the target field in JSON error
     let resourceId: string | null = null;
     const targetMatch = error.match(
-      /"target":\s*"([^"]+databaseAccounts[^"]+)"/,
+      /"target":\s*"([^"]+databaseAccounts[^"]+)"/
     );
     if (targetMatch && targetMatch[1]) {
       resourceId = targetMatch[1];
     } else {
       // Try to extract from the error message directly
       const resourceIdMatch = error.match(
-        /\/subscriptions\/[^\/]+\/resourceGroups\/[^\/]+\/providers\/Microsoft\.DocumentDB\/databaseAccounts\/[a-zA-Z0-9-]+/,
+        /\/subscriptions\/[^\/]+\/resourceGroups\/[^\/]+\/providers\/Microsoft\.DocumentDB\/databaseAccounts\/[a-zA-Z0-9-]+/
       );
       if (resourceIdMatch && resourceIdMatch[0]) {
         resourceId = resourceIdMatch[0];
@@ -114,7 +114,7 @@ export function InfrastructureResponseDisplay({
 
       if (result.success) {
         alert(
-          `✅ Successfully deleted the failed Cosmos DB account.\n\nYou can now retry the deployment.`,
+          `✅ Successfully deleted the failed Cosmos DB account.\n\nYou can now retry the deployment.`
         );
         // Refresh the response to clear the error
         if (onLastResponseChange) {
@@ -126,7 +126,7 @@ export function InfrastructureResponseDisplay({
         }
       } else {
         alert(
-          `❌ Failed to delete resource: ${result.error || "Unknown error"}`,
+          `❌ Failed to delete resource: ${result.error || "Unknown error"}`
         );
       }
     } catch (error) {
@@ -149,11 +149,11 @@ export function InfrastructureResponseDisplay({
         await invoke<CommandResponse>("install_azure_cli");
       if (installResponse.success) {
         alert(
-          "Azure CLI installation started. Please restart the application after installation completes.",
+          "Azure CLI installation started. Please restart the application after installation completes."
         );
       } else {
         alert(
-          `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}`,
+          `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}`
         );
       }
     } catch (error) {

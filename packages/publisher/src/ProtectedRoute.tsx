@@ -1,6 +1,6 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/hooks';
-import { Spinner } from '@/components';
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks";
+import { Spinner } from "@/components";
 
 export function ProtectedRoute() {
   const { isAuthenticated, isCheckingAuth } = useAuth();

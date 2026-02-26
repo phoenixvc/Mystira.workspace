@@ -136,7 +136,7 @@ public sealed record SceneStateNode<TSceneId, TStateSig>(
 
 - `SceneId`: identifier of the underlying “location” (in Mystira: a scene).
 - `StateSignature`: **abstract state** used for merging.
-    - e.g. `(known_entities, critical_flags, time_bucket)`.
+  - e.g. `(known_entities, critical_flags, time_bucket)`.
 
 Two concrete states that share the same `(SceneId, StateSignature)` are merged into one node.
 
@@ -285,11 +285,10 @@ Here you:
    ```
 
 5. Run analyses on `mergedGraph`:
-
-    - Count effective paths using DP on the merged graph.
-    - For each root→terminal path, collect scenes and states and run:
-        - static checks (intro-before-use, no resurrected NPCs, no backward time),
-        - LLM-based narrative/emotional consistency checks.
+   - Count effective paths using DP on the merged graph.
+   - For each root→terminal path, collect scenes and states and run:
+     - static checks (intro-before-use, no resurrected NPCs, no backward time),
+     - LLM-based narrative/emotional consistency checks.
 
 ---
 
@@ -298,19 +297,19 @@ Here you:
 - **Stateless core**: `DirectedGraph` and algorithms are immutable and side-effect-free.
 - **Domain-free core**: No story/NPC/child-development concepts in the graph layer.
 - **Abstraction-driven merging**:
-    - You choose what goes into `StateSignature`.
-    - The merged graph is correct for exactly those properties that depend only on that abstraction.
+  - You choose what goes into `StateSignature`.
+  - The merged graph is correct for exactly those properties that depend only on that abstraction.
 - **Composable**:
-    - You can use the core graph layer for other subsystems (e.g. DM tools, puzzle graphs, quest logic) without pulling in Mystira-specific code.
+  - You can use the core graph layer for other subsystems (e.g. DM tools, puzzle graphs, quest logic) without pulling in Mystira-specific code.
 
 ---
 
 ## Next Steps / TODOs
 
 - Add a `FrontierMergedPathCounter` helper that:
-    - Takes a `FrontierMergedGraphResult`,
-    - Does DP over the merged graph,
-    - Returns path counts per terminal node.
+  - Takes a `FrontierMergedGraphResult`,
+  - Does DP over the merged graph,
+  - Returns path counts per terminal node.
 - Add small test fixtures:
-    - Tiny branching story with known number of raw and merged paths.
-    - Unit tests for merging logic via `StateSignature`.
+  - Tiny branching story with known number of raw and merged paths.
+  - Unit tests for merging logic via `StateSignature`.

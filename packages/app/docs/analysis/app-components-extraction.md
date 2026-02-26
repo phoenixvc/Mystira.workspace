@@ -29,13 +29,13 @@ Mystira.App/
 
 ### Current Integration Points
 
-| Component | Shared With | Coupling Type |
-|-----------|-------------|---------------|
-| Domain Models | Both APIs | Code (project reference) |
-| CQRS Handlers | Both APIs | Code (project reference) |
-| Repositories | Both APIs | Code (project reference) |
-| Authentication | Both APIs | Configuration (Entra External ID) |
-| Database | Both APIs | Data (Cosmos DB) |
+| Component      | Shared With | Coupling Type                     |
+| -------------- | ----------- | --------------------------------- |
+| Domain Models  | Both APIs   | Code (project reference)          |
+| CQRS Handlers  | Both APIs   | Code (project reference)          |
+| Repositories   | Both APIs   | Code (project reference)          |
+| Authentication | Both APIs   | Configuration (Entra External ID) |
+| Database       | Both APIs   | Data (Cosmos DB)                  |
 
 ---
 
@@ -47,13 +47,13 @@ Mystira.App/
 
 **Problems**:
 
-| Issue | Impact |
-|-------|--------|
-| Mixed Concerns | UI and API logic tightly coupled |
-| Not Modern | Server-rendering less flexible than SPA |
-| Deployment Coupling | Frontend and backend deploy together |
-| Scaling Limitations | UI and API scale together |
-| Technology Lock-in | Harder to migrate to modern frontend |
+| Issue               | Impact                                  |
+| ------------------- | --------------------------------------- |
+| Mixed Concerns      | UI and API logic tightly coupled        |
+| Not Modern          | Server-rendering less flexible than SPA |
+| Deployment Coupling | Frontend and backend deploy together    |
+| Scaling Limitations | UI and API scale together               |
+| Technology Lock-in  | Harder to migrate to modern frontend    |
 
 **If Separated**:
 
@@ -64,24 +64,24 @@ Mystira.App/
 
 ### 2. Different Security Boundaries
 
-| Aspect | Public API | Admin API |
-|--------|------------|-----------|
-| Users | End users (external) | Staff/admins (internal) |
-| Endpoints | Public-facing | High-security |
-| Auth | Standard OAuth | Enhanced auth + MFA |
-| Access | Open registration | Restricted |
-| Availability | High (99.9% SLA) | Standard (99.5% SLA) |
+| Aspect       | Public API           | Admin API               |
+| ------------ | -------------------- | ----------------------- |
+| Users        | End users (external) | Staff/admins (internal) |
+| Endpoints    | Public-facing        | High-security           |
+| Auth         | Standard OAuth       | Enhanced auth + MFA     |
+| Access       | Open registration    | Restricted              |
+| Availability | High (99.9% SLA)     | Standard (99.5% SLA)    |
 
 **Implication**: Different security postures suggest separation improves security isolation.
 
 ### 3. Different Release Cycles
 
-| Consideration | Public API | Admin API |
-|---------------|------------|-----------|
-| Iteration Speed | Stable, slower | Rapid, experimental |
-| Risk Tolerance | Low | Higher (internal users) |
-| Deployment Frequency | Weekly | Daily |
-| Breaking Changes | Rare | More acceptable |
+| Consideration        | Public API     | Admin API               |
+| -------------------- | -------------- | ----------------------- |
+| Iteration Speed      | Stable, slower | Rapid, experimental     |
+| Risk Tolerance       | Low            | Higher (internal users) |
+| Deployment Frequency | Weekly         | Daily                   |
+| Breaking Changes     | Rare           | More acceptable         |
 
 **If Separate**: Independent release cycles without cross-impact.
 
@@ -91,13 +91,14 @@ Mystira.App/
 
 **Options for Shared Code**:
 
-| Approach | Pros | Cons |
-|----------|------|------|
-| NuGet Packages | Versioned, explicit | Package management overhead |
-| Git Submodules | Single source | Complexity for .NET |
-| Shared Repository | Centralized | Additional repo to manage |
+| Approach          | Pros                | Cons                        |
+| ----------------- | ------------------- | --------------------------- |
+| NuGet Packages    | Versioned, explicit | Package management overhead |
+| Git Submodules    | Single source       | Complexity for .NET         |
+| Shared Repository | Centralized         | Additional repo to manage   |
 
 **Recommended**: NuGet packages for:
+
 - `Mystira.App.Domain`
 - `Mystira.App.Application`
 - `Mystira.App.Infrastructure.*`
@@ -111,14 +112,14 @@ Mystira.App/
 
 We evaluate extraction based on:
 
-| Criterion | Weight | Description |
-|-----------|--------|-------------|
-| Security Isolation | High | Separate attack surface |
-| Release Independence | High | Deploy without coordination |
-| Team Scalability | Medium | Support team growth |
-| Operational Simplicity | Medium | Reduce blast radius |
-| Development Velocity | Medium | Faster iteration |
-| Migration Effort | Low | One-time cost |
+| Criterion              | Weight | Description                 |
+| ---------------------- | ------ | --------------------------- |
+| Security Isolation     | High   | Separate attack surface     |
+| Release Independence   | High   | Deploy without coordination |
+| Team Scalability       | Medium | Support team growth         |
+| Operational Simplicity | Medium | Reduce blast radius         |
+| Development Velocity   | Medium | Faster iteration            |
+| Migration Effort       | Low    | One-time cost               |
 
 ---
 
@@ -129,11 +130,13 @@ We evaluate extraction based on:
 **Description**: Maintain current monorepo structure.
 
 **Pros**:
+
 - No migration effort
 - Single deployment pipeline
 - Shared code via project references
 
 **Cons**:
+
 - Security boundaries not enforced
 - Release cycles coupled
 - Scaling requires full deployment
@@ -146,12 +149,14 @@ We evaluate extraction based on:
 **Description**: Move `Mystira.App.Admin.Api` to `Mystira.Admin.Api` repository.
 
 **Pros**:
+
 - Security isolation
 - Independent releases
 - Cleaner codebase
 - Same effort as Option C Phase 1
 
 **Cons**:
+
 - Admin UI still coupled with API
 - Doesn't modernize frontend
 
@@ -160,10 +165,12 @@ We evaluate extraction based on:
 ### Option C: Extract Admin API + Modern UI (Recommended)
 
 **Description**:
+
 1. Move Admin API to `Mystira.Admin.Api`
 2. Create `Mystira.Admin.UI` with modern SPA
 
 **Pros**:
+
 - Full separation of concerns
 - Modern frontend architecture
 - Independent scaling
@@ -171,6 +178,7 @@ We evaluate extraction based on:
 - Future-proof
 
 **Cons**:
+
 - Higher initial effort
 - More repositories to manage
 - Package management setup
@@ -246,22 +254,22 @@ See [Admin API Extraction Plan](../migration/admin-api-extraction-plan.md) for d
 
 ### Positive Impacts
 
-| Impact | Magnitude | Beneficiary |
-|--------|-----------|-------------|
-| Security isolation | High | Platform |
-| Release velocity | High | Admin team |
-| Code clarity | Medium | All developers |
-| Scaling flexibility | Medium | Operations |
-| Team autonomy | Medium | Both teams |
+| Impact              | Magnitude | Beneficiary    |
+| ------------------- | --------- | -------------- |
+| Security isolation  | High      | Platform       |
+| Release velocity    | High      | Admin team     |
+| Code clarity        | Medium    | All developers |
+| Scaling flexibility | Medium    | Operations     |
+| Team autonomy       | Medium    | Both teams     |
 
 ### Negative Impacts
 
-| Impact | Magnitude | Mitigation |
-|--------|-----------|------------|
-| Initial effort | Medium | Phased approach |
-| Package management | Low | Automation |
-| More repositories | Low | Clear ownership |
-| Coordination overhead | Low | Versioned contracts |
+| Impact                | Magnitude | Mitigation          |
+| --------------------- | --------- | ------------------- |
+| Initial effort        | Medium    | Phased approach     |
+| Package management    | Low       | Automation          |
+| More repositories     | Low       | Clear ownership     |
+| Coordination overhead | Low       | Versioned contracts |
 
 ---
 
@@ -301,6 +309,7 @@ The initial analysis correctly identified the trade-offs, but underestimated the
 **Final Recommendation**: **Extract Admin API** and create modern Admin UI.
 
 This positions Mystira.App for:
+
 - Better security posture
 - Faster admin feature iteration
 - Cleaner codebase

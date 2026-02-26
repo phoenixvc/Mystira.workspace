@@ -92,10 +92,10 @@ az keyvault secret set \
 
 Secrets use double-dash (`--`) separator for nested configuration:
 
-| Configuration Path | Key Vault Secret Name |
-|-------------------|----------------------|
-| `JwtSettings:RsaPrivateKey` | `JwtSettings--RsaPrivateKey` |
-| `ChainService:ApiKey` | `ChainService--ApiKey` |
+| Configuration Path           | Key Vault Secret Name         |
+| ---------------------------- | ----------------------------- |
+| `JwtSettings:RsaPrivateKey`  | `JwtSettings--RsaPrivateKey`  |
+| `ChainService:ApiKey`        | `ChainService--ApiKey`        |
 | `ConnectionStrings:CosmosDb` | `ConnectionStrings--CosmosDb` |
 
 ## Monitoring Secret Usage
@@ -112,12 +112,14 @@ traces
 ### Key Vault Diagnostics
 
 Enable diagnostic logs in Key Vault for:
+
 - `AuditEvent` - Track all secret operations
 - `AllMetrics` - Monitor access patterns
 
 ## Automation (Future)
 
 Consider implementing Azure Key Vault secret rotation using:
+
 - Azure Functions with timer trigger
 - Azure Event Grid notifications for expiring secrets
 - Azure Automation runbooks

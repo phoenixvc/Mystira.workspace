@@ -13,7 +13,7 @@ interface WhatIfChangeItemProps {
   onToggleSelection: (resourceName: string) => void;
   onStartEditResourceGroup: (
     resourceName: string,
-    currentGroup: string,
+    currentGroup: string
   ) => void;
   onUpdateResourceGroup: (resourceName: string, resourceGroup: string) => void;
   onCancelEditResourceGroup: () => void;
@@ -104,7 +104,7 @@ export function WhatIfChangeItem({
                             if (e.key === "Enter") {
                               onUpdateResourceGroup(
                                 change.resourceName,
-                                tempResourceGroup,
+                                tempResourceGroup
                               );
                             }
                             if (e.key === "Escape") {
@@ -119,7 +119,7 @@ export function WhatIfChangeItem({
                           onClick={() =>
                             onUpdateResourceGroup(
                               change.resourceName,
-                              tempResourceGroup,
+                              tempResourceGroup
                             )
                           }
                           className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300"
@@ -142,7 +142,7 @@ export function WhatIfChangeItem({
                           e.stopPropagation();
                           onStartEditResourceGroup(
                             change.resourceName,
-                            change.resourceGroup || "",
+                            change.resourceGroup || ""
                           );
                         }}
                         title="Click to edit resource group"

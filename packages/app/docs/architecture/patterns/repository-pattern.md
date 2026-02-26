@@ -5,6 +5,7 @@
 The Repository Pattern provides an abstraction layer between the business logic and data access layers. It encapsulates the logic needed to access data sources and provides a more object-oriented view of the persistence layer.
 
 **Key Benefits**:
+
 - 🔒 **Abstraction** - Decouples domain logic from data access
 - 🧪 **Testability** - Easy to mock for unit testing
 - 🔄 **Flexibility** - Can swap data sources without changing business logic
@@ -129,6 +130,7 @@ public class GetContentBundlesByAgeGroupQueryHandler
 ```
 
 **Key Points**:
+
 - ✅ Queries use repositories for data access
 - ✅ Specifications encapsulate complex query logic
 - ✅ No `IUnitOfWork` needed (read-only operations)
@@ -197,6 +199,7 @@ public class CreateContentBundleCommandHandler
 ```
 
 **Key Points**:
+
 - ✅ Commands use repositories to modify data
 - ✅ `IUnitOfWork` ensures transactional consistency
 - ✅ Error handling with try-catch
@@ -206,14 +209,14 @@ public class CreateContentBundleCommandHandler
 
 ## Repository vs Direct LINQ
 
-| Aspect | **Repository** | **Direct LINQ** |
-|--------|----------------|-----------------|
-| **Abstraction** | ✅ Decoupled from EF Core | ❌ Coupled to DbContext |
-| **Testability** | ✅ Easy to mock | ❌ Requires DbContext mock |
-| **Reusability** | ✅ Reusable query methods | ❌ Repeated LINQ everywhere |
-| **Specification Support** | ✅ `ListAsync(spec)` | ❌ No specification support |
-| **CQRS Fit** | ✅ Perfect for handlers | ⚠️ Mixes concerns |
-| **Flexibility** | ✅ Can swap data source | ❌ Tightly coupled to EF |
+| Aspect                    | **Repository**            | **Direct LINQ**             |
+| ------------------------- | ------------------------- | --------------------------- |
+| **Abstraction**           | ✅ Decoupled from EF Core | ❌ Coupled to DbContext     |
+| **Testability**           | ✅ Easy to mock           | ❌ Requires DbContext mock  |
+| **Reusability**           | ✅ Reusable query methods | ❌ Repeated LINQ everywhere |
+| **Specification Support** | ✅ `ListAsync(spec)`      | ❌ No specification support |
+| **CQRS Fit**              | ✅ Perfect for handlers   | ⚠️ Mixes concerns           |
+| **Flexibility**           | ✅ Can swap data source   | ❌ Tightly coupled to EF    |
 
 **Recommendation**: Always use repositories in Command/Query handlers. Never inject `DbContext` directly.
 
@@ -268,6 +271,7 @@ var bundles = await _repository.ListAsync(spec);
 ```
 
 **Benefits of Specifications**:
+
 - ✅ Reusable across multiple handlers
 - ✅ Testable independently
 - ✅ Composable
@@ -295,16 +299,16 @@ public interface IUnitOfWork : IDisposable
 
 ## When to Use Repository Methods
 
-| Method | When to Use | Example |
-|--------|-------------|---------|
-| **`GetByIdAsync(id)`** | Simple ID lookup | Get scenario by ID |
-| **`GetAllAsync()`** | Get all entities (small tables) | Get all age groups |
-| **`AddAsync(entity)`** | Create new entity (commands) | Create content bundle |
-| **`UpdateAsync(entity)`** | Update existing entity (commands) | Update scenario |
-| **`DeleteAsync(id)`** | Delete entity (commands) | Delete user profile |
-| **`ListAsync(spec)`** | Complex queries (queries) | Get bundles by age group |
+| Method                     | When to Use                         | Example                     |
+| -------------------------- | ----------------------------------- | --------------------------- |
+| **`GetByIdAsync(id)`**     | Simple ID lookup                    | Get scenario by ID          |
+| **`GetAllAsync()`**        | Get all entities (small tables)     | Get all age groups          |
+| **`AddAsync(entity)`**     | Create new entity (commands)        | Create content bundle       |
+| **`UpdateAsync(entity)`**  | Update existing entity (commands)   | Update scenario             |
+| **`DeleteAsync(id)`**      | Delete entity (commands)            | Delete user profile         |
+| **`ListAsync(spec)`**      | Complex queries (queries)           | Get bundles by age group    |
 | **`GetBySpecAsync(spec)`** | Single entity with complex criteria | Get scenario with relations |
-| **`CountAsync(spec)`** | Count matching entities | Count active bundles |
+| **`CountAsync(spec)`**     | Count matching entities             | Count active bundles        |
 
 ---
 
@@ -315,6 +319,7 @@ Repositories support the **Specification Pattern** for reusable query logic. Thi
 ### Example Workflow
 
 **1. Create Specification** (Domain layer):
+
 ```csharp
 public class ActiveContentBundlesWithScenariosSpecification : BaseSpecification<ContentBundle>
 {
@@ -328,6 +333,7 @@ public class ActiveContentBundlesWithScenariosSpecification : BaseSpecification<
 ```
 
 **2. Use in Query Handler** (Application layer):
+
 ```csharp
 public class GetActiveContentBundlesQueryHandler
     : IQueryHandler<GetActiveContentBundlesQuery, IEnumerable<ContentBundle>>
@@ -345,6 +351,7 @@ public class GetActiveContentBundlesQueryHandler
 ```
 
 **3. Repository Implementation** (Infrastructure layer):
+
 ```csharp
 public class ContentBundleRepository : Repository<ContentBundle>, IContentBundleRepository
 {
@@ -433,6 +440,7 @@ public class ContentBundleRepository : Repository<ContentBundle>, IContentBundle
 When migrating existing services to use repositories:
 
 ### Step 1: Create Repository Interface
+
 ```csharp
 // Application/Ports/Data/IContentBundleRepository.cs
 public interface IContentBundleRepository : IRepository<ContentBundle>
@@ -442,6 +450,7 @@ public interface IContentBundleRepository : IRepository<ContentBundle>
 ```
 
 ### Step 2: Implement Repository
+
 ```csharp
 // Infrastructure.Data/Repositories/ContentBundleRepository.cs
 public class ContentBundleRepository : Repository<ContentBundle>, IContentBundleRepository
@@ -453,12 +462,14 @@ public class ContentBundleRepository : Repository<ContentBundle>, IContentBundle
 ```
 
 ### Step 3: Register in DI
+
 ```csharp
 // Program.cs
 builder.Services.AddScoped<IContentBundleRepository, ContentBundleRepository>();
 ```
 
 ### Step 4: Replace DbContext with Repository
+
 ```csharp
 // Before:
 public class CreateContentBundleCommandHandler
@@ -518,4 +529,3 @@ public class CreateContentBundleCommandHandler
 ## License
 
 Copyright (c) 2025 Mystira. All rights reserved.
-

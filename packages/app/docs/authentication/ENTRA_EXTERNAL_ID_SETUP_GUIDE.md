@@ -33,13 +33,13 @@ sequenceDiagram
 
 ### 1.2. Key Configuration Values
 
-| Setting         | Value                                                 | Source                        |
-|-----------------|-------------------------------------------------------|-------------------------------|
-| **Tenant ID**     | `a816d461-fbf8-4477-83a6-a62ad74ff28f`                | Entra Admin Center            |
-| **Domain**        | `mystira.ciamlogin.com`                               | Entra Admin Center            |
-| **Authority**     | `https://mystira.ciamlogin.com/{TENANT_ID}`           | **Note:** No `/v2.0` suffix     |
-| **PWA Client ID** | `768ac1c6-47f4-4449-b57a-f3fe4016b006`                | Terraform Output              |
-| **Redirect URI**  | `http://localhost:5173/authentication/login-callback` | PWA `appsettings.json`        |
+| Setting           | Value                                                 | Source                      |
+| ----------------- | ----------------------------------------------------- | --------------------------- |
+| **Tenant ID**     | `a816d461-fbf8-4477-83a6-a62ad74ff28f`                | Entra Admin Center          |
+| **Domain**        | `mystira.ciamlogin.com`                               | Entra Admin Center          |
+| **Authority**     | `https://mystira.ciamlogin.com/{TENANT_ID}`           | **Note:** No `/v2.0` suffix |
+| **PWA Client ID** | `768ac1c6-47f4-4449-b57a-f3fe4016b006`                | Terraform Output            |
+| **Redirect URI**  | `http://localhost:5173/authentication/login-callback` | PWA `appsettings.json`      |
 
 ---
 
@@ -55,16 +55,19 @@ The first step is to provision the necessary Azure resources using the provided 
 ### 2.2. Deployment Steps
 
 1.  **Navigate to the Terraform test directory**:
+
     ```bash
     cd /home/ubuntu/Mystira.workspace/infra/terraform/modules/azure-ad-b2c/test
     ```
 
 2.  **Initialize Terraform**:
+
     ```bash
     terraform init
     ```
 
 3.  **Plan the deployment**:
+
     ```bash
     terraform plan
     ```
@@ -75,9 +78,10 @@ The first step is to provision the necessary Azure resources using the provided 
     ```
 
 This will create the following resources:
--   **App Registration for PWA**: For the Blazor WebAssembly application.
--   **App Registration for Public API**: For the backend API.
--   **App Registration for Mobile**: For the future mobile application.
+
+- **App Registration for PWA**: For the Blazor WebAssembly application.
+- **App Registration for Public API**: For the backend API.
+- **App Registration for Mobile**: For the future mobile application.
 
 ### 2.3. Terraform Outputs
 
@@ -120,8 +124,8 @@ https://mystira.ciamlogin.com/mystira.onmicrosoft.com/federation/oauth2
 
 Add the following domains to the **Authorized domains** section of the OAuth consent screen:
 
--   `ciamlogin.com`
--   `microsoftonline.com`
+- `ciamlogin.com`
+- `microsoftonline.com`
 
 ### 3.4. Get Client ID and Secret
 
@@ -214,7 +218,6 @@ public async Task<IActionResult> GetProfile()
 
 ## 7. Troubleshooting
 
--   **`redirect_uri` mismatch error**: Ensure all 7 redirect URIs are correctly entered in the Google Cloud Console.
--   **Entra sign-in page still showing**: This is a known limitation of Entra External ID; the `domain_hint` is not always honored. The current implementation is correct.
--   **404 errors**: Double-check that the `Authority` in `appsettings.json` does **not** have a `/v2.0` suffix.
-
+- **`redirect_uri` mismatch error**: Ensure all 7 redirect URIs are correctly entered in the Google Cloud Console.
+- **Entra sign-in page still showing**: This is a known limitation of Entra External ID; the `domain_hint` is not always honored. The current implementation is correct.
+- **404 errors**: Double-check that the `Authority` in `appsettings.json` does **not** have a `/v2.0` suffix.

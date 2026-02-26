@@ -4,7 +4,7 @@ import { BuildStatus } from "../types";
 
 export function useBuildManagement() {
   const [buildStatus, setBuildStatus] = useState<Record<string, BuildStatus>>(
-    {},
+    {}
   );
 
   const prebuildService = async (
@@ -12,7 +12,7 @@ export function useBuildManagement() {
     repoRoot: string,
     onViewModeChange: (serviceName: string, mode: "logs") => void,
     onShowLogs: (serviceName: string, show: boolean) => void,
-    isManual: boolean = false,
+    isManual: boolean = false
   ): Promise<boolean> => {
     const startTime = Date.now();
 
@@ -95,7 +95,7 @@ export function useBuildManagement() {
     useCurrentBranch: boolean,
     currentBranch: string,
     onViewModeChange: (serviceName: string, mode: "logs") => void,
-    onShowLogs: (serviceName: string, show: boolean) => void,
+    onShowLogs: (serviceName: string, show: boolean) => void
   ) => {
     // Validate repoRoot is not empty
     if (!repoRoot || repoRoot.trim() === "") {
@@ -114,10 +114,10 @@ export function useBuildManagement() {
         rootToUse,
         onViewModeChange,
         onShowLogs,
-        false,
+        false
       ).catch((err) => {
         console.error(`Failed to prebuild ${config.name}:`, err);
-      }),
+      })
     );
 
     await Promise.allSettled(prebuildPromises);

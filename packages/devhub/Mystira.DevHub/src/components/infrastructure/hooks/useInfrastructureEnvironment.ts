@@ -32,14 +32,14 @@ export function useInfrastructureEnvironment({
             alert(
               "Access Denied: You must have Subscription Owner role to switch to production environment.\n\n" +
                 `Current user: ${ownerCheck.result?.userName || "Unknown"}\n` +
-                "Please contact your subscription administrator.",
+                "Please contact your subscription administrator."
             );
             return;
           }
         } catch (error) {
           console.error("Failed to check subscription owner:", error);
           alert(
-            "Failed to verify subscription owner role. Cannot switch to production environment.",
+            "Failed to verify subscription owner role. Cannot switch to production environment."
           );
           return;
         }
@@ -49,7 +49,7 @@ export function useInfrastructureEnvironment({
         onResetState();
       }
     },
-    [onEnvironmentChanged, onResetState],
+    [onEnvironmentChanged, onResetState]
   );
 
   const confirmProdSwitch = useCallback(() => {

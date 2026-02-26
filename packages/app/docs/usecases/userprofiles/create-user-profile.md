@@ -26,9 +26,9 @@ sequenceDiagram
 
     Client->>Controller: POST /api/userprofiles<br/>(CreateUserProfileRequest)
     Controller->>Service: CreateProfileAsync(request)
-    
+
     Service->>UseCase: ExecuteAsync(request)
-    
+
     Note over UseCase: Step 1: Check Existing Profile
     UseCase->>Repo: GetByIdAsync(request.Id)
     Repo->>DB: Query profile
@@ -41,7 +41,7 @@ sequenceDiagram
     end
     DB-->>Repo: null
     Repo-->>UseCase: null
-    
+
     Note over UseCase: Step 2: Validate Fantasy Themes
     loop For each theme in request.PreferredFantasyThemes
         UseCase->>UseCase: FantasyTheme.Parse(theme)
@@ -51,7 +51,7 @@ sequenceDiagram
             Controller-->>Client: 400 Bad Request
         end
     end
-    
+
     Note over UseCase: Step 3: Validate Age Group
     UseCase->>UseCase: Check if request.AgeGroup<br/>in AgeGroupConstants.AllAgeGroups
     alt Invalid Age Group
@@ -59,16 +59,16 @@ sequenceDiagram
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 4: Create Domain Model
     UseCase->>UseCase: new UserProfile {<br/>  Id = request.Id,<br/>  Name = request.Name,<br/>  AccountId = request.AccountId,<br/>  PreferredFantasyThemes =<br/>    (parsed FantasyTheme list),<br/>  AgeGroupName = request.AgeGroup,<br/>  DateOfBirth = request.DateOfBirth,<br/>  IsGuest = request.IsGuest,<br/>  IsNpc = request.IsNpc,<br/>  HasCompletedOnboarding =<br/>    request.HasCompletedOnboarding,<br/>  Pronouns = request.Pronouns,<br/>  Bio = request.Bio,<br/>  CreatedAt = Now,<br/>  UpdatedAt = Now,<br/>  AvatarMediaId = request.SelectedAvatarMediaId,<br/>  SelectedAvatarMediaId =<br/>    request.SelectedAvatarMediaId<br/>}
-    
+
     Note over UseCase: Step 5: Auto-Update Age Group
     alt DateOfBirth Provided
         UseCase->>UseCase: profile.UpdateAgeGroupFromBirthDate()
         UseCase->>UseCase: Calculate age from DateOfBirth<br/>Update AgeGroupName based on age
     end
-    
+
     Note over UseCase: Step 6: Persist Profile
     UseCase->>Repo: AddAsync(profile)
     Repo->>DB: Add entity to DbSet
@@ -77,7 +77,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     Repo-->>UseCase: UserProfile (with ID)
-    
+
     UseCase-->>Service: UserProfile
     Service-->>Controller: UserProfile
     Controller-->>Client: 201 Created<br/>(UserProfile)

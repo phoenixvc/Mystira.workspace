@@ -80,7 +80,7 @@ function InfrastructureStatus({
         {
           environment,
           resourceGroup,
-        },
+        }
       );
 
       if (response.success && response.result) {
@@ -361,20 +361,20 @@ function InfrastructureStatus({
                                   ) {
                                     const result = healthResponse.result;
                                     alert(
-                                      `Health Check Result:\nStatus: ${result.health}\nDetails: ${JSON.stringify(result.details, null, 2)}`,
+                                      `Health Check Result:\nStatus: ${result.health}\nDetails: ${JSON.stringify(result.details, null, 2)}`
                                     );
                                   } else {
                                     alert(
-                                      `Health check failed: ${healthResponse.error || "Unknown error"}`,
+                                      `Health check failed: ${healthResponse.error || "Unknown error"}`
                                     );
                                   }
                                 } catch (err) {
                                   console.error(
                                     "Failed to check health endpoint:",
-                                    err,
+                                    err
                                   );
                                   alert(
-                                    `Failed to check health endpoint: ${err}`,
+                                    `Failed to check health endpoint: ${err}`
                                   );
                                 }
                               }}

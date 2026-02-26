@@ -34,11 +34,11 @@ interface ServiceListProps {
   onPortChange: (serviceName: string, port: number) => void;
   onEnvironmentSwitch: (
     serviceName: string,
-    env: "local" | "dev" | "prod",
+    env: "local" | "dev" | "prod"
   ) => void;
   onViewModeChange: (
     serviceName: string,
-    mode: "logs" | "webview" | "split",
+    mode: "logs" | "webview" | "split"
   ) => void;
   onMaximize: (serviceName: string) => void;
   onOpenInBrowser: (url: string) => void;
@@ -46,7 +46,7 @@ interface ServiceListProps {
   onClearLogs: (serviceName: string) => void;
   onFilterChange: (
     serviceName: string,
-    filter: { search: string; type: "all" | "stdout" | "stderr" },
+    filter: { search: string; type: "all" | "stdout" | "stderr" }
   ) => void;
   onAutoScrollChange: (serviceName: string, enabled: boolean) => void;
   onWebviewRetry: (serviceName: string) => void;

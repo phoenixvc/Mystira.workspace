@@ -8,8 +8,8 @@ export function usePortManagement(
   getEnvironmentUrls: (serviceName: string) => { dev?: string; prod?: string },
   onToast: (
     message: string,
-    type: "success" | "error" | "warning" | "info",
-  ) => void,
+    type: "success" | "error" | "warning" | "info"
+  ) => void
 ) {
   const [customPorts, setCustomPorts] = useState<Record<string, number>>(() => {
     const saved = localStorage.getItem("servicePorts");
@@ -19,7 +19,7 @@ export function usePortManagement(
   const updateServicePort = async (
     serviceName: string,
     port: number,
-    persistToFile: boolean = false,
+    persistToFile: boolean = false
   ) => {
     if (port < 1 || port > 65535) {
       onToast("Port must be between 1 and 65535", "error");
@@ -29,19 +29,19 @@ export function usePortManagement(
     const configs = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     );
     const config = configs.find((c) => c.name === serviceName);
     const displayName = config?.displayName || serviceName;
 
     // Check for conflicts
     const conflictingService = configs.find(
-      (c) => c.name !== serviceName && c.port === port,
+      (c) => c.name !== serviceName && c.port === port
     );
     if (conflictingService) {
       const confirmed = window.confirm(
         `Port ${port} is already used by "${conflictingService.displayName}".\n\n` +
-          `Would you like to auto-assign a new port?`,
+          `Would you like to auto-assign a new port?`
       );
 
       if (confirmed) {
@@ -75,19 +75,19 @@ export function usePortManagement(
         });
         onToast(
           `Port ${port} updated for ${displayName} and saved to launchSettings.json`,
-          "success",
+          "success"
         );
       } catch (error) {
         onToast(
           `Port updated in UI but failed to save to file: ${error}`,
-          "warning",
+          "warning"
         );
       }
     } else if (!persistToFile) {
       // Show confirmation dialog to persist
       const confirmed = window.confirm(
         `Port ${port} updated for ${displayName}.\n\n` +
-          `Would you like to save this to launchSettings.json?`,
+          `Would you like to save this to launchSettings.json?`
       );
 
       if (confirmed && repoRoot) {
@@ -128,7 +128,7 @@ export function usePortManagement(
       const configs = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       );
       const portMap = new Map<number, string[]>();
 
@@ -144,7 +144,7 @@ export function usePortManagement(
         if (services.length > 1) {
           onToast(
             `Port conflict detected: Port ${port} used by ${services.join(", ")}`,
-            "warning",
+            "warning"
           );
         }
       });

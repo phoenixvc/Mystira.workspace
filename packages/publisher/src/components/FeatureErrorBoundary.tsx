@@ -1,6 +1,6 @@
-import { Component, type ReactNode } from 'react';
-import { Alert, Button } from './index';
-import { logger } from '@/utils/logger';
+import { Component, type ReactNode } from "react";
+import { Alert, Button } from "./index";
+import { logger } from "@/utils/logger";
 
 interface FeatureErrorBoundaryProps {
   children: ReactNode;
@@ -13,7 +13,10 @@ interface State {
   error?: Error;
 }
 
-export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, State> {
+export class FeatureErrorBoundary extends Component<
+  FeatureErrorBoundaryProps,
+  State
+> {
   constructor(props: FeatureErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -41,8 +44,9 @@ export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, S
         <div className="feature-error-boundary">
           <Alert variant="error" title={`Error in ${this.props.featureName}`}>
             <p>
-              An error occurred in {this.props.featureName}. Please try refreshing this section or
-              contact support if the problem persists.
+              An error occurred in {this.props.featureName}. Please try
+              refreshing this section or contact support if the problem
+              persists.
             </p>
             {import.meta.env.DEV && this.state.error && (
               <pre className="feature-error-boundary__details">
@@ -60,4 +64,3 @@ export class FeatureErrorBoundary extends Component<FeatureErrorBoundaryProps, S
     return this.props.children;
   }
 }
-

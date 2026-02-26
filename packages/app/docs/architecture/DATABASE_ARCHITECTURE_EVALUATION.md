@@ -8,6 +8,7 @@
 ## Executive Summary
 
 The WhatsApp conversation discussed a polyglot database architecture using:
+
 - **Blue**: PostgreSQL (relational, frequently updated data)
 - **Yellow**: Cosmos DB (hierarchical/deeply nested, rarely updated)
 - **Green**: Redis + Blob Storage (caching + media assets)
@@ -21,12 +22,12 @@ This document evaluates the discussion against the **actual Mystira.App implemen
 
 ### Technology Stack
 
-| Layer | Technology | Status |
-|-------|------------|--------|
-| **Primary Database** | Azure Cosmos DB | ✅ Active |
-| **Secondary Database** | PostgreSQL | 🔮 Planned (not implemented) |
-| **Cache** | Redis | ✅ Active (optional) |
-| **Blob Storage** | Azure Blob Storage | ✅ Active |
+| Layer                   | Technology           | Status                       |
+| ----------------------- | -------------------- | ---------------------------- |
+| **Primary Database**    | Azure Cosmos DB      | ✅ Active                    |
+| **Secondary Database**  | PostgreSQL           | 🔮 Planned (not implemented) |
+| **Cache**               | Redis                | ✅ Active (optional)         |
+| **Blob Storage**        | Azure Blob Storage   | ✅ Active                    |
 | **Migration Framework** | Polyglot Persistence | ✅ Ready (Mode: SingleStore) |
 
 ### Key Finding
@@ -49,21 +50,22 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 
 ### Discussion vs Implementation
 
-| Entity | WhatsApp Decision | Current Implementation | Evaluation |
-|--------|-------------------|------------------------|------------|
-| **accounts** | PostgreSQL | Cosmos DB (`/id` partition) | ⚠️ Currently Cosmos, planned for PG |
-| **gamesessions** | PostgreSQL | Cosmos DB (`/accountId` partition) | ⚠️ Good partition key choice! |
-| **user profiles** | Cosmos (uncertain) | Cosmos DB (`/id` partition) | ✅ Correctly identified |
-| **playerscenarioscores** | PostgreSQL | Cosmos DB (`/profileId` partition) | ⚠️ Currently Cosmos, good for PG |
-| **avatarconfiguration** | Cosmos/uncertain | Cosmos DB (as `AvatarConfigurationFile`) | 🔄 Simple mapping - could be either |
-| **charactermediametadata** | Delete/Cosmos | Cosmos DB (`CharacterMediaMetadataFile`) | ✅ Exists, stored as Cosmos document |
-| **mystiraappdbcontext** | Unknown | EF Core DbContext class | ❓ Not an entity - it's infrastructure |
+| Entity                     | WhatsApp Decision  | Current Implementation                   | Evaluation                             |
+| -------------------------- | ------------------ | ---------------------------------------- | -------------------------------------- |
+| **accounts**               | PostgreSQL         | Cosmos DB (`/id` partition)              | ⚠️ Currently Cosmos, planned for PG    |
+| **gamesessions**           | PostgreSQL         | Cosmos DB (`/accountId` partition)       | ⚠️ Good partition key choice!          |
+| **user profiles**          | Cosmos (uncertain) | Cosmos DB (`/id` partition)              | ✅ Correctly identified                |
+| **playerscenarioscores**   | PostgreSQL         | Cosmos DB (`/profileId` partition)       | ⚠️ Currently Cosmos, good for PG       |
+| **avatarconfiguration**    | Cosmos/uncertain   | Cosmos DB (as `AvatarConfigurationFile`) | 🔄 Simple mapping - could be either    |
+| **charactermediametadata** | Delete/Cosmos      | Cosmos DB (`CharacterMediaMetadataFile`) | ✅ Exists, stored as Cosmos document   |
+| **mystiraappdbcontext**    | Unknown            | EF Core DbContext class                  | ❓ Not an entity - it's infrastructure |
 
 ---
 
 ## Detailed Container Mapping (26 Cosmos Containers)
 
 ### User & Profile Data
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -75,6 +77,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Game Session Data
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -85,6 +88,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Content & Scenario Data
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -96,6 +100,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Media & Metadata
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container                  │ Partition Key │ PostgreSQL?    │
@@ -109,6 +114,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Configuration (Read-heavy, rarely updated)
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -123,6 +129,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Badge System
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -134,6 +141,7 @@ The codebase has a sophisticated polyglot persistence layer (`PolyglotRepository
 ```
 
 ### Analytics
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Container              │ Partition Key │ PostgreSQL Candidate│
@@ -202,6 +210,7 @@ The conversation didn't mention these existing systems:
 ## Recommended Migration Strategy
 
 ### Phase 1: PostgreSQL Candidates (High Value)
+
 ```
 Priority 1: accounts        - Transactional, relational, FK target
 Priority 2: gamesessions    - ACID required, frequent updates
@@ -209,6 +218,7 @@ Priority 3: player_scores   - Analytical queries, joins needed
 ```
 
 ### Phase 2: Keep in Cosmos (Architectural Fit)
+
 ```
 - Scenarios (deeply nested, complex documents)
 - ContentBundles (rarely updated, hierarchical)
@@ -217,6 +227,7 @@ Priority 3: player_scores   - Analytical queries, joins needed
 ```
 
 ### Phase 3: Consider Split
+
 ```
 - UserProfiles: Core → PostgreSQL, Preferences → Cosmos
 - AvatarConfiguration: Could move to PostgreSQL (simple mapping)
@@ -227,6 +238,7 @@ Priority 3: player_scores   - Analytical queries, joins needed
 ## Redis Usage Clarification
 
 Current Redis configuration (`CacheOptions.cs`):
+
 - **Not for data storage** - Pure caching layer
 - **Cache-aside pattern** - Check cache first, load from DB on miss
 - **Write-through** - Update cache on writes (configurable)
@@ -239,13 +251,13 @@ This is the **correct** usage of Redis - the WhatsApp grouping of Redis with Blo
 
 ## Action Items
 
-| Priority | Action | Owner | Notes |
-|----------|--------|-------|-------|
-| 🔴 High | Clarify `mystiraappdbcontext` | Dev Team | It's infrastructure, not data |
-| 🔴 High | Decide on `CharacterMediaMetadataFile` | Dev Team | Delete or keep in Cosmos |
-| 🟡 Medium | Review UserProfile split strategy | Architect | Core vs Extended separation |
-| 🟡 Medium | Test PolyglotRepository in staging | DevOps | Migration infrastructure ready |
-| 🟢 Low | Document partition key rationale | Dev Team | ADR update |
+| Priority  | Action                                 | Owner     | Notes                          |
+| --------- | -------------------------------------- | --------- | ------------------------------ |
+| 🔴 High   | Clarify `mystiraappdbcontext`          | Dev Team  | It's infrastructure, not data  |
+| 🔴 High   | Decide on `CharacterMediaMetadataFile` | Dev Team  | Delete or keep in Cosmos       |
+| 🟡 Medium | Review UserProfile split strategy      | Architect | Core vs Extended separation    |
+| 🟡 Medium | Test PolyglotRepository in staging     | DevOps    | Migration infrastructure ready |
+| 🟢 Low    | Document partition key rationale       | Dev Team  | ADR update                     |
 
 ---
 
@@ -268,10 +280,10 @@ The team's instinct to question and examine actual data before migration is the 
 
 ### New Files Created
 
-| File | Purpose |
-|------|---------|
-| `PostgresDbContext.cs` | PostgreSQL DbContext for migration candidates |
-| `V001__Initial_Migration_Candidates.sql` | PostgreSQL schema migration script |
+| File                                     | Purpose                                       |
+| ---------------------------------------- | --------------------------------------------- |
+| `PostgresDbContext.cs`                   | PostgreSQL DbContext for migration candidates |
+| `V001__Initial_Migration_Candidates.sql` | PostgreSQL schema migration script            |
 
 ### Configuration Added
 
@@ -294,16 +306,18 @@ The team's instinct to question and examine actual data before migration is the 
 
 The system uses **permanent polyglot persistence** (not migration):
 
-| Mode | Description | Use Case |
-|------|-------------|----------|
+| Mode          | Description                       | Use Case                                |
+| ------------- | --------------------------------- | --------------------------------------- |
 | `SingleStore` | All operations use Cosmos DB only | Initial setup, no PostgreSQL configured |
-| `DualWrite` | Write to both, read from Cosmos | **Recommended for production** |
+| `DualWrite`   | Write to both, read from Cosmos   | **Recommended for production**          |
 
 **Architecture:**
+
 - **Primary Store (Cosmos DB)**: All reads/writes, document data, global distribution
 - **Secondary Store (PostgreSQL)**: Analytics, reporting, relational queries
 
 To enable dual-write, set:
+
 ```json
 "PolyglotPersistence": {
   "Mode": "DualWrite"
@@ -313,6 +327,7 @@ To enable dual-write, set:
 ### PostgreSQL Schema
 
 Run the migration script at:
+
 ```
 src/Mystira.App.Infrastructure.Data/Migrations/PostgreSQL/V001__Initial_Migration_Candidates.sql
 ```

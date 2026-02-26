@@ -3,18 +3,22 @@
 ## Database Initialization on Startup
 
 ### Problem
+
 The application was hanging during startup when deployed to Azure App Service because the database initialization code (`EnsureCreatedAsync`) would hang indefinitely if:
+
 - The Cosmos DB connection string was invalid or empty
 - The database/containers didn't exist
 - Network connectivity issues occurred
 - Cosmos DB service was unavailable
 
 ### Solution
+
 We've implemented a robust startup configuration system with the following improvements:
 
 #### 1. Configuration Flags
 
 **`InitializeDatabaseOnStartup`** (default: `false`)
+
 - Controls whether the app attempts to initialize the database on startup
 - **Production**: Set to `false` to skip database initialization (recommended)
 - **Development**: Automatically `true` for in-memory databases
@@ -27,6 +31,7 @@ We've implemented a robust startup configuration system with the following impro
 ```
 
 **`SeedMasterDataOnStartup`** (default: `false`)
+
 - Controls whether to seed master data (CompassAxes, Archetypes, etc.) on startup
 - Only runs if `InitializeDatabaseOnStartup` is `true`
 - Automatically enabled for in-memory databases (local development)
@@ -60,6 +65,7 @@ If any timeout is reached, the application logs a warning and continues to start
    - Create containers with correct partition keys (see error logs for details)
 
 2. **Configure App Service Settings**:
+
    ```
    ConnectionStrings__CosmosDb = "AccountEndpoint=https://...;AccountKey=..."
    InitializeDatabaseOnStartup = false
@@ -84,6 +90,7 @@ In-memory database is used by default when no Cosmos DB connection string is con
 ```
 
 This automatically:
+
 - Enables `InitializeDatabaseOnStartup` (override in appsettings)
 - Enables `SeedMasterDataOnStartup` (override in appsettings)
 - Uses in-memory database provider
@@ -91,17 +98,20 @@ This automatically:
 ### Troubleshooting
 
 **Application hangs on startup**:
+
 - Check if `InitializeDatabaseOnStartup=true` is set
 - Verify Cosmos DB connection string is valid
 - Check network connectivity to Cosmos DB
 - Review application logs for timeout messages
 
 **Database not initialized**:
+
 - Ensure `InitializeDatabaseOnStartup=true` in configuration
 - Check application logs for timeout or error messages
 - Verify Cosmos DB permissions and container existence
 
 **Seeding fails**:
+
 - Check `SeedMasterDataOnStartup` setting
 - Verify JSON seed files exist in the application deployment
 - Review logs for specific seeding errors
@@ -109,6 +119,7 @@ This automatically:
 ### Configuration Examples
 
 **Azure App Service (Production)**:
+
 ```
 InitializeDatabaseOnStartup=false
 SeedMasterDataOnStartup=false
@@ -116,6 +127,7 @@ ConnectionStrings__CosmosDb=<your-cosmos-connection-string>
 ```
 
 **Local Development (In-Memory)**:
+
 ```json
 {
   "ConnectionStrings": {
@@ -125,6 +137,7 @@ ConnectionStrings__CosmosDb=<your-cosmos-connection-string>
 ```
 
 **Local Development (Cosmos DB)**:
+
 ```json
 {
   "ConnectionStrings": {

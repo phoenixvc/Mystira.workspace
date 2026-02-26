@@ -14,13 +14,13 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 
 ## Recovery Objectives
 
-| Component | RTO | RPO | Backup Strategy |
-|-----------|-----|-----|-----------------|
-| **Cosmos DB** | 1 hour | 0 (continuous) | Continuous backup + periodic snapshots |
-| **App Service** | 30 min | N/A | Redeploy from GitHub |
-| **Blob Storage** | 2 hours | 24 hours | GRS replication |
-| **Key Vault** | 15 min | N/A | Soft delete + purge protection |
-| **DNS (Front Door)** | 15 min | N/A | Azure-managed redundancy |
+| Component            | RTO     | RPO            | Backup Strategy                        |
+| -------------------- | ------- | -------------- | -------------------------------------- |
+| **Cosmos DB**        | 1 hour  | 0 (continuous) | Continuous backup + periodic snapshots |
+| **App Service**      | 30 min  | N/A            | Redeploy from GitHub                   |
+| **Blob Storage**     | 2 hours | 24 hours       | GRS replication                        |
+| **Key Vault**        | 15 min  | N/A            | Soft delete + purge protection         |
+| **DNS (Front Door)** | 15 min  | N/A            | Azure-managed redundancy               |
 
 ---
 
@@ -33,6 +33,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 **Recovery Steps**:
 
 1. **Verify Regional Outage**
+
    ```bash
    # Check Azure status
    curl -s https://status.azure.com/api/v2/summary.json | jq '.status'
@@ -44,6 +45,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
    ```
 
 2. **Activate DR Region** (if configured)
+
    ```bash
    # Update Front Door to point to DR region
    az network front-door backend-pool update \
@@ -67,6 +69,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 **Recovery Steps**:
 
 1. **Assess Damage**
+
    ```bash
    # Check container document count
    az cosmosdb sql container show \
@@ -78,6 +81,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
    ```
 
 2. **Point-in-Time Restore** (Continuous Backup)
+
    ```bash
    # Restore to new account
    az cosmosdb restore \
@@ -112,6 +116,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
    - Review access logs
 
 2. **Rotate Critical Secrets**
+
    ```bash
    # Rotate database credentials
    az keyvault secret set \
@@ -124,6 +129,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
    ```
 
 3. **Restart All Services**
+
    ```bash
    az webapp restart \
      --name mys-prod-mystira-api-san \
@@ -144,6 +150,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 **Recovery Steps**:
 
 1. **Recover from Soft Delete** (if within retention)
+
    ```bash
    # Check for deleted Key Vault
    az keyvault list-deleted --query "[?name=='mys-prod-mystira-kv-san']"
@@ -153,6 +160,7 @@ This runbook covers recovery procedures for major infrastructure failures. It de
    ```
 
 2. **Rebuild from Infrastructure-as-Code**
+
    ```bash
    # Navigate to workspace repo
    cd Mystira.workspace
@@ -176,13 +184,13 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 
 ### During Disaster
 
-| Time | Action | Owner |
-|------|--------|-------|
-| 0 min | Acknowledge alert | On-call |
-| 5 min | Assess severity | On-call |
+| Time   | Action                | Owner            |
+| ------ | --------------------- | ---------------- |
+| 0 min  | Acknowledge alert     | On-call          |
+| 5 min  | Assess severity       | On-call          |
 | 15 min | Initial status update | Engineering Lead |
-| 30 min | Update stakeholders | Product Manager |
-| Hourly | Status updates | Engineering Lead |
+| 30 min | Update stakeholders   | Product Manager  |
+| Hourly | Status updates        | Engineering Lead |
 
 ### Status Page Updates
 
@@ -196,18 +204,21 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 ## Post-Disaster
 
 ### Immediate (Within 24 hours)
+
 - [ ] Verify all services healthy
 - [ ] Check data integrity
 - [ ] Review error rates in App Insights
 - [ ] Document timeline of events
 
 ### Short-term (Within 1 week)
+
 - [ ] Conduct post-mortem
 - [ ] Identify improvement opportunities
 - [ ] Update runbooks if needed
 - [ ] Test recovery procedures
 
 ### Long-term
+
 - [ ] Implement identified improvements
 - [ ] Schedule disaster recovery drills
 - [ ] Review and update RTO/RPO targets
@@ -216,11 +227,11 @@ This runbook covers recovery procedures for major infrastructure failures. It de
 
 ## DR Testing Schedule
 
-| Test Type | Frequency | Last Test | Next Test |
-|-----------|-----------|-----------|-----------|
-| Backup Verification | Monthly | - | - |
-| Failover Drill | Quarterly | - | - |
-| Full DR Test | Annually | - | - |
+| Test Type           | Frequency | Last Test | Next Test |
+| ------------------- | --------- | --------- | --------- |
+| Backup Verification | Monthly   | -         | -         |
+| Failover Drill      | Quarterly | -         | -         |
+| Full DR Test        | Annually  | -         | -         |
 
 ---
 

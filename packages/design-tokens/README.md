@@ -13,7 +13,7 @@ npm install @mystira/design-tokens
 ### TypeScript/JavaScript
 
 ```typescript
-import { colors, spacing, tokens } from '@mystira/design-tokens';
+import { colors, spacing, tokens } from "@mystira/design-tokens";
 
 // Use individual tokens
 const primaryColor = colors.primary[700]; // #7c3aed
@@ -25,7 +25,7 @@ const { fontFamily, fontSize } = tokens;
 ### CSS Variables
 
 ```css
-@import '@mystira/design-tokens/css';
+@import "@mystira/design-tokens/css";
 
 .button {
   background-color: var(--color-primary-700);
@@ -41,7 +41,7 @@ const { fontFamily, fontSize } = tokens;
 ```javascript
 // tailwind.config.js
 module.exports = {
-  presets: [require('@mystira/design-tokens/tailwind')],
+  presets: [require("@mystira/design-tokens/tailwind")],
   // your customizations...
 };
 ```
@@ -90,7 +90,7 @@ Replace direct CSS custom property references:
 --color-primary-500: #9333ea;
 
 /* After (design-tokens) */
-@import '@mystira/design-tokens/css';
+@import "@mystira/design-tokens/css";
 /* Uses --color-primary-700: #7c3aed (App color) */
 ```
 
@@ -104,7 +104,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#0ea5e9', // DevHub sky blue
+        primary: "#0ea5e9", // DevHub sky blue
       },
     },
   },
@@ -112,7 +112,7 @@ module.exports = {
 
 // After
 module.exports = {
-  presets: [require('@mystira/design-tokens/tailwind')],
+  presets: [require("@mystira/design-tokens/tailwind")],
   // primary is now the unified purple from Mystira App
 };
 ```

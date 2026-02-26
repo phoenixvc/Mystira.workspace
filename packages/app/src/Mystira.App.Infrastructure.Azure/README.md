@@ -7,6 +7,7 @@ Azure Cloud infrastructure adapter implementing storage and media processing por
 **Layer**: **Infrastructure - Azure Adapter (Secondary/Driven)**
 
 The Infrastructure.Azure layer is a **secondary adapter** (driven adapter) that:
+
 - **Implements** storage and media port interfaces defined in `Application.Ports`
 - **Provides** Azure Blob Storage implementation for media management
 - **Offers** FFmpeg-based audio transcoding services
@@ -15,6 +16,7 @@ The Infrastructure.Azure layer is a **secondary adapter** (driven adapter) that:
 - **ZERO reverse dependencies** - Application never references Infrastructure
 
 **Dependency Flow** (Correct ✅):
+
 ```
 Domain Layer (Core)
     ↓ references
@@ -29,6 +31,7 @@ Azure SDK, FFmpeg
 ```
 
 **Key Principles**:
+
 - ✅ **Port Implementation** - Implements `IBlobService` and `IAudioTranscodingService` from Application
 - ✅ **Technology Adapter** - Adapts Azure Blob Storage SDK to Application needs
 - ✅ **Dependency Inversion** - Application defines ports, Infrastructure implements them
@@ -57,6 +60,7 @@ Mystira.App.Infrastructure.Azure/
 ```
 
 **Port Interfaces** (defined in Application layer):
+
 - `IBlobService` lives in `Application/Ports/Storage/`
 - `IAudioTranscodingService` lives in `Application/Ports/Media/`
 - Infrastructure.Azure references Application to implement these ports
@@ -304,6 +308,7 @@ public class UploadMediaUseCase
 ```
 
 **Benefits**:
+
 - ✅ Application never references Infrastructure.Azure
 - ✅ Can swap Azure for AWS S3 without changing Application
 - ✅ Easy to mock for testing (in-memory, local file system)
@@ -403,6 +408,7 @@ public static class AzureHealthChecks
 ```
 
 Access health checks at:
+
 - `/health` - Comprehensive health status
 - `/health/ready` - Readiness probe
 - `/health/live` - Liveness probe
@@ -527,18 +533,21 @@ az deployment group create \
 The deployment creates the following Azure resources:
 
 ### App Service
+
 - **Plan**: Linux-based App Service Plan
 - **Runtime**: .NET 9.0
 - **Features**: Always On, HTTPS Only, Health Check monitoring
 - **Configuration**: Environment variables for connection strings and JWT settings
 
 ### Cosmos DB
+
 - **Type**: Serverless SQL API
 - **Containers**: UserProfiles, Scenarios, GameSessions, MediaAssets
 - **Consistency**: Session-level consistency
 - **Partition Keys**: Optimized for query patterns
 
 ### Storage Account
+
 - **Type**: StorageV2 with Hot access tier
 - **Features**: HTTPS only, TLS 1.2 minimum
 - **Containers**: mystira-app-media (public blob access)
@@ -562,11 +571,13 @@ The deployment creates the following Azure resources:
 ## Monitoring
 
 Health checks are available at:
+
 - `/health` - Comprehensive health status
 - `/health/ready` - Readiness probe
 - `/health/live` - Liveness probe
 
 Monitor the following metrics:
+
 - App Service response time and availability
 - Cosmos DB request units and throttling
 - Storage account blob operations and bandwidth
@@ -574,12 +585,14 @@ Monitor the following metrics:
 ## Environment-Specific Configuration
 
 ### Development
+
 - **App Service**: Basic B1 SKU
 - **Storage**: Standard LRS replication
 - **Cosmos DB**: Serverless with minimal throughput
 - **Alternative**: Use Azurite for local development
 
 ### Production
+
 - **App Service**: Premium P1v3 SKU
 - **Storage**: Standard GRS replication
 - **Cosmos DB**: Serverless with auto-scale
@@ -604,6 +617,7 @@ grep -r "using Mystira.App.Infrastructure" .
 ```
 
 **Results**:
+
 - ✅ Infrastructure.Azure references Application (correct direction)
 - ✅ Services implement Application.Ports interfaces
 - ✅ Application has ZERO Infrastructure references
@@ -614,6 +628,7 @@ grep -r "using Mystira.App.Infrastructure" .
 The port-based architecture allows easy swapping of implementations:
 
 ### Local File Storage (Development)
+
 ```csharp
 public class LocalFileStorageService : IBlobService
 {
@@ -637,6 +652,7 @@ public class LocalFileStorageService : IBlobService
 ```
 
 ### AWS S3 (Alternative Cloud)
+
 ```csharp
 public class AwsS3BlobService : IBlobService
 {
@@ -692,6 +708,7 @@ public class AwsS3BlobService : IBlobService
 ## Summary
 
 **What This Layer Does**:
+
 - ✅ Implements storage and media port interfaces from Application.Ports
 - ✅ Provides Azure Blob Storage-based media management
 - ✅ Offers FFmpeg-based audio transcoding
@@ -699,11 +716,13 @@ public class AwsS3BlobService : IBlobService
 - ✅ Maintains clean hexagonal architecture
 
 **What This Layer Does NOT Do**:
+
 - ❌ Define port interfaces (Application does that)
 - ❌ Contain business logic (Application/Domain does that)
 - ❌ Make decisions about when to upload/transcode (Application decides)
 
 **Key Success Metrics**:
+
 - ✅ **Zero reverse dependencies** - Application never references Infrastructure.Azure
 - ✅ **Clean interfaces** - All ports defined in Application layer
 - ✅ **Testability** - Use cases can mock storage/transcoding services

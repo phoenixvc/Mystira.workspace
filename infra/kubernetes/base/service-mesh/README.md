@@ -5,6 +5,7 @@ This directory contains Istio service mesh configuration for enabling mTLS (mutu
 ## Overview
 
 The service mesh configuration provides:
+
 - **Mutual TLS (mTLS)**: Automatic encryption of all service-to-service traffic
 - **Identity-based access control**: Services authenticate using cryptographic identities
 - **Zero-trust networking**: Default deny policies with explicit allow rules
@@ -42,11 +43,11 @@ az aks show --resource-group <rg-name> --name <aks-name> --query "serviceMeshPro
 
 ## Configuration Files
 
-| File | Description |
-|------|-------------|
-| `peer-authentication.yaml` | mTLS policies (STRICT mode for all services) |
-| `destination-rules.yaml` | Client-side TLS settings and traffic policies |
-| `authorization-policies.yaml` | Service-to-service access control rules |
+| File                          | Description                                   |
+| ----------------------------- | --------------------------------------------- |
+| `peer-authentication.yaml`    | mTLS policies (STRICT mode for all services)  |
+| `destination-rules.yaml`      | Client-side TLS settings and traffic policies |
+| `authorization-policies.yaml` | Service-to-service access control rules       |
 
 ## Deployment
 
@@ -89,11 +90,11 @@ kubectl get pods -n mys-staging
 
 ### mTLS Modes
 
-| Mode | Description | Use Case |
-|------|-------------|----------|
-| `STRICT` | Only accept mTLS traffic | Production (default) |
-| `PERMISSIVE` | Accept both plain text and mTLS | Migration period |
-| `DISABLE` | Disable mTLS | Not recommended |
+| Mode         | Description                     | Use Case             |
+| ------------ | ------------------------------- | -------------------- |
+| `STRICT`     | Only accept mTLS traffic        | Production (default) |
+| `PERMISSIVE` | Accept both plain text and mTLS | Migration period     |
+| `DISABLE`    | Disable mTLS                    | Not recommended      |
 
 ### Authorization Policy Flow
 
@@ -163,7 +164,7 @@ metadata:
   namespace: mystira
 spec:
   mtls:
-    mode: PERMISSIVE  # Accept both plain and mTLS
+    mode: PERMISSIVE # Accept both plain and mTLS
 ```
 
 ### Phase 2: Strict Mode (Production)
@@ -178,7 +179,7 @@ metadata:
   namespace: mystira
 spec:
   mtls:
-    mode: STRICT  # Only accept mTLS
+    mode: STRICT # Only accept mTLS
 ```
 
 ### Rollback: Reverting to Permissive Mode
@@ -201,6 +202,7 @@ istioctl analyze -n mys-prod
 ```
 
 **Root Cause Analysis:**
+
 - Check if all pods have sidecars injected: `kubectl get pods -n mys-prod -o jsonpath='{.items[*].spec.containers[*].name}' | tr ' ' '\n' | grep istio-proxy`
 - Verify AuthorizationPolicies aren't blocking traffic
 - Ensure service accounts have proper Istio certificates

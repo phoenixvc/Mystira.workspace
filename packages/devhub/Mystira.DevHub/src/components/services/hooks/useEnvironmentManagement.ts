@@ -39,7 +39,7 @@ export function useEnvironmentManagement() {
     try {
       const response = await invoke<{ success: boolean; result?: any[] }>(
         "get_azure_resources",
-        {},
+        {}
       );
       if (response.success && response.result) {
         const urls: Record<string, EnvironmentUrls> = {};
@@ -104,7 +104,7 @@ export function useEnvironmentManagement() {
   // Check environment health
   const checkEnvironmentHealth = async (
     serviceName: string,
-    environment: "dev" | "prod",
+    environment: "dev" | "prod"
   ) => {
     const envUrls = getEnvironmentUrls(serviceName);
     const url = environment === "dev" ? envUrls.dev : envUrls.prod;

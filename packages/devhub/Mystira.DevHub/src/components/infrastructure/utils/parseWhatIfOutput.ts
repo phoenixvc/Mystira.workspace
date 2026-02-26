@@ -93,7 +93,7 @@ export function parseWhatIfOutput(whatIfJson: string): WhatIfChange[] {
               if (d.path || d.property) {
                 const path = d.path || d.property;
                 propertyChanges.push(
-                  `${path}: ${d.before || d.oldValue || "null"} → ${d.after || d.newValue || "null"}`,
+                  `${path}: ${d.before || d.oldValue || "null"} → ${d.after || d.newValue || "null"}`
                 );
               }
             });
@@ -105,7 +105,7 @@ export function parseWhatIfOutput(whatIfJson: string): WhatIfChange[] {
                   if (d.path || d.property) {
                     const path = d.path || d.property || key;
                     propertyChanges.push(
-                      `${path}: ${d.before || d.oldValue || "null"} → ${d.after || d.newValue || "null"}`,
+                      `${path}: ${d.before || d.oldValue || "null"} → ${d.after || d.newValue || "null"}`
                     );
                   }
                 });

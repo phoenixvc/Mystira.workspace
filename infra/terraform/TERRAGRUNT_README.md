@@ -36,6 +36,7 @@ infra/terraform/
 ## Prerequisites
 
 1. **Install Terragrunt**:
+
    ```bash
    # macOS
    brew install terragrunt
@@ -50,6 +51,7 @@ infra/terraform/
    ```
 
 2. **Azure CLI authenticated**:
+
    ```bash
    az login
    az account set --subscription "Your-Subscription"
@@ -113,14 +115,14 @@ All products depend on `shared-infra`. Products are independent of each other an
 
 Each product/environment gets a separate state file in Azure Blob Storage:
 
-| Product | State Key |
-|---------|-----------|
-| shared-infra | `shared-infra/dev.tfstate` |
-| mystira-app | `mystira-app/dev.tfstate` |
+| Product         | State Key                     |
+| --------------- | ----------------------------- |
+| shared-infra    | `shared-infra/dev.tfstate`    |
+| mystira-app     | `mystira-app/dev.tfstate`     |
 | story-generator | `story-generator/dev.tfstate` |
-| admin | `admin/dev.tfstate` |
-| publisher | `publisher/dev.tfstate` |
-| chain | `chain/dev.tfstate` |
+| admin           | `admin/dev.tfstate`           |
+| publisher       | `publisher/dev.tfstate`       |
+| chain           | `chain/dev.tfstate`           |
 
 ## Common Commands
 
@@ -153,7 +155,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'infra/terraform/**'
+      - "infra/terraform/**"
 
 jobs:
   deploy:
@@ -189,12 +191,14 @@ jobs:
 ## Troubleshooting
 
 ### "Backend configuration changed"
+
 ```bash
 # Reinitialize with migration
 terragrunt init -migrate-state
 ```
 
 ### "Dependency not found"
+
 ```bash
 # Deploy shared-infra first
 cd shared-infra/environments/dev
@@ -202,6 +206,7 @@ terragrunt apply
 ```
 
 ### "State lock held"
+
 ```bash
 # Force unlock (use with caution!)
 terragrunt force-unlock LOCK_ID

@@ -81,7 +81,7 @@ export function useCliBuild() {
       } catch (error) {
         console.error(
           `Failed to get CLI build time (attempt ${i + 1}):`,
-          error,
+          error
         );
       }
     }

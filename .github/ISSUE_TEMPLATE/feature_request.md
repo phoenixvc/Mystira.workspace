@@ -1,9 +1,9 @@
 ---
 name: Feature Request
 about: Suggest an idea for Mystira
-title: '[FEATURE] '
+title: "[FEATURE] "
 labels: enhancement
-assignees: ''
+assignees: ""
 ---
 
 ## Feature Description
@@ -34,4 +34,3 @@ Any alternative solutions or features you've considered.
 ## Additional Context
 
 Add any other context, mockups, or screenshots about the feature request.
-

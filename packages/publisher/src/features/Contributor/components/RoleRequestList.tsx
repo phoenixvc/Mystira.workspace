@@ -1,5 +1,5 @@
-import { roleRequestsApi } from '@/api';
-import type { RoleRequest, RoleRequestStatus } from '@/api/types';
+import { roleRequestsApi } from "@/api";
+import type { RoleRequest, RoleRequestStatus } from "@/api/types";
 import {
   Badge,
   Button,
@@ -9,10 +9,10 @@ import {
   EmptyState,
   Modal,
   Spinner,
-} from '@/components';
-import { formatDate } from '@/utils/format';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+} from "@/components";
+import { formatDate } from "@/utils/format";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
 interface RoleRequestListProps {
   storyId?: string;
@@ -21,37 +21,39 @@ interface RoleRequestListProps {
 
 function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 function getStatusBadgeVariant(
   status: RoleRequestStatus
-): 'info' | 'success' | 'danger' | 'warning' {
+): "info" | "success" | "danger" | "warning" {
   switch (status) {
-    case 'pending':
-      return 'info';
-    case 'accepted':
-      return 'success';
-    case 'rejected':
-      return 'danger';
-    case 'withdrawn':
-      return 'warning';
+    case "pending":
+      return "info";
+    case "accepted":
+      return "success";
+    case "rejected":
+      return "danger";
+    case "withdrawn":
+      return "warning";
     default:
-      return 'info';
+      return "info";
   }
 }
 
 export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
-  const [selectedRequest, setSelectedRequest] = useState<RoleRequest | null>(null);
+  const [selectedRequest, setSelectedRequest] = useState<RoleRequest | null>(
+    null
+  );
   const [showResponseModal, setShowResponseModal] = useState(false);
-  const [responseMessage, setResponseMessage] = useState('');
+  const [responseMessage, setResponseMessage] = useState("");
   const [accepting, setAccepting] = useState(false);
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['role-requests', storyId, openRoleId],
+    queryKey: ["role-requests", storyId, openRoleId],
     queryFn: async () => {
       if (openRoleId) {
         return await roleRequestsApi.getRoleRequestsByOpenRole(openRoleId);
@@ -67,18 +69,24 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
   const requests = Array.isArray(data) ? data : [];
 
   const respondMutation = useMutation({
-    mutationFn: ({ requestId, accept }: { requestId: string; accept: boolean }) =>
+    mutationFn: ({
+      requestId,
+      accept,
+    }: {
+      requestId: string;
+      accept: boolean;
+    }) =>
       roleRequestsApi.respondToRoleRequest({
         requestId,
         accept,
         message: responseMessage || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['role-requests'] });
-      queryClient.invalidateQueries({ queryKey: ['open-roles'] });
+      queryClient.invalidateQueries({ queryKey: ["role-requests"] });
+      queryClient.invalidateQueries({ queryKey: ["open-roles"] });
       setShowResponseModal(false);
       setSelectedRequest(null);
-      setResponseMessage('');
+      setResponseMessage("");
     },
   });
 
@@ -112,15 +120,19 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
   return (
     <>
       <div className="role-request-list">
-        {requests.map(request => (
+        {requests.map((request) => (
           <Card key={request.id} className="role-request-list__item">
             <CardHeader>
               <div className="role-request-list__header">
                 <div>
                   <h4>{request.userName}</h4>
-                  <p className="role-request-list__email">{request.userEmail}</p>
+                  <p className="role-request-list__email">
+                    {request.userEmail}
+                  </p>
                 </div>
-                <Badge variant={getStatusBadgeVariant(request.status)}>{request.status}</Badge>
+                <Badge variant={getStatusBadgeVariant(request.status)}>
+                  {request.status}
+                </Badge>
               </div>
             </CardHeader>
             <CardBody>
@@ -145,8 +157,12 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
                   )}
                   {request.portfolio && (
                     <div>
-                      <strong>Portfolio:</strong>{' '}
-                      <a href={request.portfolio} target="_blank" rel="noopener noreferrer">
+                      <strong>Portfolio:</strong>{" "}
+                      <a
+                        href={request.portfolio}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
                         View Portfolio
                       </a>
                     </div>
@@ -155,7 +171,7 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
                     <span>Applied {formatDate(request.createdAt)}</span>
                   </div>
                 </div>
-                {request.status === 'pending' && (
+                {request.status === "pending" && (
                   <div className="role-request-list__actions">
                     <Button
                       variant="outline"
@@ -164,7 +180,10 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
                     >
                       Reject
                     </Button>
-                    <Button size="sm" onClick={() => handleRespond(request, true)}>
+                    <Button
+                      size="sm"
+                      onClick={() => handleRespond(request, true)}
+                    >
                       Accept
                     </Button>
                   </div>
@@ -181,9 +200,9 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
           onClose={() => {
             setShowResponseModal(false);
             setSelectedRequest(null);
-            setResponseMessage('');
+            setResponseMessage("");
           }}
-          title={accepting ? 'Accept Role Request' : 'Reject Role Request'}
+          title={accepting ? "Accept Role Request" : "Reject Role Request"}
           size="md"
         >
           <div className="role-request-response">
@@ -195,7 +214,7 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
             <textarea
               className="role-request-response__message"
               value={responseMessage}
-              onChange={e => setResponseMessage(e.target.value)}
+              onChange={(e) => setResponseMessage(e.target.value)}
               placeholder="Optional message to the contributor..."
               rows={4}
             />
@@ -205,17 +224,17 @@ export function RoleRequestList({ storyId, openRoleId }: RoleRequestListProps) {
                 onClick={() => {
                   setShowResponseModal(false);
                   setSelectedRequest(null);
-                  setResponseMessage('');
+                  setResponseMessage("");
                 }}
               >
                 Cancel
               </Button>
               <Button
-                variant={accepting ? 'primary' : 'danger'}
+                variant={accepting ? "primary" : "danger"}
                 onClick={handleSubmitResponse}
                 loading={respondMutation.isPending}
               >
-                {accepting ? 'Accept' : 'Reject'} Request
+                {accepting ? "Accept" : "Reject"} Request
               </Button>
             </div>
           </div>

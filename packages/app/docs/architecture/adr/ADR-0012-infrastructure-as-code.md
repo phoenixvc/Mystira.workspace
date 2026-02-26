@@ -14,10 +14,10 @@
 
 ## Approvals
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Tech Lead | | | ⏳ Pending |
-| DevOps | | | ⏳ Pending |
+| Role      | Name | Date | Status     |
+| --------- | ---- | ---- | ---------- |
+| Tech Lead |      |      | ⏳ Pending |
+| DevOps    |      |      | ⏳ Pending |
 
 ---
 
@@ -60,34 +60,35 @@ Mystira.App/
 
 The current `main.bicep` supports:
 
-| Resource | Module | Features |
-|----------|--------|----------|
-| **App Services** | `app-service.bicep` | API + Admin API on shared plan, custom domains, managed certs |
-| **Static Web App** | `static-web-app.bicep` | PWA hosting, fallback region (eastus2) for SA North limitations |
-| **Cosmos DB** | `cosmos-db.bicep` | Serverless or provisioned, database + containers |
-| **Key Vault** | `key-vault.bicep` | JWT keys, Discord/Bot tokens, WhatsApp config |
-| **Communication Services** | `communication-services.bicep` | Email, WhatsApp integration |
-| **Azure Bot** | `azure-bot.bicep` | Teams + WebChat channels |
-| **Monitoring** | `log-analytics.bicep`, `application-insights.bicep` | Full observability |
-| **DNS** | `dns-zone.bicep` | Custom domain records |
-| **Storage** | `storage.bicep` | Blob storage |
+| Resource                   | Module                                              | Features                                                        |
+| -------------------------- | --------------------------------------------------- | --------------------------------------------------------------- |
+| **App Services**           | `app-service.bicep`                                 | API + Admin API on shared plan, custom domains, managed certs   |
+| **Static Web App**         | `static-web-app.bicep`                              | PWA hosting, fallback region (eastus2) for SA North limitations |
+| **Cosmos DB**              | `cosmos-db.bicep`                                   | Serverless or provisioned, database + containers                |
+| **Key Vault**              | `key-vault.bicep`                                   | JWT keys, Discord/Bot tokens, WhatsApp config                   |
+| **Communication Services** | `communication-services.bicep`                      | Email, WhatsApp integration                                     |
+| **Azure Bot**              | `azure-bot.bicep`                                   | Teams + WebChat channels                                        |
+| **Monitoring**             | `log-analytics.bicep`, `application-insights.bicep` | Full observability                                              |
+| **DNS**                    | `dns-zone.bicep`                                    | Custom domain records                                           |
+| **Storage**                | `storage.bicep`                                     | Blob storage                                                    |
 
 ### Naming Convention
 
 All resources follow: `[org]-[env]-[project]-[type]-[region]`
+
 - Example: `mys-dev-mystira-api-san` (API in South Africa North)
 
 ### CI/CD Status
 
 **Why deployments aren't fully automated:**
 
-| Workflow | Status | Missing Secrets |
-|----------|--------|-----------------|
+| Workflow              | Status              | Missing Secrets                                                  |
+| --------------------- | ------------------- | ---------------------------------------------------------------- |
 | Infrastructure Deploy | ⚠️ Requires secrets | `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY`, `JWT_RSA_PUBLIC_KEY` |
-| API CI/CD | ⚠️ Requires secrets | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`, `AZURE_CREDENTIALS` |
-| Admin API CI/CD | ⚠️ Requires secrets | Same as API |
-| PWA CI/CD | ✅ Working | - |
-| SWA Preview Tests | ❌ Failing | Smoke test issues |
+| API CI/CD             | ⚠️ Requires secrets | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`, `AZURE_CREDENTIALS`          |
+| Admin API CI/CD       | ⚠️ Requires secrets | Same as API                                                      |
+| PWA CI/CD             | ✅ Working          | -                                                                |
+| SWA Preview Tests     | ❌ Failing          | Smoke test issues                                                |
 
 The workflows are correctly configured but **require GitHub secrets to be set**:
 
@@ -243,27 +244,32 @@ Mystira.Infra/
 ## Migration Plan
 
 ### Step 1: Document Current State ✅
+
 - [x] Audit existing infrastructure
 - [x] Document CI/CD workflows
 - [x] Identify missing secrets
 
 ### Step 2: Enable Deployments
+
 - [ ] Set up GitHub secrets (see Migration Guide)
 - [ ] Test infrastructure deploy workflow
 - [ ] Test API/Admin API deployment
 
 ### Step 3: Add Security Modules (In Mystira.App first)
+
 - [ ] Add VNet module to `infrastructure/modules/`
 - [ ] Add private endpoints
 - [ ] Test in dev environment
 
 ### Step 4: Create Mystira.Infra Repo
+
 - [ ] Create repository
 - [ ] Copy modules from Mystira.App
 - [ ] Add Container Apps module for Mystira.Chain
 - [ ] Add Front Door module
 
 ### Step 5: Migrate References
+
 - [ ] Update Mystira.App workflows to reference Mystira.Infra
 - [ ] Add Mystira.Chain infrastructure
 - [ ] Deprecate Mystira.App/infrastructure (keep for reference)

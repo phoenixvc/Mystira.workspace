@@ -27,9 +27,9 @@ sequenceDiagram
 
     Client->>Controller: PUT /api/gamesessions/{id}/progress<br/>(ProgressSceneRequest)
     Controller->>Service: ProgressSessionSceneAsync(sessionId, request)
-    
+
     Service->>UseCase: ExecuteAsync(request)
-    
+
     Note over UseCase: Step 1: Validate Session
     UseCase->>SessionRepo: GetByIdAsync(sessionId)
     SessionRepo->>DB: Query session
@@ -42,37 +42,37 @@ sequenceDiagram
     end
     DB-->>SessionRepo: GameSession
     SessionRepo-->>UseCase: session
-    
+
     alt Session Not InProgress or Paused
         UseCase-->>Service: InvalidOperationException
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 2: Validate Scenario & Scene
     UseCase->>ScenarioRepo: GetByIdAsync(session.ScenarioId)
     ScenarioRepo->>DB: Query scenario
     DB-->>ScenarioRepo: Scenario
     ScenarioRepo-->>UseCase: scenario
-    
+
     UseCase->>UseCase: Find targetScene<br/>by request.SceneId
     alt Scene Not Found
         UseCase-->>Service: ArgumentException("Scene not found")
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 3: Update Session State
     UseCase->>UseCase: session.CurrentSceneId =<br/>request.SceneId
     UseCase->>UseCase: session.ElapsedTime =<br/>Now - session.StartTime
-    
+
     Note over UseCase: Step 4: Resume if Paused
     alt Session Status == Paused
         UseCase->>UseCase: session.Status = InProgress
         UseCase->>UseCase: session.IsPaused = false
         UseCase->>UseCase: session.PausedAt = null
     end
-    
+
     Note over UseCase: Step 5: Persist Changes
     UseCase->>SessionRepo: UpdateAsync(session)
     SessionRepo->>DB: Update entity
@@ -81,7 +81,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     SessionRepo-->>UseCase: GameSession (updated)
-    
+
     UseCase-->>Service: GameSession
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)

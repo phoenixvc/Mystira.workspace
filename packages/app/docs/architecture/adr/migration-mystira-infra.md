@@ -38,17 +38,17 @@ To enable current CI/CD, configure these GitHub secrets in Mystira.App:
 
 #### Required Secrets
 
-| Secret Name | Description | How to Get |
-|-------------|-------------|------------|
-| `AZURE_CREDENTIALS` | Service principal JSON | See below |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID | Azure Portal → Subscriptions |
-| `JWT_RSA_PRIVATE_KEY` | RSA private key (PEM) | Generate with OpenSSL |
-| `JWT_RSA_PUBLIC_KEY` | RSA public key (PEM) | Extract from private key |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV` | App Service publish profile | Azure Portal → App Service → Download |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` | Staging publish profile | Same as above |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD` | Production publish profile | Same as above |
-| `AZURE_ACS_CONNECTION_STRING` | Azure Communication Services | Azure Portal → ACS → Keys |
-| `AZURE_ACS_SENDER_EMAIL_DEV` | Sender email for dev | e.g., `DoNotReply@mystira.app` |
+| Secret Name                            | Description                  | How to Get                            |
+| -------------------------------------- | ---------------------------- | ------------------------------------- |
+| `AZURE_CREDENTIALS`                    | Service principal JSON       | See below                             |
+| `AZURE_SUBSCRIPTION_ID`                | Azure subscription ID        | Azure Portal → Subscriptions          |
+| `JWT_RSA_PRIVATE_KEY`                  | RSA private key (PEM)        | Generate with OpenSSL                 |
+| `JWT_RSA_PUBLIC_KEY`                   | RSA public key (PEM)         | Extract from private key              |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`     | App Service publish profile  | Azure Portal → App Service → Download |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` | Staging publish profile      | Same as above                         |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`    | Production publish profile   | Same as above                         |
+| `AZURE_ACS_CONNECTION_STRING`          | Azure Communication Services | Azure Portal → ACS → Keys             |
+| `AZURE_ACS_SENDER_EMAIL_DEV`           | Sender email for dev         | e.g., `DoNotReply@mystira.app`        |
 
 #### Creating Azure Credentials
 
@@ -145,18 +145,21 @@ cp ../Mystira.App/infrastructure/params.*.json apps/mystira-app/
 Create these new modules for missing capabilities:
 
 #### modules/networking/vnet.bicep
+
 ```bicep
 // Virtual Network with app and private endpoint subnets
 // See ADR-0012 for design
 ```
 
 #### modules/security/front-door.bicep
+
 ```bicep
 // Azure Front Door with WAF
 // See ADR-0012 for design
 ```
 
 #### modules/compute/container-app.bicep
+
 ```bicep
 // Container Apps for Python services (Mystira.Chain)
 // See ADR-0010 for design
@@ -250,6 +253,7 @@ module appInsights '../../modules/monitoring/application-insights.bicep' = { ...
 ### Mystira.Infra GitHub Workflows
 
 Create `.github/workflows/deploy.yml` that:
+
 1. Validates Bicep syntax
 2. Runs what-if for PRs
 3. Deploys on merge to main
@@ -286,20 +290,21 @@ If migration causes issues:
 
 ## Timeline
 
-| Phase | Duration | Dependencies |
-|-------|----------|--------------|
+| Phase                | Duration | Dependencies          |
+| -------------------- | -------- | --------------------- |
 | Enable current CI/CD | 1-2 days | Secrets configuration |
-| Create Mystira.Infra | 2-3 days | Phase 1 complete |
-| Add new modules | 3-5 days | Phase 2 complete |
-| Update workflows | 1-2 days | Phase 3 complete |
-| Testing & validation | 2-3 days | All phases |
-| Deprecate old infra | 1 day | Full validation |
+| Create Mystira.Infra | 2-3 days | Phase 1 complete      |
+| Add new modules      | 3-5 days | Phase 2 complete      |
+| Update workflows     | 1-2 days | Phase 3 complete      |
+| Testing & validation | 2-3 days | All phases            |
+| Deprecate old infra  | 1 day    | Full validation       |
 
 ---
 
 ## Support
 
 For issues during migration:
+
 - Check Azure deployment logs
 - Validate Bicep syntax: `az bicep build --file main.bicep`
 - Review what-if output before deployment

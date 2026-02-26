@@ -24,18 +24,18 @@ DevHub is a TypeScript developer portal. Migration focuses on:
 
 ### Technology Stack
 
-| Component | Current | Target |
-|-----------|---------|--------|
-| Node.js | 20.x | 22.x LTS |
-| TypeScript | 5.x | 5.x (latest) |
-| pnpm | 9.x | 9.15+ |
+| Component  | Current | Target       |
+| ---------- | ------- | ------------ |
+| Node.js    | 20.x    | 22.x LTS     |
+| TypeScript | 5.x     | 5.x (latest) |
+| pnpm       | 9.x     | 9.15+        |
 
 ### Package Dependencies
 
-| Current | Action | Replacement |
-|---------|--------|-------------|
+| Current              | Action  | Replacement              |
+| -------------------- | ------- | ------------------------ |
 | Custom design tokens | Replace | `@mystira/design-tokens` |
-| Custom utilities | Replace | `@mystira/shared-utils` |
+| Custom utilities     | Replace | `@mystira/shared-utils`  |
 
 ---
 
@@ -58,7 +58,7 @@ DevHub is a TypeScript developer portal. Migration focuses on:
 # .github/workflows/ci.yml
 - uses: actions/setup-node@v4
   with:
-    node-version: '22'
+    node-version: "22"
 ```
 
 ---
@@ -91,20 +91,20 @@ pnpm add @mystira/design-tokens@0.2.0 @mystira/shared-utils@0.2.0
 
 ```css
 /* styles/globals.css */
-@import '@mystira/design-tokens/css/variables.css';
-@import '@mystira/design-tokens/css/dark-mode.css';
+@import "@mystira/design-tokens/css/variables.css";
+@import "@mystira/design-tokens/css/dark-mode.css";
 ```
 
 ### 3.2 Update Tailwind Config (if applicable)
 
 ```javascript
 // tailwind.config.js
-const mystiraPreset = require('@mystira/design-tokens/tailwind/preset');
+const mystiraPreset = require("@mystira/design-tokens/tailwind/preset");
 
 module.exports = {
   presets: [mystiraPreset],
-  content: ['./src/**/*.{ts,tsx}', './pages/**/*.{ts,tsx}'],
-  darkMode: 'class', // Enable dark mode support
+  content: ["./src/**/*.{ts,tsx}", "./pages/**/*.{ts,tsx}"],
+  darkMode: "class", // Enable dark mode support
 };
 ```
 
@@ -129,14 +129,14 @@ module.exports = {
 
 ```typescript
 // Before
-import axios from 'axios';
+import axios from "axios";
 
-const response = await axios.get('/api/docs');
+const response = await axios.get("/api/docs");
 
 // After
-import { httpClient } from '@mystira/shared-utils';
+import { httpClient } from "@mystira/shared-utils";
 
-const response = await httpClient.get('/api/docs');
+const response = await httpClient.get("/api/docs");
 ```
 
 ### 4.2 Retry Logic
@@ -148,11 +148,11 @@ async function fetchWithRetry(url: string, retries = 3) {
 }
 
 // After
-import { retry } from '@mystira/shared-utils';
+import { retry } from "@mystira/shared-utils";
 
 const result = await retry(() => fetch(url), {
   retries: 3,
-  backoff: 'exponential',
+  backoff: "exponential",
 });
 ```
 
@@ -160,12 +160,12 @@ const result = await retry(() => fetch(url), {
 
 ```typescript
 // Before
-console.log('User action:', action);
+console.log("User action:", action);
 
 // After
-import { logger } from '@mystira/shared-utils';
+import { logger } from "@mystira/shared-utils";
 
-logger.info('User action', { action });
+logger.info("User action", { action });
 ```
 
 ### 4.4 Date Formatting
@@ -175,9 +175,9 @@ logger.info('User action', { action });
 const formatted = new Date(timestamp).toLocaleDateString();
 
 // After
-import { formatDate } from '@mystira/shared-utils';
+import { formatDate } from "@mystira/shared-utils";
 
-const formatted = formatDate(timestamp, 'long');
+const formatted = formatDate(timestamp, "long");
 ```
 
 ---
@@ -188,25 +188,27 @@ const formatted = formatDate(timestamp, 'long');
 
 ```tsx
 // components/ThemeToggle.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 export function ThemeToggle() {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const stored = localStorage.getItem('theme');
-    setIsDark(stored === 'dark' || (!stored && prefersDark));
+    const prefersDark = window.matchMedia(
+      "(prefers-color-scheme: dark)"
+    ).matches;
+    const stored = localStorage.getItem("theme");
+    setIsDark(stored === "dark" || (!stored && prefersDark));
   }, []);
 
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', isDark);
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
   return (
     <button onClick={() => setIsDark(!isDark)}>
-      {isDark ? 'Light Mode' : 'Dark Mode'}
+      {isDark ? "Light Mode" : "Dark Mode"}
     </button>
   );
 }
@@ -226,35 +228,42 @@ export function ThemeToggle() {
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Review current color usage
 - [ ] Identify custom utility functions
 
 ### Phase 1: Runtime
+
 - [ ] Update Node.js version in package.json
 - [ ] Update CI/CD workflows
 
 ### Phase 2: Packages
+
 - [ ] Install @mystira/design-tokens
 - [ ] Install @mystira/shared-utils
 
 ### Phase 3: Design Tokens
+
 - [ ] Import CSS variables
 - [ ] Update Tailwind config
 - [ ] Remove custom color definitions
 - [ ] Test color consistency
 
 ### Phase 4: Shared Utils
+
 - [ ] Replace custom HTTP client
 - [ ] Replace retry logic
 - [ ] Replace logging
 - [ ] Replace date formatting
 
 ### Phase 5: Dark Mode
+
 - [ ] Add theme toggle
 - [ ] Test dark mode styling
 - [ ] Verify color contrast
 
 ### Post-Migration
+
 - [ ] Run all tests
 - [ ] Visual regression testing
 - [ ] Cross-browser testing
@@ -264,11 +273,11 @@ export function ThemeToggle() {
 
 ## Breaking Changes
 
-| Change | Impact | Mitigation |
-|--------|--------|------------|
-| Node.js 20 → 22 | Runtime upgrade | Test in CI first |
-| CSS variable names | Possible style breaks | Audit usage |
-| Custom utils removal | Import path changes | Find/replace |
+| Change               | Impact                | Mitigation       |
+| -------------------- | --------------------- | ---------------- |
+| Node.js 20 → 22      | Runtime upgrade       | Test in CI first |
+| CSS variable names   | Possible style breaks | Audit usage      |
+| Custom utils removal | Import path changes   | Find/replace     |
 
 ---
 

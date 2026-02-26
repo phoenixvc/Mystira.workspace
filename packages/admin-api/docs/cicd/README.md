@@ -12,14 +12,15 @@ The Admin API uses GitHub Actions for continuous integration and deployment.
 
 **Jobs**:
 
-| Job | Description | Dependencies |
-|-----|-------------|--------------|
-| `lint` | Code formatting check (`dotnet format`) | None |
-| `test` | Unit tests with code coverage | None |
-| `build` | Production build + artifact upload | lint, test |
-| `validate` | Config files, documentation, Dockerfile | None |
+| Job        | Description                             | Dependencies |
+| ---------- | --------------------------------------- | ------------ |
+| `lint`     | Code formatting check (`dotnet format`) | None         |
+| `test`     | Unit tests with code coverage           | None         |
+| `build`    | Production build + artifact upload      | lint, test   |
+| `validate` | Config files, documentation, Dockerfile | None         |
 
 **Features**:
+
 - Concurrency control (cancels duplicate runs)
 - Path filtering (only runs on source changes)
 - Code coverage with Codecov
@@ -30,12 +31,12 @@ The Admin API uses GitHub Actions for continuous integration and deployment.
 
 The following secrets are **optional**. Configure them only if you need access to a private Azure DevOps NuGet feed:
 
-| Secret | Description |
-|--------|-------------|
-| `MYSTIRA_DEVOPS_AZURE_ORG` | Azure DevOps organization name |
-| `MYSTIRA_DEVOPS_AZURE_PROJECT` | Azure DevOps project name |
-| `MYSTIRA_DEVOPS_AZURE_PAT` | Personal Access Token (Packaging Read scope) |
-| `MYSTIRA_DEVOPS_NUGET_FEED` | Artifacts feed name (e.g., `Mystira-Internal`) |
+| Secret                         | Description                                    |
+| ------------------------------ | ---------------------------------------------- |
+| `MYSTIRA_DEVOPS_AZURE_ORG`     | Azure DevOps organization name                 |
+| `MYSTIRA_DEVOPS_AZURE_PROJECT` | Azure DevOps project name                      |
+| `MYSTIRA_DEVOPS_AZURE_PAT`     | Personal Access Token (Packaging Read scope)   |
+| `MYSTIRA_DEVOPS_NUGET_FEED`    | Artifacts feed name (e.g., `Mystira-Internal`) |
 
 **Note**: If these secrets are not configured, the workflow will skip the Azure DevOps feed configuration and use only nuget.org. This is intentional to support environments without access to private feeds.
 

@@ -25,6 +25,7 @@ dotnet add package Mystira.Shared
 ```
 
 Or via NuGet Package Manager:
+
 ```
 Install-Package Mystira.Shared
 ```
@@ -279,6 +280,7 @@ public class ScenariosController : ControllerBase
 This package replaces `Mystira.App.Shared`. To migrate:
 
 1. Update package reference:
+
    ```xml
    <!-- Before -->
    <PackageReference Include="Mystira.App.Shared" Version="x.x.x" />
@@ -288,6 +290,7 @@ This package replaces `Mystira.App.Shared`. To migrate:
    ```
 
 2. Update using statements:
+
    ```csharp
    // Before
    using Mystira.App.Shared.Authentication;

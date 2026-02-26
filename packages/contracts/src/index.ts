@@ -23,10 +23,10 @@
  */
 
 // Re-export modules as namespaces
-import * as App from './app';
-import * as StoryGenerator from './story-generator';
+import * as App from "./app";
+import * as StoryGenerator from "./story-generator";
 
 export { App, StoryGenerator };
 
 // Also re-export common types at root level for convenience
-export type { ApiRequest, ApiResponse, ApiError } from './app/types';
+export type { ApiRequest, ApiResponse, ApiError } from "./app/types";

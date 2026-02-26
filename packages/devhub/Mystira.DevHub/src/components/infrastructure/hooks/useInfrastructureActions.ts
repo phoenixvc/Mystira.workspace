@@ -33,14 +33,14 @@ interface UseInfrastructureActionsParams {
   onSetShowDestroySelect: (show: boolean) => void;
   onFetchWorkflowStatus: () => void;
   onSetCurrentAction?: (
-    action: "validate" | "preview" | "deploy" | "destroy" | null,
+    action: "validate" | "preview" | "deploy" | "destroy" | null
   ) => void;
   onSetHasDeployedInfrastructure?: (deployed: boolean) => void;
   onSetDeploymentProgress?: (progress: string | null) => void;
   onSetShowResourceGroupConfirm?: (
     show: boolean,
     resourceGroup?: string,
-    location?: string,
+    location?: string
   ) => void;
 }
 
@@ -112,13 +112,13 @@ export function useInfrastructureActions({
             case "validate": {
               const selectedTemplates = templates.filter((t) => t.selected);
               const deployStorage = selectedTemplates.some(
-                (t) => t.id === "storage",
+                (t) => t.id === "storage"
               );
               const deployCosmos = selectedTemplates.some(
-                (t) => t.id === "cosmos",
+                (t) => t.id === "cosmos"
               );
               const deployAppService = selectedTemplates.some(
-                (t) => t.id === "appservice",
+                (t) => t.id === "appservice"
               );
 
               response = await invoke("azure_validate_infrastructure", {
@@ -147,13 +147,13 @@ export function useInfrastructureActions({
               onSetCosmosWarning(null);
               const selectedTemplates = templates.filter((t) => t.selected);
               const deployStorage = selectedTemplates.some(
-                (t) => t.id === "storage",
+                (t) => t.id === "storage"
               );
               const deployCosmos = selectedTemplates.some(
-                (t) => t.id === "cosmos",
+                (t) => t.id === "cosmos"
               );
               const deployAppService = selectedTemplates.some(
-                (t) => t.id === "appservice",
+                (t) => t.id === "appservice"
               );
 
               response = await invoke("azure_preview_infrastructure", {
@@ -178,7 +178,7 @@ export function useInfrastructureActions({
                   previewData.warnings &&
                   (warningText.includes("Cosmos DB nested resource") ||
                     warningText.includes(
-                      "nested resource errors are expected",
+                      "nested resource errors are expected"
                     ));
 
                 if (previewData.warnings) {
@@ -187,7 +187,7 @@ export function useInfrastructureActions({
 
                 if (previewData.parsed && previewData.parsed.changes) {
                   parsedChanges = parseWhatIfOutput(
-                    JSON.stringify(previewData.parsed),
+                    JSON.stringify(previewData.parsed)
                   );
                 } else if (previewData.preview) {
                   parsedChanges = parseWhatIfOutput(previewData.preview);
@@ -220,7 +220,7 @@ export function useInfrastructureActions({
                   if (validChanges.length === 0) {
                     if (previewData.parsed && previewData.parsed.changes) {
                       validChanges = parseWhatIfOutput(
-                        JSON.stringify(previewData.parsed),
+                        JSON.stringify(previewData.parsed)
                       );
                     } else if (previewData.preview) {
                       validChanges = parseWhatIfOutput(previewData.preview);
@@ -244,7 +244,7 @@ export function useInfrastructureActions({
                   const searchText = errorStr || warningText || "";
                   if (searchText) {
                     const resourceMatches = searchText.matchAll(
-                      /containers\/(\w+)|sqlDatabases\/(\w+)/g,
+                      /containers\/(\w+)|sqlDatabases\/(\w+)/g
                     );
                     for (const match of resourceMatches) {
                       const resource = match[1] || match[2];
@@ -260,10 +260,10 @@ export function useInfrastructureActions({
                       // Keep non-Cosmos resources, or Cosmos account itself (not nested)
                       return (
                         !change.resourceType?.includes(
-                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases"
                         ) &&
                         !change.resourceType?.includes(
-                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
                         )
                       );
                     });
@@ -324,7 +324,7 @@ export function useInfrastructureActions({
                 if (isOnlyCosmosErrors) {
                   const affectedResources: string[] = [];
                   const resourceMatches = errorStr.matchAll(
-                    /containers\/(\w+)|sqlDatabases\/(\w+)/g,
+                    /containers\/(\w+)|sqlDatabases\/(\w+)/g
                   );
                   for (const match of resourceMatches) {
                     const resource = match[1] || match[2];
@@ -338,7 +338,7 @@ export function useInfrastructureActions({
                     const previewData = response.result as any;
                     if (previewData.parsed && previewData.parsed.changes) {
                       parsedChanges = parseWhatIfOutput(
-                        JSON.stringify(previewData.parsed),
+                        JSON.stringify(previewData.parsed)
                       );
                     } else if (previewData.preview) {
                       parsedChanges = parseWhatIfOutput(previewData.preview);
@@ -353,10 +353,10 @@ export function useInfrastructureActions({
                       // Keep non-Cosmos resources, or Cosmos account itself (not nested)
                       return (
                         !change.resourceType?.includes(
-                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases"
                         ) &&
                         !change.resourceType?.includes(
-                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+                          "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers"
                         )
                       );
                     });
@@ -461,7 +461,7 @@ export function useInfrastructureActions({
                     (t) =>
                       t.id === "storage" ||
                       t.id === "cosmos" ||
-                      t.id === "appservice",
+                      t.id === "appservice"
                   )
                   .map((t) => ({
                     name: t.name,
@@ -487,7 +487,7 @@ export function useInfrastructureActions({
               }
 
               const selectedModules = new Set(
-                selectedResources.map((r) => r.module).filter(Boolean),
+                selectedResources.map((r) => r.module).filter(Boolean)
               );
               if (selectedModules.has("appservice")) {
                 if (
@@ -558,7 +558,7 @@ export function useInfrastructureActions({
 
             case "deploy":
               const confirmDeploy = confirm(
-                "Are you sure you want to deploy infrastructure?",
+                "Are you sure you want to deploy infrastructure?"
               );
               if (!confirmDeploy) {
                 onSetLoading(false);
@@ -593,7 +593,7 @@ export function useInfrastructureActions({
           if (result.azureCliMissing && result.wingetAvailable) {
             const shouldInstall = confirm(
               "Azure CLI is not installed. Would you like to install it now using winget?\n\n" +
-                "This will open a terminal window to install Azure CLI. After installation, please restart the application.",
+                "This will open a terminal window to install Azure CLI. After installation, please restart the application."
             );
 
             if (shouldInstall) {
@@ -604,21 +604,21 @@ export function useInfrastructureActions({
                   const result = installResponse.result as any;
                   if (result?.requiresRestart) {
                     alert(
-                      "A terminal window has opened to install Azure CLI. After installation completes in that window, please RESTART the application for Azure CLI to be detected.\n\nNote: If Azure CLI was already installed, you may need to restart the app for it to be detected in the PATH.",
+                      "A terminal window has opened to install Azure CLI. After installation completes in that window, please RESTART the application for Azure CLI to be detected.\n\nNote: If Azure CLI was already installed, you may need to restart the app for it to be detected in the PATH."
                     );
                   } else {
                     alert(
-                      "A terminal window has opened to install Azure CLI. Please wait for installation to complete in that window, then restart the application.",
+                      "A terminal window has opened to install Azure CLI. Please wait for installation to complete in that window, then restart the application."
                     );
                   }
                 } else {
                   alert(
-                    `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}\n\nPlease install manually from https://aka.ms/installazurecliwindows`,
+                    `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}\n\nPlease install manually from https://aka.ms/installazurecliwindows`
                   );
                 }
               } catch (error) {
                 alert(
-                  `Error installing Azure CLI: ${error}\n\nPlease install manually from https://aka.ms/installazurecliwindows`,
+                  `Error installing Azure CLI: ${error}\n\nPlease install manually from https://aka.ms/installazurecliwindows`
                 );
               }
             }
@@ -674,7 +674,7 @@ export function useInfrastructureActions({
       onSetHasDeployedInfrastructure,
       onSetDeploymentProgress,
       onSetShowResourceGroupConfirm,
-    ],
+    ]
   );
 
   const handleDestroyConfirm = useCallback(async () => {
@@ -685,7 +685,7 @@ export function useInfrastructureActions({
         .filter(
           (c) =>
             c.selected !== false &&
-            (c.changeType === "delete" || c.selected === true),
+            (c.changeType === "delete" || c.selected === true)
         )
         .map((c) => ({
           resourceId: c.resourceId || "",
@@ -805,9 +805,7 @@ export function useInfrastructureActions({
           selectedResources = selectedTemplates
             .filter(
               (t) =>
-                t.id === "storage" ||
-                t.id === "cosmos" ||
-                t.id === "appservice",
+                t.id === "storage" || t.id === "cosmos" || t.id === "appservice"
             )
             .map((t) => ({
               name: t.name,
@@ -833,7 +831,7 @@ export function useInfrastructureActions({
             acc[rg].push(resource);
             return acc;
           },
-          {} as Record<string, typeof selectedResources>,
+          {} as Record<string, typeof selectedResources>
         );
 
         const resourceGroups = Object.keys(resourcesByGroup);
@@ -848,7 +846,7 @@ export function useInfrastructureActions({
           const resourcesInGroup = resourcesByGroup[resourceGroup];
 
           const selectedModules = new Set(
-            resourcesInGroup.map((r) => r.module).filter(Boolean),
+            resourcesInGroup.map((r) => r.module).filter(Boolean)
           );
           const deployStorage = selectedModules.has("storage");
           const deployCosmos = selectedModules.has("cosmos");
@@ -864,7 +862,7 @@ export function useInfrastructureActions({
           if (deployCosmos) modulesToDeploy.push("Cosmos DB");
           if (deployAppService) modulesToDeploy.push("App Service");
           onSetDeploymentProgress?.(
-            `Deploying ${modulesToDeploy.join(", ")} to ${resourceGroup}...`,
+            `Deploying ${modulesToDeploy.join(", ")} to ${resourceGroup}...`
           );
 
           const response = await invoke<CommandResponse>(
@@ -876,7 +874,7 @@ export function useInfrastructureActions({
               deployStorage,
               deployCosmos,
               deployAppService,
-            },
+            }
           );
 
           // Show logs immediately if available - send to Output tab in bottom panel
@@ -951,7 +949,7 @@ export function useInfrastructureActions({
             let actualCosmosAccountName = cosmosAccountName;
             // Try to extract the actual account name from the error message
             const accountNameMatch = response.error.match(
-              /databaseAccounts\/([a-zA-Z0-9-]+)/,
+              /databaseAccounts\/([a-zA-Z0-9-]+)/
             );
             if (accountNameMatch && accountNameMatch[1]) {
               actualCosmosAccountName = accountNameMatch[1];
@@ -959,7 +957,7 @@ export function useInfrastructureActions({
             // Also try to extract from the JSON error message
             if (!actualCosmosAccountName) {
               const jsonMatch = response.error.match(
-                /"message":\s*"[^"]*DatabaseAccount\s+([a-zA-Z0-9-]+)/,
+                /"message":\s*"[^"]*DatabaseAccount\s+([a-zA-Z0-9-]+)/
               );
               if (jsonMatch && jsonMatch[1]) {
                 actualCosmosAccountName = jsonMatch[1];
@@ -1105,7 +1103,7 @@ export function useInfrastructureActions({
       onFetchWorkflowStatus,
       onSetHasDeployedInfrastructure,
       onSetDeploymentProgress,
-    ],
+    ]
   );
 
   return {

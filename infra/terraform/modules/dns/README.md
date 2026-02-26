@@ -8,26 +8,26 @@ This module manages the `mystira.app` DNS zone and creates appropriate records f
 
 ## Resources Created
 
-| Resource | Purpose |
-|----------|---------|
-| DNS Zone | Primary zone for mystira.app |
-| A Records | Direct IP routing (when not using Front Door) |
-| CNAME Records | Front Door routing (when using Front Door) |
-| TXT Records | Domain validation tokens for Front Door |
+| Resource      | Purpose                                       |
+| ------------- | --------------------------------------------- |
+| DNS Zone      | Primary zone for mystira.app                  |
+| A Records     | Direct IP routing (when not using Front Door) |
+| CNAME Records | Front Door routing (when using Front Door)    |
+| TXT Records   | Domain validation tokens for Front Door       |
 
 ## Managed Subdomains
 
 The module manages DNS records for all Mystira services:
 
-| Service | Dev | Staging | Production |
-|---------|-----|---------|------------|
-| Mystira.App (SWA) | dev.mystira.app | staging.mystira.app | mystira.app |
-| Mystira.App (API) | dev.api.mystira.app | staging.api.mystira.app | api.mystira.app |
-| Publisher | dev.publisher.mystira.app | staging.publisher.mystira.app | publisher.mystira.app |
-| Chain | dev.chain.mystira.app | staging.chain.mystira.app | chain.mystira.app |
-| Admin UI | dev.admin.mystira.app | staging.admin.mystira.app | admin.mystira.app |
-| Admin API | dev.admin-api.mystira.app | staging.admin-api.mystira.app | admin-api.mystira.app |
-| Story Generator (SWA) | dev.story.mystira.app | staging.story.mystira.app | story.mystira.app |
+| Service               | Dev                       | Staging                       | Production            |
+| --------------------- | ------------------------- | ----------------------------- | --------------------- |
+| Mystira.App (SWA)     | dev.mystira.app           | staging.mystira.app           | mystira.app           |
+| Mystira.App (API)     | dev.api.mystira.app       | staging.api.mystira.app       | api.mystira.app       |
+| Publisher             | dev.publisher.mystira.app | staging.publisher.mystira.app | publisher.mystira.app |
+| Chain                 | dev.chain.mystira.app     | staging.chain.mystira.app     | chain.mystira.app     |
+| Admin UI              | dev.admin.mystira.app     | staging.admin.mystira.app     | admin.mystira.app     |
+| Admin API             | dev.admin-api.mystira.app | staging.admin-api.mystira.app | admin-api.mystira.app |
+| Story Generator (SWA) | dev.story.mystira.app     | staging.story.mystira.app     | story.mystira.app     |
 | Story Generator (API) | dev.story-api.mystira.app | staging.story-api.mystira.app | story-api.mystira.app |
 
 ## Usage
@@ -102,16 +102,16 @@ output "name_servers" {
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `dns_zone_id` | DNS Zone resource ID |
-| `dns_zone_name` | DNS Zone name |
-| `name_servers` | Azure name servers for the zone |
-| `publisher_fqdn` | Full domain for publisher service |
-| `chain_fqdn` | Full domain for chain service |
-| `mystira_app_swa_fqdn` | Full domain for Mystira.App SWA |
-| `mystira_app_api_fqdn` | Full domain for Mystira.App API |
-| `admin_api_fqdn` | Full domain for Admin API |
-| `admin_ui_fqdn` | Full domain for Admin UI |
-| `story_api_fqdn` | Full domain for Story Generator API |
-| `story_swa_fqdn` | Full domain for Story Generator SWA |
+| Output                 | Description                         |
+| ---------------------- | ----------------------------------- |
+| `dns_zone_id`          | DNS Zone resource ID                |
+| `dns_zone_name`        | DNS Zone name                       |
+| `name_servers`         | Azure name servers for the zone     |
+| `publisher_fqdn`       | Full domain for publisher service   |
+| `chain_fqdn`           | Full domain for chain service       |
+| `mystira_app_swa_fqdn` | Full domain for Mystira.App SWA     |
+| `mystira_app_api_fqdn` | Full domain for Mystira.App API     |
+| `admin_api_fqdn`       | Full domain for Admin API           |
+| `admin_ui_fqdn`        | Full domain for Admin UI            |
+| `story_api_fqdn`       | Full domain for Story Generator API |
+| `story_swa_fqdn`       | Full domain for Story Generator SWA |

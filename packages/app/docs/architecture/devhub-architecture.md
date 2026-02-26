@@ -5,10 +5,12 @@
 **Mystira DevHub** is a cross-platform desktop application built with Tauri that provides a unified interface for all development operations, data management, and infrastructure deployment for the Mystira Application Suite.
 
 ### Previous State
+
 - **Tool**: `Mystira.App.CosmosConsole` - Command-line only tool
 - **Limitations**: No GUI, manual command execution, limited visibility into operations
 
 ### New State
+
 - **Tool**: `Mystira.DevHub` - Modern desktop application (Tauri + React)
 - **Capabilities**: Visual UI, real-time monitoring, integrated IaC management, comprehensive data operations
 
@@ -17,6 +19,7 @@
 ## Technology Stack
 
 ### Frontend
+
 - **Framework**: React 18 with TypeScript
 - **Styling**: TailwindCSS + Shadcn/ui component library
 - **State Management**: React Query (TanStack Query) for async operations
@@ -24,6 +27,7 @@
 - **Code Editor**: Monaco Editor for Bicep template viewing/editing
 
 ### Backend
+
 - **Desktop Framework**: Tauri 1.5+ (Rust)
 - **Service Layer**: .NET 9 (extracted from CosmosConsole)
 - **Inter-Process Communication**: Tauri Commands → .NET CLI wrapper → Services
@@ -295,6 +299,7 @@ Mystira.App/
 **Purpose**: Central hub for quick access and status overview
 
 **Components**:
+
 - **Quick Actions Grid**:
   - Export Sessions to CSV
   - Run Scenario Stats
@@ -315,6 +320,7 @@ Mystira.App/
 ### 2. Cosmos Explorer
 
 **Export Panel**:
+
 - Container selection dropdown
 - Date range filter (optional)
 - Output format: CSV, JSON
@@ -322,6 +328,7 @@ Mystira.App/
 - Download or save to specific path
 
 **Statistics Panel**:
+
 - Scenario completion rates (bar chart)
 - Sessions over time (line chart)
 - Top scenarios by engagement (pie chart)
@@ -330,12 +337,14 @@ Mystira.App/
 ### 3. Migration Manager
 
 **Source/Destination Configuration**:
+
 - Visual connection string editor
 - Test connection buttons
 - Save/load configurations
 - Environment presets (dev → staging, staging → prod)
 
 **Resource Selection**:
+
 - Checkboxes for:
   - ☑ Scenarios
   - ☑ Content Bundles
@@ -344,6 +353,7 @@ Mystira.App/
 - "Select All" / "Select None" buttons
 
 **Migration Progress**:
+
 - Overall progress bar
 - Per-resource progress
 - Real-time log stream
@@ -352,6 +362,7 @@ Mystira.App/
 - Cancel button (graceful cancellation)
 
 **Result Summary**:
+
 - Total items processed
 - Success/failure counts
 - Duration
@@ -361,6 +372,7 @@ Mystira.App/
 ### 4. Infrastructure Control Panel ⭐
 
 **Bicep Template Viewer**:
+
 - Tree view of all Bicep files:
   ```
   📁 infrastructure/dev/
@@ -380,6 +392,7 @@ Mystira.App/
   - Find/search functionality
 
 **Action Buttons**:
+
 ```tsx
 ┌─────────────────────────────────────────────────────────────┐
 │  🔍 Validate Templates                                      │
@@ -409,7 +422,9 @@ Mystira.App/
 ```
 
 **What-If Viewer**:
+
 - Diff-style visualization:
+
   ```
   Resources to be created: (5)
   + Cosmos DB Account: dev-euw-cosmos-mystira
@@ -422,6 +437,7 @@ Mystira.App/
 
   Resources to be deleted: (0)
   ```
+
 - Color coding:
   - Green: Created
   - Yellow: Modified
@@ -429,6 +445,7 @@ Mystira.App/
 - Resource details on click
 
 **GitHub Actions Workflow Monitor**:
+
 - Workflow run status: Queued / In Progress / Success / Failed
 - Step-by-step progress:
   ```
@@ -443,6 +460,7 @@ Mystira.App/
 - Estimated time remaining
 
 **Azure Resource Status Grid**:
+
 - Cards for each resource:
   ```
   ┌──────────────────────────────────┐
@@ -465,7 +483,9 @@ Mystira.App/
   - View logs
 
 **Deployment History Timeline**:
+
 - Chronological list of deployments:
+
   ```
   📅 2025-11-23 14:30 UTC
   🚀 Deploy Infrastructure
@@ -486,6 +506,7 @@ Mystira.App/
 ### 5. Configuration Management
 
 **Secrets & Connection Strings**:
+
 - Stored securely in system keychain (using tauri-plugin-keytar)
 - Visual editor with "Show/Hide" toggle
 - Test connection buttons
@@ -493,6 +514,7 @@ Mystira.App/
 - Export to .env file (with warnings)
 
 **Application Settings**:
+
 - Default output paths
 - Notification preferences
 - Theme (Light/Dark/Auto)
@@ -504,22 +526,26 @@ Mystira.App/
 ## Security Considerations
 
 ### Credential Storage
+
 - **Never** store secrets in application config files
 - Use system keychain (Keychain on macOS, Credential Manager on Windows, libsecret on Linux)
 - Encrypt sensitive data in memory
 - Clear secrets from memory after use
 
 ### Bicep Template Viewing
+
 - Read-only Monaco Editor (prevent accidental modifications)
 - No direct editing from DevHub (use VS Code or preferred IDE)
 - Display file hash to verify integrity
 
 ### Infrastructure Operations
+
 - Require explicit confirmation for destructive actions (destroy)
 - Log all infrastructure operations
 - Display clear warnings before deploying to production
 
 ### GitHub/Azure CLI Integration
+
 - Verify CLI tools are authenticated before operations
 - Never capture or log authentication tokens
 - Use existing user's authenticated sessions
@@ -529,6 +555,7 @@ Mystira.App/
 ## Implementation Phases
 
 ### Phase 1: Foundation (Week 1)
+
 - [ ] Create Mystira.DevHub.Services library
 - [ ] Extract and refactor services from CosmosConsole
 - [ ] Create DevHubDbContext
@@ -536,6 +563,7 @@ Mystira.App/
 - [ ] Test CLI wrapper with JSON input/output
 
 ### Phase 2: Tauri Application Scaffolding (Week 1-2)
+
 - [ ] Initialize Tauri project
 - [ ] Set up React + TypeScript + Vite
 - [ ] Configure TailwindCSS and Shadcn/ui
@@ -544,6 +572,7 @@ Mystira.App/
 - [ ] Test Tauri ↔ .NET CLI communication
 
 ### Phase 3: Cosmos Explorer (Week 2)
+
 - [ ] Build Export Panel UI
 - [ ] Implement export-to-CSV functionality
 - [ ] Build Statistics Panel UI
@@ -552,6 +581,7 @@ Mystira.App/
 - [ ] Test end-to-end Cosmos operations
 
 ### Phase 4: Migration Manager (Week 2-3)
+
 - [ ] Build Migration Dashboard UI
 - [ ] Implement Source/Dest configuration UI
 - [ ] Create Resource Selector with checkboxes
@@ -560,6 +590,7 @@ Mystira.App/
 - [ ] Test full migration workflow
 
 ### Phase 5: Infrastructure Control Panel (Week 3-4) ⭐
+
 - [ ] Integrate Monaco Editor for Bicep viewing
 - [ ] Build file tree navigation
 - [ ] Implement Action Buttons (Validate/Preview/Deploy/Destroy)
@@ -571,6 +602,7 @@ Mystira.App/
 - [ ] Test all infrastructure operations
 
 ### Phase 6: Dashboard & Integration (Week 4)
+
 - [ ] Build Dashboard with Quick Actions
 - [ ] Implement Connection Status Indicators
 - [ ] Create Recent Operations Log
@@ -579,6 +611,7 @@ Mystira.App/
 - [ ] Add dark mode support
 
 ### Phase 7: Configuration & Security (Week 4-5)
+
 - [ ] Integrate tauri-plugin-keytar for credential storage
 - [ ] Build Configuration Management UI
 - [ ] Implement secret encryption
@@ -586,6 +619,7 @@ Mystira.App/
 - [ ] Security audit
 
 ### Phase 8: Testing & Polish (Week 5)
+
 - [ ] End-to-end testing of all features
 - [ ] UI/UX refinements
 - [ ] Performance optimization
@@ -598,7 +632,9 @@ Mystira.App/
 ## Migration Path from CosmosConsole
 
 ### Step 1: Deprecate Old Console
+
 - Update `Mystira.App.CosmosConsole/README.md`:
+
   ```markdown
   # ⚠️ DEPRECATED
 
@@ -611,17 +647,20 @@ Mystira.App/
   ```
 
 ### Step 2: Extract Services
+
 - All business logic moved to `Mystira.DevHub.Services`
 - Console-specific code (CLI parsing) discarded
 - Services remain unit-testable
 
 ### Step 3: Create CLI Wrapper
+
 - `Mystira.DevHub.CLI` accepts JSON commands
 - Maps to service calls
 - Returns JSON responses
 - Tauri calls this CLI wrapper
 
 ### Step 4: Build Tauri UI
+
 - Progressive enhancement: start with basic features
 - Add advanced features iteratively
 - Maintain backward compatibility with .NET services
@@ -631,6 +670,7 @@ Mystira.App/
 ## Future Enhancements
 
 ### v2.0 Features
+
 - **AI Assistant**: Natural language commands ("Export sessions from last week")
 - **Scenario Editor**: Visual scenario creation tool
 - **Real-Time Collaboration**: Multiple users working on data migrations
@@ -639,6 +679,7 @@ Mystira.App/
 - **Plugin System**: Extend functionality with custom plugins
 
 ### v2.1 Features
+
 - **Cost Optimization Advisor**: Recommendations to reduce Azure costs
 - **Resource Tagging Manager**: Visual tag management across resources
 - **Backup & Restore**: Automated Cosmos DB backups with restore UI
@@ -649,6 +690,7 @@ Mystira.App/
 ## Getting Started (for Developers)
 
 ### Prerequisites
+
 - .NET 9 SDK
 - Node.js 18+ and npm
 - Rust and Cargo
@@ -679,6 +721,7 @@ npm run tauri build
 ```
 
 ### Project Structure Summary
+
 ```
 Mystira.DevHub/
 ├── src/              # React frontend
@@ -692,6 +735,7 @@ Mystira.DevHub/
 ## Questions & Support
 
 For questions about Mystira DevHub architecture or implementation:
+
 1. Review this document and related PRDs
 2. Check `tools/Mystira.DevHub/README.md` for user documentation
 3. Contact the development team

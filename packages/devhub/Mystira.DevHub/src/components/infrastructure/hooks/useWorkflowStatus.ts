@@ -12,7 +12,7 @@ export function useWorkflowStatus(workflowFile: string, repository: string) {
         {
           workflowFile,
           repository,
-        },
+        }
       );
       if (response.success && response.result) {
         setStatus(response.result);

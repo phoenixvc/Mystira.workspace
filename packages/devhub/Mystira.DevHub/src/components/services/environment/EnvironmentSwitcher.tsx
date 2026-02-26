@@ -54,7 +54,7 @@ export function EnvironmentSwitcher({
                 if (devStatus === "offline") {
                   if (
                     !window.confirm(
-                      `Dev environment appears to be offline.\n\nURL: ${envUrls.dev}\n\nContinue anyway?`,
+                      `Dev environment appears to be offline.\n\nURL: ${envUrls.dev}\n\nContinue anyway?`
                     )
                   ) {
                     return;
@@ -100,7 +100,7 @@ export function EnvironmentSwitcher({
                 if (prodStatus === "offline") {
                   if (
                     !window.confirm(
-                      `⚠️ PRODUCTION environment appears to be offline!\n\nURL: ${envUrls.prod}\n\nThis is dangerous. Continue anyway?`,
+                      `⚠️ PRODUCTION environment appears to be offline!\n\nURL: ${envUrls.prod}\n\nThis is dangerous. Continue anyway?`
                     )
                   ) {
                     return;

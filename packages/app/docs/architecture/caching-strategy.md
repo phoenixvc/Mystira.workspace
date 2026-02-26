@@ -99,6 +99,7 @@ public record GetScenarioQuery(string ScenarioId) : IQuery<Scenario?>, ICacheabl
 ```
 
 **Key Points:**
+
 - `CacheKey` must be unique for each combination of query parameters
 - `CacheDurationSeconds` determines how long the result is cached
 - Use prefix patterns for related queries (e.g., all scenario queries start with "Scenario:")
@@ -174,27 +175,27 @@ public class UpdateScenarioCommandHandler : ICommandHandler<UpdateScenarioComman
 
 ### BadgeConfiguration Queries
 
-| Query | Cache Key Pattern | Duration | Reason |
-|-------|-------------------|----------|---------|
-| `GetAllBadgeConfigurationsQuery` | `BadgeConfigurations:All` | 10 min | Badge configs rarely change |
-| `GetBadgeConfigurationQuery` | `BadgeConfiguration:{BadgeId}` | 10 min | Static reference data |
-| `GetBadgeConfigurationsByAxisQuery` | `BadgeConfigurations:Axis:{Axis}` | 10 min | Static reference data |
+| Query                               | Cache Key Pattern                 | Duration | Reason                      |
+| ----------------------------------- | --------------------------------- | -------- | --------------------------- |
+| `GetAllBadgeConfigurationsQuery`    | `BadgeConfigurations:All`         | 10 min   | Badge configs rarely change |
+| `GetBadgeConfigurationQuery`        | `BadgeConfiguration:{BadgeId}`    | 10 min   | Static reference data       |
+| `GetBadgeConfigurationsByAxisQuery` | `BadgeConfigurations:Axis:{Axis}` | 10 min   | Static reference data       |
 
 **Invalidation Strategy:** Invalidate on badge configuration create/update/delete (not currently implemented - admin operation).
 
 ### Scenario Queries
 
-| Query | Cache Key Pattern | Duration | Reason |
-|-------|-------------------|----------|---------|
-| `GetScenarioQuery` | `Scenario:{ScenarioId}` | 5 min | Scenarios change infrequently |
+| Query              | Cache Key Pattern       | Duration | Reason                        |
+| ------------------ | ----------------------- | -------- | ----------------------------- |
+| `GetScenarioQuery` | `Scenario:{ScenarioId}` | 5 min    | Scenarios change infrequently |
 
 **Invalidation Strategy:** Invalidate on scenario update (not currently implemented - admin operation).
 
 ### MediaAsset Queries
 
-| Query | Cache Key Pattern | Duration | Reason |
-|-------|-------------------|----------|---------|
-| `GetMediaAssetQuery` | `MediaAsset:{MediaId}` | 5 min | Media metadata is relatively static |
+| Query                | Cache Key Pattern      | Duration | Reason                              |
+| -------------------- | ---------------------- | -------- | ----------------------------------- |
+| `GetMediaAssetQuery` | `MediaAsset:{MediaId}` | 5 min    | Media metadata is relatively static |
 
 **Invalidation Strategy:** Invalidate on media update/delete operations.
 
@@ -205,6 +206,7 @@ public class UpdateScenarioCommandHandler : ICommandHandler<UpdateScenarioComman
 ### When to Use Caching
 
 ✅ **Good Candidates for Caching:**
+
 - Reference data (badge configurations, scenarios)
 - Data that changes infrequently
 - Lookup queries by ID
@@ -212,6 +214,7 @@ public class UpdateScenarioCommandHandler : ICommandHandler<UpdateScenarioComman
 - Queries executed frequently
 
 ❌ **Poor Candidates for Caching:**
+
 - User-specific data (user profiles, game sessions)
 - Data that changes frequently
 - Queries with time-sensitive data (recent activities, notifications)
@@ -231,12 +234,12 @@ Use consistent naming conventions:
 
 ### Cache Duration Guidelines
 
-| Data Type | Recommended Duration | Example |
-|-----------|---------------------|---------|
-| Static reference data | 10-30 minutes | Badge configurations, scenarios |
-| Semi-static data | 5-10 minutes | Media metadata, content bundles |
-| Dynamic data | 1-2 minutes | User profiles, account info |
-| Frequently changing | Don't cache | Game sessions, user badges |
+| Data Type             | Recommended Duration | Example                         |
+| --------------------- | -------------------- | ------------------------------- |
+| Static reference data | 10-30 minutes        | Badge configurations, scenarios |
+| Semi-static data      | 5-10 minutes         | Media metadata, content bundles |
+| Dynamic data          | 1-2 minutes          | User profiles, account info     |
+| Frequently changing   | Don't cache          | Game sessions, user badges      |
 
 ### Cache Invalidation Patterns
 
@@ -257,6 +260,7 @@ _cacheInvalidation.InvalidateCacheByPrefix("Scenario");
 ```
 
 **Use when:**
+
 - Multiple entities might be affected
 - Relationships between entities changed
 - "All" queries need to be refreshed
@@ -268,6 +272,7 @@ _cacheInvalidation.InvalidateCacheByPrefix("Scenario");
 ```
 
 **Use when:**
+
 - Data changes are admin-only operations
 - Slight staleness is acceptable
 - Invalidation logic is complex
@@ -289,6 +294,7 @@ builder.Services.AddMemoryCache(options =>
 ```
 
 **Tuning Parameters:**
+
 - `SizeLimit`: Maximum number of cached entries (increase for more caching)
 - `CompactionPercentage`: How much to remove when limit is reached
 - Each cached entry has `Size = 1` in `QueryCachingBehavior`
@@ -344,12 +350,12 @@ _metrics.RecordCacheMiss(typeof(TRequest).Name);
 
 ### Benchmark Results
 
-| Query | Without Cache | With Cache (Hit) | Improvement |
-|-------|--------------|------------------|-------------|
-| `GetScenarioQuery` | 45ms | 2ms | 95.6% |
-| `GetAllBadgeConfigurationsQuery` | 120ms | 3ms | 97.5% |
-| `GetBadgeConfigurationQuery` | 35ms | 1ms | 97.1% |
-| `GetMediaAssetQuery` | 50ms | 2ms | 96.0% |
+| Query                            | Without Cache | With Cache (Hit) | Improvement |
+| -------------------------------- | ------------- | ---------------- | ----------- |
+| `GetScenarioQuery`               | 45ms          | 2ms              | 95.6%       |
+| `GetAllBadgeConfigurationsQuery` | 120ms         | 3ms              | 97.5%       |
+| `GetBadgeConfigurationQuery`     | 35ms          | 1ms              | 97.1%       |
+| `GetMediaAssetQuery`             | 50ms          | 2ms              | 96.0%       |
 
 **Note:** Benchmarks are estimates. Actual performance depends on database load, network latency, and data size.
 
@@ -366,11 +372,13 @@ _metrics.RecordCacheMiss(typeof(TRequest).Name);
 ### Current: In-Memory Cache
 
 **Pros:**
+
 - Simple, no external dependencies
 - Very fast (<5ms overhead)
 - Built into .NET
 
 **Cons:**
+
 - Not shared across instances (load-balanced environments)
 - Lost on application restart
 - Limited by server memory
@@ -380,11 +388,13 @@ _metrics.RecordCacheMiss(typeof(TRequest).Name);
 To migrate to distributed caching:
 
 1. **Install package:**
+
    ```bash
    dotnet add package Microsoft.Extensions.Caching.StackExchangeRedis
    ```
 
 2. **Update `Program.cs`:**
+
    ```csharp
    // Replace AddMemoryCache with:
    builder.Services.AddStackExchangeRedisCache(options =>
@@ -395,6 +405,7 @@ To migrate to distributed caching:
    ```
 
 3. **Update `QueryCachingBehavior`:**
+
    ```csharp
    // Replace IMemoryCache with IDistributedCache
    private readonly IDistributedCache _cache;
@@ -413,11 +424,13 @@ To migrate to distributed caching:
 **Symptoms:** All queries show "Cache miss" in logs
 
 **Possible Causes:**
+
 1. Query doesn't implement `ICacheableQuery`
 2. `QueryCachingBehavior` not registered in MediatR pipeline
 3. `IMemoryCache` not registered in DI
 
 **Solution:**
+
 ```bash
 # Check DI registration
 grep "AddMemoryCache" src/Mystira.App.Api/Program.cs
@@ -432,11 +445,13 @@ grep "ICacheableQuery" src/Mystira.App.Application/CQRS/**/Queries/*.cs
 **Symptoms:** Users see outdated information
 
 **Possible Causes:**
+
 1. Cache duration too long
 2. Cache not being invalidated after updates
 3. Cache key collision (two queries sharing same key)
 
 **Solution:**
+
 - Reduce `CacheDurationSeconds` on the query
 - Add cache invalidation to relevant command handlers
 - Ensure cache keys are unique per query parameters
@@ -446,11 +461,13 @@ grep "ICacheableQuery" src/Mystira.App.Application/CQRS/**/Queries/*.cs
 **Symptoms:** Application using excessive memory
 
 **Possible Causes:**
+
 1. Cache size limit too high
 2. Large objects being cached
 3. Cache entries not expiring
 
 **Solution:**
+
 ```csharp
 // Reduce cache size limit
 builder.Services.AddMemoryCache(options =>
@@ -685,9 +702,9 @@ public async Task GetScenario_MultipleCalls_UsesCache()
 
 ## Changelog
 
-| Date | Version | Changes |
-|------|---------|---------|
-| 2025-11-24 | 1.0 | Initial caching strategy implementation |
+| Date       | Version | Changes                                 |
+| ---------- | ------- | --------------------------------------- |
+| 2025-11-24 | 1.0     | Initial caching strategy implementation |
 
 ---
 

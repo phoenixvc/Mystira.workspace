@@ -30,7 +30,7 @@ export function WhatIfWarnings({
           return "storage";
         return null;
       })
-      .filter(Boolean),
+      .filter(Boolean)
   );
 
   const hasAppService = selectedModules.has("appservice");

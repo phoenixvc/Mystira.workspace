@@ -1,24 +1,30 @@
 # SRI Intermittent Integrity Errors Fix
 
 ## Problem Statement
+
 Users experienced intermittent SRI (Subresource Integrity) validation failures when loading the PWA, particularly with .wasm files:
+
 - "Failed to find a valid digest in the 'integrity' attribute for resource 'https://mystira.app/_framework/Mystira.App.PWA.wasm'"
 - "SRI's integrity checks failed"
 - Reloading the page typically resolved the issue
 
 ## Root Cause Analysis
+
 The intermittent SRI failures were caused by a mismatch between:
+
 1. **Stale HTML cache**: Service worker was caching `index.html`, which contained SRI integrity hashes
 2. **Fresh framework files**: When new deployments occurred, new .wasm and framework .js files were served
 3. **Hash mismatch**: The cached `index.html` contained old SRI hashes that didn't match the new framework files
 4. **Brotli compression**: Azure Static Web Apps serves `.html.br` compressed versions which could also be cached with stale hashes
 
 ## Solution Overview
+
 The fix implements a **network-first strategy** for HTML and framework files to ensure SRI hashes are always fresh:
 
 ### 1. Service Worker Changes (`service-worker.js` and `service-worker.published.js`)
 
 #### Key Strategy Changes:
+
 - **HTML Files**: Network-first strategy
   - Always fetch from network first
   - Fallback to cache only if network fails
@@ -35,13 +41,18 @@ The fix implements a **network-first strategy** for HTML and framework files to 
   - Manifest: Cache-first (stable config)
 
 #### Updated `coreFilesToCache` Array:
+
 Removed `index.html` and `_framework/blazor.webassembly.js` from pre-cached files to prevent stale caching.
 
 ### 2. HTML Cache Headers (`index.html`)
 
 Added explicit cache-control meta tags to prevent HTTP caching:
+
 ```html
-<meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate" />
+<meta
+  http-equiv="cache-control"
+  content="no-cache, no-store, must-revalidate"
+/>
 <meta http-equiv="pragma" content="no-cache" />
 <meta http-equiv="expires" content="0" />
 ```
@@ -53,6 +64,7 @@ These headers instruct all layers of caching (browser, CDN, proxies) not to cach
 Created comprehensive cache control headers for all critical files:
 
 #### No-Cache Files (always fetch from server):
+
 - `/index.html` - Main HTML file
 - `/*.html` - All HTML files
 - `/*.html.br` - Brotli-compressed HTML
@@ -71,6 +83,7 @@ Created comprehensive cache control headers for all critical files:
 **Cache Headers**: `no-cache, no-store, must-revalidate, max-age=0`
 
 #### Long-Cache Files (immutable assets):
+
 - `/css/*` - CSS files (assumed versioned)
 - `/js/*` - JavaScript files (assumed versioned)
 - `/icons/*` - Icon assets
@@ -80,6 +93,7 @@ Created comprehensive cache control headers for all critical files:
 ## How This Fixes the SRI Issue
 
 ### Before (Problematic Behavior):
+
 1. User loads app → Browser caches index.html with SRI hashes (e.g., hash-v1)
 2. Service worker caches index.html in service worker cache
 3. New deployment occurs → Framework files updated (new .wasm files with different content)
@@ -90,6 +104,7 @@ Created comprehensive cache control headers for all critical files:
 8. **Error**: SRI integrity check failed
 
 ### After (Fixed Behavior):
+
 1. User loads app → index.html NOT cached (network-first)
 2. Fresh index.html served with current SRI hashes (hash-v2)
 3. Framework files loaded from network
@@ -103,6 +118,7 @@ Created comprehensive cache control headers for all critical files:
 ## Deployment Atomic Safety
 
 The configuration ensures that all related files are updated atomically:
+
 - `index.html` and `index.html.br` are never cached, so they're always fresh
 - Framework files (.wasm, .js, .js.br) are fetched on-demand from network
 - Since HTML references current framework files, they're always in sync
@@ -114,7 +130,7 @@ The solution handles various caching layers:
 
 1. **Browser HTTP Cache**: Prevented by `Cache-Control` headers in staticwebapp.config.json
 2. **Browser LocalStorage**: Not used for framework files
-3. **Service Worker Cache**: 
+3. **Service Worker Cache**:
    - Removed HTML and framework files from pre-cache list
    - Network-first fetch strategy ensures fresh files
    - Service worker clears all caches on install/activate
@@ -124,6 +140,7 @@ The solution handles various caching layers:
 ## Compression Optimization
 
 Starting from Release builds, Blazor compression is enabled:
+
 - **Debug builds**: Compression disabled for faster iteration during development
 - **Release builds**: Compression enabled to generate compressed files
 - **Compression formats**: Both gzip (.gz) and Brotli (.br) are supported for optimal compression
@@ -143,12 +160,14 @@ Starting from Release builds, Blazor compression is enabled:
 ## Testing the Fix
 
 ### Manual Testing:
+
 1. Open DevTools Network tab
 2. Verify index.html response headers include cache-control headers
 3. Load PWA, check that index.html is fetched from network (not cache)
 4. Check service worker status - should be active but not caching HTML/framework files
 
 ### Production Monitoring:
+
 1. Monitor error logs for SRI validation failures
 2. After deployment, verify errors decrease or disappear
 3. Monitor network requests to ensure HTML is always fresh

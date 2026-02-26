@@ -117,6 +117,7 @@ We will adopt the **CQRS (Command Query Responsibility Segregation) pattern** us
 ### Phased Rollout
 
 **Phase 1: Foundation** ✅ Complete
+
 - Install MediatR (v12.4.1)
 - Create `ICommand<T>`, `IQuery<T>` marker interfaces
 - Create `ICommandHandler<TCommand, TResponse>` interface
@@ -124,6 +125,7 @@ We will adopt the **CQRS (Command Query Responsibility Segregation) pattern** us
 - Register MediatR in DI container
 
 **Phase 2: Specification Pattern** ✅ Complete
+
 - Create `ISpecification<T>` interface
 - Create `BaseSpecification<T>` implementation
 - Create `SpecificationEvaluator<T>` for EF Core
@@ -131,6 +133,7 @@ We will adopt the **CQRS (Command Query Responsibility Segregation) pattern** us
 - Document Specification Pattern
 
 **Phase 3: Pilot Implementation** ✅ Complete
+
 - Migrate Scenario operations to CQRS
 - Create example commands: `CreateScenarioCommand`, `UpdateScenarioCommand`, `DeleteScenarioCommand`
 - Create example queries: `GetScenarioQuery`, `GetScenariosQuery`
@@ -138,6 +141,7 @@ We will adopt the **CQRS (Command Query Responsibility Segregation) pattern** us
 - Gather feedback from team
 
 **Phase 4: Documentation** ✅ Complete
+
 - Create [CQRS_PATTERN.md](../patterns/CQRS_PATTERN.md)
 - Create [SPECIFICATION_PATTERN.md](../patterns/SPECIFICATION_PATTERN.md)
 - Create [QUICKSTART_COMMAND.md](../patterns/QUICKSTART_COMMAND.md)
@@ -146,6 +150,7 @@ We will adopt the **CQRS (Command Query Responsibility Segregation) pattern** us
 - Update Application layer README
 
 **Phase 5: Full Migration** 🔄 In Progress
+
 - Migrate remaining entities (ContentBundles, Purchases, Users, etc.)
 - Update all controllers to use `IMediator`
 - Create specifications for common queries
@@ -287,22 +292,26 @@ src/Mystira.App.Infrastructure.Data/
 ### Naming Conventions
 
 **Commands**:
+
 - Verb-based names: `CreateScenarioCommand`, `UpdateUserCommand`
 - End with `Command`
 - Use `record` type for immutability
 
 **Queries**:
+
 - Noun-based names: `GetScenarioQuery`, `GetScenariosQuery`
 - Start with `Get`
 - End with `Query`
 - Use `record` type for immutability
 
 **Handlers**:
+
 - Named after command/query: `CreateScenarioCommandHandler`
 - End with `Handler`
 - Implement `ICommandHandler<TCommand, TResponse>` or `IQueryHandler<TQuery, TResponse>`
 
 **Specifications**:
+
 - Descriptive names: `ScenarioByIdSpecification`, `ActiveContentBundlesWithScenariosSpecification`
 - End with `Specification`
 - Inherit from `BaseSpecification<T>`

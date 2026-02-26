@@ -115,11 +115,11 @@ export default function InfrastructureRecommendedFixesTab({
                     {
                       environment: environment === "prod" ? "prod" : "dev",
                       dryRun: true,
-                    },
+                    }
                   );
                   if (response.success) {
                     alert(
-                      "Tagging script ready. Preview mode will show what tags would be added.",
+                      "Tagging script ready. Preview mode will show what tags would be added."
                     );
                   } else {
                     alert(`Error: ${response.error}`);
@@ -127,7 +127,7 @@ export default function InfrastructureRecommendedFixesTab({
                 } catch (error) {
                   console.error("Failed to run tagging script:", error);
                   alert(
-                    "Tagging script feature is not yet implemented in the backend.",
+                    "Tagging script feature is not yet implemented in the backend."
                   );
                 }
               }}
@@ -139,7 +139,7 @@ export default function InfrastructureRecommendedFixesTab({
               onClick={async () => {
                 if (
                   !confirm(
-                    `Are you sure you want to add tags to all ${environment} resources?`,
+                    `Are you sure you want to add tags to all ${environment} resources?`
                   )
                 ) {
                   return;
@@ -150,7 +150,7 @@ export default function InfrastructureRecommendedFixesTab({
                     {
                       environment: environment === "prod" ? "prod" : "dev",
                       dryRun: false,
-                    },
+                    }
                   );
                   if (response.success) {
                     alert("Tags have been successfully added to resources.");
@@ -160,7 +160,7 @@ export default function InfrastructureRecommendedFixesTab({
                 } catch (error) {
                   console.error("Failed to run tagging script:", error);
                   alert(
-                    "Tagging script feature is not yet implemented in the backend.",
+                    "Tagging script feature is not yet implemented in the backend."
                   );
                 }
               }}

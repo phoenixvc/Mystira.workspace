@@ -13,11 +13,11 @@ function ResponseDisplay({ response }: ResponseDisplayProps) {
       const result = await invoke<CommandResponse>("install_azure_cli");
       if (result.success) {
         alert(
-          "Azure CLI installation started. Please restart the application after installation completes.",
+          "Azure CLI installation started. Please restart the application after installation completes."
         );
       } else {
         alert(
-          `Failed to install Azure CLI: ${result.error || "Unknown error"}`,
+          `Failed to install Azure CLI: ${result.error || "Unknown error"}`
         );
       }
     } catch (error) {

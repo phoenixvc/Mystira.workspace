@@ -1,6 +1,7 @@
 # Avatar Carousel - Profile Management Integration
 
 ## Overview
+
 The Avatar Carousel has been successfully integrated into the Profile Management page (`/profiles`), allowing users to select and change avatars when creating or editing their profiles.
 
 ## Changes Made
@@ -8,6 +9,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
 ### ProfilesPage.razor Updates
 
 #### UI Changes
+
 1. **Avatar Carousel Component Added**
    - Location: After the Age Range dropdown in the Create/Edit Profile modal
    - Conditionally displayed only when an age group is selected
@@ -18,6 +20,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
    - Maintains reactive behavior with avatar selection
 
 #### Data Model Changes
+
 - **ProfileFormData Class**: Added `SelectedAvatarMediaId` property
   ```csharp
   public class ProfileFormData
@@ -29,6 +32,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
   ```
 
 #### Event Handlers Added
+
 1. **OnAgeGroupChanged()**
    - Resets `formData.SelectedAvatarMediaId` to null when age group changes
    - Triggers UI re-render to show new carousel for new age group
@@ -43,6 +47,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
 ### Workflow
 
 #### Creating a New Profile
+
 1. User clicks "New Profile" button
 2. Modal opens with empty form
 3. User enters profile name
@@ -53,6 +58,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
 8. Profile is created with selected avatar ID
 
 #### Editing an Existing Profile
+
 1. User clicks edit button on existing profile
 2. Modal opens with current profile data:
    - Profile name pre-filled
@@ -68,6 +74,7 @@ The Avatar Carousel has been successfully integrated into the Profile Management
 ### Data Persistence
 
 The selected avatar media ID (`SelectedAvatarMediaId`) is now:
+
 - Captured during profile creation
 - Captured during profile editing
 - Stored in the `PlayerAssignment.SelectedAvatarMediaId` field
@@ -79,16 +86,19 @@ The selected avatar media ID (`SelectedAvatarMediaId`) is now:
 ### Component Integration
 
 The avatar carousel component is now used in two places:
+
 1. **CharacterAssignmentPage.razor** - When assigning characters during game setup
 2. **ProfilesPage.razor** - When managing user profiles (NEW)
 
 Both implementations use the same component with identical parameters:
+
 - `AgeGroup` (string): The selected age group
 - `OnAvatarSelected` (EventCallback<string>): Called with selected media ID
 
 ### State Management
 
 **Form State Lifecycle:**
+
 1. Modal opens → `formData` initialized with current data (or empty for new)
 2. Age group selected → Carousel displays with avatars for that age group
 3. Avatar selected → `formData.SelectedAvatarMediaId` updated
@@ -133,14 +143,17 @@ Both implementations use the same component with identical parameters:
 ## Technical Details
 
 ### Files Modified
+
 - `src/Mystira.App.PWA/Pages/ProfilesPage.razor`
 
 ### Files Unchanged (but referenced)
+
 - `src/Mystira.App.PWA/Components/AvatarCarousel.razor` - Used by ProfilesPage
 - `src/Mystira.App.Domain/Models/AgeGroupConstants.cs` - Age group constants
 - `src/Mystira.App.PWA/Services/ApiClient.cs` - Avatar API methods
 
 ### Component Dependencies
+
 ```
 ProfilesPage.razor
 ├── AvatarCarousel.razor
@@ -150,6 +163,7 @@ ProfilesPage.razor
 ```
 
 ### API Endpoints Used
+
 - `GET /api/avatars/{ageGroup}` - Fetch avatars for age group
 - `GET /api/media/{id}` - Fetch avatar images
 - `POST /api/userprofiles` - Create profile (unchanged)
@@ -176,10 +190,12 @@ ProfilesPage.razor
    - Carousel history tracking
 
 ## Documentation Links
+
 - [Avatar Carousel Implementation](./AVATAR_CAROUSEL_IMPLEMENTATION.md)
 - [CharacterAssignmentPage Integration](./src/Mystira.App.PWA/Pages/CharacterAssignmentPage.razor)
 
 ## Related Components
+
 - `AvatarCarousel.razor` - Carousel component
 - `CharacterAssignmentPage.razor` - Character assignment with avatars
 - `ProfilesPage.razor` - Profile management with avatars (NEW)

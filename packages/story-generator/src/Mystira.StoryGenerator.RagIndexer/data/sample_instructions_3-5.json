@@ -28,8 +28,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Stories showing characters sharing, choosing between options, naming feelings, exploring with a trusted adult nearby",
-      "tags": ["developmental_goals", "confidence", "social_skills", "imagination"],
-      "keywords": ["developmental_goals", "confidence", "social_skills", "imagination"]
+      "tags": [
+        "developmental_goals",
+        "confidence",
+        "social_skills",
+        "imagination"
+      ],
+      "keywords": [
+        "developmental_goals",
+        "confidence",
+        "social_skills",
+        "imagination"
+      ]
     },
     {
       "chunk_id": "preschool_safety",

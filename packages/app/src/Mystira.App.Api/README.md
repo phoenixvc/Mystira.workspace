@@ -7,6 +7,7 @@ RESTful HTTP/Web API adapter for Mystira.App - Dynamic Story App for Child Devel
 **Layer**: **Presentation - REST API Adapter (Primary/Driver)**
 
 The Mystira.App.API layer is a **primary adapter** (driver adapter) that:
+
 - **Receives** HTTP requests from external clients (MAUI app, web browsers)
 - **Translates** HTTP requests into application use case calls
 - **Delegates** all business logic to Application use cases
@@ -15,6 +16,7 @@ The Mystira.App.API layer is a **primary adapter** (driver adapter) that:
 - **Contains** ZERO business logic (thin controllers)
 
 **Dependency Flow** (Correct ✅):
+
 ```
 External Clients (MAUI, Web, Mobile)
     ↓ HTTP requests
@@ -28,6 +30,7 @@ Infrastructure Implementations
 ```
 
 **Key Principles**:
+
 - ✅ **Thin Controllers** - Only HTTP concerns, zero business logic
 - ✅ **Use Case Orchestration** - Delegates to Application layer
 - ✅ **Dependency Injection** - Wires Infrastructure implementations
@@ -54,6 +57,7 @@ Mystira.App.Api/
 ```
 
 **What Controllers Do** (Thin Layer ✅):
+
 - Accept HTTP requests
 - Validate model binding
 - Call Application use cases
@@ -61,6 +65,7 @@ Mystira.App.Api/
 - Handle exceptions → HTTP errors
 
 **What Controllers Do NOT Do** (Zero Business Logic ✅):
+
 - ❌ Business validation (Application does that)
 - ❌ Database access (Infrastructure.Data does that)
 - ❌ Complex orchestration (Use cases do that)
@@ -148,6 +153,7 @@ public class ScenariosController : ControllerBase
 ```
 
 **Controller Responsibilities** (HTTP Only):
+
 - ✅ HTTP method routing (`[HttpGet]`, `[HttpPost]`)
 - ✅ Model binding validation (`ModelState.IsValid`)
 - ✅ Calling use cases
@@ -155,6 +161,7 @@ public class ScenariosController : ControllerBase
 - ✅ Exception handling → HTTP errors
 
 **NOT Controller Responsibilities** (Business Logic):
+
 - ❌ Scenario validation logic (use case does this)
 - ❌ Database access (Infrastructure.Data does this)
 - ❌ File storage (Infrastructure.Azure does this)
@@ -203,6 +210,7 @@ public class UserProfileApiService : IUserProfileApiService
 ```
 
 **API Service Purpose**:
+
 - Coordinate multiple related use cases
 - Provide single injection point for controllers
 - Still ZERO business logic (just delegation)
@@ -259,6 +267,7 @@ app.Run();
 ```
 
 **Benefits of This Pattern**:
+
 - ✅ Controllers know ZERO about Infrastructure
 - ✅ Easy to swap implementations (Azure → AWS, Cosmos → SQL Server)
 - ✅ Testable (mock use cases, not infrastructure)
@@ -267,6 +276,7 @@ app.Run();
 ## API Endpoints
 
 ### Scenarios
+
 - `GET /api/scenarios` - List scenarios with filtering
 - `GET /api/scenarios/{id}` - Get specific scenario
 - `POST /api/scenarios` - Create new scenario (Auth required)
@@ -276,6 +286,7 @@ app.Run();
 - `GET /api/scenarios/featured` - Featured scenarios
 
 ### Game Sessions
+
 - `POST /api/gamesessions` - Start new session (Auth required)
 - `GET /api/gamesessions/{id}` - Get session details (Auth required)
 - `GET /api/gamesessions/dm/{dmName}` - DM's sessions (Auth required)
@@ -285,6 +296,7 @@ app.Run();
 - `POST /api/gamesessions/{id}/end` - End session (Auth required)
 
 ### User Profiles
+
 - `POST /api/userprofiles` - Create profile (Auth required)
 - `GET /api/userprofiles/{id}` - Get profile (Auth required)
 - `PUT /api/userprofiles/{id}` - Update profile (Auth required)
@@ -293,17 +305,20 @@ app.Run();
 - `GET /api/userprofiles/non-guest` - Non-guest profiles (Auth required)
 
 ### Accounts
+
 - `POST /api/accounts` - Create account
 - `GET /api/accounts/{id}` - Get account (Auth required)
 - `PUT /api/accounts/{id}` - Update account (Auth required)
 - `POST /api/accounts/{id}/profiles` - Link profiles (Auth required)
 
 ### Media
+
 - `POST /api/media/upload` - Upload media (Auth required)
 - `GET /api/media/{blobName}` - Get media URL
 - `DELETE /api/media/{blobName}` - Delete media (Auth required)
 
 ### Health
+
 - `GET /health` - Comprehensive health check
 - `GET /health/ready` - Readiness probe
 - `GET /health/live` - Liveness probe
@@ -337,6 +352,7 @@ app.Run();
 ### Environment Variables (Production)
 
 Set via Azure App Service configuration:
+
 - `ConnectionStrings__CosmosDb`
 - `ConnectionStrings__AzureStorage`
 - `Jwt__Key`
@@ -383,6 +399,7 @@ builder.Services.AddHealthChecks()
 ```
 
 Access:
+
 - `/health` - Overall status
 - `/health/ready` - Kubernetes readiness probe
 - `/health/live` - Kubernetes liveness probe
@@ -464,6 +481,7 @@ grep -r "new DbContext\|SaveChangesAsync\|BlobClient" Controllers/
 ```
 
 **Results**:
+
 - ✅ Controllers reference Application.UseCases, not Infrastructure
 - ✅ Program.cs is the only composition root
 - ✅ Controllers are thin (no business logic)
@@ -480,6 +498,7 @@ grep -r "new DbContext\|SaveChangesAsync\|BlobClient" Controllers/
 ## Summary
 
 **What This Layer Does**:
+
 - ✅ Receives HTTP requests from external clients
 - ✅ Translates requests into use case invocations
 - ✅ Returns HTTP responses with proper status codes
@@ -487,12 +506,14 @@ grep -r "new DbContext\|SaveChangesAsync\|BlobClient" Controllers/
 - ✅ Provides RESTful API with OpenAPI documentation
 
 **What This Layer Does NOT Do**:
+
 - ❌ Contain business logic (Application/Domain does that)
 - ❌ Access databases directly (Infrastructure.Data does that)
 - ❌ Access cloud storage directly (Infrastructure.Azure does that)
 - ❌ Perform validations (Application/Domain does that)
 
 **Key Success Metrics**:
+
 - ✅ **Thin controllers** - Zero business logic, only HTTP concerns
 - ✅ **Use case delegation** - All logic in Application layer
 - ✅ **Composition root** - Only Program.cs knows Infrastructure

@@ -57,7 +57,7 @@ export function getEnvironmentDisplay(env: Environment) {
  * Get the status indicator for a health status
  */
 export function getStatusIndicator(
-  status: EnvironmentHealthStatus | undefined,
+  status: EnvironmentHealthStatus | undefined
 ) {
   return STATUS_INDICATORS[status || "unknown"];
 }
@@ -74,7 +74,7 @@ export function isDangerousEnvironment(env: Environment): boolean {
  */
 export function getEnvironmentBadgeStyles(
   env: Environment,
-  isActive: boolean = false,
+  isActive: boolean = false
 ): string {
   const config = ENVIRONMENT_CONFIG[env];
   if (isActive) {
@@ -95,7 +95,7 @@ export function formatEnvironmentWarning(warning: EnvironmentWarning): string {
  */
 export function getServicesOnEnvironment(
   serviceEnvironments: Record<string, Environment>,
-  targetEnv: Environment,
+  targetEnv: Environment
 ): string[] {
   return Object.entries(serviceEnvironments)
     .filter(([, env]) => env === targetEnv)
@@ -106,7 +106,7 @@ export function getServicesOnEnvironment(
  * Count services per environment
  */
 export function countServicesByEnvironment(
-  serviceEnvironments: Record<string, Environment>,
+  serviceEnvironments: Record<string, Environment>
 ): Record<Environment, number> {
   const counts: Record<Environment, number> = { local: 0, dev: 0, prod: 0 };
 
@@ -121,7 +121,7 @@ export function countServicesByEnvironment(
  * Generate environment summary text
  */
 export function getEnvironmentSummary(
-  serviceEnvironments: Record<string, Environment>,
+  serviceEnvironments: Record<string, Environment>
 ): string {
   const counts = countServicesByEnvironment(serviceEnvironments);
   const parts: string[] = [];

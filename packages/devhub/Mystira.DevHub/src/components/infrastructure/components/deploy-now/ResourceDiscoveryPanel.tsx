@@ -88,7 +88,7 @@ export function ResourceDiscoveryPanel({
       }
     } catch (error) {
       setScanError(
-        error instanceof Error ? error.message : "Failed to scan resources",
+        error instanceof Error ? error.message : "Failed to scan resources"
       );
     } finally {
       setIsScanning(false);
@@ -214,7 +214,7 @@ export function ResourceDiscoveryPanel({
                         key={rg.name}
                         onClick={() =>
                           onResourceGroupSelected?.(
-                            selectedResourceGroup?.name === rg.name ? null : rg,
+                            selectedResourceGroup?.name === rg.name ? null : rg
                           )
                         }
                         className={`w-full text-left p-3 rounded-lg border transition-colors ${

@@ -48,11 +48,13 @@
 Ensure that the `Authority` URL does **not** contain a `/v2.0` suffix. It should be in the format `https://<tenant_name>.ciamlogin.com/<tenant_id>`.
 
 **Correct**:
+
 ```json
 "Authority": "https://mystira.ciamlogin.com/a816d461-fbf8-4477-83a6-a62ad74ff28f"
 ```
 
 **Incorrect**:
+
 ```json
 "Authority": "https://mystira.ciamlogin.com/a816d461-fbf8-4477-83a6-a62ad74ff28f/v2.0"
 ```
@@ -95,9 +97,9 @@ Ensure that the `Authority` URL does **not** contain a `/v2.0` suffix. It should
 
 ### 2.1. Browser Developer Tools
 
--   **Network Tab**: Use the Network tab (F12) to inspect the redirect URLs. Check for the presence of `domain_hint`, `state`, and `nonce` parameters. Verify that the `redirect_uri` is correct.
--   **Console Tab**: Look for any JavaScript errors related to authentication.
--   **Application Tab**: Check `localStorage` to see if the `mystira_entra_token` and `mystira_entra_account` are being set after a successful login.
+- **Network Tab**: Use the Network tab (F12) to inspect the redirect URLs. Check for the presence of `domain_hint`, `state`, and `nonce` parameters. Verify that the `redirect_uri` is correct.
+- **Console Tab**: Look for any JavaScript errors related to authentication.
+- **Application Tab**: Check `localStorage` to see if the `mystira_entra_token` and `mystira_entra_account` are being set after a successful login.
 
 ### 2.2. Decoding JWTs
 
@@ -121,5 +123,5 @@ A: You can add other identity providers in the Entra admin center under **Extern
 
 **Q: What is the difference between the ID token and the access token?**
 
--   **ID Token**: Proves the identity of the user. It is for the PWA (client) to use.
--   **Access Token**: Grants access to a protected resource (the API). It is for the backend API to validate.
+- **ID Token**: Proves the identity of the user. It is for the PWA (client) to use.
+- **Access Token**: Grants access to a protected resource (the API). It is for the backend API to validate.

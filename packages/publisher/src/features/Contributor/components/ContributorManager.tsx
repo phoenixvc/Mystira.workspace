@@ -1,18 +1,26 @@
-import { useState } from 'react';
-import { Button, Card, CardBody, CardHeader } from '@/components';
-import { ContributorList } from './ContributorList';
-import { ContributorForm } from './ContributorForm';
-import { useContributors } from '../hooks/useContributors';
+import { useState } from "react";
+import { Button, Card, CardBody, CardHeader } from "@/components";
+import { ContributorList } from "./ContributorList";
+import { ContributorForm } from "./ContributorForm";
+import { useContributors } from "../hooks/useContributors";
 
 interface ContributorManagerProps {
   storyId: string;
   readonly?: boolean;
 }
 
-export function ContributorManager({ storyId, readonly = false }: ContributorManagerProps) {
+export function ContributorManager({
+  storyId,
+  readonly = false,
+}: ContributorManagerProps) {
   const [showForm, setShowForm] = useState(false);
-  const { contributors, isLoading, addContributor, removeContributor, isAdding } =
-    useContributors(storyId);
+  const {
+    contributors,
+    isLoading,
+    addContributor,
+    removeContributor,
+    isAdding,
+  } = useContributors(storyId);
 
   return (
     <div className="contributor-manager">
@@ -21,7 +29,11 @@ export function ContributorManager({ storyId, readonly = false }: ContributorMan
           <div className="contributor-manager__header">
             <h3>Contributors</h3>
             {!readonly && (
-              <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowForm(true)}
+              >
                 Add Contributor
               </Button>
             )}
@@ -39,7 +51,7 @@ export function ContributorManager({ storyId, readonly = false }: ContributorMan
       {showForm && (
         <ContributorForm
           storyId={storyId}
-          onSubmit={async data => {
+          onSubmit={async (data) => {
             await addContributor(data);
             setShowForm(false);
           }}

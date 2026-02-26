@@ -9,11 +9,13 @@ The Badge System v2 is a comprehensive achievement/badge framework that supports
 ### Domain Models
 
 #### Badge
+
 The core badge definition that represents an achievement that can be earned.
 
 **Location**: `src/Mystira.App.Domain/Models/Badge.cs`
 
 **Properties**:
+
 - `Id` (string) - Unique identifier
 - `AgeGroupId` (string) - Age group this badge applies to (e.g., "1-2", "3-5")
 - `CompassAxisId` (string) - Reference to compass axis
@@ -27,11 +29,13 @@ The core badge definition that represents an achievement that can be earned.
 - `UpdatedAt` (DateTime) - Last update timestamp
 
 #### AxisAchievement
+
 Represents achievements along compass axes for specific age groups.
 
 **Location**: `src/Mystira.App.Domain/Models/AxisAchievement.cs`
 
 **Properties**:
+
 - `Id` (string) - Unique identifier
 - `AgeGroupId` (string) - Age group identifier
 - `CompassAxisId` (string) - Reference to compass axis
@@ -41,11 +45,13 @@ Represents achievements along compass axes for specific age groups.
 - `UpdatedAt` (DateTime) - Last update timestamp
 
 #### BadgeImage
+
 Stores badge image data and metadata.
 
 **Location**: `src/Mystira.App.Domain/Models/BadgeImage.cs`
 
 **Properties**:
+
 - `Id` (string) - Unique identifier
 - `ImageId` (string) - Reference identifier for the image
 - `ContentType` (string) - MIME type (default: image/png)
@@ -55,9 +61,11 @@ Stores badge image data and metadata.
 - `UpdatedAt` (DateTime) - Last update timestamp
 
 #### UserBadge (Updated)
+
 Enhanced to support both legacy and new badge system.
 
 **New Property**:
+
 - `BadgeId` (string?) - Reference to new Badge entity
 
 ## Configuration System
@@ -67,6 +75,7 @@ Enhanced to support both legacy and new badge system.
 **Location**: `src/Mystira.App.Domain/Schemas/badge-configuration.schema.json`
 
 The schema enforces structure for age-group badge configurations:
+
 - `Age_Group_Id` - Required age group identifier
 - `Axis_Achievements` - Array of axis achievement definitions
 - `Badges` - Array of badge definitions with tier, order, and requirements
@@ -76,6 +85,7 @@ The schema enforces structure for age-group badge configurations:
 **Location**: `src/Mystira.App.Domain/Data/Badges/`
 
 Per-age-group configuration files:
+
 - `1-2.json` - Toddlers (ages 1-2)
 - `3-5.json` - Preschoolers (ages 3-5)
 - `6-9.json` - School age (ages 6-9)
@@ -83,6 +93,7 @@ Per-age-group configuration files:
 - `13-18.json` - Teens (ages 13-18)
 
 Each file conforms to the JSON schema and defines:
+
 - Axis achievements for the age group
 - Tiered badges with progressive difficulty
 - Age-appropriate titles and descriptions
@@ -106,6 +117,7 @@ Each file conforms to the JSON schema and defines:
 - `BadgeImageRepository` - Implements badge image data access
 
 All repositories support:
+
 - Standard CRUD operations
 - Specification pattern queries
 - Age group and compass axis filtering
@@ -117,6 +129,7 @@ All repositories support:
 **Location**: `src/Mystira.App.Infrastructure.Data/Services/BadgeConfigurationLoaderService.cs`
 
 Responsible for:
+
 1. Loading the JSON schema
 2. Validating configuration files against schema
 3. Loading badge configurations from JSON files
@@ -124,6 +137,7 @@ Responsible for:
 5. Idempotent seeding (skips if already seeded)
 
 **Features**:
+
 - Schema validation using JsonSchema.Net
 - Deterministic ID generation for idempotent seeding
 - Error handling and logging
@@ -136,6 +150,7 @@ Responsible for:
 **Location**: `src/Mystira.App.Infrastructure.Data/MystiraAppDbContext.cs`
 
 New DbSets:
+
 ```csharp
 public DbSet<AxisAchievement> AxisAchievements { get; set; }
 public DbSet<Badge> Badges { get; set; }
@@ -143,6 +158,7 @@ public DbSet<BadgeImage> BadgeImages { get; set; }
 ```
 
 Entity configurations:
+
 - Cosmos DB container mappings with partition keys
 - Unique indexes (in-memory mode):
   - AxisAchievement: (AgeGroupId, CompassAxisId, AxesDirection)
@@ -174,6 +190,7 @@ await badgeLoader.LoadAndSeedAsync();
 ```
 
 Seeding is controlled by configuration settings:
+
 - `InitializeDatabaseOnStartup` - Controls database initialization
 - `SeedMasterDataOnStartup` - Controls seeding behavior
 
@@ -202,6 +219,7 @@ Seeding is controlled by configuration settings:
 ## Badge Tiers
 
 The system supports five badge tiers in ascending order:
+
 1. **Bronze** - Entry level achievements
 2. **Silver** - Intermediate achievements
 3. **Gold** - Advanced achievements
@@ -209,6 +227,7 @@ The system supports five badge tiers in ascending order:
 5. **Diamond** - Master level achievements (ages 10+)
 
 Age groups have progressively more tiers:
+
 - Ages 1-2: Bronze, Silver
 - Ages 3-5: Bronze, Silver, Gold
 - Ages 6-9: Bronze, Silver, Gold, Platinum
@@ -218,6 +237,7 @@ Age groups have progressively more tiers:
 ## Badge Progression
 
 Badges are earned based on compass axis scores:
+
 - Each compass axis has multiple badges across tiers
 - Higher tiers require higher scores
 - Scores are age-appropriate and progressive
@@ -226,6 +246,7 @@ Badges are earned based on compass axis scores:
 ### Example Badge Progression (Curiosity & Initiative)
 
 **Ages 6-9**:
+
 - Bronze (10.0 score): Curious Mind
 - Silver (20.0 score): Problem Solver
 - Gold (35.0 score): Innovation Champion
@@ -236,10 +257,12 @@ Badges are earned based on compass axis scores:
 The new system coexists with the legacy `BadgeConfiguration`:
 
 ### Legacy Support
+
 - `UserBadge.BadgeConfigurationId` - Existing field (kept for compatibility)
 - `UserBadge.BadgeId` - New field (nullable for backward compatibility)
 
 ### Migration Path
+
 1. New badges use `BadgeId` to reference Badge entity
 2. Legacy badges continue to use `BadgeConfigurationId`
 3. Systems can query both for complete badge history
@@ -247,6 +270,7 @@ The new system coexists with the legacy `BadgeConfiguration`:
 ## Future Enhancements
 
 ### Planned Features
+
 - Badge image upload and management
 - Dynamic badge requirement adjustments
 - Badge statistics and analytics
@@ -255,7 +279,9 @@ The new system coexists with the legacy `BadgeConfiguration`:
 - Custom badge creation (admin)
 
 ### API Endpoints
+
 Future endpoints to expose:
+
 - `GET /api/badges?ageGroup={id}` - Get badges for age group
 - `GET /api/badges/{id}` - Get badge details
 - `GET /api/axis-achievements?ageGroup={id}` - Get achievements
@@ -271,13 +297,16 @@ Future endpoints to expose:
 ## Testing
 
 ### Unit Tests
+
 Create tests for:
+
 - BadgeConfigurationLoaderService validation
 - Repository implementations
 - Schema validation
 - ID generation determinism
 
 ### Integration Tests
+
 - End-to-end badge earning workflow
 - Configuration loading and seeding
 - Database persistence
@@ -285,6 +314,7 @@ Create tests for:
 ## Dependencies
 
 ### NuGet Packages
+
 - `JsonSchema.Net` (v7.2.2) - JSON schema validation
 - `Microsoft.EntityFrameworkCore` (v9.0.0) - Data access
 - `Microsoft.EntityFrameworkCore.Cosmos` (v9.0.0) - Cosmos DB provider

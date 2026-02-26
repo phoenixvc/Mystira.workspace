@@ -22,27 +22,27 @@ Mystira is an **AI-powered interactive storytelling platform** combining blockch
 
 ### Component Map
 
-| Component | Tech Stack | Purpose | Deployment |
-|-----------|------------|---------|------------|
-| **Mystira.App** | .NET 9 + Blazor WASM | Core platform API + PWA | Kubernetes/AKS |
-| **Mystira.Admin.Api** | .NET 9 ASP.NET Core | Content management REST API | Kubernetes/AKS |
-| **Mystira.Admin.UI** | React 18 + TypeScript | Admin dashboard SPA | Kubernetes/AKS |
-| **Mystira.Publisher** | React 18 + TypeScript | On-chain story registration | Kubernetes/AKS |
-| **Mystira.StoryGenerator** | .NET 9 + Blazor | AI story generation engine | Kubernetes/AKS |
-| **Mystira.Chain** | Python + gRPC | Blockchain/Story Protocol ops | Kubernetes/AKS |
-| **Mystira.DevHub** | Rust/Tauri + React | Desktop dev operations console | Desktop app |
+| Component                  | Tech Stack            | Purpose                        | Deployment     |
+| -------------------------- | --------------------- | ------------------------------ | -------------- |
+| **Mystira.App**            | .NET 9 + Blazor WASM  | Core platform API + PWA        | Kubernetes/AKS |
+| **Mystira.Admin.Api**      | .NET 9 ASP.NET Core   | Content management REST API    | Kubernetes/AKS |
+| **Mystira.Admin.UI**       | React 18 + TypeScript | Admin dashboard SPA            | Kubernetes/AKS |
+| **Mystira.Publisher**      | React 18 + TypeScript | On-chain story registration    | Kubernetes/AKS |
+| **Mystira.StoryGenerator** | .NET 9 + Blazor       | AI story generation engine     | Kubernetes/AKS |
+| **Mystira.Chain**          | Python + gRPC         | Blockchain/Story Protocol ops  | Kubernetes/AKS |
+| **Mystira.DevHub**         | Rust/Tauri + React    | Desktop dev operations console | Desktop app    |
 
 ### Why This Structure?
 
 **1. Technology Choice Rationale**
 
-| Decision | Reasoning |
-|----------|-----------|
-| **.NET 9 for APIs** | Strong async support, Azure integration, team expertise |
+| Decision                     | Reasoning                                                    |
+| ---------------------------- | ------------------------------------------------------------ |
+| **.NET 9 for APIs**          | Strong async support, Azure integration, team expertise      |
 | **Python for Chain service** | Story Protocol SDK is Python-native; gRPC for cross-language |
-| **React for frontends** | Component reuse between Admin UI and Publisher |
-| **Blazor WASM for PWA** | Offline-first requirement, code sharing with backend |
-| **Rust/Tauri for DevHub** | Native performance, small binary, cross-platform desktop |
+| **React for frontends**      | Component reuse between Admin UI and Publisher               |
+| **Blazor WASM for PWA**      | Offline-first requirement, code sharing with backend         |
+| **Rust/Tauri for DevHub**    | Native performance, small binary, cross-platform desktop     |
 
 **2. Architectural Patterns in Use**
 
@@ -70,12 +70,12 @@ Mystira is an **AI-powered interactive storytelling platform** combining blockch
 
 **3. Service Communication**
 
-| Path | Protocol | Auth | Use Case |
-|------|----------|------|----------|
-| Frontend → APIs | REST/HTTP | Entra ID JWT | Standard CRUD |
-| Publisher → Chain | gRPC | Wallet key in metadata | Blockchain ops |
-| PWA ↔ App.Api | SignalR | Entra External ID | Real-time updates |
-| All services | Direct DB | Managed Identity | Internal data access |
+| Path              | Protocol  | Auth                   | Use Case             |
+| ----------------- | --------- | ---------------------- | -------------------- |
+| Frontend → APIs   | REST/HTTP | Entra ID JWT           | Standard CRUD        |
+| Publisher → Chain | gRPC      | Wallet key in metadata | Blockchain ops       |
+| PWA ↔ App.Api     | SignalR   | Entra External ID      | Real-time updates    |
+| All services      | Direct DB | Managed Identity       | Internal data access |
 
 ---
 
@@ -83,31 +83,34 @@ Mystira is an **AI-powered interactive storytelling platform** combining blockch
 
 ### State Location Matrix
 
-| Location | Durability | Consistency | Scope | TTL |
-|----------|------------|-------------|-------|-----|
-| **Cosmos DB** | Persistent | Strong (partition) / Eventual (global) | Application | Permanent |
-| **PostgreSQL** | Persistent | ACID | Application | Permanent |
-| **Redis** | Configurable (AOF/RDB) | Eventual | Distributed | 1-30 min |
-| **Memory Cache** | None (process restart) | Process-local | Single instance | 1-30 min |
-| **Blob Storage** | 11 nines | Strong (single blob) | Global | Permanent |
-| **IndexedDB (PWA)** | Browser storage | Client-local | User session | Until cleared |
-| **SignalR Hub** | Ephemeral | Real-time | Connection lifetime | Connection |
-| **Story Protocol** | Immutable | Blockchain consensus | Global | Permanent |
+| Location            | Durability             | Consistency                            | Scope               | TTL           |
+| ------------------- | ---------------------- | -------------------------------------- | ------------------- | ------------- |
+| **Cosmos DB**       | Persistent             | Strong (partition) / Eventual (global) | Application         | Permanent     |
+| **PostgreSQL**      | Persistent             | ACID                                   | Application         | Permanent     |
+| **Redis**           | Configurable (AOF/RDB) | Eventual                               | Distributed         | 1-30 min      |
+| **Memory Cache**    | None (process restart) | Process-local                          | Single instance     | 1-30 min      |
+| **Blob Storage**    | 11 nines               | Strong (single blob)                   | Global              | Permanent     |
+| **IndexedDB (PWA)** | Browser storage        | Client-local                           | User session        | Until cleared |
+| **SignalR Hub**     | Ephemeral              | Real-time                              | Connection lifetime | Connection    |
+| **Story Protocol**  | Immutable              | Blockchain consensus                   | Global              | Permanent     |
 
 ### Primary Database: Cosmos DB
 
 **Entities Stored:**
+
 - User Profiles, Accounts, Game Sessions
 - Scenarios, Content Bundles, Character Maps
 - Badges, Media Assets, Compass Axes
 
 **Partition Keys:**
+
 - Most entities: `/id`
 - GameSessions: `/AccountId`
 - MediaAssets: `/MediaType`
 - PlayerScenarioScores: `/ProfileId`
 
 **Access Pattern:**
+
 ```
 Controller → MediatR → CQRS Handler → Repository → DbContext → Cosmos
 ```
@@ -115,6 +118,7 @@ Controller → MediatR → CQRS Handler → Repository → DbContext → Cosmos
 ### Distributed Cache: Redis
 
 **What's Cached:**
+
 - Query results (ICacheableQuery implementers)
 - Session state (transient)
 - Distributed locks
@@ -174,12 +178,14 @@ MystiraException (base)
 ### Resilience Patterns
 
 **Circuit Breaker (Polly v8):**
+
 ```
 CLOSED → (5 consecutive failures) → OPEN → (30s cooldown) → HALF-OPEN → (success) → CLOSED
                                                          └─ (failure) → OPEN
 ```
 
 **Retry with Exponential Backoff:**
+
 ```
 Attempt 1: Wait 2s (± 20% jitter)
 Attempt 2: Wait 4s (± 20% jitter)
@@ -213,11 +219,11 @@ Request
 
 ### Health Check Endpoints
 
-| Endpoint | Purpose | Failure Response |
-|----------|---------|------------------|
-| `GET /health` | Full health with dependencies | 503 if any unhealthy |
-| `GET /health/ready` | Kubernetes readiness | Blocks traffic routing |
-| `GET /health/live` | Kubernetes liveness | Triggers pod restart |
+| Endpoint            | Purpose                       | Failure Response       |
+| ------------------- | ----------------------------- | ---------------------- |
+| `GET /health`       | Full health with dependencies | 503 if any unhealthy   |
+| `GET /health/ready` | Kubernetes readiness          | Blocks traffic routing |
+| `GET /health/live`  | Kubernetes liveness           | Triggers pod restart   |
 
 ---
 
@@ -225,17 +231,18 @@ Request
 
 ### Critical Load Points
 
-| Component | Bottleneck | Current Limit | Impact |
-|-----------|------------|---------------|--------|
-| **LLM Rate Limiting** | API quotas | 50-250 req/min | Story generation queues |
-| **Redis** | Memory/connections | Provider tier | Cache fallback to memory |
-| **Database** | RU throughput (Cosmos) | Shared throughput | Query throttling |
-| **SignalR** | Connection count | Redis backplane | Real-time lag |
-| **Kubernetes** | Pod resources | 512Mi-1Gi per pod | Autoscaling |
+| Component             | Bottleneck             | Current Limit     | Impact                   |
+| --------------------- | ---------------------- | ----------------- | ------------------------ |
+| **LLM Rate Limiting** | API quotas             | 50-250 req/min    | Story generation queues  |
+| **Redis**             | Memory/connections     | Provider tier     | Cache fallback to memory |
+| **Database**          | RU throughput (Cosmos) | Shared throughput | Query throttling         |
+| **SignalR**           | Connection count       | Redis backplane   | Real-time lag            |
+| **Kubernetes**        | Pod resources          | 512Mi-1Gi per pod | Autoscaling              |
 
 ### Rate Limiting Configuration
 
 **Global (In-Memory Token Bucket):**
+
 ```
 Default: 100 requests/minute per client
 Window: 1 minute
@@ -244,6 +251,7 @@ Headers: X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset
 ```
 
 **LLM-Specific (Leaky Bucket):**
+
 ```
 PrefixSummaryRequests: 50/min → 1.2s interval
 SrlRequests: 250/min → 0.24s interval
@@ -251,16 +259,17 @@ SrlRequests: 250/min → 0.24s interval
 
 ### Caching TTLs
 
-| Data Type | TTL | Rationale |
-|-----------|-----|-----------|
-| Master data (badges, archetypes) | 60 min | Rarely changes |
-| Content (scenarios) | 30 min | Moderate change frequency |
-| User data (profiles) | 5 min | More dynamic |
-| Query results | 1-5 min | Configurable per query |
+| Data Type                        | TTL     | Rationale                 |
+| -------------------------------- | ------- | ------------------------- |
+| Master data (badges, archetypes) | 60 min  | Rarely changes            |
+| Content (scenarios)              | 30 min  | Moderate change frequency |
+| User data (profiles)             | 5 min   | More dynamic              |
+| Query results                    | 1-5 min | Configurable per query    |
 
 ### Kubernetes Autoscaling
 
 **Admin API:**
+
 ```yaml
 minReplicas: 2
 maxReplicas: 5
@@ -270,9 +279,10 @@ scaleAt:
 ```
 
 **Story Generator:**
+
 ```yaml
 minReplicas: 2
-maxReplicas: 10  # Higher due to LLM workload
+maxReplicas: 10 # Higher due to LLM workload
 scaleAt:
   cpu: 70%
   memory: 80%
@@ -280,22 +290,22 @@ scaleAt:
 
 ### Timeout Configuration
 
-| Operation | Timeout | Reasoning |
-|-----------|---------|-----------|
-| Standard HTTP | 30s | General operations |
-| LLM/AI calls | 300s (5 min) | Story generation with 25K tokens |
-| Cosmos DB | 30s | HTTP layer timeout |
-| PostgreSQL | 30s | Command timeout |
-| Circuit breaker reset | 30s | Recovery window |
+| Operation             | Timeout      | Reasoning                        |
+| --------------------- | ------------ | -------------------------------- |
+| Standard HTTP         | 30s          | General operations               |
+| LLM/AI calls          | 300s (5 min) | Story generation with 25K tokens |
+| Cosmos DB             | 30s          | HTTP layer timeout               |
+| PostgreSQL            | 30s          | Command timeout                  |
+| Circuit breaker reset | 30s          | Recovery window                  |
 
 ### Concurrency Controls
 
-| Mechanism | Location | Purpose |
-|-----------|----------|---------|
-| `SemaphoreSlim(1,1)` | AI Model Settings | Serialize initialization |
-| `SemaphoreSlim(N)` | Migration Service | Limit concurrent blob ops |
-| `ConcurrentDictionary` | Rate Limiter | Thread-safe client tracking |
-| Redis SET NX | Distributed Locks | Cross-instance coordination |
+| Mechanism              | Location          | Purpose                     |
+| ---------------------- | ----------------- | --------------------------- |
+| `SemaphoreSlim(1,1)`   | AI Model Settings | Serialize initialization    |
+| `SemaphoreSlim(N)`     | Migration Service | Limit concurrent blob ops   |
+| `ConcurrentDictionary` | Rate Limiter      | Thread-safe client tracking |
+| Redis SET NX           | Distributed Locks | Cross-instance coordination |
 
 ---
 
@@ -303,34 +313,34 @@ scaleAt:
 
 ### Definitely Real Constraints
 
-| Constraint | Why It's Real | Evidence |
-|------------|---------------|----------|
-| **LLM 300s timeout** | GPT-4.1 with 25K tokens + chained operations | Measured workload requirement |
-| **Cosmos eventual consistency** | Fundamental to multi-region distribution | Azure architecture property |
-| **HTTP/2 for gRPC** | Protocol requirement | RFC 7540 |
-| **Story Protocol finality** | Blockchain requires confirmations | Consensus mechanism |
-| **Kubernetes resource limits** | Physical hardware constraints | Node capacity |
+| Constraint                      | Why It's Real                                | Evidence                      |
+| ------------------------------- | -------------------------------------------- | ----------------------------- |
+| **LLM 300s timeout**            | GPT-4.1 with 25K tokens + chained operations | Measured workload requirement |
+| **Cosmos eventual consistency** | Fundamental to multi-region distribution     | Azure architecture property   |
+| **HTTP/2 for gRPC**             | Protocol requirement                         | RFC 7540                      |
+| **Story Protocol finality**     | Blockchain requires confirmations            | Consensus mechanism           |
+| **Kubernetes resource limits**  | Physical hardware constraints                | Node capacity                 |
 
 ### Likely Imagined Constraints
 
-| Constraint | Why It's Questionable | Recommendation |
-|------------|----------------------|----------------|
-| **4-phase Cosmos→PostgreSQL migration** | Phase 0 for months; 530-line PolyglotRepository unused | Remove or commit timeline |
-| **Cache TTLs (30/5/60 min)** | No measured change frequency data | Add cache hit/miss metrics |
-| **Retry policy defaults (3x, 2s base)** | Industry defaults, not calibrated | Profile actual failure rates |
-| **HPA thresholds (70%/80%)** | Standard defaults, not measured | Load test to determine |
-| **5000ms secondary write timeout** | PostgreSQL writes should be <100ms | Reduce to 500ms |
-| **gRPC over REST for Chain** | No actual latency measurements | Benchmark before committing |
-| **Mock implementations in config** | Dev-only feature flags in prod settings | Move to environment-specific |
+| Constraint                              | Why It's Questionable                                  | Recommendation               |
+| --------------------------------------- | ------------------------------------------------------ | ---------------------------- |
+| **4-phase Cosmos→PostgreSQL migration** | Phase 0 for months; 530-line PolyglotRepository unused | Remove or commit timeline    |
+| **Cache TTLs (30/5/60 min)**            | No measured change frequency data                      | Add cache hit/miss metrics   |
+| **Retry policy defaults (3x, 2s base)** | Industry defaults, not calibrated                      | Profile actual failure rates |
+| **HPA thresholds (70%/80%)**            | Standard defaults, not measured                        | Load test to determine       |
+| **5000ms secondary write timeout**      | PostgreSQL writes should be <100ms                     | Reduce to 500ms              |
+| **gRPC over REST for Chain**            | No actual latency measurements                         | Benchmark before committing  |
+| **Mock implementations in config**      | Dev-only feature flags in prod settings                | Move to environment-specific |
 
 ### Gray Area: Potentially Over-Engineered
 
-| Pattern | Current Justification | Reality Check |
-|---------|----------------------|---------------|
-| **CQRS** | "Read optimization needed" | At current scale, simpler patterns might suffice |
-| **Hexagonal Architecture** | "Swap infrastructure easily" | Have we ever swapped Azure for AWS? |
-| **32 Specification classes** | "Reusable query logic" | Many used only once |
-| **Wolverine message bus** | "Event-driven future" | Most handlers are synchronous |
+| Pattern                      | Current Justification        | Reality Check                                    |
+| ---------------------------- | ---------------------------- | ------------------------------------------------ |
+| **CQRS**                     | "Read optimization needed"   | At current scale, simpler patterns might suffice |
+| **Hexagonal Architecture**   | "Swap infrastructure easily" | Have we ever swapped Azure for AWS?              |
+| **32 Specification classes** | "Reusable query logic"       | Many used only once                              |
+| **Wolverine message bus**    | "Event-driven future"        | Most handlers are synchronous                    |
 
 ### Measurement Gaps
 
@@ -338,15 +348,15 @@ These values appear to be defaults rather than measured:
 
 ```yaml
 # Kubernetes
-cpu_trigger: 70%      # Is this where performance actually degrades?
-memory_trigger: 80%   # Measured or industry default?
+cpu_trigger: 70% # Is this where performance actually degrades?
+memory_trigger: 80% # Measured or industry default?
 
 # Retry policies
-max_retries: 3        # What's the actual success rate on retry 1 vs 2 vs 3?
-base_delay: 2s        # Calibrated to actual service recovery time?
+max_retries: 3 # What's the actual success rate on retry 1 vs 2 vs 3?
+base_delay: 2s # Calibrated to actual service recovery time?
 
 # Cache
-content_ttl: 30min    # How often does content actually change?
+content_ttl: 30min # How often does content actually change?
 ```
 
 ### Recommendations
@@ -360,35 +370,35 @@ content_ttl: 30min    # How often does content actually change?
 
 ## Quick Reference: Key File Locations
 
-| Concern | Primary Files |
-|---------|---------------|
-| **Database Context** | `packages/app/src/Mystira.App.Infrastructure.Data/MystiraAppDbContext.cs` |
-| **Polyglot Repository** | `packages/app/src/Mystira.App.Infrastructure.Data/Polyglot/PolyglotRepository.cs` |
-| **Resilience Policies** | `packages/shared/Mystira.Shared/Resilience/ResiliencePipelineFactory.cs` |
-| **Exception Handling** | `packages/shared/Mystira.Shared/Exceptions/GlobalExceptionHandler.cs` |
-| **Rate Limiting** | `packages/shared/Mystira.Shared/Middleware/RateLimitingMiddleware.cs` |
-| **Caching** | `packages/shared/Mystira.Shared/Caching/DistributedCacheService.cs` |
-| **Health Checks** | `packages/shared/Mystira.Shared/Health/` |
-| **Kubernetes Manifests** | `infra/kubernetes/base/*/deployment.yaml` |
-| **API Configuration** | `packages/app/src/Mystira.App.Api/appsettings.json` |
-| **DI Registration** | `packages/app/src/Mystira.App.Api/Program.cs` (~800 lines) |
+| Concern                  | Primary Files                                                                     |
+| ------------------------ | --------------------------------------------------------------------------------- |
+| **Database Context**     | `packages/app/src/Mystira.App.Infrastructure.Data/MystiraAppDbContext.cs`         |
+| **Polyglot Repository**  | `packages/app/src/Mystira.App.Infrastructure.Data/Polyglot/PolyglotRepository.cs` |
+| **Resilience Policies**  | `packages/shared/Mystira.Shared/Resilience/ResiliencePipelineFactory.cs`          |
+| **Exception Handling**   | `packages/shared/Mystira.Shared/Exceptions/GlobalExceptionHandler.cs`             |
+| **Rate Limiting**        | `packages/shared/Mystira.Shared/Middleware/RateLimitingMiddleware.cs`             |
+| **Caching**              | `packages/shared/Mystira.Shared/Caching/DistributedCacheService.cs`               |
+| **Health Checks**        | `packages/shared/Mystira.Shared/Health/`                                          |
+| **Kubernetes Manifests** | `infra/kubernetes/base/*/deployment.yaml`                                         |
+| **API Configuration**    | `packages/app/src/Mystira.App.Api/appsettings.json`                               |
+| **DI Registration**      | `packages/app/src/Mystira.App.Api/Program.cs` (~800 lines)                        |
 
 ---
 
 ## Appendix: Architecture Decision Records
 
-| ADR | Topic | Status |
-|-----|-------|--------|
-| 0001 | Infrastructure organization | Accepted |
-| 0004 | Branching strategy and CI/CD | Accepted |
-| 0005 | Service networking | Accepted |
-| 0006 | Admin API extraction | Accepted |
-| 0010 | Authentication and authorization | Accepted |
+| ADR  | Topic                                 | Status      |
+| ---- | ------------------------------------- | ----------- |
+| 0001 | Infrastructure organization           | Accepted    |
+| 0004 | Branching strategy and CI/CD          | Accepted    |
+| 0005 | Service networking                    | Accepted    |
+| 0006 | Admin API extraction                  | Accepted    |
+| 0010 | Authentication and authorization      | Accepted    |
 | 0013 | Data management (Cosmos + PostgreSQL) | In Progress |
-| 0014 | Polyglot persistence | Accepted |
-| 0015 | Event-driven architecture | Proposed |
+| 0014 | Polyglot persistence                  | Accepted    |
+| 0015 | Event-driven architecture             | Proposed    |
 
 ---
 
-*Last updated: 2026-01-11*
-*Generated from codebase analysis*
+_Last updated: 2026-01-11_
+_Generated from codebase analysis_

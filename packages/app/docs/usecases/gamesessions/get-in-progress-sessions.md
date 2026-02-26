@@ -26,15 +26,15 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/account/{accountId}/in-progress
     Controller->>Service: GetInProgressSessionsAsync(accountId)
-    
+
     Service->>Repo: GetInProgressSessionsAsync(accountId)
     Repo->>DB: Query sessions where:<br/>  AccountId == accountId AND<br/>  (Status == InProgress OR<br/>   Status == Paused)
     DB-->>Repo: List<GameSession>
     Repo-->>Service: sessions
-    
+
     Note over Service: Map to DTOs
     Service->>Service: Select(s => new GameSessionResponse {<br/>  Id, ScenarioId, AccountId,<br/>  ProfileId, PlayerNames, Status,<br/>  CurrentSceneId, ChoiceCount,<br/>  EchoCount, AchievementCount,<br/>  StartTime, EndTime, ElapsedTime,<br/>  IsPaused, SceneCount, TargetAgeGroup<br/>})
-    
+
     Service-->>Controller: List<GameSessionResponse>
     Controller-->>Client: 200 OK<br/>(List<GameSessionResponse>)
 ```
@@ -55,6 +55,7 @@ sequenceDiagram
 ## Filtering Logic
 
 Sessions are included if:
+
 - `AccountId` matches
 - `Status == SessionStatus.InProgress` OR `Status == SessionStatus.Paused`
 
@@ -63,6 +64,7 @@ Sessions are included if:
 ### Active Adventures Display
 
 Used to show "Active Adventures" on the home page:
+
 - Lists all sessions user can resume
 - Shows progress and status
 - Allows quick navigation to resume sessions
@@ -70,6 +72,7 @@ Used to show "Active Adventures" on the home page:
 ### Session Management
 
 Used for:
+
 - Showing active sessions in dashboard
 - Preventing duplicate sessions
 - Session cleanup/management
@@ -79,6 +82,7 @@ Used for:
 **Current**: No explicit authorization check
 
 **Future Enhancement**: Should verify:
+
 - Requesting user owns the account
 - Admin users can view any account's sessions
 
@@ -98,4 +102,3 @@ Used for:
 - [Resume Game Session Use Case](./resume-game-session.md)
 - [Get Game Sessions by Account Use Case](./get-sessions-by-account.md)
 - [Game Session Domain Model](../../domain/models/game-session.md)
-

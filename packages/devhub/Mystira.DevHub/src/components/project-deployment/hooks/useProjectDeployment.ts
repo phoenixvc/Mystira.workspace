@@ -27,17 +27,17 @@ export function useProjectDeployment({
   projects,
 }: UseProjectDeploymentProps) {
   const [selectedProjects, setSelectedProjects] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
   const [projectPipelines, setProjectPipelines] = useState<
     Record<string, ProjectPipeline>
   >({});
   const [deploying, setDeploying] = useState(false);
   const [workflowRuns, setWorkflowRuns] = useState<Record<string, WorkflowRun>>(
-    {},
+    {}
   );
   const [workflowLogs, setWorkflowLogs] = useState<Record<string, string[]>>(
-    {},
+    {}
   );
   const [showLogs, setShowLogs] = useState<Record<string, boolean>>({});
   const [availableWorkflows, setAvailableWorkflows] = useState<string[]>([]);
@@ -45,7 +45,7 @@ export function useProjectDeployment({
 
   // New UX states
   const [deploymentErrors, setDeploymentErrors] = useState<DeploymentError[]>(
-    [],
+    []
   );
   const [validationError, setValidationError] = useState<string | null>(null);
   const [workflowDiscoveryStatus, setWorkflowDiscoveryStatus] =
@@ -80,7 +80,7 @@ export function useProjectDeployment({
         "list_github_workflows",
         {
           environment,
-        },
+        }
       );
 
       if (response.success && response.result) {
@@ -147,7 +147,7 @@ export function useProjectDeployment({
   useEffect(() => {
     localStorage.setItem(
       `projectPipelines_${environment}`,
-      JSON.stringify(projectPipelines),
+      JSON.stringify(projectPipelines)
     );
   }, [projectPipelines, environment]);
 
@@ -211,7 +211,7 @@ export function useProjectDeployment({
 
     if (missingWorkflows.length > 0) {
       setValidationError(
-        `Please select a workflow for: ${missingWorkflows.join(", ")}`,
+        `Please select a workflow for: ${missingWorkflows.join(", ")}`
       );
       return;
     }
@@ -263,7 +263,7 @@ export function useProjectDeployment({
             {
               workflowFile: pipeline.workflowFile,
               inputs: pipeline.inputs || {},
-            },
+            }
           );
 
           if (dispatchResponse.success && dispatchResponse.result) {
@@ -341,7 +341,7 @@ export function useProjectDeployment({
     setFailedProjects(new Set());
     // Clear errors for failed projects
     setDeploymentErrors((prev) =>
-      prev.filter((e) => !e.projectId || !failedProjects.has(e.projectId)),
+      prev.filter((e) => !e.projectId || !failedProjects.has(e.projectId))
     );
   }, [failedProjects]);
 
@@ -362,7 +362,7 @@ export function useProjectDeployment({
             "github_workflow_status",
             {
               runId: run.id,
-            },
+            }
           );
 
           if (statusResponse.success && statusResponse.result) {
@@ -390,7 +390,7 @@ export function useProjectDeployment({
                 "github_workflow_logs",
                 {
                   runId: run.id,
-                },
+                }
               );
 
               if (logsResponse.success && logsResponse.result) {

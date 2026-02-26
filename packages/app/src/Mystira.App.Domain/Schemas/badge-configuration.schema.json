@@ -38,7 +38,15 @@
       "description": "List of badges that can be earned for this age group",
       "items": {
         "type": "object",
-        "required": ["Tier", "Tier_Order", "Title", "Description", "Required_Score", "Compass_Axis_Id", "Image_Id"],
+        "required": [
+          "Tier",
+          "Tier_Order",
+          "Title",
+          "Description",
+          "Required_Score",
+          "Compass_Axis_Id",
+          "Image_Id"
+        ],
         "properties": {
           "Tier": {
             "type": "string",

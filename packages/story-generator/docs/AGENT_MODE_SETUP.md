@@ -133,10 +133,7 @@ For development with separate frontend:
 
 ```json
 {
-  "AllowedOrigins": [
-    "http://localhost:5173",
-    "https://localhost:7001"
-  ]
+  "AllowedOrigins": ["http://localhost:5173", "https://localhost:7001"]
 }
 ```
 
@@ -231,6 +228,7 @@ curl https://localhost:7001/health
 #### Step 1: Enter Story Details
 
 1. **Story Prompt**: Enter your story idea
+
    ```
    Example: "A brave knight helps villagers defend their town from a dragon"
    ```
@@ -302,6 +300,7 @@ If evaluation fails or you want improvements:
    - All
 
 4. **User Guidance** (Optional):
+
    ```
    Example: "Make the dialogue more age-appropriate and add more descriptive language"
    ```
@@ -583,6 +582,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
 **Solutions**:
 
 1. **Check CORS Configuration**:
+
    ```json
    {
      "AllowedOrigins": ["http://localhost:5173"]
@@ -590,6 +590,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
    ```
 
 2. **Verify SSE Headers**:
+
    ```csharp
    // In API controller
    Response.Headers.Add("Content-Type", "text/event-stream");
@@ -613,6 +614,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
 **Solutions**:
 
 1. **Increase Timeout**:
+
    ```json
    {
      "AzureFoundry": {
@@ -640,6 +642,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
 **Solutions**:
 
 1. **Review Findings**:
+
    ```json
    {
      "findings": [
@@ -657,6 +660,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
    - Verify no prohibited content
 
 3. **Adjust Rubric Weights**:
+
    ```json
    {
      "EvaluationWeights": {
@@ -681,11 +685,13 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
 **Solutions**:
 
 1. **Verify Session ID**:
+
    ```bash
    GET /api/story-agent/sessions/{sessionId}
    ```
 
 2. **Check Database**:
+
    ```sql
    SELECT * FROM StorySessions WHERE SessionId = 'session-abc123';
    ```
@@ -705,6 +711,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
 **Solutions**:
 
 1. **Check Agent Response**:
+
    ```bash
    # View raw agent output in Foundry logs
    ```
@@ -714,6 +721,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
    - Add JSON schema to agent instructions
 
 3. **Add Retry Logic**:
+
    ```json
    {
      "AzureFoundry": {
@@ -740,6 +748,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
    - Adjust prompt and start new session
 
 2. **Increase Max Iterations** (not recommended):
+
    ```json
    {
      "StoryGeneration": {
@@ -764,6 +773,7 @@ cat logs/mystira-story-generator.json | jq '.[] | select(.Level == "Error")'
    - AISearch: Verify index exists and is populated
 
 2. **Test Knowledge Provider**:
+
    ```bash
    GET /api/knowledge/test?mode=FileSearch
    GET /api/knowledge/test?mode=AISearch

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Button, Card, CardBody, CardHeader } from '@/components';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { roleRequestsApi } from '@/api';
-import type { OpenRole } from '@/api/types';
-import { OpenRoleForm } from './OpenRoleForm';
-import { OpenRoleList } from './OpenRoleList';
+import { useState } from "react";
+import { Button, Card, CardBody, CardHeader } from "@/components";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { roleRequestsApi } from "@/api";
+import type { OpenRole } from "@/api/types";
+import { OpenRoleForm } from "./OpenRoleForm";
+import { OpenRoleList } from "./OpenRoleList";
 
 interface OpenRoleManagerProps {
   storyId: string;
@@ -12,13 +12,17 @@ interface OpenRoleManagerProps {
   readonly?: boolean;
 }
 
-export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenRoleManagerProps) {
+export function OpenRoleManager({
+  storyId,
+  storyTitle,
+  readonly = false,
+}: OpenRoleManagerProps) {
   const [showForm, setShowForm] = useState(false);
   const [editingRole, setEditingRole] = useState<OpenRole | null>(null);
   const queryClient = useQueryClient();
 
   const { data: openRoles, isLoading } = useQuery({
-    queryKey: ['open-roles', storyId],
+    queryKey: ["open-roles", storyId],
     queryFn: () => roleRequestsApi.getOpenRolesByStory(storyId),
     enabled: !!storyId,
   });
@@ -26,7 +30,7 @@ export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenR
   const deleteMutation = useMutation({
     mutationFn: (id: string) => roleRequestsApi.deleteOpenRole(id),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['open-roles', storyId] });
+      queryClient.invalidateQueries({ queryKey: ["open-roles", storyId] });
     },
   });
 
@@ -52,7 +56,11 @@ export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenR
               </p>
             </div>
             {!readonly && (
-              <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowForm(true)}
+              >
                 Add Open Role
               </Button>
             )}
@@ -63,7 +71,7 @@ export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenR
             roles={openRoles ?? []}
             isLoading={isLoading}
             onEdit={readonly ? undefined : handleEdit}
-            onDelete={readonly ? undefined : id => deleteMutation.mutate(id)}
+            onDelete={readonly ? undefined : (id) => deleteMutation.mutate(id)}
           />
         </CardBody>
       </Card>
@@ -73,13 +81,15 @@ export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenR
           storyId={storyId}
           storyTitle={storyTitle}
           initialData={editingRole}
-          onSubmit={async data => {
+          onSubmit={async (data) => {
             if (editingRole) {
               await roleRequestsApi.updateOpenRole(editingRole.id, data);
             } else {
               await roleRequestsApi.createOpenRole(data);
             }
-            queryClient.invalidateQueries({ queryKey: ['open-roles', storyId] });
+            queryClient.invalidateQueries({
+              queryKey: ["open-roles", storyId],
+            });
             handleClose();
           }}
           onCancel={handleClose}
@@ -88,4 +98,3 @@ export function OpenRoleManager({ storyId, storyTitle, readonly = false }: OpenR
     </div>
   );
 }
-

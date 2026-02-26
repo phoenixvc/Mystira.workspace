@@ -72,7 +72,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       children,
       ...props
     },
-    ref,
+    ref
   ) => {
     const isDisabled = disabled || loading;
 
@@ -97,7 +97,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         {!loading && icon && iconPosition === "right" && icon}
       </button>
     );
-  },
+  }
 );
 
 Button.displayName = "Button";
@@ -135,7 +135,7 @@ export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
         {icon}
       </Button>
     );
-  },
+  }
 );
 
 IconButton.displayName = "IconButton";

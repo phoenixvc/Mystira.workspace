@@ -79,10 +79,12 @@ User Journey:
 ## Key Features
 
 ### Minimal Input
+
 - **Email address** - Required, used as unique identifier
 - **Display Name** - Required, shown in user profile
 
 ### Security
+
 - 6-digit numeric codes (1 million combinations)
 - 15-minute expiration on codes
 - One-time use enforcement
@@ -90,11 +92,13 @@ User Journey:
 - XSS protection through Razor component escaping
 
 ### Entra External ID Integration
+
 - Creates ExternalUserId for identity provider linking
 - Uses Entra External ID for authentication
 - Compatible with existing Account model
 
 ### Development Features
+
 - Codes logged to console for development/testing
 - In-memory database support for local development
 - Cosmos DB support for cloud deployment
@@ -119,6 +123,7 @@ public class PendingSignup
 ## API Endpoints
 
 ### Request Signup Code
+
 ```
 POST /api/auth/passwordless/signup
 Content-Type: application/json
@@ -137,6 +142,7 @@ Response:
 ```
 
 ### Verify Code & Create Account
+
 ```
 POST /api/auth/passwordless/verify
 Content-Type: application/json
@@ -165,6 +171,7 @@ Response:
 ## Development & Testing
 
 ### Testing with Dev Console
+
 1. Navigate to `/signup`
 2. Enter email and display name
 3. Check server logs for the generated code
@@ -172,11 +179,13 @@ Response:
 5. Account should be created
 
 ### Local Development
+
 - Uses in-memory database by default
 - Codes printed to console
 - Full PWA functionality available
 
 ### Production Deployment
+
 - Uses Cosmos DB
 - Email service integration ready (currently logs to console)
 - Entra External ID compatible
@@ -207,6 +216,7 @@ Response:
 ## Error Handling
 
 The system gracefully handles:
+
 - Invalid email formats
 - Display names that are too short/long
 - Duplicate accounts
@@ -233,6 +243,7 @@ The system gracefully handles:
 ## Files Modified/Created
 
 ### Created Files
+
 - `src/Mystira.App.Domain/Models/PendingSignup.cs`
 - `src/Mystira.App.Api/Services/IPasswordlessAuthService.cs`
 - `src/Mystira.App.Api/Services/PasswordlessAuthService.cs`
@@ -240,6 +251,7 @@ The system gracefully handles:
 - `src/Mystira.App.PWA/Models/PasswordlessAuth.cs`
 
 ### Modified Files
+
 - `src/Mystira.App.Api/Data/MystiraAppDbContext.cs` - Added PendingSignup DbSet
 - `src/Mystira.App.Api/Models/ApiModels.cs` - Added request/response DTOs
 - `src/Mystira.App.Api/Controllers/AuthController.cs` - Added two new endpoints
@@ -261,10 +273,11 @@ The system gracefully handles:
 ## Code Examples
 
 ### Using from PWA Component
+
 ```csharp
 // Request code
 var (success, message) = await AuthService.RequestPasswordlessSignupAsync(
-    "user@example.com", 
+    "user@example.com",
     "John Doe");
 
 // Verify code
@@ -280,6 +293,7 @@ if (verified && account != null)
 ```
 
 ### Using from API
+
 ```csharp
 // Service is injected via DI
 await _passwordlessAuthService.RequestSignupAsync(email, displayName);

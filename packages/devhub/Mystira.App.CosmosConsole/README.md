@@ -5,14 +5,17 @@ A console application for interfacing with Cosmos DB to generate reports, statis
 ## Features
 
 ### Export Game Sessions to CSV
+
 Exports all game sessions from the Cosmos DB, joined with account information to extract user email and alias.
 
 **Usage:**
+
 ```bash
 Mystira.App.CosmosConsole export --output sessions.csv
 ```
 
 **Output CSV columns:**
+
 - SessionId: Unique identifier for the game session
 - ScenarioId: ID of the scenario played
 - ScenarioName: Name/title of the scenario
@@ -25,14 +28,17 @@ Mystira.App.CosmosConsole export --output sessions.csv
 - CompletedAt: Date and time when the session was completed (null if not completed)
 
 ### Scenario Statistics
+
 Shows completion statistics for each scenario, including per-account breakdowns.
 
 **Usage:**
+
 ```bash
 Mystira.App.CosmosConsole stats
 ```
 
 **Output includes:**
+
 - Total sessions per scenario
 - Number of completed sessions per scenario
 - Completion rate (percentage)
@@ -42,9 +48,11 @@ Mystira.App.CosmosConsole stats
   - Per-account completion rates
 
 ### Data Migration (NEW)
+
 Migrate data from old resource naming to new standardized naming convention, or between environments.
 
 **Usage:**
+
 ```bash
 # Show migration help
 Mystira.App.CosmosConsole migrate --help
@@ -66,6 +74,7 @@ Mystira.App.CosmosConsole migrate all
 ```
 
 **What gets migrated:**
+
 - **Scenarios**: All scenario definitions and content
 - **Content Bundles**: Bundle configurations linking scenarios
 - **Media Assets Metadata**: Media asset references (URLs, metadata)
@@ -105,18 +114,21 @@ dotnet build
 The console application supports two main commands:
 
 ### Export Command
+
 ```bash
 # Export all game sessions with account data to CSV
 Mystira.App.CosmosConsole export --output path/to/sessions.csv
 ```
 
 ### Statistics Command
+
 ```bash
 # Show scenario completion statistics
 Mystira.App.CosmosConsole stats
 ```
 
 ### Migration Commands
+
 ```bash
 # Migrate scenarios from old to new Cosmos DB
 Mystira.App.CosmosConsole migrate scenarios
@@ -141,6 +153,7 @@ Mystira.App.CosmosConsole migrate all
 Migrations require source and destination connection strings. Set them via environment variables:
 
 **For Cosmos DB migrations:**
+
 ```bash
 export SOURCE_COSMOS_CONNECTION="AccountEndpoint=https://old-cosmos.documents.azure.com:443/;AccountKey=..."
 export DEST_COSMOS_CONNECTION="AccountEndpoint=https://new-cosmos.documents.azure.com:443/;AccountKey=..."
@@ -148,6 +161,7 @@ export COSMOS_DATABASE_NAME="MystiraAppDb"  # Optional, defaults to MystiraAppDb
 ```
 
 **For Blob Storage migration:**
+
 ```bash
 export SOURCE_STORAGE_CONNECTION="DefaultEndpointsProtocol=https;AccountName=oldaccount;..."
 export DEST_STORAGE_CONNECTION="DefaultEndpointsProtocol=https;AccountName=newaccount;..."
@@ -197,6 +211,7 @@ dotnet run -- migrate blobs
 ## Implementation Details
 
 ### Architecture
+
 - **Dependency Injection**: Uses Microsoft.Extensions.DependencyInjection for service management
 - **Entity Framework Core**: Uses EF Core with Cosmos DB provider
 - **CSV Export**: Uses CsvHelper library for CSV generation
@@ -204,13 +219,16 @@ dotnet run -- migrate blobs
 - **Logging**: Uses Microsoft.Extensions.Logging for structured logging
 
 ### Data Models
+
 The console uses the same domain models as the main application:
+
 - `GameSession`: Game session data with completion status
 - `Account`: User account information with email and display name
 - `Scenario`: Scenario information for reporting
 - `SessionStatus`: Enum for session completion status
 
 ### Error Handling
+
 - Comprehensive error handling with detailed logging
 - User-friendly error messages
 - Graceful handling of missing configuration or connection issues
@@ -218,6 +236,7 @@ The console uses the same domain models as the main application:
 ## Example Output
 
 ### CSV Export Example
+
 ```csv
 SessionId,ScenarioId,ScenarioName,AccountId,AccountEmail,AccountAlias,ProfileId,StartedAt,IsCompleted,CompletedAt
 abc123,scenario1,The Dragon's Quest,user123,dragon@adventure.com,Dragon Master,profile456,2023-11-15T10:30:00Z,True,2023-11-15T11:45:00Z
@@ -225,6 +244,7 @@ def456,scenario2,The Lost Kingdom,user123,dragon@adventure.com,Dragon Master,pro
 ```
 
 ### Statistics Output Example
+
 ```
 Scenario Completion Statistics:
 ================================
@@ -261,14 +281,17 @@ Scenario: The Lost Kingdom
 ```
 
 ### Infrastructure Deployment (NEW)
+
 Trigger infrastructure deployment workflows directly from the console using GitHub CLI.
 
 **Prerequisites:**
+
 - Install GitHub CLI: https://cli.github.com/
 - Authenticate with: `gh auth login`
 - Ensure you have access to the repository
 
 **Usage:**
+
 ```bash
 # Show infrastructure help
 dotnet run -- infrastructure --help
@@ -284,6 +307,7 @@ dotnet run -- infrastructure deploy
 ```
 
 **Features:**
+
 - ✅ Triggers GitHub Actions workflows remotely
 - ✅ Validate Bicep templates before deployment
 - ✅ Preview infrastructure changes with what-if analysis
@@ -291,11 +315,13 @@ dotnet run -- infrastructure deploy
 - ✅ View workflow status and progress
 
 **Output:**
+
 - Workflow trigger confirmation
 - Commands to view workflow run status
 - Commands to watch workflow progress in real-time
 
 **Example:**
+
 ```bash
 $ dotnet run -- infrastructure deploy
 🚀 Triggering infrastructure deployment workflow with action: deploy

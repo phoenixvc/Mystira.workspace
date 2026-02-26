@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/{id}/achievements/check
     Controller->>Service: CheckAchievementsAsync(sessionId)
-    
+
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
     alt Session Not Found
@@ -38,13 +38,13 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Check Compass Threshold Achievements
     Service->>BadgeConfig: GetBadgeConfigurationsAsync()
     BadgeConfig->>DB: Query badge configurations
     DB-->>BadgeConfig: List<BadgeConfiguration>
     BadgeConfig-->>Service: badgeConfigs
-    
+
     loop For each compass axis
         Service->>Service: Get current compass value
         loop For each badge config matching axis
@@ -54,17 +54,17 @@ sequenceDiagram
             end
         end
     end
-    
+
     Note over Service: Check First Choice Achievement
     alt ChoiceHistory.Count == 1<br/>AND Not Already Awarded
         Service->>Service: Create SessionAchievement<br/>  (Type = FirstChoice)
     end
-    
+
     Note over Service: Check Session Completion Achievement
     alt Status == Completed<br/>AND Not Already Awarded
         Service->>Service: Create SessionAchievement<br/>  (Type = SessionComplete)
     end
-    
+
     Service-->>Controller: List<SessionAchievement>
     Controller-->>Client: 200 OK<br/>(List<SessionAchievement>)
 ```
@@ -107,6 +107,7 @@ Each achievement includes:
 **Current**: Uses hardcoded threshold (3.0f)
 
 **Future Enhancement**: Should use `BadgeConfigurationApiService`:
+
 - Get badge configurations for session's age group
 - Check thresholds dynamically
 - Link to badge configurations
@@ -126,6 +127,7 @@ Each achievement includes:
 ## Integration with Make Choice
 
 Currently called after `MakeChoiceUseCase` completes:
+
 - Checks for new achievements
 - Adds achievements to session
 - Persists session with achievements
@@ -135,4 +137,3 @@ Currently called after `MakeChoiceUseCase` completes:
 - [Make Choice Use Case](./make-choice.md)
 - [Badge Use Cases](../badges/README.md)
 - [Compass Domain Model](../../domain/models/compass.md)
-

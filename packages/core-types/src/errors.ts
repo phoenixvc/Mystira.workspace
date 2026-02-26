@@ -7,15 +7,15 @@
  * Standard error codes used across the platform.
  */
 export type ErrorCode =
-  | 'VALIDATION'
-  | 'NOT_FOUND'
-  | 'CONFLICT'
-  | 'UNAUTHORIZED'
-  | 'FORBIDDEN'
-  | 'RATE_LIMITED'
-  | 'INTERNAL'
-  | 'SERVICE_UNAVAILABLE'
-  | 'BAD_REQUEST';
+  | "VALIDATION"
+  | "NOT_FOUND"
+  | "CONFLICT"
+  | "UNAUTHORIZED"
+  | "FORBIDDEN"
+  | "RATE_LIMITED"
+  | "INTERNAL"
+  | "SERVICE_UNAVAILABLE"
+  | "BAD_REQUEST";
 
 /**
  * Base error interface for all Mystira errors.
@@ -67,7 +67,7 @@ export function validationError(
   errors?: Record<string, string[]>
 ): MystiraError {
   return {
-    code: 'VALIDATION',
+    code: "VALIDATION",
     message,
     details: errors ? { errors } : undefined,
   };
@@ -78,8 +78,10 @@ export function validationError(
  */
 export function notFoundError(resource: string, id?: string): MystiraError {
   return {
-    code: 'NOT_FOUND',
-    message: id ? `${resource} with ID '${id}' not found` : `${resource} not found`,
+    code: "NOT_FOUND",
+    message: id
+      ? `${resource} with ID '${id}' not found`
+      : `${resource} not found`,
     details: { resource, id },
   };
 }
@@ -89,7 +91,7 @@ export function notFoundError(resource: string, id?: string): MystiraError {
  */
 export function conflictError(message: string): MystiraError {
   return {
-    code: 'CONFLICT',
+    code: "CONFLICT",
     message,
   };
 }
@@ -97,9 +99,11 @@ export function conflictError(message: string): MystiraError {
 /**
  * Create an unauthorized error.
  */
-export function unauthorizedError(message = 'Authentication required'): MystiraError {
+export function unauthorizedError(
+  message = "Authentication required"
+): MystiraError {
   return {
-    code: 'UNAUTHORIZED',
+    code: "UNAUTHORIZED",
     message,
   };
 }
@@ -107,9 +111,9 @@ export function unauthorizedError(message = 'Authentication required'): MystiraE
 /**
  * Create a forbidden error.
  */
-export function forbiddenError(message = 'Access denied'): MystiraError {
+export function forbiddenError(message = "Access denied"): MystiraError {
   return {
-    code: 'FORBIDDEN',
+    code: "FORBIDDEN",
     message,
   };
 }
@@ -119,8 +123,8 @@ export function forbiddenError(message = 'Access denied'): MystiraError {
  */
 export function rateLimitError(retryAfterSeconds?: number): MystiraError {
   return {
-    code: 'RATE_LIMITED',
-    message: 'Rate limit exceeded',
+    code: "RATE_LIMITED",
+    message: "Rate limit exceeded",
     details: retryAfterSeconds ? { retryAfterSeconds } : undefined,
   };
 }
@@ -128,9 +132,11 @@ export function rateLimitError(retryAfterSeconds?: number): MystiraError {
 /**
  * Create an internal error.
  */
-export function internalError(message = 'An unexpected error occurred'): MystiraError {
+export function internalError(
+  message = "An unexpected error occurred"
+): MystiraError {
   return {
-    code: 'INTERNAL',
+    code: "INTERNAL",
     message,
   };
 }
@@ -138,7 +144,10 @@ export function internalError(message = 'An unexpected error occurred'): Mystira
 /**
  * Convert a MystiraError to an ErrorResponse.
  */
-export function toErrorResponse(error: MystiraError, status?: number): ErrorResponse {
+export function toErrorResponse(
+  error: MystiraError,
+  status?: number
+): ErrorResponse {
   const statusCode = status ?? getDefaultStatus(error.code);
   return {
     status: statusCode,
@@ -153,22 +162,22 @@ export function toErrorResponse(error: MystiraError, status?: number): ErrorResp
 
 function getDefaultStatus(code: ErrorCode): number {
   switch (code) {
-    case 'VALIDATION':
-    case 'BAD_REQUEST':
+    case "VALIDATION":
+    case "BAD_REQUEST":
       return 400;
-    case 'UNAUTHORIZED':
+    case "UNAUTHORIZED":
       return 401;
-    case 'FORBIDDEN':
+    case "FORBIDDEN":
       return 403;
-    case 'NOT_FOUND':
+    case "NOT_FOUND":
       return 404;
-    case 'CONFLICT':
+    case "CONFLICT":
       return 409;
-    case 'RATE_LIMITED':
+    case "RATE_LIMITED":
       return 429;
-    case 'SERVICE_UNAVAILABLE':
+    case "SERVICE_UNAVAILABLE":
       return 503;
-    case 'INTERNAL':
+    case "INTERNAL":
     default:
       return 500;
   }

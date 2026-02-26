@@ -7,6 +7,7 @@ Administrative API adapter for content management and system administration. Thi
 **Layer**: **Presentation - Admin REST API Adapter (Primary/Driver)**
 
 The Mystira.Admin.Api layer is a **primary adapter** (driver adapter) that:
+
 - **Receives** HTTP requests from admin clients (web dashboard, admin tools)
 - **Translates** HTTP requests into application use case calls
 - **Delegates** all business logic to Application use cases
@@ -15,6 +16,7 @@ The Mystira.Admin.Api layer is a **primary adapter** (driver adapter) that:
 - **Contains** ZERO business logic (thin controllers)
 
 **Dependency Flow** (Correct ✅):
+
 ```
 Admin Clients (Dashboard, Tools)
     ↓ HTTP requests
@@ -28,6 +30,7 @@ Infrastructure Implementations
 ```
 
 **Key Principles**:
+
 - ✅ **Thin Controllers** - Only HTTP concerns, zero business logic
 - ✅ **Use Case Orchestration** - Delegates to Application layer
 - ✅ **Dependency Injection** - Wires Infrastructure implementations
@@ -38,6 +41,7 @@ Infrastructure Implementations
 ## Separation from Client API
 
 This Admin API is **separate** from the client-facing API (`Mystira.Api`) to:
+
 - ✅ **Enhanced Security** - Admin operations isolated from public endpoints
 - ✅ **Independent Scaling** - Admin and client can scale separately
 - ✅ **Better Maintainability** - Clear separation of concerns
@@ -65,6 +69,7 @@ Mystira.Admin.Api/
 ```
 
 **What Admin Controllers Do** (Thin Layer ✅):
+
 - Accept HTTP requests
 - Validate model binding
 - Call Application use cases
@@ -73,6 +78,7 @@ Mystira.Admin.Api/
 - Handle exceptions → HTTP errors
 
 **What Admin Controllers Do NOT Do** (Zero Business Logic ✅):
+
 - ❌ Business validation (Application does that)
 - ❌ Database access (Infrastructure.Data does that)
 - ❌ Complex orchestration (Use cases do that)
@@ -250,6 +256,7 @@ public class YamlImportService : IYamlImportService
 ```
 
 **Service Responsibilities**:
+
 - Coordinate YAML parsing and use case invocation
 - Handle bulk operations
 - Still ZERO business logic (delegation only)
@@ -293,6 +300,7 @@ app.Run();
 ## API Endpoints
 
 ### Admin Dashboard (UI)
+
 - `GET /admin` - Main dashboard
 - `GET /admin/login` - Login page
 - `GET /admin/scenarios` - Scenario management
@@ -300,6 +308,7 @@ app.Run();
 - `GET /admin/charactermaps` - Character maps
 
 ### Scenario Admin
+
 - `GET /admin/api/scenarios` - List all scenarios
 - `POST /admin/api/scenarios` - Create scenario
 - `PUT /admin/api/scenarios/{id}` - Update scenario
@@ -307,12 +316,14 @@ app.Run();
 - `POST /admin/api/scenarios/import` - Bulk import from YAML
 
 ### Media Admin
+
 - `POST /admin/api/media/upload` - Upload media file
 - `DELETE /admin/api/media/{blobName}` - Delete media
 - `GET /admin/api/media` - List all media
 - `POST /admin/api/media/bulk-upload` - Bulk media upload
 
 ### System Admin
+
 - `GET /admin/api/system/status` - System health status
 - `POST /admin/api/system/badge-config` - Configure badges
 - `GET /admin/api/system/stats` - System statistics
@@ -389,6 +400,7 @@ dotnet user-secrets set "AzureAd:ClientId" "your-app-client-id-guid"
 ```
 
 **Configuration** (`appsettings.json`):
+
 ```json
 {
   "AzureAd": {
@@ -491,6 +503,7 @@ grep -r "new DbContext\|SaveChangesAsync\|BlobClient" Controllers/
 ```
 
 **Results**:
+
 - ✅ Controllers reference Application.UseCases, not Infrastructure
 - ✅ Program.cs is the only composition root
 - ✅ Controllers are thin (no business logic)
@@ -543,6 +556,7 @@ public async Task UploadMedia_WithValidFile_ReturnsOk()
 ## Summary
 
 **What This Layer Does**:
+
 - ✅ Receives HTTP requests from admin clients
 - ✅ Translates requests into use case invocations
 - ✅ Provides admin dashboard UI (MVC views)
@@ -551,12 +565,14 @@ public async Task UploadMedia_WithValidFile_ReturnsOk()
 - ✅ Deployed separately from client API
 
 **What This Layer Does NOT Do**:
+
 - ❌ Contain business logic (Application/Domain does that)
 - ❌ Access databases directly (Infrastructure.Data does that)
 - ❌ Access cloud storage directly (Infrastructure.Azure does that)
 - ❌ Perform validations (Application/Domain does that)
 
 **Key Success Metrics**:
+
 - ✅ **Thin controllers** - Zero business logic, only HTTP concerns
 - ✅ **Use case delegation** - All logic in Application layer
 - ✅ **Composition root** - Only Program.cs knows Infrastructure

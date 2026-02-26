@@ -1,17 +1,17 @@
-import { http, HttpResponse } from 'msw';
-import { mockStories, mockUsers, mockAuditLogs } from './data';
+import { http, HttpResponse } from "msw";
+import { mockStories, mockUsers, mockAuditLogs } from "./data";
 
-const API_BASE = 'http://localhost:8080/api';
+const API_BASE = "http://localhost:8080/api";
 
 export const handlers = [
   // Auth handlers
   http.post(`${API_BASE}/auth/login`, async ({ request }) => {
-    const body = await request.json() as { email: string; password: string };
-    const user = mockUsers.find(u => u.email === body.email);
+    const body = (await request.json()) as { email: string; password: string };
+    const user = mockUsers.find((u) => u.email === body.email);
 
     if (!user) {
       return HttpResponse.json(
-        { success: false, message: 'Invalid credentials' },
+        { success: false, message: "Invalid credentials" },
         { status: 401 }
       );
     }
@@ -20,8 +20,8 @@ export const handlers = [
       success: true,
       data: {
         user,
-        accessToken: 'mock-access-token',
-        refreshToken: 'mock-refresh-token',
+        accessToken: "mock-access-token",
+        refreshToken: "mock-refresh-token",
         expiresAt: new Date(Date.now() + 3600000).toISOString(),
       },
     });
@@ -41,17 +41,17 @@ export const handlers = [
   // Stories handlers
   http.get(`${API_BASE}/stories`, ({ request }) => {
     const url = new URL(request.url);
-    const status = url.searchParams.get('status');
-    const search = url.searchParams.get('search');
+    const status = url.searchParams.get("status");
+    const search = url.searchParams.get("search");
 
     let stories = [...mockStories];
 
     if (status) {
-      stories = stories.filter(s => s.status === status);
+      stories = stories.filter((s) => s.status === status);
     }
 
     if (search) {
-      stories = stories.filter(s =>
+      stories = stories.filter((s) =>
         s.title.toLowerCase().includes(search.toLowerCase())
       );
     }
@@ -69,11 +69,11 @@ export const handlers = [
   }),
 
   http.get(`${API_BASE}/stories/:id`, ({ params }) => {
-    const story = mockStories.find(s => s.id === params.id);
+    const story = mockStories.find((s) => s.id === params.id);
 
     if (!story) {
       return HttpResponse.json(
-        { success: false, message: 'Story not found' },
+        { success: false, message: "Story not found" },
         { status: 404 }
       );
     }
@@ -82,23 +82,26 @@ export const handlers = [
   }),
 
   http.post(`${API_BASE}/stories`, async ({ request }) => {
-    const body = await request.json() as { title: string; summary: string };
+    const body = (await request.json()) as { title: string; summary: string };
     const newStory = {
       id: `story-${Date.now()}`,
       title: body.title,
       summary: body.summary,
       contributors: [],
-      status: 'draft' as const,
+      status: "draft" as const,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    return HttpResponse.json({ success: true, data: newStory }, { status: 201 });
+    return HttpResponse.json(
+      { success: true, data: newStory },
+      { status: 201 }
+    );
   }),
 
   // Contributors handlers
   http.get(`${API_BASE}/contributors/story/:storyId`, ({ params }) => {
-    const story = mockStories.find(s => s.id === params.storyId);
+    const story = mockStories.find((s) => s.id === params.storyId);
 
     if (!story) {
       return HttpResponse.json({ success: true, data: [] });
@@ -136,11 +139,12 @@ export const handlers = [
   // User search
   http.get(`${API_BASE}/users/search`, ({ request }) => {
     const url = new URL(request.url);
-    const query = url.searchParams.get('query') || '';
+    const query = url.searchParams.get("query") || "";
 
-    const users = mockUsers.filter(u =>
-      u.name.toLowerCase().includes(query.toLowerCase()) ||
-      u.email.toLowerCase().includes(query.toLowerCase())
+    const users = mockUsers.filter(
+      (u) =>
+        u.name.toLowerCase().includes(query.toLowerCase()) ||
+        u.email.toLowerCase().includes(query.toLowerCase())
     );
 
     return HttpResponse.json({ success: true, data: users });

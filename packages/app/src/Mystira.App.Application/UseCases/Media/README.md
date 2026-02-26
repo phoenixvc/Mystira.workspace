@@ -13,12 +13,14 @@ Media asset management use cases for upload, download, transcoding, and metadata
 ## Port Interfaces Used
 
 These use cases depend on port interfaces defined in `Application/Ports`:
+
 - **`IBlobService`** (Ports/Storage) - Media file storage operations
 - **`IAudioTranscodingService`** (Ports/Media) - Audio format conversion
 - **`IMediaAssetRepository`** (Ports/Data) - Media metadata persistence
 - **`IUnitOfWork`** (Ports/Data) - Transaction management
 
 Infrastructure implementations:
+
 - `AzureBlobService` implements `IBlobService`
 - `FfmpegAudioTranscodingService` implements `IAudioTranscodingService`
 - `MediaAssetRepository` implements `IMediaAssetRepository`
@@ -34,6 +36,7 @@ Infrastructure implementations:
 ## Domain Models
 
 Media entities are in `Domain/Models`:
+
 - `MediaAsset` - Media file metadata and references
 - `MediaMetadata` - Extended media information
 

@@ -107,7 +107,7 @@ function Dashboard({ onNavigate }: DashboardProps) {
         color: "from-indigo-400 to-indigo-600",
       },
     ],
-    [onNavigate],
+    [onNavigate]
   );
 
   // Memoize utility functions to prevent recreation

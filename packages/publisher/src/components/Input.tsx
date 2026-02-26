@@ -1,5 +1,5 @@
-import { forwardRef, type InputHTMLAttributes } from 'react';
-import clsx from 'clsx';
+import { forwardRef, type InputHTMLAttributes } from "react";
+import clsx from "clsx";
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -9,10 +9,10 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, hint, className, id, ...props }, ref) => {
-    const inputId = id || label?.toLowerCase().replace(/\s+/g, '-');
+    const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
 
     return (
-      <div className={clsx('input-wrapper', className)}>
+      <div className={clsx("input-wrapper", className)}>
         {label && (
           <label htmlFor={inputId} className="input-label">
             {label}
@@ -21,9 +21,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <input
           ref={ref}
           id={inputId}
-          className={clsx('input', error && 'input--error')}
+          className={clsx("input", error && "input--error")}
           aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined}
+          aria-describedby={
+            error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined
+          }
           {...props}
         />
         {error && (
@@ -41,4 +43,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Input.displayName = "Input";

@@ -45,7 +45,7 @@ export function getProjectTypeDescription(type: string): string {
 
 export function getStatusColor(
   status: string,
-  conclusion: string | null,
+  conclusion: string | null
 ): string {
   if (status === "completed") {
     return conclusion === "success"
@@ -60,7 +60,7 @@ export function getStatusColor(
 
 export function getStatusIcon(
   status: string,
-  conclusion: string | null,
+  conclusion: string | null
 ): string {
   if (status === "completed") {
     return conclusion === "success" ? "✅" : "❌";

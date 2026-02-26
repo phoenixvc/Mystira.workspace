@@ -18,6 +18,7 @@ The Mystira PWA now supports authentication via **Microsoft Entra External ID** 
 Add the Entra External ID configuration to your environment-specific appsettings file:
 
 **appsettings.Development.json**:
+
 ```json
 {
   "MicrosoftEntraExternalId": {
@@ -34,6 +35,7 @@ Add the Entra External ID configuration to your environment-specific appsettings
 ```
 
 **appsettings.Production.json**:
+
 ```json
 {
   "MicrosoftEntraExternalId": {
@@ -121,6 +123,7 @@ await builder.Build().RunAsync();
 ### Code Example
 
 **Login.razor**:
+
 ```razor
 @inject IAuthService AuthService
 
@@ -239,7 +242,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 ### Issue: Google login not showing
 
-**Solution**: 
+**Solution**:
+
 1. Verify Google is configured as an identity provider in Entra External ID
 2. Ensure Google is enabled in the user flow
 3. Check that Google OAuth credentials are correct
@@ -253,6 +257,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 If you're migrating from the custom passwordless authentication:
 
 1. **Keep both services** during transition:
+
    ```csharp
    builder.Services.AddScoped<IAuthService, EntraExternalIdAuthService>();
    builder.Services.AddScoped<AuthService>(); // Legacy service

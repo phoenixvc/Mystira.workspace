@@ -17,6 +17,7 @@ The integration layer follows a clean architecture pattern with:
 ### Core Components
 
 #### 1. ILLMService Interface
+
 Located in `Services/LLM/ILLMService.cs`
 
 ```csharp
@@ -31,34 +32,41 @@ public interface ILLMService
 #### 2. Provider Implementations
 
 **Azure AI Foundry Service** (`Services/LLM/AzureAIFoundryService.cs`):
+
 - Supports Azure AI Foundry chat completion endpoints
 - Uses deployment identifiers resolved via model configuration
 - Full error handling and logging
 - Token usage tracking
 
 **Google Gemini Service** (`Services/LLM/GoogleGeminiService.cs`):
+
 - Supports Google Generative AI API
 - Gemini Pro model integration
 - Content safety and filtering
 - Usage statistics
 
 #### 3. LLM Service Factory
+
 `Services/LLM/LLMServiceFactory.cs` provides:
+
 - Dynamic provider resolution based on request
 - Fallback to available providers
 - Configuration-driven default provider selection
 - Health checking for provider availability
 
 #### 4. Chat Controller
+
 `Controllers/ChatController.cs` exposes:
 
 **POST** `/api/chat/complete` - Generate chat completions
+
 - Request validation
 - Provider selection
 - Error handling
 - Security (API keys never exposed)
 
 **GET** `/api/chat/providers` - Get available providers
+
 - Provider availability status
 - Configuration validation
 
@@ -131,14 +139,18 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 ### Core Components
 
 #### 1. Chat Service
+
 `Services/ChatService.cs` provides:
+
 - API client for chat completion endpoints
 - Provider information retrieval
 - Error handling and timeout management
 - Response validation
 
 #### 2. Enhanced Chat Container
+
 `Components/Chat/EnhancedChatContainer.razor`:
+
 - Integrated provider settings panel
 - Real-time AI chat completion
 - Loading states and error handling
@@ -146,7 +158,9 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 - Token usage display
 
 #### 3. Provider Settings Component
+
 `Components/Chat/ProviderSettings.razor`:
+
 - Dynamic provider selection dropdown
 - Temperature and max tokens controls
 - System prompt configuration
@@ -156,6 +170,7 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 ### Features
 
 #### User Interface
+
 - **Provider Selection**: Dropdown with available providers and their status
 - **Model Configuration**: Optional model id and deployment override fields
 - **Temperature Control**: Slider for creativity adjustment (0.0 - 2.0)
@@ -164,6 +179,7 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 - **Real-time Status**: Visual indicators for provider availability
 
 #### Chat Experience
+
 - **Enhanced Messages**: Shows provider and model used for each response
 - **Loading States**: Animated typing indicator during AI processing
 - **Error Handling**: Clear error messages with retry options
@@ -173,17 +189,20 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 ## Security Features
 
 ### API Key Protection
+
 - API keys are stored server-side only
 - No sensitive credentials exposed to client
 - Environment-based configuration support
 
 ### Request Validation
+
 - Server-side parameter validation
 - Rate limiting capability
 - Input sanitization
 - Error message sanitization
 
 ### CORS Configuration
+
 - Configurable allowed origins
 - Secure header policies
 - Development vs. production settings
@@ -191,9 +210,11 @@ builder.Services.AddScoped<ILLMServiceFactory, LLMServiceFactory>();
 ## API Endpoints
 
 ### Chat Completion
+
 **POST** `/api/chat/complete`
 
 Request:
+
 ```json
 {
   "provider": "azure-ai-foundry",
@@ -211,6 +232,7 @@ Request:
 ```
 
 Response:
+
 ```json
 {
   "content": "Once upon a time, in a mystical forest...",
@@ -228,9 +250,11 @@ Response:
 ```
 
 ### Provider Information
+
 **GET** `/api/chat/providers`
 
 Response:
+
 ```json
 {
   "providers": [
@@ -250,6 +274,7 @@ Response:
 ## Testing
 
 ### Unit Tests
+
 The solution includes comprehensive unit tests covering:
 
 - **LLMServiceFactory**: Provider resolution logic
@@ -257,11 +282,13 @@ The solution includes comprehensive unit tests covering:
 - **Provider Integration**: Mock HTTP responses and error scenarios
 
 Run tests:
+
 ```bash
 dotnet test
 ```
 
 ### Manual Testing
+
 1. Configure API keys in `appsettings.json`
 2. Start the API: `dotnet run --project src/Mystira.StoryGenerator.Api`
 3. Start the Web app: `dotnet run --project src/Mystira.StoryGenerator.Web`
@@ -286,6 +313,7 @@ dotnet run --project src/Mystira.StoryGenerator.Web --urls="https://localhost:50
 ## Configuration Guide
 
 ### Azure AI Foundry Setup
+
 1. Create an Azure AI Foundry project workspace
 2. Deploy an OpenAI model (e.g., gpt-4o) within the workspace
 3. Get the endpoint URL and API key from the project settings
@@ -299,6 +327,7 @@ dotnet run --project src/Mystira.StoryGenerator.Web --urls="https://localhost:50
    ```
 
 ### Google Gemini Setup
+
 1. Get a Google AI API key from Google AI Studio
 2. Update configuration:
    ```json
@@ -309,6 +338,7 @@ dotnet run --project src/Mystira.StoryGenerator.Web --urls="https://localhost:50
    ```
 
 ### Environment Variables (Recommended)
+
 ```bash
 export AI__AZUREAIFOUNDRY__APIKEY="your-azure-key"
 export AI__GOOGLEGEMINI__APIKEY="your-google-key"

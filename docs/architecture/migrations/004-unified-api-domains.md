@@ -13,6 +13,7 @@ All Mystira services follow the pattern:
 ```
 
 Where:
+
 - **environment**: `dev`, `staging`, or omitted for production
 - **service**: The service identifier (e.g., `api`, `story-api`, `publisher`)
 - **domain**: Always [`mystira.app`](https://mystira.app)
@@ -21,52 +22,52 @@ Where:
 
 ### Production (no environment prefix)
 
-| Service | Domain | Description |
-|---------|--------|-------------|
-| Main App | `mystira.app` | Main web application |
-| App API | `api.mystira.app` | Main application API |
-| Admin UI | `admin.mystira.app` | Admin dashboard |
-| Admin API | `admin-api.mystira.app` | Admin API |
+| Service   | Domain                  | Description                |
+| --------- | ----------------------- | -------------------------- |
+| Main App  | `mystira.app`           | Main web application       |
+| App API   | `api.mystira.app`       | Main application API       |
+| Admin UI  | `admin.mystira.app`     | Admin dashboard            |
+| Admin API | `admin-api.mystira.app` | Admin API                  |
 | Publisher | `publisher.mystira.app` | Content publishing service |
-| Chain | `chain.mystira.app` | Blockchain service |
-| Story API | `story-api.mystira.app` | Story generator API |
-| Story Web | `story.mystira.app` | Story generator SWA |
+| Chain     | `chain.mystira.app`     | Blockchain service         |
+| Story API | `story-api.mystira.app` | Story generator API        |
+| Story Web | `story.mystira.app`     | Story generator SWA        |
 
 ### Staging
 
-| Service | Domain |
-|---------|--------|
-| Main App | `staging.mystira.app` |
-| App API | `staging.api.mystira.app` |
-| Admin UI | `staging.admin.mystira.app` |
+| Service   | Domain                          |
+| --------- | ------------------------------- |
+| Main App  | `staging.mystira.app`           |
+| App API   | `staging.api.mystira.app`       |
+| Admin UI  | `staging.admin.mystira.app`     |
 | Admin API | `staging.admin-api.mystira.app` |
 | Publisher | `staging.publisher.mystira.app` |
-| Chain | `staging.chain.mystira.app` |
+| Chain     | `staging.chain.mystira.app`     |
 | Story API | `staging.story-api.mystira.app` |
-| Story Web | `staging.story.mystira.app` |
+| Story Web | `staging.story.mystira.app`     |
 
 ### Development
 
-| Service | Domain |
-|---------|--------|
-| Main App | `dev.mystira.app` |
-| App API | `dev.api.mystira.app` |
-| Admin UI | `dev.admin.mystira.app` |
+| Service   | Domain                      |
+| --------- | --------------------------- |
+| Main App  | `dev.mystira.app`           |
+| App API   | `dev.api.mystira.app`       |
+| Admin UI  | `dev.admin.mystira.app`     |
 | Admin API | `dev.admin-api.mystira.app` |
 | Publisher | `dev.publisher.mystira.app` |
-| Chain | `dev.chain.mystira.app` |
+| Chain     | `dev.chain.mystira.app`     |
 | Story API | `dev.story-api.mystira.app` |
-| Story Web | `dev.story.mystira.app` |
+| Story Web | `dev.story.mystira.app`     |
 
 ## SSL/TLS Certificates
 
 All domains use Let's Encrypt certificates:
 
-| Environment | Certificate Type | Notes |
-|-------------|-----------------|-------|
-| Production | Let's Encrypt Production | Fully trusted |
-| Staging | Let's Encrypt Staging | May show warnings |
-| Development | Let's Encrypt Staging | May show warnings |
+| Environment | Certificate Type         | Notes             |
+| ----------- | ------------------------ | ----------------- |
+| Production  | Let's Encrypt Production | Fully trusted     |
+| Staging     | Let's Encrypt Staging    | May show warnings |
+| Development | Let's Encrypt Staging    | May show warnings |
 
 ## DNS Configuration
 
@@ -110,23 +111,23 @@ Update CORS to include all environment domains:
 // config/cors.ts
 const allowedOrigins = [
   // Production
-  'https://mystira.app',
-  'https://admin.mystira.app',
-  'https://story.mystira.app',
+  "https://mystira.app",
+  "https://admin.mystira.app",
+  "https://story.mystira.app",
 
   // Staging
-  'https://staging.mystira.app',
-  'https://staging.admin.mystira.app',
-  'https://staging.story.mystira.app',
+  "https://staging.mystira.app",
+  "https://staging.admin.mystira.app",
+  "https://staging.story.mystira.app",
 
   // Development
-  'https://dev.mystira.app',
-  'https://dev.admin.mystira.app',
-  'https://dev.story.mystira.app',
+  "https://dev.mystira.app",
+  "https://dev.admin.mystira.app",
+  "https://dev.story.mystira.app",
 
   // Local
-  'http://localhost:3000',
-  'http://localhost:5173',
+  "http://localhost:3000",
+  "http://localhost:5173",
 ];
 ```
 
@@ -145,13 +146,14 @@ Current API version: **v1**
 
 All services expose standard health endpoints:
 
-| Endpoint | Purpose | Response |
-|----------|---------|----------|
-| `/health` | Full health check | `HealthCheckResult` |
-| `/health/ready` | K8s readiness | 200/503 |
-| `/health/live` | K8s liveness | 200 |
+| Endpoint        | Purpose           | Response            |
+| --------------- | ----------------- | ------------------- |
+| `/health`       | Full health check | `HealthCheckResult` |
+| `/health/ready` | K8s readiness     | 200/503             |
+| `/health/live`  | K8s liveness      | 200                 |
 
 Example:
+
 ```bash
 # Check production API health
 curl https://api.mystira.app/health
@@ -194,12 +196,12 @@ public static class EnvironmentDetector
 ### Frontend (TypeScript)
 
 ```typescript
-export function getApiUrl(service: string = 'api'): string {
+export function getApiUrl(service: string = "api"): string {
   const hostname = window.location.hostname;
 
-  let prefix = '';
-  if (hostname.startsWith('dev.')) prefix = 'dev.';
-  else if (hostname.startsWith('staging.')) prefix = 'staging.';
+  let prefix = "";
+  if (hostname.startsWith("dev.")) prefix = "dev.";
+  else if (hostname.startsWith("staging.")) prefix = "staging.";
 
   return `https://${prefix}${service}.mystira.app`;
 }
@@ -221,16 +223,17 @@ jobs:
       matrix:
         include:
           - environment: development
-            prefix: 'dev.'
+            prefix: "dev."
           - environment: staging
-            prefix: 'staging.'
+            prefix: "staging."
           - environment: production
-            prefix: ''
+            prefix: ""
 ```
 
 ## Migration Checklist
 
 ### Infrastructure
+
 - [ ] Update Azure DNS zone records
 - [ ] Update Azure Front Door custom domains
 - [ ] Update Let's Encrypt certificate configurations
@@ -238,6 +241,7 @@ jobs:
 - [ ] Update Terraform domain variables
 
 ### Applications
+
 - [ ] Update all hardcoded URLs in codebase
 - [ ] Update environment variables
 - [ ] Update CORS configurations
@@ -245,12 +249,14 @@ jobs:
 - [ ] Update webhook URLs
 
 ### Documentation
+
 - [ ] Update API documentation
 - [ ] Update README files
 - [ ] Update developer onboarding guides
 - [ ] Update deployment runbooks
 
 ### Monitoring
+
 - [ ] Update health check URLs
 - [ ] Update uptime monitoring
 - [ ] Update alerting configurations
@@ -259,6 +265,7 @@ jobs:
 ## Contact
 
 For questions or assistance:
+
 - Technical: jurie@phoenixvc.tech
 - Business/Admin: eben@phoenixvc.tech
 - Issues: https://github.com/phoenixvc/Mystira.workspace/issues

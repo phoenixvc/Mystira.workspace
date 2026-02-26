@@ -18,6 +18,7 @@ This document outlines security best practices and guidelines for using Mystira 
    - Add `.env` files to `.gitignore`
 
 2. **Use environment variables for local development**
+
    ```bash
    # Set in your shell
    export SOURCE_COSMOS_CONNECTION="AccountEndpoint=..."
@@ -35,6 +36,7 @@ This document outlines security best practices and guidelines for using Mystira 
 ### Future Enhancements
 
 **System Keychain Integration** (Phase 7 - Future):
+
 - macOS: Keychain Access
 - Windows: Credential Manager
 - Linux: libsecret/Secret Service API
@@ -103,6 +105,7 @@ az account set --subscription "your-subscription-id"
 ### Recommendations
 
 1. **Always backup before migration**
+
    ```bash
    # Cosmos DB backup (automatic in Azure)
    # Blob Storage backup
@@ -129,11 +132,11 @@ DevHub requests minimal Tauri permissions:
 {
   "allowlist": {
     "fs": {
-      "readFile": true,  // For reading Bicep templates
+      "readFile": true, // For reading Bicep templates
       "scope": ["infrastructure/**/*.bicep"]
     },
     "shell": {
-      "execute": true,   // For spawning .NET process
+      "execute": true, // For spawning .NET process
       "scope": ["dotnet"]
     }
   }
@@ -180,7 +183,7 @@ Infrastructure operations are tracked:
 const exportAuditLog = () => {
   const logs = getOperationHistory();
   const csv = convertToCSV(logs);
-  saveFile('audit-log.csv', csv);
+  saveFile("audit-log.csv", csv);
 };
 ```
 
@@ -264,6 +267,7 @@ npm install @tauri-apps/api@latest
 **DO NOT** open public GitHub issues for security vulnerabilities.
 
 Instead:
+
 1. Email security issues to the development team
 2. Provide detailed description and reproduction steps
 3. Allow time for patching before public disclosure

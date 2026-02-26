@@ -5,16 +5,17 @@ This guide documents the process for migrating data between Azure Cosmos DB acco
 ## Overview
 
 ### Source Account (Legacy)
+
 - **Account Name:** `prodwusappmystiracosmos`
 - **Resource Group:** `prod-wus-rg-mystira`
 - **Database:** `MystiraAppDb`
 
 ### Destination Accounts
 
-| Environment | Account Name | Resource Group |
-|------------|--------------|----------------|
-| Production | `mys-prod-core-cosmos-san` | `mys-prod-core-rg-san` |
-| Development | `mys-dev-core-cosmos-san` | `mys-dev-core-rg-san` |
+| Environment | Account Name               | Resource Group         |
+| ----------- | -------------------------- | ---------------------- |
+| Production  | `mys-prod-core-cosmos-san` | `mys-prod-core-rg-san` |
+| Development | `mys-dev-core-cosmos-san`  | `mys-dev-core-rg-san`  |
 
 ## Migration Architecture
 
@@ -30,20 +31,20 @@ The migration is handled by the `MigrationService` in the Mystira.DevHub.Service
 
 ### Supported Containers
 
-| Container | Partition Key | Migration Type |
-|-----------|---------------|----------------|
-| Scenarios | `/id` | Typed |
-| ContentBundles | `/id` | Typed |
-| MediaAssets | `/id` | Typed |
-| UserProfiles | `/id` | Generic |
-| GameSessions | `/id` | Generic |
-| Accounts | `/id` | Generic |
-| CompassTrackings | `/id` | Generic |
-| CharacterMaps | `/id` | Generic |
-| CharacterMapFiles | `/id` | Generic |
-| CharacterMediaMetadataFiles | `/id` | Generic |
-| AvatarConfigurationFiles | `/id` | Generic |
-| BadgeConfigurations | `/id` | Generic |
+| Container                   | Partition Key | Migration Type |
+| --------------------------- | ------------- | -------------- |
+| Scenarios                   | `/id`         | Typed          |
+| ContentBundles              | `/id`         | Typed          |
+| MediaAssets                 | `/id`         | Typed          |
+| UserProfiles                | `/id`         | Generic        |
+| GameSessions                | `/id`         | Generic        |
+| Accounts                    | `/id`         | Generic        |
+| CompassTrackings            | `/id`         | Generic        |
+| CharacterMaps               | `/id`         | Generic        |
+| CharacterMapFiles           | `/id`         | Generic        |
+| CharacterMediaMetadataFiles | `/id`         | Generic        |
+| AvatarConfigurationFiles    | `/id`         | Generic        |
+| BadgeConfigurations         | `/id`         | Generic        |
 
 ## Quick Start
 
@@ -93,21 +94,21 @@ cd Mystira.Devhub
 
 ### Script Options
 
-| Option | Description |
-|--------|-------------|
-| `-e, --environment` | Target environment: `dev` or `prod` (required) |
-| `-t, --type` | Migration type (default: `all`). Options: `scenarios`, `bundles`, `media-metadata`, `user-profiles`, `game-sessions`, `accounts`, `compass-trackings`, `character-maps`, `badge-configurations`, `blobs`, `master-data`, `all` |
-| `-d, --dry-run` | Preview mode - counts items without migrating |
-| `-v, --verbose` | Enable verbose output |
+| Option              | Description                                                                                                                                                                                                                    |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `-e, --environment` | Target environment: `dev` or `prod` (required)                                                                                                                                                                                 |
+| `-t, --type`        | Migration type (default: `all`). Options: `scenarios`, `bundles`, `media-metadata`, `user-profiles`, `game-sessions`, `accounts`, `compass-trackings`, `character-maps`, `badge-configurations`, `blobs`, `master-data`, `all` |
+| `-d, --dry-run`     | Preview mode - counts items without migrating                                                                                                                                                                                  |
+| `-v, --verbose`     | Enable verbose output                                                                                                                                                                                                          |
 
 ### Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `SOURCE_COSMOS_CONNECTION` | Source Cosmos DB connection string (auto-detected from Azure if not set) |
-| `DEST_COSMOS_CONNECTION` | Destination Cosmos DB connection string (auto-detected from Azure if not set) |
-| `SOURCE_STORAGE_CONNECTION` | Source Azure Storage connection string (for blob migration) |
-| `DEST_STORAGE_CONNECTION` | Destination Azure Storage connection string (for blob migration) |
+| Variable                    | Description                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `SOURCE_COSMOS_CONNECTION`  | Source Cosmos DB connection string (auto-detected from Azure if not set)      |
+| `DEST_COSMOS_CONNECTION`    | Destination Cosmos DB connection string (auto-detected from Azure if not set) |
+| `SOURCE_STORAGE_CONNECTION` | Source Azure Storage connection string (for blob migration)                   |
+| `DEST_STORAGE_CONNECTION`   | Destination Azure Storage connection string (for blob migration)              |
 
 ## Manual Migration via CLI
 
@@ -146,16 +147,16 @@ cat migration-command.json | dotnet run --configuration Release --no-build
 
 ### Migration Options
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `type` | string | (required) | Migration type to run |
-| `sourceCosmosConnection` | string | - | Source Cosmos DB connection string |
-| `destCosmosConnection` | string | - | Destination Cosmos DB connection string |
-| `sourceDatabaseName` | string | `MystiraDb` | Source database name |
-| `destDatabaseName` | string | `MystiraAppDb` | Destination database name |
-| `dryRun` | boolean | `false` | Preview mode |
-| `maxRetries` | number | `3` | Maximum retries for failed items |
-| `useBulkOperations` | boolean | `true` | Use bulk API for better performance |
+| Option                   | Type    | Default        | Description                             |
+| ------------------------ | ------- | -------------- | --------------------------------------- |
+| `type`                   | string  | (required)     | Migration type to run                   |
+| `sourceCosmosConnection` | string  | -              | Source Cosmos DB connection string      |
+| `destCosmosConnection`   | string  | -              | Destination Cosmos DB connection string |
+| `sourceDatabaseName`     | string  | `MystiraDb`    | Source database name                    |
+| `destDatabaseName`       | string  | `MystiraAppDb` | Destination database name               |
+| `dryRun`                 | boolean | `false`        | Preview mode                            |
+| `maxRetries`             | number  | `3`            | Maximum retries for failed items        |
+| `useBulkOperations`      | boolean | `true`         | Use bulk API for better performance     |
 
 ## Using the DevHub UI
 
@@ -200,6 +201,7 @@ The Mystira DevHub desktop application provides a graphical interface for migrat
 **Cause:** Missing Azure access or wrong resource group/account name.
 
 **Solution:**
+
 1. Verify you're logged in: `az account show`
 2. Check subscription: `az account set --subscription <subscription-id>`
 3. Verify resource exists: `az cosmosdb show --name <account-name> --resource-group <rg-name>`
@@ -209,6 +211,7 @@ The Mystira DevHub desktop application provides a graphical interface for migrat
 **Cause:** Source or destination account has insufficient throughput.
 
 **Solution:**
+
 1. Increase RU/s on the destination account temporarily
 2. Reduce `useBulkOperations` batch size
 3. Run migration during off-peak hours
@@ -218,6 +221,7 @@ The Mystira DevHub desktop application provides a graphical interface for migrat
 **Cause:** Destination container has different partition key.
 
 **Solution:**
+
 1. Delete the destination container (if empty)
 2. Let the migration recreate it with correct partition key
 3. Or manually create with matching partition key path

@@ -7,11 +7,11 @@
 
 ## Current Environment Configuration
 
-| Environment | Platform | Status | Workflow |
-|-------------|----------|--------|----------|
-| **Dev** | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-dev-san-swa-mystira-app.yml` |
-| **Staging** | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-staging.yml` |
-| **Production** | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-blue-water-0eab7991e.yml` |
+| Environment    | Platform              | Status    | Workflow                                            |
+| -------------- | --------------------- | --------- | --------------------------------------------------- |
+| **Dev**        | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-dev-san-swa-mystira-app.yml` |
+| **Staging**    | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-staging.yml`                 |
+| **Production** | Azure Static Web Apps | ✅ Active | `azure-static-web-apps-blue-water-0eab7991e.yml`    |
 
 ---
 
@@ -46,23 +46,25 @@ All three environments use Azure Static Web Apps for maximum production parity.
 
 ## Environment URLs
 
-| Environment | PWA URL | API URL |
-|-------------|---------|---------|
-| **Dev** | `https://dev-san-swa-mystira-app.azurestaticapps.net` | `https://dev-san-app-mystira-api.azurewebsites.net` |
-| **Staging** | `https://staging-euw-swa-mystira-app.azurestaticapps.net` | `https://staging-euw-app-mystira-api.azurewebsites.net` |
-| **Production** | `https://mystira.app` | `https://prod-wus-app-mystira-api.azurewebsites.net` |
+| Environment    | PWA URL                                                   | API URL                                                 |
+| -------------- | --------------------------------------------------------- | ------------------------------------------------------- |
+| **Dev**        | `https://dev-san-swa-mystira-app.azurestaticapps.net`     | `https://dev-san-app-mystira-api.azurewebsites.net`     |
+| **Staging**    | `https://staging-euw-swa-mystira-app.azurestaticapps.net` | `https://staging-euw-app-mystira-api.azurewebsites.net` |
+| **Production** | `https://mystira.app`                                     | `https://prod-wus-app-mystira-api.azurewebsites.net`    |
 
 ---
 
 ## Deployment Workflows
 
 ### PWA (Static Web Apps)
+
 - **Trigger**: Push to respective branch
 - **Dev**: `main` branch → Dev SWA
 - **Staging**: `staging` branch → Staging SWA
 - **Production**: Release tag → Prod SWA
 
 ### API (App Services)
+
 - **Trigger**: Push or manual dispatch
 - **Dev**: `main` branch → Dev App Service
 - **Staging**: `staging` branch → Staging App Service
@@ -72,11 +74,11 @@ All three environments use Azure Static Web Apps for maximum production parity.
 
 ## Branch Strategy
 
-| Branch | Environment | Auto-Deploy |
-|--------|-------------|-------------|
-| `main` | Dev | Yes |
-| `staging` | Staging | Yes |
-| `release/*` | Production | Manual approval |
+| Branch      | Environment | Auto-Deploy     |
+| ----------- | ----------- | --------------- |
+| `main`      | Dev         | Yes             |
+| `staging`   | Staging     | Yes             |
+| `release/*` | Production  | Manual approval |
 
 ---
 
@@ -84,19 +86,19 @@ All three environments use Azure Static Web Apps for maximum production parity.
 
 ### Environment Variables
 
-| Variable | Dev | Staging | Prod |
-|----------|-----|---------|------|
-| `ASPNETCORE_ENVIRONMENT` | Development | Staging | Production |
-| `CosmosDb` | Dev DB | Staging DB | Prod DB |
-| `BlobStorage` | Dev Storage | Staging Storage | Prod Storage |
+| Variable                 | Dev         | Staging         | Prod         |
+| ------------------------ | ----------- | --------------- | ------------ |
+| `ASPNETCORE_ENVIRONMENT` | Development | Staging         | Production   |
+| `CosmosDb`               | Dev DB      | Staging DB      | Prod DB      |
+| `BlobStorage`            | Dev Storage | Staging Storage | Prod Storage |
 
 ### Feature Flags
 
-| Feature | Dev | Staging | Prod |
-|---------|-----|---------|------|
-| Swagger UI | ✅ Enabled | ✅ Enabled | ❌ Disabled |
+| Feature       | Dev        | Staging    | Prod        |
+| ------------- | ---------- | ---------- | ----------- |
+| Swagger UI    | ✅ Enabled | ✅ Enabled | ❌ Disabled |
 | Debug Logging | ✅ Enabled | ⚠️ Limited | ❌ Disabled |
-| Rate Limiting | ⚠️ Relaxed | ✅ Enabled | ✅ Enabled |
+| Rate Limiting | ⚠️ Relaxed | ✅ Enabled | ✅ Enabled  |
 
 ---
 

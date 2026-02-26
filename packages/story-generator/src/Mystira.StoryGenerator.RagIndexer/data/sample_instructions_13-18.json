@@ -14,8 +14,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Epic adventures with political intrigue, morally complex quests, character-driven narratives with real consequences",
-      "tags": ["teen_design", "agency", "narrative_complexity", "multiple_endings"],
-      "keywords": ["teen_design", "agency", "narrative_complexity", "multiple_endings"]
+      "tags": [
+        "teen_design",
+        "agency",
+        "narrative_complexity",
+        "multiple_endings"
+      ],
+      "keywords": [
+        "teen_design",
+        "agency",
+        "narrative_complexity",
+        "multiple_endings"
+      ]
     },
     {
       "chunk_id": "teen_developmental",
@@ -29,7 +39,12 @@
       "isMandatory": true,
       "examples": "Stories exploring identity, systemic issues, leadership challenges, complex moral questions with multiple valid perspectives",
       "tags": ["developmental_goals", "identity", "philosophy", "leadership"],
-      "keywords": ["developmental_goals", "identity", "philosophy", "leadership"]
+      "keywords": [
+        "developmental_goals",
+        "identity",
+        "philosophy",
+        "leadership"
+      ]
     },
     {
       "chunk_id": "teen_safety",

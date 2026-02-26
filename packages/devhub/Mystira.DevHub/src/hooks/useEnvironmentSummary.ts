@@ -1,14 +1,14 @@
 export function useEnvironmentSummary(
-  serviceEnvironments: Record<string, "local" | "dev" | "prod">,
+  serviceEnvironments: Record<string, "local" | "dev" | "prod">
 ): string {
   const localCount = Object.values(serviceEnvironments).filter(
-    (e) => e === "local" || !e,
+    (e) => e === "local" || !e
   ).length;
   const devCount = Object.values(serviceEnvironments).filter(
-    (e) => e === "dev",
+    (e) => e === "dev"
   ).length;
   const prodCount = Object.values(serviceEnvironments).filter(
-    (e) => e === "prod",
+    (e) => e === "prod"
   ).length;
 
   const parts: string[] = [];

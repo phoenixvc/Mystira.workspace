@@ -20,7 +20,7 @@ export function useServiceCardResize(serviceName: string) {
       setLogHeight(clampedHeight);
       localStorage.setItem(
         `service-${serviceName}-log-height`,
-        clampedHeight.toString(),
+        clampedHeight.toString()
       );
     };
 

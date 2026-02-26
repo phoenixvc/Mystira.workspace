@@ -14,10 +14,10 @@
 
 ## Approvals
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Tech Lead | | | ✅ Approved |
-| DevOps | | | ⏳ Pending |
+| Role      | Name | Date | Status      |
+| --------- | ---- | ---- | ----------- |
+| Tech Lead |      |      | ✅ Approved |
+| DevOps    |      |      | ⏳ Pending  |
 
 ---
 
@@ -33,18 +33,19 @@ Mystira.App requires a structured approach to implementation that balances multi
 
 ### Current State
 
-| Area | Status | Notes |
-|------|--------|-------|
-| CQRS Migration | Complete | All 8 entities migrated (ADR-0006) |
-| Hexagonal Architecture | Complete | Clean boundaries established |
-| Admin API Extraction | In Progress | Repos created, migration ongoing |
-| Infrastructure | In Progress | Bicep to Terraform migration |
-| Polyglot/gRPC | Proposed | ADR-0013 defined, not implemented |
-| Monitoring | Partial | Basic Application Insights |
+| Area                   | Status      | Notes                              |
+| ---------------------- | ----------- | ---------------------------------- |
+| CQRS Migration         | Complete    | All 8 entities migrated (ADR-0006) |
+| Hexagonal Architecture | Complete    | Clean boundaries established       |
+| Admin API Extraction   | In Progress | Repos created, migration ongoing   |
+| Infrastructure         | In Progress | Bicep to Terraform migration       |
+| Polyglot/gRPC          | Proposed    | ADR-0013 defined, not implemented  |
+| Monitoring             | Partial     | Basic Application Insights         |
 
 ### Problem Statement
 
 Without a clear roadmap:
+
 - Priorities conflict and create churn
 - Cross-cutting concerns (like gRPC) get delayed indefinitely
 - Teams work on different areas without coordination
@@ -58,17 +59,17 @@ We will adopt a **phased implementation roadmap** with clear priorities, deliver
 
 ### Phase Overview
 
-| Phase | Focus Area | Priority | Status |
-|-------|------------|----------|--------|
-| Phase 1 | Infrastructure Foundation | High | In Progress |
-| **Phase 1.5** | **Polyglot Integration (gRPC)** | **High** | **Planned** |
-| Phase 2 | Pipeline Enhancement | High | Planned |
-| Phase 3 | Monitoring & Observability | Medium | Planned |
-| Phase 4 | Documentation & Knowledge Management | Medium | Planned |
-| Phase 5 | Security & Compliance | High | Planned |
-| Phase 6 | Performance & Scalability | Medium | Planned |
-| Phase 7 | Developer Experience | Medium | Planned |
-| Phase 8 | Advanced Features | Low | Planned |
+| Phase         | Focus Area                           | Priority | Status      |
+| ------------- | ------------------------------------ | -------- | ----------- |
+| Phase 1       | Infrastructure Foundation            | High     | In Progress |
+| **Phase 1.5** | **Polyglot Integration (gRPC)**      | **High** | **Planned** |
+| Phase 2       | Pipeline Enhancement                 | High     | Planned     |
+| Phase 3       | Monitoring & Observability           | Medium   | Planned     |
+| Phase 4       | Documentation & Knowledge Management | Medium   | Planned     |
+| Phase 5       | Security & Compliance                | High     | Planned     |
+| Phase 6       | Performance & Scalability            | Medium   | Planned     |
+| Phase 7       | Developer Experience                 | Medium   | Planned     |
+| Phase 8       | Advanced Features                    | Low      | Planned     |
 
 ### Key Decision: Prioritize Polyglot Integration Early (Phase 1.5)
 
@@ -95,22 +96,22 @@ We will adopt a **phased implementation roadmap** with clear priorities, deliver
 
 ### Phase 1.5 Deliverables
 
-| Deliverable | Description |
-|-------------|-------------|
+| Deliverable       | Description                                                 |
+| ----------------- | ----------------------------------------------------------- |
 | Proto Definitions | `chain_service.proto`, `ip_assets.proto`, `royalties.proto` |
-| .NET Client | `GrpcChainServiceAdapter` with retry policies |
-| Python Server | `ChainServiceServicer` with health checks |
-| Streaming | `WatchTransactions`, `BatchRegisterIpAssets` |
-| Migration | Feature flags, gradual rollout, REST deprecation |
+| .NET Client       | `GrpcChainServiceAdapter` with retry policies               |
+| Python Server     | `ChainServiceServicer` with health checks                   |
+| Streaming         | `WatchTransactions`, `BatchRegisterIpAssets`                |
+| Migration         | Feature flags, gradual rollout, REST deprecation            |
 
 ### Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Latency (p50) | <15ms (3x improvement) |
-| Latency (p99) | <40ms (4.5x improvement) |
-| Throughput | 5,000+ req/s (4x improvement) |
-| Payload Size | <500 bytes (5x smaller) |
+| Metric        | Target                        |
+| ------------- | ----------------------------- |
+| Latency (p50) | <15ms (3x improvement)        |
+| Latency (p99) | <40ms (4.5x improvement)      |
+| Throughput    | 5,000+ req/s (4x improvement) |
+| Payload Size  | <500 bytes (5x smaller)       |
 
 ---
 
@@ -162,12 +163,12 @@ The detailed roadmap is maintained in:
 
 ### Related Documents
 
-| Document | Purpose |
-|----------|---------|
-| [ADR-0013](ADR-0013-grpc-for-csharp-python-integration.md) | gRPC technical specification |
-| [ADR-0012](ADR-0012-infrastructure-as-code.md) | Infrastructure approach |
-| [ADR-0011](ADR-0011-unified-workspace-orchestration.md) | Workspace structure |
-| [Admin API Extraction](../../migration/admin-api-extraction-plan.md) | Migration plan |
+| Document                                                             | Purpose                      |
+| -------------------------------------------------------------------- | ---------------------------- |
+| [ADR-0013](ADR-0013-grpc-for-csharp-python-integration.md)           | gRPC technical specification |
+| [ADR-0012](ADR-0012-infrastructure-as-code.md)                       | Infrastructure approach      |
+| [ADR-0011](ADR-0011-unified-workspace-orchestration.md)              | Workspace structure          |
+| [Admin API Extraction](../../migration/admin-api-extraction-plan.md) | Migration plan               |
 
 ---
 
@@ -175,22 +176,22 @@ The detailed roadmap is maintained in:
 
 This roadmap aligns with `Mystira.workspace` documentation:
 
-| Workspace Doc | Local Implementation |
-|---------------|---------------------|
-| ADR-0005 (Service Networking) | Phase 1.5 Polyglot Integration |
+| Workspace Doc                           | Local Implementation            |
+| --------------------------------------- | ------------------------------- |
+| ADR-0005 (Service Networking)           | Phase 1.5 Polyglot Integration  |
 | docs/planning/implementation-roadmap.md | Adapted for Mystira.App context |
-| docs/migration/ | Admin API extraction plan |
-| docs/analysis/ | Component extraction analysis |
+| docs/migration/                         | Admin API extraction plan       |
+| docs/analysis/                          | Component extraction analysis   |
 
 ---
 
 ## Review Schedule
 
-| Milestone | Review Date | Focus |
-|-----------|-------------|-------|
-| Phase 1 Complete | TBD | Infrastructure foundation |
-| Phase 1.5 Complete | TBD | gRPC integration validated |
-| Quarterly Review | Every 3 months | Overall roadmap progress |
+| Milestone          | Review Date    | Focus                      |
+| ------------------ | -------------- | -------------------------- |
+| Phase 1 Complete   | TBD            | Infrastructure foundation  |
+| Phase 1.5 Complete | TBD            | gRPC integration validated |
+| Quarterly Review   | Every 3 months | Overall roadmap progress   |
 
 ---
 

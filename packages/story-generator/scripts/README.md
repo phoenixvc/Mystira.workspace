@@ -24,6 +24,7 @@ Creates all four required Azure AI Foundry agents for the story generation pipel
 **Output:**
 
 The script will:
+
 1. Build the AgentSetup tool
 2. Create four agents in Azure AI Foundry:
    - Writer Agent (`mystira-writer-v01`)
@@ -81,6 +82,7 @@ Retrieves all agent IDs from your Azure AI Foundry project using the Azure REST 
 ```
 
 The script will:
+
 1. Authenticate using Azure CLI credentials
 2. Query the Azure AI Foundry API for all agents
 3. Display a formatted table of agents with their IDs, names, and creation dates
@@ -154,6 +156,7 @@ python3 scripts/list-agents.py "https://your-project.azure.com/api/projects/your
 ### Error: "az: command not found"
 
 Install Azure CLI:
+
 - **macOS**: `brew install azure-cli`
 - **Ubuntu/Debian**: `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`
 - **Windows**: Download from https://aka.ms/installazurecliwindows
@@ -163,6 +166,7 @@ Then run `az login` to authenticate.
 ### Error: "jq: command not found"
 
 Install jq:
+
 - **macOS**: `brew install jq`
 - **Ubuntu/Debian**: `sudo apt-get install jq`
 - **Windows**: Download from https://stedolan.github.io/jq/
@@ -180,6 +184,7 @@ You don't have permissions to access the Azure AI project. Ask your Azure admini
 ## Future Scripts
 
 Additional scripts may be added for:
+
 - Vector store setup and document upload
 - Configuration validation
 - Deployment automation

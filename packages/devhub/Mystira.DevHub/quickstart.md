@@ -31,12 +31,14 @@ make help          # Show all available commands
 Before launching DevHub, ensure you have:
 
 1. **Node.js 18+** and **npm**
+
    ```bash
    node --version  # Should be 18.0.0 or higher
    npm --version
    ```
 
 2. **Rust** (for Tauri)
+
    ```bash
    rustc --version
    cargo --version

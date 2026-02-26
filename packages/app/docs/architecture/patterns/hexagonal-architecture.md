@@ -8,7 +8,7 @@ Hexagonal Architecture, also known as Ports and Adapters, is an architectural pa
 
 ## Architecture Layers
 
-``` text
+```text
 ┌─────────────────────────────────────────┐
 │         Presentation Layer              │
 │  (APIs, Controllers, PWA)               │

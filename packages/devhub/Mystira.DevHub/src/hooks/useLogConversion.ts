@@ -26,7 +26,7 @@ export function useLogConversion(
   globalLogs: GlobalLog[],
   deploymentLogs: string | null,
   problems: Problem[],
-  logFilter: LogFilter,
+  logFilter: LogFilter
 ) {
   // Convert logs and problems to LogEntry format for LogsViewer
   const allLogs = useMemo<LogEntry[]>(() => {
@@ -87,7 +87,7 @@ export function useLogConversion(
       filtered = filtered.filter(
         (log) =>
           log.message.toLowerCase().includes(searchLower) ||
-          log.service.toLowerCase().includes(searchLower),
+          log.service.toLowerCase().includes(searchLower)
       );
     }
 

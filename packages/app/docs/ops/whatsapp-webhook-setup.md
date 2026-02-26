@@ -167,12 +167,12 @@ await _botService.SendTemplateMessageAsync(
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| Webhook verification fails | Check verify token matches |
-| Messages not delivered | Verify 24-hour window or use templates |
-| 401/403 errors | Check connection string and channel ID |
-| Rate limiting | Reduce message frequency, add delays |
+| Issue                      | Solution                               |
+| -------------------------- | -------------------------------------- |
+| Webhook verification fails | Check verify token matches             |
+| Messages not delivered     | Verify 24-hour window or use templates |
+| 401/403 errors             | Check connection string and channel ID |
+| Rate limiting              | Reduce message frequency, add delays   |
 
 ### Logging
 
@@ -192,10 +192,12 @@ Enable detailed logging:
 ## Message Templates
 
 Templates must be pre-approved by Meta. Create them in:
+
 1. Meta Business Suite > WhatsApp Manager > Message Templates
 2. Or via the WhatsApp Business API
 
 Example template:
+
 ```
 Name: order_status
 Language: en

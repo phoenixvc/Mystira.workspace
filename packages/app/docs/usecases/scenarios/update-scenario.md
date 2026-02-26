@@ -28,9 +28,9 @@ sequenceDiagram
 
     Client->>Controller: PUT /api/scenarios/{id}<br/>(CreateScenarioRequest)
     Controller->>Service: UpdateScenarioAsync(id, request)
-    
+
     Service->>UseCase: ExecuteAsync(id, request)
-    
+
     Note over UseCase: Step 1: Find Existing Scenario
     UseCase->>Repo: GetByIdAsync(id)
     Repo->>DB: Query scenario
@@ -43,7 +43,7 @@ sequenceDiagram
     end
     DB-->>Repo: Scenario
     Repo-->>UseCase: existingScenario
-    
+
     Note over UseCase: Step 2: Schema Validation
     UseCase->>Schema: ValidateAgainstSchema(request)
     Schema->>Schema: Serialize to JSON<br/>(snake_case)
@@ -54,10 +54,10 @@ sequenceDiagram
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 3: Apply Updates
     UseCase->>UseCase: Update scenario properties:<br/>  Title, Description, Tags,<br/>  Difficulty, SessionLength,<br/>  Archetypes (parsed),<br/>  AgeGroup, MinimumAge,<br/>  CoreAxes (parsed),<br/>  Characters, Scenes<br/>(ID preserved)
-    
+
     Note over UseCase: Step 4: Business Rule Validation
     UseCase->>Validator: ExecuteAsync(updatedScenario)
     Validator->>Validator: Validate scene IDs unique
@@ -69,7 +69,7 @@ sequenceDiagram
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 5: Persist Changes
     UseCase->>Repo: UpdateAsync(scenario)
     Repo->>DB: Update entity
@@ -78,7 +78,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     Repo-->>UseCase: Scenario (updated)
-    
+
     UseCase-->>Service: Scenario
     Service-->>Controller: Scenario
     Controller-->>Client: 200 OK<br/>(Scenario)

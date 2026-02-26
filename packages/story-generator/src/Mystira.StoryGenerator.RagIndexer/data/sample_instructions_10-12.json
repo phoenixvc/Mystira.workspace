@@ -14,8 +14,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Adventures with puzzles requiring planning, strategic team choices, skill-based challenges with meaningful consequences",
-      "tags": ["preteen_design", "strategy", "complex_branching", "skill_challenges"],
-      "keywords": ["preteen_design", "strategy", "complex_branching", "skill_challenges"]
+      "tags": [
+        "preteen_design",
+        "strategy",
+        "complex_branching",
+        "skill_challenges"
+      ],
+      "keywords": [
+        "preteen_design",
+        "strategy",
+        "complex_branching",
+        "skill_challenges"
+      ]
     },
     {
       "chunk_id": "preteen_developmental",
@@ -28,8 +38,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Stories with moral dilemmas, strategic challenges requiring team input, situations showing how choices affect outcomes",
-      "tags": ["developmental_goals", "independence", "critical_thinking", "ethics"],
-      "keywords": ["developmental_goals", "independence", "critical_thinking", "ethics"]
+      "tags": [
+        "developmental_goals",
+        "independence",
+        "critical_thinking",
+        "ethics"
+      ],
+      "keywords": [
+        "developmental_goals",
+        "independence",
+        "critical_thinking",
+        "ethics"
+      ]
     },
     {
       "chunk_id": "preteen_safety",

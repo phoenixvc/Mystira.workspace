@@ -28,7 +28,12 @@ export const INPUT_DEBOUNCE_DELAY = 500;
 
 // File upload limits
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-export const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+export const ALLOWED_FILE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+];
 
 // Story limits
 export const MAX_STORY_TITLE_LENGTH = 200;
@@ -38,4 +43,3 @@ export const MIN_STORY_SUMMARY_LENGTH = 10;
 // Role request limits
 export const MAX_MESSAGE_LENGTH = 1000;
 export const MAX_PORTFOLIO_URL_LENGTH = 500;
-

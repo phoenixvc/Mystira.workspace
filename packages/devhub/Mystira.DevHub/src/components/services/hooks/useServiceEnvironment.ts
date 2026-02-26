@@ -15,16 +15,16 @@ interface UseServiceEnvironmentProps {
   services: Array<{ name: string; running: boolean }>;
   onStopService: (serviceName: string) => Promise<void>;
   onServiceEnvironmentsChange: (
-    environments: Record<string, "local" | "dev" | "prod">,
+    environments: Record<string, "local" | "dev" | "prod">
   ) => void;
   onCheckEnvironmentHealth: (
     serviceName: string,
-    environment: "dev" | "prod",
+    environment: "dev" | "prod"
   ) => void;
   onAddToast: (
     message: string,
     type: "info" | "success" | "error" | "warning",
-    duration?: number,
+    duration?: number
   ) => void;
 }
 
@@ -46,7 +46,7 @@ export function useServiceEnvironment({
   const performEnvironmentSwitch = async (
     serviceName: string,
     environment: "local" | "dev" | "prod",
-    needsStop: boolean,
+    needsStop: boolean
   ) => {
     if (needsStop) {
       await onStopService(serviceName);
@@ -116,18 +116,18 @@ export function useServiceEnvironment({
 
   const switchServiceEnvironment = async (
     serviceName: string,
-    environment: "local" | "dev" | "prod",
+    environment: "local" | "dev" | "prod"
   ) => {
     const serviceConfigs = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     );
     const contextCheck = checkEnvironmentContext(
       serviceName,
       environment,
       serviceEnvironments,
-      serviceConfigs,
+      serviceConfigs
     );
 
     const status = services.find((s) => s.name === serviceName);

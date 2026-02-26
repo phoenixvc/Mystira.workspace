@@ -219,7 +219,7 @@ export function ResizablePanel({
     if (storageKey) {
       localStorage.setItem(
         `${storageKey}_collapsed`,
-        JSON.stringify(isCollapsed),
+        JSON.stringify(isCollapsed)
       );
     }
   }, [isCollapsed, storageKey]);
@@ -242,7 +242,7 @@ export function ResizablePanel({
         const deltaY = startY - e.clientY;
         const newHeight = Math.max(
           minHeight,
-          Math.min(maxHeight, startHeight + deltaY),
+          Math.min(maxHeight, startHeight + deltaY)
         );
         setHeight(newHeight);
       };
@@ -256,7 +256,7 @@ export function ResizablePanel({
       document.addEventListener("mousemove", handleMouseMove);
       document.addEventListener("mouseup", handleMouseUp);
     },
-    [height, minHeight, maxHeight],
+    [height, minHeight, maxHeight]
   );
 
   const toggleCollapse = useCallback(() => {

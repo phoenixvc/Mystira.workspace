@@ -72,14 +72,14 @@ var credential = new DefaultAzureCredential(new DefaultAzureCredentialOptions
 
 Each service identity receives only the minimum permissions required:
 
-| Resource | Role | Principal | Purpose |
-|----------|------|-----------|---------|
-| **Key Vault** | Key Vault Secrets User | App Service MI | Read secrets at runtime |
-| **Key Vault** | Key Vault Administrator | Admin User | Manage secrets (admin only) |
-| **Cosmos DB** | Cosmos DB Account Reader | App Service MI | Read/write data |
-| **Blob Storage** | Storage Blob Data Contributor | App Service MI | Upload/download media |
-| **App Insights** | Monitoring Metrics Publisher | App Service MI | Write telemetry |
-| **DNS Zone** | DNS Zone Contributor | GitHub Actions SP | Manage DNS records |
+| Resource         | Role                          | Principal         | Purpose                     |
+| ---------------- | ----------------------------- | ----------------- | --------------------------- |
+| **Key Vault**    | Key Vault Secrets User        | App Service MI    | Read secrets at runtime     |
+| **Key Vault**    | Key Vault Administrator       | Admin User        | Manage secrets (admin only) |
+| **Cosmos DB**    | Cosmos DB Account Reader      | App Service MI    | Read/write data             |
+| **Blob Storage** | Storage Blob Data Contributor | App Service MI    | Upload/download media       |
+| **App Insights** | Monitoring Metrics Publisher  | App Service MI    | Write telemetry             |
+| **DNS Zone**     | DNS Zone Contributor          | GitHub Actions SP | Manage DNS records          |
 
 ### Service Principal Roles (CI/CD)
 
@@ -106,11 +106,11 @@ az role assignment create \
 
 For environments using access policies:
 
-| Principal | Secrets | Keys | Certificates |
-|-----------|---------|------|--------------|
-| App Service MI | Get, List | - | - |
-| Admin User | Get, List, Set, Delete | - | - |
-| GitHub Actions SP | Get, List | - | - |
+| Principal         | Secrets                | Keys | Certificates |
+| ----------------- | ---------------------- | ---- | ------------ |
+| App Service MI    | Get, List              | -    | -            |
+| Admin User        | Get, List, Set, Delete | -    | -            |
+| GitHub Actions SP | Get, List              | -    | -            |
 
 ### RBAC Model (Recommended)
 
@@ -139,12 +139,13 @@ az role assignment create \
 ```json
 {
   "KeyVault": {
-    "Name": ""  // Empty - secrets from local config or user-secrets
+    "Name": "" // Empty - secrets from local config or user-secrets
   }
 }
 ```
 
 Developers use:
+
 - `dotnet user-secrets` for local development
 - Azure CLI login (`az login`) if Key Vault is needed
 
@@ -197,6 +198,7 @@ services.AddSingleton(new BlobServiceClient(
 ### 3. Minimize Token Lifetime
 
 Configure short-lived tokens where possible:
+
 - Access tokens: 1 hour (Azure default)
 - Refresh tokens: As short as practical
 - Key rotation: Every 90 days (see secret-rotation.md)
@@ -257,6 +259,7 @@ az keyvault secret list \
 If migrating from access policies to RBAC:
 
 1. **Enable RBAC on Key Vault**:
+
    ```bash
    az keyvault update \
      --name mys-{env}-mystira-kv-san \

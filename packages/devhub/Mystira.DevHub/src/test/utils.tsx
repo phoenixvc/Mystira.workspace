@@ -7,7 +7,7 @@ import { vi } from "vitest";
  */
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, "wrapper">,
+  options?: Omit<RenderOptions, "wrapper">
 ) {
   return render(ui, { ...options });
 }

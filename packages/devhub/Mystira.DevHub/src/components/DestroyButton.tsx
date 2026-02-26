@@ -55,7 +55,7 @@ export function DestroyButton({
         acc[`--particle-outer-${i}-y`] = `${p.particleY}px`;
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     ),
     ...innerParticles.reduce(
       (acc, p, i) => {
@@ -63,7 +63,7 @@ export function DestroyButton({
         acc[`--particle-inner-${i}-y`] = `${p.particleY}px`;
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     ),
     ...sparkParticles.reduce(
       (acc, p, i) => {
@@ -71,7 +71,7 @@ export function DestroyButton({
         acc[`--particle-spark-${i}-y`] = `${p.particleY}px`;
         return acc;
       },
-      {} as Record<string, string>,
+      {} as Record<string, string>
     ),
   } as React.CSSProperties;
 

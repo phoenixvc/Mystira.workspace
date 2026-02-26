@@ -1,6 +1,6 @@
 // Attribution types that mirror backend API contracts
 
-import type { ApprovalStatus, ContributorRole } from './story';
+import type { ApprovalStatus, ContributorRole } from "./story";
 
 export interface Attribution {
   id: string;

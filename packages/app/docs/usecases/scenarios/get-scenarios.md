@@ -26,13 +26,13 @@ sequenceDiagram
     Client->>Controller: GET /api/scenarios<br/>?difficulty=Medium&ageGroup=teens&page=1&pageSize=10
     Controller->>Controller: Map query params<br/>to ScenarioQueryRequest
     Controller->>Service: GetScenariosAsync(request)
-    
+
     Service->>UseCase: ExecuteAsync(request)
-    
+
     Note over UseCase: Step 1: Get Queryable
     UseCase->>Repo: GetQueryable()
     Repo-->>UseCase: IQueryable<Scenario>
-    
+
     Note over UseCase: Step 2: Apply Filters
     alt Filter by Difficulty
         UseCase->>UseCase: query.Where(s => s.Difficulty == request.Difficulty)
@@ -55,23 +55,23 @@ sequenceDiagram
     alt Filter by CoreAxes
         UseCase->>UseCase: Parse core axes<br/>query.Where(s => CoreAxes.ContainsAny(parsed))
     end
-    
+
     Note over UseCase: Step 3: Get Total Count
     UseCase->>DB: CountAsync(query)
     DB-->>UseCase: totalCount
-    
+
     Note over UseCase: Step 4: Apply Pagination & Sorting
     UseCase->>UseCase: query.OrderByDescending(s => s.CreatedAt)<br/>.Skip((page-1) * pageSize)<br/>.Take(pageSize)
-    
+
     Note over UseCase: Step 5: Project to DTO
     UseCase->>UseCase: Select(s => new ScenarioSummary {<br/>  Id, Title, Description, Tags,<br/>  Difficulty, SessionLength,<br/>  Archetypes, MinimumAge,<br/>  AgeGroup, CoreAxes, CreatedAt<br/>})
-    
+
     UseCase->>DB: ToListAsync()
     DB-->>UseCase: List<ScenarioSummary>
-    
+
     Note over UseCase: Step 6: Build Response
     UseCase->>UseCase: new ScenarioListResponse {<br/>  Scenarios, TotalCount,<br/>  Page, PageSize, HasNextPage<br/>}
-    
+
     UseCase-->>Service: ScenarioListResponse
     Service-->>Controller: ScenarioListResponse
     Controller-->>Client: 200 OK<br/>(ScenarioListResponse)

@@ -8,53 +8,53 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 
 ## Key Vault Naming
 
-| Service | Key Vault Name | Resource Group |
-|---------|----------------|----------------|
-| Story-Generator | `mys-{env}-story-kv-san` | `mys-{env}-story-rg-san` |
-| Admin-API | `mys-{env}-adm-kv-san` | `mys-{env}-admin-rg-san` |
-| Publisher | `mys-{env}-pub-kv-san` | `mys-{env}-publisher-rg-san` |
-| Chain | `mys-{env}-chain-kv-san` | `mys-{env}-chain-rg-san` |
+| Service         | Key Vault Name           | Resource Group               |
+| --------------- | ------------------------ | ---------------------------- |
+| Story-Generator | `mys-{env}-story-kv-san` | `mys-{env}-story-rg-san`     |
+| Admin-API       | `mys-{env}-adm-kv-san`   | `mys-{env}-admin-rg-san`     |
+| Publisher       | `mys-{env}-pub-kv-san`   | `mys-{env}-publisher-rg-san` |
+| Chain           | `mys-{env}-chain-kv-san` | `mys-{env}-chain-rg-san`     |
 
 ## Secrets by Service
 
 ### Story-Generator
 
-| Secret Name | Source | Description |
-|-------------|--------|-------------|
-| `postgres-connection-string` | Shared PostgreSQL | Database connection string |
-| `redis-connection-string` | Shared Redis | Cache connection string |
+| Secret Name                     | Source            | Description                     |
+| ------------------------------- | ----------------- | ------------------------------- |
+| `postgres-connection-string`    | Shared PostgreSQL | Database connection string      |
+| `redis-connection-string`       | Shared Redis      | Cache connection string         |
 | `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
-| `azure-ai-endpoint` | Shared Azure AI | Azure AI Foundry endpoint URL |
-| `azure-ai-api-key` | Shared Azure AI | Azure AI Foundry API key |
+| `azure-ai-endpoint`             | Shared Azure AI   | Azure AI Foundry endpoint URL   |
+| `azure-ai-api-key`              | Shared Azure AI   | Azure AI Foundry API key        |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated from Terraform modules.
 
 ### Admin-API
 
-| Secret Name | Source | Description |
-|-------------|--------|-------------|
-| `postgres-connection-string` | Shared PostgreSQL | Database connection string |
-| `redis-connection-string` | Shared Redis | Cache connection string |
+| Secret Name                     | Source            | Description                     |
+| ------------------------------- | ----------------- | ------------------------------- |
+| `postgres-connection-string`    | Shared PostgreSQL | Database connection string      |
+| `redis-connection-string`       | Shared Redis      | Cache connection string         |
 | `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
-| `azure-ad-tenant-id` | Entra ID Module | Azure AD tenant ID |
-| `azure-ad-client-id` | Entra ID Module | Admin API client ID |
-| `admin-ui-client-id` | Entra ID Module | Admin UI client ID |
+| `azure-ad-tenant-id`            | Entra ID Module   | Azure AD tenant ID              |
+| `azure-ad-client-id`            | Entra ID Module   | Admin API client ID             |
+| `admin-ui-client-id`            | Entra ID Module   | Admin UI client ID              |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated from Terraform modules.
 
 ### Publisher
 
-| Secret Name | Source | Description |
-|-------------|--------|-------------|
-| `servicebus-connection-string` | Shared Service Bus | Message queue connection |
-| `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
+| Secret Name                     | Source             | Description                     |
+| ------------------------------- | ------------------ | ------------------------------- |
+| `servicebus-connection-string`  | Shared Service Bus | Message queue connection        |
+| `appinsights-connection-string` | Shared Monitoring  | Application Insights connection |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated.
 
 ### Chain
 
-| Secret Name | Source | Description |
-|-------------|--------|-------------|
+| Secret Name                     | Source            | Description                     |
+| ------------------------------- | ----------------- | ------------------------------- |
 | `appinsights-connection-string` | Shared Monitoring | Application Insights connection |
 
 **GitHub Secrets Required:** None - all secrets are auto-populated.
@@ -72,6 +72,7 @@ terraform apply
 ```
 
 This automatically creates:
+
 - All Key Vaults in service-specific RGs
 - All secrets from shared modules (PostgreSQL, Redis, Service Bus, Monitoring, Azure AI, Entra ID)
 
@@ -152,12 +153,14 @@ kubectl rollout restart deployment/mys-story-generator -n mystira
 ### Secret Not Found in Key Vault
 
 1. Check if Terraform has been applied:
+
    ```bash
    cd infra/terraform/environments/dev
    terraform plan
    ```
 
 2. Check if the Key Vault exists:
+
    ```bash
    az keyvault show --name "mys-dev-story-kv-san"
    ```
@@ -170,6 +173,7 @@ kubectl rollout restart deployment/mys-story-generator -n mystira
 ### Pod Cannot Access Secrets
 
 1. Verify Kubernetes secret exists:
+
    ```bash
    kubectl get secret mys-story-generator-secrets -n mystira
    ```
@@ -183,24 +187,24 @@ kubectl rollout restart deployment/mys-story-generator -n mystira
 
 All secrets are auto-populated from these Terraform modules:
 
-| Module | Secrets Provided |
-|--------|------------------|
-| `shared/postgresql` | postgres-connection-string |
-| `shared/redis` | redis-connection-string |
-| `shared/servicebus` | servicebus-connection-string |
-| `shared/monitoring` | appinsights-connection-string |
-| `shared/azure-ai` | azure-ai-endpoint, azure-ai-api-key |
-| `entra-id` | azure-ad-tenant-id, azure-ad-client-id, admin-ui-client-id |
+| Module              | Secrets Provided                                           |
+| ------------------- | ---------------------------------------------------------- |
+| `shared/postgresql` | postgres-connection-string                                 |
+| `shared/redis`      | redis-connection-string                                    |
+| `shared/servicebus` | servicebus-connection-string                               |
+| `shared/monitoring` | appinsights-connection-string                              |
+| `shared/azure-ai`   | azure-ai-endpoint, azure-ai-api-key                        |
+| `entra-id`          | azure-ad-tenant-id, azure-ad-client-id, admin-ui-client-id |
 
 ## Global Azure Secrets (CI/CD only)
 
 These secrets are only needed in GitHub Actions for infrastructure deployments:
 
-| Secret | Description |
-|--------|-------------|
-| `AZURE_CLIENT_ID` | Service principal client ID for deployments |
-| `AZURE_TENANT_ID` | Azure tenant ID |
-| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID |
+| Secret                  | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| `AZURE_CLIENT_ID`       | Service principal client ID for deployments |
+| `AZURE_TENANT_ID`       | Azure tenant ID                             |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID                       |
 
 ## Related Documentation
 

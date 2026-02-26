@@ -16,9 +16,9 @@ Extends `StringEnum<FantasyTheme>` - See [StringEnum Documentation](./string-enu
 
 ## Properties
 
-| Property      | Type     | Description                                    |
-| ------------- | -------- | ---------------------------------------------- |
-| `Value`       | `string` | Fantasy theme identifier (from StringEnum)     |
+| Property | Type     | Description                                |
+| -------- | -------- | ------------------------------------------ |
+| `Value`  | `string` | Fantasy theme identifier (from StringEnum) |
 
 ## JSON Configuration
 
@@ -82,4 +82,3 @@ Uses standard `StringEnum<T>` serialization (no custom converter):
 
 - [StringEnum Base Class](./string-enum.md)
 - [UserProfile Domain Model](./user-profile.md)
-

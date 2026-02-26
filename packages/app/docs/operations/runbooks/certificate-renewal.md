@@ -12,12 +12,12 @@ This runbook guides you through renewing SSL/TLS certificates for Mystira applic
 
 ## Certificate Locations
 
-| Domain | Certificate Type | Managed By |
-|--------|-----------------|------------|
-| mystira.app | Azure Front Door | Azure (auto-renew) |
-| api.mystira.app | App Service | Azure (auto-renew) |
-| *.mystira.app | Wildcard | Let's Encrypt/Manual |
-| Custom domains | Varies | Manual |
+| Domain          | Certificate Type | Managed By           |
+| --------------- | ---------------- | -------------------- |
+| mystira.app     | Azure Front Door | Azure (auto-renew)   |
+| api.mystira.app | App Service      | Azure (auto-renew)   |
+| \*.mystira.app  | Wildcard         | Let's Encrypt/Manual |
+| Custom domains  | Varies           | Manual               |
 
 ## Azure-Managed Certificates
 
@@ -162,6 +162,7 @@ curl -v https://mystira.app 2>&1 | grep "SSL certificate verify ok"
 ### Issue: Certificate validation failing
 
 **Resolution**:
+
 1. Verify DNS records are correct
 2. Check domain ownership
 3. Ensure no firewall blocking validation
@@ -170,6 +171,7 @@ curl -v https://mystira.app 2>&1 | grep "SSL certificate verify ok"
 ### Issue: Old certificate still being served
 
 **Resolution**:
+
 1. Clear browser cache
 2. Restart App Service
 3. Clear CDN/Front Door cache
@@ -178,6 +180,7 @@ curl -v https://mystira.app 2>&1 | grep "SSL certificate verify ok"
 ### Issue: Mixed content warnings
 
 **Resolution**:
+
 1. Ensure all resources loaded over HTTPS
 2. Update absolute URLs to use HTTPS
 3. Implement HSTS headers

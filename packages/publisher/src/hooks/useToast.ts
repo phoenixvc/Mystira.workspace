@@ -1,6 +1,6 @@
-import { useCallback } from 'react';
-import { useUIStore } from '@/state/uiStore';
-import type { ToastVariant } from '@/components/Toast';
+import { useCallback } from "react";
+import { useUIStore } from "@/state/uiStore";
+import type { ToastVariant } from "@/components/Toast";
 
 interface ToastOptions {
   variant?: ToastVariant;
@@ -8,12 +8,12 @@ interface ToastOptions {
 }
 
 export function useToast() {
-  const addNotification = useUIStore(state => state.addNotification);
+  const addNotification = useUIStore((state) => state.addNotification);
 
   const toast = useCallback(
     (title: string, message?: string, options?: ToastOptions) => {
       addNotification({
-        type: options?.variant || 'info',
+        type: options?.variant || "info",
         title,
         message,
         duration: options?.duration,
@@ -24,32 +24,31 @@ export function useToast() {
 
   const success = useCallback(
     (title: string, message?: string, duration?: number) => {
-      toast(title, message, { variant: 'success', duration });
+      toast(title, message, { variant: "success", duration });
     },
     [toast]
   );
 
   const error = useCallback(
     (title: string, message?: string, duration?: number) => {
-      toast(title, message, { variant: 'error', duration });
+      toast(title, message, { variant: "error", duration });
     },
     [toast]
   );
 
   const warning = useCallback(
     (title: string, message?: string, duration?: number) => {
-      toast(title, message, { variant: 'warning', duration });
+      toast(title, message, { variant: "warning", duration });
     },
     [toast]
   );
 
   const info = useCallback(
     (title: string, message?: string, duration?: number) => {
-      toast(title, message, { variant: 'info', duration });
+      toast(title, message, { variant: "info", duration });
     },
     [toast]
   );
 
   return { toast, success, error, warning, info };
 }
-

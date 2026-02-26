@@ -19,13 +19,13 @@ This guide provides comprehensive instructions for implementing SignalR WebSocke
 
 ### Decision Matrix
 
-| Component | Implement SignalR Hub? | Reason |
-|-----------|----------------------|--------|
-| **Admin API** (`packages/admin-api`) | ✅ **YES** | Primary backend for admin operations, content management, and real-time event broadcasting |
-| **Story Generator** (`packages/story-generator`) | ✅ **YES** | Long-running story generation needs real-time progress updates |
-| **Publisher** (`packages/publisher`) | ⚠️ **OPTIONAL** | Consider if content publishing needs real-time updates |
-| **Admin UI** (`packages/admin-ui`) | ✅ **CLIENT** | React client that consumes SignalR connections from Admin API |
-| **App** (`packages/app`) | ⚠️ **EVALUATE** | Depends on whether end-users need real-time features |
+| Component                                        | Implement SignalR Hub? | Reason                                                                                     |
+| ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------ |
+| **Admin API** (`packages/admin-api`)             | ✅ **YES**             | Primary backend for admin operations, content management, and real-time event broadcasting |
+| **Story Generator** (`packages/story-generator`) | ✅ **YES**             | Long-running story generation needs real-time progress updates                             |
+| **Publisher** (`packages/publisher`)             | ⚠️ **OPTIONAL**        | Consider if content publishing needs real-time updates                                     |
+| **Admin UI** (`packages/admin-ui`)               | ✅ **CLIENT**          | React client that consumes SignalR connections from Admin API                              |
+| **App** (`packages/app`)                         | ⚠️ **EVALUATE**        | Depends on whether end-users need real-time features                                       |
 
 ### Recommended Approach
 
@@ -94,7 +94,7 @@ public class EventsHub : Hub
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         var userId = Context.User?.FindFirst("sub")?.Value;
-        
+
         if (exception != null)
         {
             _logger.LogWarning(
@@ -179,7 +179,7 @@ public class EventNotificationService : IEventNotificationService
     public async Task NotifyScenarioUpdatedAsync(string scenarioId, object data)
     {
         _logger.LogDebug("Broadcasting scenario update: {ScenarioId}", scenarioId);
-        
+
         await _hubContext.Clients.All.SendAsync(
             "ScenarioUpdated",
             new { scenarioId, data, timestamp = DateTimeOffset.UtcNow });
@@ -188,7 +188,7 @@ public class EventNotificationService : IEventNotificationService
     public async Task NotifyContentPublishedAsync(string contentId, object data)
     {
         _logger.LogDebug("Broadcasting content published: {ContentId}", contentId);
-        
+
         await _hubContext.Clients.All.SendAsync(
             "ContentPublished",
             new { contentId, data, timestamp = DateTimeOffset.UtcNow });
@@ -197,7 +197,7 @@ public class EventNotificationService : IEventNotificationService
     public async Task NotifyUserActivityAsync(string userId, object data)
     {
         _logger.LogDebug("Broadcasting user activity: {UserId}", userId);
-        
+
         await _hubContext.Clients.All.SendAsync(
             "UserActivity",
             new { userId, data, timestamp = DateTimeOffset.UtcNow });
@@ -206,7 +206,7 @@ public class EventNotificationService : IEventNotificationService
     public async Task NotifyAllAsync(string eventType, object data)
     {
         _logger.LogDebug("Broadcasting event to all clients: {EventType}", eventType);
-        
+
         await _hubContext.Clients.All.SendAsync(
             eventType,
             new { data, timestamp = DateTimeOffset.UtcNow });
@@ -218,7 +218,7 @@ public class EventNotificationService : IEventNotificationService
             "Broadcasting event to group: Group={GroupName}, EventType={EventType}",
             groupName,
             eventType);
-        
+
         await _hubContext.Clients.Group(groupName).SendAsync(
             eventType,
             new { data, timestamp = DateTimeOffset.UtcNow });
@@ -243,7 +243,7 @@ builder.Services.AddSignalR(options =>
     options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
     options.KeepAliveInterval = TimeSpan.FromSeconds(15);
     options.HandshakeTimeout = TimeSpan.FromSeconds(15);
-    
+
     // Enable detailed errors in development
     options.EnableDetailedErrors = builder.Environment.IsDevelopment();
 })
@@ -305,7 +305,7 @@ public class ScenarioService
     public async Task UpdateScenarioAsync(Scenario scenario)
     {
         await _repository.UpdateAsync(scenario);
-        
+
         // Broadcast update to all connected clients
         await _eventService.NotifyScenarioUpdatedAsync(
             scenario.Id,
@@ -340,8 +340,8 @@ public class ScenarioService
 **`packages/admin-ui/src/hooks/useSignalR.ts`**:
 
 ```typescript
-import { useEffect, useRef, useState, useCallback } from 'react';
-import * as signalR from '@microsoft/signalr';
+import { useEffect, useRef, useState, useCallback } from "react";
+import * as signalR from "@microsoft/signalr";
 
 interface UseSignalROptions {
   hubUrl: string;
@@ -383,18 +383,21 @@ export function useSignalR({
       // Build connection
       const connection = new signalR.HubConnectionBuilder()
         .withUrl(hubUrl, {
-          accessTokenFactory: () => accessToken || '',
+          accessTokenFactory: () => accessToken || "",
           skipNegotiation: false,
           transport: signalR.HttpTransportType.WebSockets,
         })
         .withAutomaticReconnect({
           nextRetryDelayInMilliseconds: (retryContext) => {
             // Exponential backoff with max delay
-            return Math.min(1000 * Math.pow(2, retryContext.previousRetryCount), reconnectDelay);
+            return Math.min(
+              1000 * Math.pow(2, retryContext.previousRetryCount),
+              reconnectDelay
+            );
           },
         })
         .configureLogging(
-          process.env.NODE_ENV === 'development'
+          process.env.NODE_ENV === "development"
             ? signalR.LogLevel.Debug
             : signalR.LogLevel.Warning
         )
@@ -402,19 +405,19 @@ export function useSignalR({
 
       // Setup event handlers
       connection.onreconnecting((error) => {
-        console.warn('SignalR reconnecting...', error);
+        console.warn("SignalR reconnecting...", error);
         setIsConnected(false);
         setError(error || null);
       });
 
       connection.onreconnected((connectionId) => {
-        console.info('SignalR reconnected:', connectionId);
+        console.info("SignalR reconnected:", connectionId);
         setIsConnected(true);
         setError(null);
       });
 
       connection.onclose((error) => {
-        console.error('SignalR connection closed', error);
+        console.error("SignalR connection closed", error);
         setIsConnected(false);
         setError(error || null);
       });
@@ -431,10 +434,10 @@ export function useSignalR({
       setIsConnected(true);
       setError(null);
 
-      console.info('SignalR connected:', connection.connectionId);
+      console.info("SignalR connected:", connection.connectionId);
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      console.error('SignalR connection failed:', error);
+      console.error("SignalR connection failed:", error);
       setError(error);
       setIsConnected(false);
     }
@@ -448,23 +451,26 @@ export function useSignalR({
         setIsConnected(false);
         setError(null);
       } catch (err) {
-        console.error('Error disconnecting SignalR:', err);
+        console.error("Error disconnecting SignalR:", err);
       }
     }
   }, []);
 
-  const on = useCallback((eventName: string, callback: (...args: any[]) => void) => {
-    // Store handler for reconnection
-    if (!eventHandlersRef.current.has(eventName)) {
-      eventHandlersRef.current.set(eventName, new Set());
-    }
-    eventHandlersRef.current.get(eventName)!.add(callback);
+  const on = useCallback(
+    (eventName: string, callback: (...args: any[]) => void) => {
+      // Store handler for reconnection
+      if (!eventHandlersRef.current.has(eventName)) {
+        eventHandlersRef.current.set(eventName, new Set());
+      }
+      eventHandlersRef.current.get(eventName)!.add(callback);
 
-    // Register with connection if connected
-    if (connectionRef.current) {
-      connectionRef.current.on(eventName, callback);
-    }
-  }, []);
+      // Register with connection if connected
+      if (connectionRef.current) {
+        connectionRef.current.on(eventName, callback);
+      }
+    },
+    []
+  );
 
   const off = useCallback((eventName: string) => {
     // Remove from stored handlers
@@ -479,7 +485,7 @@ export function useSignalR({
   const invoke = useCallback(
     async <T = any>(methodName: string, ...args: any[]): Promise<T> => {
       if (!connectionRef.current) {
-        throw new Error('SignalR connection not established');
+        throw new Error("SignalR connection not established");
       }
       return connectionRef.current.invoke<T>(methodName, ...args);
     },
@@ -514,8 +520,8 @@ export function useSignalR({
 **`packages/admin-ui/src/hooks/useEventListener.ts`**:
 
 ```typescript
-import { useEffect } from 'react';
-import { useSignalR } from './useSignalR';
+import { useEffect } from "react";
+import { useSignalR } from "./useSignalR";
 
 interface UseEventListenerOptions<T> {
   eventName: string;
@@ -530,7 +536,7 @@ export function useEventListener<T = any>({
 }: UseEventListenerOptions<T>) {
   const signalR = useSignalR({
     hubUrl: `${import.meta.env.VITE_API_URL}/hubs/events`,
-    accessToken: localStorage.getItem('access_token') || undefined,
+    accessToken: localStorage.getItem("access_token") || undefined,
   });
 
   useEffect(() => {
@@ -792,6 +798,7 @@ terraform output front_door_custom_domain_verification
 ```
 
 Example output:
+
 ```
 front_door_admin_api_endpoint = "mystira-dev-admin-api-abc123.z01.azurefd.net"
 front_door_admin_ui_endpoint = "mystira-dev-admin-ui-abc123.z01.azurefd.net"
@@ -802,12 +809,14 @@ front_door_admin_ui_endpoint = "mystira-dev-admin-ui-abc123.z01.azurefd.net"
 Update your DNS provider (e.g., Cloudflare, Azure DNS, Route53) to point to Front Door:
 
 **Before (direct to AKS ingress)**:
+
 ```
 dev.admin-api.mystira.app  A     20.123.45.67  (NGINX Ingress IP)
 dev.admin.mystira.app      A     20.123.45.67  (NGINX Ingress IP)
 ```
 
 **After (through Front Door)**:
+
 ```
 dev.admin-api.mystira.app  CNAME  mystira-dev-admin-api-abc123.z01.azurefd.net
 dev.admin.mystira.app      CNAME  mystira-dev-admin-ui-abc123.z01.azurefd.net
@@ -864,6 +873,7 @@ terraform output front_door_custom_domain_verification
 ```
 
 Example output:
+
 ```json
 {
   "admin-api": {
@@ -939,6 +949,7 @@ az afd custom-domain show \
 ```
 
 **Typical timeline**:
+
 - DNS propagation: 5-30 minutes
 - Domain validation: 10-60 minutes
 - Certificate issuance: 30-120 minutes
@@ -946,6 +957,7 @@ az afd custom-domain show \
 **Total time**: 45 minutes to 3 hours
 
 **Monitor via Azure Portal**:
+
 1. Navigate to Front Door profile
 2. Go to "Domains"
 3. Check "Certificate Status" column
@@ -974,7 +986,7 @@ wscat -c wss://dev.admin-api.mystira.app/hubs/events
 const connection = new signalR.HubConnectionBuilder()
   .withUrl("https://dev.admin-api.mystira.app/hubs/events", {
     accessTokenFactory: () => "YOUR_AUTH_TOKEN",
-    transport: signalR.HttpTransportType.WebSockets
+    transport: signalR.HttpTransportType.WebSockets,
   })
   .configureLogging(signalR.LogLevel.Debug)
   .build();
@@ -1016,11 +1028,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.All;
-    
+
     // Trust Front Door forwarded headers
     options.KnownNetworks.Clear();
     options.KnownProxies.Clear();
-    
+
     // Front Door sends client IP in X-Azure-ClientIP
     options.ForwardedForHeaderName = "X-Forwarded-For";
     options.OriginalHostHeaderName = "X-Original-Host";
@@ -1111,6 +1123,7 @@ module "front_door" {
 #### Environment-Specific Configuration
 
 **Development**:
+
 ```hcl
 enable_admin_services = true
 waf_mode              = "Detection"  # Don't block during testing
@@ -1118,6 +1131,7 @@ cache_duration_seconds = 1800        # 30 minutes
 ```
 
 **Staging**:
+
 ```hcl
 enable_admin_services = true
 waf_mode              = "Prevention"
@@ -1125,6 +1139,7 @@ cache_duration_seconds = 3600        # 1 hour
 ```
 
 **Production**:
+
 ```hcl
 enable_admin_services = true
 waf_mode              = "Prevention"
@@ -1304,14 +1319,14 @@ public class SignalRIntegrationTests : IAsyncLifetime
 **`packages/admin-ui/src/hooks/__tests__/useSignalR.test.ts`**:
 
 ```typescript
-import { renderHook, waitFor } from '@testing-library/react';
-import { useSignalR } from '../useSignalR';
+import { renderHook, waitFor } from "@testing-library/react";
+import { useSignalR } from "../useSignalR";
 
-describe('useSignalR', () => {
-  it('should connect to SignalR hub', async () => {
+describe("useSignalR", () => {
+  it("should connect to SignalR hub", async () => {
     const { result } = renderHook(() =>
       useSignalR({
-        hubUrl: 'http://localhost:5000/hubs/events',
+        hubUrl: "http://localhost:5000/hubs/events",
         autoConnect: true,
       })
     );
@@ -1321,16 +1336,16 @@ describe('useSignalR', () => {
     });
   });
 
-  it('should receive events', async () => {
+  it("should receive events", async () => {
     const { result } = renderHook(() =>
       useSignalR({
-        hubUrl: 'http://localhost:5000/hubs/events',
+        hubUrl: "http://localhost:5000/hubs/events",
         autoConnect: true,
       })
     );
 
     const events: any[] = [];
-    result.current.on('TestEvent', (data) => {
+    result.current.on("TestEvent", (data) => {
       events.push(data);
     });
 
@@ -1351,7 +1366,7 @@ describe('useSignalR', () => {
 // SignalR connection metrics
 customMetrics
 | where name startswith "signalr"
-| summarize 
+| summarize
     AvgConnections = avg(value),
     MaxConnections = max(value)
     by bin(timestamp, 5m), name
@@ -1435,7 +1450,7 @@ function useRealTimeData() {
   useEffect(() => {
     if (signalR.isConnected) {
       setUsingFallback(false);
-      signalR.on('DataUpdated', setData);
+      signalR.on("DataUpdated", setData);
     }
   }, [signalR]);
 
@@ -1444,7 +1459,7 @@ function useRealTimeData() {
     if (signalR.error && !signalR.isConnected) {
       setUsingFallback(true);
       const interval = setInterval(async () => {
-        const response = await fetch('/api/data');
+        const response = await fetch("/api/data");
         setData(await response.json());
       }, 10000); // Slower polling as fallback
 
@@ -1463,11 +1478,13 @@ function useRealTimeData() {
 ### Security
 
 1. **Always require authentication**:
+
    ```csharp
    [Authorize] // On hub class
    ```
 
 2. **Validate user access in hub methods**:
+
    ```csharp
    public async Task JoinGroup(string groupName)
    {

@@ -47,6 +47,7 @@ builder.Services.AddWhatsAppBotAsDefault(builder.Configuration);
 ```
 
 **Inject normally:**
+
 ```csharp
 public class MyService(IChatBotService chatBot)
 {
@@ -69,6 +70,7 @@ builder.Services.AddWhatsAppBotKeyed(builder.Configuration, "whatsapp");
 ```
 
 **Inject with keys:**
+
 ```csharp
 public class NotificationService
 {
@@ -219,12 +221,12 @@ builder.Services.AddHealthChecks()
 
 ## Troubleshooting
 
-| Issue | Platform | Solution |
-|-------|----------|----------|
-| "Bot is not connected" | All | Ensure `StartAsync()` was called or use hosted service |
-| "No conversation reference" | Teams/WhatsApp | Requires prior user interaction |
-| Rate limited | Discord | Built-in retry with exponential backoff |
-| Template required | WhatsApp | Use `SendTemplateMessageAsync()` after 24h |
+| Issue                       | Platform       | Solution                                               |
+| --------------------------- | -------------- | ------------------------------------------------------ |
+| "Bot is not connected"      | All            | Ensure `StartAsync()` was called or use hosted service |
+| "No conversation reference" | Teams/WhatsApp | Requires prior user interaction                        |
+| Rate limited                | Discord        | Built-in retry with exponential backoff                |
+| Template required           | WhatsApp       | Use `SendTemplateMessageAsync()` after 24h             |
 
 ## See Also
 

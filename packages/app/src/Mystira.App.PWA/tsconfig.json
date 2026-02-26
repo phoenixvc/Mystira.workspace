@@ -17,14 +17,6 @@
     "outDir": "./wwwroot/js",
     "rootDir": "./wwwroot/ts"
   },
-  "include": [
-    "wwwroot/ts/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "wwwroot/js",
-    "bin",
-    "obj"
-  ]
+  "include": ["wwwroot/ts/**/*"],
+  "exclude": ["node_modules", "wwwroot/js", "bin", "obj"]
 }
-

@@ -38,7 +38,7 @@ export function useDeploymentStatus({
         {
           environment,
           resourceGroup,
-        },
+        }
       );
 
       if (response.success && response.result) {

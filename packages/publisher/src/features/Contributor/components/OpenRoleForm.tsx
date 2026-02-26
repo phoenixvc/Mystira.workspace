@@ -1,6 +1,10 @@
-import { useState } from 'react';
-import { Button, Input, Select, Modal } from '@/components';
-import type { OpenRole, CreateOpenRoleRequest, ContributorRole } from '@/api/types';
+import { useState } from "react";
+import { Button, Input, Select, Modal } from "@/components";
+import type {
+  OpenRole,
+  CreateOpenRoleRequest,
+  ContributorRole,
+} from "@/api/types";
 
 interface OpenRoleFormProps {
   storyId: string;
@@ -11,12 +15,12 @@ interface OpenRoleFormProps {
 }
 
 const ROLE_OPTIONS = [
-  { value: 'primary_author', label: 'Primary Author' },
-  { value: 'co_author', label: 'Co-Author' },
-  { value: 'illustrator', label: 'Illustrator' },
-  { value: 'editor', label: 'Editor' },
-  { value: 'moderator', label: 'Moderator' },
-  { value: 'publisher', label: 'Publisher' },
+  { value: "primary_author", label: "Primary Author" },
+  { value: "co_author", label: "Co-Author" },
+  { value: "illustrator", label: "Illustrator" },
+  { value: "editor", label: "Editor" },
+  { value: "moderator", label: "Moderator" },
+  { value: "publisher", label: "Publisher" },
 ];
 
 export function OpenRoleForm({
@@ -26,12 +30,20 @@ export function OpenRoleForm({
   onSubmit,
   onCancel,
 }: OpenRoleFormProps) {
-  const [role, setRole] = useState<ContributorRole>(initialData?.role ?? 'co_author');
-  const [splitPercentage, setSplitPercentage] = useState(initialData?.splitPercentage ?? 10);
-  const [description, setDescription] = useState(initialData?.description ?? '');
-  const [requirements, setRequirements] = useState(initialData?.requirements ?? '');
+  const [role, setRole] = useState<ContributorRole>(
+    initialData?.role ?? "co_author"
+  );
+  const [splitPercentage, setSplitPercentage] = useState(
+    initialData?.splitPercentage ?? 10
+  );
+  const [description, setDescription] = useState(
+    initialData?.description ?? ""
+  );
+  const [requirements, setRequirements] = useState(
+    initialData?.requirements ?? ""
+  );
   const [deadline, setDeadline] = useState(
-    initialData?.deadline ? initialData.deadline.split('T')[0] : ''
+    initialData?.deadline ? initialData.deadline.split("T")[0] : ""
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,7 +69,7 @@ export function OpenRoleForm({
     <Modal
       isOpen
       onClose={onCancel}
-      title={initialData ? 'Edit Open Role' : 'Create Open Role'}
+      title={initialData ? "Edit Open Role" : "Create Open Role"}
       size="md"
     >
       <form onSubmit={handleSubmit} className="open-role-form">
@@ -69,7 +81,7 @@ export function OpenRoleForm({
           label="Role"
           options={ROLE_OPTIONS}
           value={role}
-          onChange={e => setRole(e.target.value as ContributorRole)}
+          onChange={(e) => setRole(e.target.value as ContributorRole)}
           required
         />
 
@@ -81,7 +93,7 @@ export function OpenRoleForm({
             max={100}
             step={0.1}
             value={splitPercentage}
-            onChange={e => setSplitPercentage(Number(e.target.value))}
+            onChange={(e) => setSplitPercentage(Number(e.target.value))}
             required
           />
           <input
@@ -90,7 +102,7 @@ export function OpenRoleForm({
             max={100}
             step={0.1}
             value={splitPercentage}
-            onChange={e => setSplitPercentage(Number(e.target.value))}
+            onChange={(e) => setSplitPercentage(Number(e.target.value))}
             className="open-role-form__slider"
           />
         </div>
@@ -102,7 +114,7 @@ export function OpenRoleForm({
           <textarea
             id="description"
             value={description}
-            onChange={e => setDescription(e.target.value)}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="Describe what you're looking for in this role..."
             rows={3}
             className="input"
@@ -116,7 +128,7 @@ export function OpenRoleForm({
           <textarea
             id="requirements"
             value={requirements}
-            onChange={e => setRequirements(e.target.value)}
+            onChange={(e) => setRequirements(e.target.value)}
             placeholder="List any specific requirements or qualifications..."
             rows={3}
             className="input"
@@ -127,8 +139,8 @@ export function OpenRoleForm({
           label="Application Deadline (optional)"
           type="date"
           value={deadline}
-          onChange={e => setDeadline(e.target.value)}
-          min={new Date().toISOString().split('T')[0]}
+          onChange={(e) => setDeadline(e.target.value)}
+          min={new Date().toISOString().split("T")[0]}
         />
 
         <div className="open-role-form__actions">
@@ -136,11 +148,10 @@ export function OpenRoleForm({
             Cancel
           </Button>
           <Button type="submit" loading={isSubmitting}>
-            {initialData ? 'Update' : 'Create'} Open Role
+            {initialData ? "Update" : "Create"} Open Role
           </Button>
         </div>
       </form>
     </Modal>
   );
 }
-

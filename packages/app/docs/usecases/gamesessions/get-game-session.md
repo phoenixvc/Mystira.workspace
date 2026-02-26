@@ -26,7 +26,7 @@ sequenceDiagram
 
     Client->>Controller: GET /api/gamesessions/{id}
     Controller->>Service: GetSessionAsync(sessionId)
-    
+
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session by ID
     alt Session Not Found
@@ -58,6 +58,7 @@ sequenceDiagram
 ## Authorization Considerations
 
 **Future Enhancement**: Should verify:
+
 - Session belongs to requesting account
 - User has permission to view session
 - COPPA compliance (parent access to child profiles)
@@ -77,4 +78,3 @@ sequenceDiagram
 
 - [Create Game Session Use Case](./create-game-session.md)
 - [Game Session Domain Model](../../domain/models/game-session.md)
-

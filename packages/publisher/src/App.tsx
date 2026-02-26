@@ -1,30 +1,54 @@
-import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { ErrorBoundary, Spinner, ToastContainer } from '@/components';
-import { useUIStore } from '@/state/uiStore';
-import { Layout } from './Layout';
-import { ProtectedRoute } from './ProtectedRoute';
+import { lazy, Suspense } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { ErrorBoundary, Spinner, ToastContainer } from "@/components";
+import { useUIStore } from "@/state/uiStore";
+import { Layout } from "./Layout";
+import { ProtectedRoute } from "./ProtectedRoute";
 
 // Lazy load pages for code splitting
-const HomePage = lazy(() => import('@/pages/HomePage').then(m => ({ default: m.HomePage })));
-const LoginPage = lazy(() => import('@/pages/LoginPage').then(m => ({ default: m.LoginPage })));
-const DashboardPage = lazy(() => import('@/pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
-const StoriesPage = lazy(() => import('@/pages/StoriesPage').then(m => ({ default: m.StoriesPage })));
-const StoryDetailPage = lazy(() => import('@/pages/StoryDetailPage').then(m => ({ default: m.StoryDetailPage })));
-const RegisterPage = lazy(() => import('@/pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
-const AuditPage = lazy(() => import('@/pages/AuditPage').then(m => ({ default: m.AuditPage })));
-const OpenRolesPage = lazy(() => import('@/pages/OpenRolesPage').then(m => ({ default: m.OpenRolesPage })));
-const RoleRequestsPage = lazy(() => import('@/pages/RoleRequestsPage').then(m => ({ default: m.RoleRequestsPage })));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const HomePage = lazy(() =>
+  import("@/pages/HomePage").then((m) => ({ default: m.HomePage }))
+);
+const LoginPage = lazy(() =>
+  import("@/pages/LoginPage").then((m) => ({ default: m.LoginPage }))
+);
+const DashboardPage = lazy(() =>
+  import("@/pages/DashboardPage").then((m) => ({ default: m.DashboardPage }))
+);
+const StoriesPage = lazy(() =>
+  import("@/pages/StoriesPage").then((m) => ({ default: m.StoriesPage }))
+);
+const StoryDetailPage = lazy(() =>
+  import("@/pages/StoryDetailPage").then((m) => ({
+    default: m.StoryDetailPage,
+  }))
+);
+const RegisterPage = lazy(() =>
+  import("@/pages/RegisterPage").then((m) => ({ default: m.RegisterPage }))
+);
+const AuditPage = lazy(() =>
+  import("@/pages/AuditPage").then((m) => ({ default: m.AuditPage }))
+);
+const OpenRolesPage = lazy(() =>
+  import("@/pages/OpenRolesPage").then((m) => ({ default: m.OpenRolesPage }))
+);
+const RoleRequestsPage = lazy(() =>
+  import("@/pages/RoleRequestsPage").then((m) => ({
+    default: m.RoleRequestsPage,
+  }))
+);
+const NotFoundPage = lazy(() =>
+  import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage }))
+);
 
 function AppContent() {
-  const notifications = useUIStore(state => state.notifications);
-  const removeNotification = useUIStore(state => state.removeNotification);
+  const notifications = useUIStore((state) => state.notifications);
+  const removeNotification = useUIStore((state) => state.removeNotification);
 
   // Convert UI notifications to toast format
-  const toasts = notifications.map(n => ({
+  const toasts = notifications.map((n) => ({
     id: n.id,
-    variant: n.type as 'success' | 'error' | 'warning' | 'info',
+    variant: n.type as "success" | "error" | "warning" | "info",
     title: n.title,
     message: n.message,
     duration: n.duration,
@@ -32,11 +56,13 @@ function AppContent() {
 
   return (
     <>
-      <Suspense fallback={
-        <div className="page page--loading">
-          <Spinner size="lg" />
-        </div>
-      }>
+      <Suspense
+        fallback={
+          <div className="page page--loading">
+            <Spinner size="lg" />
+          </div>
+        }
+      >
         <Routes>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />

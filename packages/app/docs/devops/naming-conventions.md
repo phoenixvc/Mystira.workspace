@@ -12,69 +12,69 @@ All Azure resources follow this naming pattern:
 
 ### Components
 
-| Component | Description | Example |
-|-----------|-------------|---------|
-| `org` | Organisation code | `mys`, `nl`, `pvc`, `tws` |
-| `env` | Environment | `dev`, `staging`, `prod` |
-| `project` | Project name | `mystira`, `website`, `api` |
-| `type` | Resource type abbreviation | `rg`, `st`, `cosmos`, `api` |
-| `region` | Azure region code | `san`, `eus2`, `euw` |
+| Component | Description                | Example                     |
+| --------- | -------------------------- | --------------------------- |
+| `org`     | Organisation code          | `mys`, `nl`, `pvc`, `tws`   |
+| `env`     | Environment                | `dev`, `staging`, `prod`    |
+| `project` | Project name               | `mystira`, `website`, `api` |
+| `type`    | Resource type abbreviation | `rg`, `st`, `cosmos`, `api` |
+| `region`  | Azure region code          | `san`, `eus2`, `euw`        |
 
 ## Organisation Codes
 
-| Code | Organisation | Owner |
-|------|--------------|-------|
-| `mys` | Mystira | Eben |
-| `nl` | NeuralLiquid | Jurie |
-| `pvc` | Phoenix VC | Eben |
+| Code  | Organisation    | Owner  |
+| ----- | --------------- | ------ |
+| `mys` | Mystira         | Eben   |
+| `nl`  | NeuralLiquid    | Jurie  |
+| `pvc` | Phoenix VC      | Eben   |
 | `tws` | Twines & Straps | Martyn |
 
 ## Environment Codes
 
-| Code | Environment | Description |
-|------|-------------|-------------|
-| `dev` | Development | Development and testing |
-| `staging` | Staging | Pre-production validation |
-| `prod` | Production | Live production environment |
+| Code      | Environment | Description                 |
+| --------- | ----------- | --------------------------- |
+| `dev`     | Development | Development and testing     |
+| `staging` | Staging     | Pre-production validation   |
+| `prod`    | Production  | Live production environment |
 
 ## Region Codes
 
-| Code | Azure Region | Location | Notes |
-|------|--------------|----------|-------|
-| `san` | southafricanorth | South Africa North | **PRIMARY** |
-| `eus2` | eastus2 | East US 2 | Fallback for SWA |
-| `euw` | westeurope | West Europe (Netherlands) | |
-| `eun` | northeurope | North Europe (Ireland) | |
-| `wus` | westus | West US | |
-| `eus` | eastus | East US | |
-| `swe` | swedencentral | Sweden Central | |
-| `uks` | uksouth | UK South | |
-| `usw` | westus2 | West US 2 | |
-| `glob` | global | Global/non-regional resources | ACS, Bot |
+| Code   | Azure Region     | Location                      | Notes            |
+| ------ | ---------------- | ----------------------------- | ---------------- |
+| `san`  | southafricanorth | South Africa North            | **PRIMARY**      |
+| `eus2` | eastus2          | East US 2                     | Fallback for SWA |
+| `euw`  | westeurope       | West Europe (Netherlands)     |                  |
+| `eun`  | northeurope      | North Europe (Ireland)        |                  |
+| `wus`  | westus           | West US                       |                  |
+| `eus`  | eastus           | East US                       |                  |
+| `swe`  | swedencentral    | Sweden Central                |                  |
+| `uks`  | uksouth          | UK South                      |                  |
+| `usw`  | westus2          | West US 2                     |                  |
+| `glob` | global           | Global/non-regional resources | ACS, Bot         |
 
 ## Resource Type Abbreviations
 
-| Abbreviation | Resource Type |
-|--------------|---------------|
-| `rg` | Resource Group |
-| `st` | Storage Account |
-| `cosmos` | Cosmos DB |
-| `api` | App Service (API) |
-| `web` | App Service (Web) |
-| `func` | Function App |
-| `plan` | App Service Plan |
-| `kv` | Key Vault |
-| `log` | Log Analytics Workspace |
-| `appins` | Application Insights |
-| `bot` | Azure Bot |
-| `comm` | Communication Services |
-| `sql` | SQL Database |
-| `redis` | Redis Cache |
-| `sb` | Service Bus |
-| `eh` | Event Hub |
-| `apim` | API Management |
-| `acr` | Container Registry |
-| `aks` | Kubernetes Service |
+| Abbreviation | Resource Type           |
+| ------------ | ----------------------- |
+| `rg`         | Resource Group          |
+| `st`         | Storage Account         |
+| `cosmos`     | Cosmos DB               |
+| `api`        | App Service (API)       |
+| `web`        | App Service (Web)       |
+| `func`       | Function App            |
+| `plan`       | App Service Plan        |
+| `kv`         | Key Vault               |
+| `log`        | Log Analytics Workspace |
+| `appins`     | Application Insights    |
+| `bot`        | Azure Bot               |
+| `comm`       | Communication Services  |
+| `sql`        | SQL Database            |
+| `redis`      | Redis Cache             |
+| `sb`         | Service Bus             |
+| `eh`         | Event Hub               |
+| `apim`       | API Management          |
+| `acr`        | Container Registry      |
+| `aks`        | Kubernetes Service      |
 
 ## Examples
 

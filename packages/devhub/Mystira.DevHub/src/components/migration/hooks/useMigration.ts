@@ -33,7 +33,7 @@ export function useMigration() {
   // Connection string validation
   const validateConnectionString = (
     connStr: string | null | undefined,
-    type: "cosmos" | "storage",
+    type: "cosmos" | "storage"
   ): string | null => {
     if (!connStr?.trim()) {
       return `${type === "cosmos" ? "Cosmos DB" : "Storage"} connection string is required`;
@@ -62,7 +62,7 @@ export function useMigration() {
 
   const validateConfig = (
     config: MigrationConfig,
-    selectedResources: ResourceSelection,
+    selectedResources: ResourceSelection
   ): string | null => {
     // Check if any Cosmos DB migration is selected
     const needsCosmos =
@@ -90,7 +90,7 @@ export function useMigration() {
       // Validate connection string formats
       const sourceCosmosError = validateConnectionString(
         config.sourceCosmosConnection,
-        "cosmos",
+        "cosmos"
       );
       if (sourceCosmosError) {
         return `Source Cosmos DB: ${sourceCosmosError}`;
@@ -98,7 +98,7 @@ export function useMigration() {
 
       const destCosmosError = validateConnectionString(
         config.destCosmosConnection,
-        "cosmos",
+        "cosmos"
       );
       if (destCosmosError) {
         return `Destination Cosmos DB: ${destCosmosError}`;
@@ -116,7 +116,7 @@ export function useMigration() {
 
       const destCosmosError = validateConnectionString(
         config.destCosmosConnection,
-        "cosmos",
+        "cosmos"
       );
       if (destCosmosError) {
         return `Destination Cosmos DB: ${destCosmosError}`;
@@ -135,7 +135,7 @@ export function useMigration() {
       // Validate storage connection strings
       const sourceStorageError = validateConnectionString(
         config.sourceStorageConnection,
-        "storage",
+        "storage"
       );
       if (sourceStorageError) {
         return `Source Storage: ${sourceStorageError}`;
@@ -143,7 +143,7 @@ export function useMigration() {
 
       const destStorageError = validateConnectionString(
         config.destStorageConnection,
-        "storage",
+        "storage"
       );
       if (destStorageError) {
         return `Destination Storage: ${destStorageError}`;
@@ -163,7 +163,7 @@ export function useMigration() {
 
   // Get list of operations to run based on selected resources
   const getOperations = (
-    selectedResources: ResourceSelection,
+    selectedResources: ResourceSelection
   ): Array<{ type: string; name: string; parallel?: boolean }> => {
     const ops: Array<{ type: string; name: string; parallel?: boolean }> = [];
 
@@ -252,7 +252,7 @@ export function useMigration() {
   const runMigration = async (
     config: MigrationConfig,
     selectedResources: ResourceSelection,
-    useParallel: boolean = true,
+    useParallel: boolean = true
   ): Promise<MigrationResponse> => {
     abortRef.current = false;
     setIsCancelled(false);
@@ -278,7 +278,7 @@ export function useMigration() {
 
       const migrateResource = async (
         type: string,
-        _operationName: string,
+        _operationName: string
       ): Promise<MigrationResult | null> => {
         if (abortRef.current) {
           return null;
@@ -318,7 +318,7 @@ export function useMigration() {
             migrateResource(op.type, op.name).then((result) => ({
               op,
               result,
-            })),
+            }))
           );
 
           const parallelResults = await Promise.all(parallelPromises);
@@ -337,7 +337,7 @@ export function useMigration() {
             ...prev,
             completedOperations: [...completedOps],
             percentComplete: Math.round(
-              (completedOps.length / operations.length) * 100,
+              (completedOps.length / operations.length) * 100
             ),
             itemsProcessed: totalSuccess + totalFailures,
             itemsTotal: totalItems,
@@ -366,7 +366,7 @@ export function useMigration() {
             ...prev,
             completedOperations: [...completedOps],
             percentComplete: Math.round(
-              (completedOps.length / operations.length) * 100,
+              (completedOps.length / operations.length) * 100
             ),
             itemsProcessed: totalSuccess + totalFailures,
             itemsTotal: totalItems,
@@ -395,7 +395,7 @@ export function useMigration() {
             ...prev,
             completedOperations: [...completedOps],
             percentComplete: Math.round(
-              (completedOps.length / operations.length) * 100,
+              (completedOps.length / operations.length) * 100
             ),
             itemsProcessed: totalSuccess + totalFailures,
             itemsTotal: totalItems,
@@ -457,7 +457,7 @@ export function useMigration() {
   // Dry run to preview what would be migrated
   const runDryRun = async (
     config: MigrationConfig,
-    selectedResources: ResourceSelection,
+    selectedResources: ResourceSelection
   ): Promise<MigrationResponse> => {
     const dryRunConfig: MigrationConfig = { ...config, dryRun: true };
     return runMigration(dryRunConfig, selectedResources, false);

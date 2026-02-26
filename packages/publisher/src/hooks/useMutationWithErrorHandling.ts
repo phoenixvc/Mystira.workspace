@@ -1,15 +1,32 @@
-import { useMutation, UseMutationOptions, UseMutationResult } from '@tanstack/react-query';
-import { useErrorHandler } from './useErrorHandler';
-import { useToast } from './useToast';
+import {
+  useMutation,
+  UseMutationOptions,
+  UseMutationResult,
+} from "@tanstack/react-query";
+import { useErrorHandler } from "./useErrorHandler";
+import { useToast } from "./useToast";
 
-interface MutationWithErrorHandlingOptions<TData, TError, TVariables, TContext> extends Omit<
+interface MutationWithErrorHandlingOptions<
+  TData,
+  TError,
+  TVariables,
+  TContext,
+> extends Omit<
   UseMutationOptions<TData, TError, TVariables, TContext>,
-  'onError' | 'onSuccess'
+  "onError" | "onSuccess"
 > {
   successMessage?: string;
   errorContext?: string;
-  onError?: (error: TError, variables: TVariables, context: TContext | undefined) => void;
-  onSuccess?: (data: TData, variables: TVariables, context: TContext | undefined) => void;
+  onError?: (
+    error: TError,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => void;
+  onSuccess?: (
+    data: TData,
+    variables: TVariables,
+    context: TContext | undefined
+  ) => void;
 }
 
 export function useMutationWithErrorHandling<
@@ -23,7 +40,13 @@ export function useMutationWithErrorHandling<
   const { handleApiError } = useErrorHandler();
   const { success } = useToast();
 
-  const { successMessage, errorContext, onError, onSuccess, ...mutationOptions } = options;
+  const {
+    successMessage,
+    errorContext,
+    onError,
+    onSuccess,
+    ...mutationOptions
+  } = options;
 
   return useMutation({
     ...mutationOptions,

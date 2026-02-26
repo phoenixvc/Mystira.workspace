@@ -29,37 +29,44 @@ Create separate markdown files for each age group with appropriate content:
 ### Toddler (Ages 1-2)
 
 **File: `knowledge/toddler_vocabulary.md`**
+
 ```markdown
 # Vocabulary Guidelines for Ages 1-2
 
 ## Sentence Structure
+
 - Use 2-4 word sentences only
 - Simple subject-verb patterns: "Dog runs", "Baby eats"
 - No complex grammar
 
 ## Vocabulary
+
 - Concrete nouns: ball, dog, mom, milk, toy
 - Basic verbs: eat, run, sleep, play
 - Simple adjectives: big, small, hot, cold
 - NO abstract concepts (hope, bravery, justice)
 
 ## Repetition
+
 - Repeat key phrases for memory building
 - Use consistent character names
 - Pattern-based storytelling (e.g., "Brown bear, brown bear, what do you see?")
 ```
 
 **File: `knowledge/toddler_safety_guidelines.md`**
+
 ```markdown
 # Safety Guidelines for Ages 1-2
 
 ## Forbidden Content
+
 - NO separation anxiety themes (lost parent, being alone)
 - NO scary animals or monsters
 - NO loud noises or sudden events
 - NO bedtime resistance themes
 
 ## Appropriate Themes
+
 - Daily routines (eating, bathing, playing)
 - Sensory exploration (textures, colors, sounds)
 - Familiar objects and people
@@ -69,21 +76,25 @@ Create separate markdown files for each age group with appropriate content:
 ### Elementary (Ages 6-9)
 
 **File: `knowledge/elementary_vocabulary.md`**
+
 ```markdown
 # Vocabulary Guidelines for Ages 6-9
 
 ## Sentence Structure
+
 - Use compound and complex sentences
 - Introduce subordinate clauses
 - Vary sentence length for rhythm
 
 ## Vocabulary
+
 - Reading level: 3rd-4th grade
 - Introduce figurative language: simple metaphors ("brave as a lion")
 - Abstract concepts OK: courage, honesty, friendship, fairness
 - Context clues for new words
 
 ## Narrative Techniques
+
 - Character development arcs
 - Foreshadowing (basic)
 - Multiple perspectives (if clear)
@@ -91,16 +102,19 @@ Create separate markdown files for each age group with appropriate content:
 ```
 
 **File: `knowledge/elementary_safety_guidelines.md`**
+
 ```markdown
 # Safety Guidelines for Ages 6-9
 
 ## Forbidden Content
+
 - NO graphic violence or death
 - NO romantic relationships beyond friendship
 - NO adult themes (substance use, etc.)
 - NO horror or psychological terror
 
 ## Appropriate Themes
+
 - Moral dilemmas with clear resolutions
 - Overcoming fears (age-appropriate: dark, first day of school)
 - Friendship conflicts and resolution
@@ -122,6 +136,7 @@ Create separate markdown files for each age group with appropriate content:
 **Create the following 4 vector stores:**
 
 #### Store 1: Toddler (1-2 years)
+
 - **Name**: `vs-mystira-age-1-2`
 - **Description**: Story guidelines and examples for toddlers (ages 1-2)
 - **Files to upload**:
@@ -131,6 +146,7 @@ Create separate markdown files for each age group with appropriate content:
 - **Copy the Vector Store ID** (e.g., `vs_abc123xyz456`)
 
 #### Store 2: Preschool (3-5 years)
+
 - **Name**: `vs-mystira-age-3-5`
 - **Description**: Story guidelines and examples for preschoolers (ages 3-5)
 - **Files to upload**:
@@ -140,6 +156,7 @@ Create separate markdown files for each age group with appropriate content:
 - **Copy the Vector Store ID**
 
 #### Store 3: Elementary (6-9 years)
+
 - **Name**: `vs-mystira-age-6-9`
 - **Description**: Story guidelines and examples for elementary age (ages 6-9)
 - **Files to upload**:
@@ -149,6 +166,7 @@ Create separate markdown files for each age group with appropriate content:
 - **Copy the Vector Store ID**
 
 #### Store 4: Preteen (10-12 years)
+
 - **Name**: `vs-mystira-age-10-12`
 - **Description**: Story guidelines and examples for preteens (ages 10-12)
 - **Files to upload**:
@@ -178,8 +196,8 @@ Update your `appsettings.json` with the vector store IDs you copied:
     "KnowledgeMode": "FileSearch",
 
     "VectorStoresByAgeGroup": {
-      "1-2": "vs_abc123xyz456",      // Replace with your actual IDs
-      "3-5": "vs_def456abc789",      // from Azure portal
+      "1-2": "vs_abc123xyz456", // Replace with your actual IDs
+      "3-5": "vs_def456abc789", // from Azure portal
       "6-9": "vs_ghi789def012",
       "10-12": "vs_jkl012ghi345"
     }
@@ -210,6 +228,7 @@ Content-Type: application/json
 ### What Happens Under the Hood
 
 1. **Session Initialization** (`AgentOrchestrator.InitializeSessionAsync`)
+
    ```csharp
    // Gets vector store ID for age 6-9
    var vectorStoreId = "vs_ghi789def012";
@@ -219,6 +238,7 @@ Content-Type: application/json
    ```
 
 2. **Agent Receives Age-Specific Guidance** (in prompt)
+
    ```
    Use the file_search tool to retrieve age-appropriate guidelines.
    The vector store is pre-filtered for age group 6-9.
@@ -262,6 +282,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Expected Output**:
+
 ```json
 {
   "scenes": [
@@ -287,6 +308,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Expected Output**:
+
 ```json
 {
   "scenes": [
@@ -312,6 +334,7 @@ POST /api/story-agent/sessions/start
 **Symptom**: 6-9 year old story has toddler-level vocabulary
 
 **Solution**:
+
 1. Check logs for vector store ID: `grep "vector store" logs/app.log`
 2. Verify configuration mapping in appsettings.json
 3. Confirm vector store has files indexed:
@@ -324,6 +347,7 @@ POST /api/story-agent/sessions/start
 **Symptom**: Exception thrown during session initialization
 
 **Solution**:
+
 - Ensure EITHER `VectorStoreName` (fallback) OR `VectorStoresByAgeGroup` is configured
 - Check appsettings.json syntax (valid JSON)
 
@@ -332,6 +356,7 @@ POST /api/story-agent/sessions/start
 **Symptom**: No difference between toddler and elementary stories
 
 **Solution**:
+
 - Verify different files were uploaded to each vector store
 - Check file content is actually different
 - Test vector store search directly via Foundry portal
@@ -360,6 +385,7 @@ To add a new age group (e.g., "13-15" for teens):
 ### Fallback Behavior
 
 If an age group is requested but not configured:
+
 - System logs warning: `"No vector store configured for age group X, falling back to default"`
 - Uses `VectorStoreName` as fallback
 - Story may not be age-appropriate (monitor evaluation scores)
@@ -382,6 +408,7 @@ To update guidelines for an age group:
 ### Version Control
 
 Recommended practice:
+
 - Store knowledge files in Git: `knowledge/elementary_vocabulary_v2.md`
 - Tag vector store versions in descriptions: "Elementary guidelines v1.2"
 - Keep audit log of when files were updated
@@ -391,18 +418,21 @@ Recommended practice:
 ## Summary
 
 You've now configured:
+
 - ✅ **4 isolated vector stores** (one per age group)
 - ✅ **Automatic vector store selection** based on session age group
 - ✅ **Age-appropriate knowledge retrieval** via FileSearch
 - ✅ **Zero code changes needed** to add new age groups
 
 **Architecture Benefits**:
+
 - **Single Writer Agent** (no need for 4 separate agents)
 - **Knowledge-driven specialization** (not prompt-driven)
 - **Easy maintenance** (update markdown files, not agent configs)
 - **Scalable** (add age groups without deploying new agents)
 
 Next steps:
+
 1. Create your knowledge markdown files
 2. Upload to vector stores in Azure
 3. Copy vector store IDs to appsettings.json

@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions/{id}/end
     Controller->>Service: EndSessionAsync(sessionId)
-    
+
     Note over Service: Step 1: Get Session
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
@@ -39,13 +39,13 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Step 2: End Session
     Service->>Service: session.Status = Completed
     Service->>Service: session.EndTime = Now
     Service->>Service: session.ElapsedTime =<br/>  EndTime - StartTime
     Service->>Service: session.IsPaused = false
-    
+
     Note over Service: Step 3: Persist Changes
     Service->>Repo: UpdateAsync(session)
     Repo->>DB: Update entity
@@ -54,7 +54,7 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>Service: Success
     Repo-->>Service: GameSession (updated)
-    
+
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)
 ```
@@ -94,7 +94,7 @@ Administrators can end sessions for management purposes.
 
 ## State Transitions
 
-``` text
+```text
 InProgress → Completed
 Paused → Completed
 ```
@@ -103,7 +103,7 @@ Paused → Completed
 
 The elapsed time is calculated as:
 
-``` text
+```text
 ElapsedTime = EndTime - StartTime
 ```
 

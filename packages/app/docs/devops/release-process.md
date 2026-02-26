@@ -12,11 +12,11 @@ MAJOR.MINOR.PATCH
 Example: v1.2.3
 ```
 
-| Component | When to Increment |
-|-----------|-------------------|
-| `MAJOR` | Breaking changes, incompatible API changes |
-| `MINOR` | New features, backwards compatible |
-| `PATCH` | Bug fixes, backwards compatible |
+| Component | When to Increment                          |
+| --------- | ------------------------------------------ |
+| `MAJOR`   | Breaking changes, incompatible API changes |
+| `MINOR`   | New features, backwards compatible         |
+| `PATCH`   | Bug fixes, backwards compatible            |
 
 ## Release Types
 
@@ -47,6 +47,7 @@ Before starting a release:
 ### Step 1: Merge to Main
 
 1. Create PR from `dev` to `main`:
+
    ```bash
    # Ensure dev is up to date
    git checkout dev
@@ -207,6 +208,7 @@ If rollback needed after slot swap:
 ### Freeze Periods
 
 No releases during:
+
 - Major holidays
 - Critical business periods
 - Scheduled maintenance windows
@@ -217,6 +219,7 @@ No releases during:
 ## Release v[X.Y.Z] Checklist
 
 ### Pre-Release
+
 - [ ] All target features merged to dev
 - [ ] All tests passing
 - [ ] Dev environment validated
@@ -225,6 +228,7 @@ No releases during:
 - [ ] PR reviewed and approved
 
 ### Staging
+
 - [ ] PR merged to main
 - [ ] Staging deployment successful
 - [ ] Staging smoke tests pass
@@ -232,6 +236,7 @@ No releases during:
 - [ ] No blocking issues found
 
 ### Production
+
 - [ ] Release tag created: v[X.Y.Z]
 - [ ] Tag pushed to origin
 - [ ] Production deployment approved
@@ -241,6 +246,7 @@ No releases during:
 - [ ] No error spikes in monitoring
 
 ### Post-Release
+
 - [ ] GitHub Release created
 - [ ] Stakeholders notified
 - [ ] Documentation updated (if needed)
@@ -249,13 +255,13 @@ No releases during:
 
 ## Versioning Examples
 
-| Change Type | Current | New Version |
-|-------------|---------|-------------|
-| New feature (backward compatible) | v1.2.3 | v1.3.0 |
-| Bug fix | v1.2.3 | v1.2.4 |
-| Breaking API change | v1.2.3 | v2.0.0 |
-| Hotfix to production | v1.2.3 | v1.2.4 |
-| Security patch | v1.2.3 | v1.2.4 |
+| Change Type                       | Current | New Version |
+| --------------------------------- | ------- | ----------- |
+| New feature (backward compatible) | v1.2.3  | v1.3.0      |
+| Bug fix                           | v1.2.3  | v1.2.4      |
+| Breaking API change               | v1.2.3  | v2.0.0      |
+| Hotfix to production              | v1.2.3  | v1.2.4      |
+| Security patch                    | v1.2.3  | v1.2.4      |
 
 ## Contact
 

@@ -40,6 +40,7 @@ Components/
 ### Example: Creating a Scoped CSS File
 
 **Component File: `Components/BundleCard.razor`**
+
 ```razor
 <div class="bundle-card">
     <h3 class="bundle-title">@Title</h3>
@@ -53,35 +54,37 @@ Components/
 ```
 
 **Scoped CSS File: `Components/BundleCard.razor.css`**
+
 ```css
 /* These styles are automatically scoped to BundleCard component only */
 .bundle-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 16px;
-    transition: transform 0.2s;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  transition: transform 0.2s;
 }
 
 .bundle-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .bundle-title {
-    color: #8B5CF6;
-    font-size: 1.5rem;
-    margin-bottom: 8px;
+  color: #8b5cf6;
+  font-size: 1.5rem;
+  margin-bottom: 8px;
 }
 
 .bundle-description {
-    color: #6B7280;
-    line-height: 1.6;
+  color: #6b7280;
+  line-height: 1.6;
 }
 ```
 
 ### How Scoped CSS Works
 
 At build time, Blazor:
+
 1. Processes each `.razor.css` file
 2. Generates unique scope identifiers (e.g., `b-abc123`)
 3. Appends scope identifiers to CSS selectors
@@ -89,27 +92,31 @@ At build time, Blazor:
 5. Bundles all scoped CSS into `{ProjectName}.styles.css`
 
 **Generated HTML:**
+
 ```html
 <div class="bundle-card" b-abc123>
-    <h3 class="bundle-title" b-abc123>Adventure Title</h3>
-    <p class="bundle-description" b-abc123>Description text</p>
+  <h3 class="bundle-title" b-abc123>Adventure Title</h3>
+  <p class="bundle-description" b-abc123>Description text</p>
 </div>
 ```
 
 **Generated CSS:**
+
 ```css
 .bundle-card[b-abc123] {
-    border: 1px solid #ddd;
-    /* ... */
+  border: 1px solid #ddd;
+  /* ... */
 }
 ```
 
 ## Current Approach in Mystira
 
 ### Global CSS
+
 Location: `src/Mystira.App.PWA/wwwroot/css/app.css`
 
 Global CSS is used for:
+
 - Design system foundations (colors, typography, spacing)
 - Bootstrap customizations and overrides
 - Utility classes used across multiple components
@@ -117,9 +124,11 @@ Global CSS is used for:
 - Animation keyframes
 
 ### Scoped CSS
+
 Currently Used: `src/Mystira.App.PWA/Components/DiceRoller.razor.css`
 
 Scoped CSS should be used for:
+
 - Component-specific styles
 - Styles that should not leak to other components
 - Component state variations (hover, active, disabled)
@@ -130,18 +139,20 @@ Scoped CSS should be used for:
 The current approach uses global CSS for all components. For better maintainability, consider extracting component-specific styles:
 
 **Current Approach (Global CSS):**
+
 ```css
 /* In app.css - applies globally */
 .bundle-card {
-    border: 1px solid #ddd;
+  border: 1px solid #ddd;
 }
 ```
 
 **Future Approach (Scoped CSS):**
+
 ```css
 /* In BundleCard.razor.css - scoped to component */
 .bundle-card {
-    border: 1px solid #ddd;
+  border: 1px solid #ddd;
 }
 ```
 
@@ -150,50 +161,55 @@ This migration can be done gradually without breaking existing functionality.
 ## Best Practices
 
 ### 1. Use Scoped CSS for Component-Specific Styles
+
 ```css
 /* BundleCard.razor.css */
 .card-container {
-    /* Component-specific styles */
+  /* Component-specific styles */
 }
 ```
 
 ### 2. Use Global CSS for Shared Utilities
+
 ```css
 /* app.css */
 .text-primary-custom {
-    color: #8B5CF6;
+  color: #8b5cf6;
 }
 ```
 
 ### 3. Leverage CSS Variables for Theming
+
 ```css
 /* app.css - Define theme variables globally */
 :root {
-    --primary-color: #8B5CF6;
-    --secondary-color: #10B981;
-    --text-muted: #6B7280;
+  --primary-color: #8b5cf6;
+  --secondary-color: #10b981;
+  --text-muted: #6b7280;
 }
 
 /* Component.razor.css - Use variables in scoped styles */
 .component-title {
-    color: var(--primary-color);
+  color: var(--primary-color);
 }
 ```
 
 ### 4. Avoid Deep Selectors (::deep)
+
 ```css
 /* ❌ Avoid - breaks scoping */
 .parent ::deep .child {
-    color: red;
+  color: red;
 }
 
 /* ✅ Prefer - use parameters to pass styling props */
 .parent {
-    /* Style parent only */
+  /* Style parent only */
 }
 ```
 
 ### 5. Use CSS Classes, Not Inline Styles
+
 ```razor
 <!-- ❌ Avoid inline styles -->
 <div style="color: red; padding: 16px;">Content</div>
@@ -209,79 +225,87 @@ When styling components, ensure accessibility:
 ```css
 /* Keyboard focus indicators */
 .button:focus-visible {
-    outline: 2px solid var(--primary-color);
-    outline-offset: 2px;
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 /* Sufficient color contrast (WCAG AA) */
 .text-primary {
-    color: #8B5CF6; /* Ensure contrast ratio > 4.5:1 */
+  color: #8b5cf6; /* Ensure contrast ratio > 4.5:1 */
 }
 
 /* Touch-friendly sizes (minimum 44x44px) */
 .touch-target {
-    min-width: 44px;
-    min-height: 44px;
+  min-width: 44px;
+  min-height: 44px;
 }
 ```
 
 ## Performance Optimization
 
 ### CSS Bundling
+
 Blazor automatically bundles all scoped CSS files into a single file:
+
 ```
 _content/{ProjectName}/{ProjectName}.styles.css
 ```
 
 ### Critical CSS
+
 Keep global `app.css` lean to improve initial load:
+
 - Move component-specific styles to scoped CSS files
 - Use CSS minification in production builds
 - Leverage browser caching with proper cache headers
 
 ### Avoid Expensive Selectors
+
 ```css
 /* ❌ Expensive - descendant selector */
 .container div span a {
-    color: blue;
+  color: blue;
 }
 
 /* ✅ Efficient - single class */
 .link {
-    color: blue;
+  color: blue;
 }
 ```
 
 ## Example: Extracting Styles from Global to Scoped
 
 ### Before (Global CSS in app.css)
+
 ```css
 .hero-section {
-    background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
-    padding: 3rem 1rem;
+  background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
+  padding: 3rem 1rem;
 }
 
 .hero-badge {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: white;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
 }
 ```
 
 ### After (Scoped CSS in HeroSection.razor.css)
+
 ```css
 /* HeroSection.razor.css */
 .hero-section {
-    background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
-    padding: 3rem 1rem;
+  background: linear-gradient(135deg, #f5f3ff 0%, #faf5ff 100%);
+  padding: 3rem 1rem;
 }
 
 .hero-badge {
-    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
-    color: white;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  color: white;
 }
 ```
 
 **Benefits:**
+
 - Styles are isolated to HeroSection component
 - No risk of naming conflicts with other components
 - Easier to maintain and refactor
@@ -299,13 +323,16 @@ Visual Studio and Visual Studio Code provide excellent support for Scoped CSS:
 ## Testing Scoped Styles
 
 ### Manual Testing
+
 1. Inspect element in browser DevTools
 2. Verify scope attribute is applied (e.g., `b-abc123`)
 3. Check computed styles are correct
 4. Test in different browsers
 
 ### Automated Testing
+
 Use Playwright or similar tools to test rendered styles:
+
 ```csharp
 [Fact]
 public async Task BundleCard_AppliesScopedStyles()
@@ -320,13 +347,17 @@ public async Task BundleCard_AppliesScopedStyles()
 ## Troubleshooting
 
 ### Issue: Scoped Styles Not Applied
+
 **Solution:** Ensure the `.razor.css` file is in the same directory and has the same base name as the `.razor` file.
 
 ### Issue: Styles Affecting Other Components
+
 **Solution:** Check for `::deep` selectors or global styles in `app.css` that might be overriding scoped styles.
 
 ### Issue: Build Not Generating Scoped CSS Bundle
+
 **Solution:** Clean and rebuild the project:
+
 ```bash
 dotnet clean
 dotnet build
@@ -341,6 +372,7 @@ dotnet build
 ## Conclusion
 
 **Use Blazor Scoped CSS** for component styling in the Mystira application. It provides the best balance of:
+
 - **Simplicity**: No additional configuration needed
 - **Maintainability**: Component styles co-located with components
 - **Performance**: Efficient bundling and caching

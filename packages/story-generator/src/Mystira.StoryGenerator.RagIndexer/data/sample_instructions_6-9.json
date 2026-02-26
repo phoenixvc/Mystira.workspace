@@ -13,8 +13,22 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "At least five choice scenes; each character has an Action Choice and a Challenge Roll; about 25% of scenes along any full path are roll scenes; choice and roll branches cannot share a next_scene; multiple endings.",
-      "tags": ["story_design", "interactivity", "roll_scenes", "branching_rules", "multiple_endings", "d20"],
-      "keywords": ["story_design", "interactivity", "roll_scenes", "branching_rules", "multiple_endings", "d20"]
+      "tags": [
+        "story_design",
+        "interactivity",
+        "roll_scenes",
+        "branching_rules",
+        "multiple_endings",
+        "d20"
+      ],
+      "keywords": [
+        "story_design",
+        "interactivity",
+        "roll_scenes",
+        "branching_rules",
+        "multiple_endings",
+        "d20"
+      ]
     },
     {
       "chunk_id": "educational_goals_overview",
@@ -27,8 +41,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Stories that balance emotional growth, puzzles that require planning and flexible thinking, and dilemmas where children see how honesty or fairness affects others.",
-      "tags": ["educational_design", "social_emotional_learning", "cognitive_skills", "moral_development"],
-      "keywords": ["educational_design", "social_emotional_learning", "cognitive_skills", "moral_development"]
+      "tags": [
+        "educational_design",
+        "social_emotional_learning",
+        "cognitive_skills",
+        "moral_development"
+      ],
+      "keywords": [
+        "educational_design",
+        "social_emotional_learning",
+        "cognitive_skills",
+        "moral_development"
+      ]
     },
     {
       "chunk_id": "gameplay_mechanics_and_tone",
@@ -41,8 +65,22 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Using Focus Choices to log growth echoes, awarding a symbolic group reward at the end of a quest, and adding gentle, silly humour that makes the group laugh together without mocking anyone.",
-      "tags": ["gameplay", "tone", "humour", "echo_logs", "rewards", "collectibles"],
-      "keywords": ["gameplay", "tone", "humour", "echo_logs", "rewards", "collectibles"]
+      "tags": [
+        "gameplay",
+        "tone",
+        "humour",
+        "echo_logs",
+        "rewards",
+        "collectibles"
+      ],
+      "keywords": [
+        "gameplay",
+        "tone",
+        "humour",
+        "echo_logs",
+        "rewards",
+        "collectibles"
+      ]
     },
     {
       "chunk_id": "narrative_causality_consistency",
@@ -56,7 +94,12 @@
       "isMandatory": true,
       "examples": "A rude choice causes a friend to be distant later; using a new spell requires prior learning; a risky shortcut taken earlier leads to a complication several scenes later.",
       "tags": ["narrative_logic", "causality", "consistency", "consequences"],
-      "keywords": ["narrative_logic", "causality", "consistency", "consequences"]
+      "keywords": [
+        "narrative_logic",
+        "causality",
+        "consistency",
+        "consequences"
+      ]
     },
     {
       "chunk_id": "emotional_development_overview",
@@ -69,8 +112,18 @@
       "priority": "normal",
       "isMandatory": false,
       "examples": "Scenes where a character names feeling jealous and then chooses a constructive response, or where a stressed character uses a calming plan before acting.",
-      "tags": ["emotional_development", "self_awareness", "self_management", "resilience"],
-      "keywords": ["emotional_development", "self_awareness", "self_management", "resilience"]
+      "tags": [
+        "emotional_development",
+        "self_awareness",
+        "self_management",
+        "resilience"
+      ],
+      "keywords": [
+        "emotional_development",
+        "self_awareness",
+        "self_management",
+        "resilience"
+      ]
     },
     {
       "chunk_id": "social_skills_overview",
@@ -83,8 +136,18 @@
       "priority": "normal",
       "isMandatory": false,
       "examples": "A character apologises after interrupting a friend, works with the group to share limited resources, or chooses gentle honesty when giving feedback.",
-      "tags": ["social_skills", "relationships", "empathy", "perspective_taking"],
-      "keywords": ["social_skills", "relationships", "empathy", "perspective_taking"]
+      "tags": [
+        "social_skills",
+        "relationships",
+        "empathy",
+        "perspective_taking"
+      ],
+      "keywords": [
+        "social_skills",
+        "relationships",
+        "empathy",
+        "perspective_taking"
+      ]
     },
     {
       "chunk_id": "play_and_leisure_skills",
@@ -111,8 +174,18 @@
       "priority": "high",
       "isMandatory": false,
       "examples": "A child chooses to admit a mistake even though they fear getting in trouble, or shares a reward with a friend who helped them succeed.",
-      "tags": ["moral_foundations", "prosocial_behaviour", "fairness", "honesty"],
-      "keywords": ["moral_foundations", "prosocial_behaviour", "fairness", "honesty"]
+      "tags": [
+        "moral_foundations",
+        "prosocial_behaviour",
+        "fairness",
+        "honesty"
+      ],
+      "keywords": [
+        "moral_foundations",
+        "prosocial_behaviour",
+        "fairness",
+        "honesty"
+      ]
     },
     {
       "chunk_id": "executive_function_and_cognition",
@@ -125,8 +198,18 @@
       "priority": "normal",
       "isMandatory": false,
       "examples": "A puzzle that requires remembering clues from earlier scenes, or a character who realises their first plan is not working and consciously tries a new strategy.",
-      "tags": ["cognitive_growth", "executive_functions", "metacognition", "problem_solving"],
-      "keywords": ["cognitive_growth", "executive_functions", "metacognition", "problem_solving"]
+      "tags": [
+        "cognitive_growth",
+        "executive_functions",
+        "metacognition",
+        "problem_solving"
+      ],
+      "keywords": [
+        "cognitive_growth",
+        "executive_functions",
+        "metacognition",
+        "problem_solving"
+      ]
     },
     {
       "chunk_id": "humour_and_growth_mindset",
@@ -139,8 +222,18 @@
       "priority": "normal",
       "isMandatory": false,
       "examples": "A character makes a light-hearted joke about a mistake, then tries again and succeeds after practice, reinforcing both humour and perseverance.",
-      "tags": ["humour", "growth_mindset", "resilience", "attitude_toward_challenge"],
-      "keywords": ["humour", "growth_mindset", "resilience", "attitude_toward_challenge"]
+      "tags": [
+        "humour",
+        "growth_mindset",
+        "resilience",
+        "attitude_toward_challenge"
+      ],
+      "keywords": [
+        "humour",
+        "growth_mindset",
+        "resilience",
+        "attitude_toward_challenge"
+      ]
     },
     {
       "chunk_id": "character_format_and_roster",
@@ -168,7 +261,12 @@
       "isMandatory": true,
       "examples": "A captain-like character as a_vanguard who drives decisions but must learn flexibility, or a cautious planner as an_architect who must risk trying something new.",
       "tags": ["archetypes", "growth_echoes", "character_design", "motivation"],
-      "keywords": ["archetypes", "growth_echoes", "character_design", "motivation"]
+      "keywords": [
+        "archetypes",
+        "growth_echoes",
+        "character_design",
+        "motivation"
+      ]
     },
     {
       "chunk_id": "smart_roster_model",
@@ -181,8 +279,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Four-character stories with four Focus Choices, each tied to one of three axes from a single Parent Group, ensuring every child is scored once per session.",
-      "tags": ["smart_roster", "focus_choices", "compass_axes", "session_setup"],
-      "keywords": ["smart_roster", "focus_choices", "compass_axes", "session_setup"]
+      "tags": [
+        "smart_roster",
+        "focus_choices",
+        "compass_axes",
+        "session_setup"
+      ],
+      "keywords": [
+        "smart_roster",
+        "focus_choices",
+        "compass_axes",
+        "session_setup"
+      ]
     },
     {
       "chunk_id": "compass_axis_scoring_system",
@@ -196,7 +304,12 @@
       "isMandatory": true,
       "examples": "A dilemma where comforting a friend increases Empathy & Perspective-Taking, while telling a hard truth increases Honesty, with no negative score for the unchosen positive value.",
       "tags": ["compass_axes", "scoring_scale", "dilemmas", "compass_change"],
-      "keywords": ["compass_axes", "scoring_scale", "dilemmas", "compass_change"]
+      "keywords": [
+        "compass_axes",
+        "scoring_scale",
+        "dilemmas",
+        "compass_change"
+      ]
     },
     {
       "chunk_id": "badge_and_threshold_system",
@@ -209,8 +322,18 @@
       "priority": "normal",
       "isMandatory": true,
       "examples": "Awarding a first-tier badge after a child has consistently made honest choices across multiple stories that feature the Honesty & Integrity axis.",
-      "tags": ["badges", "thresholds", "cross_game_progress", "master_badge_axes"],
-      "keywords": ["badges", "thresholds", "cross_game_progress", "master_badge_axes"]
+      "tags": [
+        "badges",
+        "thresholds",
+        "cross_game_progress",
+        "master_badge_axes"
+      ],
+      "keywords": [
+        "badges",
+        "thresholds",
+        "cross_game_progress",
+        "master_badge_axes"
+      ]
     },
     {
       "chunk_id": "compass_scoring_guide_and_developmental_link",
@@ -223,8 +346,18 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "A compass_change for Empathy & Perspective-Taking that includes developmental_link: \"2.1.2 Social Skills (Social Awareness & Relationship Skills)\", with a delta calibrated to the impact of the choice.",
-      "tags": ["developmental_link", "scoring_guide", "impact_tiers", "pedagogical_traceability"],
-      "keywords": ["developmental_link", "scoring_guide", "impact_tiers", "pedagogical_traceability"]
+      "tags": [
+        "developmental_link",
+        "scoring_guide",
+        "impact_tiers",
+        "pedagogical_traceability"
+      ],
+      "keywords": [
+        "developmental_link",
+        "scoring_guide",
+        "impact_tiers",
+        "pedagogical_traceability"
+      ]
     },
     {
       "chunk_id": "scene_types_and_rolls",
@@ -237,8 +370,20 @@
       "priority": "high",
       "isMandatory": true,
       "examples": "Using an Action Choice to decide how to climb a cliff, followed by a d20 Challenge Roll and different success/failure outcomes; using a Flavor Roll to see what silly effect a magical gust of wind has.",
-      "tags": ["scene_types", "challenge_rolls", "flavor_rolls", "action_choices", "narrative_choices"],
-      "keywords": ["scene_types", "challenge_rolls", "flavor_rolls", "action_choices", "narrative_choices"]
+      "tags": [
+        "scene_types",
+        "challenge_rolls",
+        "flavor_rolls",
+        "action_choices",
+        "narrative_choices"
+      ],
+      "keywords": [
+        "scene_types",
+        "challenge_rolls",
+        "flavor_rolls",
+        "action_choices",
+        "narrative_choices"
+      ]
     },
     {
       "chunk_id": "cumulative_consequences_axis_system",
@@ -251,8 +396,18 @@
       "priority": "high",
       "isMandatory": false,
       "examples": "A child who has repeatedly told the truth earns help from a guard because of their reputation, while a child who often lied faces a setback, with the Echo Reveal explaining the link to earlier choices.",
-      "tags": ["cumulative_consequences", "reputation", "branch_on_axis_score", "echo_reveal"],
-      "keywords": ["cumulative_consequences", "reputation", "branch_on_axis_score", "echo_reveal"]
+      "tags": [
+        "cumulative_consequences",
+        "reputation",
+        "branch_on_axis_score",
+        "echo_reveal"
+      ],
+      "keywords": [
+        "cumulative_consequences",
+        "reputation",
+        "branch_on_axis_score",
+        "echo_reveal"
+      ]
     }
   ]
 }

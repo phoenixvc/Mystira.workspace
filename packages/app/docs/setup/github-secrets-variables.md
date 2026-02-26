@@ -5,14 +5,15 @@
 This document provides a comprehensive guide to configuring GitHub Secrets and Variables for the Mystira Application Suite across all three environments: **Development**, **Staging**, and **Production**.
 
 > ⚠️ **IMPORTANT - Staging Configuration Issue Detected**
-> 
+>
 > The staging workflows currently have a configuration error where all three services (API, Admin API, and PWA) attempt to use the same publish profile secret (`AZURE_WEBAPP_PUBLISH_PROFILE_STAGING`). However, each Azure App Service requires its own unique publish profile.
-> 
+>
 > **Impact**: Staging deployments will fail or deploy to the wrong service.
-> 
+>
 > **Fix Required**: Update staging workflows to use separate secrets:
+>
 > - `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_API`
-> - `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_ADMIN`  
+> - `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_ADMIN`
 > - `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA`
 >
 > See the [Staging Environment](#staging-environment) section for details.
@@ -21,11 +22,11 @@ This document provides a comprehensive guide to configuring GitHub Secrets and V
 
 The Mystira application uses three distinct environments, each with its own set of Azure resources and configuration:
 
-| Environment | Branch | Purpose | Azure Region | Resource Naming |
-|------------|--------|---------|--------------|-----------------|
-| **Development** | `dev` | Active development and testing | South Africa North | `mys-dev-mystira-[type]-san` |
-| **Staging** | `staging` | Pre-production validation | South Africa North | `mys-staging-mystira-[type]-san` |
-| **Production** | `main` | Live production environment | South Africa North | `mys-prod-mystira-[type]-san` |
+| Environment     | Branch    | Purpose                        | Azure Region       | Resource Naming                  |
+| --------------- | --------- | ------------------------------ | ------------------ | -------------------------------- |
+| **Development** | `dev`     | Active development and testing | South Africa North | `mys-dev-mystira-[type]-san`     |
+| **Staging**     | `staging` | Pre-production validation      | South Africa North | `mys-staging-mystira-[type]-san` |
+| **Production**  | `main`    | Live production environment    | South Africa North | `mys-prod-mystira-[type]-san`    |
 
 > 📘 **Azure Naming Conventions**: Mystira follows the standardized naming pattern `[org]-[env]-[project]-[type]-[region]` for all Azure resources. See [Azure Naming Conventions](../AZURE-NAMING-CONVENTIONS.md) for complete details. New resources will use the standard naming, while existing resources will be migrated gradually.
 
@@ -36,12 +37,14 @@ GitHub Secrets are encrypted environment variables that store sensitive informat
 ### 1. Azure Credentials & Subscription
 
 #### `AZURE_CREDENTIALS` (All Environments)
+
 - **Type**: JSON object
 - **Purpose**: Service principal credentials for Azure CLI authentication
 - **Used by**: Infrastructure deployment workflows, app settings configuration
 - **Required for**: All environments
 
 **How to generate:**
+
 ```bash
 az ad sp create-for-rbac \
   --name "mystira-github-actions" \
@@ -51,6 +54,7 @@ az ad sp create-for-rbac \
 ```
 
 **Expected format:**
+
 ```json
 {
   "clientId": "00000000-0000-0000-0000-000000000000",
@@ -61,6 +65,7 @@ az ad sp create-for-rbac \
 ```
 
 #### `AZURE_SUBSCRIPTION_ID` (All Environments)
+
 - **Type**: String (GUID)
 - **Purpose**: Azure subscription identifier
 - **Used by**: Infrastructure deployment workflows
@@ -73,34 +78,39 @@ These secrets contain the publish profile XML for deploying to Azure App Service
 > 📘 **Resource Naming**: The table below shows both current and new standard resource names following the `[org]-[env]-[project]-[type]-[region]` pattern. See [Azure Naming Conventions](../AZURE-NAMING-CONVENTIONS.md) for details.
 
 #### Development Environment
-| Secret Name | Service | Resource Name |
-|-------------|---------|---------------|
-| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV` | Main API | `mys-dev-mystira-api-san` |
+
+| Secret Name                              | Service   | Resource Name                  |
+| ---------------------------------------- | --------- | ------------------------------ |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`       | Main API  | `mys-dev-mystira-api-san`      |
 | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV_ADMIN` | Admin API | `mys-dev-mystira-adminapi-san` |
 
 #### Staging Environment
+
 > ⚠️ **Configuration Issue Detected**: The current staging workflows all reference the same secret (`AZURE_WEBAPP_PUBLISH_PROFILE_STAGING`) but deploy to three different App Services. Each App Service requires its own unique publish profile. The workflows should be updated to use separate secrets.
 
 **Current (Incorrect) Configuration:**
+
 - **`AZURE_WEBAPP_PUBLISH_PROFILE_STAGING`** - Referenced by API, Admin API, and PWA workflows (shared - **this doesn't work**)
 
 **Required (Correct) Configuration:**
 
-| Secret Name | Service | Current Resource Name | New Standard Name |
-|-------------|---------|----------------------|-------------------|
-| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_API` | Main API | `mystira-app-staging-api` | `mys-staging-mystira-api-wus` |
+| Secret Name                                  | Service   | Current Resource Name           | New Standard Name                   |
+| -------------------------------------------- | --------- | ------------------------------- | ----------------------------------- |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_API`   | Main API  | `mystira-app-staging-api`       | `mys-staging-mystira-api-wus`       |
 | `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_ADMIN` | Admin API | `mystira-app-staging-admin-api` | `mys-staging-mystira-admin-api-wus` |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA` | PWA | `mystira-app-staging-pwa` | `mys-staging-mystira-swa-wus` |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA`   | PWA       | `mystira-app-staging-pwa`       | `mys-staging-mystira-swa-wus`       |
 
 **To Fix:** Update the staging workflow files to use the separate secrets above instead of the shared `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING`.
 
 #### Production Environment
-| Secret Name | Service | Current Resource Name | New Standard Name |
-|-------------|---------|----------------------|-------------------|
-| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD` | Main API | `prod-wus-app-mystira-api` | `mys-prod-mystira-api-wus` |
+
+| Secret Name                               | Service   | Current Resource Name            | New Standard Name                |
+| ----------------------------------------- | --------- | -------------------------------- | -------------------------------- |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`       | Main API  | `prod-wus-app-mystira-api`       | `mys-prod-mystira-api-wus`       |
 | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_ADMIN` | Admin API | `prod-wus-app-mystira-api-admin` | `mys-prod-mystira-admin-api-wus` |
 
 **How to obtain:**
+
 ```bash
 # Download publish profile from Azure portal or use CLI
 az webapp deployment list-publishing-profiles \
@@ -112,11 +122,13 @@ az webapp deployment list-publishing-profiles \
 ### 3. JWT Authentication Keys
 
 #### `JWT_SECRET_KEY` (Infrastructure Deployment)
+
 - **Type**: String (base64-encoded)
 - **Purpose**: Used during infrastructure deployment for initial setup
 - **Used by**: Infrastructure deployment workflows (all environments)
 
 **Generate:**
+
 ```bash
 openssl rand -base64 64
 ```
@@ -124,18 +136,22 @@ openssl rand -base64 64
 #### JWT RSA Key Pairs (Per Environment)
 
 **Development:**
+
 - **`JWT_RSA_PRIVATE_KEY`** - RSA private key for JWT signing (dev)
 - **`JWT_RSA_PUBLIC_KEY`** - RSA public key for JWT verification (dev)
 
 **Staging:**
+
 - **`JWT_RSA_PRIVATE_KEY_STAGING`** - RSA private key for JWT signing (staging)
 - **`JWT_RSA_PUBLIC_KEY_STAGING`** - RSA public key for JWT verification (staging)
 
 **Production:**
+
 - **`JWT_RSA_PRIVATE_KEY_PROD`** - RSA private key for JWT signing (production)
 - **`JWT_RSA_PUBLIC_KEY_PROD`** - RSA public key for JWT verification (production)
 
 **Generate RSA key pair:**
+
 ```bash
 # Generate private key
 openssl genrsa -out private_key.pem 2048
@@ -151,12 +167,14 @@ cat public_key.pem | sed 's/$/\\n/' | tr -d '\n'
 ### 4. Azure Communication Services (Email)
 
 #### `AZURE_ACS_CONNECTION_STRING` (Development Only)
+
 - **Type**: Connection string
 - **Purpose**: Azure Communication Services connection for email sending
 - **Used by**: Dev API workflow only
 - **Format**: `endpoint=https://...;accesskey=...`
 
 **How to obtain:**
+
 ```bash
 az communication list-key \
   --name {acs-name} \
@@ -165,6 +183,7 @@ az communication list-key \
 ```
 
 #### `AZURE_ACS_SENDER_EMAIL_DEV` (Development Only)
+
 - **Type**: Email address
 - **Purpose**: Sender email for Azure Communication Services
 - **Example**: `DoNotReply@yourdomain.azurecomm.net`
@@ -175,14 +194,15 @@ az communication list-key \
 
 > 📘 **Resource Naming**: Static Web Apps will follow the naming pattern `mys-[env]-mystira-swa-[region]` in the new standard.
 
-| Secret Name | Environment | Current Resource Name | New Standard Name | Domain |
-|-------------|-------------|-----------------------|-------------------|--------|
-| `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP` | Development | `mango-water-04fdb1c03` (auto-generated) | `mys-dev-mystira-swa-san` | dev.mystira.app |
-| `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E` | Production | `blue-water-0eab7991e` (auto-generated) | `mys-prod-mystira-swa-wus` | mystira.app |
+| Secret Name                                            | Environment | Current Resource Name                    | New Standard Name          | Domain          |
+| ------------------------------------------------------ | ----------- | ---------------------------------------- | -------------------------- | --------------- |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP`  | Development | `mango-water-04fdb1c03` (auto-generated) | `mys-dev-mystira-swa-san`  | dev.mystira.app |
+| `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E` | Production  | `blue-water-0eab7991e` (auto-generated)  | `mys-prod-mystira-swa-wus` | mystira.app     |
 
 **Note:** Staging environment uses App Service for PWA hosting (not Static Web Apps), hence no Static Web App token is required.
 
 **How to obtain:**
+
 ```bash
 az staticwebapp secrets list \
   --name {static-web-app-name} \
@@ -192,6 +212,7 @@ az staticwebapp secrets list \
 ### 6. Code Coverage & Testing
 
 #### `CODECOV_SECRET`
+
 - **Type**: API token
 - **Purpose**: Uploads test coverage reports to Codecov
 - **Used by**: `ci-tests-codecov.yml` workflow
@@ -200,6 +221,7 @@ az staticwebapp secrets list \
 ### 7. Automatic Secrets (No Configuration Required)
 
 #### `GITHUB_TOKEN`
+
 - **Type**: Automatic token
 - **Purpose**: GitHub API authentication for workflow actions (PR comments, etc.)
 - **Scope**: Automatically provided by GitHub Actions
@@ -208,6 +230,7 @@ az staticwebapp secrets list \
 ## GitHub Variables
 
 GitHub Variables are non-sensitive configuration values. Currently, **no custom variables** are used in the workflows. All configuration uses:
+
 - Environment-specific hardcoded values in workflow files
 - Secrets for sensitive data
 - Environment variables derived from branch names
@@ -217,6 +240,7 @@ GitHub Variables are non-sensitive configuration values. Currently, **no custom 
 ### Complete Checklist by Environment
 
 #### Development Environment Secrets
+
 - [x] `AZURE_CREDENTIALS`
 - [x] `AZURE_SUBSCRIPTION_ID`
 - [x] `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`
@@ -229,6 +253,7 @@ GitHub Variables are non-sensitive configuration values. Currently, **no custom 
 - [x] `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP`
 
 #### Staging Environment Secrets
+
 > ⚠️ **Note**: Current workflows use a shared secret which is incorrect. The checklist below shows the **correct** configuration needed.
 
 - [x] `AZURE_CREDENTIALS`
@@ -241,6 +266,7 @@ GitHub Variables are non-sensitive configuration values. Currently, **no custom 
 - [x] `JWT_RSA_PUBLIC_KEY_STAGING`
 
 #### Production Environment Secrets
+
 - [x] `AZURE_CREDENTIALS`
 - [x] `AZURE_SUBSCRIPTION_ID`
 - [x] `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`
@@ -251,46 +277,47 @@ GitHub Variables are non-sensitive configuration values. Currently, **no custom 
 - [x] `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E`
 
 #### Optional/Shared Secrets
+
 - [x] `CODECOV_SECRET` (for test coverage reporting)
 
 ## Workflow-to-Secret Mapping
 
 ### Infrastructure Deployment Workflows
 
-| Workflow | Environment | Required Secrets |
-|----------|------------|-----------------|
-| `infrastructure-deploy-dev.yml` | Development | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
-| `infrastructure-deploy-staging.yml` | Staging | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
-| `infrastructure-deploy-prod.yml` | Production | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
+| Workflow                            | Environment | Required Secrets                                               |
+| ----------------------------------- | ----------- | -------------------------------------------------------------- |
+| `infrastructure-deploy-dev.yml`     | Development | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
+| `infrastructure-deploy-staging.yml` | Staging     | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
+| `infrastructure-deploy-prod.yml`    | Production  | `AZURE_CREDENTIALS`, `AZURE_SUBSCRIPTION_ID`, `JWT_SECRET_KEY` |
 
 ### API Deployment Workflows
 
-| Workflow | Environment | Required Secrets |
-|----------|------------|-----------------|
-| `mystira-app-api-cicd-dev.yml` | Development | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY`, `JWT_RSA_PUBLIC_KEY`, `AZURE_ACS_CONNECTION_STRING`, `AZURE_ACS_SENDER_EMAIL_DEV` |
-| `mystira-app-api-cicd-staging.yml` | Staging | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_API`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY_STAGING`, `JWT_RSA_PUBLIC_KEY_STAGING` |
-| `mystira-app-api-cicd-prod.yml` | Production | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY_PROD`, `JWT_RSA_PUBLIC_KEY_PROD` |
+| Workflow                           | Environment | Required Secrets                                                                                                                                                                                                    |
+| ---------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mystira-app-api-cicd-dev.yml`     | Development | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY`, `JWT_RSA_PUBLIC_KEY`, `AZURE_ACS_CONNECTION_STRING`, `AZURE_ACS_SENDER_EMAIL_DEV`                                                   |
+| `mystira-app-api-cicd-staging.yml` | Staging     | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_API`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY_STAGING`, `JWT_RSA_PUBLIC_KEY_STAGING` |
+| `mystira-app-api-cicd-prod.yml`    | Production  | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`, `AZURE_CREDENTIALS`, `JWT_RSA_PRIVATE_KEY_PROD`, `JWT_RSA_PUBLIC_KEY_PROD`                                                                                                     |
 
 ### Admin API Deployment Workflows
 
-| Workflow | Environment | Required Secrets |
-|----------|------------|-----------------|
-| `mystira-app-admin-api-cicd-dev.yml` | Development | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV_ADMIN` |
-| `mystira-app-admin-api-cicd-staging.yml` | Staging | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_ADMIN` |
-| `mystira-app-admin-api-cicd-prod.yml` | Production | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_ADMIN` |
+| Workflow                                 | Environment | Required Secrets                                                                                                                    |
+| ---------------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `mystira-app-admin-api-cicd-dev.yml`     | Development | `AZURE_WEBAPP_PUBLISH_PROFILE_DEV_ADMIN`                                                                                            |
+| `mystira-app-admin-api-cicd-staging.yml` | Staging     | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_ADMIN` |
+| `mystira-app-admin-api-cicd-prod.yml`    | Production  | `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_ADMIN`                                                                                           |
 
 ### PWA Deployment Workflows
 
-| Workflow | Environment | Required Secrets |
-|----------|------------|-----------------|
-| `azure-static-web-apps-dev-san-swa-mystira-app.yml` | Development | `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP` |
-| `azure-static-web-apps-blue-water-0eab7991e.yml` | Production | `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E` |
-| `mystira-app-pwa-cicd-staging.yml` | Staging | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA` |
+| Workflow                                            | Environment | Required Secrets                                                                                                                  |
+| --------------------------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `azure-static-web-apps-dev-san-swa-mystira-app.yml` | Development | `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP`                                                                             |
+| `azure-static-web-apps-blue-water-0eab7991e.yml`    | Production  | `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E`                                                                            |
+| `mystira-app-pwa-cicd-staging.yml`                  | Staging     | ⚠️ **Currently**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING` (incorrect)<br>**Should be**: `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA` |
 
 ### Testing Workflows
 
-| Workflow | Purpose | Required Secrets |
-|----------|---------|-----------------|
+| Workflow               | Purpose                 | Required Secrets |
+| ---------------------- | ----------------------- | ---------------- |
 | `ci-tests-codecov.yml` | Test coverage reporting | `CODECOV_SECRET` |
 
 ## Setup Instructions
@@ -323,11 +350,11 @@ for env in dev staging prod; do
   echo "Generating keys for $env..."
   openssl genrsa -out jwt_private_${env}.pem 2048
   openssl rsa -in jwt_private_${env}.pem -pubout -out jwt_public_${env}.pem
-  
+
   echo "Private key for JWT_RSA_PRIVATE_KEY_${env^^}:"
   cat jwt_private_${env}.pem | sed 's/$/\\n/' | tr -d '\n'
   echo ""
-  
+
   echo "Public key for JWT_RSA_PUBLIC_KEY_${env^^}:"
   cat jwt_public_${env}.pem | sed 's/$/\\n/' | tr -d '\n'
   echo ""
@@ -444,19 +471,23 @@ ERROR: Secret AZURE_WEBAPP_PUBLISH_PROFILE_DEV is not set.
 ### Secret Format Issues
 
 **JWT Keys:**
+
 - Must be properly escaped with `\n` for newlines in RSA keys
 - Use the provided generation scripts to ensure correct format
 
 **Publish Profiles:**
+
 - Must be valid XML
 - Include the entire output from `az webapp deployment list-publishing-profiles`
 
 **Azure Credentials:**
+
 - Must be valid JSON in the exact format from `az ad sp create-for-rbac --sdk-auth`
 
 ### Workflow Failures
 
 If workflows fail due to secrets:
+
 1. Check the workflow run logs for specific secret validation errors
 2. Verify the secret name matches exactly (case-sensitive)
 3. Ensure the secret value is not empty
@@ -480,6 +511,7 @@ If migrating from an older configuration:
 ## Support
 
 For issues with GitHub secrets configuration:
+
 1. Verify secret names match exactly (case-sensitive)
 2. Check workflow logs for specific validation errors
 3. Consult the troubleshooting section above

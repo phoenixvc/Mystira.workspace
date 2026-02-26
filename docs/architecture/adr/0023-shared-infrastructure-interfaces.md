@@ -68,11 +68,11 @@ MyApp.Application/
 
 ### Accepted Trade-offs
 
-| Trade-off | Mitigation |
-|-----------|------------|
-| Deviates from strict Clean Architecture | Documented as intentional architectural decision |
+| Trade-off                                               | Mitigation                                               |
+| ------------------------------------------------------- | -------------------------------------------------------- |
+| Deviates from strict Clean Architecture                 | Documented as intentional architectural decision         |
 | All apps coupled to shared package's interface versions | Versioning strategy via NuGet ensures controlled updates |
-| Harder to customize transaction semantics per-app | Domain-specific needs can extend the base interface |
+| Harder to customize transaction semantics per-app       | Domain-specific needs can extend the base interface      |
 
 ### When This Doesn't Apply
 

@@ -34,19 +34,19 @@ module "shared_redis" {
 
 ## Inputs
 
-| Name                | Description                      | Type          | Default          | Required |
-| ------------------- | -------------------------------- | ------------- | ---------------- | -------- |
-| environment         | Deployment environment           | `string`      | -                | yes      |
-| location            | Azure region                     | `string`      | `"eastus"`       | no       |
-| resource_group_name | Resource group name              | `string`      | -                | yes      |
-| subnet_id           | Subnet ID (required for Premium) | `string`      | `null`           | no       |
-| capacity            | Redis cache capacity             | `number`      | `1`              | no       |
-| family              | Redis cache family               | `string`      | `"C"`            | no       |
-| sku_name            | Redis cache SKU name             | `string`      | `"Standard"`     | no       |
+| Name                 | Description                      | Type          | Default          | Required |
+| -------------------- | -------------------------------- | ------------- | ---------------- | -------- |
+| environment          | Deployment environment           | `string`      | -                | yes      |
+| location             | Azure region                     | `string`      | `"eastus"`       | no       |
+| resource_group_name  | Resource group name              | `string`      | -                | yes      |
+| subnet_id            | Subnet ID (required for Premium) | `string`      | `null`           | no       |
+| capacity             | Redis cache capacity             | `number`      | `1`              | no       |
+| family               | Redis cache family               | `string`      | `"C"`            | no       |
+| sku_name             | Redis cache SKU name             | `string`      | `"Standard"`     | no       |
 | non_ssl_port_enabled | Enable non-SSL port              | `bool`        | `false`          | no       |
-| minimum_tls_version | Minimum TLS version              | `string`      | `"1.2"`          | no       |
-| maxmemory_policy    | Redis maxmemory policy           | `string`      | `"volatile-lru"` | no       |
-| tags                | Resource tags                    | `map(string)` | `{}`             | no       |
+| minimum_tls_version  | Minimum TLS version              | `string`      | `"1.2"`          | no       |
+| maxmemory_policy     | Redis maxmemory policy           | `string`      | `"volatile-lru"` | no       |
+| tags                 | Resource tags                    | `map(string)` | `{}`             | no       |
 
 ## Outputs
 
@@ -71,4 +71,3 @@ module "shared_redis" {
 - TLS 1.2 minimum enforced by default
 - Non-SSL port disabled by default
 - VNet integration recommended for production (Premium tier)
-

@@ -21,6 +21,7 @@ This proposal outlines enhancements to the `Mystira.Shared` and `Mystira.Contrac
 ### Problem Statement
 
 Currently, Mystira.App uses manual mapping patterns scattered across handlers:
+
 - 1 dedicated mapper file (`ScenarioMappers.cs`)
 - ~20 files with inline `MapTo*` methods
 - No compile-time verification of mappings
@@ -112,14 +113,14 @@ public static class GetScenarioQueryHandler
 
 ### Benefits
 
-| Feature | AutoMapper | Mapperly |
-|---------|------------|----------|
-| Runtime Overhead | Reflection-based | Zero (compile-time) |
-| AOT Compatible | Limited | Full support |
-| Debugging | Opaque | View generated code |
-| IDE Support | Runtime errors | Compile-time errors |
-| Configuration | Runtime profiles | Attributes |
-| .NET 9 Native AOT | Requires config | Works out of box |
+| Feature           | AutoMapper       | Mapperly            |
+| ----------------- | ---------------- | ------------------- |
+| Runtime Overhead  | Reflection-based | Zero (compile-time) |
+| AOT Compatible    | Limited          | Full support        |
+| Debugging         | Opaque           | View generated code |
+| IDE Support       | Runtime errors   | Compile-time errors |
+| Configuration     | Runtime profiles | Attributes          |
+| .NET 9 Native AOT | Requires config  | Works out of box    |
 
 ### Migration Path
 
@@ -135,6 +136,7 @@ public static class GetScenarioQueryHandler
 ### Problem Statement
 
 Current validation in Mystira.App:
+
 - Imperative `if/throw` statements in handlers
 - JSON Schema validation for complex scenarios
 - No centralized validation pipeline
@@ -319,6 +321,7 @@ builder.Host.UseWolverine(opts =>
 ### Problem Statement
 
 Current ICommand/IQuery interfaces in `Mystira.App.Application/CQRS/`:
+
 - 143 files reference these interfaces
 - Purely semantic markers (Wolverine doesn't require them)
 - Cannot be reused in other Mystira.Workspace apps
@@ -386,6 +389,7 @@ public interface IQuery<out TResponse>
 ### Recommendation
 
 **Keep local unless:**
+
 - Other apps in Mystira.Workspace will adopt Wolverine + CQRS
 - You want enforced consistency across the workspace
 - You plan to share command/query types between apps
@@ -396,11 +400,11 @@ Since Wolverine discovers handlers by convention (not interface), these interfac
 
 ## Implementation Priority
 
-| Enhancement | Priority | Effort | Dependencies | Recommendation |
-|-------------|----------|--------|--------------|----------------|
-| Mapperly | Medium | 2-3 hours | None | **Implement** - Clear benefits |
-| FluentValidation | Low | 4-6 hours | Domain exceptions | **Consider** - Nice to have |
-| CQRS Interfaces | Optional | 1 hour | None | **Defer** - Low value |
+| Enhancement      | Priority | Effort    | Dependencies      | Recommendation                 |
+| ---------------- | -------- | --------- | ----------------- | ------------------------------ |
+| Mapperly         | Medium   | 2-3 hours | None              | **Implement** - Clear benefits |
+| FluentValidation | Low      | 4-6 hours | Domain exceptions | **Consider** - Nice to have    |
+| CQRS Interfaces  | Optional | 1 hour    | None              | **Defer** - Low value          |
 
 ---
 
@@ -449,6 +453,7 @@ If implementing all enhancements, update `Mystira.Shared.csproj`:
 ### If Implementing Mapperly Only
 
 **Mystira.Shared:**
+
 ```
 + Mapping/IMapper.cs
 + Mapping/README.md
@@ -456,6 +461,7 @@ If implementing all enhancements, update `Mystira.Shared.csproj`:
 ```
 
 **Mystira.App:**
+
 ```
 + Application/Mapping/ScenarioMapper.cs
 + Application/Mapping/AccountMapper.cs
@@ -467,6 +473,7 @@ If implementing all enhancements, update `Mystira.Shared.csproj`:
 ### If Implementing All
 
 **Mystira.Shared:**
+
 ```
 + Mapping/IMapper.cs
 + Mapping/README.md
@@ -482,6 +489,7 @@ If implementing all enhancements, update `Mystira.Shared.csproj`:
 ```
 
 **Mystira.App:**
+
 ```
 + Application/Mapping/*.cs
 + Application/Validators/*.cs

@@ -6,13 +6,13 @@ This document outlines how the Admin UI integrates with the Mystira platform's h
 
 The Admin UI has **LOW to MEDIUM** impact in the hybrid data strategy migration:
 
-| Phase | Impact Level | Tasks |
-|-------|--------------|-------|
-| Phase 1 (Foundation) | Low | No changes required |
-| Phase 2 (Migration) | Medium | API contract updates, migration dashboard |
-| Phase 3 (Integration) | Medium | Event-driven updates, account list changes |
-| Phase 4 (PostgreSQL Primary) | Low | No changes (API abstraction) |
-| Phase 5 (Evolution) | High | Analytics dashboards, BI components |
+| Phase                        | Impact Level | Tasks                                      |
+| ---------------------------- | ------------ | ------------------------------------------ |
+| Phase 1 (Foundation)         | Low          | No changes required                        |
+| Phase 2 (Migration)          | Medium       | API contract updates, migration dashboard  |
+| Phase 3 (Integration)        | Medium       | Event-driven updates, account list changes |
+| Phase 4 (PostgreSQL Primary) | Low          | No changes (API abstraction)               |
+| Phase 5 (Evolution)          | High         | Analytics dashboards, BI components        |
 
 ## Phase 2: Admin UI Updates (Weeks 7-12)
 
@@ -21,12 +21,14 @@ The Admin UI has **LOW to MEDIUM** impact in the hybrid data strategy migration:
 A new dashboard component to monitor the Cosmos DB → PostgreSQL migration:
 
 **Planned Features**:
+
 - [ ] Migration phase indicator (Phase 0-3)
 - [ ] Sync queue status display
 - [ ] Data reconciliation metrics
 - [ ] Error/warning alerts
 
 **API Endpoints Required** (from Admin.Api):
+
 ```
 GET /api/admin/migration/status
 GET /api/admin/migration/sync-queue
@@ -64,6 +66,7 @@ New components planned for Phase 5:
 - [ ] User journey visualization
 
 **Tech Stack Additions** (potential):
+
 - Chart.js or Recharts for visualizations
 - React Table for data grids
 - Date range pickers for time-series analysis
@@ -77,7 +80,7 @@ When new endpoints are added, update `/src/api/admin.ts`:
 ```typescript
 // Future: Migration status endpoint
 export const getMigrationStatus = async (): Promise<MigrationStatus> => {
-  const response = await client.get('/admin/migration/status');
+  const response = await client.get("/admin/migration/status");
   return response.data;
 };
 ```
@@ -89,20 +92,20 @@ New query keys for migration data:
 ```typescript
 // Future query keys
 export const migrationKeys = {
-  status: ['migration', 'status'] as const,
-  syncQueue: ['migration', 'sync-queue'] as const,
-  reconciliation: ['migration', 'reconciliation'] as const,
+  status: ["migration", "status"] as const,
+  syncQueue: ["migration", "sync-queue"] as const,
+  reconciliation: ["migration", "reconciliation"] as const,
 };
 ```
 
 ## Dependencies
 
-| Dependency | Required By | Status |
-|------------|-------------|--------|
-| Admin.Api PostgreSQL endpoints | Phase 2 | Pending |
-| Migration status API | Phase 2 | Pending |
-| Event subscriptions (WebSocket) | Phase 3 | Future |
-| Analytics APIs | Phase 5 | Future |
+| Dependency                      | Required By | Status  |
+| ------------------------------- | ----------- | ------- |
+| Admin.Api PostgreSQL endpoints  | Phase 2     | Pending |
+| Migration status API            | Phase 2     | Pending |
+| Event subscriptions (WebSocket) | Phase 3     | Future  |
+| Analytics APIs                  | Phase 5     | Future  |
 
 ## Related Documentation
 

@@ -18,6 +18,7 @@ services.AddHealthChecks()
 Endpoint: `/health`
 
 Response:
+
 ```json
 {
   "status": "Healthy",
@@ -71,13 +72,13 @@ public class TeamsBotHealthCheck : IHealthCheck
 
 ### Key Metrics to Track
 
-| Metric | Description | Alert Threshold |
-|--------|-------------|-----------------|
-| `bot.messages.sent` | Messages sent per minute | > 100/min warning |
-| `bot.messages.failed` | Failed message attempts | > 5/min critical |
-| `bot.latency.ms` | Message send latency | > 5000ms warning |
-| `bot.connections` | Active connections | 0 = critical |
-| `bot.rate_limits` | Rate limit hits | > 10/min warning |
+| Metric                | Description              | Alert Threshold   |
+| --------------------- | ------------------------ | ----------------- |
+| `bot.messages.sent`   | Messages sent per minute | > 100/min warning |
+| `bot.messages.failed` | Failed message attempts  | > 5/min critical  |
+| `bot.latency.ms`      | Message send latency     | > 5000ms warning  |
+| `bot.connections`     | Active connections       | 0 = critical      |
+| `bot.rate_limits`     | Rate limit hits          | > 10/min warning  |
 
 ### Application Insights Integration
 
@@ -164,13 +165,13 @@ public static class BotMetrics
 
 ### Key Log Events
 
-| Event | Level | Description |
-|-------|-------|-------------|
-| `Sent message to channel {ChannelId}` | Debug | Successful message send |
-| `Rate limited while sending message` | Warning | Hit rate limit |
-| `Failed to send message` | Error | Message send failure |
-| `Bot disconnected` | Warning | Connection lost |
-| `Bot reconnected` | Information | Connection restored |
+| Event                                 | Level       | Description             |
+| ------------------------------------- | ----------- | ----------------------- |
+| `Sent message to channel {ChannelId}` | Debug       | Successful message send |
+| `Rate limited while sending message`  | Warning     | Hit rate limit          |
+| `Failed to send message`              | Error       | Message send failure    |
+| `Bot disconnected`                    | Warning     | Connection lost         |
+| `Bot reconnected`                     | Information | Connection restored     |
 
 ## Alerting
 

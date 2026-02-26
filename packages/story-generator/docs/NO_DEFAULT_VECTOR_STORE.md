@@ -13,6 +13,7 @@ There is **NO default/fallback vector store**. If a user requests a story for an
 ### Scenario 1: Age Group Not Configured
 
 **Configuration:**
+
 ```json
 {
   "FileSearch": {
@@ -25,6 +26,7 @@ There is **NO default/fallback vector store**. If a user requests a story for an
 ```
 
 **Request:**
+
 ```http
 POST /api/story-agent/sessions/start
 {
@@ -33,6 +35,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Result:**
+
 ```
 InvalidOperationException:
 No vector store configured for age group '3-5'.
@@ -45,6 +48,7 @@ Add a vector store for age group '3-5' to FoundryAgent:FileSearch:VectorStoresBy
 ### Scenario 2: No Age Group Provided
 
 **Request:**
+
 ```http
 POST /api/story-agent/sessions/start
 {
@@ -54,6 +58,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Result:**
+
 ```
 ArgumentException:
 Age group is required for FileSearch knowledge mode.
@@ -65,15 +70,17 @@ Ensure the session has a valid age group specified.
 ### Scenario 3: Empty Configuration
 
 **Configuration:**
+
 ```json
 {
   "FileSearch": {
-    "VectorStoresByAgeGroup": {}  // Empty!
+    "VectorStoresByAgeGroup": {} // Empty!
   }
 }
 ```
 
 **Request:**
+
 ```http
 POST /api/story-agent/sessions/start
 {
@@ -82,6 +89,7 @@ POST /api/story-agent/sessions/start
 ```
 
 **Result:**
+
 ```
 InvalidOperationException:
 No vector stores configured for FileSearch mode.
@@ -108,6 +116,7 @@ Set FoundryAgent:FileSearch:VectorStoresByAgeGroup in configuration with age-spe
 ```
 
 **Behavior:**
+
 - Age 6-9 requests: ✅ Uses `vs_elementary_ghi789`
 - Any other age: ❌ Fails with clear error message
 
@@ -135,6 +144,7 @@ Set FoundryAgent:FileSearch:VectorStoresByAgeGroup in configuration with age-spe
 ```
 
 **Behavior:**
+
 - All configured ages: ✅ Uses age-specific vector store
 - Unconfigured ages: ❌ Fails with clear error listing configured ages
 
@@ -145,6 +155,7 @@ Set FoundryAgent:FileSearch:VectorStoresByAgeGroup in configuration with age-spe
 ### Safety First
 
 **Problem with defaults:**
+
 ```
 User requests: Age 1-2 (toddler)
 No config for 1-2 exists
@@ -153,6 +164,7 @@ Falls back to "default" store containing 10-12 content
 ```
 
 **Solution: Explicit configuration:**
+
 ```
 User requests: Age 1-2 (toddler)
 No config for 1-2 exists
@@ -214,6 +226,7 @@ public class FileSearchConfig
 ```
 
 **Key changes:**
+
 - ❌ Removed `DefaultVectorStoreId` property
 - ✅ `VectorStoresByAgeGroup` is now required (not nullable)
 - ✅ Empty dictionary = clear error at runtime
@@ -245,23 +258,26 @@ curl -X POST http://localhost:7001/api/story-agent/sessions/start \
 
 ## Error Messages Reference
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| "Age group is required for FileSearch knowledge mode" | `ageGroup` is null/empty | Include `ageGroup` in request |
-| "No vector stores configured for FileSearch mode" | `VectorStoresByAgeGroup` is empty | Add at least one age group mapping |
-| "No vector store configured for age group 'X'" | Age group 'X' not in dictionary | Add 'X' to `VectorStoresByAgeGroup` or use different age |
+| Error                                                 | Cause                             | Solution                                                 |
+| ----------------------------------------------------- | --------------------------------- | -------------------------------------------------------- |
+| "Age group is required for FileSearch knowledge mode" | `ageGroup` is null/empty          | Include `ageGroup` in request                            |
+| "No vector stores configured for FileSearch mode"     | `VectorStoresByAgeGroup` is empty | Add at least one age group mapping                       |
+| "No vector store configured for age group 'X'"        | Age group 'X' not in dictionary   | Add 'X' to `VectorStoresByAgeGroup` or use different age |
 
 ---
 
 ## Summary
 
 **Old Behavior:**
+
 - Missing age group → Falls back to default → Risk of inappropriate content
 
 **New Behavior:**
+
 - Missing age group → **Error with clear message** → Safe, explicit configuration required
 
 **Action Required:**
+
 - ✅ Configure ALL age groups your application supports
 - ✅ Remove any references to `DefaultVectorStoreId` from configuration
 - ✅ Test all age groups to ensure configuration is complete

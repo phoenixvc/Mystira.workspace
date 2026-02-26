@@ -22,7 +22,7 @@ export function ProjectDeploymentSummary({
 
     setTimeout(() => {
       const step2Element = document.getElementById(
-        "step-2-infrastructure-actions",
+        "step-2-infrastructure-actions"
       );
       if (step2Element) {
         requestAnimationFrame(() => {
@@ -39,7 +39,7 @@ export function ProjectDeploymentSummary({
             step2Element.classList.remove(
               "ring-2",
               "ring-blue-500",
-              "rounded-lg",
+              "rounded-lg"
             );
           }, 2000);
         });

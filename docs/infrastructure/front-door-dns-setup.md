@@ -15,42 +15,42 @@ Azure Front Door requires proper DNS configuration before it can provision SSL c
 
 ### Development (`dev`)
 
-| Service | Domain | Purpose |
-|---------|--------|---------|
-| Mystira.App (PWA) | `dev.mystira.app` | Main web application |
-| Mystira.App API | `dev.api.mystira.app` | Backend API |
-| Admin UI | `dev.admin.mystira.app` | Admin portal |
-| Admin API | `dev.admin-api.mystira.app` | Admin backend |
-| Story Generator | `dev.story.mystira.app` | Story generator PWA |
-| Story API | `dev.story-api.mystira.app` | Story generator backend |
-| Publisher | `dev.publisher.mystira.app` | Publisher service (AKS) |
-| Chain | `dev.chain.mystira.app` | Chain service (AKS) |
+| Service           | Domain                      | Purpose                 |
+| ----------------- | --------------------------- | ----------------------- |
+| Mystira.App (PWA) | `dev.mystira.app`           | Main web application    |
+| Mystira.App API   | `dev.api.mystira.app`       | Backend API             |
+| Admin UI          | `dev.admin.mystira.app`     | Admin portal            |
+| Admin API         | `dev.admin-api.mystira.app` | Admin backend           |
+| Story Generator   | `dev.story.mystira.app`     | Story generator PWA     |
+| Story API         | `dev.story-api.mystira.app` | Story generator backend |
+| Publisher         | `dev.publisher.mystira.app` | Publisher service (AKS) |
+| Chain             | `dev.chain.mystira.app`     | Chain service (AKS)     |
 
 ### Staging (`staging`)
 
-| Service | Domain | Purpose |
-|---------|--------|---------|
-| Mystira.App (PWA) | `staging.app.mystira.app` | Main web application |
-| Mystira.App API | `staging.api.mystira.app` | Backend API |
-| Admin UI | `staging.admin.mystira.app` | Admin portal |
-| Admin API | `staging.admin-api.mystira.app` | Admin backend |
-| Story Generator | `staging.story.mystira.app` | Story generator PWA |
-| Story API | `staging.story-api.mystira.app` | Story generator backend |
-| Publisher | `staging.publisher.mystira.app` | Publisher service (AKS) |
-| Chain | `staging.chain.mystira.app` | Chain service (AKS) |
+| Service           | Domain                          | Purpose                 |
+| ----------------- | ------------------------------- | ----------------------- |
+| Mystira.App (PWA) | `staging.app.mystira.app`       | Main web application    |
+| Mystira.App API   | `staging.api.mystira.app`       | Backend API             |
+| Admin UI          | `staging.admin.mystira.app`     | Admin portal            |
+| Admin API         | `staging.admin-api.mystira.app` | Admin backend           |
+| Story Generator   | `staging.story.mystira.app`     | Story generator PWA     |
+| Story API         | `staging.story-api.mystira.app` | Story generator backend |
+| Publisher         | `staging.publisher.mystira.app` | Publisher service (AKS) |
+| Chain             | `staging.chain.mystira.app`     | Chain service (AKS)     |
 
 ### Production (`prod`)
 
-| Service | Domain | Purpose |
-|---------|--------|---------|
-| Mystira.App (PWA) | `app.mystira.app` | Main web application |
-| Mystira.App API | `api.mystira.app` | Backend API |
-| Admin UI | `admin.mystira.app` | Admin portal |
-| Admin API | `admin-api.mystira.app` | Admin backend |
-| Story Generator | `story.mystira.app` | Story generator PWA |
-| Story API | `story-api.mystira.app` | Story generator backend |
-| Publisher | `publisher.mystira.app` | Publisher service (AKS) |
-| Chain | `chain.mystira.app` | Chain service (AKS) |
+| Service           | Domain                  | Purpose                 |
+| ----------------- | ----------------------- | ----------------------- |
+| Mystira.App (PWA) | `app.mystira.app`       | Main web application    |
+| Mystira.App API   | `api.mystira.app`       | Backend API             |
+| Admin UI          | `admin.mystira.app`     | Admin portal            |
+| Admin API         | `admin-api.mystira.app` | Admin backend           |
+| Story Generator   | `story.mystira.app`     | Story generator PWA     |
+| Story API         | `story-api.mystira.app` | Story generator backend |
+| Publisher         | `publisher.mystira.app` | Publisher service (AKS) |
+| Chain             | `chain.mystira.app`     | Chain service (AKS)     |
 
 ## DNS Configuration Steps
 
@@ -244,6 +244,7 @@ module "dns" {
 **Cause:** DNS is not pointing to Front Door or validation hasn't completed.
 
 **Solution:**
+
 1. Verify CNAME record points to correct Front Door endpoint
 2. Verify TXT validation record exists and has correct token
 3. Wait for Azure to complete domain validation (5-15 minutes)
@@ -254,6 +255,7 @@ module "dns" {
 **Cause:** TXT record not found or incorrect.
 
 **Solution:**
+
 ```bash
 # Check if TXT record is resolvable
 dig TXT _dnsauth.<subdomain>.mystira.app
@@ -267,6 +269,7 @@ terraform output front_door_custom_domain_verification
 **Cause:** Domain validation incomplete or DNS propagation delay.
 
 **Solution:**
+
 1. Wait up to 1 hour for DNS propagation
 2. Check Azure Portal → Front Door → Custom Domains for status
 3. Ensure no conflicting records (e.g., existing A records)
@@ -284,7 +287,7 @@ Add the following changes to improve offline error handling:
 1. Add the `OFFLINE_HTML` constant after `LOG_PREFIX`:
 
 ```javascript
-const LOG_PREFIX = '[Mystira ServiceWorker]';
+const LOG_PREFIX = "[Mystira ServiceWorker]";
 
 // Offline fallback HTML page
 const OFFLINE_HTML = `<!DOCTYPE html>
@@ -360,6 +363,7 @@ const OFFLINE_HTML = `<!DOCTYPE html>
 ### Other PWA Submodules
 
 Similar service worker improvements should be applied to:
+
 - `Mystira.StoryGenerator` - Story Generator PWA
 - `Mystira.Admin.UI` - Admin portal (if using service worker)
 

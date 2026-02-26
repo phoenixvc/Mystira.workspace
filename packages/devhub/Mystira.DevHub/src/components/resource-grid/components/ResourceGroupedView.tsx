@@ -26,7 +26,7 @@ export function ResourceGroupedView({
   deletingResource,
 }: ResourceGroupedViewProps) {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(
-    new Set(),
+    new Set()
   );
 
   const groupedResources = useMemo(() => {
@@ -87,10 +87,10 @@ export function ResourceGroupedView({
       {Object.entries(groupedResources).map(([typeKey, groupResources]) => {
         const isCollapsed = collapsedGroups.has(typeKey);
         const runningCount = groupResources.filter(
-          (r) => r.status === "running",
+          (r) => r.status === "running"
         ).length;
         const failedCount = groupResources.filter(
-          (r) => r.status === "failed",
+          (r) => r.status === "failed"
         ).length;
 
         return (

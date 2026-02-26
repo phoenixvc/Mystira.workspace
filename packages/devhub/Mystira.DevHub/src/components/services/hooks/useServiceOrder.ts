@@ -13,7 +13,7 @@ export function useServiceOrder(serviceConfigs: ServiceConfig[]) {
             .map((name) => serviceConfigs.find((s) => s.name === name))
             .filter((s): s is ServiceConfig => s !== undefined);
           const newServices = serviceConfigs.filter(
-            (s) => !order.includes(s.name),
+            (s) => !order.includes(s.name)
           );
           return [...ordered, ...newServices];
         } catch {
@@ -21,7 +21,7 @@ export function useServiceOrder(serviceConfigs: ServiceConfig[]) {
         }
       }
       return serviceConfigs;
-    },
+    }
   );
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function useServiceOrder(serviceConfigs: ServiceConfig[]) {
           .map((name) => serviceConfigs.find((s) => s.name === name))
           .filter((s): s is ServiceConfig => s !== undefined);
         const newServices = serviceConfigs.filter(
-          (s) => !order.includes(s.name),
+          (s) => !order.includes(s.name)
         );
         setOrderedServices([...ordered, ...newServices]);
       } catch {

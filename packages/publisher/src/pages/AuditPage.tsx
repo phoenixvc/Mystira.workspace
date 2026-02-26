@@ -1,14 +1,20 @@
-import { useState } from 'react';
-import { Card, CardBody, CardHeader, Button } from '@/components';
-import { AuditLogList, AuditLogFilters, AuditLogDetail, useAuditLogs } from '@/features/AuditTrail';
-import type { AuditLog } from '@/api/types';
+import { useState } from "react";
+import { Card, CardBody, CardHeader, Button } from "@/components";
+import {
+  AuditLogList,
+  AuditLogFilters,
+  AuditLogDetail,
+  useAuditLogs,
+} from "@/features/AuditTrail";
+import type { AuditLog } from "@/api/types";
 
 export function AuditPage() {
   const { logs, isLoading, filters, setFilters, exportLogs } = useAuditLogs();
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
-  const hasActiveFilters = filters.eventType || filters.startDate || filters.endDate;
+  const hasActiveFilters =
+    filters.eventType || filters.startDate || filters.endDate;
 
   return (
     <div className="page page--audit">
@@ -23,15 +29,28 @@ export function AuditPage() {
           <Button
             variant="outline"
             onClick={() => setShowFilters(!showFilters)}
-            style={{ position: 'relative' }}
+            style={{ position: "relative" }}
           >
-            {showFilters ? 'Hide' : 'Show'} Filters
-            {hasActiveFilters && <span className="audit-header__filter-badge" />}
+            {showFilters ? "Hide" : "Show"} Filters
+            {hasActiveFilters && (
+              <span className="audit-header__filter-badge" />
+            )}
           </Button>
           {exportLogs && (
             <Button variant="outline" onClick={exportLogs}>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
               Export
             </Button>
@@ -45,10 +64,7 @@ export function AuditPage() {
             <h2>Filters</h2>
           </CardHeader>
           <CardBody>
-            <AuditLogFilters
-              filters={filters}
-              onChange={setFilters}
-            />
+            <AuditLogFilters filters={filters} onChange={setFilters} />
           </CardBody>
         </Card>
       )}
@@ -58,7 +74,9 @@ export function AuditPage() {
           <div>
             <h2>Activity Log</h2>
             <span className="audit-log-card__count">
-              {isLoading ? 'Loading...' : `${logs.length} ${logs.length === 1 ? 'event' : 'events'}`}
+              {isLoading
+                ? "Loading..."
+                : `${logs.length} ${logs.length === 1 ? "event" : "events"}`}
             </span>
           </div>
         </CardHeader>
@@ -71,10 +89,7 @@ export function AuditPage() {
         </CardBody>
       </Card>
 
-      <AuditLogDetail
-        log={selectedLog}
-        onClose={() => setSelectedLog(null)}
-      />
+      <AuditLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} />
     </div>
   );
 }

@@ -72,7 +72,12 @@ The API configuration has already been updated with Entra External ID settings:
     "TenantId": "a816d461-fbf8-4477-83a6-a62ad74ff28f",
     "ClientId": "<PUBLIC_API_CLIENT_ID>",
     "Authority": "https://mystira.ciamlogin.com/a816d461-fbf8-4477-83a6-a62ad74ff28f/v2.0",
-    "ValidScopes": ["API.Access", "Profile.Read", "Stories.Read", "Stories.Write"]
+    "ValidScopes": [
+      "API.Access",
+      "Profile.Read",
+      "Stories.Read",
+      "Stories.Write"
+    ]
   }
 }
 ```
@@ -85,6 +90,7 @@ terraform output public_api_client_id
 ```
 
 **Example output**:
+
 ```
 public_api_client_id = "87654321-4321-4321-4321-987654321cba"
 ```
@@ -117,7 +123,7 @@ if (!string.IsNullOrWhiteSpace(jwksEndpoint))
     // Use JWKS endpoint for key rotation support (most secure)
     options.MetadataAddress = jwksEndpoint;
     options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-    
+
     // Configure refresh interval for JWKS keys
     options.RefreshInterval = TimeSpan.FromHours(1);
     options.AutomaticRefreshInterval = TimeSpan.FromHours(24);
@@ -125,6 +131,7 @@ if (!string.IsNullOrWhiteSpace(jwksEndpoint))
 ```
 
 **What this does**:
+
 - Fetches public keys from Entra External ID's JWKS endpoint
 - Caches keys for 1 hour
 - Automatically refreshes keys every 24 hours
@@ -174,6 +181,7 @@ The API logs authentication events for monitoring:
 ```
 
 **Claims**:
+
 - `iss` (issuer): Entra External ID authority
 - `aud` (audience): Public API Client ID
 - `sub` (subject): User's unique ID in Entra
@@ -202,7 +210,7 @@ public class ProfileController : ControllerBase
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var email = User.FindFirst(ClaimTypes.Email)?.Value;
         var name = User.Identity?.Name;
-        
+
         return Ok(new { userId, email, name });
     }
 }
@@ -223,7 +231,7 @@ public class StoriesController : ControllerBase
         // User must have "Stories.Read" scope
         return Ok(stories);
     }
-    
+
     [HttpPost]
     [RequiredScope("Stories.Write")]
     public async Task<IActionResult> CreateStory([FromBody] Story story)
@@ -239,7 +247,7 @@ public class StoriesController : ControllerBase
 ```csharp
 public class RequiredScopeAttribute : TypeFilterAttribute
 {
-    public RequiredScopeAttribute(params string[] scopes) 
+    public RequiredScopeAttribute(params string[] scopes)
         : base(typeof(RequiredScopeFilter))
     {
         Arguments = new object[] { scopes };
@@ -249,12 +257,12 @@ public class RequiredScopeAttribute : TypeFilterAttribute
 public class RequiredScopeFilter : IAuthorizationFilter
 {
     private readonly string[] _scopes;
-    
+
     public RequiredScopeFilter(string[] scopes)
     {
         _scopes = scopes;
     }
-    
+
     public void OnAuthorization(AuthorizationFilterContext context)
     {
         var scopeClaim = context.HttpContext.User.FindFirst("scp")?.Value;
@@ -263,7 +271,7 @@ public class RequiredScopeFilter : IAuthorizationFilter
             context.Result = new ForbidResult();
             return;
         }
-        
+
         var userScopes = scopeClaim.Split(' ');
         if (!_scopes.Any(s => userScopes.Contains(s)))
         {
@@ -323,6 +331,7 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ### 3. Expected Response
 
 **Success (200 OK)**:
+
 ```json
 {
   "userId": "12345678-1234-1234-1234-123456789abc",
@@ -332,6 +341,7 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ```
 
 **Unauthorized (401)**:
+
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc7235#section-3.1",
@@ -341,6 +351,7 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ```
 
 **Forbidden (403)** - Missing required scope:
+
 ```json
 {
   "type": "https://tools.ietf.org/html/rfc7231#section-6.5.3",
@@ -354,11 +365,13 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ### Issue: "401 Unauthorized" on all requests
 
 **Possible causes**:
+
 1. Token expired (tokens are valid for 1 hour)
 2. Audience mismatch (API Client ID doesn't match token audience)
 3. Issuer mismatch (Authority doesn't match token issuer)
 
 **Solution**:
+
 1. Check token expiry: Decode the token at [jwt.io](https://jwt.io) and check `exp` claim
 2. Verify `Audience` in appsettings matches the Public API Client ID
 3. Verify `Issuer` matches the authority in the token's `iss` claim
@@ -366,11 +379,13 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ### Issue: "Unable to obtain configuration from JWKS endpoint"
 
 **Possible causes**:
+
 1. JWKS endpoint URL is incorrect
 2. Network connectivity issues
 3. Entra External ID tenant not accessible
 
 **Solution**:
+
 1. Verify JWKS endpoint: `https://mystira.ciamlogin.com/<TENANT_ID>/discovery/v2.0/keys`
 2. Test endpoint in browser - should return JSON with keys
 3. Check API logs for detailed error messages
@@ -378,11 +393,13 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ### Issue: "Signature validation failed"
 
 **Possible causes**:
+
 1. Token was signed by a different authority
 2. JWKS keys not fetched correctly
 3. Token was tampered with
 
 **Solution**:
+
 1. Verify the token was issued by Entra External ID
 2. Restart the API to force JWKS refresh
 3. Check API logs for signature validation errors
@@ -390,11 +407,13 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 ### Issue: "Scope validation failed"
 
 **Possible causes**:
+
 1. Token doesn't contain required scopes
 2. PWA didn't request the correct scopes during login
 3. Scopes not configured in Entra External ID app registration
 
 **Solution**:
+
 1. Check token claims at [jwt.io](https://jwt.io) - look for `scp` claim
 2. Verify PWA requests scopes in `LoginWithEntraAsync()` method
 3. Verify scopes are exposed in Public API app registration in Entra
@@ -445,11 +464,13 @@ Invoke-RestMethod -Uri "https://localhost:5260/api/profile" -Headers $headers
 The API logs authentication events to Application Insights:
 
 **Successful authentication**:
+
 ```
 JWT token validated for user: john.doe@example.com
 ```
 
 **Failed authentication**:
+
 ```
 JWT authentication failed on /api/profile (UA: Mozilla/5.0...)
 Exception: IDX10223: Lifetime validation failed. The token is expired.

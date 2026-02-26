@@ -12,19 +12,19 @@ The `Account` domain model represents a user account with authentication, subscr
 
 ## Properties
 
-| Property                | Type                      | Description                                    |
-| ----------------------- | ------------------------- | ---------------------------------------------- |
-| `Id`                    | `string`                  | Unique identifier (GUID)                      |
-| `ExternalUserId`        | `string`                  | External identity provider user identifier (Entra External ID) |
-| `Email`                  | `string`                  | Account email address                         |
-| `DisplayName`           | `string`                  | Display name for the account                  |
-| `Role`                  | `string`                  | User role (default: "Guest", can be "Admin")  |
-| `UserProfileIds`        | `List<string>`            | IDs of user profiles associated with account  |
-| `CompletedScenarioIds`  | `List<string>`            | IDs of scenarios completed by this account   |
-| `Subscription`          | `SubscriptionDetails`     | Subscription information                      |
-| `Settings`              | `AccountSettings`         | Account settings                              |
-| `CreatedAt`             | `DateTime`                | Account creation timestamp                     |
-| `LastLoginAt`           | `DateTime`                | Last login timestamp                          |
+| Property               | Type                  | Description                                                    |
+| ---------------------- | --------------------- | -------------------------------------------------------------- |
+| `Id`                   | `string`              | Unique identifier (GUID)                                       |
+| `ExternalUserId`       | `string`              | External identity provider user identifier (Entra External ID) |
+| `Email`                | `string`              | Account email address                                          |
+| `DisplayName`          | `string`              | Display name for the account                                   |
+| `Role`                 | `string`              | User role (default: "Guest", can be "Admin")                   |
+| `UserProfileIds`       | `List<string>`        | IDs of user profiles associated with account                   |
+| `CompletedScenarioIds` | `List<string>`        | IDs of scenarios completed by this account                     |
+| `Subscription`         | `SubscriptionDetails` | Subscription information                                       |
+| `Settings`             | `AccountSettings`     | Account settings                                               |
+| `CreatedAt`            | `DateTime`            | Account creation timestamp                                     |
+| `LastLoginAt`          | `DateTime`            | Last login timestamp                                           |
 
 ## Related Domain Models
 
@@ -34,15 +34,15 @@ Represents subscription and purchase information for the account.
 
 **Properties**:
 
-| Property              | Type                | Description                                    |
-| --------------------- | ------------------- | ---------------------------------------------- |
-| `Type`                | `SubscriptionType`  | Subscription type (Free, Monthly, Annual, etc.) |
-| `ProductId`           | `string`            | App store product identifier                  |
-| `ValidUntil`          | `DateTime?`         | Subscription expiration (null for lifetime)   |
-| `IsActive`            | `bool`              | Whether subscription is active                |
-| `PurchaseToken`       | `string?`           | App store purchase verification token         |
-| `LastVerified`        | `DateTime?`         | Last subscription verification timestamp      |
-| `PurchasedScenarios`  | `List<string>`      | IDs of individually purchased scenarios       |
+| Property             | Type               | Description                                     |
+| -------------------- | ------------------ | ----------------------------------------------- |
+| `Type`               | `SubscriptionType` | Subscription type (Free, Monthly, Annual, etc.) |
+| `ProductId`          | `string`           | App store product identifier                    |
+| `ValidUntil`         | `DateTime?`        | Subscription expiration (null for lifetime)     |
+| `IsActive`           | `bool`             | Whether subscription is active                  |
+| `PurchaseToken`      | `string?`          | App store purchase verification token           |
+| `LastVerified`       | `DateTime?`        | Last subscription verification timestamp        |
+| `PurchasedScenarios` | `List<string>`     | IDs of individually purchased scenarios         |
 
 **Methods**:
 
@@ -54,12 +54,12 @@ Represents user preferences and account settings.
 
 **Properties**:
 
-| Property                  | Type     | Description                                    |
-| ------------------------- | -------- | ---------------------------------------------- |
-| `CacheCredentials`        | `bool`   | Whether to cache credentials (default: true)   |
-| `RequireAuthOnStartup`    | `bool`   | Whether to require auth on startup (default: false) |
-| `PreferredLanguage`       | `string` | Preferred language code (default: "en")       |
-| `NotificationsEnabled`    | `bool`   | Whether notifications are enabled (default: true) |
+| Property               | Type     | Description                                         |
+| ---------------------- | -------- | --------------------------------------------------- |
+| `CacheCredentials`     | `bool`   | Whether to cache credentials (default: true)        |
+| `RequireAuthOnStartup` | `bool`   | Whether to require auth on startup (default: false) |
+| `PreferredLanguage`    | `string` | Preferred language code (default: "en")             |
+| `NotificationsEnabled` | `bool`   | Whether notifications are enabled (default: true)   |
 
 ### SubscriptionType Enum
 

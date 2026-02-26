@@ -1,9 +1,9 @@
 ---
 name: Bug Report
 about: Report a bug to help us improve Mystira
-title: '[BUG] '
+title: "[BUG] "
 labels: bug
-assignees: ''
+assignees: ""
 ---
 
 ## Bug Description
@@ -46,4 +46,3 @@ If applicable, add screenshots to help explain your problem.
 ## Additional Context
 
 Add any other context about the problem here.
-

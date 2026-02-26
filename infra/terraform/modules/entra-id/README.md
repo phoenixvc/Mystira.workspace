@@ -62,7 +62,7 @@ module "entra_id" {
 ### Providers
 
 | Provider | Version |
-|----------|---------|
+| -------- | ------- |
 | azuread  | ~> 2.47 |
 | azurerm  | ~> 3.80 |
 | random   | ~> 3.5  |
@@ -77,26 +77,26 @@ The service principal running Terraform needs the following Microsoft Graph API 
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| environment | Deployment environment (dev, staging, prod) | `string` | n/a | yes |
-| admin_ui_redirect_uris | Redirect URIs for Admin UI application | `list(string)` | `[]` | no |
-| enable_external_id | Enable Entra External ID configuration | `bool` | `false` | no |
-| external_id_tenant_domain | External ID tenant domain | `string` | `""` | no |
-| tags | Tags to apply to resources | `map(string)` | `{}` | no |
+| Name                      | Description                                 | Type           | Default | Required |
+| ------------------------- | ------------------------------------------- | -------------- | ------- | :------: |
+| environment               | Deployment environment (dev, staging, prod) | `string`       | n/a     |   yes    |
+| admin_ui_redirect_uris    | Redirect URIs for Admin UI application      | `list(string)` | `[]`    |    no    |
+| enable_external_id        | Enable Entra External ID configuration      | `bool`         | `false` |    no    |
+| external_id_tenant_domain | External ID tenant domain                   | `string`       | `""`    |    no    |
+| tags                      | Tags to apply to resources                  | `map(string)`  | `{}`    |    no    |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| admin_api_client_id | Admin API application (client) ID |
+| Name                     | Description                         |
+| ------------------------ | ----------------------------------- |
+| admin_api_client_id      | Admin API application (client) ID   |
 | admin_api_identifier_uri | Admin API identifier URI (audience) |
-| admin_ui_client_id | Admin UI application (client) ID |
-| tenant_id | Azure AD tenant ID |
-| api_scopes | Map of API scope names to their IDs |
-| app_roles | Map of app role names to their IDs |
-| admin_api_config | Configuration values for Admin API |
-| admin_ui_config | Configuration values for Admin UI |
+| admin_ui_client_id       | Admin UI application (client) ID    |
+| tenant_id                | Azure AD tenant ID                  |
+| api_scopes               | Map of API scope names to their IDs |
+| app_roles                | Map of app role names to their IDs  |
+| admin_api_config         | Configuration values for Admin API  |
+| admin_ui_config          | Configuration values for Admin UI   |
 
 ## Post-Deployment Steps
 
@@ -140,6 +140,7 @@ az ad app role assignment create \
 Use the output values to configure your applications:
 
 **Admin API (appsettings.json)**:
+
 ```json
 {
   "AzureAd": {
@@ -152,6 +153,7 @@ Use the output values to configure your applications:
 ```
 
 **Admin UI (.env)**:
+
 ```bash
 VITE_AZURE_CLIENT_ID=<admin_ui_client_id>
 VITE_AZURE_TENANT_ID=<tenant_id>

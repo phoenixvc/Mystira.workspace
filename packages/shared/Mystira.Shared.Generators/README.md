@@ -7,6 +7,7 @@ This source generator project is available but **commented out by default**.
 ## Why It's Commented Out
 
 The **Generic Repository + Ardalis.Specification** pattern covers 90% of use cases with:
+
 - Zero boilerplate code
 - Better testability
 - Simpler debugging
@@ -35,6 +36,7 @@ var products = await _repository.ListAsync(new LowStockProductsSpec(10));
 ## When To Consider Source Generators
 
 Only enable if you have:
+
 - 20+ repositories with similar patterns
 - Custom methods that can't be expressed as specifications
 - Team familiarity with Roslyn source generators
@@ -54,6 +56,7 @@ If you decide to use them, uncomment in `Mystira.Shared.csproj`:
 ## Future Alternatives
 
 Consider these modern AOP approaches instead:
+
 - **.NET 8+ Interceptors** - Compile-time, type-safe
 - **Scrutor** - Convention-based registration + decorators
 - **Metalama** - Full compile-time AOP (licensed)

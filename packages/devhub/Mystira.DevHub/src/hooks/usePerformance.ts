@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
  */
 export function usePerformance(
   componentName: string,
-  enabled = process.env.NODE_ENV === "development",
+  enabled = process.env.NODE_ENV === "development"
 ) {
   const renderCount = useRef(0);
   const startTime = useRef(performance.now());
@@ -19,13 +19,13 @@ export function usePerformance(
     const renderTime = endTime - startTime.current;
 
     console.log(
-      `[Performance] ${componentName} - Render #${renderCount.current} - ${renderTime.toFixed(2)}ms`,
+      `[Performance] ${componentName} - Render #${renderCount.current} - ${renderTime.toFixed(2)}ms`
     );
 
     // Log slow renders
     if (renderTime > 16) {
       console.warn(
-        `[Performance Warning] ${componentName} took ${renderTime.toFixed(2)}ms (>16ms frame budget)`,
+        `[Performance Warning] ${componentName} took ${renderTime.toFixed(2)}ms (>16ms frame budget)`
       );
     }
 
@@ -41,7 +41,7 @@ export function usePerformance(
 export function useAsyncPerformance() {
   const measure = async <T>(
     operationName: string,
-    operation: () => Promise<T>,
+    operation: () => Promise<T>
   ): Promise<T> => {
     const startTime = performance.now();
 
@@ -50,12 +50,12 @@ export function useAsyncPerformance() {
       const duration = performance.now() - startTime;
 
       console.log(
-        `[Async Performance] ${operationName} - ${duration.toFixed(2)}ms`,
+        `[Async Performance] ${operationName} - ${duration.toFixed(2)}ms`
       );
 
       if (duration > 1000) {
         console.warn(
-          `[Async Performance Warning] ${operationName} took ${duration.toFixed(2)}ms (>1s)`,
+          `[Async Performance Warning] ${operationName} took ${duration.toFixed(2)}ms (>1s)`
         );
       }
 
@@ -64,7 +64,7 @@ export function useAsyncPerformance() {
       const duration = performance.now() - startTime;
       console.error(
         `[Async Performance] ${operationName} failed after ${duration.toFixed(2)}ms`,
-        error,
+        error
       );
       throw error;
     }
@@ -99,7 +99,7 @@ export function useRenderMonitor(componentName: string, threshold = 16) {
 
       if (avg > threshold) {
         console.warn(
-          `[Render Monitor] ${componentName} average render time: ${avg.toFixed(2)}ms (threshold: ${threshold}ms)`,
+          `[Render Monitor] ${componentName} average render time: ${avg.toFixed(2)}ms (threshold: ${threshold}ms)`
         );
       }
     };
@@ -109,7 +109,7 @@ export function useRenderMonitor(componentName: string, threshold = 16) {
     return () => {
       const lifetimeMs = Date.now() - mountTime.current;
       console.log(
-        `[Component Lifecycle] ${componentName} unmounted after ${(lifetimeMs / 1000).toFixed(2)}s`,
+        `[Component Lifecycle] ${componentName} unmounted after ${(lifetimeMs / 1000).toFixed(2)}s`
       );
     };
   }, [componentName]);

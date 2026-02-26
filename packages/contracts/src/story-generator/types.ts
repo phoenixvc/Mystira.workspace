@@ -15,9 +15,9 @@
  * Type of message in a chat conversation
  */
 export enum ChatMessageType {
-  User = 'User',
-  AI = 'AI',
-  System = 'System',
+  User = "User",
+  AI = "AI",
+  System = "System",
 }
 
 /**
@@ -25,54 +25,54 @@ export enum ChatMessageType {
  */
 export enum SceneEntityType {
   /** Places, rooms, villages, forests, magical realms */
-  Location = 'location',
+  Location = "location",
   /** Any sentient individual (child, adult, animal with personality, monster, etc.) */
-  Character = 'character',
+  Character = "character",
   /** Physical objects, tools, weapons, artifacts, etc. */
-  Item = 'item',
+  Item = "item",
   /** Abstract ideas (fear, honesty, courage, chaos, magic, time) */
-  Concept = 'concept',
+  Concept = "concept",
 }
 
 /**
  * Confidence level for entity recognition
  */
 export enum Confidence {
-  Unknown = 'unknown',
-  Low = 'low',
-  Medium = 'medium',
-  High = 'high',
+  Unknown = "unknown",
+  Low = "low",
+  Medium = "medium",
+  High = "high",
 }
 
 /**
  * Intent category for routing requests
  */
 export enum IntentCategory {
-  StoryGeneration = 'story_generation',
-  Validation = 'validation',
-  Autofix = 'autofix',
-  Summarization = 'summarization',
-  Config = 'config',
-  Safety = 'safety',
-  Meta = 'meta',
+  StoryGeneration = "story_generation",
+  Validation = "validation",
+  Autofix = "autofix",
+  Summarization = "summarization",
+  Config = "config",
+  Safety = "safety",
+  Meta = "meta",
 }
 
 /**
  * Specific instruction type for intent routing
  */
 export enum IntentInstructionType {
-  StoryGenerateInitial = 'story_generate_initial',
-  StoryGenerateRefine = 'story_generate_refine',
-  StoryValidate = 'story_validate',
-  StoryAutofix = 'story_autofix',
-  StorySummarize = 'story_summarize',
-  ConfigView = 'config_view',
-  ConfigUpdate = 'config_update',
-  Help = 'help',
-  SchemaDocs = 'schema_docs',
-  SafetyPolicy = 'safety_policy',
-  Requirements = 'requirements',
-  Guidelines = 'guidelines',
+  StoryGenerateInitial = "story_generate_initial",
+  StoryGenerateRefine = "story_generate_refine",
+  StoryValidate = "story_validate",
+  StoryAutofix = "story_autofix",
+  StorySummarize = "story_summarize",
+  ConfigView = "config_view",
+  ConfigUpdate = "config_update",
+  Help = "help",
+  SchemaDocs = "schema_docs",
+  SafetyPolicy = "safety_policy",
+  Requirements = "requirements",
+  Guidelines = "guidelines",
 }
 
 // =============================================================================

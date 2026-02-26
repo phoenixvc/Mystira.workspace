@@ -51,7 +51,7 @@ export const useDeploymentsStore = create<DeploymentsState>((set, get) => ({
         {
           repository,
           limit: limit || 20,
-        },
+        }
       );
 
       if (response.success && response.result) {
@@ -102,7 +102,7 @@ export const useDeploymentsStore = create<DeploymentsState>((set, get) => ({
               message: run.display_title || run.name || "Workflow run",
               githubUrl: run.html_url,
             };
-          },
+          }
         );
 
         const now = new Date();

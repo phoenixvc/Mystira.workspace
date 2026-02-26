@@ -78,11 +78,11 @@ This guide covers the networking architecture and configuration for the Mystira 
 
 ### Address Spaces by Environment
 
-| Environment | VNet CIDR | Purpose |
-|-------------|-----------|---------|
-| Dev | `10.0.0.0/16` | Development and testing |
-| Staging | `10.1.0.0/16` | Pre-production validation |
-| Prod | `10.2.0.0/16` | Production workloads |
+| Environment | VNet CIDR     | Purpose                   |
+| ----------- | ------------- | ------------------------- |
+| Dev         | `10.0.0.0/16` | Development and testing   |
+| Staging     | `10.1.0.0/16` | Pre-production validation |
+| Prod        | `10.2.0.0/16` | Production workloads      |
 
 ### VNet Configuration
 
@@ -97,6 +97,7 @@ resource "azurerm_virtual_network" "main" {
 ```
 
 **Key Files:**
+
 - Dev VNet: [`environments/dev/main.tf`](../../infra/terraform/environments/dev/main.tf)
 - Staging VNet: [`environments/staging/main.tf`](../../infra/terraform/environments/staging/main.tf)
 - Prod VNet: [`environments/prod/main.tf`](../../infra/terraform/environments/prod/main.tf)
@@ -105,15 +106,15 @@ resource "azurerm_virtual_network" "main" {
 
 ### Dev Environment Subnets
 
-| Subnet | CIDR | Purpose | Delegation |
-|--------|------|---------|------------|
-| `chain-subnet` | `10.0.1.0/24` | Chain blockchain nodes | None |
-| `publisher-subnet` | `10.0.2.0/24` | Publisher service | None |
-| `postgresql-subnet` | `10.0.3.0/24` | PostgreSQL Flexible Server | `Microsoft.DBforPostgreSQL/flexibleServers` |
-| `redis-subnet` | `10.0.4.0/24` | Redis Cache (Premium) | `Microsoft.Cache/redis` |
-| `story-generator-subnet` | `10.0.5.0/24` | Story Generator service | None |
-| `admin-api-subnet` | `10.0.6.0/24` | Admin API service | None |
-| `aks-subnet` | `10.0.10.0/22` | AKS cluster nodes | None |
+| Subnet                   | CIDR           | Purpose                    | Delegation                                  |
+| ------------------------ | -------------- | -------------------------- | ------------------------------------------- |
+| `chain-subnet`           | `10.0.1.0/24`  | Chain blockchain nodes     | None                                        |
+| `publisher-subnet`       | `10.0.2.0/24`  | Publisher service          | None                                        |
+| `postgresql-subnet`      | `10.0.3.0/24`  | PostgreSQL Flexible Server | `Microsoft.DBforPostgreSQL/flexibleServers` |
+| `redis-subnet`           | `10.0.4.0/24`  | Redis Cache (Premium)      | `Microsoft.Cache/redis`                     |
+| `story-generator-subnet` | `10.0.5.0/24`  | Story Generator service    | None                                        |
+| `admin-api-subnet`       | `10.0.6.0/24`  | Admin API service          | None                                        |
+| `aks-subnet`             | `10.0.10.0/22` | AKS cluster nodes          | None                                        |
 
 ### Subnet with Delegation Example
 
@@ -242,6 +243,7 @@ resource "azurerm_network_security_group" "admin_api" {
 ```
 
 **Key Files:**
+
 - Chain NSG: [`modules/chain/main.tf`](../../infra/terraform/modules/chain/main.tf)
 - Publisher NSG: [`modules/publisher/main.tf`](../../infra/terraform/modules/publisher/main.tf)
 - Admin API NSG: [`modules/admin-api/main.tf`](../../infra/terraform/modules/admin-api/main.tf)
@@ -303,11 +305,11 @@ module "front_door" {
 
 ### WAF Rules
 
-| Rule | Type | Description |
-|------|------|-------------|
-| Rate Limiting | RateLimitRule | Block after 100 req/min |
-| Bad Bots | MatchRule | Block sqlmap, nikto, scanners |
-| Allowed Methods | MatchRule | Only GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS |
+| Rule            | Type          | Description                                       |
+| --------------- | ------------- | ------------------------------------------------- |
+| Rate Limiting   | RateLimitRule | Block after 100 req/min                           |
+| Bad Bots        | MatchRule     | Block sqlmap, nikto, scanners                     |
+| Allowed Methods | MatchRule     | Only GET, POST, PUT, DELETE, PATCH, HEAD, OPTIONS |
 
 ### TLS Configuration
 
@@ -316,6 +318,7 @@ module "front_door" {
 - **HTTPS Redirect**: Enabled
 
 **Key Files:**
+
 - Front Door Module: [`modules/front-door/`](../../infra/terraform/modules/front-door/)
 - Dev Config: [`environments/dev/front-door.tf`](../../infra/terraform/environments/dev/front-door.tf)
 
@@ -333,33 +336,36 @@ resource "azurerm_dns_zone" "main" {
 
 ### Record Types
 
-| Record Type | Use Case | Example |
-|-------------|----------|---------|
-| A Record | Direct to Load Balancer IP | `dev.publisher.mystira.app → 10.0.1.50` |
-| CNAME | Point to Front Door | `publisher.mystira.app → mystira-prod-publisher.azurefd.net` |
-| TXT | Domain validation | `_dnsauth.publisher → <validation-token>` |
+| Record Type | Use Case                   | Example                                                      |
+| ----------- | -------------------------- | ------------------------------------------------------------ |
+| A Record    | Direct to Load Balancer IP | `dev.publisher.mystira.app → 10.0.1.50`                      |
+| CNAME       | Point to Front Door        | `publisher.mystira.app → mystira-prod-publisher.azurefd.net` |
+| TXT         | Domain validation          | `_dnsauth.publisher → <validation-token>`                    |
 
 ### CNAME vs A Records
 
 **Without Front Door (A Record):**
+
 ```
 dev.publisher.mystira.app → A → <NGINX LB IP>
 ```
 
 **With Front Door (CNAME):**
+
 ```
 publisher.mystira.app → CNAME → mystira-prod-publisher.azurefd.net
 ```
 
 ### Environment-Specific Subdomains
 
-| Environment | Pattern | Example |
-|-------------|---------|---------|
-| Dev | `dev.<service>.mystira.app` | `dev.publisher.mystira.app` |
-| Staging | `staging.<service>.mystira.app` | `staging.publisher.mystira.app` |
-| Prod | `<service>.mystira.app` | `publisher.mystira.app` |
+| Environment | Pattern                         | Example                         |
+| ----------- | ------------------------------- | ------------------------------- |
+| Dev         | `dev.<service>.mystira.app`     | `dev.publisher.mystira.app`     |
+| Staging     | `staging.<service>.mystira.app` | `staging.publisher.mystira.app` |
+| Prod        | `<service>.mystira.app`         | `publisher.mystira.app`         |
 
 **Key Files:**
+
 - DNS Module: [`modules/dns/`](../../infra/terraform/modules/dns/)
 
 ## Private Endpoints
@@ -401,16 +407,16 @@ Admin API Pod → mys-dev-core-db.postgres.database.azure.com (Private DNS) → 
 
 ### Common Ports
 
-| Service | Port | Protocol | Purpose |
-|---------|------|----------|---------|
-| Admin API | 8080 | HTTP | API endpoint |
-| Admin API | 8081 | HTTP | Health check |
-| Publisher | 8080 | HTTP | API endpoint |
-| Story Generator | 8080 | HTTP | API endpoint |
-| Chain RPC | 8545 | TCP | JSON-RPC |
-| Chain P2P | 30303 | TCP/UDP | Peer discovery |
-| PostgreSQL | 5432 | TCP | Database |
-| Redis | 6379 | TCP | Cache |
+| Service         | Port  | Protocol | Purpose        |
+| --------------- | ----- | -------- | -------------- |
+| Admin API       | 8080  | HTTP     | API endpoint   |
+| Admin API       | 8081  | HTTP     | Health check   |
+| Publisher       | 8080  | HTTP     | API endpoint   |
+| Story Generator | 8080  | HTTP     | API endpoint   |
+| Chain RPC       | 8545  | TCP      | JSON-RPC       |
+| Chain P2P       | 30303 | TCP/UDP  | Peer discovery |
+| PostgreSQL      | 5432  | TCP      | Database       |
+| Redis           | 6379  | TCP      | Cache          |
 
 ### Terraform Commands
 
@@ -445,16 +451,19 @@ az network nsg rule list -g mys-dev-core-rg-san --nsg-name mys-dev-admin-api-nsg
 ### Troubleshooting
 
 **Cannot connect to PostgreSQL:**
+
 1. Check VNet integration is enabled
 2. Verify private DNS zone is linked to VNet
 3. Confirm subnet delegation is correct
 
 **Front Door not routing traffic:**
+
 1. Verify backend health probes are passing
 2. Check custom domain validation TXT records
 3. Confirm origin host header is correct
 
 **Inter-service communication failing:**
+
 1. Check NSG rules allow traffic between subnets
 2. Verify AKS network policy allows egress
 3. Confirm DNS resolution works within VNet
@@ -487,6 +496,7 @@ terraform state list | grep -E "network|subnet|nsg"
 ```
 
 **Best Practices:**
+
 - Always backup Terraform state before making changes
 - Test rollbacks in staging environment first
 - Document the reason for rollback in Git commit message
@@ -494,6 +504,7 @@ terraform state list | grep -E "network|subnet|nsg"
 - Keep rollback window minimal to reduce impact
 
 **References:**
+
 - [Terraform State Management](https://developer.hashicorp.com/terraform/language/state)
 - [Azure Resource Rollback Best Practices](https://learn.microsoft.com/en-us/azure/azure-resource-manager/templates/rollback-on-error)
 
@@ -528,6 +539,7 @@ kubectl exec -n mystira deploy/mys-admin-api -- curl -I https://api.github.com
 ```
 
 **Best Practices:**
+
 - Document all NSG rule changes with comments
 - Test rules in non-production environment first
 - Use Terraform for NSG management to maintain consistency
@@ -535,6 +547,7 @@ kubectl exec -n mystira deploy/mys-admin-api -- curl -I https://api.github.com
 - Monitor network flow logs after changes
 
 **References:**
+
 - [NSG Diagnostic Logging](https://learn.microsoft.com/en-us/azure/network-watcher/network-watcher-nsg-flow-logging-overview)
 - [Network Security Best Practices](https://learn.microsoft.com/en-us/azure/security/fundamentals/network-best-practices)
 
@@ -570,6 +583,7 @@ kubectl exec -n mystira deploy/mys-admin-api -- \
 ```
 
 **Best Practices:**
+
 - Schedule subnet delegation changes during maintenance windows
 - Communicate changes to team before executing
 - Test in staging environment with same network topology
@@ -577,17 +591,20 @@ kubectl exec -n mystira deploy/mys-admin-api -- \
 - Keep rollback script ready before making changes
 
 **Important Notes:**
+
 - Some Azure services require subnet delegation (e.g., Azure Database for PostgreSQL Flexible Server)
 - Removing delegation may break service connectivity
 - Always verify service requirements before removing delegation
 - Consult Azure service documentation for delegation requirements
 
 **Escalation Contacts:**
+
 - For production issues: Contact your team's on-call engineer or incident response team
 - Azure Support: Use Azure Portal support request for platform issues
 - Network team: Contact designated network administrator
 
 **References:**
+
 - [Subnet Delegation Overview](https://learn.microsoft.com/en-us/azure/virtual-network/subnet-delegation-overview)
 - [Azure Database for PostgreSQL Networking](https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/concepts-networking)
 

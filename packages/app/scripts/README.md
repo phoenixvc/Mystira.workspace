@@ -5,11 +5,13 @@ PowerShell scripts to launch the Mystira.App development environment.
 ## Quick Start
 
 From the repository root, run:
+
 ```powershell
 .\start.ps1
 ```
 
 Or use the full path:
+
 ```powershell
 .\scripts\start-all.ps1
 ```
@@ -45,6 +47,7 @@ Or use the full path:
 ## Usage Examples
 
 ### Start all services (recommended)
+
 ```powershell
 # From repository root
 .\start.ps1
@@ -54,6 +57,7 @@ Or use the full path:
 ```
 
 ### Start individual services
+
 ```powershell
 # Terminal 1 - API
 .\scripts\start-api.ps1
@@ -66,6 +70,7 @@ Or use the full path:
 ```
 
 ### Open browsers after services are running
+
 ```powershell
 .\scripts\open-swagger.ps1
 .\scripts\open-admin-ui.ps1
@@ -74,11 +79,11 @@ Or use the full path:
 
 ## Ports Summary
 
-| Service | HTTP Port | HTTPS Port | UI/Swagger |
-|---------|-----------|------------|------------|
-| API | 5260 | 7096 | /swagger |
-| Admin API | 5260 | 7096 | /admin, /swagger |
-| PWA | 7000 | 7000 | / |
+| Service   | HTTP Port | HTTPS Port | UI/Swagger       |
+| --------- | --------- | ---------- | ---------------- |
+| API       | 5260      | 7096       | /swagger         |
+| Admin API | 5260      | 7096       | /admin, /swagger |
+| PWA       | 7000      | 7000       | /                |
 
 **Note:** API and Admin API use the same ports and cannot run simultaneously. Run only one at a time, or configure different ports in their respective `launchSettings.json` files.
 
@@ -89,4 +94,3 @@ Or use the full path:
 - Services may take a few seconds to start up
 - If ports are already in use, you'll need to stop the existing processes first
 - Each service runs in its own minimized PowerShell window
-

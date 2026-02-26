@@ -4,7 +4,7 @@ export function checkEnvironmentContext(
   serviceName: string,
   newEnvironment: "local" | "dev" | "prod",
   allServiceEnvironments: Record<string, "local" | "dev" | "prod">,
-  serviceConfigs: ServiceConfig[],
+  serviceConfigs: ServiceConfig[]
 ): { shouldWarn: boolean; message: string; severity: "warning" | "danger" } {
   const otherEnvironments = Object.entries(allServiceEnvironments)
     .filter(([name]) => name !== serviceName)

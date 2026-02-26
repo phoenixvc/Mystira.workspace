@@ -98,24 +98,26 @@ az webapp config appsettings set \
 
 ### Configuration Sources (Priority Order)
 
-| Source | Use Case | Example |
-|--------|----------|---------|
-| Azure Key Vault | Production secrets | `Discord--BotToken` |
-| App Settings | Azure deployment | `Discord__Enabled=true` |
-| User Secrets | Development | `dotnet user-secrets set` |
-| appsettings.json | Defaults only | Never store tokens here |
+| Source           | Use Case           | Example                   |
+| ---------------- | ------------------ | ------------------------- |
+| Azure Key Vault  | Production secrets | `Discord--BotToken`       |
+| App Settings     | Azure deployment   | `Discord__Enabled=true`   |
+| User Secrets     | Development        | `dotnet user-secrets set` |
+| appsettings.json | Defaults only      | Never store tokens here   |
 
 ---
 
 ## API Endpoints
 
 ### Check Discord Status
+
 ```http
 GET /api/discord/status
 Authorization: Bearer {admin-token}
 ```
 
 Response:
+
 ```json
 {
   "enabled": true,
@@ -126,6 +128,7 @@ Response:
 ```
 
 ### Send Message
+
 ```http
 POST /api/discord/send
 Authorization: Bearer {admin-token}
@@ -138,6 +141,7 @@ Content-Type: application/json
 ```
 
 ### Send Rich Embed
+
 ```http
 POST /api/discord/send-embed
 Authorization: Bearer {admin-token}
@@ -163,6 +167,7 @@ Content-Type: application/json
 ## Frontend Widget
 
 ### Features
+
 - Floating display (bottom-right corner)
 - Collapsible with status indicator
 - Real-time status updates (auto-refresh every 30s)
@@ -172,6 +177,7 @@ Content-Type: application/json
 ### Widget States
 
 **Collapsed (Default):**
+
 ```
     +-----+
     |     |  <- Discord icon
@@ -180,6 +186,7 @@ Content-Type: application/json
 ```
 
 **Expanded - Online:**
+
 ```
 +-------------------------------+
 | Discord                     x |
@@ -195,6 +202,7 @@ Content-Type: application/json
 ### Integration
 
 The widget is included in `MainLayout.razor`:
+
 ```razor
 <DiscordWidget />
 ```
@@ -252,11 +260,11 @@ public async Task SendGameStatusEmbed(ulong channelId, GameSession session)
 
 ## Deployment Options
 
-| Option | Cost | Best For |
-|--------|------|----------|
-| Azure App Service (B1) | ~$55/mo | Always-on, reliable |
-| Azure Container Apps | ~$15-30/mo | Scalable, modern |
-| Azure Container Instances | ~$10-20/mo | Simple, budget |
+| Option                    | Cost       | Best For            |
+| ------------------------- | ---------- | ------------------- |
+| Azure App Service (B1)    | ~$55/mo    | Always-on, reliable |
+| Azure Container Apps      | ~$15-30/mo | Scalable, modern    |
+| Azure Container Instances | ~$10-20/mo | Simple, budget      |
 
 ### Azure App Service Setup
 
@@ -302,6 +310,7 @@ curl https://your-app.azurewebsites.net/health
 ```
 
 Response:
+
 ```json
 {
   "status": "Healthy",
@@ -322,12 +331,14 @@ Response:
 ### Startup Logs
 
 When enabled:
+
 ```
 info: Discord bot integration: ENABLED
 info: Discord bot is ready! Logged in as MystiraBot
 ```
 
 When disabled:
+
 ```
 info: Discord bot integration: DISABLED
 ```
@@ -336,14 +347,14 @@ info: Discord bot integration: DISABLED
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Bot not connecting | Verify token, check intents in Developer Portal |
-| `message.Content` empty | Enable Message Content Intent in Developer Portal |
-| 429 rate limit errors | Reduce message frequency, use bulk operations |
+| Issue                    | Solution                                                  |
+| ------------------------ | --------------------------------------------------------- |
+| Bot not connecting       | Verify token, check intents in Developer Portal           |
+| `message.Content` empty  | Enable Message Content Intent in Developer Portal         |
+| 429 rate limit errors    | Reduce message frequency, use bulk operations             |
 | 404 on Discord endpoints | Discord integration is disabled - check `Discord:Enabled` |
-| 503 Service Unavailable | Bot enabled but not connected - check token/intents |
-| 401 Unauthorized | Missing/invalid admin token |
+| 503 Service Unavailable  | Bot enabled but not connected - check token/intents       |
+| 401 Unauthorized         | Missing/invalid admin token                               |
 
 ---
 

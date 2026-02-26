@@ -35,4 +35,3 @@ Brief description of the changes.
 ## Screenshots (if applicable)
 
 ## Additional Notes
-

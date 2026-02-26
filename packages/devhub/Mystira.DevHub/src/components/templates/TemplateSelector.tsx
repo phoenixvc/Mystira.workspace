@@ -41,7 +41,7 @@ function TemplateSelector({
     rg = rg.replace(/{region}/g, resourceGroupConfig.region || region);
     rg = rg.replace(
       /{project}/g,
-      resourceGroupConfig.projectName || projectName,
+      resourceGroupConfig.projectName || projectName
     );
     rg = rg.replace(/{resource}/g, templateId);
     return rg;
@@ -49,14 +49,14 @@ function TemplateSelector({
 
   const toggleTemplateSelection = (templateId: string) => {
     const updated = templates.map((t) =>
-      t.id === templateId ? { ...t, selected: !t.selected } : t,
+      t.id === templateId ? { ...t, selected: !t.selected } : t
     );
     onTemplatesChange(updated);
   };
 
   const updateResourceGroup = (templateId: string, resourceGroup: string) => {
     const updated = templates.map((t) =>
-      t.id === templateId ? { ...t, resourceGroup } : t,
+      t.id === templateId ? { ...t, resourceGroup } : t
     );
     onTemplatesChange(updated);
     setEditingResourceGroup(null);
@@ -64,7 +64,7 @@ function TemplateSelector({
 
   const startEditingResourceGroup = (
     templateId: string,
-    currentResourceGroup: string,
+    currentResourceGroup: string
   ) => {
     setEditingResourceGroup(templateId);
     setTempResourceGroup(currentResourceGroup);
@@ -168,7 +168,7 @@ function TemplateSelector({
                             if (e.key === "Enter") {
                               updateResourceGroup(
                                 template.id,
-                                tempResourceGroup,
+                                tempResourceGroup
                               );
                             } else if (e.key === "Escape") {
                               setEditingResourceGroup(null);
@@ -203,7 +203,7 @@ function TemplateSelector({
                           onClick={() =>
                             startEditingResourceGroup(
                               template.id,
-                              resourceGroup,
+                              resourceGroup
                             )
                           }
                           className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-900 hover:bg-blue-200 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-300 rounded"

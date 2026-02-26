@@ -13,7 +13,7 @@ export function formatTimeSince(timestamp?: number): string | null {
 }
 
 export function getHealthIndicator(
-  health?: "healthy" | "unhealthy" | "unknown",
+  health?: "healthy" | "unhealthy" | "unknown"
 ): string {
   if (health === "healthy") {
     return "🟢";
@@ -26,7 +26,7 @@ export function getHealthIndicator(
 export function getServiceConfigs(
   customPorts: Record<string, number>,
   serviceEnvironments: Record<string, "local" | "dev" | "prod">,
-  getEnvironmentUrls: (serviceName: string) => { dev?: string; prod?: string },
+  getEnvironmentUrls: (serviceName: string) => { dev?: string; prod?: string }
 ): ServiceConfig[] {
   const baseConfigs = [
     {

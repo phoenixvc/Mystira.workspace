@@ -119,18 +119,21 @@ We will adopt the **Specification Pattern** to encapsulate query logic in reusab
 ### Phased Rollout
 
 **Phase 1: Foundation** ✅ Complete
+
 - Create `ISpecification<T>` interface
 - Create `BaseSpecification<T>` implementation
 - Create `SpecificationEvaluator<T>` for EF Core
 - Update repository interfaces to support specifications
 
 **Phase 2: Repository Implementation** ✅ Complete
+
 - Implement `ListAsync(ISpecification<T> spec)` in repositories
 - Implement `GetBySpecAsync(ISpecification<T> spec)` in repositories
 - Implement `CountAsync(ISpecification<T> spec)` in repositories
 - Add specification support to base repository
 
 **Phase 3: Pilot Specifications** ✅ Complete
+
 - Create scenario specifications:
   - `ScenarioByIdSpecification`
   - `ScenariosWithContentBundleSpecification`
@@ -139,12 +142,14 @@ We will adopt the **Specification Pattern** to encapsulate query logic in reusab
 - Gather feedback from team
 
 **Phase 4: Documentation** ✅ Complete
+
 - Create [SPECIFICATION_PATTERN.md](../patterns/SPECIFICATION_PATTERN.md)
 - Create [QUICKSTART_SPECIFICATION.md](../patterns/QUICKSTART_SPECIFICATION.md)
 - Add examples to Application layer README
 - Document best practices
 
 **Phase 5: Full Migration** 🔄 In Progress
+
 - Create specifications for all entities
 - Update all query handlers to use specifications
 - Deprecate direct LINQ in handlers
@@ -236,6 +241,7 @@ We will adopt the **Specification Pattern** to encapsulate query logic in reusab
 ### Core Interfaces
 
 **ISpecification<T>** (Domain layer):
+
 ```csharp
 public interface ISpecification<T>
 {
@@ -250,6 +256,7 @@ public interface ISpecification<T>
 ```
 
 **BaseSpecification<T>** (Domain layer):
+
 ```csharp
 public abstract class BaseSpecification<T> : ISpecification<T>
 {
@@ -295,6 +302,7 @@ public abstract class BaseSpecification<T> : ISpecification<T>
 ```
 
 **SpecificationEvaluator<T>** (Infrastructure layer):
+
 ```csharp
 public static class SpecificationEvaluator<T> where T : class
 {
@@ -386,6 +394,7 @@ public class Repository<T> : IRepository<T> where T : class
 ### Example Specifications
 
 **ContentBundleSpecifications.cs**:
+
 ```csharp
 public class ContentBundlesByAgeGroupSpecification : BaseSpecification<ContentBundle>
 {

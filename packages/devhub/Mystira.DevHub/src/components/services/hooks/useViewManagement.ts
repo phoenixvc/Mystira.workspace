@@ -6,13 +6,13 @@ export function useViewManagement() {
   >({});
   const [maximizedService, setMaximizedService] = useState<string | null>(null);
   const [webviewErrors, setWebviewErrors] = useState<Record<string, boolean>>(
-    {},
+    {}
   );
   const [showLogs, setShowLogs] = useState<Record<string, boolean>>({});
 
   const setViewModeForService = (
     serviceName: string,
-    mode: "logs" | "webview" | "split",
+    mode: "logs" | "webview" | "split"
   ) => {
     setViewMode((prev) => ({ ...prev, [serviceName]: mode }));
     if (mode === "logs") {

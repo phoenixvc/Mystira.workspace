@@ -14,40 +14,41 @@ dotnet add package Mystira.Contracts
 
 ### App API (`Mystira.Contracts.App`)
 
-| Namespace | Description |
-|-----------|-------------|
-| `Requests.Scenarios` | Scenario creation, query, and validation requests |
-| `Requests.GameSessions` | Game session management |
-| `Requests.Accounts` | Account and profile management |
-| `Requests.Badges` | Badge configuration and award requests |
-| `Requests.Auth` | Passwordless authentication requests |
-| `Requests.Client` | Client status and sync requests |
-| `Requests.Characters` | Character selection requests |
-| `Responses.Scenarios` | Scenario responses, summaries, and validation |
-| `Responses.GameSessions` | Game session state responses |
-| `Responses.Badges` | Badge and achievement responses |
-| `Responses.Auth` | Authentication responses |
-| `Responses.Client` | Client status and content manifest |
-| `Responses.Avatars` | Avatar configuration responses |
-| `Responses.Contributors` | Contributor and Story Protocol responses |
-| `Responses.Common` | Error responses and health checks |
-| `Enums` | Shared enumerations (AgeGroup, ScenarioStatus, etc.) |
-| `Models` | Shared models (AccountSettings, SubscriptionDetails) |
+| Namespace                | Description                                          |
+| ------------------------ | ---------------------------------------------------- |
+| `Requests.Scenarios`     | Scenario creation, query, and validation requests    |
+| `Requests.GameSessions`  | Game session management                              |
+| `Requests.Accounts`      | Account and profile management                       |
+| `Requests.Badges`        | Badge configuration and award requests               |
+| `Requests.Auth`          | Passwordless authentication requests                 |
+| `Requests.Client`        | Client status and sync requests                      |
+| `Requests.Characters`    | Character selection requests                         |
+| `Responses.Scenarios`    | Scenario responses, summaries, and validation        |
+| `Responses.GameSessions` | Game session state responses                         |
+| `Responses.Badges`       | Badge and achievement responses                      |
+| `Responses.Auth`         | Authentication responses                             |
+| `Responses.Client`       | Client status and content manifest                   |
+| `Responses.Avatars`      | Avatar configuration responses                       |
+| `Responses.Contributors` | Contributor and Story Protocol responses             |
+| `Responses.Common`       | Error responses and health checks                    |
+| `Enums`                  | Shared enumerations (AgeGroup, ScenarioStatus, etc.) |
+| `Models`                 | Shared models (AccountSettings, SubscriptionDetails) |
 
 ### StoryGenerator API (`Mystira.Contracts.StoryGenerator`)
 
-| Namespace | Description |
-|-----------|-------------|
-| `Chat` | Chat completion requests/responses |
-| `Stories` | Story generation requests/responses |
-| `Entities` | Entity recognition (SceneEntity, Confidence) |
-| `StoryConsistency` | Story consistency evaluation |
-| `Intent` | Intent classification |
-| `Configuration` | AI and LLM settings |
+| Namespace          | Description                                  |
+| ------------------ | -------------------------------------------- |
+| `Chat`             | Chat completion requests/responses           |
+| `Stories`          | Story generation requests/responses          |
+| `Entities`         | Entity recognition (SceneEntity, Confidence) |
+| `StoryConsistency` | Story consistency evaluation                 |
+| `Intent`           | Intent classification                        |
+| `Configuration`    | AI and LLM settings                          |
 
 ### Generated Contracts (`Mystira.Contracts.Generated`)
 
 Auto-generated from OpenAPI specs:
+
 - `AppApiContracts` - Generated App API client
 - `StoryGeneratorApiContracts` - Generated StoryGenerator API client
 
@@ -91,10 +92,12 @@ var storyRequest = new GenerateStoryRequest
 ## Migration from Legacy Packages
 
 This package replaces:
+
 - `Mystira.App.Contracts` → `Mystira.Contracts.App`
 - `Mystira.StoryGenerator.Contracts` → `Mystira.Contracts.StoryGenerator`
 
 Update your imports:
+
 ```csharp
 // Before
 using Mystira.App.Contracts.Requests;

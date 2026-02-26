@@ -18,6 +18,7 @@ This guide helps you navigate common errors and issues in the Mystira.App projec
 ### AZURE_LOCATION_001: Region Not Available for Resource Type
 
 **Error Message:**
+
 ```
 LocationNotAvailableForResourceType: The provided location 'eastus' is not available for resource type 'Microsoft.Web/staticSites'.
 ```
@@ -28,6 +29,7 @@ Azure Static Web Apps (and some other resources) are only available in specific 
 **Solutions:**
 
 1. **Use a supported region:**
+
    ```bash
    # Static Web Apps supported regions:
    ./deploy-dev.sh -l westus2       # Western US
@@ -38,6 +40,7 @@ Azure Static Web Apps (and some other resources) are only available in specific 
    ```
 
 2. **Check available regions for any resource type:**
+
    ```bash
    # For Static Web Apps
    az provider show --namespace Microsoft.Web \
@@ -49,6 +52,7 @@ Azure Static Web Apps (and some other resources) are only available in specific 
    ```
 
 **Related Links:**
+
 - [Azure Products by Region](https://azure.microsoft.com/explore/global-infrastructure/products-by-region/)
 - [Static Web Apps Regions](https://docs.microsoft.com/azure/static-web-apps/overview#regional-availability)
 
@@ -57,6 +61,7 @@ Azure Static Web Apps (and some other resources) are only available in specific 
 ### AZURE_LOCATION_002: Resource Group Location Conflict
 
 **Error Message:**
+
 ```
 InvalidResourceGroupLocation: Invalid resource group location 'westeurope'.
 The Resource group already exists in location 'eastus'.
@@ -68,6 +73,7 @@ Azure resource groups are tied to a specific region and cannot be moved. You're 
 **Solutions:**
 
 1. **Option A - Use the existing location:**
+
    ```bash
    # Find the existing resource group's location
    az group show --name your-rg-name --query location -o tsv
@@ -77,6 +83,7 @@ Azure resource groups are tied to a specific region and cannot be moved. You're 
    ```
 
 2. **Option B - Delete the old resource group:**
+
    ```bash
    # Delete the existing resource group (CAREFUL: deletes all resources inside!)
    az group delete --name your-rg-name --yes
@@ -94,6 +101,7 @@ Azure resource groups are tied to a specific region and cannot be moved. You're 
    ```
 
 **Pro Tip:** Name your resource groups with the region code to avoid confusion:
+
 - `dev-eus2-rg-mystira` (East US 2)
 - `dev-weu-rg-mystira` (West Europe)
 
@@ -102,6 +110,7 @@ Azure resource groups are tied to a specific region and cannot be moved. You're 
 ### Deployment Timeout
 
 **Error Message:**
+
 ```
 Deployment timed out. The deployment operation is still running...
 ```
@@ -109,11 +118,13 @@ Deployment timed out. The deployment operation is still running...
 **Solutions:**
 
 1. **Check deployment status:**
+
    ```bash
    az deployment group list --resource-group your-rg-name -o table
    ```
 
 2. **View deployment operations:**
+
    ```bash
    az deployment operation group list \
      --resource-group your-rg-name \
@@ -130,6 +141,7 @@ Deployment timed out. The deployment operation is still running...
 ### AUTH_001: Not Logged In
 
 **Error Message:**
+
 ```
 You are not logged in to Azure. Please run 'az login' first.
 ```
@@ -137,11 +149,13 @@ You are not logged in to Azure. Please run 'az login' first.
 **Solutions:**
 
 1. **Standard login (opens browser):**
+
    ```bash
    az login
    ```
 
 2. **Device code login (for remote/headless environments):**
+
    ```bash
    az login --use-device-code
    ```
@@ -159,6 +173,7 @@ You are not logged in to Azure. Please run 'az login' first.
 ### AUTH_002: Wrong Subscription
 
 **Error Message:**
+
 ```
 The subscription 'xxx' could not be found.
 ```
@@ -166,11 +181,13 @@ The subscription 'xxx' could not be found.
 **Solutions:**
 
 1. **List available subscriptions:**
+
    ```bash
    az account list --output table
    ```
 
 2. **Switch to correct subscription:**
+
    ```bash
    az account set --subscription "Your Subscription Name"
    # or by ID
@@ -187,6 +204,7 @@ The subscription 'xxx' could not be found.
 ### JWT Token Invalid
 
 **Error Message:**
+
 ```
 InvalidOperationException: IDX10214: Audience validation failed.
 ```
@@ -194,6 +212,7 @@ InvalidOperationException: IDX10214: Audience validation failed.
 **Solutions:**
 
 1. **Check JWT settings in appsettings:**
+
    ```json
    {
      "JwtSettings": {
@@ -206,6 +225,7 @@ InvalidOperationException: IDX10214: Audience validation failed.
    ```
 
 2. **Generate a proper secret key:**
+
    ```bash
    openssl rand -base64 32
    ```
@@ -223,6 +243,7 @@ InvalidOperationException: IDX10214: Audience validation failed.
 ### DB_001: Cosmos DB Connection Failed
 
 **Error Message:**
+
 ```
 CosmosException: Request failed with status code ServiceUnavailable
 ```
@@ -230,11 +251,13 @@ CosmosException: Request failed with status code ServiceUnavailable
 **Solutions:**
 
 1. **Verify Cosmos account exists:**
+
    ```bash
    az cosmosdb list --resource-group your-rg-name -o table
    ```
 
 2. **Check connection string:**
+
    ```bash
    az cosmosdb keys list \
      --name your-cosmos-account \
@@ -257,6 +280,7 @@ CosmosException: Request failed with status code ServiceUnavailable
 ### DB_002: Partition Key Error
 
 **Error Message:**
+
 ```
 PartitionKey extracted from document doesn't match the one specified in the header.
 ```
@@ -264,6 +288,7 @@ PartitionKey extracted from document doesn't match the one specified in the head
 **Solutions:**
 
 1. **Ensure partition key is set on entity:**
+
    ```csharp
    public class MyEntity : Entity
    {
@@ -289,6 +314,7 @@ PartitionKey extracted from document doesn't match the one specified in the head
 ### BUILD_001: npm Install Failed
 
 **Error Message:**
+
 ```
 npm ERR! code ERESOLVE
 npm ERR! ERESOLVE unable to resolve dependency tree
@@ -297,6 +323,7 @@ npm ERR! ERESOLVE unable to resolve dependency tree
 **Solutions:**
 
 1. **Clear npm cache and reinstall:**
+
    ```bash
    rm -rf node_modules package-lock.json
    npm cache clean --force
@@ -304,11 +331,13 @@ npm ERR! ERESOLVE unable to resolve dependency tree
    ```
 
 2. **Use legacy peer deps (if needed):**
+
    ```bash
    npm install --legacy-peer-deps
    ```
 
 3. **Check Node.js version:**
+
    ```bash
    node --version  # Should be 18.x or higher
 
@@ -322,6 +351,7 @@ npm ERR! ERESOLVE unable to resolve dependency tree
 ### BUILD_002: Rust/Tauri Build Failed
 
 **Error Message:**
+
 ```
 error: could not find `Cargo.toml`
 # or
@@ -331,17 +361,20 @@ cargo: command not found
 **Solutions:**
 
 1. **Install Rust:**
+
    ```bash
    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
    source $HOME/.cargo/env
    ```
 
 2. **Update Rust:**
+
    ```bash
    rustup update stable
    ```
 
 3. **Install Tauri dependencies (Ubuntu/Debian):**
+
    ```bash
    sudo apt update
    sudo apt install libwebkit2gtk-4.1-dev build-essential curl wget \
@@ -360,6 +393,7 @@ cargo: command not found
 ### BUILD_003: .NET Build Failed
 
 **Error Message:**
+
 ```
 error NU1301: Unable to load the service index for source
 ```
@@ -367,16 +401,19 @@ error NU1301: Unable to load the service index for source
 **Solutions:**
 
 1. **Clear NuGet cache:**
+
    ```bash
    dotnet nuget locals all --clear
    ```
 
 2. **Restore packages:**
+
    ```bash
    dotnet restore Mystira.sln
    ```
 
 3. **Check NuGet.config:**
+
    ```bash
    cat NuGet.config
    # Should have nuget.org as a source
@@ -395,6 +432,7 @@ error NU1301: Unable to load the service index for source
 ### NET_001: Connection Refused
 
 **Error Message:**
+
 ```
 System.Net.Http.HttpRequestException: Connection refused
 ```
@@ -402,6 +440,7 @@ System.Net.Http.HttpRequestException: Connection refused
 **Solutions:**
 
 1. **For local development, ensure services are running:**
+
    ```bash
    # Start all services
    ./scripts/start-all.ps1
@@ -412,6 +451,7 @@ System.Net.Http.HttpRequestException: Connection refused
    ```
 
 2. **Check ports aren't in use:**
+
    ```bash
    # Check if port 5000 is in use
    lsof -i :5000
@@ -434,6 +474,7 @@ System.Net.Http.HttpRequestException: Connection refused
 ### NET_002: CORS Error
 
 **Error Message:**
+
 ```
 Access to XMLHttpRequest at '...' has been blocked by CORS policy
 ```
@@ -441,6 +482,7 @@ Access to XMLHttpRequest at '...' has been blocked by CORS policy
 **Solutions:**
 
 1. **Check CORS configuration in API:**
+
    ```csharp
    // Program.cs
    builder.Services.AddCors(options =>
@@ -461,10 +503,7 @@ Access to XMLHttpRequest at '...' has been blocked by CORS policy
    ```json
    {
      "Cors": {
-       "AllowedOrigins": [
-         "https://localhost:7001",
-         "https://mystira.app"
-       ]
+       "AllowedOrigins": ["https://localhost:7001", "https://mystira.app"]
      }
    }
    ```
@@ -476,6 +515,7 @@ Access to XMLHttpRequest at '...' has been blocked by CORS policy
 ### CONFIG_001: Missing Configuration Value
 
 **Error Message:**
+
 ```
 System.InvalidOperationException: Configuration value 'XYZ' not found
 ```
@@ -483,6 +523,7 @@ System.InvalidOperationException: Configuration value 'XYZ' not found
 **Solutions:**
 
 1. **Check appsettings.json has the value:**
+
    ```json
    {
      "XYZ": "your-value-here"
@@ -490,6 +531,7 @@ System.InvalidOperationException: Configuration value 'XYZ' not found
    ```
 
 2. **For secrets, use user-secrets:**
+
    ```bash
    cd src/Mystira.App.Api
    dotnet user-secrets init  # if not already initialized
@@ -497,6 +539,7 @@ System.InvalidOperationException: Configuration value 'XYZ' not found
    ```
 
 3. **Check environment variables:**
+
    ```bash
    # Linux/Mac
    export XYZ="your-value"

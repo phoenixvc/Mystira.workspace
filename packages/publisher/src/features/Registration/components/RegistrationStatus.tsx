@@ -1,6 +1,6 @@
-import { useQuery } from '@tanstack/react-query';
-import { chainApi, type RegistrationResponse } from '@/api';
-import { Alert, Spinner, Badge, Card, CardBody } from '@/components';
+import { useQuery } from "@tanstack/react-query";
+import { chainApi, type RegistrationResponse } from "@/api";
+import { Alert, Spinner, Badge, Card, CardBody } from "@/components";
 
 interface RegistrationStatusProps {
   storyId: string;
@@ -8,11 +8,15 @@ interface RegistrationStatusProps {
   isLoading?: boolean;
 }
 
-export function RegistrationStatus({ storyId, result, isLoading }: RegistrationStatusProps) {
+export function RegistrationStatus({
+  storyId,
+  result,
+  isLoading,
+}: RegistrationStatusProps) {
   const { data: status } = useQuery({
-    queryKey: ['registration-status', result?.transactionId],
+    queryKey: ["registration-status", result?.transactionId],
     queryFn: () => chainApi.getRegistrationStatus(result!.transactionId),
-    enabled: !!result?.transactionId && result.status === 'pending',
+    enabled: !!result?.transactionId && result.status === "pending",
     refetchInterval: 5000, // Poll every 5 seconds for pending transactions
   });
 
@@ -42,24 +46,27 @@ export function RegistrationStatus({ storyId, result, isLoading }: RegistrationS
         <CardBody>
           <div className="registration-status__header">
             <h3>Registration {getStatusText(currentStatus)}</h3>
-            <Badge variant={getStatusVariant(currentStatus)}>{currentStatus}</Badge>
+            <Badge variant={getStatusVariant(currentStatus)}>
+              {currentStatus}
+            </Badge>
           </div>
 
-          {currentStatus === 'confirmed' && (
+          {currentStatus === "confirmed" && (
             <Alert variant="success" title="Successfully Registered!">
               Your story has been permanently recorded on the blockchain.
             </Alert>
           )}
 
-          {currentStatus === 'failed' && (
+          {currentStatus === "failed" && (
             <Alert variant="error" title="Registration Failed">
-              {status?.errorMessage || 'An error occurred during registration.'}
+              {status?.errorMessage || "An error occurred during registration."}
             </Alert>
           )}
 
-          {currentStatus === 'pending' && (
+          {currentStatus === "pending" && (
             <Alert variant="warning" title="Pending Confirmation">
-              Your transaction is being processed. Confirmations: {status?.confirmations || 0}
+              Your transaction is being processed. Confirmations:{" "}
+              {status?.confirmations || 0}
             </Alert>
           )}
 
@@ -87,12 +94,12 @@ export function RegistrationStatus({ storyId, result, isLoading }: RegistrationS
 
 function getStatusText(status: string): string {
   switch (status) {
-    case 'confirmed':
-      return 'Complete';
-    case 'pending':
-      return 'In Progress';
-    case 'failed':
-      return 'Failed';
+    case "confirmed":
+      return "Complete";
+    case "pending":
+      return "In Progress";
+    case "failed":
+      return "Failed";
     default:
       return status;
   }
@@ -100,13 +107,13 @@ function getStatusText(status: string): string {
 
 function getStatusVariant(status: string) {
   switch (status) {
-    case 'confirmed':
-      return 'success' as const;
-    case 'pending':
-      return 'warning' as const;
-    case 'failed':
-      return 'danger' as const;
+    case "confirmed":
+      return "success" as const;
+    case "pending":
+      return "warning" as const;
+    case "failed":
+      return "danger" as const;
     default:
-      return 'default' as const;
+      return "default" as const;
   }
 }

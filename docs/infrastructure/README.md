@@ -7,6 +7,7 @@
 > Infrastructure for Mystira.App is now managed centrally in **[Mystira.workspace](https://github.com/phoenixvc/Mystira.workspace)**.
 >
 > ### New Location
+>
 > ```
 > Mystira.workspace/infra/terraform/modules/mystira-app/
 > ├── main.tf           # All resources (Cosmos, App Service, SWA, etc.)
@@ -16,6 +17,7 @@
 > ```
 >
 > ### Benefits of Centralized Infrastructure
+>
 > - **Single source of truth** for all Mystira infrastructure
 > - **Consistent tooling** with other services (Publisher, Chain, Story Generator)
 > - **Shared modules** for common patterns (networking, monitoring, security)
@@ -23,6 +25,7 @@
 > - **Import support** for existing resources deployed via Bicep
 >
 > ### Migration Steps
+>
 > 1. Clone Mystira.workspace: `git clone https://github.com/phoenixvc/Mystira.workspace`
 > 2. Navigate to: `cd infra/terraform/environments/dev`
 > 3. Run import script: `./import-mystira-app.sh`
@@ -30,6 +33,7 @@
 > 5. Continue managing via Terraform
 >
 > ### Existing Resources
+>
 > Resources already deployed via these Bicep templates can be imported into Terraform
 > without recreation. The import script handles this automatically.
 >
@@ -45,30 +49,31 @@ This directory contains Bicep templates for deploying the Mystira application in
 
 All resources follow the pattern: `[org]-[env]-[project]-[type]-[region]`
 
-| Segment | Description | Values |
-|---------|-------------|--------|
-| `org` | Organisation code | `mys` (Mystira), `nl` (NeuralLiquid), `pvc` (Phoenix VC), `tws` (Twines & Straps) |
-| `env` | Environment | `dev`, `staging`, `prod` |
-| `project` | Project name | `mystira`, `mystira-story` |
-| `type` | Resource type | `api`, `app`, `log`, `cosmos`, `storage`, `kv`, `acs`, `bot`, `swa`, etc. |
-| `region` | Region code | `san` (South Africa North - **primary**), `eus2` (East US 2 - fallback), `euw` (West Europe), etc. |
+| Segment   | Description       | Values                                                                                             |
+| --------- | ----------------- | -------------------------------------------------------------------------------------------------- |
+| `org`     | Organisation code | `mys` (Mystira), `nl` (NeuralLiquid), `pvc` (Phoenix VC), `tws` (Twines & Straps)                  |
+| `env`     | Environment       | `dev`, `staging`, `prod`                                                                           |
+| `project` | Project name      | `mystira`, `mystira-story`                                                                         |
+| `type`    | Resource type     | `api`, `app`, `log`, `cosmos`, `storage`, `kv`, `acs`, `bot`, `swa`, etc.                          |
+| `region`  | Region code       | `san` (South Africa North - **primary**), `eus2` (East US 2 - fallback), `euw` (West Europe), etc. |
 
 ### Resource Group Pattern
+
 ```
 [org]-[env]-[project]-rg-[region]
 ```
 
 ### Examples (South Africa North)
 
-| Resource | Name |
-|----------|------|
-| Dev Resource Group | `mys-dev-mystira-rg-san` |
-| Dev API App Service | `mys-dev-mystira-api-san` |
-| Dev Cosmos DB | `mys-dev-mystira-cosmos-san` |
-| Dev Log Analytics | `mys-dev-mystira-log-san` |
-| Dev Static Web App | `mys-dev-mystira-swa-eus2` (fallback region - see below) |
-| Prod API App Service | `mys-prod-mystira-api-san` |
-| Prod Storage Account | `mysprodmystirstsan` (no dashes for storage) |
+| Resource             | Name                                                     |
+| -------------------- | -------------------------------------------------------- |
+| Dev Resource Group   | `mys-dev-mystira-rg-san`                                 |
+| Dev API App Service  | `mys-dev-mystira-api-san`                                |
+| Dev Cosmos DB        | `mys-dev-mystira-cosmos-san`                             |
+| Dev Log Analytics    | `mys-dev-mystira-log-san`                                |
+| Dev Static Web App   | `mys-dev-mystira-swa-eus2` (fallback region - see below) |
+| Prod API App Service | `mys-prod-mystira-api-san`                               |
+| Prod Storage Account | `mysprodmystirstsan` (no dashes for storage)             |
 
 ## Regional Availability
 
@@ -78,21 +83,22 @@ Not all Azure services are available in South Africa North. The infrastructure u
 
 ### Service Availability Matrix
 
-| Service | South Africa North | Fallback Region | Notes |
-|---------|-------------------|-----------------|-------|
-| **App Service** | ✅ Available | - | Primary compute |
-| **Cosmos DB** | ✅ Available | - | NoSQL database |
-| **Storage Account** | ✅ Available | - | Blob storage |
-| **Key Vault** | ✅ Available | - | Secret management |
-| **Log Analytics** | ✅ Available | - | Monitoring |
-| **App Insights** | ✅ Available | - | APM |
-| **Azure Bot** | ✅ Available (global) | - | Teams/Discord bots |
-| **Communication Services** | ✅ Available (global) | - | Email/SMS/WhatsApp |
-| **Static Web Apps** | ❌ NOT Available | **eastus2** | PWA hosting |
+| Service                    | South Africa North    | Fallback Region | Notes              |
+| -------------------------- | --------------------- | --------------- | ------------------ |
+| **App Service**            | ✅ Available          | -               | Primary compute    |
+| **Cosmos DB**              | ✅ Available          | -               | NoSQL database     |
+| **Storage Account**        | ✅ Available          | -               | Blob storage       |
+| **Key Vault**              | ✅ Available          | -               | Secret management  |
+| **Log Analytics**          | ✅ Available          | -               | Monitoring         |
+| **App Insights**           | ✅ Available          | -               | APM                |
+| **Azure Bot**              | ✅ Available (global) | -               | Teams/Discord bots |
+| **Communication Services** | ✅ Available (global) | -               | Email/SMS/WhatsApp |
+| **Static Web Apps**        | ❌ NOT Available      | **eastus2**     | PWA hosting        |
 
 ### Fallback Region Strategy
 
 For services not available in South Africa North, we use **East US 2 (eastus2)** as the fallback region because:
+
 1. It has full service availability
 2. Good connectivity to Africa via Azure backbone
 3. Lower latency than other fully-featured regions
@@ -102,6 +108,7 @@ Static Web Apps are CDN-accelerated globally, so the backend region has minimal 
 ### ACS Data Location
 
 Azure Communication Services data is stored in **Europe** (closest supported data location to Africa). Supported data locations are:
+
 - United States, Europe, UK, Australia, Japan, Canada, India, France
 
 "Africa" is not yet a supported data location for ACS.
@@ -129,6 +136,7 @@ infrastructure/
 ```
 
 This approach provides:
+
 - **One template, multiple environments** - Same infrastructure code, different configurations
 - **Environment parity** - Dev, staging, and prod use identical resource structure
 - **Simple CI/CD** - Pipelines choose the right parameter file per environment
@@ -150,7 +158,7 @@ The infrastructure deployment pipeline requires several secrets to be configured
 
 1. Navigate to your repository: `https://github.com/phoenixvc/Mystira.App`
 2. Click on **Settings** (top navigation bar)
-3. In the left sidebar, expand **Secrets and variables** 
+3. In the left sidebar, expand **Secrets and variables**
 4. Click on **Actions**
 5. Click the **New repository secret** button
 
@@ -176,6 +184,7 @@ az ad sp create-for-rbac \
 ```
 
 The command will output JSON like this:
+
 ```json
 {
   "clientId": "12345678-1234-1234-1234-123456789abc",
@@ -212,14 +221,16 @@ Add each of the following secrets to your GitHub repository:
 
 3. **`JWT_SECRET_KEY`**
    - **Value**: A strong, randomly generated secret key for JWT token signing (at least 32 characters)
-   - **How to generate**: 
+   - **How to generate**:
+
      ```bash
      # Using OpenSSL
      openssl rand -base64 32
-     
+
      # Using PowerShell
      [Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
      ```
+
    - **Example**: `YourSecretKeyHere123456789012345678901234567890==`
    - **Location**: GitHub → Settings → Secrets and variables → Actions → New repository secret
    - **Name**: `JWT_SECRET_KEY`
@@ -229,6 +240,7 @@ Add each of the following secrets to your GitHub repository:
 4. **`ACS_CONNECTION_STRING`** (Optional)
    - **Value**: Azure Communication Services connection string for sending emails
    - **How to get**:
+
      ```bash
      # List your ACS resources
      az communication list --resource-group mys-dev-mystira-rg-san
@@ -240,6 +252,7 @@ Add each of the following secrets to your GitHub repository:
        --query primaryConnectionString \
        --output tsv
      ```
+
    - **Example**: `endpoint=https://mys-dev-mystira-acs-glob.communication.azure.com/;accesskey=your-access-key-here`
    - **Location**: GitHub → Settings → Secrets and variables → Actions → New repository secret
    - **Name**: `ACS_CONNECTION_STRING`
@@ -300,30 +313,33 @@ After adding all secrets, verify them in GitHub:
 
 #### Summary Table
 
-| Secret Name | Required | Used By | Where to Get Value |
-|-------------|----------|---------|-------------------|
-| `AZURE_CLIENT_ID` | ✅ Yes | Infrastructure deployment | Service Principal JSON → `clientId` |
-| `AZURE_TENANT_ID` | ✅ Yes | Infrastructure deployment | Service Principal JSON → `tenantId` |
-| `JWT_SECRET_KEY` | ✅ Yes | Infrastructure deployment | Generate with `openssl rand -base64 32` |
-| `ACS_CONNECTION_STRING` | ⚠️ Optional | Infrastructure deployment | Azure Communication Services → Connection string |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV` | ✅ Yes | API deployment (dev) | Azure Portal → App Service → Get publish profile |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV_ADMIN` | ✅ Yes | Admin API deployment (dev) | Azure Portal → App Service → Get publish profile |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD` | ✅ Yes | API deployment (prod) | Azure Portal → App Service → Get publish profile |
-| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_ADMIN` | ✅ Yes | Admin API deployment (prod) | Azure Portal → App Service → Get publish profile |
+| Secret Name                               | Required    | Used By                     | Where to Get Value                               |
+| ----------------------------------------- | ----------- | --------------------------- | ------------------------------------------------ |
+| `AZURE_CLIENT_ID`                         | ✅ Yes      | Infrastructure deployment   | Service Principal JSON → `clientId`              |
+| `AZURE_TENANT_ID`                         | ✅ Yes      | Infrastructure deployment   | Service Principal JSON → `tenantId`              |
+| `JWT_SECRET_KEY`                          | ✅ Yes      | Infrastructure deployment   | Generate with `openssl rand -base64 32`          |
+| `ACS_CONNECTION_STRING`                   | ⚠️ Optional | Infrastructure deployment   | Azure Communication Services → Connection string |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV`        | ✅ Yes      | API deployment (dev)        | Azure Portal → App Service → Get publish profile |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_DEV_ADMIN`  | ✅ Yes      | Admin API deployment (dev)  | Azure Portal → App Service → Get publish profile |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD`       | ✅ Yes      | API deployment (prod)       | Azure Portal → App Service → Get publish profile |
+| `AZURE_WEBAPP_PUBLISH_PROFILE_PROD_ADMIN` | ✅ Yes      | Admin API deployment (prod) | Azure Portal → App Service → Get publish profile |
 
 #### Troubleshooting
 
 **Secret not found error**:
+
 - Ensure secret name matches exactly (case-sensitive)
 - Verify you added the secret to the correct repository
 - Check if you have admin access to the repository
 
 **Authentication failed**:
+
 - Verify Service Principal has Contributor role on the subscription/resource group
 - Ensure `AZURE_CLIENT_ID` and `AZURE_TENANT_ID` are correct
 - Check if Service Principal has been deleted or credentials expired
 
 **Deployment fails with "secret not set"**:
+
 - Check workflow YAML references the correct secret name
 - Ensure secret is not empty (re-add if needed)
 
@@ -332,6 +348,7 @@ After adding all secrets, verify them in GitHub:
 The development environment includes the following resources (using the naming convention `[org]-[env]-[project]-[type]-[region]`):
 
 ### Core Infrastructure
+
 - **Log Analytics Workspace**: `mys-dev-mystira-log-san`
   - Centralized logging and monitoring
   - 30-day retention
@@ -342,6 +359,7 @@ The development environment includes the following resources (using the naming c
   - Integrated with Log Analytics
 
 ### Communication Services (Global)
+
 - **Azure Communication Services**: `mys-dev-mystira-acs-glob`
   - Email, SMS, and WhatsApp capabilities
   - Global deployment (data location: Europe)
@@ -351,6 +369,7 @@ The development environment includes the following resources (using the naming c
   - Sender: `DoNotReply@mystira.app`
 
 ### Storage & Database
+
 - **Storage Account**: `mysdevmystirstsan`
   - Container: `mystira-app-media`
   - SKU: Standard_LRS (Locally Redundant - dev optimized)
@@ -369,6 +388,7 @@ The development environment includes the following resources (using the naming c
     - PendingSignups
 
 ### Application Hosting
+
 - **App Service Plan**: `mys-dev-mystira-plan-san` (shared by both APIs)
   - SKU: F1 (Free - dev optimized)
 
@@ -383,6 +403,7 @@ The development environment includes the following resources (using the naming c
   - Integrated with App Insights
 
 ### Frontend
+
 - **Static Web App**: `mys-dev-mystira-swa-eus2`
   - URL: `https://mango-water-04fdb1c03.3.azurestaticapps.net`
   - SKU: Free (dev optimized)
@@ -392,6 +413,7 @@ The development environment includes the following resources (using the naming c
 ## Key Vault Administration
 
 The Key Vault module supports an optional `adminObjectId` parameter to grant full Key Vault access to a specific user or service principal. This is useful for:
+
 - Manual secret management in Azure Portal
 - Debugging and troubleshooting
 - Initial secret setup
@@ -428,11 +450,11 @@ The infrastructure automatically configures custom domains for all services usin
 
 ### Custom Domain Configuration
 
-| Environment | PWA | API | Admin API |
-|-------------|-----|-----|-----------|
-| Dev | `dev.mystira.app` | `api.dev.mystira.app` | `admin.dev.mystira.app` |
-| Staging | `staging.mystira.app` | `api.staging.mystira.app` | `admin.staging.mystira.app` |
-| Prod | `mystira.app` | `api.mystira.app` | `admin.mystira.app` |
+| Environment | PWA                   | API                       | Admin API                   |
+| ----------- | --------------------- | ------------------------- | --------------------------- |
+| Dev         | `dev.mystira.app`     | `api.dev.mystira.app`     | `admin.dev.mystira.app`     |
+| Staging     | `staging.mystira.app` | `api.staging.mystira.app` | `admin.staging.mystira.app` |
+| Prod        | `mystira.app`         | `api.mystira.app`         | `admin.mystira.app`         |
 
 ### How It Works
 
@@ -466,15 +488,15 @@ az role assignment create \
 
 The following parameters control custom domain configuration:
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `enableCustomDomain` | Enable custom domain for Static Web App | `false` |
-| `enableApiCustomDomain` | Enable custom domains for API App Services | `false` |
-| `dnsZoneName` | DNS zone name | `mystira.app` |
-| `dnsZoneResourceGroup` | Resource group containing DNS zone | `mys-prod-mystira-rg-glob` |
-| `customDomainSubdomain` | Environment subdomain (empty for prod) | varies |
-| `apiSubdomainPrefix` | API subdomain prefix | `api` |
-| `adminApiSubdomainPrefix` | Admin API subdomain prefix | `admin` |
+| Parameter                 | Description                                | Default                    |
+| ------------------------- | ------------------------------------------ | -------------------------- |
+| `enableCustomDomain`      | Enable custom domain for Static Web App    | `false`                    |
+| `enableApiCustomDomain`   | Enable custom domains for API App Services | `false`                    |
+| `dnsZoneName`             | DNS zone name                              | `mystira.app`              |
+| `dnsZoneResourceGroup`    | Resource group containing DNS zone         | `mys-prod-mystira-rg-glob` |
+| `customDomainSubdomain`   | Environment subdomain (empty for prod)     | varies                     |
+| `apiSubdomainPrefix`      | API subdomain prefix                       | `api`                      |
+| `adminApiSubdomainPrefix` | Admin API subdomain prefix                 | `admin`                    |
 
 ### Verifying DNS Records
 
@@ -497,6 +519,7 @@ az network dns record-set list \
 ### Infrastructure → API Deployment Chain
 
 API deployment workflows are configured to automatically trigger after successful infrastructure deployments. This ensures:
+
 - App Services exist before code deployment
 - Key Vault and secrets are configured before API uses them
 - Connection strings and settings are properly applied
@@ -512,6 +535,7 @@ Infrastructure Deploy (Production) → API CI/CD (Production) + Admin API CI/CD 
 ### API Workflow Triggers
 
 Each API workflow runs on:
+
 1. **Push to branch** - When code changes are pushed
 2. **PR merged** - When a pull request is merged
 3. **Infrastructure completed** - When infrastructure workflow succeeds
@@ -520,6 +544,7 @@ Each API workflow runs on:
 ### Incremental Deployment Mode
 
 All infrastructure deployments use `--mode Incremental` which:
+
 - **Adds/updates** resources defined in the template
 - **Preserves** existing resources not in the template
 - **Never deletes** resources automatically
@@ -540,7 +565,8 @@ Infrastructure deployment is **manual only** to prevent accidental changes. Use 
    - **destroy**: Deletes all infrastructure (requires confirmation)
 4. Click **"Run workflow"**
 
-**Note**: 
+**Note**:
+
 - Destroy action requires checking the "Confirm destruction" checkbox
 - Preview action automatically runs on pull requests that modify infrastructure files
 - Preview action generates a what-if analysis comment on the PR
@@ -567,6 +593,7 @@ dotnet run -- infrastructure deploy
 ```
 
 **Benefits of using CosmosConsole for deployment:**
+
 - ✅ Trigger workflows from command line
 - ✅ No need to navigate to GitHub Actions UI
 - ✅ Integrated with other management operations
@@ -692,6 +719,7 @@ The following environment variables are configured in App Services via Bicep:
 ### CORS Configuration
 
 CORS is configured for the following origins:
+
 - `http://localhost:7000` - Local development
 - `https://localhost:7000` - Local development (HTTPS)
 - `https://mystira.app` - Production custom domain
@@ -703,6 +731,7 @@ CORS is configured for the following origins:
 ### Application Insights
 
 All App Services are instrumented with Application Insights for:
+
 - Request tracking
 - Dependency tracking
 - Exception tracking
@@ -711,6 +740,7 @@ All App Services are instrumented with Application Insights for:
 ### Diagnostic Logs
 
 The following logs are collected:
+
 - HTTP logs (7-day retention)
 - Console logs (7-day retention)
 - Application logs (7-day retention)
@@ -723,6 +753,7 @@ All App Services have health check endpoints configured at `/health`.
 ## Cost Optimization
 
 ### Development Environment (Optimized for Low Cost)
+
 - **Cosmos DB**: Serverless mode (pay per request - $0.25/million RUs)
 - **App Services**: F1 tier (Free tier - $0/month)
   - ⚠️ Note: Free tier has limitations (60 CPU minutes/day, 1GB RAM, 1GB storage)
@@ -733,6 +764,7 @@ All App Services have health check endpoints configured at `/health`.
 - **Communication Services**: Pay per use (emails/SMS)
 
 ### Estimated Monthly Cost (Development - Optimized)
+
 - Cosmos DB: ~$1-5 (serverless, low dev usage)
 - App Services (2x F1): **$0** (Free tier)
 - Storage Account: ~$1-3 (LRS, low usage)
@@ -742,7 +774,9 @@ All App Services have health check endpoints configured at `/health`.
 **Total: ~$2-15/month** (vs ~$40-70 with B1 App Services)
 
 ### Upgrading for Production
+
 When moving to production, consider:
+
 - **Cosmos DB**: Switch to provisioned throughput for predictable performance
 - **App Services**: Upgrade to P1v3 or higher for production workloads
 - **Storage**: Change to GRS (Geo-Redundant) for high availability
@@ -802,6 +836,7 @@ To scale the application:
 ## Support
 
 For issues or questions:
+
 1. Check Application Insights logs
 2. Review GitHub Actions workflow runs
 3. Consult Azure Portal for resource status

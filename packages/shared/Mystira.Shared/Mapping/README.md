@@ -4,14 +4,14 @@ This module provides compile-time object mapping using [Mapperly](https://mapper
 
 ## Why Mapperly?
 
-| Feature | AutoMapper | Mapperly |
-|---------|------------|----------|
-| Runtime Overhead | Reflection-based | Zero (compile-time) |
-| AOT Compatible | Limited | Full support |
-| Debugging | Opaque | View generated code |
-| IDE Support | Runtime errors | Compile-time errors |
-| Configuration | Runtime profiles | Attributes |
-| .NET 9 Native AOT | Requires config | Works out of box |
+| Feature           | AutoMapper       | Mapperly            |
+| ----------------- | ---------------- | ------------------- |
+| Runtime Overhead  | Reflection-based | Zero (compile-time) |
+| AOT Compatible    | Limited          | Full support        |
+| Debugging         | Opaque           | View generated code |
+| IDE Support       | Runtime errors   | Compile-time errors |
+| Configuration     | Runtime profiles | Attributes          |
+| .NET 9 Native AOT | Requires config  | Works out of box    |
 
 ## Usage
 

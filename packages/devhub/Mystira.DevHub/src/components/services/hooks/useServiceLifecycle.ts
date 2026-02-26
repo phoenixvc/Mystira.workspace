@@ -19,7 +19,7 @@ export function useServiceLifecycle({
 }: UseServiceLifecycleProps) {
   const [loading, setLoading] = useState<Record<string, boolean>>({});
   const [statusMessage, setStatusMessage] = useState<Record<string, string>>(
-    {},
+    {}
   );
   const [services, setServices] = useState<ServiceStatus[]>([]);
 
@@ -93,7 +93,7 @@ export function useServiceLifecycle({
           serviceName,
           repoRoot,
           port: customPorts[serviceName] || undefined,
-        },
+        }
       );
 
       if (result.success) {
@@ -101,7 +101,7 @@ export function useServiceLifecycle({
           const existing = prev.find((s) => s.name === serviceName);
           if (existing) {
             return prev.map((s) =>
-              s.name === serviceName ? { ...s, running: true, url } : s,
+              s.name === serviceName ? { ...s, running: true, url } : s
             );
           }
           return [...prev, { name: serviceName, running: true, url }];
@@ -131,9 +131,7 @@ export function useServiceLifecycle({
     try {
       await invoke("stop_service", { serviceName });
       setServices((prev) =>
-        prev.map((s) =>
-          s.name === serviceName ? { ...s, running: false } : s,
-        ),
+        prev.map((s) => (s.name === serviceName ? { ...s, running: false } : s))
       );
       setStatusMessage((prev) => ({ ...prev, [serviceName]: "Stopped" }));
     } catch (error) {

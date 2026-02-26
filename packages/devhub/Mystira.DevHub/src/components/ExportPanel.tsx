@@ -15,7 +15,7 @@ interface CommandResponse {
 function ExportPanel() {
   const [loading, setLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<CommandResponse | null>(
-    null,
+    null
   );
   const [outputPath, setOutputPath] = useState("");
 

@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - Comprehensive README documentation with setup, configuration, and deployment guides
 - CONTRIBUTING.md with detailed contribution guidelines
 - Error boundaries for graceful error handling
@@ -34,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for JSON file uploads in addition to YAML
 
 ### Changed
+
 - Refactored ImportScenarioPage to use reusable components and hooks
 - Improved error handling throughout the application
 - Enhanced validation error messages with detailed context
@@ -41,6 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved React Query configuration with error handlers
 
 ### Fixed
+
 - TypeScript configuration to support JSON module imports
 - Error boundary error catching and recovery
 - API error parsing for various error types
@@ -48,6 +51,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2024-12-21
 
 ### Added
+
 - Initial project setup with React, TypeScript, and Vite
 - Authentication flow with cookie-based auth
 - Core pages:
@@ -81,27 +85,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Vite configuration for development and production builds
 
 ### Changed
+
 - Migrated from Blazor WebAssembly to React SPA
 - Separated frontend from backend API
 - Improved development workflow with HMR
 
 ### Removed
+
 - Blazor WebAssembly dependencies
 - .NET frontend dependencies
 
 ## Release Types
 
 ### Major Version (X.0.0)
+
 - Breaking changes
 - Major feature additions
 - Architecture changes
 
 ### Minor Version (0.X.0)
+
 - New features
 - Non-breaking changes
 - Enhancements
 
 ### Patch Version (0.0.X)
+
 - Bug fixes
 - Documentation updates
 - Minor improvements
@@ -109,21 +118,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Categories
 
 ### Added
+
 New features and capabilities
 
 ### Changed
+
 Changes to existing functionality
 
 ### Deprecated
+
 Features that will be removed in future versions
 
 ### Removed
+
 Features that have been removed
 
 ### Fixed
+
 Bug fixes
 
 ### Security
+
 Security fixes and improvements
 
 ---

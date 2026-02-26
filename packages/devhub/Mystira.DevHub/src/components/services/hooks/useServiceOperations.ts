@@ -18,19 +18,19 @@ interface UseServiceOperationsProps {
   onAddToast: (
     message: string,
     type: "info" | "success" | "error" | "warning",
-    duration?: number,
+    duration?: number
   ) => void;
   prebuildService: (
     serviceName: string,
     repoRoot: string,
     onViewModeChange: (serviceName: string, mode: "logs") => void,
     onShowLogs: (serviceName: string, show: boolean) => void,
-    isManual?: boolean,
+    isManual?: boolean
   ) => Promise<boolean>;
   viewMode: Record<string, "logs" | "webview" | "split">;
   setViewModeForService: (
     name: string,
-    mode: "logs" | "webview" | "split",
+    mode: "logs" | "webview" | "split"
   ) => void;
   handleShowLogs: (name: string, show: boolean) => void;
   setServices: React.Dispatch<React.SetStateAction<ServiceStatus[]>>;
@@ -69,12 +69,12 @@ export function useServiceOperations({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       onAddToast(
         `Cannot start ${config?.displayName || serviceName}: build is in progress. Please wait for the build to complete.`,
         "warning",
-        5000,
+        5000
       );
       return;
     }
@@ -85,13 +85,13 @@ export function useServiceOperations({
       onAddToast(
         `${serviceName} is set to ${envName} environment. It will connect to the deployed service, not start locally.`,
         "info",
-        5000,
+        5000
       );
       setServices((prev) => {
         const existing = prev.find((s) => s.name === serviceName);
         if (existing) {
           return prev.map((s) =>
-            s.name === serviceName ? { ...s, running: true } : s,
+            s.name === serviceName ? { ...s, running: true } : s
           );
         }
         const envUrls = getEnvironmentUrls(serviceName);
@@ -105,7 +105,7 @@ export function useServiceOperations({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       const displayName = config?.displayName || serviceName;
 
@@ -118,7 +118,7 @@ export function useServiceOperations({
             onAddToast(
               `Port ${config.port} is already in use!`,
               "warning",
-              7000,
+              7000
             );
             return;
           }
@@ -148,7 +148,7 @@ export function useServiceOperations({
         onAddToast(
           `Tauri API error: Make sure you're running DevHub through Tauri (not in a browser). Restart the app if the issue persists.`,
           "error",
-          10000,
+          10000
         );
       } else {
         onAddToast(`Failed to start ${serviceName}: ${errorMessage}`, "error");
@@ -160,18 +160,16 @@ export function useServiceOperations({
     const environment = serviceEnvironments[serviceName] || "local";
     if (environment !== "local") {
       setServices((prev) =>
-        prev.map((s) =>
-          s.name === serviceName ? { ...s, running: false } : s,
-        ),
+        prev.map((s) => (s.name === serviceName ? { ...s, running: false } : s))
       );
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       onAddToast(
         `${config?.displayName || serviceName} disconnected from ${environment.toUpperCase()} environment`,
-        "info",
+        "info"
       );
       return;
     }
@@ -180,7 +178,7 @@ export function useServiceOperations({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       await invoke("stop_service", { serviceName });
       await onRefreshServices();
@@ -195,7 +193,7 @@ export function useServiceOperations({
     if (environment !== "local") {
       onAddToast(
         `Cannot rebuild ${serviceName}: it's connected to ${environment.toUpperCase()} environment`,
-        "info",
+        "info"
       );
       return;
     }
@@ -204,7 +202,7 @@ export function useServiceOperations({
     if (!rootToUse || rootToUse.trim() === "") {
       onAddToast(
         "Repository root is not set. Please configure it first.",
-        "error",
+        "error"
       );
       return;
     }
@@ -216,12 +214,12 @@ export function useServiceOperations({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       onAddToast(
         `Stopping ${config?.displayName || serviceName} before rebuild...`,
         "info",
-        2000,
+        2000
       );
       try {
         await stopService(serviceName);
@@ -229,20 +227,20 @@ export function useServiceOperations({
 
         await onRefreshServices();
         const stillRunning = services.find(
-          (s) => s.name === serviceName,
+          (s) => s.name === serviceName
         )?.running;
         if (stillRunning) {
           onAddToast(
             `Service ${serviceName} is still running. Please stop it manually and try again.`,
             "error",
-            5000,
+            5000
           );
           return;
         }
       } catch (error) {
         onAddToast(
           `Failed to stop ${serviceName} before rebuild: ${error}`,
-          "error",
+          "error"
         );
         return;
       }
@@ -254,33 +252,33 @@ export function useServiceOperations({
         rootToUse,
         (name, mode) => setViewModeForService(name, mode),
         handleShowLogs,
-        true,
+        true
       );
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       if (success) {
         onAddToast(
           `${config?.displayName || serviceName} rebuilt successfully`,
-          "success",
+          "success"
         );
       } else {
         onAddToast(
           `Failed to rebuild ${config?.displayName || serviceName}`,
-          "error",
+          "error"
         );
       }
     } catch (error) {
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: ServiceConfig) => s.name === serviceName);
       onAddToast(
         `Failed to rebuild ${config?.displayName || serviceName}`,
-        "error",
+        "error"
       );
     }
   };
@@ -289,7 +287,7 @@ export function useServiceOperations({
     const serviceConfigs = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     );
     const servicesToStart = serviceConfigs.filter((config: ServiceConfig) => {
       const status = services.find((s) => s.name === config.name);
@@ -302,19 +300,19 @@ export function useServiceOperations({
         (config: ServiceConfig) => {
           const currentBuild = buildStatus[config.name];
           return currentBuild?.status === "building";
-        },
+        }
       );
 
       if (buildingServices.length > 0) {
         onAddToast(
           `Cannot start services: ${buildingServices.map((s) => s.displayName).join(", ")} ${buildingServices.length === 1 ? "is" : "are"} currently building. Please wait for the build to complete.`,
           "warning",
-          5000,
+          5000
         );
       } else {
         onAddToast(
           "All services are already running or configured for remote environments!",
-          "info",
+          "info"
         );
       }
       return;
@@ -323,7 +321,7 @@ export function useServiceOperations({
     onAddToast(
       `Starting ${servicesToStart.length} service(s)... This may take a minute.`,
       "info",
-      8000,
+      8000
     );
 
     try {
@@ -340,13 +338,13 @@ export function useServiceOperations({
           onAddToast(
             `${service.displayName || service.name} started (${i + 1}/${servicesToStart.length})`,
             "success",
-            3000,
+            3000
           );
         } catch (error) {
           console.error(`Failed to start ${service.name}:`, error);
           onAddToast(
             `Failed to start ${service.displayName || service.name}`,
-            "error",
+            "error"
           );
         }
       }
@@ -355,7 +353,7 @@ export function useServiceOperations({
       onAddToast(
         `All ${servicesToStart.length} service(s) started successfully!`,
         "success",
-        5000,
+        5000
       );
     } catch (error) {
       onAddToast(`Failed to start services: ${error}`, "error");
@@ -374,7 +372,7 @@ export function useServiceOperations({
         invoke("stop_service", { serviceName: service.name }).catch((error) => {
           console.error(`Failed to stop ${service.name}:`, error);
           return { service: service.name, error };
-        }),
+        })
       );
 
       await Promise.allSettled(stopPromises);
@@ -390,7 +388,7 @@ export function useServiceOperations({
     if (!rootToUse || rootToUse.trim() === "") {
       onAddToast(
         "Repository root is not set. Please configure it first.",
-        "error",
+        "error"
       );
       return;
     }
@@ -398,7 +396,7 @@ export function useServiceOperations({
     const serviceConfigs = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     );
     const servicesToBuild = serviceConfigs.filter((config: ServiceConfig) => {
       const environment = serviceEnvironments[config.name] || "local";
@@ -411,7 +409,7 @@ export function useServiceOperations({
         (config: ServiceConfig) => {
           const currentBuild = buildStatus[config.name];
           return currentBuild?.status === "building";
-        },
+        }
       );
 
       if (buildingServices.length > 0) {
@@ -420,12 +418,12 @@ export function useServiceOperations({
             buildingServices.length === 1 ? "is" : "are"
           } currently building. Please wait for the build to complete.`,
           "warning",
-          5000,
+          5000
         );
       } else {
         onAddToast(
           "No local services to build. All services are configured for remote environments.",
-          "info",
+          "info"
         );
       }
       return;
@@ -434,7 +432,7 @@ export function useServiceOperations({
     onAddToast(
       `Building ${servicesToBuild.length} service(s)... This may take a few minutes.`,
       "info",
-      10000,
+      10000
     );
 
     let successCount = 0;
@@ -447,20 +445,20 @@ export function useServiceOperations({
           rootToUse,
           (name, mode) => setViewModeForService(name, mode),
           handleShowLogs,
-          true,
+          true
         );
         if (success) {
           successCount++;
           onAddToast(
             `${service.displayName || service.name} built (${successCount}/${servicesToBuild.length})`,
             "success",
-            3000,
+            3000
           );
         } else {
           failCount++;
           onAddToast(
             `Failed to build ${service.displayName || service.name}`,
-            "error",
+            "error"
           );
         }
       } catch (error) {
@@ -468,7 +466,7 @@ export function useServiceOperations({
         console.error(`Failed to build ${service.name}:`, error);
         onAddToast(
           `Failed to build ${service.displayName || service.name}`,
-          "error",
+          "error"
         );
       }
     }
@@ -477,13 +475,13 @@ export function useServiceOperations({
       onAddToast(
         `All ${successCount} service(s) built successfully!`,
         "success",
-        5000,
+        5000
       );
     } else {
       onAddToast(
         `Build complete: ${successCount} succeeded, ${failCount} failed`,
         failCount > 0 ? "warning" : "success",
-        5000,
+        5000
       );
     }
   };

@@ -29,9 +29,9 @@ sequenceDiagram
 
     Client->>Controller: POST /api/gamesessions/{id}/choice<br/>(MakeChoiceRequest)
     Controller->>Service: MakeChoiceAsync(sessionId, request)
-    
+
     Service->>UseCase: ExecuteAsync(request)
-    
+
     Note over UseCase: Step 1: Validate Session
     UseCase->>SessionRepo: GetByIdAsync(sessionId)
     SessionRepo->>DB: Query session
@@ -44,43 +44,43 @@ sequenceDiagram
     end
     DB-->>SessionRepo: GameSession
     SessionRepo-->>UseCase: session
-    
+
     alt Session Not InProgress
         UseCase-->>Service: InvalidOperationException
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 2: Validate Scenario & Scene
     UseCase->>ScenarioRepo: GetByIdAsync(session.ScenarioId)
     ScenarioRepo->>DB: Query scenario
     DB-->>ScenarioRepo: Scenario
     ScenarioRepo-->>UseCase: scenario
-    
+
     UseCase->>UseCase: Find currentScene<br/>by request.SceneId
     alt Scene Not Found
         UseCase-->>Service: ArgumentException("Scene not found")
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     UseCase->>UseCase: Find branch<br/>by request.ChoiceText
     alt Branch Not Found
         UseCase-->>Service: ArgumentException("Choice not found")
         Service-->>Controller: BadRequest
         Controller-->>Client: 400 Bad Request
     end
-    
+
     Note over UseCase: Step 3: Record Choice
     UseCase->>UseCase: Create SessionChoice {<br/>  SceneId, SceneTitle,<br/>  ChoiceText, NextScene,<br/>  ChosenAt = Now,<br/>  EchoGenerated = branch.EchoLog,<br/>  CompassChange = branch.CompassChange<br/>}
     UseCase->>UseCase: session.ChoiceHistory.Add(choice)
-    
+
     Note over UseCase: Step 4: Process Echo Log
     alt Branch Has EchoLog
         UseCase->>UseCase: Create EchoLog {<br/>  EchoType, Description,<br/>  Strength, Timestamp = Now<br/>}
         UseCase->>UseCase: session.EchoHistory.Add(echo)
     end
-    
+
     Note over UseCase: Step 5: Update Compass Values
     alt Branch Has CompassChange
         UseCase->>UseCase: Get CompassTracking<br/>for branch.CompassChange.Axis
@@ -89,18 +89,18 @@ sequenceDiagram
         UseCase->>UseCase: tracking.History.Add(compassChange)
         UseCase->>UseCase: tracking.LastUpdated = Now
     end
-    
+
     Note over UseCase: Step 6: Update Session State
     UseCase->>UseCase: session.CurrentSceneId =<br/>request.NextSceneId
     UseCase->>UseCase: session.ElapsedTime =<br/>Now - session.StartTime
-    
+
     Note over UseCase: Step 7: Check Completion
     UseCase->>UseCase: Find nextScene<br/>by request.NextSceneId
     alt Next Scene Has No Branches<br/>AND No NextSceneId
         UseCase->>UseCase: session.Status = Completed
         UseCase->>UseCase: session.EndTime = Now
     end
-    
+
     Note over UseCase: Step 8: Persist Changes
     UseCase->>SessionRepo: UpdateAsync(session)
     SessionRepo->>DB: Update entity
@@ -109,15 +109,15 @@ sequenceDiagram
     DB-->>UoW: Success
     UoW-->>UseCase: Success
     SessionRepo-->>UseCase: GameSession (updated)
-    
+
     UseCase-->>Service: GameSession
-    
+
     Note over Service: Step 9: Check for Badges
     Service->>BadgeConfig: GetBadgeConfigurationsAsync()
     BadgeConfig->>DB: Query badge configurations
     DB-->>BadgeConfig: List<BadgeConfiguration>
     BadgeConfig-->>Service: badgeConfigs
-    
+
     loop For each compass axis with change
         Service->>Service: Get current compass value
         loop For each badge config matching axis
@@ -133,7 +133,7 @@ sequenceDiagram
             end
         end
     end
-    
+
     Service-->>Controller: GameSession
     Controller-->>Client: 200 OK<br/>(GameSession)
 ```

@@ -142,6 +142,7 @@ Authentication is handled via **Microsoft Entra ID (Azure AD)** using the **MSAL
 4. **Session State**: The `AuthProvider` component initializes MSAL and manages the authentication state globally
 
 Key authentication files:
+
 - `src/auth/AuthProvider.tsx` - MSAL provider wrapper with initialization logic
 - `src/auth/useAuth.ts` - Custom hook exposing `login()`, `logout()`, `getAccessToken()`, `isAuthenticated`
 - `src/auth/msalConfig.ts` - MSAL configuration with environment variables

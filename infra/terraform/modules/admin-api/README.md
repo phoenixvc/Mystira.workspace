@@ -8,12 +8,12 @@ The Admin API is a .NET Web API that provides administrative functionality for M
 
 ## Resources Created
 
-| Resource | Purpose |
-|----------|---------|
+| Resource                       | Purpose                                                      |
+| ------------------------------ | ------------------------------------------------------------ |
 | User Assigned Managed Identity | Workload identity for AKS, Key Vault access, PostgreSQL auth |
-| Network Security Group | Network traffic rules for the service |
-| Application Insights | Monitoring and telemetry |
-| Key Vault | Secure storage for secrets and configuration |
+| Network Security Group         | Network traffic rules for the service                        |
+| Application Insights           | Monitoring and telemetry                                     |
+| Key Vault                      | Secure storage for secrets and configuration                 |
 
 ## Usage
 
@@ -76,6 +76,7 @@ The Admin API can authenticate to PostgreSQL using Azure AD tokens instead of pa
 3. The Azure SDK automatically obtains tokens via workload identity
 
 Example connection string:
+
 ```
 Host=<server>.postgres.database.azure.com;Database=admindb;Username=<identity-name>;Authentication=Active Directory Default
 ```
@@ -97,11 +98,11 @@ The Admin API uses Microsoft.Identity.Web for JWT token validation. Configuratio
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `identity_id` | Managed Identity resource ID |
-| `identity_principal_id` | Managed Identity principal ID (for RBAC) |
-| `identity_client_id` | Managed Identity client ID (for workload identity) |
-| `key_vault_id` | Key Vault resource ID |
-| `key_vault_uri` | Key Vault URI |
-| `app_insights_connection_string` | Application Insights connection string |
+| Output                           | Description                                        |
+| -------------------------------- | -------------------------------------------------- |
+| `identity_id`                    | Managed Identity resource ID                       |
+| `identity_principal_id`          | Managed Identity principal ID (for RBAC)           |
+| `identity_client_id`             | Managed Identity client ID (for workload identity) |
+| `key_vault_id`                   | Key Vault resource ID                              |
+| `key_vault_uri`                  | Key Vault URI                                      |
+| `app_insights_connection_string` | Application Insights connection string             |

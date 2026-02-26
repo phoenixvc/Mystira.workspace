@@ -51,13 +51,13 @@ sequenceDiagram
     participant DB as Database
 
     UseCase-->>Service: GameSession (updated)
-    
+
     Note over Service: Check for Badge Eligibility
     Service->>BadgeConfig: GetBadgeConfigurationsAsync()
     BadgeConfig->>DB: Query badge configs
     DB-->>BadgeConfig: List<BadgeConfiguration>
     BadgeConfig-->>Service: badgeConfigs
-    
+
     loop For each compass axis with change
         Service->>Service: Get current compass value
         loop For each badge config matching axis

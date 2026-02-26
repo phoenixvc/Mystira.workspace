@@ -7,6 +7,7 @@ Discord messaging adapter implementing the messaging port defined by the Applica
 **Layer**: **Infrastructure - Discord Adapter (Secondary/Driven)**
 
 The Infrastructure.Discord layer is a **secondary adapter** (driven adapter) that:
+
 - **Implements** messaging port interface defined in `Application.Ports.Messaging`
 - **Provides** Discord bot functionality using Discord.NET
 - **Manages** Discord-specific health checks and configuration
@@ -14,6 +15,7 @@ The Infrastructure.Discord layer is a **secondary adapter** (driven adapter) tha
 - **ZERO reverse dependencies** - Application never references Infrastructure
 
 **Dependency Flow** (Correct ✅):
+
 ```
 Domain Layer (Core)
     ↓ references
@@ -27,6 +29,7 @@ Discord.NET SDK
 ```
 
 **Key Principles**:
+
 - ✅ **Port Implementation** - Implements `IMessagingService` from Application
 - ✅ **Technology Adapter** - Adapts Discord.NET to Application needs
 - ✅ **Dependency Inversion** - Application defines ports, Infrastructure implements them
@@ -49,17 +52,18 @@ Discord.NET SDK
   - [AI Assistant Integration](#ai-assistant-integration)
 
 **Port Interface** (defined in Application layer):
+
 - `IMessagingService` lives in `Application/Ports/Messaging/`
 - Infrastructure.Discord references Application to implement this port
 
-| Label         | Area                                   | Description                                                                             |
-| ------------- | -------------------------------------- | --------------------------------------------------------------------------------------- |
-| 🧠 Domain      | `src/Mystira.App.Domain`               | Core domain models, enumerations, and shared business logic.                           |
-| ☁️ Azure Infra | `src/Mystira.App.Infrastructure.Azure` | Azure configuration, Cosmos DB & Blob Storage adapters.                                 |
-| 🌐 Public API  | `src/Mystira.App.Api`                  | ASP.NET Core API serving PWA and mobile clients.                                        |
-| 🛡️ Admin API   | `src/Mystira.App.Admin.Api`            | Internal-facing API for content management and moderation.                              |
-| 📱 PWA         | `src/Mystira.App.PWA`                  | Blazor WebAssembly PWA with offline assets and haptics.                                 |
-| 📊 Ops Console | `tools/Mystira.App.CosmosConsole`    | CLI for Cosmos DB exports and analytics.                                                |
+| Label          | Area                                   | Description                                                  |
+| -------------- | -------------------------------------- | ------------------------------------------------------------ |
+| 🧠 Domain      | `src/Mystira.App.Domain`               | Core domain models, enumerations, and shared business logic. |
+| ☁️ Azure Infra | `src/Mystira.App.Infrastructure.Azure` | Azure configuration, Cosmos DB & Blob Storage adapters.      |
+| 🌐 Public API  | `src/Mystira.App.Api`                  | ASP.NET Core API serving PWA and mobile clients.             |
+| 🛡️ Admin API   | `src/Mystira.App.Admin.Api`            | Internal-facing API for content management and moderation.   |
+| 📱 PWA         | `src/Mystira.App.PWA`                  | Blazor WebAssembly PWA with offline assets and haptics.      |
+| 📊 Ops Console | `tools/Mystira.App.CosmosConsole`      | CLI for Cosmos DB exports and analytics.                     |
 
 ## Design System & Visual Identity
 
@@ -84,6 +88,7 @@ Application defines the platform-agnostic port interface:
 Mystira uses **Hexagonal Architecture (Ports & Adapters)** to decouple business logic from infrastructure.
 
 ### Hexagonal Model
+
 ```
 ┌────────────────────────────────┐
 │  Infrastructure (Adapters)     │
@@ -114,11 +119,12 @@ A governed audit (2025-12) identified and resolved the following:
 
 public interface IMessagingService
 {
-    Task SendMessageAsync(ulong channelId, string message);
-    Task SendRichMessageAsync(ulong channelId, RichMessage richMessage);
-    Task<bool> IsConnectedAsync();
+Task SendMessageAsync(ulong channelId, string message);
+Task SendRichMessageAsync(ulong channelId, RichMessage richMessage);
+Task<bool> IsConnectedAsync();
 }
-```
+
+````
 
 Infrastructure.Discord provides the Discord-specific implementation:
 
@@ -175,7 +181,7 @@ public class DiscordBotService : IMessagingService  // Implements port ✅
         return Task.FromResult(_client.ConnectionState == ConnectionState.Connected);
     }
 }
-```
+````
 
 ## Usage in Application Layer
 
@@ -221,6 +227,7 @@ public class SendGameNotificationUseCase
 ```
 
 **Benefits**:
+
 - ✅ Application never references Infrastructure.Discord
 - ✅ Can swap Discord for Slack/Teams without changing Application
 - ✅ Easy to mock for testing
@@ -342,6 +349,7 @@ builder.Services.AddHealthChecks()
 ```
 
 Access at:
+
 - `/health` - Comprehensive health status
 - `/health/ready` - Readiness probe
 - `/health/live` - Liveness probe
@@ -467,6 +475,7 @@ grep -r "using Mystira.App.Infrastructure" .
 ```
 
 **Results**:
+
 - ✅ Infrastructure.Discord references Application (correct direction)
 - ✅ Services implement Application.Ports.Messaging interface
 - ✅ Application has ZERO Infrastructure references
@@ -477,6 +486,7 @@ grep -r "using Mystira.App.Infrastructure" .
 The port-based architecture allows easy swapping of messaging platforms:
 
 ### Console Messaging (Development)
+
 ```csharp
 public class ConsoleMessagingService : IMessagingService
 {
@@ -497,6 +507,7 @@ public class ConsoleMessagingService : IMessagingService
 ```
 
 ### Slack Messaging (Alternative Platform)
+
 ```csharp
 public class SlackMessagingService : IMessagingService
 {
@@ -537,12 +548,14 @@ public class SlackMessagingService : IMessagingService
 ## Troubleshooting
 
 ### Bot Not Connecting
+
 1. Verify bot token is correct
 2. Check required intents enabled in Discord Developer Portal
 3. Ensure bot is invited to server
 4. Check logs for error messages
 
 ### Health Check Failing
+
 1. Bot may still be connecting (5-10 seconds)
 2. Network connectivity issues
 3. Invalid or revoked token
@@ -557,6 +570,7 @@ public class SlackMessagingService : IMessagingService
 ## Summary
 
 **What This Layer Does**:
+
 - ✅ Implements messaging port interface from Application.Ports.Messaging
 - ✅ Provides Discord bot functionality using Discord.NET
 - ✅ Manages Discord-specific health checks and configuration
@@ -567,12 +581,15 @@ public class SlackMessagingService : IMessagingService
 Implementation progress and outstanding technical debt are tracked in the [Technical Debt Registry](docs/technical-debt-registry.md).
 
 ### Planned Future Work
+
 - **Story Protocol Hardening:** Complete actual contract ABI integration for real-time IP attribution.
 - **Offline Persistence:** Transition `InMemoryStoreService` to a real IndexedDB-backed persistence layer for the PWA.
 - **Adaptive Music:** Enhance the audio engine with engagement-based cross-fading.
 
 ## Contributing / PR Checklist
+
 **Key Success Metrics**:
+
 - ✅ **Zero reverse dependencies** - Application never references Infrastructure.Discord
 - ✅ **Clean interfaces** - All ports defined in Application layer
 - ✅ **Testability** - Use cases can mock messaging service

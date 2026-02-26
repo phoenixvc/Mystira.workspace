@@ -48,7 +48,7 @@ export function EnvironmentPresetSelector({
 
   const handleDeletePreset = (
     preset: EnvironmentPreset,
-    e: React.MouseEvent,
+    e: React.MouseEvent
   ) => {
     e.stopPropagation();
     if (window.confirm(`Delete preset "${preset.name}"?`)) {
@@ -96,7 +96,7 @@ export function EnvironmentPresetSelector({
             <div className="p-2 space-y-1">
               {allPresets.map((preset) => {
                 const isDefault = DEFAULT_PRESETS.some(
-                  (dp) => dp.id === preset.id,
+                  (dp) => dp.id === preset.id
                 );
                 return (
                   <div
@@ -135,7 +135,7 @@ export function EnvironmentPresetSelector({
                               >
                                 {service}: {env.toUpperCase()}
                               </span>
-                            ),
+                            )
                           )}
                         </div>
                       </div>

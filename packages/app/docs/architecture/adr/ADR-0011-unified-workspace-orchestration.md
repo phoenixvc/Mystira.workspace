@@ -14,10 +14,10 @@
 
 ## Approvals
 
-| Role | Name | Date | Status |
-|------|------|------|--------|
-| Tech Lead | | | ⏳ Pending |
-| DevOps | | | ⏳ Pending |
+| Role      | Name | Date | Status     |
+| --------- | ---- | ---- | ---------- |
+| Tech Lead |      |      | ⏳ Pending |
+| DevOps    |      |      | ⏳ Pending |
 
 ---
 
@@ -29,13 +29,13 @@ The Mystira ecosystem has grown organically with multiple repositories and appli
 
 **Mystira Repositories** (all follow `Mystira.X` naming convention):
 
-| Repository | Description | Tech Stack | Status |
-|------------|-------------|------------|--------|
-| `Mystira.App` | Main platform - API, Admin API, PWA | .NET 9, Blazor, Cosmos DB | ✅ Existing |
-| `Mystira.StoryGenerator` | Interactive story generation engine | .NET, AI/ML | ✅ Existing |
-| `Mystira.Chain` | Blockchain integration (Story Protocol) | Python, FastAPI | 🆕 ADR-0010 |
-| `Mystira.Infra` | Infrastructure as Code (Azure) | Bicep, Azure CLI | 🆕 ADR-0012 |
-| `Mystira.workspace` | Multi-repo workspace & centralized docs | Scripts, Markdown | 🆕 This ADR |
+| Repository               | Description                             | Tech Stack                | Status      |
+| ------------------------ | --------------------------------------- | ------------------------- | ----------- |
+| `Mystira.App`            | Main platform - API, Admin API, PWA     | .NET 9, Blazor, Cosmos DB | ✅ Existing |
+| `Mystira.StoryGenerator` | Interactive story generation engine     | .NET, AI/ML               | ✅ Existing |
+| `Mystira.Chain`          | Blockchain integration (Story Protocol) | Python, FastAPI           | 🆕 ADR-0010 |
+| `Mystira.Infra`          | Infrastructure as Code (Azure)          | Bicep, Azure CLI          | 🆕 ADR-0012 |
+| `Mystira.workspace`      | Multi-repo workspace & centralized docs | Scripts, Markdown         | 🆕 This ADR |
 
 **GitHub Topics for all repos:** `mystira`, `interactive-fiction`, `web3`
 
@@ -75,6 +75,7 @@ Based on team discussion:
 ### Repository Naming Considerations
 
 Options discussed:
+
 - `Mystira.orchestration` - orchestration/coordination focus
 - `Mystira.workspace` - workspace/development focus
 - `mystira-workspace` - hyphenated style (GitHub convention)
@@ -103,12 +104,14 @@ Options discussed:
 **Description**: Migrate all code into a single repository with proper monorepo tooling (Nx, Turborepo, or similar).
 
 **Pros**:
+
 - ✅ Single source of truth
 - ✅ Atomic commits across all projects
 - ✅ Simplified CI/CD
 - ✅ Full AI visibility
 
 **Cons**:
+
 - ❌ Major migration effort
 - ❌ Breaks existing workflows
 - ❌ v0-generated code still problematic
@@ -120,12 +123,14 @@ Options discussed:
 **Description**: Create `Mystira.workspace` repo that includes other repos as git submodules.
 
 **Pros**:
+
 - ✅ All code visible in one place
 - ✅ Individual repos remain independent
 - ✅ Can update submodules selectively
 - ✅ Works with VS Code multi-root workspaces
 
 **Cons**:
+
 - ❌ Submodule complexity (detached HEAD, sync issues)
 - ❌ Nested git operations confusing
 - ❌ CI/CD complications
@@ -134,6 +139,7 @@ Options discussed:
 ### Option 3: VS Code Multi-Root Workspace ⭐ **RECOMMENDED**
 
 **Description**: Create `Mystira.workspace` repository (cloned locally as `.workspace`) containing:
+
 - VS Code workspace file (`.code-workspace`)
 - Shared documentation
 - Cross-repo scripts and tooling
@@ -154,6 +160,7 @@ Options discussed:
 ```
 
 **Pros**:
+
 - ✅ All code visible to developer and AI
 - ✅ Individual repos stay independent
 - ✅ No submodule complexity
@@ -163,6 +170,7 @@ Options discussed:
 - ✅ Centralized docs without moving code
 
 **Cons**:
+
 - ⚠️ Requires cloning multiple repos
 - ⚠️ Not a true monorepo (separate git histories)
 - ⚠️ Cross-repo changes need multiple commits
@@ -172,11 +180,13 @@ Options discussed:
 **Description**: Use Codespaces with a dev container that clones all repos automatically.
 
 **Pros**:
+
 - ✅ Consistent environment
 - ✅ Cloud-based development
 - ✅ Auto-setup of all repos
 
 **Cons**:
+
 - ❌ Requires GitHub Codespaces subscription
 - ❌ Latency for some developers
 - ❌ Doesn't solve local development needs
@@ -191,13 +201,14 @@ We will adopt **Option 3: VS Code Multi-Root Workspace** with the following impl
 
 **Recommended: GitHub repo `Mystira.workspace` → clone locally as `.workspace`**
 
-| GitHub Repo Name | Local Clone | Pros | Cons |
-|------------------|-------------|------|------|
-| `Mystira.workspace` ⭐ | `.workspace` | Follows naming convention, can clone to dot-dir | Requires clone with rename |
-| `mystira-workspace` | `.workspace` | GitHub convention (hyphen) | Inconsistent with `Mystira.App` |
-| `Mystira.orchestration` | as-is | Explicit purpose | Long, doesn't sort first |
+| GitHub Repo Name        | Local Clone  | Pros                                            | Cons                            |
+| ----------------------- | ------------ | ----------------------------------------------- | ------------------------------- |
+| `Mystira.workspace` ⭐  | `.workspace` | Follows naming convention, can clone to dot-dir | Requires clone with rename      |
+| `mystira-workspace`     | `.workspace` | GitHub convention (hyphen)                      | Inconsistent with `Mystira.App` |
+| `Mystira.orchestration` | as-is        | Explicit purpose                                | Long, doesn't sort first        |
 
 **Recommendation**:
+
 - **GitHub repo**: `Mystira.workspace` (follows `Mystira.App` naming pattern)
 - **Local directory**: Clone as `.workspace` for alphabetical sorting benefit
 
@@ -248,41 +259,41 @@ git clone https://github.com/phoenixvc/Mystira.workspace.git .workspace
   "folders": [
     {
       "name": "📋 Mystira.workspace",
-      "path": "."
+      "path": ".",
     },
     {
       "name": "🎮 Mystira.App",
-      "path": "../Mystira.App"
+      "path": "../Mystira.App",
     },
     {
       "name": "⛓️ Mystira.Chain",
-      "path": "../Mystira.Chain"
+      "path": "../Mystira.Chain",
     },
     {
       "name": "📖 Mystira.StoryGenerator",
-      "path": "../Mystira.StoryGenerator"
-    }
+      "path": "../Mystira.StoryGenerator",
+    },
     // Add more repos as needed
   ],
   "settings": {
     "files.exclude": {
       "**/bin": true,
       "**/obj": true,
-      "**/node_modules": true
+      "**/node_modules": true,
     },
     "search.exclude": {
       "**/bin": true,
       "**/obj": true,
-      "**/node_modules": true
-    }
+      "**/node_modules": true,
+    },
   },
   "extensions": {
     "recommendations": [
       "ms-dotnettools.csdevkit",
       "dbaeumer.vscode-eslint",
-      "esbenp.prettier-vscode"
-    ]
-  }
+      "esbenp.prettier-vscode",
+    ],
+  },
 }
 ```
 
@@ -302,7 +313,7 @@ Cross-repo tasks for common operations:
       "command": "dotnet build ../Mystira.App/Mystira.App.sln && dotnet build ../Mystira.StoryGenerator/Mystira.StoryGenerator.sln",
       "group": "build",
       "problemMatcher": "$msCompile",
-      "presentation": { "reveal": "always", "panel": "shared" }
+      "presentation": { "reveal": "always", "panel": "shared" },
     },
     {
       "label": "Build: Mystira.App",
@@ -310,14 +321,14 @@ Cross-repo tasks for common operations:
       "command": "dotnet build",
       "options": { "cwd": "${workspaceFolder}/../Mystira.App" },
       "group": "build",
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
     },
     {
       "label": "Build: Mystira.Chain (Docker)",
       "type": "shell",
       "command": "docker build -t mystira-chain .",
       "options": { "cwd": "${workspaceFolder}/../Mystira.Chain" },
-      "group": "build"
+      "group": "build",
     },
 
     // === Test Tasks ===
@@ -326,14 +337,14 @@ Cross-repo tasks for common operations:
       "type": "shell",
       "command": "dotnet test ../Mystira.App/Mystira.App.sln && dotnet test ../Mystira.StoryGenerator/Mystira.StoryGenerator.sln",
       "group": "test",
-      "problemMatcher": "$msCompile"
+      "problemMatcher": "$msCompile",
     },
     {
       "label": "Test: Mystira.Chain (pytest)",
       "type": "shell",
       "command": "pytest",
       "options": { "cwd": "${workspaceFolder}/../Mystira.Chain" },
-      "group": "test"
+      "group": "test",
     },
 
     // === Run Tasks ===
@@ -348,22 +359,22 @@ Cross-repo tasks for common operations:
         "background": {
           "activeOnStart": true,
           "beginsPattern": "^.*Starting.*$",
-          "endsPattern": "^.*Now listening on.*$"
-        }
-      }
+          "endsPattern": "^.*Now listening on.*$",
+        },
+      },
     },
     {
       "label": "Run: Mystira.Chain (uvicorn)",
       "type": "shell",
       "command": "uvicorn app.main:app --reload --port 8000",
       "options": { "cwd": "${workspaceFolder}/../Mystira.Chain" },
-      "isBackground": true
+      "isBackground": true,
     },
     {
       "label": "Run: All Services",
       "dependsOn": ["Run: Mystira.App API", "Run: Mystira.Chain (uvicorn)"],
       "dependsOrder": "parallel",
-      "problemMatcher": []
+      "problemMatcher": [],
     },
 
     // === Utility Tasks ===
@@ -371,29 +382,30 @@ Cross-repo tasks for common operations:
       "label": "Update: All Repos",
       "type": "shell",
       "command": "./scripts/update-all.sh",
-      "problemMatcher": []
+      "problemMatcher": [],
     },
     {
       "label": "Lint: Mystira.Chain (ruff)",
       "type": "shell",
       "command": "ruff check app/",
       "options": { "cwd": "${workspaceFolder}/../Mystira.Chain" },
-      "problemMatcher": []
+      "problemMatcher": [],
     },
     {
       "label": "Format: Mystira.Chain (black)",
       "type": "shell",
       "command": "black app/",
       "options": { "cwd": "${workspaceFolder}/../Mystira.Chain" },
-      "problemMatcher": []
-    }
-  ]
+      "problemMatcher": [],
+    },
+  ],
 }
 ```
 
 ### Setup Script
 
 **Initial clone** (one-time):
+
 ```bash
 # Clone Mystira.workspace as .workspace for sorting benefit
 cd ~/mystira  # or your preferred parent directory
@@ -403,6 +415,7 @@ cd .workspace
 ```
 
 **scripts/setup.sh** - Clone sibling repositories:
+
 ```bash
 #!/bin/bash
 # scripts/setup.sh - Clone all Mystira repositories as siblings
@@ -443,6 +456,7 @@ The `.workspace` repo becomes the **primary source for documentation**:
 4. **API documentation** - Aggregated API docs
 
 Individual repos keep:
+
 - README with repo-specific setup
 - Code comments and inline docs
 - Repo-specific configuration docs
@@ -455,17 +469,21 @@ Include `.claude/` directory for Claude Code settings:
 # .claude/settings.md - Instructions for AI assistants
 
 ## Project Context
+
 This is the Mystira workspace containing multiple repositories:
+
 - Mystira.App: .NET 9 main platform
 - Mystira.Chain: Python/FastAPI blockchain service
 - Mystira.StoryGenerator: .NET story generation
 
 ## Code Style
+
 - .NET: Follow existing patterns, use C# 12 features
 - Python: PEP 8, type hints required
 - All: Prefer composition over inheritance
 
 ## Testing
+
 - Run `dotnet test` for .NET projects
 - Run `pytest` for Python projects
 ```
@@ -483,6 +501,7 @@ Also add a `.gitignore`:
 ### Additional Scripts
 
 **scripts/setup.ps1** - Windows setup:
+
 ```powershell
 # scripts/setup.ps1 - Windows setup script
 $ParentDir = Split-Path -Parent (Get-Location)
@@ -507,6 +526,7 @@ Write-Host "   code mystira.code-workspace" -ForegroundColor Gray
 ```
 
 **scripts/update-all.sh** - Pull latest for all repos:
+
 ```bash
 #!/bin/bash
 # scripts/update-all.sh - Update all repositories
@@ -682,12 +702,12 @@ code mystira.code-workspace
 
 ### Naming Conventions
 
-| Context | Name | Reason |
-|---------|------|--------|
-| GitHub repo | `Mystira.workspace` | Consistent with `Mystira.App` |
-| Local directory | `.workspace` | Sorts first alphabetically |
-| Azure resources | `mystira-*` | Azure doesn't allow dots |
-| VS Code display | `📋 Mystira.workspace` | Visual distinction |
+| Context         | Name                   | Reason                        |
+| --------------- | ---------------------- | ----------------------------- |
+| GitHub repo     | `Mystira.workspace`    | Consistent with `Mystira.App` |
+| Local directory | `.workspace`           | Sorts first alphabetically    |
+| Azure resources | `mystira-*`            | Azure doesn't allow dots      |
+| VS Code display | `📋 Mystira.workspace` | Visual distinction            |
 
 ---
 

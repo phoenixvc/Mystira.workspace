@@ -27,7 +27,7 @@ sequenceDiagram
 
     Client->>Controller: DELETE /api/gamesessions/{id}
     Controller->>Service: DeleteSessionAsync(sessionId)
-    
+
     Note over Service: Step 1: Get Session
     Service->>Repo: GetByIdAsync(sessionId)
     Repo->>DB: Query session
@@ -39,7 +39,7 @@ sequenceDiagram
     end
     DB-->>Repo: GameSession
     Repo-->>Service: session
-    
+
     Note over Service: Step 2: Delete Session
     Service->>Repo: DeleteAsync(sessionId)
     Repo->>DB: Remove entity from DbSet
@@ -47,7 +47,7 @@ sequenceDiagram
     UoW->>DB: Commit transaction
     DB-->>UoW: Success
     UoW-->>Service: Success
-    
+
     Service-->>Controller: true
     Controller-->>Client: 200 OK<br/>(Success)
 ```

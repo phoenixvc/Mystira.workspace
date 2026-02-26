@@ -1,8 +1,8 @@
-import { useCallback } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { authApi } from '@/api';
-import type { LoginRequest } from '@/api/types';
-import { useAuthStore } from '@/state/authStore';
+import { useCallback } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { authApi } from "@/api";
+import type { LoginRequest } from "@/api/types";
+import { useAuthStore } from "@/state/authStore";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -10,19 +10,19 @@ export function useAuth() {
 
   // Fetch current user on mount if token exists
   const { isLoading: isCheckingAuth } = useQuery({
-    queryKey: ['auth', 'me'],
+    queryKey: ["auth", "me"],
     queryFn: async () => {
       const user = await authApi.getCurrentUser();
       setUser(user);
       return user;
     },
-    enabled: !!localStorage.getItem('accessToken') && !user,
+    enabled: !!localStorage.getItem("accessToken") && !user,
     retry: false,
   });
 
   const loginMutation = useMutation({
     mutationFn: (data: LoginRequest) => authApi.login(data),
-    onSuccess: response => {
+    onSuccess: (response) => {
       setUser(response.user);
       queryClient.invalidateQueries();
     },

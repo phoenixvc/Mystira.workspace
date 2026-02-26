@@ -64,13 +64,13 @@ const BICEP_FILES: BicepFile[] = [
 
 function BicepViewer() {
   const [selectedFile, setSelectedFile] = useState<string>(
-    "infrastructure/dev/main.bicep",
+    "infrastructure/dev/main.bicep"
   );
   const [fileContent, setFileContent] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(
-    new Set(["infrastructure/dev", "infrastructure/dev/modules"]),
+    new Set(["infrastructure/dev", "infrastructure/dev/modules"])
   );
   const [isDeploying, setIsDeploying] = useState(false);
   const [deployError, setDeployError] = useState<string | null>(null);
@@ -82,7 +82,7 @@ function BicepViewer() {
     const checkDarkMode = () => {
       setIsDarkMode(
         document.documentElement.classList.contains("dark") ||
-          window.matchMedia("(prefers-color-scheme: dark)").matches,
+          window.matchMedia("(prefers-color-scheme: dark)").matches
       );
     };
     checkDarkMode();
@@ -147,7 +147,7 @@ function BicepViewer() {
     // Only allow deploying main.bicep, not individual modules
     if (!selectedFile.includes("main.bicep")) {
       setDeployError(
-        "Only the main.bicep template can be deployed. Individual modules are deployed as part of the main template.",
+        "Only the main.bicep template can be deployed. Individual modules are deployed as part of the main template."
       );
       return;
     }
@@ -156,7 +156,7 @@ function BicepViewer() {
       `Are you sure you want to deploy this Bicep template?\n\n` +
         `File: ${selectedFile}\n` +
         `Environment: dev\n\n` +
-        `This will deploy all infrastructure resources to the dev environment.`,
+        `This will deploy all infrastructure resources to the dev environment.`
     );
 
     if (!confirmDeploy) return;
@@ -174,7 +174,7 @@ function BicepViewer() {
           deployStorage: true,
           deployCosmos: true,
           deployAppService: true,
-        },
+        }
       );
 
       if (response.success) {

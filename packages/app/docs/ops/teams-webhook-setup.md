@@ -148,12 +148,12 @@ services.AddTeamsBot(configuration);
 
 ### Common Issues
 
-| Issue | Solution |
-|-------|----------|
-| 401 Unauthorized | Verify App ID and Password |
-| Messages not received | Check messaging endpoint URL |
-| Bot not responding | Verify bot is started and connected |
-| Timeout errors | Increase DefaultTimeoutSeconds |
+| Issue                 | Solution                            |
+| --------------------- | ----------------------------------- |
+| 401 Unauthorized      | Verify App ID and Password          |
+| Messages not received | Check messaging endpoint URL        |
+| Bot not responding    | Verify bot is started and connected |
+| Timeout errors        | Increase DefaultTimeoutSeconds      |
 
 ### Logging
 

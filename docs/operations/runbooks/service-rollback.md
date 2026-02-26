@@ -4,14 +4,14 @@
 
 ## Quick Reference
 
-| Service | Rollback Method | Recovery Time |
-|---------|----------------|---------------|
-| Mystira.App | Azure App Service slot swap | < 1 min |
-| Mystira.Admin.Api | Azure App Service slot swap | < 1 min |
-| Mystira.StoryGenerator | Container rollback | < 2 min |
-| Mystira.Publisher | Container rollback | < 2 min |
-| Mystira.Chain | Container rollback | < 2 min |
-| Mystira.Admin.UI | SWA revert | < 1 min |
+| Service                | Rollback Method             | Recovery Time |
+| ---------------------- | --------------------------- | ------------- |
+| Mystira.App            | Azure App Service slot swap | < 1 min       |
+| Mystira.Admin.Api      | Azure App Service slot swap | < 1 min       |
+| Mystira.StoryGenerator | Container rollback          | < 2 min       |
+| Mystira.Publisher      | Container rollback          | < 2 min       |
+| Mystira.Chain          | Container rollback          | < 2 min       |
+| Mystira.Admin.UI       | SWA revert                  | < 1 min       |
 
 ---
 
@@ -29,11 +29,11 @@ az webapp log tail --name <app-name> --resource-group <rg>
 
 ### 2. Decide: Rollback vs Fix Forward
 
-| Situation | Action |
-|-----------|--------|
-| Critical outage | Rollback immediately |
-| Data corruption | Rollback + investigate |
-| Minor bug | Fix forward if < 30 min |
+| Situation               | Action                   |
+| ----------------------- | ------------------------ |
+| Critical outage         | Rollback immediately     |
+| Data corruption         | Rollback + investigate   |
+| Minor bug               | Fix forward if < 30 min  |
 | Performance degradation | Rollback if > 20% impact |
 
 ---
@@ -172,7 +172,7 @@ az postgres flexible-server restore \
 
 ## Emergency Contacts
 
-| Role | Contact |
-|------|---------|
-| Technical Lead | `jurie@phoenixvc.tech` |
-| Business/Escalation | `eben@phoenixvc.tech` |
+| Role                | Contact                |
+| ------------------- | ---------------------- |
+| Technical Lead      | `jurie@phoenixvc.tech` |
+| Business/Escalation | `eben@phoenixvc.tech`  |

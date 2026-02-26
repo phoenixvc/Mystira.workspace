@@ -29,6 +29,7 @@ This file provides GitHub Copilot with comprehensive context about:
 ### How It Works
 
 GitHub Copilot automatically reads this file when:
+
 - Making code suggestions
 - Generating new code
 - Answering questions about the repository
@@ -52,6 +53,7 @@ No setup required if you have GitHub Copilot installed in VS Code, Visual Studio
 ### What It Is
 
 MCP is an open protocol that allows AI assistants to:
+
 - Access repository files and structure
 - Execute development commands (build, test, run)
 - Query GitHub issues and pull requests

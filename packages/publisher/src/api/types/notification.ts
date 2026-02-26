@@ -1,16 +1,16 @@
 // Notification types
 
 export type NotificationType =
-  | 'role_request_received'
-  | 'role_request_accepted'
-  | 'role_request_rejected'
-  | 'open_role_created'
-  | 'contributor_added'
-  | 'story_approved'
-  | 'story_registered'
-  | 'approval_required';
+  | "role_request_received"
+  | "role_request_accepted"
+  | "role_request_rejected"
+  | "open_role_created"
+  | "contributor_added"
+  | "story_approved"
+  | "story_registered"
+  | "approval_required";
 
-export type NotificationStatus = 'unread' | 'read';
+export type NotificationStatus = "unread" | "read";
 
 export interface Notification {
   id: string;
@@ -35,4 +35,3 @@ export interface NotificationListParams {
 export interface MarkNotificationReadRequest {
   notificationIds: string[];
 }
-

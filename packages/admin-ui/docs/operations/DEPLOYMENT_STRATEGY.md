@@ -13,12 +13,12 @@ This document outlines the deployment strategy for the Mystira Admin UI applicat
 
 The Mystira platform uses a distributed deployment strategy across repositories:
 
-| Repository | Dev Deploy | Staging/Prod Deploy | Notes |
-|------------|------------|---------------------|-------|
-| **Mystira.Admin.UI** | ✅ This repo | Via workspace | React frontend for admin portal |
-| **Mystira.Admin.Api** | Via workspace | Via workspace | .NET 9 API, CI in own repo |
-| **Mystira.App** | Own repo | Own repo | Full CI/CD for API + PWA |
-| **mystira.workspace** | N/A | ✅ Central | Infrastructure & coordinated deploys |
+| Repository            | Dev Deploy    | Staging/Prod Deploy | Notes                                |
+| --------------------- | ------------- | ------------------- | ------------------------------------ |
+| **Mystira.Admin.UI**  | ✅ This repo  | Via workspace       | React frontend for admin portal      |
+| **Mystira.Admin.Api** | Via workspace | Via workspace       | .NET 9 API, CI in own repo           |
+| **Mystira.App**       | Own repo      | Own repo            | Full CI/CD for API + PWA             |
+| **mystira.workspace** | N/A           | ✅ Central          | Infrastructure & coordinated deploys |
 
 ### Deployment Responsibility
 
@@ -114,7 +114,7 @@ on:
     branches: [dev, main]
 
 env:
-  NODE_VERSION: '20'
+  NODE_VERSION: "20"
 
 jobs:
   build:
@@ -126,7 +126,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
 
       - name: Install dependencies
         run: npm ci
@@ -167,8 +167,8 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN }}
-          action: 'upload'
-          app_location: 'dist'
+          action: "upload"
+          app_location: "dist"
           skip_app_build: true
 
   deploy-production:
@@ -187,8 +187,8 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_SWA_TOKEN_PROD }}
-          action: 'upload'
-          app_location: 'dist'
+          action: "upload"
+          app_location: "dist"
           skip_app_build: true
 ```
 
@@ -236,11 +236,13 @@ npm run preview
 **Trigger**: Push or merge to `dev` branch
 
 **Automatic Steps**:
+
 1. CI builds and tests
 2. Artifact uploaded
 3. Deployed to staging environment
 
 **Manual Verification**:
+
 1. Check deployment completed in GitHub Actions
 2. Verify staging URL accessible
 3. Run smoke tests
@@ -251,12 +253,14 @@ npm run preview
 **Trigger**: Push or merge to `main` branch
 
 **Pre-Deployment Checklist**:
+
 - [ ] All staging tests passed
 - [ ] QA sign-off obtained
 - [ ] Rollback plan ready
 - [ ] Stakeholders notified
 
 **Deployment Steps**:
+
 1. Create PR from `dev` to `main`
 2. Review and approve PR
 3. Merge PR (triggers deployment)
@@ -265,6 +269,7 @@ npm run preview
 6. Run production smoke tests
 
 **Post-Deployment**:
+
 - [ ] Verify all pages load
 - [ ] Verify API connectivity
 - [ ] Check error monitoring
@@ -274,27 +279,29 @@ npm run preview
 
 ### Required Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
+| Variable            | Description   | Example                         |
+| ------------------- | ------------- | ------------------------------- |
 | `VITE_API_BASE_URL` | Admin API URL | `https://api.admin.mystira.app` |
 
 ### GitHub Secrets
 
-| Secret | Environment | Description |
-|--------|-------------|-------------|
-| `AZURE_SWA_TOKEN` | Staging | Azure SWA deployment token |
-| `AZURE_SWA_TOKEN_PROD` | Production | Azure SWA deployment token |
+| Secret                 | Environment | Description                |
+| ---------------------- | ----------- | -------------------------- |
+| `AZURE_SWA_TOKEN`      | Staging     | Azure SWA deployment token |
+| `AZURE_SWA_TOKEN_PROD` | Production  | Azure SWA deployment token |
 
 ## Rollback Procedure
 
 See [ROLLBACK_PROCEDURE.md](./ROLLBACK_PROCEDURE.md) for detailed rollback steps.
 
 **Quick Rollback** (via GitHub Actions):
+
 1. Go to Actions tab
 2. Find last successful production deployment
 3. Click "Re-run all jobs"
 
 **Or via Azure Portal**:
+
 1. Open Azure Static Web Apps
 2. Navigate to Deployment History
 3. Select previous deployment
@@ -311,22 +318,23 @@ See [ROLLBACK_PROCEDURE.md](./ROLLBACK_PROCEDURE.md) for detailed rollback steps
 ### Alerts
 
 Set up alerts for:
+
 - Deployment failures
 - High error rates
 - Availability drops
 
 ## Deployment Timeline
 
-| Environment | Deployment Window | Frequency |
-|-------------|-------------------|-----------|
-| Staging | Anytime | On every `dev` push |
-| Production | Business hours | On `main` merge |
+| Environment | Deployment Window | Frequency           |
+| ----------- | ----------------- | ------------------- |
+| Staging     | Anytime           | On every `dev` push |
+| Production  | Business hours    | On `main` merge     |
 
 ## Contacts
 
-- **DevOps Lead**: _________________
-- **On-Call Engineer**: _________________
-- **Product Owner**: _________________
+- **DevOps Lead**: **\*\*\*\***\_**\*\*\*\***
+- **On-Call Engineer**: **\*\*\*\***\_**\*\*\*\***
+- **Product Owner**: **\*\*\*\***\_**\*\*\*\***
 
 ## References
 

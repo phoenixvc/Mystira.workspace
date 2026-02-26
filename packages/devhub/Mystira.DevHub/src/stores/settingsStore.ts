@@ -59,6 +59,6 @@ export const useSettingsStore = create<SettingsState>()(
     {
       name: "devhub-settings",
       storage: createJSONStorage(() => localStorage),
-    },
-  ),
+    }
+  )
 );

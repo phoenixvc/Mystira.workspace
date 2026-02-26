@@ -56,36 +56,36 @@ module "identity" {
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| resource_group_name | Resource group name | `string` | n/a | yes |
-| aks_principal_id | AKS cluster managed identity principal ID | `string` | `""` | no |
-| acr_id | Container registry resource ID | `string` | `""` | no |
-| storage_role | Storage account role assignment | `string` | `"Storage Blob Data Contributor"` | no |
-| service_identities | Map of service identity configurations | `map(object)` | `{}` | no |
-| workload_identities | Map of workload identity configurations | `map(object)` | `{}` | no |
-| tags | Resource tags | `map(string)` | `{}` | no |
+| Name                | Description                               | Type          | Default                           | Required |
+| ------------------- | ----------------------------------------- | ------------- | --------------------------------- | :------: |
+| resource_group_name | Resource group name                       | `string`      | n/a                               |   yes    |
+| aks_principal_id    | AKS cluster managed identity principal ID | `string`      | `""`                              |    no    |
+| acr_id              | Container registry resource ID            | `string`      | `""`                              |    no    |
+| storage_role        | Storage account role assignment           | `string`      | `"Storage Blob Data Contributor"` |    no    |
+| service_identities  | Map of service identity configurations    | `map(object)` | `{}`                              |    no    |
+| workload_identities | Map of workload identity configurations   | `map(object)` | `{}`                              |    no    |
+| tags                | Resource tags                             | `map(string)` | `{}`                              |    no    |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| aks_acr_role_assignment_id | Role assignment ID for AKS to ACR |
-| service_key_vault_role_assignments | Map of Key Vault role assignments |
-| service_postgres_role_assignments | Map of PostgreSQL role assignments |
-| service_redis_role_assignments | Map of Redis role assignments |
-| workload_identity_federation_ids | Map of workload identity credentials |
+| Name                               | Description                          |
+| ---------------------------------- | ------------------------------------ |
+| aks_acr_role_assignment_id         | Role assignment ID for AKS to ACR    |
+| service_key_vault_role_assignments | Map of Key Vault role assignments    |
+| service_postgres_role_assignments  | Map of PostgreSQL role assignments   |
+| service_redis_role_assignments     | Map of Redis role assignments        |
+| workload_identity_federation_ids   | Map of workload identity credentials |
 
 ## Role Definitions
 
-| Resource | Role | Purpose |
-|----------|------|---------|
-| ACR | AcrPull | Pull container images |
-| Key Vault | Key Vault Secrets User | Read secrets |
-| PostgreSQL | Reader | Database access (use Azure AD auth) |
-| Redis | Redis Cache Contributor | Cache operations |
-| Log Analytics | Log Analytics Contributor | Write logs/metrics |
-| Storage | Storage Blob Data Contributor | Blob operations |
+| Resource      | Role                          | Purpose                             |
+| ------------- | ----------------------------- | ----------------------------------- |
+| ACR           | AcrPull                       | Pull container images               |
+| Key Vault     | Key Vault Secrets User        | Read secrets                        |
+| PostgreSQL    | Reader                        | Database access (use Azure AD auth) |
+| Redis         | Redis Cache Contributor       | Cache operations                    |
+| Log Analytics | Log Analytics Contributor     | Write logs/metrics                  |
+| Storage       | Storage Blob Data Contributor | Blob operations                     |
 
 ## Security Best Practices
 
@@ -100,11 +100,13 @@ module "identity" {
 For AKS workload identity to work:
 
 1. Enable OIDC issuer on AKS cluster:
+
    ```hcl
    oidc_issuer_enabled = true
    ```
 
 2. Create ServiceAccount in Kubernetes with annotation:
+
    ```yaml
    apiVersion: v1
    kind: ServiceAccount

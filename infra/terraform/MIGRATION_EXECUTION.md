@@ -32,6 +32,7 @@ products/chain/environments/dev/terraform.tfstate
 ## Wave 1: Preparation and Backup
 
 ### Step 1.1: Create Backup
+
 ```bash
 cd infra/terraform
 
@@ -49,6 +50,7 @@ ls -la "$BACKUP_DIR"
 ```
 
 ### Step 1.2: Run Migration Analysis
+
 ```bash
 # Make the script executable
 chmod +x scripts/migrate-state.sh
@@ -65,21 +67,23 @@ cat .chain_resources.txt
 ```
 
 ### Step 1.3: Review Resource Categorization
+
 The script categorizes resources into products. Review and adjust the `.*.txt` files if needed:
 
-| File | Contains |
-|------|----------|
-| `.shared_infra_resources.txt` | VNet, AKS, PostgreSQL, Redis, ACR, monitoring |
-| `.story_generator_resources.txt` | Story Generator module resources |
-| `.admin_resources.txt` | Admin API and Admin UI resources |
-| `.publisher_resources.txt` | Publisher module resources |
-| `.chain_resources.txt` | Chain module resources |
+| File                             | Contains                                      |
+| -------------------------------- | --------------------------------------------- |
+| `.shared_infra_resources.txt`    | VNet, AKS, PostgreSQL, Redis, ACR, monitoring |
+| `.story_generator_resources.txt` | Story Generator module resources              |
+| `.admin_resources.txt`           | Admin API and Admin UI resources              |
+| `.publisher_resources.txt`       | Publisher module resources                    |
+| `.chain_resources.txt`           | Chain module resources                        |
 
 ---
 
 ## Wave 2: Migrate Shared Infrastructure (Dev)
 
 ### Step 2.1: Initialize Shared-Infra
+
 ```bash
 cd infra/terraform/shared-infra/environments/dev
 
@@ -89,6 +93,7 @@ terragrunt init --terragrunt-non-interactive
 ```
 
 ### Step 2.2: Import Existing Resources
+
 ```bash
 # For each resource in .shared_infra_resources.txt, import to new state
 # Example:
@@ -97,6 +102,7 @@ terragrunt import 'module.shared_postgresql.azurerm_postgresql_flexible_server.m
 ```
 
 ### Step 2.3: Validate (No Changes Expected)
+
 ```bash
 terragrunt plan
 # Should show "No changes" if import was successful
@@ -107,6 +113,7 @@ terragrunt plan
 ## Wave 3: Migrate Products (Dev)
 
 ### Step 3.1: Migrate Story Generator
+
 ```bash
 cd infra/terraform/products/story-generator/environments/dev
 
@@ -120,6 +127,7 @@ terragrunt plan
 ```
 
 ### Step 3.2: Migrate Admin
+
 ```bash
 cd infra/terraform/products/admin/environments/dev
 
@@ -131,6 +139,7 @@ terragrunt plan
 ```
 
 ### Step 3.3: Migrate Publisher
+
 ```bash
 cd infra/terraform/products/publisher/environments/dev
 
@@ -142,6 +151,7 @@ terragrunt plan
 ```
 
 ### Step 3.4: Migrate Chain
+
 ```bash
 cd infra/terraform/products/chain/environments/dev
 
@@ -157,6 +167,7 @@ terragrunt plan
 ## Wave 4: Validation
 
 ### Step 4.1: Run Full Validation
+
 ```bash
 cd infra/terraform
 
@@ -165,6 +176,7 @@ terragrunt run-all validate --terragrunt-non-interactive
 ```
 
 ### Step 4.2: Plan All (Verify No Changes)
+
 ```bash
 # Plan all - should show no changes if migration was correct
 export TF_VAR_environment=dev
@@ -172,6 +184,7 @@ terragrunt run-all plan --terragrunt-non-interactive
 ```
 
 ### Step 4.3: Test Dependency Chain
+
 ```bash
 # Destroy-plan a product (don't apply!) to verify dependencies
 cd products/story-generator/environments/dev
@@ -222,6 +235,7 @@ cd ../..
 If issues occur during migration:
 
 ### Restore from Backup
+
 ```bash
 cd infra/terraform
 
@@ -234,6 +248,7 @@ terraform state push "../../$BACKUP_DIR/dev_backup.tfstate"
 ```
 
 ### Reset New State Files
+
 ```bash
 # Delete new state files in Azure Storage
 az storage blob delete \
@@ -259,12 +274,14 @@ az storage blob delete \
 After migration, use the new workflows:
 
 ### Validate on PR
+
 ```yaml
 # Automatically runs on PR changes to infra/terraform/**
 # See: .github/workflows/infra-terragrunt-validate.yml
 ```
 
 ### Manual Deployment
+
 ```bash
 # Via GitHub Actions UI:
 # 1. Go to Actions > "[CD] Infrastructure - Terragrunt Deploy"
@@ -273,6 +290,7 @@ After migration, use the new workflows:
 ```
 
 ### CLI Deployment
+
 ```bash
 # Deploy shared-infra
 cd infra/terraform/shared-infra/environments/dev

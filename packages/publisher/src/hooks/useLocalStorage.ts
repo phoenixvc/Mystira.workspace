@@ -1,10 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { logger } from '@/utils/logger';
+import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/utils/logger";
 
 export function useLocalStorage<T>(key: string, initialValue: T) {
   // Get stored value or use initial value
   const readValue = useCallback((): T => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return initialValue;
     }
 
@@ -23,9 +23,10 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   const setValue = useCallback(
     (value: T | ((prev: T) => T)) => {
       try {
-        const valueToStore = value instanceof Function ? value(storedValue) : value;
+        const valueToStore =
+          value instanceof Function ? value(storedValue) : value;
         setStoredValue(valueToStore);
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch (error) {
@@ -39,7 +40,7 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
   const removeValue = useCallback(() => {
     try {
       setStoredValue(initialValue);
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         window.localStorage.removeItem(key);
       }
     } catch (error) {
@@ -55,8 +56,8 @@ export function useLocalStorage<T>(key: string, initialValue: T) {
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [key]);
 
   return [storedValue, setValue, removeValue] as const;

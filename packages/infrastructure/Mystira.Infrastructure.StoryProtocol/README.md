@@ -104,6 +104,7 @@ Set `UseGrpc: false` in configuration to use the mock implementation during deve
 ## Proto Files
 
 gRPC code is generated from proto files in `/protos/mystira/chain/v1/`:
+
 - `chain_service.proto` - Main service definition
 - `ip_assets.proto` - IP Asset registration messages
 - `royalties.proto` - Royalty management messages

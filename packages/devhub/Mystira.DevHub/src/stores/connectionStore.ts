@@ -16,7 +16,7 @@ interface ConnectionState {
   testConnection: (type: string, connectionString?: string) => Promise<void>;
   setConnectionStatus: (
     type: string,
-    status: Partial<ConnectionStatus>,
+    status: Partial<ConnectionStatus>
   ) => void;
   reset: () => void;
 }
@@ -65,7 +65,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
           ? (process.env as Record<string, string | undefined>)[
               `${conn.type.toUpperCase()}_CONNECTION_STRING`
             ]
-          : undefined,
+          : undefined
       );
     }
 
@@ -79,7 +79,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
         {
           connectionType: type,
           connectionString: connectionString || null,
-        },
+        }
       );
 
       if (response.success && response.result) {
@@ -107,7 +107,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
   setConnectionStatus: (type: string, status: Partial<ConnectionStatus>) => {
     set((state) => ({
       connections: state.connections.map((c) =>
-        c.type === type ? { ...c, ...status } : c,
+        c.type === type ? { ...c, ...status } : c
       ),
     }));
   },
@@ -123,7 +123,7 @@ export const useConnectionStore = create<ConnectionState>((set, get) => ({
 
 function getConnectionDetails(
   type: string,
-  result: ConnectionTestResult,
+  result: ConnectionTestResult
 ): string {
   switch (type) {
     case "cosmos":

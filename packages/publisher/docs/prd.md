@@ -34,16 +34,16 @@ Mystyra.Publisher provides a streamlined, collaborative interface for creative c
 
 ### User Personas
 
-| Persona | Description |
-|---------|-------------|
-| Primary Author | Original creator, responsible for submission and team coordination. |
-| Illustrator | Visual contributor, claims and negotiates graphical/cover attributions. |
-| Moderator/Editor | Facilitates consensus, verifies team roles, and manages workflow. |
-| Co-Author | Participating author, often adds depth, seeks recognition and royalty fairness. |
-| Project Administrator | Oversees project-wide registrations, manages user engagement and notifications. |
+| Persona                          | Description                                                                                                      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Primary Author                   | Original creator, responsible for submission and team coordination.                                              |
+| Illustrator                      | Visual contributor, claims and negotiates graphical/cover attributions.                                          |
+| Moderator/Editor                 | Facilitates consensus, verifies team roles, and manages workflow.                                                |
+| Co-Author                        | Participating author, often adds depth, seeks recognition and royalty fairness.                                  |
+| Project Administrator            | Oversees project-wide registrations, manages user engagement and notifications.                                  |
 | Publisher/Imprint Representative | Represents publishing house or imprint, validates institutional participation, commissioning, and legal display. |
-| IP Rights Manager/Legal Counsel | Ensures contracts, agreements, and registrations align with copyright/IP law, interfaces on disputes or policy. |
-| Platform Administrator | Operates and governs Mystyra.Publisher, manages user permissions, audits, compliance, and system policies. |
+| IP Rights Manager/Legal Counsel  | Ensures contracts, agreements, and registrations align with copyright/IP law, interfaces on disputes or policy.  |
+| Platform Administrator           | Operates and governs Mystyra.Publisher, manages user permissions, audits, compliance, and system policies.       |
 
 ### User Stories by Persona
 
@@ -153,15 +153,15 @@ Lila (author), her illustrator, a co-author, the moderator, and their publishing
 
 ## Success Metrics
 
-| Category | Metric | Measurement Approach |
-|----------|--------|---------------------|
-| User-Centric | Registration completion rate | % initiated registrations completed |
+| Category     | Metric                         | Measurement Approach                      |
+| ------------ | ------------------------------ | ----------------------------------------- |
+| User-Centric | Registration completion rate   | % initiated registrations completed       |
 | User-Centric | Contributor/Publisher approval | % approvals (contributors and publishers) |
-| User-Centric | Satisfaction (CSAT/NPS) | Post-registration surveys, interviews |
-| Business | Stories registered | Dashboard/backend count |
-| Business | Unique contributors/publishers | Backend unique user/orgs |
-| Technical | Error-free publish rate | % successful vs failed transactions |
-| Technical | Audit log accuracy | Audit gaps or inconsistencies detected |
+| User-Centric | Satisfaction (CSAT/NPS)        | Post-registration surveys, interviews     |
+| Business     | Stories registered             | Dashboard/backend count                   |
+| Business     | Unique contributors/publishers | Backend unique user/orgs                  |
+| Technical    | Error-free publish rate        | % successful vs failed transactions       |
+| Technical    | Audit log accuracy             | Audit gaps or inconsistencies detected    |
 
 ### User-Centric
 

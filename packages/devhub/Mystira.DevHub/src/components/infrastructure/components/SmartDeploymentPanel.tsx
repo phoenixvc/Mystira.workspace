@@ -79,7 +79,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
     selectedStaticWebApp ||
     (discoveredResources &&
       (discoveredResources.resourceGroups.some((rg) => rg.hasResources) ||
-        discoveredResources.staticWebApps.length > 0)),
+        discoveredResources.staticWebApps.length > 0))
   );
 
   // Auto-select deploy mode based on infrastructure state
@@ -100,7 +100,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
     // Auto-select the first resource group with resources if none selected
     if (!selectedResourceGroup && resources.resourceGroups.length > 0) {
       const rgWithResources = resources.resourceGroups.find(
-        (rg) => rg.hasResources,
+        (rg) => rg.hasResources
       );
       if (rgWithResources) {
         setSelectedResourceGroup(rgWithResources);
@@ -286,7 +286,7 @@ export function SmartDeploymentPanel({ repoRoot }: SmartDeploymentPanelProps) {
                     <span className="font-mono text-green-900 dark:text-green-200">
                       {
                         AZURE_REGIONS.find(
-                          (r) => r.id === deploymentResult.region,
+                          (r) => r.id === deploymentResult.region
                         )?.name
                       }
                     </span>

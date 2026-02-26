@@ -8,9 +8,9 @@ The Admin UI is a React/Vite frontend application that provides administrative f
 
 ## Resources Created
 
-| Resource | Purpose |
-|----------|---------|
-| Azure Static Web App | Hosts the React/Vite frontend |
+| Resource                 | Purpose                                 |
+| ------------------------ | --------------------------------------- |
+| Azure Static Web App     | Hosts the React/Vite frontend           |
 | Custom Domain (optional) | Custom domain configuration for the SWA |
 
 ## Usage
@@ -71,11 +71,11 @@ The SWA API key is used to deploy from GitHub Actions:
 
 ## Outputs
 
-| Output | Description |
-|--------|-------------|
-| `static_web_app_id` | Static Web App resource ID |
-| `static_web_app_name` | Static Web App name |
+| Output                            | Description                               |
+| --------------------------------- | ----------------------------------------- |
+| `static_web_app_id`               | Static Web App resource ID                |
+| `static_web_app_name`             | Static Web App name                       |
 | `static_web_app_default_hostname` | Default hostname (for Front Door backend) |
-| `static_web_app_url` | Full URL to the Static Web App |
-| `static_web_app_api_key` | API key for deployments (sensitive) |
-| `custom_domain` | Custom domain if enabled |
+| `static_web_app_url`              | Full URL to the Static Web App            |
+| `static_web_app_api_key`          | API key for deployments (sensitive)       |
+| `custom_domain`                   | Custom domain if enabled                  |

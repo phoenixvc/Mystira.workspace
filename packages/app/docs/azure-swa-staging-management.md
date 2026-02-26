@@ -7,6 +7,7 @@ This document explains how staging environments are managed for Azure Static Web
 ## Problem Statement
 
 Azure Static Web Apps has a limit on the number of staging (preview) environments:
+
 - **Free tier**: 3 staging environments
 - **Standard tier**: 10 staging environments
 - **Enterprise tier**: Custom limits
@@ -26,6 +27,7 @@ Please remove one and try again.
 The PWA CI/CD workflows have been updated to ensure preview environments are **always** cleaned up when a PR is closed, regardless of which files were changed:
 
 **Before:**
+
 ```yaml
 pull_request:
   branches: [dev]
@@ -34,9 +36,11 @@ pull_request:
     - "src/Mystira.App.PWA/**"
     # ... other paths
 ```
+
 **Problem**: Path filter applies to ALL PR actions including 'closed', so cleanup only runs if PWA files were changed.
 
 **After:**
+
 ```yaml
 # Build/deploy - with path filters on push only
 push:
@@ -54,6 +58,7 @@ pull_request:
 ```
 
 **Key Points:**
+
 1. ✅ Build job only runs when action is not 'closed' (controlled by job-level `if` condition)
 2. ✅ Cleanup job ALWAYS runs when a PR is closed (no path filter on PR trigger)
 3. ⚠️ Trade-off: Workflow runs for all PRs, but jobs are skipped appropriately (minimal CI minute usage)
@@ -71,6 +76,7 @@ A manual cleanup workflow is available at: `.github/workflows/swa-cleanup-stagin
 5. Click "Run workflow"
 
 This workflow will:
+
 - Send a cleanup request to Azure SWA
 - Optionally comment on the PR (if PR number provided)
 - Remove the orphaned staging environment
@@ -107,11 +113,13 @@ You can view current staging environments in the Azure Portal:
 ### Deployment Fails with "Maximum Staging Environments" Error
 
 **Quick Fix:**
+
 1. Identify orphaned staging environments in Azure Portal
 2. Run the manual cleanup workflow for each orphaned environment
 3. Retry the deployment
 
 **Long-term Fix:**
+
 - Ensure the updated workflow files are merged to all branches (dev, staging, main)
 - Consider upgrading Azure SWA tier if you have many concurrent PRs
 

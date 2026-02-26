@@ -47,20 +47,20 @@ python -m grpc_tools.protoc \
 
 The `ChainService` provides blockchain integration operations via Story Protocol:
 
-| Method | Type | Description |
-|--------|------|-------------|
-| `RegisterIpAsset` | Unary | Register content as an IP Asset |
-| `IsRegistered` | Unary | Check if content is registered |
-| `GetIpAssetStatus` | Unary | Get registration status |
-| `BatchRegisterIpAssets` | Client Streaming | Register multiple assets |
-| `GetRoyaltyConfiguration` | Unary | Get royalty config |
-| `UpdateRoyaltySplit` | Unary | Update royalty splits |
-| `PayRoyalties` | Unary | Pay royalties to IP Asset |
-| `GetClaimableRoyalties` | Unary | Get claimable balance |
-| `ClaimRoyalties` | Unary | Claim accumulated royalties |
-| `WatchTransactions` | Server Streaming | Stream transaction updates |
-| `HealthCheck` | Unary | Service health check |
-| `GetServiceInfo` | Unary | Get service metadata |
+| Method                    | Type             | Description                     |
+| ------------------------- | ---------------- | ------------------------------- |
+| `RegisterIpAsset`         | Unary            | Register content as an IP Asset |
+| `IsRegistered`            | Unary            | Check if content is registered  |
+| `GetIpAssetStatus`        | Unary            | Get registration status         |
+| `BatchRegisterIpAssets`   | Client Streaming | Register multiple assets        |
+| `GetRoyaltyConfiguration` | Unary            | Get royalty config              |
+| `UpdateRoyaltySplit`      | Unary            | Update royalty splits           |
+| `PayRoyalties`            | Unary            | Pay royalties to IP Asset       |
+| `GetClaimableRoyalties`   | Unary            | Get claimable balance           |
+| `ClaimRoyalties`          | Unary            | Claim accumulated royalties     |
+| `WatchTransactions`       | Server Streaming | Stream transaction updates      |
+| `HealthCheck`             | Unary            | Service health check            |
+| `GetServiceInfo`          | Unary            | Get service metadata            |
 
 ## Versioning
 

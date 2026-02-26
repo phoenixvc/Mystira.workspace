@@ -14,18 +14,18 @@ This roadmap outlines the strategic implementation plan for Mystira.App, coverin
 
 ## Phase Summary
 
-| Phase | Focus Area | Status | Priority |
-|-------|------------|--------|----------|
-| Phase 1 | Infrastructure Foundation | Complete | High |
-| **Phase 1.5** | **Polyglot Integration (gRPC)** | **Complete** | **High** |
-| **Phase 1.6** | **Polyglot Persistence (Data)** | **Complete** | **Medium** |
-| Phase 2 | Pipeline Enhancement | Complete | High |
-| Phase 3 | Monitoring & Observability | Complete | Medium |
-| Phase 4 | Documentation & Knowledge Management | In Progress | Medium |
-| Phase 5 | Security & Compliance | Complete | High |
-| Phase 6 | Performance & Scalability | Planned | Medium |
-| Phase 7 | Developer Experience | Planned | Medium |
-| Phase 8 | Advanced Features | Planned | Low |
+| Phase         | Focus Area                           | Status       | Priority   |
+| ------------- | ------------------------------------ | ------------ | ---------- |
+| Phase 1       | Infrastructure Foundation            | Complete     | High       |
+| **Phase 1.5** | **Polyglot Integration (gRPC)**      | **Complete** | **High**   |
+| **Phase 1.6** | **Polyglot Persistence (Data)**      | **Complete** | **Medium** |
+| Phase 2       | Pipeline Enhancement                 | Complete     | High       |
+| Phase 3       | Monitoring & Observability           | Complete     | Medium     |
+| Phase 4       | Documentation & Knowledge Management | In Progress  | Medium     |
+| Phase 5       | Security & Compliance                | Complete     | High       |
+| Phase 6       | Performance & Scalability            | Planned      | Medium     |
+| Phase 7       | Developer Experience                 | Planned      | Medium     |
+| Phase 8       | Advanced Features                    | Planned      | Low        |
 
 > **Note**: Phase 1.5 (Polyglot Integration) is prioritized early due to cross-service communication requirements with Mystira.Chain and other Python/TypeScript services.
 
@@ -85,12 +85,12 @@ This roadmap outlines the strategic implementation plan for Mystira.App, coverin
 
 Mystira uses a **polyglot architecture** with multiple tech stacks:
 
-| Service | Tech Stack | Communication |
-|---------|------------|---------------|
-| Mystira.App | .NET 9 | REST (public), gRPC (internal) |
-| Mystira.Chain | Python/FastAPI | gRPC server |
-| Mystira.Publisher | TypeScript/React | gRPC-Web to Chain |
-| Mystira.Admin.Api | .NET 9 | REST (public) |
+| Service           | Tech Stack       | Communication                  |
+| ----------------- | ---------------- | ------------------------------ |
+| Mystira.App       | .NET 9           | REST (public), gRPC (internal) |
+| Mystira.Chain     | Python/FastAPI   | gRPC server                    |
+| Mystira.Publisher | TypeScript/React | gRPC-Web to Chain              |
+| Mystira.Admin.Api | .NET 9           | REST (public)                  |
 
 See [ADR-0013](../architecture/adr/ADR-0013-grpc-for-csharp-python-integration.md) for full technical details.
 
@@ -130,12 +130,12 @@ See [ADR-0013](../architecture/adr/ADR-0013-grpc-for-csharp-python-integration.m
 
 ### Success Metrics
 
-| Metric | REST Baseline | gRPC Target | Improvement |
-|--------|---------------|-------------|-------------|
-| Latency (p50) | 45ms | <15ms | 3x faster |
-| Latency (p99) | 180ms | <40ms | 4.5x faster |
-| Throughput | 1,200 req/s | 5,000+ req/s | 4x higher |
-| Payload Size | 2.4 KB | <500 bytes | 5x smaller |
+| Metric        | REST Baseline | gRPC Target  | Improvement |
+| ------------- | ------------- | ------------ | ----------- |
+| Latency (p50) | 45ms          | <15ms        | 3x faster   |
+| Latency (p99) | 180ms         | <40ms        | 4.5x faster |
+| Throughput    | 1,200 req/s   | 5,000+ req/s | 4x higher   |
+| Payload Size  | 2.4 KB        | <500 bytes   | 5x smaller  |
 
 ### Dependencies
 
@@ -179,13 +179,13 @@ See [ADR-0013](../architecture/adr/ADR-0013-grpc-for-csharp-python-integration.m
 
 Per [Workspace ADR-0013](https://github.com/phoenixvc/Mystira.workspace/blob/dev/docs/architecture/adr/0013-data-management-and-storage-strategy.md) and [ADR-0014](https://github.com/phoenixvc/Mystira.workspace/blob/dev/docs/architecture/adr/0014-polyglot-persistence-framework-selection.md):
 
-| Data Type | Current | Target | Reason |
-|-----------|---------|--------|--------|
-| Users/Accounts | Cosmos DB | PostgreSQL | ACID, relational integrity |
-| Profiles/Progress | Cosmos DB | Cosmos DB | Document-heavy, flexible schema |
-| Scenarios/Content | Cosmos DB | Cosmos DB | Complex nested JSON |
-| Analytics | Cosmos DB | PostgreSQL | SQL aggregations, reporting |
-| Cache | None | Redis | Session data, hot content |
+| Data Type         | Current   | Target     | Reason                          |
+| ----------------- | --------- | ---------- | ------------------------------- |
+| Users/Accounts    | Cosmos DB | PostgreSQL | ACID, relational integrity      |
+| Profiles/Progress | Cosmos DB | Cosmos DB  | Document-heavy, flexible schema |
+| Scenarios/Content | Cosmos DB | Cosmos DB  | Complex nested JSON             |
+| Analytics         | Cosmos DB | PostgreSQL | SQL aggregations, reporting     |
+| Cache             | None      | Redis      | Session data, hot content       |
 
 ### Key Deliverables
 
@@ -215,12 +215,12 @@ Per [Workspace ADR-0013](https://github.com/phoenixvc/Mystira.workspace/blob/dev
 
 ### Success Metrics
 
-| Metric | Target |
-|--------|--------|
-| Specification test coverage | > 90% |
-| Cache hit ratio | > 80% |
-| Query performance (p95) | < 50ms |
-| Dual-write consistency | 100% |
+| Metric                      | Target |
+| --------------------------- | ------ |
+| Specification test coverage | > 90%  |
+| Cache hit ratio             | > 80%  |
+| Query performance (p95)     | < 50ms |
+| Dual-write consistency      | 100%   |
 
 ### Dependencies
 
@@ -465,12 +465,12 @@ Per [Workspace ADR-0013](https://github.com/phoenixvc/Mystira.workspace/blob/dev
 
 ### Risk Management
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Azure service limits | High | Quota monitoring, pre-provisioning |
-| Team capacity | Medium | Phased approach, prioritization |
-| Dependency on external services | High | Fallback strategies, caching |
-| Security vulnerabilities | High | Automated scanning, quick patching |
+| Risk                            | Impact | Mitigation                         |
+| ------------------------------- | ------ | ---------------------------------- |
+| Azure service limits            | High   | Quota monitoring, pre-provisioning |
+| Team capacity                   | Medium | Phased approach, prioritization    |
+| Dependency on external services | High   | Fallback strategies, caching       |
+| Security vulnerabilities        | High   | Automated scanning, quick patching |
 
 ### Dependencies
 
@@ -501,9 +501,9 @@ Each phase must pass these gates before proceeding:
 
 ## Revision History
 
-| Date | Version | Author | Changes |
-|------|---------|--------|---------|
-| 2025-12-22 | 1.0 | Development Team | Initial roadmap |
+| Date       | Version | Author           | Changes         |
+| ---------- | ------- | ---------------- | --------------- |
+| 2025-12-22 | 1.0     | Development Team | Initial roadmap |
 
 ---
 

@@ -11,6 +11,7 @@ The following files have been created for the Admin API (`packages/admin-api`):
 SignalR hub that handles WebSocket connections from clients.
 
 **Features:**
+
 - Authentication required via `[Authorize]` attribute
 - Connection lifecycle management (connect/disconnect logging)
 - Group management for targeted broadcasts
@@ -23,6 +24,7 @@ SignalR hub that handles WebSocket connections from clients.
 Service for broadcasting events to connected SignalR clients.
 
 **Methods:**
+
 - `NotifyScenarioUpdatedAsync` - Broadcast scenario updates
 - `NotifyContentPublishedAsync` - Broadcast published content
 - `NotifyUserActivityAsync` - Broadcast user activities
@@ -37,6 +39,7 @@ Service for broadcasting events to connected SignalR clients.
 Extension methods for configuring SignalR in the application.
 
 **Methods:**
+
 - `AddMystiraSignalR` - Configures SignalR with Redis backplane
 - `MapMystiraSignalRHubs` - Maps SignalR hub endpoints
 - `AddSignalRCors` - Configures CORS for SignalR
@@ -52,6 +55,7 @@ The following files have been added to the shared utilities package (`packages/s
 TypeScript interfaces and types for SignalR connections.
 
 **Exports:**
+
 - `SignalROptions` - Connection configuration
 - `SignalRConnectionState` - Connection state enum
 - `ISignalRConnection` - Connection interface
@@ -64,10 +68,12 @@ TypeScript interfaces and types for SignalR connections.
 SignalR client implementation for TypeScript/React applications.
 
 **Exports:**
+
 - `SignalRConnection` - Main connection class
 - `createSignalRConnection` - Factory function
 
 **Features:**
+
 - Automatic reconnection with exponential backoff
 - Event handler management
 - Group management
@@ -141,7 +147,7 @@ Add SignalR configuration to `packages/admin-api/src/Mystira.App.Admin.Api/appse
 ```json
 {
   "ConnectionStrings": {
-    "Redis": "localhost:6379"  // Update with your Redis connection string
+    "Redis": "localhost:6379" // Update with your Redis connection string
   },
   "SignalR": {
     "AllowedOrigins": [
@@ -172,7 +178,7 @@ For production (`appsettings.Production.json`):
 
 ### Step 5: Install Frontend Package
 
-The SignalR client utilities are already in `@mystira/shared-utils`. 
+The SignalR client utilities are already in `@mystira/shared-utils`.
 
 For admin-ui or other projects using it:
 
@@ -216,7 +222,7 @@ function Dashboard() {
     conn.on<ScenarioUpdatedEvent>('ScenarioUpdated', (event) => {
       console.log('Scenario updated:', event);
       // Update local state
-      setScenarios(prev => 
+      setScenarios(prev =>
         prev.map(s => s.id === event.scenarioId ? { ...s, ...event.data } : s)
       );
     });
@@ -291,7 +297,7 @@ public class ScenarioService
     public async Task UpdateScenarioAsync(Scenario scenario, CancellationToken cancellationToken)
     {
         await _repository.UpdateAsync(scenario, cancellationToken);
-        
+
         // Broadcast update to all connected clients
         await _eventService.NotifyScenarioUpdatedAsync(
             scenario.Id,

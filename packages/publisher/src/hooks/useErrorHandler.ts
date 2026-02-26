@@ -1,7 +1,7 @@
-import { useCallback } from 'react';
-import { useToast } from './useToast';
-import { logger } from '@/utils/logger';
-import { ApiRequestError } from '@/api/client';
+import { useCallback } from "react";
+import { useToast } from "./useToast";
+import { logger } from "@/utils/logger";
+import { ApiRequestError } from "@/api/client";
 
 interface ErrorHandlerOptions {
   showToast?: boolean;
@@ -17,7 +17,7 @@ export function useErrorHandler() {
       const {
         showToast = true,
         logError = true,
-        fallbackMessage = 'An unexpected error occurred',
+        fallbackMessage = "An unexpected error occurred",
       } = options;
 
       let errorMessage = fallbackMessage;
@@ -26,16 +26,18 @@ export function useErrorHandler() {
       // Extract error message based on error type
       if (error instanceof ApiRequestError) {
         errorMessage = error.message || fallbackMessage;
-        errorDetails = error.errors.map(e => e.message || e.field || 'Unknown error');
+        errorDetails = error.errors.map(
+          (e) => e.message || e.field || "Unknown error"
+        );
       } else if (error instanceof Error) {
         errorMessage = error.message || fallbackMessage;
-      } else if (typeof error === 'string') {
+      } else if (typeof error === "string") {
         errorMessage = error;
       }
 
       // Log error
       if (logError) {
-        logger.error('Error handled:', {
+        logger.error("Error handled:", {
           message: errorMessage,
           details: errorDetails,
           error,
@@ -46,7 +48,7 @@ export function useErrorHandler() {
       if (showToast) {
         showErrorToast(
           errorMessage,
-          errorDetails.length > 0 ? errorDetails.join(', ') : undefined
+          errorDetails.length > 0 ? errorDetails.join(", ") : undefined
         );
       }
 
@@ -62,7 +64,7 @@ export function useErrorHandler() {
         logError: true,
         fallbackMessage: context
           ? `Failed to ${context}. Please try again.`
-          : 'An error occurred while processing your request.',
+          : "An error occurred while processing your request.",
       });
     },
     [handleError]
@@ -73,7 +75,7 @@ export function useErrorHandler() {
       return handleError(error, {
         showToast: true,
         logError: false,
-        fallbackMessage: 'Please check your input and try again.',
+        fallbackMessage: "Please check your input and try again.",
       });
     },
     [handleError]
@@ -84,17 +86,17 @@ export function useErrorHandler() {
       // Detect network errors
       const isNetworkError =
         (error instanceof Error &&
-          (error.message.includes('Network Error') ||
-            error.message.includes('timeout') ||
-            error.message.includes('Failed to fetch'))) ||
-        (typeof navigator !== 'undefined' && !navigator.onLine);
+          (error.message.includes("Network Error") ||
+            error.message.includes("timeout") ||
+            error.message.includes("Failed to fetch"))) ||
+        (typeof navigator !== "undefined" && !navigator.onLine);
 
       return handleError(error, {
         showToast: true,
         logError: true,
         fallbackMessage: isNetworkError
-          ? 'Network error. Please check your connection and try again.'
-          : 'An error occurred while processing your request.',
+          ? "Network error. Please check your connection and try again."
+          : "An error occurred while processing your request.",
       });
     },
     [handleError]
@@ -107,4 +109,3 @@ export function useErrorHandler() {
     handleNetworkError,
   };
 }
-

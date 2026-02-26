@@ -45,19 +45,19 @@ pnpm add @mystira/core-types@0.2.0-alpha
 ### 2.1 Result Pattern
 
 ```typescript
-import { Result, ok, err, isOk } from '@mystira/core-types';
+import { Result, ok, err, isOk } from "@mystira/core-types";
 
 async function fetchScenario(id: string): Promise<Result<Scenario>> {
   try {
     const response = await api.get(`/scenarios/${id}`);
     return ok(response.data);
   } catch (error) {
-    return err({ code: 'NOT_FOUND', message: 'Scenario not found' });
+    return err({ code: "NOT_FOUND", message: "Scenario not found" });
   }
 }
 
 // Usage
-const result = await fetchScenario('123');
+const result = await fetchScenario("123");
 if (isOk(result)) {
   console.log(result.value);
 } else {
@@ -68,18 +68,18 @@ if (isOk(result)) {
 ### 2.2 Error Types
 
 ```typescript
-import { ErrorResponse, MystiraError, ErrorCode } from '@mystira/core-types';
+import { ErrorResponse, MystiraError, ErrorCode } from "@mystira/core-types";
 
 // Handle API errors
 function handleApiError(response: ErrorResponse) {
   switch (response.code) {
-    case 'VALIDATION':
+    case "VALIDATION":
       showValidationErrors(response.errors);
       break;
-    case 'NOT_FOUND':
-      navigate('/404');
+    case "NOT_FOUND":
+      navigate("/404");
       break;
-    case 'UNAUTHORIZED':
+    case "UNAUTHORIZED":
       redirectToLogin();
       break;
     default:
@@ -91,10 +91,12 @@ function handleApiError(response: ErrorResponse) {
 ### 2.3 Pagination
 
 ```typescript
-import { PaginatedResponse, PaginationParams } from '@mystira/core-types';
+import { PaginatedResponse, PaginationParams } from "@mystira/core-types";
 
-async function fetchScenarios(params: PaginationParams): Promise<PaginatedResponse<Scenario>> {
-  const response = await api.get('/scenarios', { params });
+async function fetchScenarios(
+  params: PaginationParams
+): Promise<PaginatedResponse<Scenario>> {
+  const response = await api.get("/scenarios", { params });
   return response.data;
 }
 ```
@@ -111,18 +113,18 @@ import {
   SessionStarted,
   SessionCompleted,
   ScenarioPublished,
-} from '@mystira/core-types';
+} from "@mystira/core-types";
 
 // Type-safe event handling
 function handleEvent(event: MystiraEvent) {
   switch (event.type) {
-    case 'SessionStarted':
+    case "SessionStarted":
       handleSessionStarted(event);
       break;
-    case 'SessionCompleted':
+    case "SessionCompleted":
       handleSessionCompleted(event);
       break;
-    case 'ScenarioPublished':
+    case "ScenarioPublished":
       refreshScenarioList();
       break;
   }
@@ -134,13 +136,14 @@ function handleEvent(event: MystiraEvent) {
 **Current Status**: The infrastructure (Azure App Service) has WebSocket support enabled via Terraform. Backend SignalR hub implementation is pending.
 
 **Interim Approach** (Use until SignalR is available):
+
 - Use REST polling for updates (e.g., every 30 seconds)
 - Implement manual refresh button for users
 - Use optimistic UI updates where possible
 
 ```typescript
 // Interim: Polling approach
-import { MystiraEvent } from '@mystira/core-types';
+import { MystiraEvent } from "@mystira/core-types";
 
 function setupPolling() {
   setInterval(async () => {
@@ -158,15 +161,15 @@ The infrastructure is ready for WebSocket/SignalR. Once the backend SignalR hub 
 
 ```typescript
 // Future: SignalR real-time connection
-import { MystiraEvent } from '@mystira/core-types';
-import * as signalR from '@microsoft/signalr';
+import { MystiraEvent } from "@mystira/core-types";
+import * as signalR from "@microsoft/signalr";
 
 const connection = new signalR.HubConnectionBuilder()
-  .withUrl('/hubs/events')
+  .withUrl("/hubs/events")
   .withAutomaticReconnect()
   .build();
 
-connection.on('ReceiveEvent', (event: MystiraEvent) => {
+connection.on("ReceiveEvent", (event: MystiraEvent) => {
   handleEvent(event);
 });
 
@@ -174,8 +177,9 @@ await connection.start();
 ```
 
 **Migration Path**:
+
 1. **Now**: Implement polling approach (Phase 3.2 interim code)
-2. **When backend is ready**: 
+2. **When backend is ready**:
    - Install `@microsoft/signalr` package: `pnpm add @microsoft/signalr`
    - Replace polling code with SignalR connection (Phase 3.2 future code)
    - Remove polling interval
@@ -214,23 +218,28 @@ CMD ["nginx", "-g", "daemon off;"]
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Ensure @mystira/core-types is published
 - [ ] Create feature branch
 
 ### Phase 1: Package Setup
+
 - [ ] Install @mystira/core-types
 - [ ] Verify build succeeds
 
 ### Phase 2: Type Adoption
+
 - [ ] Replace local error types with shared
 - [ ] Use Result pattern for async operations
 - [ ] Update pagination types
 
 ### Phase 3: Events
+
 - [ ] Add event type imports
 - [ ] Prepare for real-time updates
 
 ### Phase 4: Dockerfile
+
 - [ ] Move Dockerfile to submodule
 - [ ] Update CI/CD workflow
 
@@ -239,6 +248,7 @@ CMD ["nginx", "-g", "daemon off;"]
 ## Notes
 
 Publisher's migration is simpler than backend services since it primarily:
+
 1. Consumes types (not produces)
 2. Handles events (not publishes)
 3. Uses REST APIs (already compatible)

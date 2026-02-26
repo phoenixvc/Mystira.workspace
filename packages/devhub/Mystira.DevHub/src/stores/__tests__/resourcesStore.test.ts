@@ -27,7 +27,7 @@ describe("resourcesStore", () => {
       const testResource = createTestResource();
       await mockTauriInvoke(
         "get_azure_resources",
-        mockAzureResourcesResponse([testResource]),
+        mockAzureResourcesResponse([testResource])
       );
 
       await useResourcesStore.getState().fetchResources();
@@ -90,8 +90,8 @@ describe("resourcesStore", () => {
       invoke.mockImplementation(
         () =>
           new Promise((resolve) =>
-            setTimeout(() => resolve(mockAzureResourcesResponse([])), 100),
-          ),
+            setTimeout(() => resolve(mockAzureResourcesResponse([])), 100)
+          )
       );
 
       // Start two fetches concurrently
@@ -109,7 +109,7 @@ describe("resourcesStore", () => {
     it("should clear cache timestamps", async () => {
       await mockTauriInvoke(
         "get_azure_resources",
-        mockAzureResourcesResponse([createTestResource()]),
+        mockAzureResourcesResponse([createTestResource()])
       );
       await useResourcesStore.getState().fetchResources();
 
@@ -129,7 +129,7 @@ describe("resourcesStore", () => {
     it("should reset to initial state", async () => {
       await mockTauriInvoke(
         "get_azure_resources",
-        mockAzureResourcesResponse([createTestResource()]),
+        mockAzureResourcesResponse([createTestResource()])
       );
       await useResourcesStore.getState().fetchResources();
 

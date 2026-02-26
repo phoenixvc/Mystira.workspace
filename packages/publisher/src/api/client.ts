@@ -1,9 +1,14 @@
-import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import type { ApiError, ApiResponse } from './types';
-import { env } from '@/config/env';
-import { authApi } from './auth';
-import { logger } from '@/utils/logger';
-import { API_TIMEOUT } from '@/constants';
+import axios, {
+  AxiosError,
+  AxiosInstance,
+  AxiosRequestConfig,
+  InternalAxiosRequestConfig,
+} from "axios";
+import type { ApiError, ApiResponse } from "./types";
+import { env } from "@/config/env";
+import { authApi } from "./auth";
+import { logger } from "@/utils/logger";
+import { API_TIMEOUT } from "@/constants";
 
 // API base URL from environment config
 const API_BASE_URL = env.apiBaseUrl;
@@ -16,67 +21,74 @@ export const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor for adding auth token
 apiClient.interceptors.request.use(
-  config => {
-    const token = localStorage.getItem('accessToken');
+  (config) => {
+    const token = localStorage.getItem("accessToken");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  error => Promise.reject(error)
+  (error) => Promise.reject(error)
 );
 
 // Response interceptor for handling errors and token refresh
 apiClient.interceptors.response.use(
-  response => response,
+  (response) => response,
   async (error: AxiosError<ApiResponse<unknown>>) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // Prevent infinite loop - don't refresh if already on refresh endpoint
-    const isRefreshEndpoint = originalRequest?.url?.includes('/auth/refresh');
-    
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry && !isRefreshEndpoint) {
+    const isRefreshEndpoint = originalRequest?.url?.includes("/auth/refresh");
+
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      !isRefreshEndpoint
+    ) {
       originalRequest._retry = true;
 
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
+        const refreshToken = localStorage.getItem("refreshToken");
         if (!refreshToken) {
           // No refresh token, logout user
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('refreshToken');
-          window.location.href = '/login';
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          window.location.href = "/login";
           return Promise.reject(error);
         }
 
-        logger.debug('Attempting to refresh access token');
+        logger.debug("Attempting to refresh access token");
         const response = await authApi.refreshToken({ refreshToken });
-        
+
         // Update stored tokens
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('refreshToken', response.refreshToken);
-        
+        localStorage.setItem("accessToken", response.accessToken);
+        localStorage.setItem("refreshToken", response.refreshToken);
+
         // Retry original request with new token
         originalRequest.headers.Authorization = `Bearer ${response.accessToken}`;
         return apiClient(originalRequest);
       } catch (refreshError) {
-        logger.error('Token refresh failed:', refreshError);
+        logger.error("Token refresh failed:", refreshError);
         // Refresh failed, logout user
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        window.location.href = '/login';
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/login";
         return Promise.reject(refreshError);
       }
     }
 
     // Log other errors in development
     if (import.meta.env.DEV && error.response) {
-      logger.error('API Error:', {
+      logger.error("API Error:", {
         status: error.response.status,
         data: error.response.data,
         url: originalRequest?.url,
@@ -96,7 +108,7 @@ export async function request<T>(config: AxiosRequestConfig): Promise<T> {
     if (axios.isAxiosError(error) && error.response?.data) {
       const apiError = error.response.data as ApiResponse<unknown>;
       throw new ApiRequestError(
-        apiError.message || 'An error occurred',
+        apiError.message || "An error occurred",
         apiError.errors || []
       );
     }
@@ -110,6 +122,6 @@ export class ApiRequestError extends Error {
     public errors: ApiError[]
   ) {
     super(message);
-    this.name = 'ApiRequestError';
+    this.name = "ApiRequestError";
   }
 }

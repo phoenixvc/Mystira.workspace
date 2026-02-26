@@ -22,7 +22,7 @@ sequenceDiagram
     Note over UseCase: Step 1: Extract Scene IDs
     UseCase->>Scenario: Extract all scene IDs<br/>from scenario.Scenes
     Scenario-->>UseCase: HashSet<string> sceneIds
-    
+
     Note over UseCase: Step 2: Validate Scene References
     loop For each scene in scenario.Scenes
         alt Scene has NextSceneId
@@ -32,7 +32,7 @@ sequenceDiagram
             end
             UseCase->>UseCase: Add to referencedScenes
         end
-        
+
         loop For each branch in scene.Branches
             UseCase->>UseCase: Check if branch.NextSceneId<br/>exists in sceneIds
             alt Reference Invalid
@@ -40,7 +40,7 @@ sequenceDiagram
             end
             UseCase->>UseCase: Add to referencedScenes
         end
-        
+
         loop For each echo reveal in scene.EchoReveals
             UseCase->>UseCase: Check if reveal.TriggerSceneId<br/>exists in sceneIds
             alt Reference Invalid
@@ -48,14 +48,14 @@ sequenceDiagram
             end
         end
     end
-    
+
     Note over UseCase: Step 3: Validate Scene Reachability
     UseCase->>UseCase: Find first scene<br/>(starting point)
     UseCase->>UseCase: Calculate unreachable scenes:<br/>sceneIds - referencedScenes<br/>(excluding first scene)
     alt Unreachable Scenes Found
         UseCase->>UseCase: Log warning<br/>(does not throw exception)
     end
-    
+
     UseCase-->>UseCase: Validation Complete
 ```
 

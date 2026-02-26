@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { storiesApi, chainApi, type RegistrationResponse } from '@/api';
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { storiesApi, chainApi, type RegistrationResponse } from "@/api";
 
 export function useRegistration() {
   const queryClient = useQueryClient();
-  const [registrationResult, setRegistrationResult] = useState<RegistrationResponse | null>(null);
+  const [registrationResult, setRegistrationResult] =
+    useState<RegistrationResponse | null>(null);
 
   const submitMutation = useMutation({
     mutationFn: async (storyId: string) => {
@@ -19,7 +20,7 @@ export function useRegistration() {
           summary: story.summary,
           createdAt: story.createdAt,
         },
-        contributors: story.contributors.map(c => ({
+        contributors: story.contributors.map((c) => ({
           userId: c.userId,
           role: c.role,
           splitPercentage: c.split,
@@ -28,10 +29,10 @@ export function useRegistration() {
 
       return result;
     },
-    onSuccess: result => {
+    onSuccess: (result) => {
       setRegistrationResult(result);
       // Invalidate queries to refresh story data
-      queryClient.invalidateQueries({ queryKey: ['stories'] });
+      queryClient.invalidateQueries({ queryKey: ["stories"] });
     },
   });
 

@@ -21,12 +21,14 @@ Before configuring DevHub, ensure you have:
 ### Development Environment
 
 **1. Clone the repository**
+
 ```bash
 git clone https://github.com/phoenixvc/Mystira.App.git
 cd Mystira.App/tools/Mystira.DevHub
 ```
 
 **2. Install dependencies**
+
 ```bash
 # Install npm packages
 npm install
@@ -41,6 +43,7 @@ dotnet build
 ```
 
 **3. Run in development mode**
+
 ```bash
 cd ../Mystira.DevHub
 npm run tauri dev
@@ -80,12 +83,14 @@ Create `tools/Mystira.DevHub.CLI/appsettings.json`:
 #### Option 3: UI Input
 
 Enter connection strings directly in the DevHub UI:
+
 - Migration Manager → Configuration step
 - Cosmos Explorer → Connection Manager (future)
 
 ### Azure Configuration
 
 **Subscription Setup**
+
 ```bash
 # List subscriptions
 az account list --output table
@@ -98,6 +103,7 @@ az account show
 ```
 
 **Resource Group**
+
 ```bash
 # Create development resource group (if needed)
 az group create --name dev-rg --location westeurope
@@ -106,6 +112,7 @@ az group create --name dev-rg --location westeurope
 ### GitHub Configuration
 
 **Authentication**
+
 ```bash
 # Login
 gh auth login
@@ -120,6 +127,7 @@ gh repo set-default phoenixvc/Mystira.App
 **Workflow Permissions**
 
 Ensure GitHub Actions has permissions to:
+
 - Trigger workflows
 - Access secrets
 - Deploy to Azure
@@ -129,6 +137,7 @@ Ensure GitHub Actions has permissions to:
 ### Cosmos Explorer
 
 **Database Configuration**
+
 - Default database name: `MystiraDb`
 - Containers accessed:
   - `Scenarios`
@@ -137,6 +146,7 @@ Ensure GitHub Actions has permissions to:
   - `GameSessions`
 
 **Export Settings**
+
 - Default format: CSV
 - Output path: User-selected via file dialog
 - Encoding: UTF-8
@@ -144,6 +154,7 @@ Ensure GitHub Actions has permissions to:
 ### Migration Manager
 
 **Default Settings**
+
 ```json
 {
   "databaseName": "MystiraDb",
@@ -154,6 +165,7 @@ Ensure GitHub Actions has permissions to:
 ```
 
 **Migration Types**
+
 - `scenarios`: Cosmos DB Scenarios container
 - `bundles`: Cosmos DB ContentBundles container
 - `media-metadata`: Cosmos DB MediaAssets container
@@ -163,15 +175,17 @@ Ensure GitHub Actions has permissions to:
 ### Infrastructure Panel
 
 **Workflow Configuration**
+
 ```typescript
 const config = {
-  workflowFile: 'infrastructure-deploy-dev.yml',
-  repository: 'phoenixvc/Mystira.App',
-  branch: 'main'
+  workflowFile: "infrastructure-deploy-dev.yml",
+  repository: "phoenixvc/Mystira.App",
+  branch: "main",
 };
 ```
 
 **Bicep Templates Path**
+
 ```
 infrastructure/dev/
 ├── main.bicep
@@ -240,14 +254,16 @@ npm run tauri build
 Current version stores preferences in component state (session-only).
 
 Future version will persist to:
+
 - **Windows**: `%APPDATA%\Mystira DevHub\config.json`
 - **macOS**: `~/Library/Application Support/Mystira DevHub/config.json`
 - **Linux**: `~/.config/mystira-devhub/config.json`
 
 **Settings Schema** (future):
+
 ```json
 {
-  "theme": "light",  // "light" | "dark" | "auto"
+  "theme": "light", // "light" | "dark" | "auto"
   "defaultPaths": {
     "export": "~/Documents/exports",
     "logs": "~/Documents/logs"
@@ -270,6 +286,7 @@ Future version will persist to:
 **Error**: `dotnet: command not found`
 
 **Solution**:
+
 ```bash
 # Install .NET 9 SDK
 # Windows: Download from https://dotnet.microsoft.com/download
@@ -282,6 +299,7 @@ Future version will persist to:
 **Error**: `Please run 'az login' to setup account`
 
 **Solution**:
+
 ```bash
 az login
 az account set --subscription "your-subscription"
@@ -292,6 +310,7 @@ az account set --subscription "your-subscription"
 **Error**: `gh: To get started with GitHub CLI, please run: gh auth login`
 
 **Solution**:
+
 ```bash
 gh auth login
 # Follow interactive prompts
@@ -302,6 +321,7 @@ gh auth login
 **Error**: `Error: Failed to build Tauri application`
 
 **Solution**:
+
 ```bash
 # Install Rust if not already installed
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -319,6 +339,7 @@ rustup update
 **Error**: Blank editor or console error about Monaco
 
 **Solution**:
+
 ```bash
 # Reinstall dependencies
 rm -rf node_modules package-lock.json
@@ -365,6 +386,7 @@ var query = container.GetItemQueryIterator<T>(
 Extend CLI with new commands:
 
 **1. Add service method** (`Mystira.DevHub.Services`):
+
 ```csharp
 public interface IMyService
 {
@@ -373,6 +395,7 @@ public interface IMyService
 ```
 
 **2. Add CLI command** (`Mystira.DevHub.CLI`):
+
 ```csharp
 public class MyCommands
 {
@@ -384,6 +407,7 @@ public class MyCommands
 ```
 
 **3. Add Tauri command** (`src-tauri/src/main.rs`):
+
 ```rust
 #[tauri::command]
 async fn my_operation() -> Result<CommandResponse, String> {
@@ -392,8 +416,9 @@ async fn my_operation() -> Result<CommandResponse, String> {
 ```
 
 **4. Add UI component** (`src/components/MyFeature.tsx`):
+
 ```typescript
-const response = await invoke('my_operation');
+const response = await invoke("my_operation");
 ```
 
 ### Custom Bicep Templates
@@ -403,13 +428,14 @@ Add templates to be viewable in DevHub:
 **1. Place Bicep file** in `infrastructure/dev/modules/`
 
 **2. Update file tree** in `BicepViewer.tsx`:
+
 ```typescript
 const BICEP_FILES: BicepFile[] = [
   // ... existing files
   {
-    name: 'my-resource.bicep',
-    path: 'infrastructure/dev/modules/my-resource.bicep',
-    type: 'file',
+    name: "my-resource.bicep",
+    path: "infrastructure/dev/modules/my-resource.bicep",
+    type: "file",
   },
 ];
 ```

@@ -1,11 +1,11 @@
 // Story types that mirror backend API contracts
 
 export type StoryStatus =
-  | 'draft'
-  | 'pending_approval'
-  | 'approved'
-  | 'registered'
-  | 'rejected';
+  | "draft"
+  | "pending_approval"
+  | "approved"
+  | "registered"
+  | "rejected";
 
 export interface Story {
   id: string;
@@ -30,14 +30,14 @@ export interface StoryContributor {
 }
 
 export type ContributorRole =
-  | 'primary_author'
-  | 'co_author'
-  | 'illustrator'
-  | 'editor'
-  | 'moderator'
-  | 'publisher';
+  | "primary_author"
+  | "co_author"
+  | "illustrator"
+  | "editor"
+  | "moderator"
+  | "publisher";
 
-export type ApprovalStatus = 'pending' | 'approved' | 'rejected' | 'overridden';
+export type ApprovalStatus = "pending" | "approved" | "rejected" | "overridden";
 
 export interface CreateStoryRequest {
   title: string;

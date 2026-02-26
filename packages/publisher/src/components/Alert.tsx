@@ -1,9 +1,9 @@
-import { type ReactNode } from 'react';
-import clsx from 'clsx';
+import { type ReactNode } from "react";
+import clsx from "clsx";
 
 export interface AlertProps {
   children: ReactNode;
-  variant?: 'info' | 'success' | 'warning' | 'error';
+  variant?: "info" | "success" | "warning" | "error";
   title?: string;
   dismissible?: boolean;
   onDismiss?: () => void;
@@ -12,7 +12,7 @@ export interface AlertProps {
 
 export function Alert({
   children,
-  variant = 'info',
+  variant = "info",
   title,
   dismissible = false,
   onDismiss,
@@ -20,7 +20,7 @@ export function Alert({
 }: AlertProps) {
   return (
     <div
-      className={clsx('alert', `alert--${variant}`, className)}
+      className={clsx("alert", `alert--${variant}`, className)}
       role="alert"
       aria-live="polite"
     >

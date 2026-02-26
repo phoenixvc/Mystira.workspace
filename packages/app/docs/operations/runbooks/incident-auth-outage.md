@@ -170,6 +170,7 @@ az webapp config appsettings set \
 ### Communication to Users
 
 Post status update:
+
 ```
 🚨 We're experiencing authentication issues. We're working to resolve this quickly.
 - Unable to sign in: [Y/N]
@@ -248,6 +249,7 @@ customEvents
 ### Issue: Auth working but slow
 
 **Resolution**:
+
 1. Check token validation performance
 2. Review JWKS caching
 3. Check database query performance for user lookups
@@ -255,6 +257,7 @@ customEvents
 ### Issue: Specific users cannot auth
 
 **Resolution**:
+
 1. Check account status in database
 2. Verify email address validity
 3. Check for account lockouts

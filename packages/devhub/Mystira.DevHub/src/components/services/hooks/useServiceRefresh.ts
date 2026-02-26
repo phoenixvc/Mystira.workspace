@@ -33,13 +33,13 @@ export function useServiceRefresh() {
             } catch (error) {
               console.error(
                 `Failed to check health for ${status.name}:`,
-                error,
+                error
               );
             }
           }
 
           return { ...status, portConflict, health };
-        }),
+        })
       );
 
       setServices((prev) => {

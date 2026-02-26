@@ -27,7 +27,7 @@ export interface IntegrationEvent extends DomainEvent {
  * Published when a new user account is created.
  */
 export interface AccountCreated extends IntegrationEvent {
-  type: 'AccountCreated';
+  type: "AccountCreated";
   accountId: string;
   email: string;
   provider?: string;
@@ -37,7 +37,7 @@ export interface AccountCreated extends IntegrationEvent {
  * Published when a user account is updated.
  */
 export interface AccountUpdated extends IntegrationEvent {
-  type: 'AccountUpdated';
+  type: "AccountUpdated";
   accountId: string;
   updatedFields: string[];
 }
@@ -46,7 +46,7 @@ export interface AccountUpdated extends IntegrationEvent {
  * Published when a user account is deleted.
  */
 export interface AccountDeleted extends IntegrationEvent {
-  type: 'AccountDeleted';
+  type: "AccountDeleted";
   accountId: string;
   isSoftDelete: boolean;
 }
@@ -59,7 +59,7 @@ export interface AccountDeleted extends IntegrationEvent {
  * Published when a game session is started.
  */
 export interface SessionStarted extends IntegrationEvent {
-  type: 'SessionStarted';
+  type: "SessionStarted";
   sessionId: string;
   accountId: string;
   scenarioId: string;
@@ -69,7 +69,7 @@ export interface SessionStarted extends IntegrationEvent {
  * Published when a game session is completed.
  */
 export interface SessionCompleted extends IntegrationEvent {
-  type: 'SessionCompleted';
+  type: "SessionCompleted";
   sessionId: string;
   accountId: string;
   scenarioId: string;
@@ -81,7 +81,7 @@ export interface SessionCompleted extends IntegrationEvent {
  * Published when a session is abandoned.
  */
 export interface SessionAbandoned extends IntegrationEvent {
-  type: 'SessionAbandoned';
+  type: "SessionAbandoned";
   sessionId: string;
   accountId: string;
   durationSeconds: number;
@@ -96,7 +96,7 @@ export interface SessionAbandoned extends IntegrationEvent {
  * Published when a scenario is created.
  */
 export interface ScenarioCreated extends IntegrationEvent {
-  type: 'ScenarioCreated';
+  type: "ScenarioCreated";
   scenarioId: string;
   title: string;
   authorId: string;
@@ -107,7 +107,7 @@ export interface ScenarioCreated extends IntegrationEvent {
  * Published when a scenario is updated.
  */
 export interface ScenarioUpdated extends IntegrationEvent {
-  type: 'ScenarioUpdated';
+  type: "ScenarioUpdated";
   scenarioId: string;
   updatedFields: string[];
   version?: number;
@@ -117,7 +117,7 @@ export interface ScenarioUpdated extends IntegrationEvent {
  * Published when a scenario is published.
  */
 export interface ScenarioPublished extends IntegrationEvent {
-  type: 'ScenarioPublished';
+  type: "ScenarioPublished";
   scenarioId: string;
   title: string;
   authorId: string;
@@ -127,7 +127,7 @@ export interface ScenarioPublished extends IntegrationEvent {
  * Published when a scenario is unpublished.
  */
 export interface ScenarioUnpublished extends IntegrationEvent {
-  type: 'ScenarioUnpublished';
+  type: "ScenarioUnpublished";
   scenarioId: string;
   reason?: string;
 }
@@ -136,7 +136,7 @@ export interface ScenarioUnpublished extends IntegrationEvent {
  * Published when media is uploaded.
  */
 export interface MediaUploaded extends IntegrationEvent {
-  type: 'MediaUploaded';
+  type: "MediaUploaded";
   mediaId: string;
   uploaderId: string;
   mimeType: string;
@@ -151,7 +151,7 @@ export interface MediaUploaded extends IntegrationEvent {
  * Published when cache should be invalidated.
  */
 export interface CacheInvalidated extends IntegrationEvent {
-  type: 'CacheInvalidated';
+  type: "CacheInvalidated";
   keyPattern: string;
   entityType: string;
   entityId?: string;
@@ -162,7 +162,7 @@ export interface CacheInvalidated extends IntegrationEvent {
  * Published when cache warmup is requested.
  */
 export interface CacheWarmupRequested extends IntegrationEvent {
-  type: 'CacheWarmupRequested';
+  type: "CacheWarmupRequested";
   entityType: string;
   entityIds?: string[];
   priority: number;
@@ -176,7 +176,7 @@ export interface CacheWarmupRequested extends IntegrationEvent {
  * Published when story generation is requested.
  */
 export interface StoryGenerationRequested extends IntegrationEvent {
-  type: 'StoryGenerationRequested';
+  type: "StoryGenerationRequested";
   requestId: string;
   scenarioId: string;
   accountId: string;
@@ -187,7 +187,7 @@ export interface StoryGenerationRequested extends IntegrationEvent {
  * Published when story generation completes successfully.
  */
 export interface StoryGenerationCompleted extends IntegrationEvent {
-  type: 'StoryGenerationCompleted';
+  type: "StoryGenerationCompleted";
   requestId: string;
   scenarioId: string;
   durationMs: number;
@@ -199,7 +199,7 @@ export interface StoryGenerationCompleted extends IntegrationEvent {
  * Published when story generation fails.
  */
 export interface StoryGenerationFailed extends IntegrationEvent {
-  type: 'StoryGenerationFailed';
+  type: "StoryGenerationFailed";
   requestId: string;
   scenarioId: string;
   errorCode: string;
@@ -215,7 +215,7 @@ export interface StoryGenerationFailed extends IntegrationEvent {
  * Published when a user logs in.
  */
 export interface UserLoggedIn extends IntegrationEvent {
-  type: 'UserLoggedIn';
+  type: "UserLoggedIn";
   accountId: string;
   provider: string;
   clientIp?: string;
@@ -226,7 +226,7 @@ export interface UserLoggedIn extends IntegrationEvent {
  * Published when a user logs out.
  */
 export interface UserLoggedOut extends IntegrationEvent {
-  type: 'UserLoggedOut';
+  type: "UserLoggedOut";
   accountId: string;
   isExplicit: boolean;
 }
@@ -235,7 +235,7 @@ export interface UserLoggedOut extends IntegrationEvent {
  * Published when a password reset is requested.
  */
 export interface PasswordResetRequested extends IntegrationEvent {
-  type: 'PasswordResetRequested';
+  type: "PasswordResetRequested";
   accountId: string;
   email: string;
   expiresAt: string;
@@ -245,7 +245,7 @@ export interface PasswordResetRequested extends IntegrationEvent {
  * Published when a password is successfully changed.
  */
 export interface PasswordChanged extends IntegrationEvent {
-  type: 'PasswordChanged';
+  type: "PasswordChanged";
   accountId: string;
   viaReset: boolean;
 }
@@ -258,7 +258,7 @@ export interface PasswordChanged extends IntegrationEvent {
  * Published when a notification is sent.
  */
 export interface NotificationSent extends IntegrationEvent {
-  type: 'NotificationSent';
+  type: "NotificationSent";
   notificationId: string;
   recipientId: string;
   notificationType: string;
@@ -269,7 +269,7 @@ export interface NotificationSent extends IntegrationEvent {
  * Published when an email is sent.
  */
 export interface EmailSent extends IntegrationEvent {
-  type: 'EmailSent';
+  type: "EmailSent";
   emailId: string;
   recipientEmail: string;
   template: string;
@@ -280,7 +280,7 @@ export interface EmailSent extends IntegrationEvent {
  * Published when a notification delivery fails.
  */
 export interface NotificationFailed extends IntegrationEvent {
-  type: 'NotificationFailed';
+  type: "NotificationFailed";
   notificationId: string;
   recipientId: string;
   reason: string;
@@ -295,7 +295,7 @@ export interface NotificationFailed extends IntegrationEvent {
  * Published when a user makes a choice in a story.
  */
 export interface ChoiceMade extends IntegrationEvent {
-  type: 'ChoiceMade';
+  type: "ChoiceMade";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -308,7 +308,7 @@ export interface ChoiceMade extends IntegrationEvent {
  * Published when a user starts a chapter.
  */
 export interface ChapterStarted extends IntegrationEvent {
-  type: 'ChapterStarted';
+  type: "ChapterStarted";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -321,7 +321,7 @@ export interface ChapterStarted extends IntegrationEvent {
  * Published when a user completes a chapter.
  */
 export interface ChapterCompleted extends IntegrationEvent {
-  type: 'ChapterCompleted';
+  type: "ChapterCompleted";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -336,7 +336,7 @@ export interface ChapterCompleted extends IntegrationEvent {
  * Published when a user reaches a checkpoint.
  */
 export interface CheckpointReached extends IntegrationEvent {
-  type: 'CheckpointReached';
+  type: "CheckpointReached";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -349,7 +349,7 @@ export interface CheckpointReached extends IntegrationEvent {
  * Published when user takes a specific story branch.
  */
 export interface StoryBranchTaken extends IntegrationEvent {
-  type: 'StoryBranchTaken';
+  type: "StoryBranchTaken";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -363,7 +363,7 @@ export interface StoryBranchTaken extends IntegrationEvent {
  * Published when user explicitly saves their progress.
  */
 export interface ProgressSaved extends IntegrationEvent {
-  type: 'ProgressSaved';
+  type: "ProgressSaved";
   sessionId: string;
   scenarioId: string;
   accountId: string;
@@ -381,7 +381,7 @@ export interface ProgressSaved extends IntegrationEvent {
  * Published when a user unlocks an achievement.
  */
 export interface AchievementUnlocked extends IntegrationEvent {
-  type: 'AchievementUnlocked';
+  type: "AchievementUnlocked";
   accountId: string;
   achievementId: string;
   achievementName: string;
@@ -395,7 +395,7 @@ export interface AchievementUnlocked extends IntegrationEvent {
  * Published when a user earns a badge.
  */
 export interface BadgeEarned extends IntegrationEvent {
-  type: 'BadgeEarned';
+  type: "BadgeEarned";
   accountId: string;
   badgeId: string;
   badgeName: string;
@@ -407,7 +407,7 @@ export interface BadgeEarned extends IntegrationEvent {
  * Published when a user earns experience points.
  */
 export interface XPEarned extends IntegrationEvent {
-  type: 'XPEarned';
+  type: "XPEarned";
   accountId: string;
   amount: number;
   source: string;
@@ -420,7 +420,7 @@ export interface XPEarned extends IntegrationEvent {
  * Published when a user levels up.
  */
 export interface LevelUp extends IntegrationEvent {
-  type: 'LevelUp';
+  type: "LevelUp";
   accountId: string;
   fromLevel: number;
   toLevel: number;
@@ -432,7 +432,7 @@ export interface LevelUp extends IntegrationEvent {
  * Published when a user's streak is updated.
  */
 export interface StreakUpdated extends IntegrationEvent {
-  type: 'StreakUpdated';
+  type: "StreakUpdated";
   accountId: string;
   streakType: string;
   currentStreak: number;
@@ -446,7 +446,7 @@ export interface StreakUpdated extends IntegrationEvent {
  * Published when leaderboard position changes.
  */
 export interface LeaderboardUpdated extends IntegrationEvent {
-  type: 'LeaderboardUpdated';
+  type: "LeaderboardUpdated";
   accountId: string;
   leaderboardId: string;
   previousRank: number;
@@ -463,7 +463,7 @@ export interface LeaderboardUpdated extends IntegrationEvent {
  * Published when a subscription is started.
  */
 export interface SubscriptionStarted extends IntegrationEvent {
-  type: 'SubscriptionStarted';
+  type: "SubscriptionStarted";
   accountId: string;
   subscriptionId: string;
   planId: string;
@@ -479,7 +479,7 @@ export interface SubscriptionStarted extends IntegrationEvent {
  * Published when a subscription is renewed.
  */
 export interface SubscriptionRenewed extends IntegrationEvent {
-  type: 'SubscriptionRenewed';
+  type: "SubscriptionRenewed";
   accountId: string;
   subscriptionId: string;
   paymentId: string;
@@ -492,7 +492,7 @@ export interface SubscriptionRenewed extends IntegrationEvent {
  * Published when a subscription is cancelled.
  */
 export interface SubscriptionCancelled extends IntegrationEvent {
-  type: 'SubscriptionCancelled';
+  type: "SubscriptionCancelled";
   accountId: string;
   subscriptionId: string;
   reason?: string;
@@ -505,7 +505,7 @@ export interface SubscriptionCancelled extends IntegrationEvent {
  * Published when a payment succeeds.
  */
 export interface PaymentSucceeded extends IntegrationEvent {
-  type: 'PaymentSucceeded';
+  type: "PaymentSucceeded";
   accountId: string;
   paymentId: string;
   amountCents: number;
@@ -520,7 +520,7 @@ export interface PaymentSucceeded extends IntegrationEvent {
  * Published when a payment fails.
  */
 export interface PaymentFailed extends IntegrationEvent {
-  type: 'PaymentFailed';
+  type: "PaymentFailed";
   accountId: string;
   paymentId: string;
   amountCents: number;
@@ -535,7 +535,7 @@ export interface PaymentFailed extends IntegrationEvent {
  * Published when a refund is processed.
  */
 export interface RefundProcessed extends IntegrationEvent {
-  type: 'RefundProcessed';
+  type: "RefundProcessed";
   accountId: string;
   refundId: string;
   originalPaymentId: string;
@@ -549,7 +549,7 @@ export interface RefundProcessed extends IntegrationEvent {
  * Published when premium content is unlocked.
  */
 export interface PremiumContentUnlocked extends IntegrationEvent {
-  type: 'PremiumContentUnlocked';
+  type: "PremiumContentUnlocked";
   accountId: string;
   contentType: string;
   contentId: string;
@@ -565,7 +565,7 @@ export interface PremiumContentUnlocked extends IntegrationEvent {
  * Published when a user rates a scenario.
  */
 export interface ScenarioRated extends IntegrationEvent {
-  type: 'ScenarioRated';
+  type: "ScenarioRated";
   accountId: string;
   scenarioId: string;
   rating: number;
@@ -576,7 +576,7 @@ export interface ScenarioRated extends IntegrationEvent {
  * Published when a user reviews a scenario.
  */
 export interface ScenarioReviewed extends IntegrationEvent {
-  type: 'ScenarioReviewed';
+  type: "ScenarioReviewed";
   reviewId: string;
   accountId: string;
   scenarioId: string;
@@ -590,7 +590,7 @@ export interface ScenarioReviewed extends IntegrationEvent {
  * Published when a user shares a scenario.
  */
 export interface ScenarioShared extends IntegrationEvent {
-  type: 'ScenarioShared';
+  type: "ScenarioShared";
   accountId: string;
   scenarioId: string;
   platform: string;
@@ -601,7 +601,7 @@ export interface ScenarioShared extends IntegrationEvent {
  * Published when a user follows another user.
  */
 export interface UserFollowed extends IntegrationEvent {
-  type: 'UserFollowed';
+  type: "UserFollowed";
   followerAccountId: string;
   followedAccountId: string;
   isMutual: boolean;
@@ -611,7 +611,7 @@ export interface UserFollowed extends IntegrationEvent {
  * Published when a user unfollows another user.
  */
 export interface UserUnfollowed extends IntegrationEvent {
-  type: 'UserUnfollowed';
+  type: "UserUnfollowed";
   followerAccountId: string;
   unfollowedAccountId: string;
 }
@@ -620,7 +620,7 @@ export interface UserUnfollowed extends IntegrationEvent {
  * Published when a comment is posted.
  */
 export interface CommentPosted extends IntegrationEvent {
-  type: 'CommentPosted';
+  type: "CommentPosted";
   commentId: string;
   accountId: string;
   targetType: string;
@@ -633,7 +633,7 @@ export interface CommentPosted extends IntegrationEvent {
  * Published when a comment is deleted.
  */
 export interface CommentDeleted extends IntegrationEvent {
-  type: 'CommentDeleted';
+  type: "CommentDeleted";
   commentId: string;
   accountId: string;
   deletedBy: string;
@@ -644,7 +644,7 @@ export interface CommentDeleted extends IntegrationEvent {
  * Published when a user likes content.
  */
 export interface ContentLiked extends IntegrationEvent {
-  type: 'ContentLiked';
+  type: "ContentLiked";
   accountId: string;
   contentType: string;
   contentId: string;
@@ -655,7 +655,7 @@ export interface ContentLiked extends IntegrationEvent {
  * Published when a user unlikes content.
  */
 export interface ContentUnliked extends IntegrationEvent {
-  type: 'ContentUnliked';
+  type: "ContentUnliked";
   accountId: string;
   contentType: string;
   contentId: string;
@@ -669,7 +669,7 @@ export interface ContentUnliked extends IntegrationEvent {
  * Published when content is reported by a user.
  */
 export interface ContentReported extends IntegrationEvent {
-  type: 'ContentReported';
+  type: "ContentReported";
   reportId: string;
   reporterAccountId: string;
   contentType: string;
@@ -683,7 +683,7 @@ export interface ContentReported extends IntegrationEvent {
  * Published when content is moderated.
  */
 export interface ContentModerated extends IntegrationEvent {
-  type: 'ContentModerated';
+  type: "ContentModerated";
   actionId: string;
   contentType: string;
   contentId: string;
@@ -698,7 +698,7 @@ export interface ContentModerated extends IntegrationEvent {
  * Published when a user receives a warning.
  */
 export interface UserWarned extends IntegrationEvent {
-  type: 'UserWarned';
+  type: "UserWarned";
   warningId: string;
   accountId: string;
   moderatorId: string;
@@ -712,7 +712,7 @@ export interface UserWarned extends IntegrationEvent {
  * Published when a user is suspended.
  */
 export interface UserSuspended extends IntegrationEvent {
-  type: 'UserSuspended';
+  type: "UserSuspended";
   suspensionId: string;
   accountId: string;
   moderatorId: string;
@@ -726,7 +726,7 @@ export interface UserSuspended extends IntegrationEvent {
  * Published when a user is banned.
  */
 export interface UserBanned extends IntegrationEvent {
-  type: 'UserBanned';
+  type: "UserBanned";
   banId: string;
   accountId: string;
   moderatorId: string;
@@ -740,7 +740,7 @@ export interface UserBanned extends IntegrationEvent {
  * Published when a user submits an appeal.
  */
 export interface AppealSubmitted extends IntegrationEvent {
-  type: 'AppealSubmitted';
+  type: "AppealSubmitted";
   appealId: string;
   accountId: string;
   appealType: string;
@@ -751,7 +751,7 @@ export interface AppealSubmitted extends IntegrationEvent {
  * Published when an appeal is resolved.
  */
 export interface AppealResolved extends IntegrationEvent {
-  type: 'AppealResolved';
+  type: "AppealResolved";
   appealId: string;
   accountId: string;
   moderatorId: string;
@@ -767,7 +767,7 @@ export interface AppealResolved extends IntegrationEvent {
  * Published when a user's email is verified.
  */
 export interface EmailVerified extends IntegrationEvent {
-  type: 'EmailVerified';
+  type: "EmailVerified";
   accountId: string;
   email: string;
   verificationMethod: string;
@@ -777,7 +777,7 @@ export interface EmailVerified extends IntegrationEvent {
  * Published when onboarding flow begins.
  */
 export interface OnboardingStarted extends IntegrationEvent {
-  type: 'OnboardingStarted';
+  type: "OnboardingStarted";
   accountId: string;
   onboardingVersion: string;
   source?: string;
@@ -787,7 +787,7 @@ export interface OnboardingStarted extends IntegrationEvent {
  * Published when an onboarding step is completed.
  */
 export interface OnboardingStepCompleted extends IntegrationEvent {
-  type: 'OnboardingStepCompleted';
+  type: "OnboardingStepCompleted";
   accountId: string;
   stepId: string;
   stepName: string;
@@ -800,7 +800,7 @@ export interface OnboardingStepCompleted extends IntegrationEvent {
  * Published when full onboarding is completed.
  */
 export interface OnboardingCompleted extends IntegrationEvent {
-  type: 'OnboardingCompleted';
+  type: "OnboardingCompleted";
   accountId: string;
   durationSeconds: number;
   stepsCompleted: number;
@@ -811,7 +811,7 @@ export interface OnboardingCompleted extends IntegrationEvent {
  * Published when onboarding is entirely skipped.
  */
 export interface OnboardingSkipped extends IntegrationEvent {
-  type: 'OnboardingSkipped';
+  type: "OnboardingSkipped";
   accountId: string;
   atStep: number;
 }
@@ -820,7 +820,7 @@ export interface OnboardingSkipped extends IntegrationEvent {
  * Published when profile setup is completed.
  */
 export interface ProfileCompleted extends IntegrationEvent {
-  type: 'ProfileCompleted';
+  type: "ProfileCompleted";
   accountId: string;
   displayNameSet: boolean;
   avatarSet: boolean;
@@ -831,7 +831,7 @@ export interface ProfileCompleted extends IntegrationEvent {
  * Published when a user signs up via referral.
  */
 export interface ReferralSignup extends IntegrationEvent {
-  type: 'ReferralSignup';
+  type: "ReferralSignup";
   accountId: string;
   referrerAccountId: string;
   referralCode: string;
@@ -842,7 +842,7 @@ export interface ReferralSignup extends IntegrationEvent {
  * Published when referral reward is granted.
  */
 export interface ReferralRewardGranted extends IntegrationEvent {
-  type: 'ReferralRewardGranted';
+  type: "ReferralRewardGranted";
   accountId: string;
   referredAccountId: string;
   rewardType: string;
@@ -857,7 +857,7 @@ export interface ReferralRewardGranted extends IntegrationEvent {
  * Published when a content bundle is created.
  */
 export interface BundleCreated extends IntegrationEvent {
-  type: 'BundleCreated';
+  type: "BundleCreated";
   bundleId: string;
   bundleName: string;
   creatorId: string;
@@ -870,7 +870,7 @@ export interface BundleCreated extends IntegrationEvent {
  * Published when a bundle is purchased.
  */
 export interface BundlePurchased extends IntegrationEvent {
-  type: 'BundlePurchased';
+  type: "BundlePurchased";
   accountId: string;
   bundleId: string;
   paymentId: string;
@@ -883,7 +883,7 @@ export interface BundlePurchased extends IntegrationEvent {
  * Published when a bundle is activated.
  */
 export interface BundleActivated extends IntegrationEvent {
-  type: 'BundleActivated';
+  type: "BundleActivated";
   accountId: string;
   bundleId: string;
   itemsUnlocked: string[];
@@ -893,7 +893,7 @@ export interface BundleActivated extends IntegrationEvent {
  * Published when a bundle is gifted.
  */
 export interface BundleGifted extends IntegrationEvent {
-  type: 'BundleGifted';
+  type: "BundleGifted";
   senderAccountId: string;
   recipientAccountId: string;
   bundleId: string;
@@ -905,7 +905,7 @@ export interface BundleGifted extends IntegrationEvent {
  * Published when a promo code is redeemed.
  */
 export interface PromoCodeRedeemed extends IntegrationEvent {
-  type: 'PromoCodeRedeemed';
+  type: "PromoCodeRedeemed";
   accountId: string;
   promoCode: string;
   discountType: string;
@@ -921,7 +921,7 @@ export interface PromoCodeRedeemed extends IntegrationEvent {
  * Published when a partner invite is sent.
  */
 export interface PartnerInviteSent extends IntegrationEvent {
-  type: 'PartnerInviteSent';
+  type: "PartnerInviteSent";
   inviteId: string;
   senderAccountId: string;
   recipientAccountId: string;
@@ -933,7 +933,7 @@ export interface PartnerInviteSent extends IntegrationEvent {
  * Published when a partner invite is accepted.
  */
 export interface PartnerInviteAccepted extends IntegrationEvent {
-  type: 'PartnerInviteAccepted';
+  type: "PartnerInviteAccepted";
   inviteId: string;
   senderAccountId: string;
   recipientAccountId: string;
@@ -944,7 +944,7 @@ export interface PartnerInviteAccepted extends IntegrationEvent {
  * Published when a partner invite is declined.
  */
 export interface PartnerInviteDeclined extends IntegrationEvent {
-  type: 'PartnerInviteDeclined';
+  type: "PartnerInviteDeclined";
   inviteId: string;
   senderAccountId: string;
   recipientAccountId: string;
@@ -955,7 +955,7 @@ export interface PartnerInviteDeclined extends IntegrationEvent {
  * Published when a co-op session is started.
  */
 export interface CoopSessionStarted extends IntegrationEvent {
-  type: 'CoopSessionStarted';
+  type: "CoopSessionStarted";
   coopSessionId: string;
   hostAccountId: string;
   scenarioId: string;
@@ -966,7 +966,7 @@ export interface CoopSessionStarted extends IntegrationEvent {
  * Published when a partner joins a session.
  */
 export interface PartnerJoinedSession extends IntegrationEvent {
-  type: 'PartnerJoinedSession';
+  type: "PartnerJoinedSession";
   coopSessionId: string;
   partnerAccountId: string;
   joinMethod: string;
@@ -977,7 +977,7 @@ export interface PartnerJoinedSession extends IntegrationEvent {
  * Published when a partner leaves a session.
  */
 export interface PartnerLeftSession extends IntegrationEvent {
-  type: 'PartnerLeftSession';
+  type: "PartnerLeftSession";
   coopSessionId: string;
   partnerAccountId: string;
   reason: string;
@@ -988,7 +988,7 @@ export interface PartnerLeftSession extends IntegrationEvent {
  * Published when a co-op session ends.
  */
 export interface CoopSessionEnded extends IntegrationEvent {
-  type: 'CoopSessionEnded';
+  type: "CoopSessionEnded";
   coopSessionId: string;
   hostAccountId: string;
   durationSeconds: number;
@@ -1000,7 +1000,7 @@ export interface CoopSessionEnded extends IntegrationEvent {
  * Published when a turn is passed in co-op.
  */
 export interface TurnPassed extends IntegrationEvent {
-  type: 'TurnPassed';
+  type: "TurnPassed";
   coopSessionId: string;
   fromAccountId: string;
   toAccountId: string;
@@ -1015,7 +1015,7 @@ export interface TurnPassed extends IntegrationEvent {
  * Published when a conversation is started.
  */
 export interface ConversationStarted extends IntegrationEvent {
-  type: 'ConversationStarted';
+  type: "ConversationStarted";
   conversationId: string;
   initiatorAccountId: string;
   participantIds: string[];
@@ -1027,7 +1027,7 @@ export interface ConversationStarted extends IntegrationEvent {
  * Published when a message is sent.
  */
 export interface MessageSent extends IntegrationEvent {
-  type: 'MessageSent';
+  type: "MessageSent";
   messageId: string;
   conversationId: string;
   senderAccountId: string;
@@ -1040,7 +1040,7 @@ export interface MessageSent extends IntegrationEvent {
  * Published when a message is delivered.
  */
 export interface MessageDelivered extends IntegrationEvent {
-  type: 'MessageDelivered';
+  type: "MessageDelivered";
   messageId: string;
   conversationId: string;
   recipientAccountId: string;
@@ -1051,7 +1051,7 @@ export interface MessageDelivered extends IntegrationEvent {
  * Published when a message is read.
  */
 export interface MessageRead extends IntegrationEvent {
-  type: 'MessageRead';
+  type: "MessageRead";
   messageId: string;
   conversationId: string;
   readerAccountId: string;
@@ -1062,7 +1062,7 @@ export interface MessageRead extends IntegrationEvent {
  * Published when a message is deleted.
  */
 export interface MessageDeleted extends IntegrationEvent {
-  type: 'MessageDeleted';
+  type: "MessageDeleted";
   messageId: string;
   conversationId: string;
   deletedByAccountId: string;
@@ -1073,7 +1073,7 @@ export interface MessageDeleted extends IntegrationEvent {
  * Published when user starts typing.
  */
 export interface TypingStarted extends IntegrationEvent {
-  type: 'TypingStarted';
+  type: "TypingStarted";
   conversationId: string;
   accountId: string;
 }
@@ -1082,7 +1082,7 @@ export interface TypingStarted extends IntegrationEvent {
  * Published when a conversation is archived.
  */
 export interface ConversationArchived extends IntegrationEvent {
-  type: 'ConversationArchived';
+  type: "ConversationArchived";
   conversationId: string;
   archivedByAccountId: string;
 }
@@ -1091,7 +1091,7 @@ export interface ConversationArchived extends IntegrationEvent {
  * Published when a user is muted in a conversation.
  */
 export interface UserMutedInConversation extends IntegrationEvent {
-  type: 'UserMutedInConversation';
+  type: "UserMutedInConversation";
   conversationId: string;
   mutedAccountId: string;
   mutedByAccountId: string;
@@ -1106,7 +1106,7 @@ export interface UserMutedInConversation extends IntegrationEvent {
  * Published when a device is registered.
  */
 export interface DeviceRegistered extends IntegrationEvent {
-  type: 'DeviceRegistered';
+  type: "DeviceRegistered";
   accountId: string;
   deviceId: string;
   deviceType: string;
@@ -1119,7 +1119,7 @@ export interface DeviceRegistered extends IntegrationEvent {
  * Published when a device is removed.
  */
 export interface DeviceRemoved extends IntegrationEvent {
-  type: 'DeviceRemoved';
+  type: "DeviceRemoved";
   accountId: string;
   deviceId: string;
   removedBy: string;
@@ -1130,7 +1130,7 @@ export interface DeviceRemoved extends IntegrationEvent {
  * Published when a session is synced across devices.
  */
 export interface SessionSynced extends IntegrationEvent {
-  type: 'SessionSynced';
+  type: "SessionSynced";
   accountId: string;
   sessionId: string;
   fromDeviceId: string;
@@ -1142,7 +1142,7 @@ export interface SessionSynced extends IntegrationEvent {
  * Published when a sync conflict is detected.
  */
 export interface SyncConflictDetected extends IntegrationEvent {
-  type: 'SyncConflictDetected';
+  type: "SyncConflictDetected";
   accountId: string;
   sessionId: string;
   device1Id: string;
@@ -1155,7 +1155,7 @@ export interface SyncConflictDetected extends IntegrationEvent {
  * Published when device handoff is initiated.
  */
 export interface DeviceHandoffStarted extends IntegrationEvent {
-  type: 'DeviceHandoffStarted';
+  type: "DeviceHandoffStarted";
   accountId: string;
   sessionId: string;
   fromDeviceId: string;
@@ -1166,7 +1166,7 @@ export interface DeviceHandoffStarted extends IntegrationEvent {
  * Published when device handoff is completed.
  */
 export interface DeviceHandoffCompleted extends IntegrationEvent {
-  type: 'DeviceHandoffCompleted';
+  type: "DeviceHandoffCompleted";
   accountId: string;
   sessionId: string;
   fromDeviceId: string;
@@ -1179,7 +1179,7 @@ export interface DeviceHandoffCompleted extends IntegrationEvent {
  * Published when push notification settings are updated.
  */
 export interface PushSettingsUpdated extends IntegrationEvent {
-  type: 'PushSettingsUpdated';
+  type: "PushSettingsUpdated";
   accountId: string;
   deviceId: string;
   pushEnabled: boolean;
@@ -1194,7 +1194,7 @@ export interface PushSettingsUpdated extends IntegrationEvent {
  * Published when a search is performed.
  */
 export interface SearchPerformed extends IntegrationEvent {
-  type: 'SearchPerformed';
+  type: "SearchPerformed";
   accountId?: string;
   searchId: string;
   query: string;
@@ -1207,7 +1207,7 @@ export interface SearchPerformed extends IntegrationEvent {
  * Published when a search result is clicked.
  */
 export interface SearchResultClicked extends IntegrationEvent {
-  type: 'SearchResultClicked';
+  type: "SearchResultClicked";
   accountId: string;
   searchId: string;
   resultId: string;
@@ -1219,7 +1219,7 @@ export interface SearchResultClicked extends IntegrationEvent {
  * Published when a recommendation is shown.
  */
 export interface RecommendationShown extends IntegrationEvent {
-  type: 'RecommendationShown';
+  type: "RecommendationShown";
   accountId: string;
   recommendationId: string;
   itemIds: string[];
@@ -1231,7 +1231,7 @@ export interface RecommendationShown extends IntegrationEvent {
  * Published when a recommendation is clicked.
  */
 export interface RecommendationClicked extends IntegrationEvent {
-  type: 'RecommendationClicked';
+  type: "RecommendationClicked";
   accountId: string;
   recommendationId: string;
   itemId: string;
@@ -1242,7 +1242,7 @@ export interface RecommendationClicked extends IntegrationEvent {
  * Published when a recommendation is dismissed.
  */
 export interface RecommendationDismissed extends IntegrationEvent {
-  type: 'RecommendationDismissed';
+  type: "RecommendationDismissed";
   accountId: string;
   recommendationId: string;
   itemId?: string;
@@ -1253,7 +1253,7 @@ export interface RecommendationDismissed extends IntegrationEvent {
  * Published when content is featured.
  */
 export interface ContentFeatured extends IntegrationEvent {
-  type: 'ContentFeatured';
+  type: "ContentFeatured";
   contentId: string;
   contentType: string;
   featuredBy: string;
@@ -1265,7 +1265,7 @@ export interface ContentFeatured extends IntegrationEvent {
  * Published when a tag is followed.
  */
 export interface TagFollowed extends IntegrationEvent {
-  type: 'TagFollowed';
+  type: "TagFollowed";
   accountId: string;
   tagId: string;
   tagName: string;
@@ -1275,7 +1275,7 @@ export interface TagFollowed extends IntegrationEvent {
  * Published when a tag is unfollowed.
  */
 export interface TagUnfollowed extends IntegrationEvent {
-  type: 'TagUnfollowed';
+  type: "TagUnfollowed";
   accountId: string;
   tagId: string;
   tagName: string;
@@ -1289,7 +1289,7 @@ export interface TagUnfollowed extends IntegrationEvent {
  * Published when an item is acquired.
  */
 export interface ItemAcquired extends IntegrationEvent {
-  type: 'ItemAcquired';
+  type: "ItemAcquired";
   accountId: string;
   itemId: string;
   itemType: string;
@@ -1303,7 +1303,7 @@ export interface ItemAcquired extends IntegrationEvent {
  * Published when an item is used/consumed.
  */
 export interface ItemUsed extends IntegrationEvent {
-  type: 'ItemUsed';
+  type: "ItemUsed";
   accountId: string;
   itemId: string;
   quantity: number;
@@ -1315,7 +1315,7 @@ export interface ItemUsed extends IntegrationEvent {
  * Published when a cosmetic item is equipped.
  */
 export interface ItemEquipped extends IntegrationEvent {
-  type: 'ItemEquipped';
+  type: "ItemEquipped";
   accountId: string;
   itemId: string;
   slot: string;
@@ -1326,7 +1326,7 @@ export interface ItemEquipped extends IntegrationEvent {
  * Published when an item is unequipped.
  */
 export interface ItemUnequipped extends IntegrationEvent {
-  type: 'ItemUnequipped';
+  type: "ItemUnequipped";
   accountId: string;
   itemId: string;
   slot: string;
@@ -1336,7 +1336,7 @@ export interface ItemUnequipped extends IntegrationEvent {
  * Published when virtual currency is earned.
  */
 export interface CurrencyEarned extends IntegrationEvent {
-  type: 'CurrencyEarned';
+  type: "CurrencyEarned";
   accountId: string;
   currencyType: string;
   amount: number;
@@ -1348,7 +1348,7 @@ export interface CurrencyEarned extends IntegrationEvent {
  * Published when virtual currency is spent.
  */
 export interface CurrencySpent extends IntegrationEvent {
-  type: 'CurrencySpent';
+  type: "CurrencySpent";
   accountId: string;
   currencyType: string;
   amount: number;
@@ -1361,7 +1361,7 @@ export interface CurrencySpent extends IntegrationEvent {
  * Published when items are traded between users.
  */
 export interface ItemTraded extends IntegrationEvent {
-  type: 'ItemTraded';
+  type: "ItemTraded";
   tradeId: string;
   user1AccountId: string;
   user2AccountId: string;
@@ -1373,7 +1373,7 @@ export interface ItemTraded extends IntegrationEvent {
  * Published when daily/login reward is claimed.
  */
 export interface DailyRewardClaimed extends IntegrationEvent {
-  type: 'DailyRewardClaimed';
+  type: "DailyRewardClaimed";
   accountId: string;
   streakDay: number;
   rewardType: string;
@@ -1389,7 +1389,7 @@ export interface DailyRewardClaimed extends IntegrationEvent {
  * Published when user preferences are updated.
  */
 export interface PreferencesUpdated extends IntegrationEvent {
-  type: 'PreferencesUpdated';
+  type: "PreferencesUpdated";
   accountId: string;
   category: string;
   key: string;
@@ -1401,7 +1401,7 @@ export interface PreferencesUpdated extends IntegrationEvent {
  * Published when theme is changed.
  */
 export interface ThemeChanged extends IntegrationEvent {
-  type: 'ThemeChanged';
+  type: "ThemeChanged";
   accountId: string;
   fromTheme: string;
   toTheme: string;
@@ -1411,7 +1411,7 @@ export interface ThemeChanged extends IntegrationEvent {
  * Published when language is changed.
  */
 export interface LanguageChanged extends IntegrationEvent {
-  type: 'LanguageChanged';
+  type: "LanguageChanged";
   accountId: string;
   fromLanguage: string;
   toLanguage: string;
@@ -1421,7 +1421,7 @@ export interface LanguageChanged extends IntegrationEvent {
  * Published when accessibility settings change.
  */
 export interface AccessibilitySettingChanged extends IntegrationEvent {
-  type: 'AccessibilitySettingChanged';
+  type: "AccessibilitySettingChanged";
   accountId: string;
   setting: string;
   enabled: boolean;
@@ -1432,7 +1432,7 @@ export interface AccessibilitySettingChanged extends IntegrationEvent {
  * Published when privacy settings change.
  */
 export interface PrivacySettingChanged extends IntegrationEvent {
-  type: 'PrivacySettingChanged';
+  type: "PrivacySettingChanged";
   accountId: string;
   setting: string;
   newValue: string;
@@ -1442,7 +1442,7 @@ export interface PrivacySettingChanged extends IntegrationEvent {
  * Published when notification preferences change.
  */
 export interface NotificationPreferenceChanged extends IntegrationEvent {
-  type: 'NotificationPreferenceChanged';
+  type: "NotificationPreferenceChanged";
   accountId: string;
   channel: string;
   category: string;
@@ -1453,7 +1453,7 @@ export interface NotificationPreferenceChanged extends IntegrationEvent {
  * Published when content preferences change.
  */
 export interface ContentPreferenceUpdated extends IntegrationEvent {
-  type: 'ContentPreferenceUpdated';
+  type: "ContentPreferenceUpdated";
   accountId: string;
   preferenceType: string;
   values: string[];
@@ -1463,7 +1463,7 @@ export interface ContentPreferenceUpdated extends IntegrationEvent {
  * Published when parental controls are updated.
  */
 export interface ParentalControlsUpdated extends IntegrationEvent {
-  type: 'ParentalControlsUpdated';
+  type: "ParentalControlsUpdated";
   parentAccountId: string;
   childAccountId?: string;
   controlType: string;
@@ -1478,7 +1478,7 @@ export interface ParentalControlsUpdated extends IntegrationEvent {
  * Published when a new season starts.
  */
 export interface SeasonStarted extends IntegrationEvent {
-  type: 'SeasonStarted';
+  type: "SeasonStarted";
   seasonId: string;
   seasonName: string;
   startDate: string;
@@ -1490,7 +1490,7 @@ export interface SeasonStarted extends IntegrationEvent {
  * Published when a season ends.
  */
 export interface SeasonEnded extends IntegrationEvent {
-  type: 'SeasonEnded';
+  type: "SeasonEnded";
   seasonId: string;
   totalParticipants?: number;
 }
@@ -1499,7 +1499,7 @@ export interface SeasonEnded extends IntegrationEvent {
  * Published when a user purchases a battle pass.
  */
 export interface BattlePassPurchased extends IntegrationEvent {
-  type: 'BattlePassPurchased';
+  type: "BattlePassPurchased";
   accountId: string;
   seasonId: string;
   passType: string;
@@ -1510,7 +1510,7 @@ export interface BattlePassPurchased extends IntegrationEvent {
  * Published when a user completes a battle pass tier.
  */
 export interface BattlePassTierCompleted extends IntegrationEvent {
-  type: 'BattlePassTierCompleted';
+  type: "BattlePassTierCompleted";
   accountId: string;
   seasonId: string;
   tier: number;
@@ -1521,7 +1521,7 @@ export interface BattlePassTierCompleted extends IntegrationEvent {
  * Published when a seasonal reward is claimed.
  */
 export interface SeasonalRewardClaimed extends IntegrationEvent {
-  type: 'SeasonalRewardClaimed';
+  type: "SeasonalRewardClaimed";
   accountId: string;
   seasonId: string;
   rewardId: string;
@@ -1537,7 +1537,7 @@ export interface SeasonalRewardClaimed extends IntegrationEvent {
  * Published when a tutorial is started.
  */
 export interface TutorialStarted extends IntegrationEvent {
-  type: 'TutorialStarted';
+  type: "TutorialStarted";
   accountId: string;
   tutorialId: string;
   tutorialName?: string;
@@ -1547,7 +1547,7 @@ export interface TutorialStarted extends IntegrationEvent {
  * Published when a tutorial step is completed.
  */
 export interface TutorialStepCompleted extends IntegrationEvent {
-  type: 'TutorialStepCompleted';
+  type: "TutorialStepCompleted";
   accountId: string;
   tutorialId: string;
   stepId: string;
@@ -1559,7 +1559,7 @@ export interface TutorialStepCompleted extends IntegrationEvent {
  * Published when a tutorial is fully completed.
  */
 export interface TutorialCompleted extends IntegrationEvent {
-  type: 'TutorialCompleted';
+  type: "TutorialCompleted";
   accountId: string;
   tutorialId: string;
   totalDurationSeconds: number;
@@ -1570,7 +1570,7 @@ export interface TutorialCompleted extends IntegrationEvent {
  * Published when a tutorial is skipped.
  */
 export interface TutorialSkipped extends IntegrationEvent {
-  type: 'TutorialSkipped';
+  type: "TutorialSkipped";
   accountId: string;
   tutorialId: string;
   lastCompletedStep?: string;
@@ -1585,7 +1585,7 @@ export interface TutorialSkipped extends IntegrationEvent {
  * Published when matchmaking queue is entered.
  */
 export interface MatchmakingStarted extends IntegrationEvent {
-  type: 'MatchmakingStarted';
+  type: "MatchmakingStarted";
   accountId: string;
   queueId: string;
   gameMode: string;
@@ -1596,7 +1596,7 @@ export interface MatchmakingStarted extends IntegrationEvent {
  * Published when a match is found.
  */
 export interface MatchFound extends IntegrationEvent {
-  type: 'MatchFound';
+  type: "MatchFound";
   matchId: string;
   participants: string[];
   waitTimeSeconds: number;
@@ -1607,7 +1607,7 @@ export interface MatchFound extends IntegrationEvent {
  * Published when a player accepts a match.
  */
 export interface MatchAccepted extends IntegrationEvent {
-  type: 'MatchAccepted';
+  type: "MatchAccepted";
   accountId: string;
   matchId: string;
 }
@@ -1616,7 +1616,7 @@ export interface MatchAccepted extends IntegrationEvent {
  * Published when a player declines a match.
  */
 export interface MatchDeclined extends IntegrationEvent {
-  type: 'MatchDeclined';
+  type: "MatchDeclined";
   accountId: string;
   matchId: string;
   reason?: string;
@@ -1626,7 +1626,7 @@ export interface MatchDeclined extends IntegrationEvent {
  * Published when matchmaking is cancelled.
  */
 export interface MatchmakingCancelled extends IntegrationEvent {
-  type: 'MatchmakingCancelled';
+  type: "MatchmakingCancelled";
   accountId: string;
   queueId: string;
   timeInQueueSeconds: number;
@@ -1640,7 +1640,7 @@ export interface MatchmakingCancelled extends IntegrationEvent {
  * Published when a user joins voice chat.
  */
 export interface VoiceChatJoined extends IntegrationEvent {
-  type: 'VoiceChatJoined';
+  type: "VoiceChatJoined";
   accountId: string;
   channelId: string;
   sessionId?: string;
@@ -1650,7 +1650,7 @@ export interface VoiceChatJoined extends IntegrationEvent {
  * Published when a user leaves voice chat.
  */
 export interface VoiceChatLeft extends IntegrationEvent {
-  type: 'VoiceChatLeft';
+  type: "VoiceChatLeft";
   accountId: string;
   channelId: string;
   durationSeconds: number;
@@ -1660,7 +1660,7 @@ export interface VoiceChatLeft extends IntegrationEvent {
  * Published when voice chat is muted.
  */
 export interface VoiceChatMuted extends IntegrationEvent {
-  type: 'VoiceChatMuted';
+  type: "VoiceChatMuted";
   accountId: string;
   channelId: string;
   mutedByAccountId?: string;
@@ -1670,7 +1670,7 @@ export interface VoiceChatMuted extends IntegrationEvent {
  * Published when voice chat is unmuted.
  */
 export interface VoiceChatUnmuted extends IntegrationEvent {
-  type: 'VoiceChatUnmuted';
+  type: "VoiceChatUnmuted";
   accountId: string;
   channelId: string;
 }
@@ -1679,7 +1679,7 @@ export interface VoiceChatUnmuted extends IntegrationEvent {
  * Published when audio settings are changed.
  */
 export interface AudioSettingsChanged extends IntegrationEvent {
-  type: 'AudioSettingsChanged';
+  type: "AudioSettingsChanged";
   accountId: string;
   setting: string;
   newValue: string;
@@ -1693,7 +1693,7 @@ export interface AudioSettingsChanged extends IntegrationEvent {
  * Published when content translation is requested.
  */
 export interface ContentTranslationRequested extends IntegrationEvent {
-  type: 'ContentTranslationRequested';
+  type: "ContentTranslationRequested";
   contentId: string;
   contentType: string;
   sourceLanguage: string;
@@ -1705,7 +1705,7 @@ export interface ContentTranslationRequested extends IntegrationEvent {
  * Published when content translation is completed.
  */
 export interface ContentTranslationCompleted extends IntegrationEvent {
-  type: 'ContentTranslationCompleted';
+  type: "ContentTranslationCompleted";
   contentId: string;
   targetLanguage: string;
   translationQuality?: string;
@@ -1715,7 +1715,7 @@ export interface ContentTranslationCompleted extends IntegrationEvent {
  * Published when a localization string is updated.
  */
 export interface LocalizationStringUpdated extends IntegrationEvent {
-  type: 'LocalizationStringUpdated';
+  type: "LocalizationStringUpdated";
   stringKey: string;
   language: string;
   oldValue?: string;
@@ -1726,7 +1726,7 @@ export interface LocalizationStringUpdated extends IntegrationEvent {
  * Published when translation feedback is submitted.
  */
 export interface TranslationFeedbackSubmitted extends IntegrationEvent {
-  type: 'TranslationFeedbackSubmitted';
+  type: "TranslationFeedbackSubmitted";
   accountId: string;
   contentId: string;
   language: string;
@@ -1742,7 +1742,7 @@ export interface TranslationFeedbackSubmitted extends IntegrationEvent {
  * Published when AI-generated content is rated.
  */
 export interface AIContentRated extends IntegrationEvent {
-  type: 'AIContentRated';
+  type: "AIContentRated";
   accountId: string;
   contentId: string;
   rating: number;
@@ -1753,7 +1753,7 @@ export interface AIContentRated extends IntegrationEvent {
  * Published when feedback on AI generation is submitted.
  */
 export interface AIGenerationFeedbackSubmitted extends IntegrationEvent {
-  type: 'AIGenerationFeedbackSubmitted';
+  type: "AIGenerationFeedbackSubmitted";
   accountId: string;
   generationId: string;
   feedbackType: string;
@@ -1765,7 +1765,7 @@ export interface AIGenerationFeedbackSubmitted extends IntegrationEvent {
  * Published when AI response regeneration is requested.
  */
 export interface AIResponseRegenerationRequested extends IntegrationEvent {
-  type: 'AIResponseRegenerationRequested';
+  type: "AIResponseRegenerationRequested";
   accountId: string;
   originalGenerationId: string;
   reason?: string;
@@ -1775,7 +1775,7 @@ export interface AIResponseRegenerationRequested extends IntegrationEvent {
  * Published when AI output is accepted by user.
  */
 export interface AIOutputAccepted extends IntegrationEvent {
-  type: 'AIOutputAccepted';
+  type: "AIOutputAccepted";
   accountId: string;
   generationId: string;
   editsMade: boolean;
@@ -1785,7 +1785,7 @@ export interface AIOutputAccepted extends IntegrationEvent {
  * Published when AI hallucination is reported.
  */
 export interface AIHallucinationReported extends IntegrationEvent {
-  type: 'AIHallucinationReported';
+  type: "AIHallucinationReported";
   accountId: string;
   generationId: string;
   hallucinationType?: string;
@@ -1824,17 +1824,27 @@ export type CacheEvent = CacheInvalidated | CacheWarmupRequested;
 /**
  * All AI-related events.
  */
-export type AIEvent = StoryGenerationRequested | StoryGenerationCompleted | StoryGenerationFailed;
+export type AIEvent =
+  | StoryGenerationRequested
+  | StoryGenerationCompleted
+  | StoryGenerationFailed;
 
 /**
  * All user authentication events.
  */
-export type UserEvent = UserLoggedIn | UserLoggedOut | PasswordResetRequested | PasswordChanged;
+export type UserEvent =
+  | UserLoggedIn
+  | UserLoggedOut
+  | PasswordResetRequested
+  | PasswordChanged;
 
 /**
  * All notification-related events.
  */
-export type NotificationEvent = NotificationSent | EmailSent | NotificationFailed;
+export type NotificationEvent =
+  | NotificationSent
+  | EmailSent
+  | NotificationFailed;
 
 /**
  * All progression-related events.
@@ -2088,4 +2098,4 @@ export type MystiraEvent =
 /**
  * Event type discriminator values.
  */
-export type EventType = MystiraEvent['type'];
+export type EventType = MystiraEvent["type"];

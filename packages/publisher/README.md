@@ -38,17 +38,20 @@ Mystira.Publisher provides a streamlined interface for registering stories creat
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/phoenixvc/Mystira.Publisher.git
 cd Mystira.Publisher
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.development
 # Edit .env.development with your configuration
@@ -57,6 +60,7 @@ cp .env.example .env.development
 ### Development
 
 Start the development server:
+
 ```bash
 npm run dev
 ```
@@ -66,11 +70,13 @@ The application will be available at `http://localhost:5173` (or the port specif
 ### Building for Production
 
 Create an optimized production build:
+
 ```bash
 npm run build
 ```
 
 Preview the production build locally:
+
 ```bash
 npm run preview
 ```
@@ -78,26 +84,31 @@ npm run preview
 ## 🧪 Testing
 
 Run unit and integration tests:
+
 ```bash
 npm run test
 ```
 
 Run tests in watch mode:
+
 ```bash
 npm run test:watch
 ```
 
 Generate coverage report:
+
 ```bash
 npm run test:coverage
 ```
 
 Run end-to-end tests:
+
 ```bash
 npm run test:e2e
 ```
 
 Open Cypress test runner:
+
 ```bash
 npm run test:e2e:open
 ```
@@ -105,21 +116,25 @@ npm run test:e2e:open
 ## 🔍 Code Quality
 
 Run ESLint:
+
 ```bash
 npm run lint
 ```
 
 Auto-fix linting issues:
+
 ```bash
 npm run lint:fix
 ```
 
 Format code with Prettier:
+
 ```bash
 npm run format
 ```
 
 Type checking:
+
 ```bash
 npm run typecheck
 ```
@@ -214,6 +229,7 @@ Detailed documentation is available in the `docs/` directory:
 ## 🆘 Support
 
 For questions or issues:
+
 - Open a GitHub issue
 - Refer to the documentation in the `docs/` directory
 - Contact the development team
@@ -221,16 +237,19 @@ For questions or issues:
 ## 🎯 Roadmap
 
 ### Current: Phase 1 - Core MVP
+
 - Multi-role registration with consensus/override
 - Email/handle invitations
 - Basic audit and log flows
 
 ### Upcoming: Phase 2 - Expanded Persona Support
+
 - Enhanced publisher, legal, and platform admin workflows
 - Advanced audit and cross-role tracking
 - User feedback integration
 
 ### Future: Phase 3 - Scaling & Compliance
+
 - Localization and multilingual support
 - Institutional compliance workflows
 - Advanced analytics and reporting

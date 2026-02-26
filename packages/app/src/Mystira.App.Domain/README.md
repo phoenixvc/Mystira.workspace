@@ -11,6 +11,7 @@ The core domain layer containing business entities, domain logic, and value obje
 **Dependencies**: ZERO dependencies on Application or Infrastructure layers ✅
 
 **Recent Fix** (2025-11-24): Removed File I/O - now uses embedded resources for static data
+
 - ✅ RandomNameGenerator.cs - loads from embedded assembly resources
 - ✅ StringEnum.cs - loads from embedded assembly resources
 - ✅ Pure domain with no file system dependencies
@@ -20,12 +21,14 @@ The core domain layer containing business entities, domain logic, and value obje
 **Layer**: **Domain (Core/Center)**
 
 The Domain layer is the **innermost circle** of the hexagonal architecture, containing:
+
 - Pure business logic independent of frameworks and infrastructure
 - Domain models that represent the core business concepts
 - Business rules and invariants
 - Domain events and value objects
 
 **Key Principles**:
+
 - ✅ **No external dependencies** - Only references standard libraries (System.Text.Json, YamlDotNet)
 - ✅ **Framework-agnostic** - Targets `netstandard2.1` for maximum portability
 - ✅ **Self-contained** - All business logic lives here
@@ -66,12 +69,16 @@ Mystira.App.Domain/
 ## Core Domain Entities
 
 ### Account
+
 Represents user authentication and authorization.
+
 - DM (Dungeon Master) accounts for content creators
 - COPPA-compliant (no child accounts with PII)
 
 ### Scenario
+
 The central domain entity representing an interactive story:
+
 - **Scenes**: Individual story moments with narrative text
 - **Choices**: Player decisions that branch the narrative
 - **Echo Logs**: Moral implications of choices
@@ -79,7 +86,9 @@ The central domain entity representing an interactive story:
 - **Age Groups**: Content appropriateness (Ages 4-6, 7-9, 10-12)
 
 ### GameSession
+
 Tracks a player's journey through a scenario:
+
 - Current scene position
 - Choice history
 - Compass tracking (4 moral axes)
@@ -87,7 +96,9 @@ Tracks a player's journey through a scenario:
 - Session state (Active, Paused, Completed)
 
 ### UserProfile
+
 Player profile with preferences and progress:
+
 - Display name and avatar
 - Fantasy theme preference
 - Age group targeting
@@ -95,13 +106,17 @@ Player profile with preferences and progress:
 - Earned badges
 
 ### BadgeConfiguration
+
 Achievement definitions based on moral compass alignment:
+
 - Axis-based badges (e.g., "Champion of Justice")
 - Threshold requirements (min/max values)
 - Badge metadata (name, description, icon)
 
 ### CompassTracking
+
 Real-time moral compass value tracking:
+
 - **Four Core Axes**:
   - Justice ↔ Mercy
   - Truth ↔ Harmony
@@ -111,7 +126,9 @@ Real-time moral compass value tracking:
 - Historical change tracking
 
 ### StoryProtocolMetadata
+
 Blockchain IP registration for content creators:
+
 - IP Asset ID (on-chain identifier)
 - Contributor royalty splits
 - Registration transaction hash
@@ -120,7 +137,9 @@ Blockchain IP registration for content creators:
 ## Value Objects and Enums
 
 ### StringEnum Pattern
+
 Type-safe string enums with predefined values:
+
 ```csharp
 public class FantasyTheme : StringEnum
 {
@@ -131,6 +150,7 @@ public class FantasyTheme : StringEnum
 ```
 
 ### Core Enumerations
+
 - **AgeGroup**: Ages4to6, Ages7to9, Ages10to12
 - **SessionState**: Active, Paused, Completed
 - **EchoType**: Predefined moral echo categories
@@ -141,14 +161,18 @@ public class FantasyTheme : StringEnum
 ## Domain Logic Examples
 
 ### Scenario Validation
+
 Scenarios enforce business rules:
+
 - Maximum 4 character archetypes
 - Maximum 4 compass axes
 - Age-appropriate content validation
 - Echo/compass value ranges
 
 ### Compass Tracking
+
 Automatic calculation of moral compass values:
+
 ```csharp
 public void ApplyCompassChange(CoreAxis axis, int value)
 {
@@ -159,7 +183,9 @@ public void ApplyCompassChange(CoreAxis axis, int value)
 ```
 
 ### Badge Earning Logic
+
 Badge eligibility based on compass thresholds:
+
 ```csharp
 public bool IsEligibleForBadge(CompassTracking tracking)
 {
@@ -173,19 +199,25 @@ public bool IsEligibleForBadge(CompassTracking tracking)
 The Domain includes master data definitions loaded from YAML:
 
 ### archetypes.yml
+
 Defines character personality archetypes:
+
 - Name, description
 - Base compass values
 - Personality traits
 
 ### echo-types.yml
+
 Master list of moral echo categories:
+
 - Echo type names
 - Descriptions
 - Associated moral lessons
 
 ### fantasy-themes.yml
+
 Visual theme catalog:
+
 - Theme names
 - Asset categories
 - UI styling preferences
@@ -193,6 +225,7 @@ Visual theme catalog:
 ## Domain Events (Future)
 
 The domain is designed to support domain events for:
+
 - Scenario completion
 - Badge earning
 - Compass threshold crossing
@@ -201,6 +234,7 @@ The domain is designed to support domain events for:
 ## Validation Rules
 
 Domain entities enforce invariants:
+
 - **Account**: Valid email, unique username
 - **Scenario**: Required title, valid age group, max limits
 - **GameSession**: Valid scenario reference, non-empty choices
@@ -217,6 +251,7 @@ Domain entities enforce invariants:
 ## Usage in Other Layers
 
 ### Application Layer
+
 ```csharp
 using Mystira.App.Domain.Models;
 
@@ -237,6 +272,7 @@ public class CreateScenarioUseCase
 ```
 
 ### Infrastructure Layer
+
 ```csharp
 using Mystira.App.Domain.Models;
 
@@ -247,6 +283,7 @@ public class ScenarioRepository : IRepository<Scenario>
 ```
 
 ### API Layer
+
 ```csharp
 using Mystira.App.Domain.Models;
 
@@ -260,7 +297,9 @@ public class ScenariosController : ControllerBase
 ## Design Patterns
 
 ### Repository Pattern (Interface)
+
 Domain defines repository contracts:
+
 ```csharp
 public interface IRepository<T>
 {
@@ -271,7 +310,9 @@ public interface IRepository<T>
 ```
 
 ### Unit of Work (Interface)
+
 Domain defines transaction boundaries:
+
 ```csharp
 public interface IUnitOfWork
 {
@@ -281,6 +322,7 @@ public interface IUnitOfWork
 ```
 
 ### Domain-Driven Design
+
 - **Entities**: Objects with identity (Account, Scenario, GameSession)
 - **Value Objects**: Objects defined by values (CoreAxis, EchoType)
 - **Aggregates**: Scenario is the root aggregate with Scenes and Choices
@@ -334,50 +376,61 @@ public void CompassTracking_ApplyChange_ShouldClampValues()
 ### ⚠️ Architectural Issues Found
 
 #### 1. **File I/O in Domain Layer** (CRITICAL)
+
 **Location**: `RandomNameGenerator.cs` (lines 18-28), `StringEnum.cs`
 
 **Issue**: Domain layer contains direct file system operations:
+
 ```csharp
 var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 ```
 
 **Impact**:
+
 - ❌ Violates pure domain principle
 - ❌ Creates infrastructure dependency
 - ❌ Makes unit testing difficult
 - ❌ Breaks portability (file paths, disk access)
 
 **Recommendation**:
+
 - Move `RandomNameGenerator` to **Mystira.App.Shared** or create `Mystira.App.Infrastructure.Data.Seed`
 - Load name data at startup via dependency injection
 - Pass data through constructor or factory
 
 #### 2. **Persistence Models Mixed with Domain Models** (MEDIUM)
+
 **Location**: `MediaMetadataModels.cs`
 
 **Issue**: Contains file-based persistence models (`MediaMetadataFile`, `CharacterMapFile`) that include:
+
 - Persistence concerns (`Id`, `CreatedAt`, `UpdatedAt`, `Version`)
 - Document structure for file storage
 - These are infrastructure/data transfer concerns
 
 **Impact**:
+
 - ⚠️ Domain polluted with persistence details
 - ⚠️ Harder to evolve domain independently
 - ⚠️ Confuses domain models with data models
 
 **Recommendation**:
+
 - Keep pure domain models: `MediaMetadata`, `CharacterMap` (without file structure)
 - Move file models (`*File` classes) to **Infrastructure.Data** or **Contracts**
 - Use DTOs for persistence/serialization
 
 #### 3. **Missing Repository Interfaces** (LOW)
+
 **Issue**: Repository interfaces (`IRepository<T>`, `IUnitOfWork`) are not defined in Domain
 
 **Impact**:
+
 - ⚠️ Domain doesn't define its data access contracts
 - ⚠️ Infrastructure defines the interfaces (inverted dependency)
 
 **Recommendation** (Optional for Clean Architecture purists):
+
 - Add `Domain/Interfaces/` folder
 - Define `IRepository<T>`, `IUnitOfWork` in Domain
 - Infrastructure.Data implements these contracts
@@ -393,6 +446,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 ## 📋 Refactoring TODO
 
 ### High Priority
+
 - [ ] **Extract file I/O from RandomNameGenerator**
   - Create `INameGeneratorDataProvider` interface
   - Implement provider in Infrastructure.Data or Shared
@@ -405,6 +459,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
   - Location: `Domain/Models/StringEnum.cs`
 
 ### Medium Priority
+
 - [ ] **Separate domain models from persistence models**
   - Keep `MediaMetadataEntry`, `CharacterMediaMetadataEntry` in Domain (pure data)
   - Move `MediaMetadataFile`, `CharacterMapFile` to Infrastructure.Data
@@ -417,6 +472,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
   - Define `IUnitOfWork` interface
 
 ### Low Priority
+
 - [ ] **Add domain events infrastructure**
   - Create `IDomainEvent` interface
   - Add `DomainEventBase` abstract class
@@ -429,11 +485,13 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 ## 💡 Recommendations
 
 ### Immediate Actions
+
 1. **Create Infrastructure.Data.Seed project** for data loading
 2. **Refactor RandomNameGenerator** to accept pre-loaded data
 3. **Move file-based models** out of Domain
 
 ### Future Improvements
+
 1. **Domain Events**: Publish events when entities change state
 2. **Aggregate Boundaries**: Strengthen scenario aggregate root
 3. **Value Object Library**: More value objects for type safety (EmailAddress, ScenarioId)
@@ -442,6 +500,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 ## 📊 SWOT Analysis
 
 ### Strengths 💪
+
 - ✅ **Framework Independence**: Pure C# with minimal dependencies
 - ✅ **netstandard2.1**: Compatible with .NET Core, .NET 5+, Unity, Xamarin
 - ✅ **Rich Domain Models**: Business logic in entities, not anemic models
@@ -451,6 +510,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 - ✅ **Business Rules**: Validation logic in domain (max 4 archetypes, compass ranges)
 
 ### Weaknesses ⚠️
+
 - ❌ **File I/O in Domain**: Breaks infrastructure independence
 - ❌ **Persistence Models Mixed In**: File models pollute domain
 - ⚠️ **No Domain Events**: Can't react to domain state changes
@@ -459,6 +519,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 - ⚠️ **Thread-Local Random**: `RandomNameGenerator` uses ThreadLocal (okay, but could be better)
 
 ### Opportunities 🚀
+
 - 📈 **Domain Events**: Enable event-driven architecture, CQRS
 - 📈 **Richer Type System**: More value objects for compile-time safety
 - 📈 **Domain Services**: Extract complex business workflows
@@ -468,6 +529,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 - 📈 **Audit Trail**: Track entity changes at domain level
 
 ### Threats 🔒
+
 - ⚡ **File I/O Coupling**: Hard to test, platform-dependent
 - ⚡ **Persistence Leakage**: File models creep into domain logic
 - ⚡ **Serialization Dependency**: YamlDotNet couples to YAML format
@@ -475,6 +537,7 @@ var json = File.ReadAllText(path);  // Infrastructure concern in domain!
 - ⚡ **Performance**: File.ReadAllText on every enum load (mitigated by Lazy<T>)
 
 ### Risk Mitigation
+
 1. **Extract File I/O**: High priority refactoring
 2. **Separate Models**: Keep domain pure
 3. **Add Tests**: Unit tests for all domain logic

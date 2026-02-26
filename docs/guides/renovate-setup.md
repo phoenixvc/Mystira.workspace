@@ -14,9 +14,7 @@ Add a `renovate.json` file to the repository root:
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>phoenixvc/Mystira.workspace//renovate-config"
-  ]
+  "extends": ["github>phoenixvc/Mystira.workspace//renovate-config"]
 }
 ```
 
@@ -35,9 +33,7 @@ You can override or extend the shared config:
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>phoenixvc/Mystira.workspace//renovate-config"
-  ],
+  "extends": ["github>phoenixvc/Mystira.workspace//renovate-config"],
   "schedule": ["after 10am on monday"],
   "packageRules": [
     {
@@ -55,26 +51,26 @@ The shared preset (`renovate-config.json`) includes:
 
 ### Package Grouping
 
-| Group | Packages |
-|-------|----------|
-| Mystira packages | `Mystira.*` |
-| Microsoft packages | `Microsoft.*` |
-| Azure SDK packages | `Azure.*` |
-| Testing packages | `xunit`, `Moq`, `FluentAssertions`, etc. |
-| Linting packages | `eslint`, `prettier`, `@typescript-eslint` |
-| TypeScript tooling | `typescript`, `vite`, `vitest`, etc. |
-| Terraform providers | All Terraform providers |
-| GitHub Actions | All GitHub Actions |
+| Group               | Packages                                   |
+| ------------------- | ------------------------------------------ |
+| Mystira packages    | `Mystira.*`                                |
+| Microsoft packages  | `Microsoft.*`                              |
+| Azure SDK packages  | `Azure.*`                                  |
+| Testing packages    | `xunit`, `Moq`, `FluentAssertions`, etc.   |
+| Linting packages    | `eslint`, `prettier`, `@typescript-eslint` |
+| TypeScript tooling  | `typescript`, `vite`, `vitest`, etc.       |
+| Terraform providers | All Terraform providers                    |
+| GitHub Actions      | All GitHub Actions                         |
 
 ### Automerge Rules
 
-| Update Type | Automerge? | Condition |
-|-------------|------------|-----------|
-| Patch | Yes | Non-Mystira packages |
-| Minor | Yes | Microsoft, Azure, Serilog, Swashbuckle |
-| Major | No | Requires manual approval |
-| Mystira packages | No | Always requires review |
-| Security fixes | No | Prioritized but requires review |
+| Update Type      | Automerge? | Condition                              |
+| ---------------- | ---------- | -------------------------------------- |
+| Patch            | Yes        | Non-Mystira packages                   |
+| Minor            | Yes        | Microsoft, Azure, Serilog, Swashbuckle |
+| Major            | No         | Requires manual approval               |
+| Mystira packages | No         | Always requires review                 |
+| Security fixes   | No         | Prioritized but requires review        |
 
 ### Schedule
 
@@ -113,6 +109,7 @@ Adjust limits in your `renovate.json`:
 ### Automerge Not Working
 
 Ensure:
+
 1. Branch protection allows Renovate to merge
 2. Required status checks are passing
 3. `platformAutomerge` is enabled (default in shared config)

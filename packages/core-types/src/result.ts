@@ -3,7 +3,7 @@
  * Mirrors Mystira.Shared.Exceptions.Result<T> in C#.
  */
 
-import { MystiraError } from './errors';
+import { MystiraError } from "./errors";
 
 /**
  * Represents a result that can be either success or failure.
@@ -29,14 +29,18 @@ export function err<E = MystiraError>(error: E): Result<never, E> {
 /**
  * Check if a result is successful.
  */
-export function isOk<T, E>(result: Result<T, E>): result is { success: true; value: T } {
+export function isOk<T, E>(
+  result: Result<T, E>
+): result is { success: true; value: T } {
   return result.success;
 }
 
 /**
  * Check if a result is a failure.
  */
-export function isErr<T, E>(result: Result<T, E>): result is { success: false; error: E } {
+export function isErr<T, E>(
+  result: Result<T, E>
+): result is { success: false; error: E } {
   return !result.success;
 }
 
@@ -60,14 +64,20 @@ export function unwrapOr<T, E>(result: Result<T, E>, defaultValue: T): T {
 /**
  * Map a successful result to a new value.
  */
-export function map<T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> {
+export function map<T, U, E>(
+  result: Result<T, E>,
+  fn: (value: T) => U
+): Result<U, E> {
   return result.success ? ok(fn(result.value)) : result;
 }
 
 /**
  * Map a failed result to a new error.
  */
-export function mapErr<T, E, F>(result: Result<T, E>, fn: (error: E) => F): Result<T, F> {
+export function mapErr<T, E, F>(
+  result: Result<T, E>,
+  fn: (error: E) => F
+): Result<T, F> {
   return result.success ? result : err(fn(result.error));
 }
 

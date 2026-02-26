@@ -16,7 +16,7 @@ interface ResourcesState {
   // Actions
   fetchResources: (
     forceRefresh?: boolean,
-    environment?: string,
+    environment?: string
   ) => Promise<void>;
   clearCache: () => void;
   reset: () => void;
@@ -54,7 +54,7 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
         {
           subscriptionId: null,
           environment: environment || null,
-        },
+        }
       );
 
       if (response.success && response.result) {
@@ -72,7 +72,7 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
               SKU: resource.sku?.name || "N/A",
               Kind: resource.kind || "N/A",
             },
-          }),
+          })
         );
 
         const now = new Date();
@@ -90,7 +90,7 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
           if (result.azureCliMissing && result.wingetAvailable) {
             const shouldInstall = confirm(
               "Azure CLI is not installed. Would you like to install it now using winget?\n\n" +
-                "This will open a terminal window to install Azure CLI. After installation, please restart the application.",
+                "This will open a terminal window to install Azure CLI. After installation, please restart the application."
             );
 
             if (shouldInstall) {
@@ -101,21 +101,21 @@ export const useResourcesStore = create<ResourcesState>((set, get) => ({
                   const result = installResponse.result as any;
                   if (result?.requiresRestart) {
                     alert(
-                      "A terminal window has opened to install Azure CLI. After installation completes in that window, please RESTART the application for Azure CLI to be detected.\n\nNote: If Azure CLI was already installed, you may need to restart the app for it to be detected in the PATH.",
+                      "A terminal window has opened to install Azure CLI. After installation completes in that window, please RESTART the application for Azure CLI to be detected.\n\nNote: If Azure CLI was already installed, you may need to restart the app for it to be detected in the PATH."
                     );
                   } else {
                     alert(
-                      "A terminal window has opened to install Azure CLI. Please wait for installation to complete in that window, then restart the application.",
+                      "A terminal window has opened to install Azure CLI. Please wait for installation to complete in that window, then restart the application."
                     );
                   }
                 } else {
                   alert(
-                    `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}\n\nPlease install manually from https://aka.ms/installazurecliwindows`,
+                    `Failed to install Azure CLI: ${installResponse.error || "Unknown error"}\n\nPlease install manually from https://aka.ms/installazurecliwindows`
                   );
                 }
               } catch (error) {
                 alert(
-                  `Error installing Azure CLI: ${error}\n\nPlease install manually from https://aka.ms/installazurecliwindows`,
+                  `Error installing Azure CLI: ${error}\n\nPlease install manually from https://aka.ms/installazurecliwindows`
                 );
               }
             }

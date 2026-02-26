@@ -21,6 +21,7 @@ infra/terraform/
 ```
 
 **Problems:**
+
 - Single state file per environment = deployment bottleneck
 - One team's change can block another
 - Long `terraform plan` times
@@ -78,6 +79,7 @@ infra/terraform/
 **Duration:** 2-4 hours per environment (start with dev)
 
 #### Step 2.1: Backup Current State
+
 ```bash
 # For each environment
 cd infra/terraform/environments/dev
@@ -85,6 +87,7 @@ terraform state pull > backup-$(date +%Y%m%d).tfstate
 ```
 
 #### Step 2.2: Create New State Files
+
 ```bash
 # Create separate state files in Azure Storage
 az storage blob directory create \
@@ -120,26 +123,27 @@ terraform state mv \
 
 **Resource Mapping:**
 
-| Current Module | Target State File |
-|----------------|-------------------|
-| `module.shared_postgresql` | `shared-infra/dev.tfstate` |
-| `module.shared_redis` | `shared-infra/dev.tfstate` |
-| `module.shared_cosmos_db` | `shared-infra/dev.tfstate` |
-| `module.shared_storage` | `shared-infra/dev.tfstate` |
-| `module.shared_azure_ai` | `shared-infra/dev.tfstate` |
-| `module.shared_servicebus` | `shared-infra/dev.tfstate` |
-| `module.shared_container_registry` | `shared-infra/dev.tfstate` |
-| `module.shared_monitoring` | `shared-infra/dev.tfstate` |
-| `module.dns` | `shared-infra/dev.tfstate` |
-| `module.front_door` | `shared-infra/dev.tfstate` |
-| `module.mystira_app` | `mystira-app/dev.tfstate` |
-| `module.story_generator` | `story-generator/dev.tfstate` |
-| `module.admin_api` | `admin/dev.tfstate` |
-| `module.admin_ui` | `admin/dev.tfstate` |
-| `module.publisher` | `publisher/dev.tfstate` |
-| `module.chain` | `chain/dev.tfstate` |
+| Current Module                     | Target State File             |
+| ---------------------------------- | ----------------------------- |
+| `module.shared_postgresql`         | `shared-infra/dev.tfstate`    |
+| `module.shared_redis`              | `shared-infra/dev.tfstate`    |
+| `module.shared_cosmos_db`          | `shared-infra/dev.tfstate`    |
+| `module.shared_storage`            | `shared-infra/dev.tfstate`    |
+| `module.shared_azure_ai`           | `shared-infra/dev.tfstate`    |
+| `module.shared_servicebus`         | `shared-infra/dev.tfstate`    |
+| `module.shared_container_registry` | `shared-infra/dev.tfstate`    |
+| `module.shared_monitoring`         | `shared-infra/dev.tfstate`    |
+| `module.dns`                       | `shared-infra/dev.tfstate`    |
+| `module.front_door`                | `shared-infra/dev.tfstate`    |
+| `module.mystira_app`               | `mystira-app/dev.tfstate`     |
+| `module.story_generator`           | `story-generator/dev.tfstate` |
+| `module.admin_api`                 | `admin/dev.tfstate`           |
+| `module.admin_ui`                  | `admin/dev.tfstate`           |
+| `module.publisher`                 | `publisher/dev.tfstate`       |
+| `module.chain`                     | `chain/dev.tfstate`           |
 
 #### Step 2.4: Verify State Integrity
+
 ```bash
 # For each new state file
 cd products/mystira-app/environments/dev
@@ -156,7 +160,8 @@ jobs:
   plan:
     strategy:
       matrix:
-        product: [shared-infra, mystira-app, story-generator, admin, publisher, chain]
+        product:
+          [shared-infra, mystira-app, story-generator, admin, publisher, chain]
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
@@ -191,12 +196,12 @@ terraform state push backup-YYYYMMDD.tfstate
 
 ## Risk Mitigation
 
-| Risk | Mitigation |
-|------|------------|
-| State corruption | Backup before each change, test in dev first |
+| Risk                            | Mitigation                                   |
+| ------------------------------- | -------------------------------------------- |
+| State corruption                | Backup before each change, test in dev first |
 | Resource drift during migration | Short maintenance window, freeze deployments |
-| Dependency issues | Terragrunt handles cross-state dependencies |
-| CI/CD failures | Keep old pipeline until verified |
+| Dependency issues               | Terragrunt handles cross-state dependencies  |
+| CI/CD failures                  | Keep old pipeline until verified             |
 
 ## Validation Checklist
 
@@ -208,13 +213,13 @@ terraform state push backup-YYYYMMDD.tfstate
 
 ## Timeline
 
-| Phase | Environment | Duration | Dependencies |
-|-------|-------------|----------|--------------|
-| 1 | All | 1-2 days | None |
-| 2 | Dev | 2-4 hours | Phase 1 |
-| 2 | Staging | 2-4 hours | Dev validated |
-| 2 | Prod | 2-4 hours | Staging validated |
-| 3 | All | 1 day | Phase 2 complete |
-| 4 | All | 1 day | Phase 3 verified |
+| Phase | Environment | Duration  | Dependencies      |
+| ----- | ----------- | --------- | ----------------- |
+| 1     | All         | 1-2 days  | None              |
+| 2     | Dev         | 2-4 hours | Phase 1           |
+| 2     | Staging     | 2-4 hours | Dev validated     |
+| 2     | Prod        | 2-4 hours | Staging validated |
+| 3     | All         | 1 day     | Phase 2 complete  |
+| 4     | All         | 1 day     | Phase 3 verified  |
 
 **Total estimated time:** 1-2 weeks (conservative)

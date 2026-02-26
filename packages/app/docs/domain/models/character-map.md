@@ -12,15 +12,15 @@ The `CharacterMap` domain model represents reusable character definitions that c
 
 ## Properties
 
-| Property      | Type                | Description                                    |
-| ------------- | ------------------- | ---------------------------------------------- |
-| `Id`          | `string`            | Unique identifier                              |
-| `Name`        | `string`            | Character name                                 |
-| `Image`        | `string`            | Media path (e.g., "media/images/elarion.jpg") |
-| `Audio`        | `string?`           | Optional audio file path                       |
-| `Metadata`     | `CharacterMetadata` | Character metadata                             |
-| `CreatedAt`   | `DateTime`          | Creation timestamp                             |
-| `UpdatedAt`   | `DateTime`          | Last update timestamp                          |
+| Property    | Type                | Description                                   |
+| ----------- | ------------------- | --------------------------------------------- |
+| `Id`        | `string`            | Unique identifier                             |
+| `Name`      | `string`            | Character name                                |
+| `Image`     | `string`            | Media path (e.g., "media/images/elarion.jpg") |
+| `Audio`     | `string?`           | Optional audio file path                      |
+| `Metadata`  | `CharacterMetadata` | Character metadata                            |
+| `CreatedAt` | `DateTime`          | Creation timestamp                            |
+| `UpdatedAt` | `DateTime`          | Last update timestamp                         |
 
 ## Related Domain Models
 
@@ -30,14 +30,14 @@ Contains detailed character information.
 
 **Properties**:
 
-| Property      | Type                | Description                                    |
-| ------------- | ------------------- | ---------------------------------------------- |
-| `Roles`       | `List<string>`      | Character roles (e.g., ["mentor", "trickster"]) |
-| `Archetypes`  | `List<string>`      | Character archetypes (e.g., ["guardian", "the listener"]) |
-| `Species`     | `string`            | Species (e.g., "elf", "goblin")               |
-| `Age`         | `int`               | Character age                                  |
-| `Traits`      | `List<string>`      | Character traits (e.g., ["wise", "calm", "mysterious"]) |
-| `Backstory`   | `string`            | Character backstory                            |
+| Property     | Type           | Description                                               |
+| ------------ | -------------- | --------------------------------------------------------- |
+| `Roles`      | `List<string>` | Character roles (e.g., ["mentor", "trickster"])           |
+| `Archetypes` | `List<string>` | Character archetypes (e.g., ["guardian", "the listener"]) |
+| `Species`    | `string`       | Species (e.g., "elf", "goblin")                           |
+| `Age`        | `int`          | Character age                                             |
+| `Traits`     | `List<string>` | Character traits (e.g., ["wise", "calm", "mysterious"])   |
+| `Backstory`  | `string`       | Character backstory                                       |
 
 ### CharacterMapYaml
 
@@ -53,13 +53,13 @@ YAML entry structure for a single character.
 
 **Properties**:
 
-| Property      | Type                | Description                                    |
-| ------------- | ------------------- | ---------------------------------------------- |
-| `Id`          | `string`            | Character ID                                   |
-| `Name`        | `string`            | Character name                                 |
-| `Image`        | `string`            | Image path                                     |
-| `Audio`        | `string?`           | Optional audio path                            |
-| `Metadata`     | `CharacterMetadata` | Character metadata                             |
+| Property   | Type                | Description         |
+| ---------- | ------------------- | ------------------- |
+| `Id`       | `string`            | Character ID        |
+| `Name`     | `string`            | Character name      |
+| `Image`    | `string`            | Image path          |
+| `Audio`    | `string?`           | Optional audio path |
+| `Metadata` | `CharacterMetadata` | Character metadata  |
 
 ## Relationships
 

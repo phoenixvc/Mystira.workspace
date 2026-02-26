@@ -101,4 +101,3 @@ Badge configurations support YAML-based import and export:
 - [CoreAxis Domain Model](./core-axis.md)
 - [Compass Domain Models](./compass.md)
 - [Use Cases Documentation](../usecases/README.md)
-

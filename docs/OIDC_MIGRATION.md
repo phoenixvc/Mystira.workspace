@@ -8,19 +8,20 @@ OIDC (OpenID Connect) authentication, also known as Workload Identity Federation
 
 ### Benefits of OIDC
 
-| Aspect | Service Principal (Legacy) | OIDC (Recommended) |
-|--------|---------------------------|-------------------|
-| Secret Rotation | Manual, every 1-2 years | Not required |
-| Credential Exposure | Risk if secret leaks | No secrets to leak |
-| Secret Management | Complex JSON credential | Three simple IDs |
-| Token Lifetime | Long-lived (configurable) | Short-lived (auto-expires) |
-| Audit Trail | Limited | Full Azure AD audit logs |
+| Aspect              | Service Principal (Legacy) | OIDC (Recommended)         |
+| ------------------- | -------------------------- | -------------------------- |
+| Secret Rotation     | Manual, every 1-2 years    | Not required               |
+| Credential Exposure | Risk if secret leaks       | No secrets to leak         |
+| Secret Management   | Complex JSON credential    | Three simple IDs           |
+| Token Lifetime      | Long-lived (configurable)  | Short-lived (auto-expires) |
+| Audit Trail         | Limited                    | Full Azure AD audit logs   |
 
 ## Migration Status
 
 All production workflows have been migrated to OIDC authentication using direct `azure/login@v2` with OIDC parameters (`client-id`, `tenant-id`, `subscription-id`).
 
 A reusable workflow `_azure-login.yml` is also available for:
+
 - Backwards compatibility during transition (supports both OIDC and legacy service principal)
 - Centralized authentication logic for new workflows
 - Automatic Terraform environment variable configuration
@@ -54,6 +55,7 @@ az ad app list --display-name "Mystira GitHub Actions" --query "[].appId" -o tsv
 ### 2. Configure Federated Credentials
 
 In Azure Portal:
+
 1. Navigate to **Azure Active Directory** > **App Registrations**
 2. Select your app registration
 3. Go to **Certificates & secrets** > **Federated credentials**
@@ -91,11 +93,11 @@ az ad app federated-credential create \
 
 Configure these secrets in your GitHub repository:
 
-| Secret | Description | Example |
-|--------|-------------|---------|
-| `AZURE_CLIENT_ID` | Azure AD App Registration Client ID | `12345678-1234-1234-1234-123456789abc` |
-| `AZURE_TENANT_ID` | Azure AD Tenant ID | `87654321-4321-4321-4321-cba987654321` |
-| `AZURE_SUBSCRIPTION_ID` | Azure Subscription ID | `aaaabbbb-cccc-dddd-eeee-ffff00001111` |
+| Secret                  | Description                         | Example                                |
+| ----------------------- | ----------------------------------- | -------------------------------------- |
+| `AZURE_CLIENT_ID`       | Azure AD App Registration Client ID | `12345678-1234-1234-1234-123456789abc` |
+| `AZURE_TENANT_ID`       | Azure AD Tenant ID                  | `87654321-4321-4321-4321-cba987654321` |
+| `AZURE_SUBSCRIPTION_ID` | Azure Subscription ID               | `aaaabbbb-cccc-dddd-eeee-ffff00001111` |
 
 ## Usage in Workflows
 
@@ -106,7 +108,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write  # Required for OIDC
+      id-token: write # Required for OIDC
       contents: read
     steps:
       - name: Azure Login (OIDC)
@@ -158,8 +160,8 @@ jobs:
   my-job:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write   # Required for OIDC
-      contents: read    # Typically needed for checkout
+      id-token: write # Required for OIDC
+      contents: read # Typically needed for checkout
 ```
 
 If your workflow has a top-level `permissions` block, ensure it includes `id-token: write`, or add it at the job level.
@@ -171,6 +173,7 @@ If your workflow has a top-level `permissions` block, ensure it includes `id-tok
 This error occurs when the federated credential doesn't match the token claims.
 
 **Solutions:**
+
 1. Verify the subject identifier matches your trigger context
 2. Check if you're using environment-scoped vs branch-scoped credentials
 3. Ensure the repository name is correct (case-sensitive)
@@ -183,7 +186,7 @@ Ensure the `permissions` block is correctly indented:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:      # At job level
+    permissions: # At job level
       id-token: write
       contents: read
 ```

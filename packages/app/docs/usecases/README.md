@@ -84,7 +84,7 @@ Use cases for content bundle management:
 
 All use cases follow the hexagonal architecture pattern:
 
-``` text
+```text
 Controller → Service → Use Case → Repository → Database
                 ↓
             Domain Models

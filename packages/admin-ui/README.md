@@ -193,18 +193,18 @@ This application uses **Microsoft Entra ID (Azure AD)** for authentication via M
 
 ### Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start development server with HMR |
-| `pnpm build` | Build for production |
-| `pnpm preview` | Preview production build locally |
-| `pnpm lint` | Run ESLint to check code quality |
-| `pnpm lint:fix` | Fix ESLint errors automatically |
-| `pnpm format` | Format code with Prettier |
-| `pnpm test` | Run tests once |
-| `pnpm test:watch` | Run tests in watch mode |
-| `pnpm test:coverage` | Generate test coverage report |
-| `pnpm typecheck` | Type check without building |
+| Script               | Description                       |
+| -------------------- | --------------------------------- |
+| `pnpm dev`           | Start development server with HMR |
+| `pnpm build`         | Build for production              |
+| `pnpm preview`       | Preview production build locally  |
+| `pnpm lint`          | Run ESLint to check code quality  |
+| `pnpm lint:fix`      | Fix ESLint errors automatically   |
+| `pnpm format`        | Format code with Prettier         |
+| `pnpm test`          | Run tests once                    |
+| `pnpm test:watch`    | Run tests in watch mode           |
+| `pnpm test:coverage` | Generate test coverage report     |
+| `pnpm typecheck`     | Type check without building       |
 
 ### Development Workflow
 
@@ -410,15 +410,15 @@ VITE_DEBUG=true
 
 **Available Variables:**
 
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `VITE_API_BASE_URL` | Backend API URL | - | Yes |
-| `VITE_AZURE_CLIENT_ID` | Azure AD Application (client) ID | - | Yes |
-| `VITE_AZURE_TENANT_ID` | Azure AD Directory (tenant) ID | `common` | Yes |
-| `VITE_AZURE_REDIRECT_URI` | OAuth redirect URI | `window.location.origin` | No |
-| `VITE_AZURE_API_SCOPE` | API scope for backend access | `User.Read` | Yes |
-| `VITE_ENV` | Environment name | `development` | No |
-| `VITE_DEBUG` | Enable debug logs | `false` | No |
+| Variable                  | Description                      | Default                  | Required |
+| ------------------------- | -------------------------------- | ------------------------ | -------- |
+| `VITE_API_BASE_URL`       | Backend API URL                  | -                        | Yes      |
+| `VITE_AZURE_CLIENT_ID`    | Azure AD Application (client) ID | -                        | Yes      |
+| `VITE_AZURE_TENANT_ID`    | Azure AD Directory (tenant) ID   | `common`                 | Yes      |
+| `VITE_AZURE_REDIRECT_URI` | OAuth redirect URI               | `window.location.origin` | No       |
+| `VITE_AZURE_API_SCOPE`    | API scope for backend access     | `User.Read`              | Yes      |
+| `VITE_ENV`                | Environment name                 | `development`            | No       |
+| `VITE_DEBUG`              | Enable debug logs                | `false`                  | No       |
 
 ### Vite Configuration
 
@@ -490,14 +490,14 @@ src/
 Use React Testing Library and Vitest:
 
 ```tsx
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import Alert from './Alert';
+import { render, screen } from "@testing-library/react";
+import { describe, it, expect } from "vitest";
+import Alert from "./Alert";
 
-describe('Alert', () => {
-  it('renders success alert', () => {
+describe("Alert", () => {
+  it("renders success alert", () => {
     render(<Alert variant="success">Success message</Alert>);
-    expect(screen.getByText('Success message')).toBeInTheDocument();
+    expect(screen.getByText("Success message")).toBeInTheDocument();
   });
 });
 ```

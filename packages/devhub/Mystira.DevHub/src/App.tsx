@@ -86,12 +86,12 @@ function App() {
 
     window.addEventListener(
       EVENTS.NAVIGATE_TO_INFRASTRUCTURE,
-      handleNavigateToInfrastructure,
+      handleNavigateToInfrastructure
     );
     return () => {
       window.removeEventListener(
         EVENTS.NAVIGATE_TO_INFRASTRUCTURE,
-        handleNavigateToInfrastructure,
+        handleNavigateToInfrastructure
       );
     };
   }, []);
@@ -99,14 +99,14 @@ function App() {
   const serviceConfigs = getServiceConfigs(
     {},
     serviceEnvironments,
-    getEnvironmentUrls,
+    getEnvironmentUrls
   );
   const environmentSummary = useEnvironmentSummary(serviceEnvironments);
   const { allLogs, filteredLogs } = useLogConversion(
     globalLogs,
     deploymentLogs,
     problems,
-    logFilter,
+    logFilter
   );
 
   const bottomPanelTabs = useAppBottomPanelTabs({

@@ -14,17 +14,18 @@
 
 The Mystira.App Blazor PWA is deployed differently across the three environments:
 
-| Environment | Deployment Method | Resource Type |
-|------------|------------------|---------------|
+| Environment     | Deployment Method     | Resource Type                            |
+| --------------- | --------------------- | ---------------------------------------- |
 | **Development** | Azure Static Web Apps | Static Web App (`mango-water-04fdb1c03`) |
-| **Staging** | Azure App Service | App Service (`mystira-app-staging-pwa`) |
-| **Production** | Azure Static Web Apps | Static Web App (`blue-water-0eab7991e`) |
+| **Staging**     | Azure App Service     | App Service (`mystira-app-staging-pwa`)  |
+| **Production**  | Azure Static Web Apps | Static Web App (`blue-water-0eab7991e`)  |
 
 This inconsistency raised questions about whether the staging environment's use of App Service instead of Static Web Apps is the correct architectural decision.
 
 ### Current State
 
 **Development & Production**: Use Azure Static Web Apps
+
 - Deployment via GitHub Actions using `Azure/static-web-apps-deploy@v1`
 - Deployment tokens stored as GitHub secrets
 - Automatic CDN, SSL, and global distribution
@@ -32,6 +33,7 @@ This inconsistency raised questions about whether the staging environment's use 
 - Optimized for static content delivery
 
 **Staging**: Uses Azure App Service
+
 - Deployment via GitHub Actions using `azure/webapps-deploy@v2`
 - Publish profile stored as GitHub secret
 - Requires App Service Plan with compute resources
@@ -89,6 +91,7 @@ App Service Plan: mystira-app-staging (B1)
 ```
 
 **Cost Analysis**:
+
 - **Current**: R350/month for shared plan (3 services)
 - **If PWA moved to Static Web App**: R350/month for plan + R0 for SWA = R350/month
 - **But**: Shared plan already budgeted for APIs; PWA adds no incremental cost
@@ -108,6 +111,7 @@ Using App Service keeps all staging deployments consistent:
 ```
 
 **Benefits**:
+
 - Consistent secret management (publish profiles)
 - Consistent deployment workflow
 - Single deployment method to maintain
@@ -134,12 +138,14 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 - Authentication flows are identical (JWT tokens)
 
 **What we're NOT testing differently**:
+
 - ✅ Application code (identical)
 - ✅ API integration (identical)
 - ✅ Authentication (identical)
 - ✅ Browser behavior (identical)
 
 **What IS different** (but acceptable for staging):
+
 - ❌ CDN behavior (not critical for staging)
 - ❌ Global distribution (staging is single region)
 - ❌ Static Web App-specific features (we don't use them)
@@ -151,12 +157,14 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ### Alternative 1: Migrate Staging to Static Web Apps ⭐ REJECTED
 
 **Pros**:
+
 - ✅ Perfect environment parity with Production
 - ✅ Consistent deployment method across all environments
 - ✅ Free tier available (no cost)
 - ✅ Automatic CDN and global distribution
 
 **Cons**:
+
 - ❌ Requires creating new Static Web App resource
 - ❌ Requires new deployment token secret
 - ❌ Different deployment workflow from APIs
@@ -169,10 +177,12 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ### Alternative 2: Migrate Dev/Prod to App Service ⭐ REJECTED
 
 **Pros**:
+
 - ✅ Consistent deployment across all environments
 - ✅ Simplified secret management
 
 **Cons**:
+
 - ❌ Increased production costs (need dedicated App Service Plan)
 - ❌ Reduced performance (no automatic CDN)
 - ❌ More infrastructure to manage
@@ -184,11 +194,13 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ### Alternative 3: Use Static Web Apps for All Environments ⭐ CONSIDERED
 
 **Pros**:
+
 - ✅ Perfect environment parity
 - ✅ Free tier for all environments
 - ✅ Optimal performance everywhere
 
 **Cons**:
+
 - ❌ Less flexibility in staging for debugging
 - ❌ Cannot share resources with APIs
 - ❌ Different deployment method from APIs (inconsistent)
@@ -259,6 +271,7 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ### Current Configuration
 
 **Development** (`dev` branch):
+
 ```yaml
 # .github/workflows/azure-static-web-apps-dev-san-swa-mystira-app.yml
 - name: Build And Deploy
@@ -269,6 +282,7 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ```
 
 **Staging** (`staging` branch):
+
 ```yaml
 # .github/workflows/mystira-app-pwa-cicd-staging.yml
 - name: Deploy to Azure Web App
@@ -279,6 +293,7 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ```
 
 **Production** (`main` branch):
+
 ```yaml
 # .github/workflows/azure-static-web-apps-blue-water-0eab7991e.yml
 - name: Build And Deploy
@@ -290,11 +305,11 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 
 ### Required Secrets by Environment
 
-| Environment | PWA Deployment Secret | Type |
-|------------|---------------------|------|
-| Development | `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP` | Static Web App Token |
-| Staging | `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA` | App Service Publish Profile |
-| Production | `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E` | Static Web App Token |
+| Environment | PWA Deployment Secret                                  | Type                        |
+| ----------- | ------------------------------------------------------ | --------------------------- |
+| Development | `AZURE_STATIC_WEB_APPS_API_TOKEN_DEV_SAN_MYSTIRA_APP`  | Static Web App Token        |
+| Staging     | `AZURE_WEBAPP_PUBLISH_PROFILE_STAGING_PWA`             | App Service Publish Profile |
+| Production  | `AZURE_STATIC_WEB_APPS_API_TOKEN_BLUE_WATER_0EAB7991E` | Static Web App Token        |
 
 ---
 
@@ -333,6 +348,7 @@ The PWA is a **static client application** - deployment method doesn't affect fu
 ### Review Triggers
 
 Review this decision if:
+
 - Static Web Apps gain exclusive features we need
 - App Service Plan becomes overloaded with staging services
 - Team requests environment parity for specific reasons
@@ -363,17 +379,17 @@ Review this decision if:
 
 ### Static Web Apps vs App Service for Blazor WASM
 
-| Feature | Static Web Apps | App Service | Staging Need |
-|---------|----------------|-------------|--------------|
-| **Static File Hosting** | ✅ Optimized | ✅ Supported | ✅ Both work |
-| **CDN** | ✅ Automatic | ❌ Separate resource | ❌ Not needed for staging |
-| **Global Distribution** | ✅ Automatic | ❌ Manual setup | ❌ Not needed for staging |
-| **Custom Domain** | ✅ Free SSL | ✅ Free SSL | ✅ Both work |
-| **Deployment** | GitHub Action | Multiple methods | ✅ Both work |
-| **Cost** | Free tier | Requires plan | ✅ Already have plan |
-| **Server-side API** | Limited | ✅ Full support | ✅ More flexibility |
-| **Logging** | Basic | ✅ Detailed | ✅ Better debugging |
-| **Health Checks** | Basic | ✅ Custom | ✅ Better monitoring |
+| Feature                 | Static Web Apps | App Service          | Staging Need              |
+| ----------------------- | --------------- | -------------------- | ------------------------- |
+| **Static File Hosting** | ✅ Optimized    | ✅ Supported         | ✅ Both work              |
+| **CDN**                 | ✅ Automatic    | ❌ Separate resource | ❌ Not needed for staging |
+| **Global Distribution** | ✅ Automatic    | ❌ Manual setup      | ❌ Not needed for staging |
+| **Custom Domain**       | ✅ Free SSL     | ✅ Free SSL          | ✅ Both work              |
+| **Deployment**          | GitHub Action   | Multiple methods     | ✅ Both work              |
+| **Cost**                | Free tier       | Requires plan        | ✅ Already have plan      |
+| **Server-side API**     | Limited         | ✅ Full support      | ✅ More flexibility       |
+| **Logging**             | Basic           | ✅ Detailed          | ✅ Better debugging       |
+| **Health Checks**       | Basic           | ✅ Custom            | ✅ Better monitoring      |
 
 ---
 

@@ -129,16 +129,16 @@ We will implement a **complete separate staging environment** that mirrors produ
 
 ### Staging Environment Components
 
-| Production Resource | Staging Equivalent | Notes |
-|--------------------|-------------------|-------|
-| mystira-pwa-prod | mystira-pwa-stag | Static Web App |
-| mystira-api-prod | mystira-api-stag | App Service |
-| mystira-admin-api-prod | mystira-admin-api-stag | App Service |
-| mystira-cosmos-prod | mystira-cosmos-stag | Cosmos DB (Serverless) |
-| mystirastorageprod | mystirastoragestag | Storage Account |
-| mystira-fd-prod | mystira-fd-stag | Front Door |
-| mystira-kv-prod | mystira-kv-stag | Key Vault |
-| mystira-appinsights-prod | mystira-appinsights-stag | App Insights |
+| Production Resource      | Staging Equivalent       | Notes                  |
+| ------------------------ | ------------------------ | ---------------------- |
+| mystira-pwa-prod         | mystira-pwa-stag         | Static Web App         |
+| mystira-api-prod         | mystira-api-stag         | App Service            |
+| mystira-admin-api-prod   | mystira-admin-api-stag   | App Service            |
+| mystira-cosmos-prod      | mystira-cosmos-stag      | Cosmos DB (Serverless) |
+| mystirastorageprod       | mystirastoragestag       | Storage Account        |
+| mystira-fd-prod          | mystira-fd-stag          | Front Door             |
+| mystira-kv-prod          | mystira-kv-stag          | Key Vault              |
+| mystira-appinsights-prod | mystira-appinsights-stag | App Insights           |
 
 ### Resource Naming Convention
 
@@ -157,6 +157,7 @@ Examples:
 Each environment will have dedicated configuration:
 
 **Staging (`appsettings.Staging.json`)**:
+
 ```json
 {
   "Environment": "Staging",
@@ -175,6 +176,7 @@ Each environment will have dedicated configuration:
 ```
 
 **Production (`appsettings.Production.json`)**:
+
 ```json
 {
   "Environment": "Production",
@@ -216,14 +218,14 @@ Each environment will have dedicated configuration:
 
 ### Environment Promotion Gates
 
-| Gate | Staging | Production |
-|------|---------|------------|
-| Automated Tests | Required | Required |
-| Health Check | Required | Required |
-| Smoke Tests | Required | Required |
-| Performance Test | Optional | Required |
-| Manual Approval | Not Required | Required |
-| Soak Time | 1 hour minimum | 24 hour rollback window |
+| Gate             | Staging        | Production              |
+| ---------------- | -------------- | ----------------------- |
+| Automated Tests  | Required       | Required                |
+| Health Check     | Required       | Required                |
+| Smoke Tests      | Required       | Required                |
+| Performance Test | Optional       | Required                |
+| Manual Approval  | Not Required   | Required                |
+| Soak Time        | 1 hour minimum | 24 hour rollback window |
 
 ---
 
@@ -336,16 +338,16 @@ Each environment will have dedicated configuration:
 
 ### Staging Environment Monthly Costs (Estimated)
 
-| Resource | SKU | Monthly Cost (ZAR) |
-|----------|-----|-------------------|
-| App Service Plan | B1 (shared with both APIs) | R350 |
-| Cosmos DB | Serverless (minimal usage) | R200 |
-| Storage Account | Standard LRS | R50 |
-| Application Insights | Pay-per-use | R100 |
-| Front Door | Standard | R400 |
-| Key Vault | Standard | R30 |
-| Static Web App | Free tier | R0 |
-| **Total Staging** | | **R1,130** |
+| Resource             | SKU                        | Monthly Cost (ZAR) |
+| -------------------- | -------------------------- | ------------------ |
+| App Service Plan     | B1 (shared with both APIs) | R350               |
+| Cosmos DB            | Serverless (minimal usage) | R200               |
+| Storage Account      | Standard LRS               | R50                |
+| Application Insights | Pay-per-use                | R100               |
+| Front Door           | Standard                   | R400               |
+| Key Vault            | Standard                   | R30                |
+| Static Web App       | Free tier                  | R0                 |
+| **Total Staging**    |                            | **R1,130**         |
 
 ### Cost Optimization Strategies
 
@@ -371,12 +373,12 @@ Each environment will have dedicated configuration:
 
 ### Total Environment Costs
 
-| Environment | Monthly Cost (ZAR) |
-|-------------|-------------------|
-| Production (current) | R1,800 |
-| Production (with Front Door) | R2,690 |
-| Staging | R1,130 |
-| **Total** | **R3,820** |
+| Environment                  | Monthly Cost (ZAR) |
+| ---------------------------- | ------------------ |
+| Production (current)         | R1,800             |
+| Production (with Front Door) | R2,690             |
+| Staging                      | R1,130             |
+| **Total**                    | **R3,820**         |
 
 **Increase from current**: +R2,020/month (+112%)
 
@@ -384,16 +386,16 @@ Each environment will have dedicated configuration:
 
 ## Environment Comparison Matrix
 
-| Aspect | Development | Staging | Production |
-|--------|-------------|---------|------------|
-| **Purpose** | Local development | Pre-production validation | Live users |
-| **Data** | Mock/seed data | Test data | Real user data |
-| **Access** | Developers | Team + stakeholders | Public |
-| **Deployment** | Manual/local | Automatic on PR merge | Manual approval |
-| **Monitoring** | Local logs | Full monitoring | Full monitoring + alerts |
-| **Performance** | Local machine | Cloud (smaller SKUs) | Cloud (production SKUs) |
-| **Availability** | On-demand | Always on | 99.9% SLA |
-| **URL** | localhost:* | *-stag.azurefd.net | mystira.app |
+| Aspect           | Development       | Staging                   | Production               |
+| ---------------- | ----------------- | ------------------------- | ------------------------ |
+| **Purpose**      | Local development | Pre-production validation | Live users               |
+| **Data**         | Mock/seed data    | Test data                 | Real user data           |
+| **Access**       | Developers        | Team + stakeholders       | Public                   |
+| **Deployment**   | Manual/local      | Automatic on PR merge     | Manual approval          |
+| **Monitoring**   | Local logs        | Full monitoring           | Full monitoring + alerts |
+| **Performance**  | Local machine     | Cloud (smaller SKUs)      | Cloud (production SKUs)  |
+| **Availability** | On-demand         | Always on                 | 99.9% SLA                |
+| **URL**          | localhost:\*      | \*-stag.azurefd.net       | mystira.app              |
 
 ---
 
@@ -426,18 +428,21 @@ src/
 ## Success Metrics
 
 ### Environment Parity
+
 - [ ] All production services mirrored in staging
 - [ ] Configuration structure identical
 - [ ] Deployment process identical
 - [ ] Monitoring identical
 
 ### Deployment Quality
+
 - [ ] 100% of deployments go through staging first
 - [ ] Zero environment-specific bugs in production
 - [ ] < 5 minute staging deployment time
 - [ ] Automated rollback capability tested
 
 ### Team Adoption
+
 - [ ] All team members have staging access
 - [ ] Staging used for all feature validation
 - [ ] QA testing performed in staging

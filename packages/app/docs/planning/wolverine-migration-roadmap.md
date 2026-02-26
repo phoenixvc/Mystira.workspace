@@ -17,33 +17,33 @@ This roadmap establishes a systematic approach to replacing MediatR with Wolveri
 
 ### Current State (MediatR)
 
-| Aspect | MediatR | Limitation |
-|--------|---------|------------|
-| Messaging | In-process only | No cross-service communication |
-| Durability | None | Messages lost on failure |
-| Retries | Manual | Complex to implement |
-| Transactions | Separate | No outbox pattern |
+| Aspect       | MediatR         | Limitation                     |
+| ------------ | --------------- | ------------------------------ |
+| Messaging    | In-process only | No cross-service communication |
+| Durability   | None            | Messages lost on failure       |
+| Retries      | Manual          | Complex to implement           |
+| Transactions | Separate        | No outbox pattern              |
 
 ### Target State (Wolverine)
 
-| Aspect | Wolverine | Benefit |
-|--------|-----------|---------|
-| Messaging | In-process + Distributed | Cross-service events |
-| Durability | Outbox/Inbox | Guaranteed delivery |
-| Retries | Built-in | Automatic with backoff |
-| Transactions | Integrated | Transactional outbox |
+| Aspect       | Wolverine                | Benefit                |
+| ------------ | ------------------------ | ---------------------- |
+| Messaging    | In-process + Distributed | Cross-service events   |
+| Durability   | Outbox/Inbox             | Guaranteed delivery    |
+| Retries      | Built-in                 | Automatic with backoff |
+| Transactions | Integrated               | Transactional outbox   |
 
 ---
 
 ## Phase Summary
 
-| Phase | Focus | Duration |
-|-------|-------|----------|
-| Phase 1 | Infrastructure Setup | Weeks 1-2 |
-| Phase 2 | Domain Events | Weeks 3-4 |
-| Phase 3 | Handler Migration | Weeks 5-8 |
-| Phase 4 | Cross-Service Events | Weeks 9-10 |
-| Phase 5 | MediatR Removal | Weeks 11-12 |
+| Phase   | Focus                | Duration    |
+| ------- | -------------------- | ----------- |
+| Phase 1 | Infrastructure Setup | Weeks 1-2   |
+| Phase 2 | Domain Events        | Weeks 3-4   |
+| Phase 3 | Handler Migration    | Weeks 5-8   |
+| Phase 4 | Cross-Service Events | Weeks 9-10  |
+| Phase 5 | MediatR Removal      | Weeks 11-12 |
 
 ---
 
@@ -223,16 +223,17 @@ public class SessionEventHandlers
 
 ### 3.1 Migration Order
 
-| Week | Handler Type | Examples |
-|------|--------------|----------|
-| 5 | Simple Queries | GetAccountQuery, GetScenarioQuery |
-| 6 | Basic Commands | CreateAccountCommand, UpdateProfileCommand |
-| 7 | Complex Queries | GetSessionHistoryQuery, GetLeaderboardQuery |
-| 8 | Complex Commands | ProcessPaymentCommand, RegisterIpAssetCommand |
+| Week | Handler Type     | Examples                                      |
+| ---- | ---------------- | --------------------------------------------- |
+| 5    | Simple Queries   | GetAccountQuery, GetScenarioQuery             |
+| 6    | Basic Commands   | CreateAccountCommand, UpdateProfileCommand    |
+| 7    | Complex Queries  | GetSessionHistoryQuery, GetLeaderboardQuery   |
+| 8    | Complex Commands | ProcessPaymentCommand, RegisterIpAssetCommand |
 
 ### 3.2 Migration Pattern
 
 **Before (MediatR):**
+
 ```csharp
 public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, AccountResponse>
 {
@@ -244,6 +245,7 @@ public class GetAccountQueryHandler : IRequestHandler<GetAccountQuery, AccountRe
 ```
 
 **After (Wolverine):**
+
 ```csharp
 public static class GetAccountQueryHandler
 {
@@ -260,6 +262,7 @@ public static class GetAccountQueryHandler
 ### 3.3 Controller Updates
 
 **Before:**
+
 ```csharp
 [ApiController]
 public class AccountsController : ControllerBase
@@ -275,6 +278,7 @@ public class AccountsController : ControllerBase
 ```
 
 **After:**
+
 ```csharp
 [ApiController]
 public class AccountsController : ControllerBase
@@ -391,6 +395,7 @@ public async Task Handle(
 ### 5.2 Pipeline Behavior Migration
 
 **Before (MediatR Pipeline):**
+
 ```csharp
 public class ValidationBehavior<TRequest, TResponse>
     : IPipelineBehavior<TRequest, TResponse>
@@ -400,6 +405,7 @@ public class ValidationBehavior<TRequest, TResponse>
 ```
 
 **After (Wolverine Middleware):**
+
 ```csharp
 public class ValidationMiddleware
 {
@@ -425,13 +431,13 @@ public class ValidationMiddleware
 
 ## Success Criteria
 
-| Metric | Target | Verification |
-|--------|--------|--------------|
-| MediatR References | 0 | Code search |
-| Handler Conversion | 100% | Audit |
-| Cross-Service Events | Operational | Integration tests |
-| Message Latency (P95) | < 100ms | Monitoring |
-| Message Loss | 0 | Outbox verification |
+| Metric                | Target      | Verification        |
+| --------------------- | ----------- | ------------------- |
+| MediatR References    | 0           | Code search         |
+| Handler Conversion    | 100%        | Audit               |
+| Cross-Service Events  | Operational | Integration tests   |
+| Message Latency (P95) | < 100ms     | Monitoring          |
+| Message Loss          | 0           | Outbox verification |
 
 ---
 

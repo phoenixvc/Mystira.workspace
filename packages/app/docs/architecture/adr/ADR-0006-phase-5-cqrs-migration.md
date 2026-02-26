@@ -12,6 +12,7 @@ Following the successful implementation of hexagonal architecture (ADR-0003) and
 ### Pre-Migration State
 
 **Migration Status Before Phase 5:**
+
 - ✅ 2 entities already migrated (Scenarios in earlier phases)
 - ⏳ 8 entities pending migration:
   1. Scenario (partially complete)
@@ -24,6 +25,7 @@ Following the successful implementation of hexagonal architecture (ADR-0003) and
   8. UserBadge
 
 **Problems with Mixed Architecture:**
+
 - **Inconsistent patterns**: Some controllers used IMediator, others used service layer
 - **Cognitive load**: Developers had to remember which pattern to use for each entity
 - **Architectural drift**: Risk of reverting to service layer for new features
@@ -39,18 +41,21 @@ Following the successful implementation of hexagonal architecture (ADR-0003) and
 All 8 entities migrated with the following structure:
 
 #### Commands (Write Operations)
+
 - Create, Update, Delete operations
 - Use `ICommand<TResult>` interface
 - Wrapped in CommandHandlers with `IUnitOfWork` for transactions
 - Validation in handlers with clear error messages
 
 #### Queries (Read Operations)
+
 - Get by ID, Get by criteria, List operations
 - Use `IQuery<TResult>` interface
 - Wrapped in QueryHandlers (no `IUnitOfWork` needed)
 - Leverage Specification Pattern for complex filtering
 
 #### Specifications
+
 - Reusable query logic encapsulated in specifications
 - Extend `BaseSpecification<T>` with fluent API
 - Supports ordering, paging, filtering, includes
@@ -58,13 +63,16 @@ All 8 entities migrated with the following structure:
 ### Entity-by-Entity Migration
 
 #### 1. Scenario (Completed Earlier + Extensions)
+
 **Commands:** 4
+
 - CreateScenarioCommand
 - UpdateScenarioCommand
 - DeleteScenarioCommand
 - PublishScenarioCommand
 
 **Queries:** 5
+
 - GetScenarioQuery
 - GetAllScenariosQuery
 - GetScenariosByAgeGroupQuery
@@ -72,6 +80,7 @@ All 8 entities migrated with the following structure:
 - GetScenariosByThemeQuery
 
 **Specifications:** 8
+
 - ScenariosByAgeGroupSpecification
 - PublishedScenariosSpecification
 - ScenariosByThemeSpecification
@@ -82,13 +91,16 @@ All 8 entities migrated with the following structure:
 - ScenariosByAuthorSpecification
 
 #### 2. ContentBundle
+
 **Commands:** 0 (read-only in current implementation)
 
 **Queries:** 2
+
 - GetAllContentBundlesQuery
 - GetContentBundlesByAgeGroupQuery
 
 **Specifications:** 5
+
 - ActiveContentBundlesSpecification
 - ContentBundlesByAgeGroupSpecification
 - FreeContentBundlesSpecification
@@ -96,13 +108,16 @@ All 8 entities migrated with the following structure:
 - ContentBundlesByScenarioSpecification
 
 #### 3. GameSession (High Priority - High Traffic)
+
 **Commands:** 4
+
 - StartGameSessionCommand
 - EndGameSessionCommand
 - MakeChoiceCommand
 - ProgressSceneCommand
 
 **Queries:** 6
+
 - GetGameSessionQuery
 - GetSessionsByAccountQuery
 - GetSessionsByProfileQuery
@@ -111,6 +126,7 @@ All 8 entities migrated with the following structure:
 - GetAchievementsQuery
 
 **Specifications:** 8
+
 - SessionsByAccountSpecification
 - SessionsByProfileSpecification
 - InProgressSessionsSpecification
@@ -121,17 +137,21 @@ All 8 entities migrated with the following structure:
 - SessionsByAccountAndScenarioSpecification
 
 #### 4. UserProfile
+
 **Commands:** 4
+
 - CreateUserProfileCommand
 - UpdateUserProfileCommand
 - DeleteUserProfileCommand
 - CompleteOnboardingCommand
 
 **Queries:** 2
+
 - GetUserProfileQuery
 - GetProfilesByAccountQuery
 
 **Specifications:** 6
+
 - ProfilesByAccountSpecification
 - GuestProfilesSpecification
 - NonGuestProfilesSpecification
@@ -140,44 +160,56 @@ All 8 entities migrated with the following structure:
 - ProfilesByAgeGroupSpecification
 
 #### 5. BadgeConfiguration (Read-Only)
+
 **Commands:** 0
 
 **Queries:** 3
+
 - GetAllBadgeConfigurationsQuery
 - GetBadgeConfigurationQuery
 - GetBadgeConfigurationsByAxisQuery
 
 **Specifications:** 1
+
 - BadgeConfigurationsByAxisSpecification
 
 #### 6. MediaAsset (Partial - File Serving Excluded)
+
 **Commands:** 0
 
 **Queries:** 1
+
 - GetMediaAssetQuery (metadata only)
 
 **Notes:** File streaming operation (`GetMediaFile`) remains in service layer as it returns binary streams, not domain objects.
 
 #### 7. Account
+
 **Commands:** 3
+
 - CreateAccountCommand
 - UpdateAccountCommand
 - DeleteAccountCommand
 
 **Queries:** 2
+
 - GetAccountByEmailQuery
 - GetAccountQuery
 
 **Notes:** Complex operations like `LinkProfilesToAccount` and `ValidateAccount` remain in service layer pending further analysis.
 
 #### 8. UserBadge
+
 **Commands:** 1
+
 - AwardBadgeCommand
 
 **Queries:** 1
+
 - GetUserBadgesQuery
 
 **Specifications:** 2
+
 - UserBadgesByProfileSpecification
 - UserBadgesByAxisSpecification
 
@@ -186,13 +218,16 @@ All 8 entities migrated with the following structure:
 ## Metrics
 
 ### Files Created
+
 - **Commands:** 16 command files + 16 handlers = 32 files
 - **Queries:** 20 query files + 20 handlers = 40 files
 - **Specifications:** 32 specification classes
 - **Total:** 104 new files across Application and Domain layers
 
 ### Controllers Updated
+
 All 8 controllers now use `IMediator`:
+
 1. ScenariosController ✅
 2. BundlesController ✅
 3. GameSessionsController ✅
@@ -203,12 +238,14 @@ All 8 controllers now use `IMediator`:
 8. UserBadgesController ✅
 
 ### Code Coverage
+
 - **Commands with handlers:** 16/16 (100%)
 - **Queries with handlers:** 20/20 (100%)
 - **Entities migrated:** 8/8 (100%)
 - **Controllers migrated:** 8/8 (100%)
 
 ### Architecture Compliance
+
 - ✅ **Zero Application → Infrastructure dependencies**
 - ✅ **Hexagonal Architecture maintained**
 - ✅ **Proper separation of concerns (Commands vs Queries)**
@@ -277,6 +314,7 @@ All 8 controllers now use `IMediator`:
 ## Implementation Timeline
 
 ### Commit History
+
 1. **Commit bf6360e** (Nov 24, 2025): GameSession migration
    - 22 files changed, 826 insertions
    - 4 commands, 6 queries, 8 specifications
@@ -298,6 +336,7 @@ All 8 controllers now use `IMediator`:
 ## Future Considerations
 
 ### Phase 6 (Future Work)
+
 1. **Migrate Complex Service Operations**
    - LinkProfilesToAccount
    - ValidateAccount

@@ -9,6 +9,7 @@
 ## What You'll Build
 
 By the end of this guide, you'll have created a complete command that:
+
 - ✅ Creates a new Content Bundle
 - ✅ Validates the input
 - ✅ Persists to the database
@@ -307,6 +308,7 @@ public class CreateContentBundleCommandHandlerTests
 ## Complete Example Flow
 
 **1. User makes HTTP POST request**:
+
 ```http
 POST /api/content-bundles
 Content-Type: application/json
@@ -320,17 +322,20 @@ Content-Type: application/json
 ```
 
 **2. Controller receives request**:
+
 ```csharp
 var command = new CreateContentBundleCommand(request);
 var bundle = await _mediator.Send(command);
 ```
 
 **3. MediatR routes to handler**:
+
 ```
 IMediator.Send() → CreateContentBundleCommandHandler.Handle()
 ```
 
 **4. Handler executes**:
+
 ```csharp
 // Validate
 // Create entity
@@ -339,6 +344,7 @@ IMediator.Send() → CreateContentBundleCommandHandler.Handle()
 ```
 
 **5. Controller returns response**:
+
 ```http
 HTTP/1.1 201 Created
 Location: /api/content-bundles/abc123
@@ -403,6 +409,7 @@ If you're stuck:
 ## Summary
 
 You've learned how to:
+
 - ✅ Create a command using `record` syntax
 - ✅ Implement a command handler with business logic
 - ✅ Use commands in controllers via `IMediator`

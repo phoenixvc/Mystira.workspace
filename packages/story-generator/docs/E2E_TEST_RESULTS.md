@@ -15,17 +15,17 @@ This document provides a comprehensive overview of all end-to-end integration te
 
 ## Test Coverage Overview
 
-| Test Class | Tests | Purpose |
-|-----------|-------|---------|
-| **AgentPipelineE2ETests** | 6 | Complete pipeline demo scenarios |
-| **StreamingIntegrationTests** | 6 | SSE real-time event streaming |
-| **StoryAgentControllerTests** | 8 | API endpoint integration |
-| **AgentPipelinePerformanceTests** | 8 | Latency & load benchmarks |
-| **StorySessionStateTransitionTests** | 18 | State machine validation |
-| **KnowledgeProviderIntegrationTests** | 12 | FileSearch & AISearch modes |
-| **StorySchemaComplianceTests** | 14 | Story JSON validation |
-| **AgentOrchestratorIntegrationTests** | 8 | Orchestrator logic (existing) |
-| **ErrorHandlingTests** | 9 | Error scenarios (existing) |
+| Test Class                            | Tests | Purpose                          |
+| ------------------------------------- | ----- | -------------------------------- |
+| **AgentPipelineE2ETests**             | 6     | Complete pipeline demo scenarios |
+| **StreamingIntegrationTests**         | 6     | SSE real-time event streaming    |
+| **StoryAgentControllerTests**         | 8     | API endpoint integration         |
+| **AgentPipelinePerformanceTests**     | 8     | Latency & load benchmarks        |
+| **StorySessionStateTransitionTests**  | 18    | State machine validation         |
+| **KnowledgeProviderIntegrationTests** | 12    | FileSearch & AISearch modes      |
+| **StorySchemaComplianceTests**        | 14    | Story JSON validation            |
+| **AgentOrchestratorIntegrationTests** | 8     | Orchestrator logic (existing)    |
+| **ErrorHandlingTests**                | 9     | Error scenarios (existing)       |
 
 **Total Tests**: 89  
 **Total Test Classes**: 9
@@ -39,20 +39,21 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Test**: `DemoScenario1_HappyPath_SuccessfulGenerationWithPositiveEvaluation`
 
 **Flow**:
+
 ```
 1. Initialize session (POST /start)
    → Response: 202 Accepted, sessionId returned
-   
+
 2. Poll until generation complete (GET /sessions/{id})
    → Stage transitions: Uninitialized → Generating → Validating
-   
+
 3. Evaluate story (POST /evaluate)
    → All gates pass
    → Safety: PASS
    → Axes Alignment: 0.92 (≥ 0.7) ✓
    → Dev Principles: 0.88 (≥ 0.7) ✓
    → Narrative Logic: 0.90 (≥ 0.7) ✓
-   
+
 4. Final state verification
    → Stage: Evaluated
    → Iteration count: 0
@@ -62,6 +63,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Result**: ✅ **PASS**
 
 **Key Validations**:
+
 - ✅ Session created with valid sessionId and threadId
 - ✅ Story JSON validates against schema
 - ✅ All evaluation scores meet threshold (≥ 0.7)
@@ -76,23 +78,24 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Test**: `DemoScenario2_FailedEvaluation_ThenTargetedRefinement_Success`
 
 **Flow**:
+
 ```
 1. Initialize and generate story
    → Story generated with intentional issues
-   
+
 2. First evaluation (POST /evaluate)
    → Overall status: Fail
    → State: RequiresRefinement
-   
+
 3. Targeted refinement (POST /refine)
    → Target scenes: scene_2, scene_3
    → Aspects: dialogue, tone
    → User guidance: "Make dialogue more age-appropriate"
-   
+
 4. Re-evaluation (POST /evaluate)
    → Overall status: Pass
    → Iteration count: 1
-   
+
 5. Verification
    → Story versions count: 2 (original + refined)
    → Non-target scenes preserved (verified via JSON diff)
@@ -101,6 +104,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Result**: ✅ **PASS**
 
 **Key Validations**:
+
 - ✅ First evaluation correctly identifies issues
 - ✅ State transitions: Validating → Evaluating → RequiresRefinement
 - ✅ Refinement request accepted (202 Accepted)
@@ -110,6 +114,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 - ✅ Targeted refinement preserves out-of-scope scenes
 
 **JSON Diff Verification**:
+
 ```json
 {
   "scene_1": {
@@ -134,25 +139,26 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Test**: `DemoScenario3_MaxIterations_EscalatesAfterFiveAttempts`
 
 **Flow**:
+
 ```
 1. Initialize session with story that fails evaluation repeatedly
-   
+
 2. Iteration Loop (5 times):
-   
+
    Iteration 0:
    → Evaluate: Fail
    → State: RequiresRefinement
    → Refine: Accepted
    → State: Validating
-   
+
    Iteration 1-3:
    → Same pattern, iteration count increments
-   
+
    Iteration 4:
    → Evaluate: Fail
    → State: StuckNeedsReview ⚠️
    → Message: "Maximum iterations reached. Needs human review."
-   
+
 3. Attempt further refinement (POST /refine)
    → Response: 409 Conflict
    → Message: "Session stuck, cannot refine"
@@ -161,6 +167,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 **Result**: ✅ **PASS**
 
 **Key Validations**:
+
 - ✅ System correctly tracks iteration count (0 → 5)
 - ✅ After 5 iterations, state changes to StuckNeedsReview
 - ✅ Further refinement requests are rejected (409 Conflict)
@@ -175,19 +182,23 @@ This document provides a comprehensive overview of all end-to-end integration te
 ### API Endpoint Tests
 
 #### Session Initialization
+
 - ✅ `StartSession_Returns202Accepted_WithSessionId`
 - ✅ `StartSession_ReturnsBadRequest_OnInvalidKnowledgeMode`
 - ✅ `StartSession_ReturnsBadRequest_OnMissingRequiredFields`
 
 #### Evaluation
+
 - ✅ `Evaluate_Returns404_OnSessionNotFound`
 - ✅ `Evaluate_Returns409_OnInvalidState`
 
 #### Refinement
+
 - ✅ `Refine_Returns404_OnSessionNotFound`
 - ✅ `Refine_Returns409_OnInvalidState`
 
 #### Session State
+
 - ✅ `GetSessionState_ReturnsCompleteSessionData`
 - ✅ `GetSessionState_Returns404_OnSessionNotFound`
 
@@ -196,6 +207,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 ### Streaming Integration Tests
 
 #### SSE Event Streaming
+
 - ✅ `SSEStream_FirstEventWithin500ms` - **Latency: 187ms** ✓
 - ✅ `SSEStream_EventsFormatted_AsSSE` - All events properly formatted
 - ✅ `SSEStream_ClosesOnTerminalState` - Stream closes after completion
@@ -204,6 +216,7 @@ This document provides a comprehensive overview of all end-to-end integration te
 - ✅ `SSEStream_MultipleEventsSequence` - 5+ events streamed
 
 **SSE Format Validation**:
+
 ```
 event: SessionStarted
 data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:45Z"}
@@ -219,13 +232,13 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 
 ### Performance Test Results
 
-| Metric | Target | Actual | Status |
-|--------|--------|--------|--------|
-| Stream startup latency | < 500ms | 187ms | ✅ PASS |
-| First SSE event | < 500ms | 124ms | ✅ PASS |
-| Evaluation latency | < 3000ms | 742ms | ✅ PASS |
-| GET session state | < 200ms | 43ms | ✅ PASS |
-| Refine start | < 500ms | 89ms | ✅ PASS |
+| Metric                  | Target   | Actual | Status  |
+| ----------------------- | -------- | ------ | ------- |
+| Stream startup latency  | < 500ms  | 187ms  | ✅ PASS |
+| First SSE event         | < 500ms  | 124ms  | ✅ PASS |
+| Evaluation latency      | < 3000ms | 742ms  | ✅ PASS |
+| GET session state       | < 200ms  | 43ms   | ✅ PASS |
+| Refine start            | < 500ms  | 89ms   | ✅ PASS |
 | Concurrent sessions (5) | < 2500ms | 1823ms | ✅ PASS |
 
 #### Detailed Performance Tests
@@ -244,6 +257,7 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 ### State Machine Tests
 
 #### Valid Transitions
+
 - ✅ Uninitialized → Generating
 - ✅ Generating → Validating
 - ✅ Validating → Evaluating
@@ -254,21 +268,25 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 - ✅ Evaluated → Complete
 
 #### Terminal States
+
 - ✅ Complete (no further transitions)
 - ✅ Failed (no further transitions)
 - ✅ StuckNeedsReview (no further transitions)
 
 #### Loop Validation
+
 - ✅ `StateTransition_Loop_Validating_To_Refining_To_Validating_IsValid`
   - Validated refinement loop works correctly
   - Iteration counter tracks each cycle
 
 #### Iteration Tracking
+
 - ✅ `StorySession_IterationCount_TracksRefinements`
   - Verified counter increments with each refinement
   - Correctly triggers escalation at 5 iterations
 
 #### Version History
+
 - ✅ `StorySession_StoryVersions_AccumulateOverRefinements`
   - Story versions properly tracked
   - Each version has unique version number
@@ -279,24 +297,28 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 ### Knowledge Provider Tests
 
 #### FileSearch Mode
+
 - ✅ `FileSearchProvider_CreatesAndAttachesVectorStore`
   - Vector store ID returned
   - Tool type: "file_search"
   - Vector store configuration included
 
 #### AISearch Mode
+
 - ✅ `AISearchProvider_ConfiguresToolWithMetadataFilters`
   - Index name returned
   - Tool type: "azure_ai_search"
   - Metadata filters configured (age_group, theme)
 
 #### Mode Switching
+
 - ✅ `KnowledgeProviders_CanBeSwitchedPerSession`
   - FileSearch and AISearch work independently
   - Sessions isolated by knowledge mode
   - No cross-contamination
 
 #### Error Handling
+
 - ✅ `KnowledgeProvider_ThrowsOnNullAgentId`
 - ✅ `KnowledgeProvider_ThrowsOnEmptyAgentId`
 
@@ -305,18 +327,21 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 ### Story Schema Compliance
 
 #### Valid Stories
+
 - ✅ 10 sample stories validated
 - ✅ 100% pass rate
 - ✅ Required fields validated: title, scenes
 - ✅ Scene fields validated: id, title, content
 
 #### Optional Fields Support
+
 - ✅ Author, ageGroup, themes
 - ✅ Moral, narrativeAxes
 - ✅ Characters, location, emotion
 - ✅ Dialogue arrays
 
 #### Invalid Story Detection
+
 - ✅ Missing title detected
 - ✅ Missing scenes detected
 - ✅ Empty scenes array detected
@@ -325,6 +350,7 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 - ✅ Malformed JSON detected
 
 **Sample Valid Story**:
+
 ```json
 {
   "title": "The Brave Little Mouse",
@@ -339,6 +365,7 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 ```
 
 **Sample Complex Story**:
+
 ```json
 {
   "title": "The Great Adventure",
@@ -511,36 +538,43 @@ data: {"sessionId":"abc123","timestamp":"2024-01-06T10:23:52Z"}
 ## Test Execution Commands
 
 ### Run All Tests
+
 ```bash
 dotnet test
 ```
 
 ### Run E2E Demo Scenarios
+
 ```bash
 dotnet test --filter "FullyQualifiedName~AgentPipelineE2ETests.DemoScenario"
 ```
 
 ### Run Performance Tests
+
 ```bash
 dotnet test --filter "FullyQualifiedName~AgentPipelinePerformanceTests"
 ```
 
 ### Run Streaming Tests
+
 ```bash
 dotnet test --filter "FullyQualifiedName~StreamingIntegrationTests"
 ```
 
 ### Run State Machine Tests
+
 ```bash
 dotnet test --filter "FullyQualifiedName~StorySessionStateTransitionTests"
 ```
 
 ### Run Schema Compliance Tests
+
 ```bash
 dotnet test --filter "FullyQualifiedName~StorySchemaComplianceTests"
 ```
 
 ### Generate Coverage Report
+
 ```bash
 dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura
 reportgenerator -reports:coverage.cobertura.xml -targetdir:coverage-report

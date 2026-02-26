@@ -17,7 +17,7 @@ interface ServiceManagerHeaderProps {
   onUseCurrentBranchChange: (use: boolean) => void;
   serviceEnvironments: Record<string, "local" | "dev" | "prod">;
   onServiceEnvironmentsChange: (
-    environments: Record<string, "local" | "dev" | "prod">,
+    environments: Record<string, "local" | "dev" | "prod">
   ) => void;
   infrastructureStatus: InfrastructureStatus;
   onApplyPreset: (preset: EnvironmentPreset) => void;
@@ -29,7 +29,7 @@ interface ServiceManagerHeaderProps {
   anyRunning: boolean;
   onCheckEnvironmentHealth: (
     serviceName: string,
-    environment: "dev" | "prod",
+    environment: "dev" | "prod"
   ) => void;
 }
 
@@ -55,7 +55,7 @@ export function ServiceManagerHeader({
     const hasProd = Object.values(preset.environments).includes("prod");
     if (hasProd) {
       const confirmed = window.confirm(
-        "⚠️ WARNING: This preset includes PRODUCTION environments.\n\nAre you sure you want to apply this preset?",
+        "⚠️ WARNING: This preset includes PRODUCTION environments.\n\nAre you sure you want to apply this preset?"
       );
       if (!confirmed) return;
     }
@@ -63,7 +63,7 @@ export function ServiceManagerHeader({
     onServiceEnvironmentsChange(preset.environments);
     localStorage.setItem(
       "serviceEnvironments",
-      JSON.stringify(preset.environments),
+      JSON.stringify(preset.environments)
     );
 
     Object.entries(preset.environments).forEach(([serviceName, env]) => {
@@ -138,7 +138,7 @@ export function ServiceManagerHeader({
                     <button
                       onClick={() => {
                         window.dispatchEvent(
-                          new CustomEvent("navigate-to-infrastructure"),
+                          new CustomEvent("navigate-to-infrastructure")
                         );
                       }}
                       className="ml-1 underline hover:no-underline"
@@ -171,7 +171,7 @@ export function ServiceManagerHeader({
                     <button
                       onClick={() => {
                         window.dispatchEvent(
-                          new CustomEvent("navigate-to-infrastructure"),
+                          new CustomEvent("navigate-to-infrastructure")
                         );
                       }}
                       className="ml-1 underline hover:no-underline"

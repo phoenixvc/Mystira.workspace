@@ -22,10 +22,10 @@ describe("storageAccountUtils", () => {
 
     it("should reject names that are too long", () => {
       expect(isValidStorageAccountName("abcdefghijklmnopqrstuvwxy")).toBe(
-        false,
+        false
       ); // 25 chars
       expect(
-        isValidStorageAccountName("thisnameiswaywaytoolongforStorageaccount"),
+        isValidStorageAccountName("thisnameiswaywaytoolongforStorageaccount")
       ).toBe(false);
     });
 
@@ -77,7 +77,7 @@ describe("storageAccountUtils", () => {
     it("should handle real Azure error format", () => {
       const realError = `{"code": "StorageAccountInAnotherResourceGroup", "target": "devsanappmystirastorage", "message": "The account devsanappmystirastorage is already in another resource group in this susbscription."}`;
       expect(extractStorageAccountName(realError)).toBe(
-        "devsanappmystirastorage",
+        "devsanappmystirastorage"
       );
     });
   });
@@ -85,30 +85,30 @@ describe("storageAccountUtils", () => {
   describe("parseAzureDeleteError", () => {
     it("should return default message for undefined error", () => {
       expect(parseAzureDeleteError(undefined)).toBe(
-        "Failed to delete storage account",
+        "Failed to delete storage account"
       );
     });
 
     it("should return default message for empty error", () => {
       expect(parseAzureDeleteError("")).toBe(
-        "Failed to delete storage account",
+        "Failed to delete storage account"
       );
     });
 
     it("should detect authorization failures", () => {
       expect(
         parseAzureDeleteError(
-          "AuthorizationFailed: The client does not have authorization",
-        ),
+          "AuthorizationFailed: The client does not have authorization"
+        )
       ).toContain("Permission denied");
       expect(
-        parseAzureDeleteError("does not have authorization to perform action"),
+        parseAzureDeleteError("does not have authorization to perform action")
       ).toContain("Permission denied");
     });
 
     it("should detect resource not found errors", () => {
       const result = parseAzureDeleteError(
-        "ResourceNotFound: The storage account was not found",
+        "ResourceNotFound: The storage account was not found"
       );
       expect(result).toContain("no longer exists");
       expect(result).toContain("retry the preview");
@@ -117,30 +117,30 @@ describe("storageAccountUtils", () => {
     it("should detect resource group not found errors", () => {
       expect(
         parseAzureDeleteError(
-          "ResourceGroupNotFound: The resource group does not exist",
-        ),
+          "ResourceGroupNotFound: The resource group does not exist"
+        )
       ).toContain(
-        "resource group containing this storage account no longer exists",
+        "resource group containing this storage account no longer exists"
       );
     });
 
     it("should detect lock errors", () => {
       expect(
-        parseAzureDeleteError("ScopeLocked: The resource is locked"),
+        parseAzureDeleteError("ScopeLocked: The resource is locked")
       ).toContain("locked and cannot be deleted");
       expect(
         parseAzureDeleteError(
-          "Cannot delete because there is a lock on the resource",
-        ),
+          "Cannot delete because there is a lock on the resource"
+        )
       ).toContain("locked and cannot be deleted");
     });
 
     it("should detect login errors", () => {
       expect(
-        parseAzureDeleteError("You are not logged in. Please run az login"),
+        parseAzureDeleteError("You are not logged in. Please run az login")
       ).toContain("Azure CLI session expired");
       expect(parseAzureDeleteError("not logged in to Azure")).toContain(
-        "Azure CLI session expired",
+        "Azure CLI session expired"
       );
     });
 
@@ -152,10 +152,10 @@ describe("storageAccountUtils", () => {
 
     it("should be case insensitive", () => {
       expect(parseAzureDeleteError("AUTHORIZATIONFAILED")).toContain(
-        "Permission denied",
+        "Permission denied"
       );
       expect(parseAzureDeleteError("resourcenotfound")).toContain(
-        "no longer exists",
+        "no longer exists"
       );
     });
   });

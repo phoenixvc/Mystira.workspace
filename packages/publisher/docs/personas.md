@@ -108,23 +108,28 @@ This document details the primary and future user personas for Mystyra.Publisher
 ### Core Experience
 
 **Step 1: User signs in or creates an account.**
+
 - Minimal fields (name, email, password); optional SSO integration.
 - Real-time validation for email and password strength.
 - Success: User is welcomed and prompted to create/register a new story.
 
 **Step 2: User initiates story registration.**
+
 - Guided form to enter story title, abstract, and select/add co-authors.
 - Option to assign contribution percentages and upload supporting files.
 - Data validation ensures required fields are populated; error messages for missing fields.
 
 **Step 3: User reviews and confirms attribution.**
+
 - Visual summary of contributors and IP split.
 - Confirm & Submit button triggers registration; user notified on success.
 
 **Step 4: Access story dashboard.**
+
 - View all registered stories, filter by status, and see recent activity/notifications.
 
 **Step 5: Manage team collaborations (if applicable).**
+
 - Invite new members, edit attribution.
 - Confirmations sent to added collaborators via email instantly.
 
@@ -228,12 +233,14 @@ For the future, as Jane's project attracts interest from publishers, Mystyra.Pub
 ### Team Size & Composition
 
 **Small Team (2–3 people):**
+
 - 1 Product/Design Lead
 - 1–2 Full-Stack Developers
 
 ### Suggested Phases
 
 **MVP Launch (2–3 weeks)**
+
 - Key Deliverables:
   - Product/Design: Core workflows, onboarding, story & attribution registration UIs
   - Engineering: APIs, authentication, initial collaboration and dashboard features
@@ -242,6 +249,7 @@ For the future, as Jane's project attracts interest from publishers, Mystyra.Pub
   - Basic analytics integration
 
 **Phase 2 Planning & Iteration (1–2 weeks)**
+
 - Key Deliverables:
   - Product: Detailed roadmap for organization/admin and audit features
   - Engineering: Organizational roles, reporting, and scalability upgrades
@@ -253,10 +261,10 @@ For the future, as Jane's project attracts interest from publishers, Mystyra.Pub
 
 ## Persona Evolution Table
 
-| Persona | Phase | Primary Jobs-to-be-Done |
-|---------|-------|-------------------------|
-| Independent Author | MVP | Register stories, prove authorship, manage own IP |
-| Creative Team Member | MVP | Co-create and register projects, attribute IP, manage teams |
-| Organization Admin | Phase 2+ | Oversee group submissions, assign roles, export reports |
-| Legal Advisor | Phase 2+ | Audit IP chains, validate authorship, resolve disputes |
-| Platform Auditor | Phase 2+ | Monitor system for fraud, run integrity checks |
+| Persona              | Phase    | Primary Jobs-to-be-Done                                     |
+| -------------------- | -------- | ----------------------------------------------------------- |
+| Independent Author   | MVP      | Register stories, prove authorship, manage own IP           |
+| Creative Team Member | MVP      | Co-create and register projects, attribute IP, manage teams |
+| Organization Admin   | Phase 2+ | Oversee group submissions, assign roles, export reports     |
+| Legal Advisor        | Phase 2+ | Audit IP chains, validate authorship, resolve disputes      |
+| Platform Auditor     | Phase 2+ | Monitor system for fraud, run integrity checks              |

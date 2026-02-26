@@ -12,7 +12,7 @@
 
 CQRS (Command Query Responsibility Segregation) is an architectural pattern that separates **read operations** (Queries) from **write operations** (Commands). This separation provides clear boundaries between state-changing and state-retrieving operations.
 
-**Key Principle**: *"A method should either change state or return data, but not both."* - Bertrand Meyer (Command-Query Separation)
+**Key Principle**: _"A method should either change state or return data, but not both."_ - Bertrand Meyer (Command-Query Separation)
 
 ---
 
@@ -490,12 +490,14 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 ### 1. Naming Conventions
 
 ✅ **Commands**: Verb-based, imperative mood
+
 - `CreateScenarioCommand`
 - `UpdateScenarioCommand`
 - `DeleteScenarioCommand`
 - `PublishScenarioCommand`
 
 ✅ **Queries**: Noun-based, descriptive
+
 - `GetScenarioQuery`
 - `GetScenariosQuery`
 - `GetScenariosByAgeGroupQuery`
@@ -705,7 +707,7 @@ public async Task<IActionResult> Create([FromBody] CreateScenarioRequest request
 - [CQRS Pattern - Martin Fowler](https://martinfowler.com/bliki/CQRS.html)
 - [Command Query Separation - Martin Fowler](https://martinfowler.com/bliki/CommandQuerySeparation.html)
 - [MediatR Library - Jimmy Bogard](https://github.com/jbogard/MediatR)
-- [CQRS Journey - Microsoft](https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj554200(v=pandp.10))
+- [CQRS Journey - Microsoft](<https://docs.microsoft.com/en-us/previous-versions/msp-n-p/jj554200(v=pandp.10)>)
 
 ---
 

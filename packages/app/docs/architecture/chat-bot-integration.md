@@ -383,26 +383,26 @@ The Mystira.App platform provides a multi-platform chat bot integration layer fo
 
 ### IChatBotService
 
-| Method | Description | Discord | Teams | WhatsApp |
-|--------|-------------|---------|-------|----------|
-| `StartAsync()` | Initialize connection | WebSocket connect | Credential init | Client init |
-| `StopAsync()` | Graceful shutdown | Logout + disconnect | Clear state | Clear client |
-| `SendMessageAsync()` | Send text message | Channel.SendMessage | ConnectorClient.Send | TextNotificationContent |
-| `SendEmbedAsync()` | Send rich message | EmbedBuilder | HeroCard | Formatted text |
-| `ReplyToMessageAsync()` | Reply to specific msg | MessageReference | Same conversation | Same number |
-| `IsConnected` | Connection status | ConnectionState | _isConnected flag | _client != null |
-| `GetStatus()` | Bot status info | Full support | Partial | Partial |
-| `SendAndAwaitFirstResponseAsync()` | Broadcast pattern | Full support | Send only | Send only |
+| Method                             | Description           | Discord             | Teams                | WhatsApp                |
+| ---------------------------------- | --------------------- | ------------------- | -------------------- | ----------------------- |
+| `StartAsync()`                     | Initialize connection | WebSocket connect   | Credential init      | Client init             |
+| `StopAsync()`                      | Graceful shutdown     | Logout + disconnect | Clear state          | Clear client            |
+| `SendMessageAsync()`               | Send text message     | Channel.SendMessage | ConnectorClient.Send | TextNotificationContent |
+| `SendEmbedAsync()`                 | Send rich message     | EmbedBuilder        | HeroCard             | Formatted text          |
+| `ReplyToMessageAsync()`            | Reply to specific msg | MessageReference    | Same conversation    | Same number             |
+| `IsConnected`                      | Connection status     | ConnectionState     | \_isConnected flag   | \_client != null        |
+| `GetStatus()`                      | Bot status info       | Full support        | Partial              | Partial                 |
+| `SendAndAwaitFirstResponseAsync()` | Broadcast pattern     | Full support        | Send only            | Send only               |
 
 ### IBotCommandService
 
-| Method | Description | Discord | Teams | WhatsApp |
-|--------|-------------|---------|-------|----------|
-| `RegisterCommandsAsync()` | Load command modules | InteractionService.AddModules | N/A (portal) | N/A |
-| `RegisterCommandsToServerAsync()` | Server-specific | RegisterToGuild | N/A | N/A |
-| `RegisterCommandsGloballyAsync()` | Global commands | RegisterGlobally | N/A | N/A |
-| `IsEnabled` | Commands enabled | Config flag | Always false | Always false |
-| `RegisteredModuleCount` | Module count | _interactions.Modules.Count | 0 | 0 |
+| Method                            | Description          | Discord                       | Teams        | WhatsApp     |
+| --------------------------------- | -------------------- | ----------------------------- | ------------ | ------------ |
+| `RegisterCommandsAsync()`         | Load command modules | InteractionService.AddModules | N/A (portal) | N/A          |
+| `RegisterCommandsToServerAsync()` | Server-specific      | RegisterToGuild               | N/A          | N/A          |
+| `RegisterCommandsGloballyAsync()` | Global commands      | RegisterGlobally              | N/A          | N/A          |
+| `IsEnabled`                       | Commands enabled     | Config flag                   | Always false | Always false |
+| `RegisteredModuleCount`           | Module count         | \_interactions.Modules.Count  | 0            | 0            |
 
 ## Configuration
 
@@ -438,11 +438,13 @@ The Mystira.App platform provides a multi-platform chat bot integration layer fo
 ## Service Registration Patterns
 
 ### Single Platform (Default)
+
 ```csharp
 services.AddDiscordBot(configuration);  // Registers as IChatBotService
 ```
 
 ### Multiple Platforms (Keyed Services)
+
 ```csharp
 services.AddDiscordBot(configuration);              // Default
 services.AddTeamsBotKeyed(configuration, "teams");  // Keyed
@@ -453,6 +455,7 @@ var teamsBot = serviceProvider.GetKeyedService<IChatBotService>("teams");
 ```
 
 ### Platform Factory Pattern
+
 ```csharp
 public interface IChatBotFactory
 {

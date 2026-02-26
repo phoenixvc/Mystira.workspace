@@ -51,7 +51,7 @@ function StatisticsPanel() {
 
   const calculateCompletionRate = (
     completed: number,
-    total: number,
+    total: number
   ): number => {
     if (total === 0) return 0;
     return Math.round((completed / total) * 100);
@@ -161,7 +161,7 @@ function StatisticsPanel() {
           {statistics.map((scenario) => {
             const completionRate = calculateCompletionRate(
               scenario.completedSessions,
-              scenario.totalSessions,
+              scenario.totalSessions
             );
             const isExpanded = expandedScenario === scenario.scenarioId;
 
@@ -226,7 +226,7 @@ function StatisticsPanel() {
                       {scenario.accountStatistics.map((account) => {
                         const accountCompletionRate = calculateCompletionRate(
                           account.completedSessions,
-                          account.sessionCount,
+                          account.sessionCount
                         );
 
                         return (

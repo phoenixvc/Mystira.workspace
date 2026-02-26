@@ -1,12 +1,15 @@
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button, Input } from '@/components';
-import type { CreateStoryRequest, UpdateStoryRequest } from '@/api/types';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button, Input } from "@/components";
+import type { CreateStoryRequest, UpdateStoryRequest } from "@/api/types";
 
 const storySchema = z.object({
-  title: z.string().min(1, 'Title is required').max(200, 'Title too long'),
-  summary: z.string().min(10, 'Summary must be at least 10 characters').max(2000, 'Summary too long'),
+  title: z.string().min(1, "Title is required").max(200, "Title too long"),
+  summary: z
+    .string()
+    .min(10, "Summary must be at least 10 characters")
+    .max(2000, "Summary too long"),
 });
 
 type StoryFormData = z.infer<typeof storySchema>;
@@ -22,7 +25,7 @@ export function StoryForm({
   defaultValues,
   onSubmit,
   isSubmitting = false,
-  submitLabel = 'Save',
+  submitLabel = "Save",
 }: StoryFormProps) {
   const {
     register,
@@ -39,7 +42,7 @@ export function StoryForm({
         label="Title"
         placeholder="Enter story title"
         error={errors.title?.message}
-        {...register('title')}
+        {...register("title")}
       />
 
       <div className="story-form__field">
@@ -49,9 +52,9 @@ export function StoryForm({
         <textarea
           id="summary"
           placeholder="Describe your story..."
-          className={`input story-form__textarea ${errors.summary ? 'input--error' : ''}`}
+          className={`input story-form__textarea ${errors.summary ? "input--error" : ""}`}
           rows={4}
-          {...register('summary')}
+          {...register("summary")}
         />
         {errors.summary && (
           <span className="input-error" role="alert">

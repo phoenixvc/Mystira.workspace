@@ -1,5 +1,5 @@
 export function getModuleFromResourceType(
-  resourceType: string,
+  resourceType: string
 ): "storage" | "cosmos" | "appservice" | null {
   const normalized = resourceType.toLowerCase().trim();
 
@@ -24,21 +24,21 @@ export function getModuleFromResourceType(
 
   if (
     storageTypes.some(
-      (type) => normalized === type || normalized.startsWith(type + "/"),
+      (type) => normalized === type || normalized.startsWith(type + "/")
     )
   ) {
     return "storage";
   }
   if (
     cosmosTypes.some(
-      (type) => normalized === type || normalized.startsWith(type + "/"),
+      (type) => normalized === type || normalized.startsWith(type + "/")
     )
   ) {
     return "cosmos";
   }
   if (
     appServiceTypes.some(
-      (type) => normalized === type || normalized.startsWith(type + "/"),
+      (type) => normalized === type || normalized.startsWith(type + "/")
     )
   ) {
     return "appservice";

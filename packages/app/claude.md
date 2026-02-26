@@ -3,6 +3,7 @@
 ## Project Overview
 
 **Mystira** is a dynamic storytelling and character development platform for children, featuring:
+
 - Interactive narrative experiences with branching storylines
 - Character progression and developmental tracking
 - Offline-first PWA with Blazor WebAssembly
@@ -10,6 +11,7 @@
 - Azure-hosted backend (Cosmos DB, Blob Storage)
 
 **Key Business Context:**
+
 - **Target Users:** Children (primary), Parents/Guardians (secondary), Content Creators (tertiary)
 - **Regulatory:** COPPA compliance required (partially implemented - CRITICAL GAP)
 - **SLA Targets:** 99.95% uptime, P99 latency < 2 seconds
@@ -81,6 +83,7 @@
 ## Technology Stack
 
 ### **Core Technologies**
+
 - **.NET 9.0** (target framework)
   - ⚠️ **WARNING:** `global.json` still references SDK 8.0.415 - needs update to 9.0.x
 - **C# 12** (latest language features)
@@ -89,6 +92,7 @@
 - **Blazor WebAssembly 9.0** (PWA frontend)
 
 ### **Frontend**
+
 - **Blazor WebAssembly** with offline support
 - **Service Worker** for caching
 - **IndexedDB** for client-side persistence
@@ -96,16 +100,19 @@
 - **Scoped CSS** for component styles
 
 ### **Backend**
+
 - **Azure Cosmos DB** (NoSQL via EF Core provider)
 - **Azure Blob Storage** (media assets)
 - **Azure Communication Services** (email)
 - **JWT Authentication** (RS256 asymmetric + HS256 symmetric fallback)
 
 ### **Integrations**
+
 - **Discord.Net 3.16.0** (bot integration)
 - **Story Protocol** (gRPC adapter + stub via feature flag `ChainService:UseGrpc`)
 
 ### **Tooling**
+
 - **Husky.Net** (pre-commit hooks - `dotnet format`)
 - **GitHub Actions** (CI/CD)
 - **Azure Bicep** (infrastructure as code)
@@ -160,6 +167,7 @@
 ## Quick Start Commands
 
 ### **Build & Restore**
+
 ```bash
 dotnet restore              # Restore all dependencies
 dotnet build                # Build entire solution
@@ -169,6 +177,7 @@ dotnet publish src/Mystira.App.PWA -c Release -o ./publish/pwa       # Publish P
 ```
 
 ### **Run Applications**
+
 ```bash
 # Backend API (https://localhost:5001, Swagger at /swagger)
 cd src/Mystira.App.Api && dotnet run
@@ -184,6 +193,7 @@ cd src/Mystira.App.CosmosConsole && dotnet run
 ```
 
 ### **Testing**
+
 ```bash
 dotnet test                                    # Run all tests
 dotnet test tests/Mystira.App.Api.Tests        # Run specific test project
@@ -192,6 +202,7 @@ dotnet test --filter "FullyQualifiedName~ScenarioTests" --verbosity normal  # Sp
 ```
 
 ### **Database**
+
 - **Local Development**: Uses in-memory database by default (no setup required)
 - **Cloud**: Uses Azure Cosmos DB when `ConnectionStrings:CosmosDb` is configured
 - Database is automatically initialized on startup via `EnsureCreatedAsync()`
@@ -201,6 +212,7 @@ dotnet test --filter "FullyQualifiedName~ScenarioTests" --verbosity normal  # Sp
 ### **When Adding/Modifying Features**
 
 1. **Follow Hexagonal Architecture:**
+
    ```
    Controller → Use Case → Domain Entity → Repository
    ```
@@ -256,6 +268,7 @@ From `docs/best-practices.md`:
 ### **Commit Standards**
 
 - Follow [Conventional Commits](https://www.conventionalcommits.org/):
+
   ```
   feat: Add guardian dashboard feature
   fix: Correct CORS policy vulnerability
@@ -404,6 +417,7 @@ The codebase contains ~14 TODO comments indicating incomplete work:
 See `PRODUCTION_REVIEW_REPORT.md` for comprehensive list of 40+ identified issues, prioritized by severity.
 
 **Top 5 Critical Items:**
+
 1. BUG-1: Production secrets exposed (immediate action)
 2. FEAT-INC-1: COPPA compliance not implemented (legal blocker)
 3. BUG-4: PII logged without redaction (compliance violation)
@@ -421,11 +435,13 @@ See `PRODUCTION_REVIEW_REPORT.md` for comprehensive list of 40+ identified issue
 ### **Testing Strategy (from TASK-2)**
 
 Target test pyramid:
+
 - **70% Unit Tests** (domain logic, use cases)
 - **20% Integration Tests** (API endpoints, repositories)
 - **10% E2E Tests** (critical user flows)
 
 **Priority Areas:**
+
 1. Authentication flows (security-critical)
 2. Game session management (core business logic)
 3. COPPA/parental consent (compliance-critical)
@@ -433,6 +449,7 @@ Target test pyramid:
 5. Use cases
 
 **Coverage Targets:**
+
 - **Minimum:** 60% overall
 - **Critical paths:** 80%+
 - **Domain layer:** 90%+
@@ -440,6 +457,7 @@ Target test pyramid:
 ### **Writing Tests**
 
 Example structure:
+
 ```csharp
 public class CreateGameSessionUseCaseTests
 {
@@ -468,14 +486,17 @@ public class CreateGameSessionUseCaseTests
 **Required Configuration:**
 
 1. **Azure Cosmos DB:**
+
    ```json
    "ConnectionStrings": {
      "CosmosDb": "AccountEndpoint=...;AccountKey=...;"
    }
    ```
+
    ⚠️ **NEVER commit connection strings to version control**
 
 2. **Azure Storage:**
+
    ```json
    "ConnectionStrings": {
      "AzureStorage": "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;"
@@ -483,6 +504,7 @@ public class CreateGameSessionUseCaseTests
    ```
 
 3. **JWT Settings:**
+
    ```json
    "JwtSettings": {
      "Issuer": "your-issuer",
@@ -496,6 +518,7 @@ public class CreateGameSessionUseCaseTests
    ```
 
 4. **CORS:**
+
    ```json
    "CorsSettings": {
      "AllowedOrigins": "https://mystira.app,https://www.mystira.app"
@@ -503,6 +526,7 @@ public class CreateGameSessionUseCaseTests
    ```
 
 5. **Azure Communication Services (Email):**
+
    ```json
    "AzureCommunicationServices": {
      "ConnectionString": "endpoint=...;accesskey=...",
@@ -529,12 +553,14 @@ public class CreateGameSessionUseCaseTests
 ### **Blazor Bundle Size**
 
 **Current Issues:**
+
 - AOT compilation disabled → slower runtime, larger bundles
 - IL Linking disabled → 30-50% larger bundles
 
 **Actions (from PERF-1, PERF-2):**
 
 In `Mystira.App.PWA.csproj`:
+
 ```xml
 <PropertyGroup Condition="'$(Configuration)' == 'Release'">
   <RunAOTCompilation>true</RunAOTCompilation>
@@ -547,6 +573,7 @@ In `Mystira.App.PWA.csproj`:
 - Always use async methods: `.ToListAsync()`, `.FirstOrDefaultAsync()`
 - Avoid N+1 queries: use `.Include()` or projections
 - Example:
+
   ```csharp
   // ❌ Bad - N+1 query
   var sessions = await _dbSet.ToListAsync();
@@ -697,4 +724,4 @@ Use this checklist from `docs/architecture/architectural-rules.md`:
 
 ---
 
-*Last Updated: 2026-02-10*
+_Last Updated: 2026-02-10_

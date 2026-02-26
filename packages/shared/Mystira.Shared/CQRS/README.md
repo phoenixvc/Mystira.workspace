@@ -11,11 +11,11 @@ CQRS separates read operations (queries) from write operations (commands):
 
 ## Interfaces
 
-| Interface | Purpose | Returns |
-|-----------|---------|---------|
-| `ICommand` | Write operation without result | Nothing |
-| `ICommand<TResponse>` | Write operation with result | TResponse |
-| `IQuery<TResponse>` | Read operation | TResponse |
+| Interface             | Purpose                        | Returns   |
+| --------------------- | ------------------------------ | --------- |
+| `ICommand`            | Write operation without result | Nothing   |
+| `ICommand<TResponse>` | Write operation with result    | TResponse |
+| `IQuery<TResponse>`   | Read operation                 | TResponse |
 
 ## Required Imports
 

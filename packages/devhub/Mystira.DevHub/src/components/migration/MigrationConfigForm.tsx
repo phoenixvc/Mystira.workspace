@@ -21,7 +21,7 @@ export function MigrationConfigForm({
 
   const handleConnectionsFetched = (
     source: { cosmos: string; storage: string; databaseName: string },
-    dest: { cosmos: string; storage: string; databaseName: string },
+    dest: { cosmos: string; storage: string; databaseName: string }
   ) => {
     onConfigChange("sourceCosmosConnection", source.cosmos);
     onConfigChange("sourceStorageConnection", source.storage);

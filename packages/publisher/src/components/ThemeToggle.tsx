@@ -1,4 +1,4 @@
-import { useUIStore } from '@/state/uiStore';
+import { useUIStore } from "@/state/uiStore";
 
 export function ThemeToggle() {
   const { effectiveTheme, toggleTheme } = useUIStore();
@@ -7,11 +7,11 @@ export function ThemeToggle() {
     <button
       onClick={toggleTheme}
       className="theme-toggle"
-      aria-label={`Switch to ${effectiveTheme === 'light' ? 'dark' : 'light'} mode`}
-      title={`Switch to ${effectiveTheme === 'light' ? 'dark' : 'light'} mode`}
+      aria-label={`Switch to ${effectiveTheme === "light" ? "dark" : "light"} mode`}
+      title={`Switch to ${effectiveTheme === "light" ? "dark" : "light"} mode`}
     >
       <span className="theme-toggle__icon">
-        {effectiveTheme === 'light' ? (
+        {effectiveTheme === "light" ? (
           <svg
             width="20"
             height="20"
@@ -48,4 +48,3 @@ export function ThemeToggle() {
     </button>
   );
 }
-

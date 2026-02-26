@@ -1,7 +1,16 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/css/*", "/js/*", "/config/*", "/_framework/*", "/_content/*", "/*.png", "/*.ico", "/*.json"]
+    "exclude": [
+      "/css/*",
+      "/js/*",
+      "/config/*",
+      "/_framework/*",
+      "/_content/*",
+      "/*.png",
+      "/*.ico",
+      "/*.json"
+    ]
   },
   "mimeTypes": {
     ".dll": "application/octet-stream",

@@ -5,6 +5,7 @@
 ## Summary
 
 Establish a unified type system using:
+
 1. **OpenAPI specs** as the single source of truth for API contracts (generates both C# and TypeScript)
 2. **Mystira.Core** for internal/shared types not exposed via APIs (Result, domain errors, etc.)
 
@@ -14,12 +15,12 @@ All .NET projects target **net9.0**.
 
 ### Current Duplication
 
-| Aspect | `Mystira.Contracts` | `Mystira.Shared` |
-|--------|---------------------|------------------|
-| **Namespace** | `Mystira.Contracts.App.Responses.Common` | `Mystira.Shared.Exceptions` |
-| **Type** | `record` (immutable) | `class` (mutable) |
-| **Framework** | net8.0 | net9.0 |
-| **StatusCode** | ✅ Has | ❌ Missing |
+| Aspect         | `Mystira.Contracts`                      | `Mystira.Shared`            |
+| -------------- | ---------------------------------------- | --------------------------- |
+| **Namespace**  | `Mystira.Contracts.App.Responses.Common` | `Mystira.Shared.Exceptions` |
+| **Type**       | `record` (immutable)                     | `class` (mutable)           |
+| **Framework**  | net8.0                                   | net9.0                      |
+| **StatusCode** | ✅ Has                                   | ❌ Missing                  |
 
 ### Issues
 
@@ -68,14 +69,14 @@ All .NET projects target **net9.0**.
 
 ### What Goes Where?
 
-| Type | Location | Reason |
-|------|----------|--------|
-| `ErrorResponse` | **api-spec/** (OpenAPI) | Exposed in API responses |
-| `ValidationErrorResponse` | **api-spec/** (OpenAPI) | Exposed in API responses |
-| `StoryRequest` | **api-spec/** (OpenAPI) | API request body |
-| `Result<T>` | **Mystira.Core** | Internal only, not serialized to API |
-| `DomainException` | **Mystira.Core** | Internal error handling |
-| `ISpecification<T>` | **Mystira.Core** | Internal query pattern |
+| Type                      | Location                | Reason                               |
+| ------------------------- | ----------------------- | ------------------------------------ |
+| `ErrorResponse`           | **api-spec/** (OpenAPI) | Exposed in API responses             |
+| `ValidationErrorResponse` | **api-spec/** (OpenAPI) | Exposed in API responses             |
+| `StoryRequest`            | **api-spec/** (OpenAPI) | API request body                     |
+| `Result<T>`               | **Mystira.Core**        | Internal only, not serialized to API |
+| `DomainException`         | **Mystira.Core**        | Internal error handling              |
+| `ISpecification<T>`       | **Mystira.Core**        | Internal query pattern               |
 
 ### New Package Structure
 
@@ -128,6 +129,7 @@ mkdir -p packages/api-spec/scripts
 ### Step 1.2: Define Common Error Types
 
 **packages/api-spec/openapi/common/errors.yaml:**
+
 ```yaml
 openapi: 3.1.0
 info:
@@ -180,7 +182,7 @@ components:
 
     ValidationErrorResponse:
       allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
+        - $ref: "#/components/schemas/ErrorResponse"
         - type: object
           required:
             - errors
@@ -195,7 +197,7 @@ components:
 
     NotFoundErrorResponse:
       allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
+        - $ref: "#/components/schemas/ErrorResponse"
         - type: object
           properties:
             resourceType:
@@ -207,7 +209,7 @@ components:
 
     UnauthorizedErrorResponse:
       allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
+        - $ref: "#/components/schemas/ErrorResponse"
         - type: object
           properties:
             authScheme:
@@ -216,7 +218,7 @@ components:
 
     ForbiddenErrorResponse:
       allOf:
-        - $ref: '#/components/schemas/ErrorResponse'
+        - $ref: "#/components/schemas/ErrorResponse"
         - type: object
           properties:
             requiredPermission:
@@ -227,6 +229,7 @@ components:
 ### Step 1.3: Create App API Spec
 
 **packages/api-spec/openapi/app-api.yaml:**
+
 ```yaml
 openapi: 3.1.0
 info:
@@ -243,20 +246,20 @@ paths:
       operationId: getHealth
       summary: Health check endpoint
       responses:
-        '200':
+        "200":
           description: Service is healthy
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthCheckResult'
+                $ref: "#/components/schemas/HealthCheckResult"
 
 components:
   schemas:
     # Import common types
     ErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/ErrorResponse'
+      $ref: "./common/errors.yaml#/components/schemas/ErrorResponse"
     ValidationErrorResponse:
-      $ref: './common/errors.yaml#/components/schemas/ValidationErrorResponse'
+      $ref: "./common/errors.yaml#/components/schemas/ValidationErrorResponse"
 
     # App-specific types
     HealthCheckResult:
@@ -274,7 +277,7 @@ components:
         checks:
           type: array
           items:
-            $ref: '#/components/schemas/HealthCheckEntry'
+            $ref: "#/components/schemas/HealthCheckEntry"
 
     HealthCheckEntry:
       type: object
@@ -298,6 +301,7 @@ components:
 ### Step 1.4: Create Generation Scripts
 
 **packages/api-spec/scripts/generate-csharp.sh:**
+
 ```bash
 #!/bin/bash
 set -e
@@ -324,6 +328,7 @@ echo "C# contracts generated at $OUTPUT_DIR"
 ```
 
 **packages/api-spec/scripts/generate-typescript.sh:**
+
 ```bash
 #!/bin/bash
 set -e
@@ -346,6 +351,7 @@ echo "TypeScript contracts generated at $OUTPUT_DIR"
 ### Step 1.5: Package Configuration
 
 **packages/api-spec/package.json:**
+
 ```json
 {
   "name": "@mystira/api-spec",
@@ -371,6 +377,7 @@ echo "TypeScript contracts generated at $OUTPUT_DIR"
 ### Step 2.1: Core Project (net9.0)
 
 **packages/core/Mystira.Core/Mystira.Core.csproj:**
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -390,6 +397,7 @@ echo "TypeScript contracts generated at $OUTPUT_DIR"
 ### Step 2.2: Result Pattern (Internal Only)
 
 **packages/core/Mystira.Core/Results/Result.cs:**
+
 ```csharp
 namespace Mystira.Core.Results;
 
@@ -467,6 +475,7 @@ public sealed record Error(string Code, string Message, Exception? Exception = n
 ### Step 2.3: TypeScript Core Types
 
 **packages/core-types/src/result.ts:**
+
 ```typescript
 export type Result<T, E = Error> =
   | { success: true; value: T }
@@ -479,13 +488,18 @@ export interface Error {
 
 export const Result = {
   success: <T>(value: T): Result<T> => ({ success: true, value }),
-  failure: <E = Error>(error: E): Result<never, E> => ({ success: false, error }),
+  failure: <E = Error>(error: E): Result<never, E> => ({
+    success: false,
+    error,
+  }),
 
   map: <T, U, E>(result: Result<T, E>, fn: (value: T) => U): Result<U, E> =>
     result.success ? Result.success(fn(result.value)) : result,
 
-  flatMap: <T, U, E>(result: Result<T, E>, fn: (value: T) => Result<U, E>): Result<U, E> =>
-    result.success ? fn(result.value) : result,
+  flatMap: <T, U, E>(
+    result: Result<T, E>,
+    fn: (value: T) => Result<U, E>
+  ): Result<U, E> => (result.success ? fn(result.value) : result),
 };
 ```
 
@@ -494,6 +508,7 @@ export const Result = {
 ### Step 3.1: Update Mystira.Contracts
 
 **packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj:**
+
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
@@ -529,13 +544,14 @@ Already net9.0, just add reference to Core:
 ### Step 4.1: Add Generation to Build Pipeline
 
 **.github/workflows/generate-contracts.yml:**
+
 ```yaml
 name: Generate API Contracts
 
 on:
   push:
     paths:
-      - 'packages/api-spec/openapi/**'
+      - "packages/api-spec/openapi/**"
   workflow_dispatch:
 
 jobs:
@@ -546,11 +562,11 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '9.0.x'
+          dotnet-version: "9.0.x"
 
       - name: Install dependencies
         run: cd packages/api-spec && npm ci
@@ -603,22 +619,22 @@ jobs:
 
 ## Benefits of Hybrid Approach
 
-| Benefit | Description |
-|---------|-------------|
-| **Single Source of Truth** | OpenAPI spec defines all API types once |
-| **Auto-sync** | C# and TypeScript always match |
-| **API Documentation** | OpenAPI gives free Swagger/Redoc docs |
-| **Contract Testing** | Can validate against spec |
-| **Internal Flexibility** | Mystira.Core can have C#-specific patterns (Result<T>) |
-| **net9.0 Everywhere** | Consistent runtime, latest features |
+| Benefit                    | Description                                            |
+| -------------------------- | ------------------------------------------------------ |
+| **Single Source of Truth** | OpenAPI spec defines all API types once                |
+| **Auto-sync**              | C# and TypeScript always match                         |
+| **API Documentation**      | OpenAPI gives free Swagger/Redoc docs                  |
+| **Contract Testing**       | Can validate against spec                              |
+| **Internal Flexibility**   | Mystira.Core can have C#-specific patterns (Result<T>) |
+| **net9.0 Everywhere**      | Consistent runtime, latest features                    |
 
 ## Tools Used
 
-| Tool | Purpose |
-|------|---------|
-| **NSwag** | Generate C# clients/types from OpenAPI |
+| Tool                   | Purpose                                |
+| ---------------------- | -------------------------------------- |
+| **NSwag**              | Generate C# clients/types from OpenAPI |
 | **openapi-typescript** | Generate TypeScript types from OpenAPI |
-| **Redocly CLI** | Validate and preview OpenAPI specs |
+| **Redocly CLI**        | Validate and preview OpenAPI specs     |
 
 ## Migration Checklist
 

@@ -166,30 +166,30 @@ spec:
 
 ### Admin API (Entra ID)
 
-| Secret Key                   | Source    | Description                            |
-| ---------------------------- | --------- | -------------------------------------- |
-| `azure-ad-tenant-id`         | Key Vault | Microsoft Entra ID tenant ID           |
-| `azure-ad-client-id`         | Key Vault | Admin API app registration client ID   |
-| `azure-ad-client-secret`     | Key Vault | Admin API app registration secret      |
+| Secret Key               | Source    | Description                          |
+| ------------------------ | --------- | ------------------------------------ |
+| `azure-ad-tenant-id`     | Key Vault | Microsoft Entra ID tenant ID         |
+| `azure-ad-client-id`     | Key Vault | Admin API app registration client ID |
+| `azure-ad-client-secret` | Key Vault | Admin API app registration secret    |
 
 ### Public API (Microsoft Entra External ID)
 
-| Secret Key                       | Source    | Description                              |
-| -------------------------------- | --------- | ---------------------------------------- |
-| `external-id-tenant-id`          | Key Vault | Entra External ID tenant ID              |
-| `external-id-client-id`          | Key Vault | Public API External ID app registration  |
-| `external-id-client-secret`      | Key Vault | External ID client secret (if confidential) |
+| Secret Key                  | Source    | Description                                 |
+| --------------------------- | --------- | ------------------------------------------- |
+| `external-id-tenant-id`     | Key Vault | Entra External ID tenant ID                 |
+| `external-id-client-id`     | Key Vault | Public API External ID app registration     |
+| `external-id-client-secret` | Key Vault | External ID client secret (if confidential) |
 
 ### Social Identity Provider Secrets
 
 These secrets are stored in Azure Key Vault and referenced by External ID:
 
-| Secret Key                   | Source    | Description                            |
-| ---------------------------- | --------- | -------------------------------------- |
-| `google-oauth-client-id`     | Key Vault | Google OAuth 2.0 client ID             |
-| `google-oauth-client-secret` | Key Vault | Google OAuth 2.0 client secret         |
-| `discord-oauth-client-id`    | Key Vault | Discord OAuth client ID                |
-| `discord-oauth-client-secret`| Key Vault | Discord OAuth client secret            |
+| Secret Key                    | Source    | Description                    |
+| ----------------------------- | --------- | ------------------------------ |
+| `google-oauth-client-id`      | Key Vault | Google OAuth 2.0 client ID     |
+| `google-oauth-client-secret`  | Key Vault | Google OAuth 2.0 client secret |
+| `discord-oauth-client-id`     | Key Vault | Discord OAuth client ID        |
+| `discord-oauth-client-secret` | Key Vault | Discord OAuth client secret    |
 
 ### Creating Authentication Secrets in Kubernetes
 

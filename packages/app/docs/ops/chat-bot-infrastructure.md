@@ -8,22 +8,22 @@ This guide covers deploying the infrastructure required for multi-platform chat 
 
 The following resources can be fully automated via Bicep templates:
 
-| Resource | Template | Purpose |
-|----------|----------|---------|
-| Azure Bot | `azure-bot.bicep` | Teams/Direct Line integration |
-| Communication Services | `communication-services.bicep` | WhatsApp/SMS/Email |
-| App Insights | `application-insights.bicep` | Bot telemetry |
-| Key Vault | `key-vault.bicep` | Secrets management |
+| Resource               | Template                       | Purpose                       |
+| ---------------------- | ------------------------------ | ----------------------------- |
+| Azure Bot              | `azure-bot.bicep`              | Teams/Direct Line integration |
+| Communication Services | `communication-services.bicep` | WhatsApp/SMS/Email            |
+| App Insights           | `application-insights.bicep`   | Bot telemetry                 |
+| Key Vault              | `key-vault.bicep`              | Secrets management            |
 
 ## Semi-Automated Resources
 
 These require initial manual setup, then can be managed via IaC:
 
-| Resource | Manual Step | Then Automate |
-|----------|-------------|---------------|
-| Azure AD App Registration | Create in Azure Portal | Reference App ID in Bicep |
-| WhatsApp Business Account | Verify with Meta | Configure in ACS |
-| Discord Application | Create at discord.com/developers | Store token in Key Vault |
+| Resource                  | Manual Step                      | Then Automate             |
+| ------------------------- | -------------------------------- | ------------------------- |
+| Azure AD App Registration | Create in Azure Portal           | Reference App ID in Bicep |
+| WhatsApp Business Account | Verify with Meta                 | Configure in ACS          |
+| Discord Application       | Create at discord.com/developers | Store token in Key Vault  |
 
 ## Deployment Parameters
 
@@ -68,6 +68,7 @@ az ad app credential reset --id $APP_ID --years 2
 ```
 
 Save the output:
+
 - `appId` → `BOT_MICROSOFT_APP_ID`
 - `password` → `BOT_MICROSOFT_APP_PASSWORD`
 
@@ -90,6 +91,7 @@ az deployment group create \
 ### 3. Configure GitHub Secrets
 
 Add to repository secrets:
+
 ```
 AZURE_CREDENTIALS          # Service principal JSON
 BOT_MICROSOFT_APP_ID       # Azure AD App ID
@@ -101,6 +103,7 @@ ACS_CONNECTION_STRING      # Communication Services connection string
 ### 4. Workflow Integration
 
 The infrastructure deployment workflow automatically:
+
 1. Creates/updates Azure Bot resource
 2. Enables Teams and WebChat channels
 3. Deploys Communication Services (if not skipping)
@@ -163,6 +166,7 @@ az webapp restart --name mys-dev-mystira-api-san --resource-group mys-dev-mystir
 ## Monitoring
 
 Bot health is monitored via:
+
 - `/health` endpoint health checks
 - Application Insights telemetry
 - Azure Bot Service analytics
@@ -171,12 +175,12 @@ See [BOT_MONITORING.md](./BOT_MONITORING.md) for detailed monitoring setup.
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Bot not responding | Check App ID/Password match |
-| Teams 401 errors | Verify messaging endpoint URL |
-| WhatsApp not sending | Check ACS connection string |
-| Discord rate limited | Review retry configuration |
+| Issue                | Solution                      |
+| -------------------- | ----------------------------- |
+| Bot not responding   | Check App ID/Password match   |
+| Teams 401 errors     | Verify messaging endpoint URL |
+| WhatsApp not sending | Check ACS connection string   |
+| Discord rate limited | Review retry configuration    |
 
 ## References
 

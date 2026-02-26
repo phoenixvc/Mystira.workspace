@@ -46,6 +46,7 @@ Tauri (Rust) → Spawns Process → DevHub.CLI
 ### Cosmos Operations
 
 #### cosmos.export
+
 Export game sessions to CSV
 
 ```json
@@ -58,6 +59,7 @@ Export game sessions to CSV
 ```
 
 #### cosmos.stats
+
 Get scenario statistics
 
 ```json
@@ -70,6 +72,7 @@ Get scenario statistics
 ### Migration Operations
 
 #### migration.run
+
 Run data migrations
 
 ```json
@@ -88,6 +91,7 @@ Run data migrations
 ```
 
 **Migration Types**:
+
 - `scenarios` - Migrate scenarios only
 - `bundles` - Migrate content bundles only
 - `media-metadata` - Migrate media assets metadata only
@@ -97,6 +101,7 @@ Run data migrations
 ### Infrastructure Operations
 
 #### infrastructure.validate
+
 Validate Bicep templates
 
 ```json
@@ -110,6 +115,7 @@ Validate Bicep templates
 ```
 
 #### infrastructure.preview
+
 Preview infrastructure changes (what-if)
 
 ```json
@@ -123,6 +129,7 @@ Preview infrastructure changes (what-if)
 ```
 
 #### infrastructure.deploy
+
 Deploy infrastructure
 
 ```json
@@ -136,6 +143,7 @@ Deploy infrastructure
 ```
 
 #### infrastructure.destroy
+
 Destroy infrastructure (requires confirmation)
 
 ```json
@@ -150,6 +158,7 @@ Destroy infrastructure (requires confirmation)
 ```
 
 #### infrastructure.status
+
 Get workflow status
 
 ```json

@@ -14,7 +14,7 @@ interface UseServiceLifecycleProps {
     getEnvironmentUrls: (serviceName: string) => {
       dev?: string;
       prod?: string;
-    },
+    }
   ) => any[];
   services: ServiceStatus[];
   buildStatus: Record<string, any>;
@@ -23,21 +23,21 @@ interface UseServiceLifecycleProps {
     repoRoot: string,
     setViewModeForService: (
       serviceName: string,
-      mode: "logs" | "webview" | "split",
+      mode: "logs" | "webview" | "split"
     ) => void,
     handleShowLogs: (serviceName: string, show: boolean) => void,
-    isManual: boolean,
+    isManual: boolean
   ) => Promise<boolean>;
   setViewModeForService: (
     serviceName: string,
-    mode: "logs" | "webview" | "split",
+    mode: "logs" | "webview" | "split"
   ) => void;
   handleShowLogs: (serviceName: string, show: boolean) => void;
   setAutoScroll: React.Dispatch<React.SetStateAction<Record<string, boolean>>>;
   addToast: (
     message: string,
     type?: "info" | "success" | "error" | "warning",
-    duration?: number,
+    duration?: number
   ) => void;
   refreshServices: () => Promise<void>;
 }
@@ -70,7 +70,7 @@ export function useServiceLifecycle({
     if (!rootToUse || rootToUse.trim() === "") {
       addToast(
         "Repository root is not set. Please configure it first.",
-        "error",
+        "error"
       );
       return;
     }
@@ -86,7 +86,7 @@ export function useServiceLifecycle({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       addToast(`${config?.displayName || serviceName} started`, "success");
       await refreshServices();
@@ -94,11 +94,11 @@ export function useServiceLifecycle({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       addToast(
         `Failed to start ${config?.displayName || serviceName}: ${error}`,
-        "error",
+        "error"
       );
     }
   };
@@ -109,7 +109,7 @@ export function useServiceLifecycle({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       addToast(`${config?.displayName || serviceName} stopped`, "info");
       await refreshServices();
@@ -123,7 +123,7 @@ export function useServiceLifecycle({
     if (environment !== "local") {
       addToast(
         `Cannot rebuild ${serviceName}: it's connected to ${environment.toUpperCase()} environment`,
-        "info",
+        "info"
       );
       return;
     }
@@ -132,7 +132,7 @@ export function useServiceLifecycle({
     if (!rootToUse || rootToUse.trim() === "") {
       addToast(
         "Repository root is not set. Please configure it first.",
-        "error",
+        "error"
       );
       return;
     }
@@ -144,32 +144,32 @@ export function useServiceLifecycle({
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       addToast(
         `Stopping ${config?.displayName || serviceName} before rebuild...`,
         "info",
-        2000,
+        2000
       );
       try {
         await stopService(serviceName);
         await new Promise((resolve) => setTimeout(resolve, 1500));
         await refreshServices();
         const stillRunning = services.find(
-          (s) => s.name === serviceName,
+          (s) => s.name === serviceName
         )?.running;
         if (stillRunning) {
           addToast(
             `Service ${serviceName} is still running. Please stop it manually and try again.`,
             "error",
-            5000,
+            5000
           );
           return;
         }
       } catch (error) {
         addToast(
           `Failed to stop ${serviceName} before rebuild: ${error}`,
-          "error",
+          "error"
         );
         return;
       }
@@ -181,33 +181,33 @@ export function useServiceLifecycle({
         rootToUse,
         setViewModeForService,
         handleShowLogs,
-        true,
+        true
       );
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       if (success) {
         addToast(
           `${config?.displayName || serviceName} rebuilt successfully`,
-          "success",
+          "success"
         );
       } else {
         addToast(
           `Failed to rebuild ${config?.displayName || serviceName}`,
-          "error",
+          "error"
         );
       }
     } catch (error) {
       const config = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).find((s: any) => s.name === serviceName);
       addToast(
         `Failed to rebuild ${config?.displayName || serviceName}`,
-        "error",
+        "error"
       );
     }
   };
@@ -216,7 +216,7 @@ export function useServiceLifecycle({
     const servicesToStart = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     ).filter((config: any) => {
       const status = services.find((s) => s.name === config.name);
       const currentBuild = buildStatus[config.name];
@@ -227,7 +227,7 @@ export function useServiceLifecycle({
       const buildingServices = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).filter((config: any) => {
         const currentBuild = buildStatus[config.name];
         return currentBuild?.status === "building";
@@ -239,12 +239,12 @@ export function useServiceLifecycle({
             buildingServices.length === 1 ? "is" : "are"
           } currently building. Please wait for the build to complete.`,
           "warning",
-          5000,
+          5000
         );
       } else {
         addToast(
           "All services are already running or configured for remote environments!",
-          "info",
+          "info"
         );
       }
       return;
@@ -253,7 +253,7 @@ export function useServiceLifecycle({
     addToast(
       `Starting ${servicesToStart.length} service(s)... This may take a minute.`,
       "info",
-      8000,
+      8000
     );
 
     try {
@@ -270,13 +270,13 @@ export function useServiceLifecycle({
           addToast(
             `${service.displayName || service.name} started (${i + 1}/${servicesToStart.length})`,
             "success",
-            3000,
+            3000
           );
         } catch (error) {
           console.error(`Failed to start ${service.name}:`, error);
           addToast(
             `Failed to start ${service.displayName || service.name}`,
-            "error",
+            "error"
           );
         }
       }
@@ -284,7 +284,7 @@ export function useServiceLifecycle({
       addToast(
         `All ${servicesToStart.length} service(s) started successfully!`,
         "success",
-        5000,
+        5000
       );
     } catch (error) {
       addToast(`Failed to start services: ${error}`, "error");
@@ -304,7 +304,7 @@ export function useServiceLifecycle({
         invoke("stop_service", { serviceName: service.name }).catch((error) => {
           console.error(`Failed to stop ${service.name}:`, error);
           return { service: service.name, error };
-        }),
+        })
       );
 
       await Promise.allSettled(stopPromises);
@@ -320,7 +320,7 @@ export function useServiceLifecycle({
     if (!rootToUse || rootToUse.trim() === "") {
       addToast(
         "Repository root is not set. Please configure it first.",
-        "error",
+        "error"
       );
       return;
     }
@@ -329,7 +329,7 @@ export function useServiceLifecycle({
     const servicesToBuild = getServiceConfigs(
       customPorts,
       serviceEnvironments,
-      getEnvironmentUrls,
+      getEnvironmentUrls
     ).filter((config: any) => {
       const environment = serviceEnvironments[config.name] || "local";
       const currentBuild = buildStatus[config.name];
@@ -341,7 +341,7 @@ export function useServiceLifecycle({
       const buildingServices = getServiceConfigs(
         customPorts,
         serviceEnvironments,
-        getEnvironmentUrls,
+        getEnvironmentUrls
       ).filter((config: any) => {
         const currentBuild = buildStatus[config.name];
         return currentBuild?.status === "building";
@@ -353,12 +353,12 @@ export function useServiceLifecycle({
             buildingServices.length === 1 ? "is" : "are"
           } currently building. Please wait for the build to complete.`,
           "warning",
-          5000,
+          5000
         );
       } else {
         addToast(
           "No local services to build. All services are configured for remote environments.",
-          "info",
+          "info"
         );
       }
       return;
@@ -367,7 +367,7 @@ export function useServiceLifecycle({
     addToast(
       `Building ${servicesToBuild.length} service(s)... This may take a few minutes.`,
       "info",
-      10000,
+      10000
     );
 
     let successCount = 0;
@@ -380,20 +380,20 @@ export function useServiceLifecycle({
           rootToUse,
           setViewModeForService,
           handleShowLogs,
-          true,
+          true
         );
         if (success) {
           successCount++;
           addToast(
             `${service.displayName || service.name} built (${successCount}/${servicesToBuild.length})`,
             "success",
-            3000,
+            3000
           );
         } else {
           failCount++;
           addToast(
             `Failed to build ${service.displayName || service.name}`,
-            "error",
+            "error"
           );
         }
       } catch (error) {
@@ -401,7 +401,7 @@ export function useServiceLifecycle({
         console.error(`Failed to build ${service.name}:`, error);
         addToast(
           `Failed to build ${service.displayName || service.name}`,
-          "error",
+          "error"
         );
       }
     }
@@ -410,13 +410,13 @@ export function useServiceLifecycle({
       addToast(
         `All ${successCount} service(s) built successfully!`,
         "success",
-        5000,
+        5000
       );
     } else {
       addToast(
         `Build complete: ${successCount} succeeded, ${failCount} failed`,
         failCount > 0 ? "warning" : "success",
-        5000,
+        5000
       );
     }
   };

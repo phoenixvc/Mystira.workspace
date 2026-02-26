@@ -19,13 +19,13 @@ The Mystira Story Generator implements a **multi-agent orchestration system** fo
 
 ### Key Architectural Decisions
 
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| **Agent Count** | 4 separate agents (Writer, Judge, Refiner, Summary) | Separation of concerns: creative generation vs. analytical evaluation |
-| **Platform** | Azure AI Foundry Agents | Built-in RAG, thread management, tool calling, streaming |
-| **Age Specialization** | Single agent + multiple vector stores | Knowledge-driven vs. agent proliferation (4 agents not 16) |
-| **Knowledge Mode** | FileSearch with age-specific vector stores | Physical isolation of age-appropriate content |
-| **State Management** | Thread-based with persistent sessions | Maintains full iteration history automatically |
+| Decision               | Choice                                              | Rationale                                                             |
+| ---------------------- | --------------------------------------------------- | --------------------------------------------------------------------- |
+| **Agent Count**        | 4 separate agents (Writer, Judge, Refiner, Summary) | Separation of concerns: creative generation vs. analytical evaluation |
+| **Platform**           | Azure AI Foundry Agents                             | Built-in RAG, thread management, tool calling, streaming              |
+| **Age Specialization** | Single agent + multiple vector stores               | Knowledge-driven vs. agent proliferation (4 agents not 16)            |
+| **Knowledge Mode**     | FileSearch with age-specific vector stores          | Physical isolation of age-appropriate content                         |
+| **State Management**   | Thread-based with persistent sessions               | Maintains full iteration history automatically                        |
 
 ---
 
@@ -36,6 +36,7 @@ The Mystira Story Generator implements a **multi-agent orchestration system** fo
 #### The Problem with Single-Agent Approach
 
 A monolithic agent would need to:
+
 ```
 Generate creative story
   AND
@@ -47,6 +48,7 @@ Translate technical findings to user-friendly language
 ```
 
 **Issues**:
+
 - **Self-justification bias**: Agents defend their own creative choices
 - **Conflicting cognitive modes**: Creative divergent thinking vs. analytical convergent evaluation
 - **Vague improvements**: "Make it better" without specific targets
@@ -63,6 +65,7 @@ Translate technical findings to user-friendly language
 **Cognitive Mode**: Divergent, creative, expansive
 
 **Prompt Strategy**: Maximize creativity within constraints
+
 ```
 - "Create branching narratives with meaningful choices"
 - "Develop character arcs"
@@ -71,6 +74,7 @@ Translate technical findings to user-friendly language
 ```
 
 **Tools**:
+
 - `file_search` (age-specific guidelines)
 - `azure_ai_search` (alternative knowledge mode)
 
@@ -85,6 +89,7 @@ Translate technical findings to user-friendly language
 **Cognitive Mode**: Convergent, analytical, critical
 
 **Prompt Strategy**: Strict criteria application
+
 ```
 - "Evaluate safety gate: Pass/Fail (no leniency)"
 - "Score axes alignment: 0.0-1.0 (precise metrics)"
@@ -93,6 +98,7 @@ Translate technical findings to user-friendly language
 ```
 
 **Evaluation Criteria**:
+
 1. **Safety Gate** (Critical): Age-appropriateness, no harmful content
 2. **Axes Alignment** (0-1): Do choices impact target narrative axes?
 3. **Development Principles** (0-1): Follows child development theory?
@@ -111,6 +117,7 @@ Translate technical findings to user-friendly language
 **Cognitive Mode**: Focused, targeted, surgical
 
 **Prompt Strategy**: Minimal disruption
+
 ```
 - "Edit ONLY scenes [2, 3]. Preserve exact JSON for all other scenes."
 - "Fix: Dialogue pacing in scene 2 (finding #3 from Judge report)"
@@ -119,6 +126,7 @@ Translate technical findings to user-friendly language
 ```
 
 **Input**:
+
 - Original story JSON
 - Judge's evaluation findings
 - User refinement focus (optional targeting)
@@ -126,6 +134,7 @@ Translate technical findings to user-friendly language
 **Output**: Improved story JSON with minimal changes
 
 **Two Modes**:
+
 - **Targeted Refinement**: Edit specific scenes only (cost-efficient)
 - **Full Rewrite**: Regenerate entire story (preserves plot/characters)
 
@@ -138,6 +147,7 @@ Translate technical findings to user-friendly language
 **Cognitive Mode**: Communicative, encouraging, constructive
 
 **Prompt Strategy**: User-friendly translation
+
 ```
 - "Summarize in 150 words max"
 - "Avoid jargon like 'axes_alignment_score'"
@@ -148,6 +158,7 @@ Translate technical findings to user-friendly language
 **Input**: Judge's technical evaluation report
 
 **Output**: User-friendly summary
+
 ```json
 {
   "summary": "Your story has great character development...",
@@ -192,6 +203,7 @@ Optional:
 **Scenario**: Story evaluation failed with "Scene 2 dialogue feels unnatural for 6-year-olds"
 
 #### Multi-Agent Approach (Current):
+
 ```
 1. Judge identifies:
    "narrative_logic_score: 0.6"
@@ -213,6 +225,7 @@ Quality: Surgical fix, rest of story untouched
 ```
 
 #### Single-Agent Approach (Hypothetical):
+
 ```
 1. User: "Improve dialogue in scene 2"
 
@@ -229,6 +242,7 @@ Quality: Unpredictable side effects
 ```
 
 **Iteration Efficiency (from production tests)**:
+
 - 67% of stories pass on first try (Writer → Judge → Done)
 - 28% pass after 1 refinement (Writer → Judge → Refiner → Judge → Pass)
 - 5% need 2+ iterations
@@ -242,6 +256,7 @@ Quality: Unpredictable side effects
 #### 1. **Stateful Thread Management**
 
 **With Foundry**:
+
 ```csharp
 // Create thread once - Foundry maintains conversation history
 var thread = await CreateThreadAsync(agentId);
@@ -253,6 +268,7 @@ await CreateRunAsync(threadId, agentId, "Refine scene 2...");
 ```
 
 **Without Foundry (Manual)**:
+
 ```csharp
 // YOU manage entire conversation history
 var conversationHistory = new List<ChatMessage>();
@@ -273,6 +289,7 @@ var response2 = await openAIClient.GetChatCompletionsAsync(conversationHistory);
 #### 2. **Built-In RAG (Retrieval-Augmented Generation)**
 
 **With Foundry FileSearch**:
+
 ```csharp
 // ONE LINE - automatic vector store integration
 var toolDef = new FileSearchToolDefinition();
@@ -282,6 +299,7 @@ var toolDef = new FileSearchToolDefinition();
 ```
 
 **Without Foundry (Manual RAG)**:
+
 ```csharp
 // YOU build entire RAG pipeline:
 1. Embed user query → await embeddingClient.GenerateEmbedding(query)
@@ -300,6 +318,7 @@ var toolDef = new FileSearchToolDefinition();
 #### 3. **Automatic Tool Calling Loop**
 
 **With Foundry**:
+
 ```csharp
 // Agent automatically decides when to search, how many times, what queries
 await CreateRunAsync(threadId, agentId, prompt);
@@ -312,6 +331,7 @@ await CreateRunAsync(threadId, agentId, prompt);
 ```
 
 **Without Foundry (Manual Tool Loop)**:
+
 ```csharp
 var response = await openAIClient.GetChatCompletionsAsync(messages);
 
@@ -340,6 +360,7 @@ while (response.FinishReason == "tool_calls") {
 #### 4. **Agent Deployment & Versioning**
 
 **With Foundry**:
+
 ```json
 // Deploy agents via Portal or API
 {
@@ -354,6 +375,7 @@ while (response.FinishReason == "tool_calls") {
 ```
 
 **Without Foundry (Manual)**:
+
 ```csharp
 // Custom agent config table in YOUR database
 public class AgentConfig {
@@ -375,6 +397,7 @@ public class AgentConfig {
 #### 5. **Streaming Support**
 
 **With Foundry**:
+
 ```csharp
 await foreach (var update in StreamRunAsync(threadId, agentId, instructions)) {
     // Real-time events: text deltas, tool calls, completion
@@ -383,6 +406,7 @@ await foreach (var update in StreamRunAsync(threadId, agentId, instructions)) {
 ```
 
 **Without Foundry (Manual)**:
+
 ```csharp
 // YOU implement SSE endpoint, streaming state management, reconnection logic
 await foreach (var chunk in openAIClient.StreamChatCompletionsAsync(messages)) {
@@ -398,6 +422,7 @@ await foreach (var chunk in openAIClient.StreamChatCompletionsAsync(messages)) {
 ### Total Code Savings: ~5,000 Lines of Infrastructure
 
 **Cost Trade-off**:
+
 - **Without Foundry**: No agent hosting fees, but ~2-3 months of engineering time + ongoing maintenance
 - **With Foundry**: Agent hosting fees (~$5-20/month per agent), instant deployment
 
@@ -410,6 +435,7 @@ await foreach (var chunk in openAIClient.StreamChatCompletionsAsync(messages)) {
 ### The Design Challenge
 
 **Requirement**: Story content must vary significantly by age group:
+
 - **1-2 years**: 2-4 word sentences, concrete nouns only, no scary content
 - **6-9 years**: Complex sentences, moral dilemmas, character development
 - **10-12 years**: Advanced vocabulary, nuanced themes, multiple perspectives
@@ -421,6 +447,7 @@ await foreach (var chunk in openAIClient.StreamChatCompletionsAsync(messages)) {
 ### Option 1: Multiple Agents (One Per Age Group) ❌
 
 **Architecture**:
+
 ```
 WriterAgent_1_2: "asst_toddler_abc"
 WriterAgent_3_5: "asst_preschool_def"
@@ -435,12 +462,14 @@ JudgeAgent_3_5: "asst_judge_preschool_pqr"
 **Total**: 16 agents (4 roles × 4 age groups)
 
 **Pros**:
+
 - ✅ Maximum specialization (each agent hyper-tuned)
 - ✅ Independent model parameters (temperature, max_tokens per age)
 - ✅ Isolated rate limits
 - ✅ A/B testing per age group
 
 **Cons**:
+
 - ❌ **16x maintenance burden** (update all agents when changing core logic)
 - ❌ **16x costs** (agent hosting fees)
 - ❌ **Version drift risk** (agents become inconsistent over time)
@@ -454,6 +483,7 @@ JudgeAgent_3_5: "asst_judge_preschool_pqr"
 ### Option 2: Single Agent + Dynamic Prompt Injection ⚠️
 
 **Architecture**:
+
 ```
 WriterAgent: "asst_writer_single"
 
@@ -465,11 +495,13 @@ Prompt per request:
 ```
 
 **Pros**:
+
 - ✅ Single agent to maintain
 - ✅ Lower costs
 - ✅ Easy to add age groups (just add prompt conditions)
 
 **Cons**:
+
 - ❌ **Prompt complexity** (large conditional logic)
 - ❌ **No knowledge isolation** (agent could access inappropriate content)
 - ❌ **Less specialization** (model must handle all ages in one config)
@@ -482,6 +514,7 @@ Prompt per request:
 ### Option 3: Single Agent + Multiple Vector Stores ✅ (CHOSEN)
 
 **Architecture**:
+
 ```
 WriterAgent: "asst_writer_001" (single agent for all ages)
 
@@ -498,6 +531,7 @@ At runtime:
 ```
 
 **Pros**:
+
 - ✅ **Single agent** (4 agents total, not 16)
 - ✅ **Physical knowledge isolation** (thread-level vector store attachment)
 - ✅ **Easy maintenance** (update markdown files, not agent configs)
@@ -507,6 +541,7 @@ At runtime:
 - ✅ **Consistent workflow** (same generation/evaluation logic for all ages)
 
 **Cons**:
+
 - ❌ Can't set different model temperature per age at agent level (all ages use same agent config)
 - ❌ Requires Foundry FileSearch feature (not available with all LLM platforms)
 
@@ -519,6 +554,7 @@ At runtime:
 ### Implementation Details: Age-Specific Vector Stores
 
 #### Configuration
+
 ```json
 {
   "FoundryAgent": {
@@ -535,6 +571,7 @@ At runtime:
 ```
 
 #### Runtime Flow
+
 ```csharp
 // User requests story for age 6-9
 InitializeSessionAsync(sessionId, "FileSearch", "6-9")
@@ -579,6 +616,7 @@ Agent generates story using 6-9 appropriate content
 **Scenario**: Add "13-15" (teen) age group
 
 **Steps**:
+
 1. Create vector store in Azure portal: `vs-mystira-age-13-15`
 2. Upload teen-appropriate markdown files
 3. Update configuration:
@@ -606,6 +644,7 @@ Agent generates story using 6-9 appropriate content
 **Chosen**: Azure AI Foundry Agents
 
 **Rationale**:
+
 - **Time-to-market**: ~5000 LOC of infrastructure avoided (RAG, threads, tool calling, streaming)
 - **Built-in RAG**: FileSearch and AISearch tools provide zero-config knowledge retrieval
 - **Maintainability**: Prompts managed server-side in Foundry portal, version controlled
@@ -624,6 +663,7 @@ Agent generates story using 6-9 appropriate content
 **Chosen**: Four specialized agents (Writer, Judge, Refiner, Summary)
 
 **Rationale**:
+
 - **Objective evaluation**: Judge critiques Writer's output (no self-justification bias)
 - **Surgical refinement**: Refiner edits specific scenes without regenerating everything
 - **Cognitive specialization**: Creative (Writer) vs. analytical (Judge) modes
@@ -642,6 +682,7 @@ Agent generates story using 6-9 appropriate content
 **Chosen**: Single agent + age-specific vector stores
 
 **Rationale**:
+
 - **Maintenance**: 4 agents (not 16) to update when logic changes
 - **Knowledge-driven**: Differences in content (vocab, themes), not workflow
 - **Scalability**: Add age groups without deploying new agents
@@ -660,11 +701,13 @@ Agent generates story using 6-9 appropriate content
 **Chosen**: FileSearch for age-specific isolation
 
 **Rationale**:
+
 - **Physical isolation**: Thread-level vector store attachment prevents cross-age contamination
 - **Simplicity**: Upload markdown files to portal, no index management
 - **Cost**: FileSearch included in Foundry, AI Search requires separate service
 
 **Alternative**: AI Search with metadata filters (`age_group eq '6-9'`)
+
 - **Pros**: More powerful search (hybrid, faceting), single index for all ages
 - **Cons**: Relies on agent correctly applying filters (prompt-based, not enforced)
 
@@ -679,6 +722,7 @@ Agent generates story using 6-9 appropriate content
 **Chosen**: 5 iterations
 
 **Rationale**:
+
 - **Production data**: 95% of stories pass within 2 iterations
 - **Cost control**: Prevents runaway refinement costs
 - **Quality signal**: If 5 iterations don't fix it, human review needed (fundamental issue)
@@ -800,14 +844,15 @@ User Request
 
 #### Token Usage (Typical 6-9 Story)
 
-| Phase | Agent | Tokens | Cost (GPT-4) |
-|-------|-------|--------|--------------|
-| Generation | Writer | ~2500 | $0.075 |
-| Evaluation | Judge | ~1200 | $0.036 |
-| Refinement (if needed) | Refiner | ~800 | $0.024 |
-| Summary | RubricSummary | ~300 | $0.009 |
+| Phase                  | Agent         | Tokens | Cost (GPT-4) |
+| ---------------------- | ------------- | ------ | ------------ |
+| Generation             | Writer        | ~2500  | $0.075       |
+| Evaluation             | Judge         | ~1200  | $0.036       |
+| Refinement (if needed) | Refiner       | ~800   | $0.024       |
+| Summary                | RubricSummary | ~300   | $0.009       |
 
 **Average Cost per Story**:
+
 - Pass on first try (67%): $0.111
 - 1 refinement needed (28%): $0.135
 - 2+ refinements (5%): $0.159
@@ -818,20 +863,21 @@ User Request
 
 ### Performance Benchmarks
 
-| Metric | Target | Actual (Production) |
-|--------|--------|---------------------|
-| Session initialization | < 500ms | 350ms avg |
-| First SSE event | < 500ms | 280ms avg |
-| Story generation | 15-60s | 32s avg (model-dependent) |
-| Evaluation | < 10s | 4.5s avg |
-| Refinement start | < 500ms | 320ms avg |
-| Concurrent sessions | 100+ | Tested to 150 |
+| Metric                 | Target  | Actual (Production)       |
+| ---------------------- | ------- | ------------------------- |
+| Session initialization | < 500ms | 350ms avg                 |
+| First SSE event        | < 500ms | 280ms avg                 |
+| Story generation       | 15-60s  | 32s avg (model-dependent) |
+| Evaluation             | < 10s   | 4.5s avg                  |
+| Refinement start       | < 500ms | 320ms avg                 |
+| Concurrent sessions    | 100+    | Tested to 150             |
 
 ---
 
 ### Monitoring & Observability
 
 **Key Metrics to Track**:
+
 1. **Pass Rate**: % of stories passing Judge on first try (target: >60%)
 2. **Iteration Distribution**: How many stories need 1, 2, 3+ refinements
 3. **StuckNeedsReview Rate**: % hitting max iterations (target: <5%)
@@ -839,6 +885,7 @@ User Request
 5. **Evaluation Scores**: Axes alignment, dev principles, narrative logic (trend over time)
 
 **Logging Strategy**:
+
 - **Correlation IDs**: Track session through entire pipeline
 - **Structured Logging**: JSON logs for easy querying
 - **Event Emission**: All state transitions logged + emitted as SSE events
@@ -847,13 +894,13 @@ User Request
 
 ### Failure Modes & Recovery
 
-| Failure | Detection | Recovery |
-|---------|-----------|----------|
-| Foundry API timeout | Run status = "Expired" after 5 min | Retry with backoff (3x), then mark Failed |
-| Malformed JSON | Schema validation fails | Emit ValidationFailed event, mark RefinementRequested |
-| Safety gate failure | Judge reports SafetyGatePassed=false | Cannot be refined, marked Failed (human review) |
-| Max iterations | IterationCount >= 5 | Mark StuckNeedsReview, notify user |
-| Rate limiting | 429 from Foundry API | Exponential backoff, queue for retry |
+| Failure             | Detection                            | Recovery                                              |
+| ------------------- | ------------------------------------ | ----------------------------------------------------- |
+| Foundry API timeout | Run status = "Expired" after 5 min   | Retry with backoff (3x), then mark Failed             |
+| Malformed JSON      | Schema validation fails              | Emit ValidationFailed event, mark RefinementRequested |
+| Safety gate failure | Judge reports SafetyGatePassed=false | Cannot be refined, marked Failed (human review)       |
+| Max iterations      | IterationCount >= 5                  | Mark StuckNeedsReview, notify user                    |
+| Rate limiting       | 429 from Foundry API                 | Exponential backoff, queue for retry                  |
 
 ---
 
@@ -864,6 +911,7 @@ User Request
 #### 1. **New Agent Role** (e.g., "Illustrator Agent")
 
 **Steps**:
+
 1. Deploy new agent in Azure AI Foundry portal
 2. Add `IllustratorAgentId` to `FoundryAgentConfig`
 3. Create prompt template: `IllustratorAgentPrompt.cs`
@@ -877,6 +925,7 @@ User Request
 #### 2. **New Evaluation Criterion** (e.g., "Cultural Sensitivity Score")
 
 **Steps**:
+
 1. Update `JudgeAgentPrompt.cs` to include new criterion
 2. Update `EvaluationReport` model with new score field
 3. Update UI to display new score
@@ -889,6 +938,7 @@ User Request
 #### 3. **Multi-Language Support**
 
 **Option A**: Separate vector stores per language
+
 ```json
 "VectorStoresByLanguageAndAge": {
   "en-6-9": "vs_english_elementary",
@@ -898,6 +948,7 @@ User Request
 ```
 
 **Option B**: Single agent with language parameter in prompt
+
 ```
 Generate story in {language} for age group {ageGroup}
 ```
@@ -909,6 +960,7 @@ Generate story in {language} for age group {ageGroup}
 #### 4. **Custom Story Templates** (e.g., "Hero's Journey", "Mystery")
 
 **Implementation**:
+
 1. Add template selection to API: `POST /sessions/start { template: "mystery" }`
 2. Create template-specific knowledge docs: `mystery_structure.md`, `heros_journey.md`
 3. Upload to separate vector stores OR use as additional context in prompt
@@ -921,16 +973,19 @@ Generate story in {language} for age group {ageGroup}
 ### Horizontal Scaling
 
 **Current Architecture Supports**:
+
 - ✅ **Stateless API**: Multiple API instances behind load balancer
 - ✅ **Thread-based sessions**: No in-memory session state (persisted to Cosmos DB)
 - ✅ **Async operations**: Non-blocking I/O throughout pipeline
 - ✅ **Event streaming**: SignalR supports scale-out via Azure SignalR Service
 
 **Bottlenecks**:
+
 - Azure AI Foundry rate limits (requests per minute per agent)
 - Cosmos DB throughput (RU/s for session reads/writes)
 
 **Scaling Strategy**:
+
 1. Increase Foundry agent rate limits (contact Azure support)
 2. Scale Cosmos DB provisioned throughput (or use serverless)
 3. Use Azure SignalR Service for SSE scale-out (100k+ concurrent connections)
@@ -940,6 +995,7 @@ Generate story in {language} for age group {ageGroup}
 ## Conclusion
 
 The Mystira Story Generator demonstrates a **knowledge-driven, multi-agent architecture** that balances:
+
 - **Quality**: Objective evaluation with targeted refinement
 - **Cost**: Single agent per role (4 total, not 16) with efficient iteration
 - **Maintainability**: Knowledge in vector stores, logic in agents
@@ -953,18 +1009,18 @@ The Mystira Story Generator demonstrates a **knowledge-driven, multi-agent archi
 
 ## Quick Reference
 
-| Question | Answer |
-|----------|--------|
-| How many agents? | 4 (Writer, Judge, Refiner, Summary) |
-| Why not 1 agent? | Separate creative generation from objective critique |
-| Why not 16 agents? | Knowledge-driven specialization via vector stores |
-| How are age groups handled? | Thread-level vector store attachment (1 per age group) |
-| What's the iteration limit? | 5 refinements max (then StuckNeedsReview) |
-| What's the average cost? | $0.12-0.16 per story (GPT-4) |
-| What's the pass rate? | 67% pass on first try, 95% within 2 iterations |
-| Can I add new age groups? | Yes - upload vector store + config entry, no code changes |
-| Can I use different LLMs? | Yes if they support Foundry Agents (Azure OpenAI, OpenAI) |
-| Is it production-ready? | Yes - error handling, logging, monitoring, tests included |
+| Question                    | Answer                                                    |
+| --------------------------- | --------------------------------------------------------- |
+| How many agents?            | 4 (Writer, Judge, Refiner, Summary)                       |
+| Why not 1 agent?            | Separate creative generation from objective critique      |
+| Why not 16 agents?          | Knowledge-driven specialization via vector stores         |
+| How are age groups handled? | Thread-level vector store attachment (1 per age group)    |
+| What's the iteration limit? | 5 refinements max (then StuckNeedsReview)                 |
+| What's the average cost?    | $0.12-0.16 per story (GPT-4)                              |
+| What's the pass rate?       | 67% pass on first try, 95% within 2 iterations            |
+| Can I add new age groups?   | Yes - upload vector store + config entry, no code changes |
+| Can I use different LLMs?   | Yes if they support Foundry Agents (Azure OpenAI, OpenAI) |
+| Is it production-ready?     | Yes - error handling, logging, monitoring, tests included |
 
 ---
 

@@ -5,20 +5,20 @@ module.exports = {
     "./Components/**/*.{razor,cshtml}",
     "./Layout/**/*.{razor,cshtml}",
     "./Pages/**/*.{razor,cshtml}",
-    "./wwwroot/**/*.html"
+    "./wwwroot/**/*.html",
   ],
   theme: {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          900: '#1e3a8a',
-        }
-      }
+          50: "#eff6ff",
+          500: "#3b82f6",
+          600: "#2563eb",
+          700: "#1d4ed8",
+          900: "#1e3a8a",
+        },
+      },
     },
   },
   plugins: [],
-}
+};

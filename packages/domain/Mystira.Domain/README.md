@@ -13,6 +13,7 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 ### Enums
 
 **Scenario Enums** (`Mystira.Domain.Enums`)
+
 - `DifficultyLevel` - Scenario difficulty (Easy, Medium, Hard, Expert)
 - `SessionLength` - Session duration (Quick, Short, Medium, Long, Extended)
 - `ScenarioGameState` - Game state (NotStarted, InProgress, Paused, Completed, Abandoned)
@@ -20,21 +21,25 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 - `SceneType` - Scene types (Standard, Intro, Decision, Action, Dialogue, Puzzle, etc.)
 
 **Game Session Enums**
+
 - `SessionStatus` - Session state (Creating, Pending, Active, Paused, Completed, Abandoned, Failed, Expired)
 - `AchievementType` - Achievement types (ScenarioCompletion, StoryChoice, CompassMilestone, etc.)
 - `SessionEndReason` - How sessions end (Completed, PlayerQuit, Inactivity, Error, etc.)
 - `TransactionStatus` - Blockchain transaction state (Pending, Submitted, Confirmed, Failed)
 
 **Account Enums**
+
 - `AccountStatus` - Account state (Active, PendingVerification, Suspended, Deactivated, Deleted)
 - `AccountType` - Account type (Free, Premium, Educational, Enterprise)
 - `AuthProvider` - Authentication providers (Local, Google, Apple, Microsoft, Passwordless)
 
 **Contributor Enums**
+
 - `ContributorRole` - Contributor roles (Author, Artist, Editor, Writer, Designer, Composer, etc.)
 - `ContributorVerificationStatus` - Verification state (Pending, Verified, Rejected, Expired)
 
 **Payment Enums**
+
 - `PaymentStatus` - Payment state (Pending, Processing, Completed, Failed, Refunded, Cancelled, Disputed)
 - `PaymentType` - Payment types (Subscription, Purchase, RoyaltyPayout, Refund)
 - `PaymentMethod` - Payment methods (Card, BankTransfer, PayPal, ApplePay, GooglePay, Crypto)
@@ -69,6 +74,7 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 ### Domain Models (`Mystira.Domain.Models`)
 
 **Core Entities**
+
 - `Account` - User account with authentication, status, and security
 - `UserProfile` - User profile with preferences, progress, and settings
 - `Scenario` - Playable scenario with scenes, characters, and branches
@@ -77,6 +83,7 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 - `CharacterMap` - Player-to-character mapping in sessions
 
 **Scenario Sub-Models**
+
 - `ScenarioCharacter` - Character in a scenario
 - `Scene` - Scene with content, branches, and media
 - `Branch` - Choice/branch from a scene
@@ -85,12 +92,14 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 - `CompassChange` / `CompassTracking` - Compass system models
 
 **Game Session Sub-Models**
+
 - `SessionPlayerAssignment` - Player assignment to session
 - `SessionCharacterAssignment` - Character assignment in session
 - `SessionChoice` - Choice made during session
 - `SessionAchievement` - Achievement earned in session
 
 **Badge System**
+
 - `Badge` - Badge definition
 - `BadgeImage` - Badge image variants
 - `BadgeConfiguration` - Badge earning criteria
@@ -99,16 +108,19 @@ dotnet add package Mystira.Domain --version 0.5.0-alpha
 - `AxisAchievement` - Achievement on compass axis
 
 **Contributors & Payments**
+
 - `Contributor` - Content contributor
 - `StoryProtocolMetadata` - Story Protocol blockchain metadata
 - `RoyaltyPayment` - Royalty payment record
 
 **Media & Configuration**
+
 - `MediaAsset` - Media asset (image, audio, video)
 - `AvatarConfiguration` - Avatar options
 - `OnboardingStep` - Onboarding flow step
 
 **Progress Tracking**
+
 - `PlayerScenarioScore` - Player's score on a scenario
 - `PlayerCompassProgress` - Player's overall compass progress
 

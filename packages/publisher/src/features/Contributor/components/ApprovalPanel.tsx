@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import type { Story } from '@/api/types';
-import { Button, Card, CardBody, Alert } from '@/components';
-import { useApproval } from '../hooks/useApproval';
+import { useState } from "react";
+import type { Story } from "@/api/types";
+import { Button, Card, CardBody, Alert } from "@/components";
+import { useApproval } from "../hooks/useApproval";
 
 interface ApprovalPanelProps {
   story: Story;
@@ -9,23 +9,27 @@ interface ApprovalPanelProps {
 }
 
 export function ApprovalPanel({ story, currentUserId }: ApprovalPanelProps) {
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const { submitApproval, isSubmitting } = useApproval();
 
-  const currentContributor = story.contributors.find(c => c.userId === currentUserId);
+  const currentContributor = story.contributors.find(
+    (c) => c.userId === currentUserId
+  );
 
   if (!currentContributor) {
     return (
-      <Alert variant="info">
-        You are not a contributor on this story.
-      </Alert>
+      <Alert variant="info">You are not a contributor on this story.</Alert>
     );
   }
 
-  if (currentContributor.approvalStatus !== 'pending') {
+  if (currentContributor.approvalStatus !== "pending") {
     return (
       <Alert
-        variant={currentContributor.approvalStatus === 'approved' ? 'success' : 'warning'}
+        variant={
+          currentContributor.approvalStatus === "approved"
+            ? "success"
+            : "warning"
+        }
       >
         You have already {currentContributor.approvalStatus} this registration.
       </Alert>
@@ -42,7 +46,7 @@ export function ApprovalPanel({ story, currentUserId }: ApprovalPanelProps) {
 
   const handleReject = () => {
     if (!comment.trim()) {
-      alert('Please provide a reason for rejection');
+      alert("Please provide a reason for rejection");
       return;
     }
     submitApproval({
@@ -57,7 +61,8 @@ export function ApprovalPanel({ story, currentUserId }: ApprovalPanelProps) {
       <CardBody>
         <h3>Your Approval Required</h3>
         <p>
-          Please review the story details and your attribution before approving registration.
+          Please review the story details and your attribution before approving
+          registration.
         </p>
 
         <div className="approval-panel__attribution">
@@ -71,11 +76,13 @@ export function ApprovalPanel({ story, currentUserId }: ApprovalPanelProps) {
         </div>
 
         <div className="approval-panel__comment">
-          <label htmlFor="approval-comment">Comment (optional for approval, required for rejection)</label>
+          <label htmlFor="approval-comment">
+            Comment (optional for approval, required for rejection)
+          </label>
           <textarea
             id="approval-comment"
             value={comment}
-            onChange={e => setComment(e.target.value)}
+            onChange={(e) => setComment(e.target.value)}
             placeholder="Add any comments or concerns..."
             rows={3}
           />
@@ -104,7 +111,7 @@ export function ApprovalPanel({ story, currentUserId }: ApprovalPanelProps) {
 
 function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }

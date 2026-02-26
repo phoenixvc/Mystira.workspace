@@ -1,19 +1,19 @@
-import { type ReactNode } from 'react';
-import clsx from 'clsx';
+import { type ReactNode } from "react";
+import clsx from "clsx";
 
 export interface CardProps {
   children: ReactNode;
   className?: string;
-  variant?: 'default' | 'outlined' | 'elevated';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
+  variant?: "default" | "outlined" | "elevated";
+  padding?: "none" | "sm" | "md" | "lg";
   onClick?: () => void;
 }
 
 export function Card({
   children,
   className,
-  variant = 'default',
-  padding = 'md',
+  variant = "default",
+  padding = "md",
   onClick,
 }: CardProps) {
   const isClickable = !!onClick;
@@ -21,19 +21,19 @@ export function Card({
   return (
     <div
       className={clsx(
-        'card',
+        "card",
         `card--${variant}`,
         `card--padding-${padding}`,
-        isClickable && 'card--clickable',
+        isClickable && "card--clickable",
         className
       )}
       onClick={onClick}
-      role={isClickable ? 'button' : undefined}
+      role={isClickable ? "button" : undefined}
       tabIndex={isClickable ? 0 : undefined}
       onKeyDown={
         isClickable
-          ? e => {
-              if (e.key === 'Enter' || e.key === ' ') {
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
                 e.preventDefault();
                 onClick?.();
               }
@@ -53,7 +53,7 @@ export function CardHeader({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={clsx('card__header', className)}>{children}</div>;
+  return <div className={clsx("card__header", className)}>{children}</div>;
 }
 
 export function CardBody({
@@ -63,7 +63,7 @@ export function CardBody({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={clsx('card__body', className)}>{children}</div>;
+  return <div className={clsx("card__body", className)}>{children}</div>;
 }
 
 export function CardFooter({
@@ -73,5 +73,5 @@ export function CardFooter({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={clsx('card__footer', className)}>{children}</div>;
+  return <div className={clsx("card__footer", className)}>{children}</div>;
 }

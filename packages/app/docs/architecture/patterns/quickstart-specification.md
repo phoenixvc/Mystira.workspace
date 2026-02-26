@@ -9,6 +9,7 @@
 ## What You'll Build
 
 By the end of this guide, you'll have created specifications that:
+
 - ✅ Encapsulate complex query logic
 - ✅ Are reusable across multiple queries
 - ✅ Support filtering, sorting, paging, and eager loading
@@ -30,6 +31,7 @@ By the end of this guide, you'll have created specifications that:
 A **Specification** is a reusable query object that encapsulates filtering, sorting, paging, and eager loading logic.
 
 **Without Specifications** (❌ Bad):
+
 ```csharp
 // Query logic scattered across handlers
 var bundles = await _context.ContentBundles
@@ -40,6 +42,7 @@ var bundles = await _context.ContentBundles
 ```
 
 **With Specifications** (✅ Good):
+
 ```csharp
 // Reusable, testable, composable
 var spec = new ContentBundlesByAgeGroupSpecification(ageGroup);
@@ -47,6 +50,7 @@ var bundles = await _repository.ListAsync(spec);
 ```
 
 **Benefits**:
+
 - 🔄 **Reusable** - Use the same spec in multiple queries
 - 🧪 **Testable** - Test query logic independently
 - 📦 **Composable** - Combine multiple specifications
@@ -63,16 +67,17 @@ All specifications inherit from `BaseSpecification<T>`, which provides a fluent 
 
 ### Available Methods
 
-| Method | Purpose | Example |
-|--------|---------|---------|
-| **Constructor** | WHERE clause | `base(b => b.IsActive)` |
-| `AddInclude()` | Eager loading (JOIN) | `AddInclude(b => b.Scenarios)` |
-| `ApplyOrderBy()` | Sort ascending | `ApplyOrderBy(b => b.Title)` |
-| `ApplyOrderByDescending()` | Sort descending | `ApplyOrderByDescending(b => b.CreatedAt)` |
-| `ApplyPaging()` | OFFSET/LIMIT | `ApplyPaging(skip: 0, take: 10)` |
-| `ApplyGroupBy()` | GROUP BY | `ApplyGroupBy(b => b.AgeGroup)` |
+| Method                     | Purpose              | Example                                    |
+| -------------------------- | -------------------- | ------------------------------------------ |
+| **Constructor**            | WHERE clause         | `base(b => b.IsActive)`                    |
+| `AddInclude()`             | Eager loading (JOIN) | `AddInclude(b => b.Scenarios)`             |
+| `ApplyOrderBy()`           | Sort ascending       | `ApplyOrderBy(b => b.Title)`               |
+| `ApplyOrderByDescending()` | Sort descending      | `ApplyOrderByDescending(b => b.CreatedAt)` |
+| `ApplyPaging()`            | OFFSET/LIMIT         | `ApplyPaging(skip: 0, take: 10)`           |
+| `ApplyGroupBy()`           | GROUP BY             | `ApplyGroupBy(b => b.AgeGroup)`            |
 
 **Example**:
+
 ```csharp
 public class MySpecification : BaseSpecification<ContentBundle>
 {
@@ -87,6 +92,7 @@ public class MySpecification : BaseSpecification<ContentBundle>
 ```
 
 This translates to:
+
 ```sql
 SELECT * FROM ContentBundles cb
 INNER JOIN Scenarios s ON cb.Id = s.ContentBundleId
@@ -247,6 +253,7 @@ public class PaginatedContentBundlesSpecification : BaseSpecification<ContentBun
 ```
 
 **Usage**:
+
 ```csharp
 // Filter by age group
 var spec1 = new ContentBundlesByAgeGroupSpecification("Ages7to9");
@@ -284,6 +291,7 @@ public class ContentBundleWithAllRelationsSpecification : BaseSpecification<Cont
 ```
 
 **Generates**:
+
 ```sql
 SELECT * FROM ContentBundles cb
 LEFT JOIN Scenarios s ON cb.Id = s.ContentBundleId
@@ -327,6 +335,7 @@ public class ContentBundleSearchSpecification : BaseSpecification<ContentBundle>
 ```
 
 **Usage**:
+
 ```csharp
 // All bundles
 var spec1 = new ContentBundleSearchSpecification();
@@ -357,6 +366,7 @@ public class ActiveContentBundlesCountSpecification : BaseSpecification<ContentB
 ```
 
 **Usage in Repository**:
+
 ```csharp
 var spec = new ActiveContentBundlesCountSpecification();
 var count = await _repository.CountAsync(spec);
@@ -487,6 +497,7 @@ public class ContentBundleSpecificationsTests
 ## Complete Example: Search with Multiple Filters
 
 **Query**:
+
 ```csharp
 public record SearchContentBundlesQuery(
     string? AgeGroup,
@@ -498,6 +509,7 @@ public record SearchContentBundlesQuery(
 ```
 
 **Specification**:
+
 ```csharp
 public class SearchContentBundlesSpecification : BaseSpecification<ContentBundle>
 {
@@ -539,6 +551,7 @@ public class SearchContentBundlesSpecification : BaseSpecification<ContentBundle
 ```
 
 **Handler**:
+
 ```csharp
 public class SearchContentBundlesQueryHandler
     : IQueryHandler<SearchContentBundlesQuery, IEnumerable<ContentBundle>>
@@ -562,6 +575,7 @@ public class SearchContentBundlesQueryHandler
 ```
 
 **Controller**:
+
 ```csharp
 [HttpGet("search")]
 public async Task<IActionResult> Search(
@@ -581,6 +595,7 @@ public async Task<IActionResult> Search(
 ```
 
 **Usage**:
+
 ```http
 GET /api/content-bundles/search?ageGroup=Ages7to9&minPrice=10&maxPrice=20&page=1&pageSize=10
 ```
@@ -614,26 +629,28 @@ Before moving on, make sure you have:
 
 ## Specification Pattern Quick Reference
 
-| Feature | Purpose | Example |
-|---------|---------|---------|
-| **Criteria** | WHERE clause | `base(b => b.IsActive)` |
-| **AddInclude** | Eager loading (JOIN) | `AddInclude(b => b.Scenarios)` |
-| **ApplyOrderBy** | Sort ascending | `ApplyOrderBy(b => b.Title)` |
-| **ApplyOrderByDescending** | Sort descending | `ApplyOrderByDescending(b => b.CreatedAt)` |
-| **ApplyPaging** | Pagination (OFFSET/LIMIT) | `ApplyPaging(0, 10)` |
-| **ApplyGroupBy** | Group results | `ApplyGroupBy(b => b.AgeGroup)` |
+| Feature                    | Purpose                   | Example                                    |
+| -------------------------- | ------------------------- | ------------------------------------------ |
+| **Criteria**               | WHERE clause              | `base(b => b.IsActive)`                    |
+| **AddInclude**             | Eager loading (JOIN)      | `AddInclude(b => b.Scenarios)`             |
+| **ApplyOrderBy**           | Sort ascending            | `ApplyOrderBy(b => b.Title)`               |
+| **ApplyOrderByDescending** | Sort descending           | `ApplyOrderByDescending(b => b.CreatedAt)` |
+| **ApplyPaging**            | Pagination (OFFSET/LIMIT) | `ApplyPaging(0, 10)`                       |
+| **ApplyGroupBy**           | Group results             | `ApplyGroupBy(b => b.AgeGroup)`            |
 
 ---
 
 ## When to Create a Specification
 
 ✅ **Create a specification when**:
+
 - The query logic will be reused in multiple places
 - The query has complex filtering or sorting
 - You need to test query logic independently
 - You want to compose multiple filters together
 
 ❌ **Don't create a specification for**:
+
 - One-off queries used in a single handler
 - Trivial queries (e.g., `GetById`)
 - Queries that are simpler as direct LINQ
@@ -643,6 +660,7 @@ Before moving on, make sure you have:
 ## Real-World Specification Examples
 
 ### Example 1: Recent Purchases with User Info
+
 ```csharp
 public class RecentPurchasesWithUserSpecification : BaseSpecification<Purchase>
 {
@@ -657,6 +675,7 @@ public class RecentPurchasesWithUserSpecification : BaseSpecification<Purchase>
 ```
 
 ### Example 2: Top-Rated Content Bundles
+
 ```csharp
 public class TopRatedContentBundlesSpecification : BaseSpecification<ContentBundle>
 {
@@ -671,6 +690,7 @@ public class TopRatedContentBundlesSpecification : BaseSpecification<ContentBund
 ```
 
 ### Example 3: User's Incomplete Scenarios
+
 ```csharp
 public class UserIncompleteeScenariosSpecification : BaseSpecification<UserProgress>
 {
@@ -711,6 +731,7 @@ If you're stuck:
 ## Summary
 
 You've learned how to:
+
 - ✅ Create specifications using `BaseSpecification<T>`
 - ✅ Use specifications for filtering, sorting, and paging
 - ✅ Pass parameters to specifications

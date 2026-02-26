@@ -13,11 +13,11 @@ pnpm add @mystira/core-types
 ### Result Pattern
 
 ```typescript
-import { ok, err, isOk, unwrap, type Result } from '@mystira/core-types';
+import { ok, err, isOk, unwrap, type Result } from "@mystira/core-types";
 
 function divide(a: number, b: number): Result<number> {
   if (b === 0) {
-    return err(validationError('Cannot divide by zero'));
+    return err(validationError("Cannot divide by zero"));
   }
   return ok(a / b);
 }
@@ -36,10 +36,10 @@ import {
   notFoundError,
   toErrorResponse,
   type ErrorResponse,
-} from '@mystira/core-types';
+} from "@mystira/core-types";
 
 // Create typed errors
-const error = notFoundError('Account', '123');
+const error = notFoundError("Account", "123");
 
 // Convert to API response
 const response = toErrorResponse(error);
@@ -49,7 +49,7 @@ const response = toErrorResponse(error);
 ### Entity Types
 
 ```typescript
-import type { AuditableEntity, DatabaseTarget } from '@mystira/core-types';
+import type { AuditableEntity, DatabaseTarget } from "@mystira/core-types";
 
 interface Account extends AuditableEntity {
   email: string;
@@ -60,22 +60,31 @@ interface Account extends AuditableEntity {
 ### Pagination
 
 ```typescript
-import { paginate, normalizePagination, type PaginatedResponse } from '@mystira/core-types';
+import {
+  paginate,
+  normalizePagination,
+  type PaginatedResponse,
+} from "@mystira/core-types";
 
 const items = await fetchAccounts(page, pageSize);
-const response: PaginatedResponse<Account> = paginate(items, page, pageSize, totalCount);
+const response: PaginatedResponse<Account> = paginate(
+  items,
+  page,
+  pageSize,
+  totalCount
+);
 ```
 
 ## Types
 
-| Type | Description |
-|------|-------------|
-| `Result<T, E>` | Success/failure result type |
-| `MystiraError` | Base error interface |
-| `ErrorResponse` | RFC 7807 Problem Details format |
-| `Entity` | Base entity with ID |
-| `AuditableEntity` | Entity with audit fields |
-| `PaginatedResponse<T>` | Paginated response wrapper |
+| Type                   | Description                     |
+| ---------------------- | ------------------------------- |
+| `Result<T, E>`         | Success/failure result type     |
+| `MystiraError`         | Base error interface            |
+| `ErrorResponse`        | RFC 7807 Problem Details format |
+| `Entity`               | Base entity with ID             |
+| `AuditableEntity`      | Entity with audit fields        |
+| `PaginatedResponse<T>` | Paginated response wrapper      |
 
 ## Related
 

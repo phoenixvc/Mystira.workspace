@@ -8,14 +8,14 @@ Mystira Chain is a private blockchain network used for content authenticity and 
 
 ## Resources Created
 
-| Resource                              | Purpose                                       |
-| ------------------------------------- | --------------------------------------------- |
-| User Assigned Managed Identity        | Workload identity for AKS, Key Vault access   |
+| Resource                              | Purpose                                           |
+| ------------------------------------- | ------------------------------------------------- |
+| User Assigned Managed Identity        | Workload identity for AKS, Key Vault access       |
 | Network Security Group                | Network rules for P2P, RPC, and WebSocket traffic |
-| Storage Account (Premium FileStorage) | Persistent storage for chain data             |
-| Azure File Shares                     | Per-node file shares for chain state          |
-| Application Insights                  | Monitoring and telemetry                      |
-| Key Vault                             | Secure storage for chain secrets              |
+| Storage Account (Premium FileStorage) | Persistent storage for chain data                 |
+| Azure File Shares                     | Per-node file shares for chain state              |
+| Application Insights                  | Monitoring and telemetry                          |
+| Key Vault                             | Secure storage for chain secrets                  |
 
 ## Usage
 
@@ -75,17 +75,17 @@ workload_identities = {
 
 ## Outputs
 
-| Output                                   | Description                                          |
-| ---------------------------------------- | ---------------------------------------------------- |
-| `nsg_id`                                 | Network Security Group ID                            |
-| `identity_id`                            | Managed Identity resource ID                         |
-| `identity_principal_id`                  | Managed Identity principal ID (for RBAC)             |
-| `identity_client_id`                     | Managed Identity client ID (for workload identity)   |
-| `storage_account_name`                   | Storage account name for chain data                  |
-| `application_insights_id`                | Application Insights resource ID                     |
-| `application_insights_connection_string` | App Insights connection string (sensitive)           |
-| `key_vault_id`                           | Key Vault resource ID                                |
-| `key_vault_uri`                          | Key Vault URI for accessing secrets                  |
+| Output                                   | Description                                        |
+| ---------------------------------------- | -------------------------------------------------- |
+| `nsg_id`                                 | Network Security Group ID                          |
+| `identity_id`                            | Managed Identity resource ID                       |
+| `identity_principal_id`                  | Managed Identity principal ID (for RBAC)           |
+| `identity_client_id`                     | Managed Identity client ID (for workload identity) |
+| `storage_account_name`                   | Storage account name for chain data                |
+| `application_insights_id`                | Application Insights resource ID                   |
+| `application_insights_connection_string` | App Insights connection string (sensitive)         |
+| `key_vault_id`                           | Key Vault resource ID                              |
+| `key_vault_uri`                          | Key Vault URI for accessing secrets                |
 
 ## Rollback Procedures
 
@@ -94,6 +94,7 @@ workload_identities = {
 If a deployment fails or causes issues, you can rollback using the following procedures:
 
 1. **Identify the previous state version**:
+
    ```bash
    az storage blob list \
      --account-name mystfstate \
@@ -104,6 +105,7 @@ If a deployment fails or causes issues, you can rollback using the following pro
    ```
 
 2. **Download the previous state file**:
+
    ```bash
    az storage blob download \
      --account-name mystfstate \
@@ -142,11 +144,13 @@ kubectl rollout status statefulset/mys-chain -n mys-<environment>
 In case of chain node corruption or consensus failure:
 
 1. **Scale down to prevent further damage**:
+
    ```bash
    kubectl scale statefulset/mys-chain -n mys-<environment> --replicas=0
    ```
 
 2. **Backup current chain data** (from Azure File Share):
+
    ```bash
    az storage file download-batch \
      --source chain-data-0 \
@@ -169,6 +173,7 @@ In case of chain node corruption or consensus failure:
 ### Internal RPC Security (mTLS Roadmap)
 
 The chain RPC currently uses HTTP for internal cluster communication. While protected by:
+
 - Kubernetes NetworkPolicies (only authorized pods can connect)
 - ClusterIP services (not exposed outside the cluster)
 - Azure NSG rules (VNet-only access)

@@ -16,23 +16,23 @@ This document analyzes Mystira.App's role within the broader Mystira workspace e
 
 ### Repository Overview
 
-| Repository | Description | Tech Stack | Deployment | Status |
-|------------|-------------|------------|------------|--------|
-| **Mystira.App** | Main platform - APIs, PWA | .NET 9, Blazor, Cosmos DB | Azure PaaS | Active |
-| Mystira.Chain | Blockchain integration (Story Protocol) | Python, FastAPI | Kubernetes | Active |
-| Mystira.Publisher | Publishing frontend | TypeScript/React | Kubernetes | Active |
-| Mystira.StoryGenerator | Story generation engine | .NET | Kubernetes | Active |
-| Mystira.Infra | Infrastructure as Code | Terraform, K8s | N/A | Proposed |
-| Mystira.workspace | Multi-repo workspace | Scripts, Docs | N/A | Active |
+| Repository             | Description                             | Tech Stack                | Deployment | Status   |
+| ---------------------- | --------------------------------------- | ------------------------- | ---------- | -------- |
+| **Mystira.App**        | Main platform - APIs, PWA               | .NET 9, Blazor, Cosmos DB | Azure PaaS | Active   |
+| Mystira.Chain          | Blockchain integration (Story Protocol) | Python, FastAPI           | Kubernetes | Active   |
+| Mystira.Publisher      | Publishing frontend                     | TypeScript/React          | Kubernetes | Active   |
+| Mystira.StoryGenerator | Story generation engine                 | .NET                      | Kubernetes | Active   |
+| Mystira.Infra          | Infrastructure as Code                  | Terraform, K8s            | N/A        | Proposed |
+| Mystira.workspace      | Multi-repo workspace                    | Scripts, Docs             | N/A        | Active   |
 
 ### Coupling Types
 
-| Coupling Type | Description | Example |
-|---------------|-------------|---------|
-| Code | Direct dependencies via packages | Domain models |
-| Network | API calls between services | gRPC, REST |
-| Data | Shared database/storage | Cosmos DB |
-| Infrastructure | Shared Azure resources | Log Analytics |
+| Coupling Type  | Description                      | Example       |
+| -------------- | -------------------------------- | ------------- |
+| Code           | Direct dependencies via packages | Domain models |
+| Network        | API calls between services       | gRPC, REST    |
+| Data           | Shared database/storage          | Cosmos DB     |
+| Infrastructure | Shared Azure resources           | Log Analytics |
 
 ---
 
@@ -57,24 +57,24 @@ Mystira.App/
 
 ### Key Characteristics
 
-| Characteristic | Value | Notes |
-|----------------|-------|-------|
-| Technology | .NET 9 | Unified stack |
-| Architecture | Hexagonal + CQRS | Clean architecture |
-| Database | Azure Cosmos DB | Document store |
-| Authentication | Entra External ID | OAuth 2.0 / OIDC |
-| Deployment | Azure App Service | PaaS model |
+| Characteristic | Value             | Notes              |
+| -------------- | ----------------- | ------------------ |
+| Technology     | .NET 9            | Unified stack      |
+| Architecture   | Hexagonal + CQRS  | Clean architecture |
+| Database       | Azure Cosmos DB   | Document store     |
+| Authentication | Entra External ID | OAuth 2.0 / OIDC   |
+| Deployment     | Azure App Service | PaaS model         |
 
 ### Analysis Criteria
 
-| Criterion | Evaluation | Score |
-|-----------|------------|-------|
-| **Independence** | Can deploy independently | High |
-| **Coupling** | Shares domain with internal projects | Medium |
-| **Tech Uniformity** | All .NET 9 | High |
-| **Release Cycle** | Unified release for all App components | High |
-| **Team Ownership** | Single platform team | High |
-| **Deployment Model** | Azure PaaS (different from K8s services) | High |
+| Criterion            | Evaluation                               | Score  |
+| -------------------- | ---------------------------------------- | ------ |
+| **Independence**     | Can deploy independently                 | High   |
+| **Coupling**         | Shares domain with internal projects     | Medium |
+| **Tech Uniformity**  | All .NET 9                               | High   |
+| **Release Cycle**    | Unified release for all App components   | High   |
+| **Team Ownership**   | Single platform team                     | High   |
+| **Deployment Model** | Azure PaaS (different from K8s services) | High   |
 
 ---
 
@@ -91,21 +91,21 @@ Mystira.App/
 
 ### What Should NOT Be Extracted
 
-| Component | Reason to Keep |
-|-----------|----------------|
-| Mystira.App.Api | Core public-facing API |
-| Mystira.App.Pwa | Tightly coupled with API |
-| Mystira.App.Domain | Shared by all App components |
-| Mystira.App.Application | CQRS handlers used everywhere |
-| Mystira.App.Infrastructure.* | Adapters for App services |
+| Component                     | Reason to Keep                |
+| ----------------------------- | ----------------------------- |
+| Mystira.App.Api               | Core public-facing API        |
+| Mystira.App.Pwa               | Tightly coupled with API      |
+| Mystira.App.Domain            | Shared by all App components  |
+| Mystira.App.Application       | CQRS handlers used everywhere |
+| Mystira.App.Infrastructure.\* | Adapters for App services     |
 
 ### What MIGHT Be Extracted (Future)
 
-| Component | Condition | Priority |
-|-----------|-----------|----------|
-| Admin API | If different team, security needs | Medium |
-| Admin UI | If modernizing to SPA | Low |
-| Infrastructure | When Mystira.Infra is ready | In Progress |
+| Component      | Condition                         | Priority    |
+| -------------- | --------------------------------- | ----------- |
+| Admin API      | If different team, security needs | Medium      |
+| Admin UI       | If modernizing to SPA             | Low         |
+| Infrastructure | When Mystira.Infra is ready       | In Progress |
 
 See [App Components Extraction Analysis](app-components-extraction.md) for Admin API extraction details.
 
@@ -236,7 +236,7 @@ Mystira.Infra manages:
     { "name": "Mystira.App", "path": "../Mystira.App" },
     { "name": "Mystira.Chain", "path": "../Mystira.Chain" },
     // ...
-  ]
+  ],
 }
 ```
 
@@ -251,13 +251,13 @@ Mystira.Infra manages:
 
 ## Summary
 
-| Aspect | Status | Notes |
-|--------|--------|-------|
-| Repository Role | Core Platform | Central to Mystira ecosystem |
-| Extraction Status | Keep as Submodule | Well-organized monorepo |
-| Internal Modularization | In Progress | CQRS complete, Admin extraction proposed |
-| Workspace Integration | Active | Part of multi-repo workspace |
-| Infrastructure | Migrating | Moving to Mystira.Infra |
+| Aspect                  | Status            | Notes                                    |
+| ----------------------- | ----------------- | ---------------------------------------- |
+| Repository Role         | Core Platform     | Central to Mystira ecosystem             |
+| Extraction Status       | Keep as Submodule | Well-organized monorepo                  |
+| Internal Modularization | In Progress       | CQRS complete, Admin extraction proposed |
+| Workspace Integration   | Active            | Part of multi-repo workspace             |
+| Infrastructure          | Migrating         | Moving to Mystira.Infra                  |
 
 ### Key Takeaways
 

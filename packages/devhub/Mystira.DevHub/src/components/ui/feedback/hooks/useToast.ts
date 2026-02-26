@@ -7,7 +7,7 @@ export function useToast() {
   const showToast = (
     message: string,
     type: FeedbackType = "info",
-    options?: { duration?: number; action?: Toast["action"] },
+    options?: { duration?: number; action?: Toast["action"] }
   ): Toast => {
     const toast: Toast = {
       id: `toast-${Date.now()}-${Math.random().toString(36).slice(2)}`,

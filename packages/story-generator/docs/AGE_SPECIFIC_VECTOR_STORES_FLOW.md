@@ -9,6 +9,7 @@ This document shows the complete code execution flow when a user requests a stor
 ## Execution Flow Example
 
 **User Request**:
+
 ```http
 POST /api/story-agent/sessions/start
 {
@@ -353,12 +354,14 @@ Agent generates story:
 ## Key Isolation Points
 
 1. **Configuration-driven mapping**:
+
    ```json
    "6-9" → "vs_elementary_ghi789"
    "1-2" → "vs_toddler_abc123"
    ```
 
 2. **Thread-level vector store attachment**:
+
    ```csharp
    // Each thread gets ONE vector store
    CreateThreadWithVectorStoresAsync(agentId, [ageSpecificVectorStoreId])
@@ -373,14 +376,14 @@ Agent generates story:
 
 ## Benefits Summary
 
-| Aspect | Implementation |
-|--------|----------------|
-| **Single Agent** | `WriterAgentId: asst_writer_abc123` (same for all age groups) |
-| **Age Specialization** | Via vector store attachment, not agent configuration |
-| **Prompt Awareness** | Agent told "pre-filtered for age group 6-9" |
-| **Knowledge Isolation** | file_search can ONLY access attached vector store |
-| **Adding Age Groups** | Just add to `VectorStoresByAgeGroup` config, no code changes |
-| **Maintenance** | Update markdown files in vector stores, instant effect |
+| Aspect                  | Implementation                                                |
+| ----------------------- | ------------------------------------------------------------- |
+| **Single Agent**        | `WriterAgentId: asst_writer_abc123` (same for all age groups) |
+| **Age Specialization**  | Via vector store attachment, not agent configuration          |
+| **Prompt Awareness**    | Agent told "pre-filtered for age group 6-9"                   |
+| **Knowledge Isolation** | file_search can ONLY access attached vector store             |
+| **Adding Age Groups**   | Just add to `VectorStoresByAgeGroup` config, no code changes  |
+| **Maintenance**         | Update markdown files in vector stores, instant effect        |
 
 ---
 

@@ -810,7 +810,4 @@ export interface CompassAxisScoreResult {
 // Re-exports for backwards compatibility
 // =============================================================================
 
-export type {
-  ApiRequest as BaseRequest,
-  ApiResponse as BaseResponse,
-};
+export type { ApiRequest as BaseRequest, ApiResponse as BaseResponse };

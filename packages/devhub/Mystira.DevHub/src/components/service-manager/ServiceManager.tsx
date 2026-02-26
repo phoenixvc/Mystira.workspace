@@ -34,7 +34,7 @@ function ServiceManager() {
   const addToast = (
     message: string,
     type: Toast["type"] = "info",
-    duration: number = 5000,
+    duration: number = 5000
   ) => {
     showToast(message, type, { duration });
   };
@@ -57,7 +57,7 @@ function ServiceManager() {
       repoRoot,
       serviceEnvironments,
       getEnvironmentUrls,
-      addToast,
+      addToast
     );
   const {
     logs,
@@ -94,14 +94,14 @@ function ServiceManager() {
     repoRoot: string,
     onViewModeChange: (serviceName: string, mode: "logs") => void,
     onShowLogs: (serviceName: string, show: boolean) => void,
-    isManual: boolean = false,
+    isManual: boolean = false
   ): Promise<boolean> => {
     return prebuildService(
       serviceName,
       repoRoot,
       onViewModeChange,
       onShowLogs,
-      isManual,
+      isManual
     );
   };
 
@@ -165,7 +165,7 @@ function ServiceManager() {
       console.error("Failed to create Tauri window:", error);
       addToast(
         "Failed to open Tauri window, opening in external browser instead",
-        "warning",
+        "warning"
       );
       await openInBrowser(url);
     }
@@ -186,12 +186,12 @@ function ServiceManager() {
             getServiceConfigs(
               customPorts,
               serviceEnvironments,
-              getEnvironmentUrls,
+              getEnvironmentUrls
             ),
             useCurrentBranch,
             currentBranch,
             setViewModeForService,
-            handleShowLogs,
+            handleShowLogs
           );
         }, 1000);
 
@@ -200,7 +200,7 @@ function ServiceManager() {
             getServiceConfigs(
               customPorts,
               serviceEnvironments,
-              getEnvironmentUrls,
+              getEnvironmentUrls
             ).forEach((config: ServiceConfig) => {
               const envUrls = getEnvironmentUrls(config.name);
               if (envUrls.dev) checkEnvironmentHealth(config.name, "dev");
@@ -213,7 +213,7 @@ function ServiceManager() {
         addToast(
           "Warning: Not running in Tauri. Please use the Tauri application window.",
           "warning",
-          5000,
+          5000
         );
       }
     };
@@ -267,14 +267,14 @@ function ServiceManager() {
   const serviceConfigs = getServiceConfigs(
     customPorts,
     serviceEnvironments,
-    getEnvironmentUrls,
+    getEnvironmentUrls
   );
   const allRunning =
     services.length === serviceConfigs.length &&
     services.every((s: ServiceStatus) => s.running);
   const anyRunning = services.some((s: ServiceStatus) => s.running);
   const anyBuilding = Object.values(buildStatus).some(
-    (status: any) => status?.status === "building",
+    (status: any) => status?.status === "building"
   );
 
   const handleApplyPreset = (preset: any) => {

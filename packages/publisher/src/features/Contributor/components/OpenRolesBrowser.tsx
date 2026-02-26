@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Button,
   Card,
@@ -10,32 +10,38 @@ import {
   EmptyState,
   Modal,
   Input,
-} from '@/components';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { roleRequestsApi } from '@/api';
-import type { OpenRole, ContributorRole, SubmitRoleRequestRequest } from '@/api/types';
-import { formatDate } from '@/utils/format';
-import { useAuthStore } from '@/state/authStore';
+} from "@/components";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { roleRequestsApi } from "@/api";
+import type {
+  OpenRole,
+  ContributorRole,
+  SubmitRoleRequestRequest,
+} from "@/api/types";
+import { formatDate } from "@/utils/format";
+import { useAuthStore } from "@/state/authStore";
 
 function formatRole(role: string): string {
   return role
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
 }
 
 export function OpenRolesBrowser() {
-  const [selectedRole, setSelectedRole] = useState<ContributorRole | ''>('');
-  const [selectedOpenRole, setSelectedOpenRole] = useState<OpenRole | null>(null);
+  const [selectedRole, setSelectedRole] = useState<ContributorRole | "">("");
+  const [selectedOpenRole, setSelectedOpenRole] = useState<OpenRole | null>(
+    null
+  );
   const [showApplicationModal, setShowApplicationModal] = useState(false);
   const [proposedSplit, setProposedSplit] = useState<number | undefined>();
-  const [message, setMessage] = useState('');
-  const [portfolio, setPortfolio] = useState('');
+  const [message, setMessage] = useState("");
+  const [portfolio, setPortfolio] = useState("");
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['open-roles', selectedRole],
+    queryKey: ["open-roles", selectedRole],
     queryFn: () =>
       roleRequestsApi.getOpenRoles({
         role: selectedRole || undefined,
@@ -47,15 +53,16 @@ export function OpenRolesBrowser() {
   const openRoles = data?.items ?? [];
 
   const submitMutation = useMutation({
-    mutationFn: (data: SubmitRoleRequestRequest) => roleRequestsApi.submitRoleRequest(data),
+    mutationFn: (data: SubmitRoleRequestRequest) =>
+      roleRequestsApi.submitRoleRequest(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['open-roles'] });
-      queryClient.invalidateQueries({ queryKey: ['role-requests'] });
+      queryClient.invalidateQueries({ queryKey: ["open-roles"] });
+      queryClient.invalidateQueries({ queryKey: ["role-requests"] });
       setShowApplicationModal(false);
       setSelectedOpenRole(null);
       setProposedSplit(undefined);
-      setMessage('');
-      setPortfolio('');
+      setMessage("");
+      setPortfolio("");
     },
   });
 
@@ -77,13 +84,13 @@ export function OpenRolesBrowser() {
   };
 
   const ROLE_FILTER_OPTIONS = [
-    { value: '', label: 'All Roles' },
-    { value: 'primary_author', label: 'Primary Author' },
-    { value: 'co_author', label: 'Co-Author' },
-    { value: 'illustrator', label: 'Illustrator' },
-    { value: 'editor', label: 'Editor' },
-    { value: 'moderator', label: 'Moderator' },
-    { value: 'publisher', label: 'Publisher' },
+    { value: "", label: "All Roles" },
+    { value: "primary_author", label: "Primary Author" },
+    { value: "co_author", label: "Co-Author" },
+    { value: "illustrator", label: "Illustrator" },
+    { value: "editor", label: "Editor" },
+    { value: "moderator", label: "Moderator" },
+    { value: "publisher", label: "Publisher" },
   ];
 
   if (!user) {
@@ -108,7 +115,9 @@ export function OpenRolesBrowser() {
             label="Filter by Role"
             options={ROLE_FILTER_OPTIONS}
             value={selectedRole}
-            onChange={e => setSelectedRole(e.target.value as ContributorRole | '')}
+            onChange={(e) =>
+              setSelectedRole(e.target.value as ContributorRole | "")
+            }
           />
         </div>
 
@@ -121,7 +130,7 @@ export function OpenRolesBrowser() {
           />
         ) : (
           <div className="open-roles-browser__list">
-            {openRoles.map(role => (
+            {openRoles.map((role) => (
               <Card key={role.id} className="open-roles-browser__item">
                 <CardHeader>
                   <div className="open-roles-browser__item-header">
@@ -134,7 +143,9 @@ export function OpenRolesBrowser() {
                 </CardHeader>
                 <CardBody>
                   {role.description && (
-                    <p className="open-roles-browser__description">{role.description}</p>
+                    <p className="open-roles-browser__description">
+                      {role.description}
+                    </p>
                   )}
                   {role.requirements && (
                     <div className="open-roles-browser__requirements">
@@ -150,7 +161,9 @@ export function OpenRolesBrowser() {
                     )}
                   </div>
                   <div className="open-roles-browser__actions">
-                    <Button onClick={() => handleApply(role)}>Apply for Role</Button>
+                    <Button onClick={() => handleApply(role)}>
+                      Apply for Role
+                    </Button>
                   </div>
                 </CardBody>
               </Card>
@@ -166,8 +179,8 @@ export function OpenRolesBrowser() {
             setShowApplicationModal(false);
             setSelectedOpenRole(null);
             setProposedSplit(undefined);
-            setMessage('');
-            setPortfolio('');
+            setMessage("");
+            setPortfolio("");
           }}
           title={`Apply for ${formatRole(selectedOpenRole.role)}`}
           size="md"
@@ -184,7 +197,7 @@ export function OpenRolesBrowser() {
               max={100}
               step={0.1}
               value={proposedSplit ?? selectedOpenRole.splitPercentage}
-              onChange={e => setProposedSplit(Number(e.target.value))}
+              onChange={(e) => setProposedSplit(Number(e.target.value))}
               hint={`Default: ${selectedOpenRole.splitPercentage}%`}
             />
 
@@ -195,7 +208,7 @@ export function OpenRolesBrowser() {
               <textarea
                 id="message"
                 value={message}
-                onChange={e => setMessage(e.target.value)}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Tell the publisher why you're a good fit for this role..."
                 rows={4}
                 className="input"
@@ -206,7 +219,7 @@ export function OpenRolesBrowser() {
               label="Portfolio Link (optional)"
               type="url"
               value={portfolio}
-              onChange={e => setPortfolio(e.target.value)}
+              onChange={(e) => setPortfolio(e.target.value)}
               placeholder="https://your-portfolio.com"
             />
 
@@ -217,13 +230,16 @@ export function OpenRolesBrowser() {
                   setShowApplicationModal(false);
                   setSelectedOpenRole(null);
                   setProposedSplit(undefined);
-                  setMessage('');
-                  setPortfolio('');
+                  setMessage("");
+                  setPortfolio("");
                 }}
               >
                 Cancel
               </Button>
-              <Button onClick={handleSubmitApplication} loading={submitMutation.isPending}>
+              <Button
+                onClick={handleSubmitApplication}
+                loading={submitMutation.isPending}
+              >
                 Submit Application
               </Button>
             </div>

@@ -15,6 +15,7 @@ Progressive Web Application (PWA) built with Blazor WebAssembly, serving as the 
 **Layer**: **Presentation - UI Adapter (Primary/Driving)**
 
 The PWA is a **primary adapter** (driving adapter) that:
+
 - **Drives** the application by initiating use cases
 - **Presents** domain data to users via interactive UI
 - **Translates** user actions into API calls
@@ -22,6 +23,7 @@ The PWA is a **primary adapter** (driving adapter) that:
 - **Manages** client-side state and routing
 
 **Dependency Flow**:
+
 ```
 User Interactions
     ↓ triggers
@@ -35,6 +37,7 @@ Domain Layer (Core)
 ```
 
 **Key Principles**:
+
 - ✅ **Primary Adapter** - Drives the application (initiates actions)
 - ✅ **Technology Specific** - Uses Blazor WebAssembly framework
 - ✅ **Thin Presentation** - UI logic only, no business rules
@@ -87,6 +90,7 @@ Mystira.App.PWA/
 ### Blazor WebAssembly
 
 Runs .NET code directly in the browser via WebAssembly:
+
 - **Client-side rendering**: No server-side rendering required
 - **Single Page Application (SPA)**: Fast navigation
 - **Offline capable**: Works without internet connection
@@ -95,6 +99,7 @@ Runs .NET code directly in the browser via WebAssembly:
 ### Progressive Web App (PWA)
 
 Installable web app with native-like experience:
+
 - **Service Worker**: Offline caching and background sync
 - **App Manifest**: Install on home screen
 - **Push Notifications**: (Future feature)
@@ -103,41 +108,53 @@ Installable web app with native-like experience:
 ## Pages and Components
 
 ### Home.razor
+
 Landing page with:
+
 - Hero section introducing Mystira
 - Feature highlights
 - Call-to-action buttons
 - Navigation to sign up/sign in
 
 ### SignUp.razor
+
 User registration:
+
 - Account creation form
 - Email validation
 - Password strength requirements
 - COPPA compliance notices
 
 ### SignIn.razor
+
 Authentication:
+
 - Email/password login
 - JWT token management
 - Remember me functionality
 - Redirect after login
 
 ### ProfilesPage.razor
+
 User profile management:
+
 - Display name and avatar
 - Age group preference
 - Fantasy theme selection
 - Onboarding status
 
 ### AchievementsPage.razor
+
 Achievement/badge progress:
+
 - Pulls badge configuration + per-profile progress from the public `/api/badges` endpoints
 - Shows compass-axis sections with Bronze/Silver/Gold tier progress
 - Remembers the last selected profile in `localStorage` under `mystira_selected_profile_id`
 
 ### GameSessionPage.razor
+
 Interactive story gameplay:
+
 - **Scene Display**: Current scene narrative
 - **Choice Buttons**: Player decision options
 - **Compass Display**: Real-time moral compass visualization
@@ -147,7 +164,9 @@ Interactive story gameplay:
 - **Session Controls**: Pause, resume, save
 
 ### CharacterAssignmentPage.razor
+
 Character selection:
+
 - Available characters for scenario
 - Archetype descriptions
 - Character portraits
@@ -194,6 +213,7 @@ public interface IScenarioApiClient
 ```
 
 **Usage**:
+
 ```csharp
 @inject IScenarioApiClient ScenarioClient
 
@@ -215,6 +235,7 @@ public interface IGameSessionApiClient
 ```
 
 **Usage**:
+
 ```csharp
 @inject IGameSessionApiClient SessionClient
 
@@ -228,6 +249,7 @@ var session = await SessionClient.StartSessionAsync(new StartSessionRequest
 ### AuthApiClient
 
 Manages authentication:
+
 - `RegisterAsync(RegisterRequest)`: Create new account
 - `LoginAsync(LoginRequest)`: Authenticate user
 - `LogoutAsync()`: Clear session
@@ -236,6 +258,7 @@ Manages authentication:
 ### MediaApiClient
 
 Media asset management:
+
 - `GetMediaUrlAsync(string blobName)`: Get media URL
 - `UploadMediaAsync(Stream, string)`: Upload media file
 - `DownloadMediaAsync(string)`: Download media
@@ -243,6 +266,7 @@ Media asset management:
 ### DiscordApiClient
 
 Discord integration:
+
 - `SendNotificationAsync(...)`: Send Discord messages
 - `CreateSessionThreadAsync(...)`: Create game session thread
 - `UpdateSessionStatusAsync(...)`: Update Discord status
@@ -301,6 +325,7 @@ public interface ILocalStorageTokenProvider
 ### Service Worker
 
 `service-worker.js` provides offline functionality:
+
 - **Cache API responses**: Scenarios, sessions, media
 - **Background sync**: Sync choices when online
 - **Offline fallback**: Show cached content
@@ -321,6 +346,7 @@ public class IndexedDbService
 ```
 
 **Use Cases**:
+
 - Cache scenarios for offline play
 - Store session progress locally
 - Queue choices for sync when online
@@ -359,6 +385,7 @@ Each Blazor component manages local state:
 ### Shared State (Future)
 
 Consider state management libraries:
+
 - **Fluxor**: Redux-like state management
 - **Blazor State**: Simple state container
 - **Wolverine**: Message-based communication (used by backend)
@@ -372,15 +399,12 @@ The PWA uses different `appsettings.{Environment}.json` files to connect to the 
 - **`appsettings.Local.json`**: For true local development with API running on `http://localhost:5260/`
   - **Not deployed** - only used when running locally with `dotnet run`
   - Copy this file to use for local dev: `cp appsettings.Local.json appsettings.Development.json.local`
-  
 - **`appsettings.Development.json`**: Dev environment (deployed to Azure)
   - API URL: `https://dev-san-app-mystira-api.azurewebsites.net/`
   - Used by: Dev branch deployments to Azure Static Web Apps
-  
 - **`appsettings.Staging.json`**: Staging environment
   - API URL: `https://mystira-app-staging-api.azurewebsites.net/`
   - Used by: Staging branch deployments
-  
 - **`appsettings.Production.json`**: Production environment
   - API URL: `https://prod-wus-app-mystira-api.azurewebsites.net/`
   - Used by: Main branch deployments to production
@@ -390,6 +414,7 @@ The PWA uses different `appsettings.{Environment}.json` files to connect to the 
 To run the PWA locally and connect to localhost API:
 
 1. **Start the API locally:**
+
    ```bash
    cd src/Mystira.App.Api
    dotnet run
@@ -397,6 +422,7 @@ To run the PWA locally and connect to localhost API:
    ```
 
 2. **Configure PWA for local development:**
+
    ```bash
    cd src/Mystira.App.PWA
    # Create a local-only appsettings file
@@ -465,6 +491,7 @@ await builder.Build().RunAsync();
 ## Responsive Design
 
 PWA uses responsive CSS for all screen sizes:
+
 - **Mobile**: Optimized touch targets, simplified navigation
 - **Tablet**: Enhanced layout, side panels
 - **Desktop**: Full-featured UI, multi-column layouts
@@ -474,23 +501,30 @@ PWA uses responsive CSS for all screen sizes:
 ```css
 /* Mobile */
 @media (max-width: 767px) {
-    .game-session { flex-direction: column; }
+  .game-session {
+    flex-direction: column;
+  }
 }
 
 /* Tablet */
 @media (min-width: 768px) and (max-width: 1023px) {
-    .sidebar { width: 250px; }
+  .sidebar {
+    width: 250px;
+  }
 }
 
 /* Desktop */
 @media (min-width: 1024px) {
-    .main-content { max-width: 1200px; }
+  .main-content {
+    max-width: 1200px;
+  }
 }
 ```
 
 ## Accessibility
 
 WCAG 2.1 AA compliance:
+
 - **Semantic HTML**: Proper heading hierarchy
 - **ARIA Labels**: Screen reader support
 - **Keyboard Navigation**: All actions keyboard-accessible
@@ -502,6 +536,7 @@ WCAG 2.1 AA compliance:
 ### Lazy Loading
 
 Load pages on-demand:
+
 ```csharp
 @page "/game-session/{SessionId}"
 @attribute [Lazy]
@@ -601,12 +636,14 @@ public async Task ScenarioClient_GetScenarios_ReturnsScenarios()
 **File Count**: ~45 C# files
 **Project References**: 1 (Domain only - but should use Contracts)
 **Dependencies**:
+
 - Domain ⚠️ (should be minimal/none)
 - No Contracts ❌ (should be primary dependency)
 - No Infrastructure ✅ (correct)
 - No Application ✅ (correct)
 
 **Folders**:
+
 - Pages/ ✅ (UI components)
 - Services/ ✅ (API clients and UI state)
 - Models/ ⚠️ (duplicate DTOs - should use Contracts)
@@ -615,9 +652,11 @@ public async Task ScenarioClient_GetScenarios_ReturnsScenarios()
 ### ⚠️ Architectural Issues Found
 
 #### 1. **Missing Contracts Reference** (MEDIUM)
+
 **Location**: `Mystira.App.PWA.csproj` (no Contracts reference)
 
 **Issue**: PWA defines its own Models instead of using Contracts project:
+
 ```
 PWA/Models/
 ├── Scenario.cs               # Duplicate of domain/contract
@@ -629,18 +668,21 @@ PWA/Models/
 ```
 
 **Impact**:
+
 - ❌ Model duplication across PWA, API, and Contracts
 - ❌ Models can drift out of sync
 - ❌ API contract changes require updating PWA models manually
 - ❌ Violates DRY principle
 
 **Recommendation**:
+
 - **ADD** reference to `Mystira.Contracts.App` project
 - **DELETE** all models from `PWA/Models/` that exist in Contracts
 - **USE** Contracts DTOs for all API communication
 - Keep only PWA-specific view models (if any)
 
 **Example**:
+
 ```diff
   <ItemGroup>
     <ProjectReference Include="../Mystira.App.Domain/Mystira.App.Domain.csproj" />
@@ -649,20 +691,24 @@ PWA/Models/
 ```
 
 #### 2. **Direct Domain Reference** (MEDIUM)
+
 **Location**: 25 files importing `Mystira.App.Domain`
 
 **Issue**: Presentation layer directly depends on Domain layer:
+
 ```csharp
 using Mystira.App.Domain.Entities;  // Should use Contracts instead
 using Mystira.App.Domain.ValueObjects;
 ```
 
 **Impact**:
+
 - ⚠️ Frontend knows about internal domain models
 - ⚠️ Not pure hexagonal architecture (presentation should use DTOs)
 - ⚠️ Domain changes affect frontend directly
 
 **Recommendation**:
+
 - **MINIMIZE** Domain reference (or remove entirely)
 - **USE** Contracts DTOs for all API data transfer
 - Domain reference only acceptable for:
@@ -671,9 +717,11 @@ using Mystira.App.Domain.ValueObjects;
   - But even these could be in Contracts
 
 #### 3. **Duplicate Project Reference** (LOW)
+
 **Location**: `Mystira.App.PWA.csproj` lines 38 and 46
 
 **Issue**: Domain project referenced twice:
+
 ```xml
 <ItemGroup>
   <ProjectReference Include="../Mystira.App.Domain/Mystira.App.Domain.csproj" />
@@ -685,22 +733,27 @@ using Mystira.App.Domain.ValueObjects;
 ```
 
 **Recommendation**:
+
 - Remove duplicate reference (keep only one)
 
 #### 4. **Performance Optimizations Disabled** (INFO)
+
 **Location**: `Mystira.App.PWA.csproj` lines 13-14
 
 **Issue**: AOT and Linking disabled:
+
 ```xml
 <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
 <RunAOTCompilation>false</RunAOTCompilation>
 ```
 
 **Impact**:
+
 - ⚠️ Larger bundle size (slower initial load)
 - ⚠️ Slower runtime performance
 
 **Recommendation** (Future optimization):
+
 - Enable linking in Release builds to reduce bundle size
 - Consider AOT compilation for performance (increases build time)
 - Test thoroughly after enabling (can break reflection-based code)
@@ -758,16 +811,19 @@ using Mystira.App.Domain.ValueObjects;
 ## 💡 Recommendations
 
 ### Immediate Actions
+
 1. **Add Contracts reference** - Eliminate model duplication
 2. **Delete duplicate models** - Use Contracts DTOs
 3. **Fix duplicate project reference** - Clean up .csproj
 
 ### Short-term
+
 1. **Minimize Domain coupling** - Use Contracts as primary dependency
 2. **Create PWA-specific view models** - For UI state that doesn't map to API
 3. **Document model usage** - When to use Contracts vs custom models
 
 ### Long-term
+
 1. **State management library** - Consider Fluxor or Blazor State
 2. **Enable performance optimizations** - Linking and AOT
 3. **Improve offline capabilities** - Enhanced IndexedDB usage
@@ -775,6 +831,7 @@ using Mystira.App.Domain.ValueObjects;
 ## 📊 SWOT Analysis
 
 ### Strengths 💪
+
 - ✅ **Clean Architecture** - No Infrastructure/Application coupling
 - ✅ **Well-Structured API Clients** - Interface-based, testable
 - ✅ **PWA Features** - Service worker, offline, installable
@@ -784,6 +841,7 @@ using Mystira.App.Domain.ValueObjects;
 - ✅ **Good DI Setup** - Proper service registration
 
 ### Weaknesses ⚠️
+
 - ❌ **No Contracts Reference** - Duplicates all API models
 - ⚠️ **Direct Domain Reference** - Should use DTOs only
 - ⚠️ **Model Duplication** - 10+ duplicate model classes
@@ -791,6 +849,7 @@ using Mystira.App.Domain.ValueObjects;
 - ⚠️ **Duplicate Project Reference** - .csproj needs cleanup
 
 ### Opportunities 🚀
+
 - 📈 **Use Contracts DTOs** - Eliminate duplication
 - 📈 **State Management** - Fluxor for complex state
 - 📈 **Performance** - AOT and linking for faster loads
@@ -800,12 +859,14 @@ using Mystira.App.Domain.ValueObjects;
 - 📈 **TypeScript Alternative** - Could use React/Vue with TypeScript
 
 ### Threats 🔒
+
 - ⚡ **Model Drift** - Duplicate models get out of sync with API
 - ⚡ **Breaking API Changes** - No compile-time safety without Contracts
 - ⚡ **Bundle Size** - Can grow large without optimization
 - ⚡ **Browser Support** - WebAssembly not universal
 
 ### Risk Mitigation
+
 1. **Add Contracts reference NOW** - Prevent model drift
 2. **Integration tests** - Catch API contract mismatches
 3. **Bundle analysis** - Monitor and optimize size

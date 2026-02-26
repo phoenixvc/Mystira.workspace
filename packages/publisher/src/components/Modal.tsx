@@ -1,13 +1,13 @@
-import { useEffect, useRef, type ReactNode } from 'react';
-import clsx from 'clsx';
-import { FocusTrap } from './FocusTrap';
+import { useEffect, useRef, type ReactNode } from "react";
+import clsx from "clsx";
+import { FocusTrap } from "./FocusTrap";
 
 export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title?: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   closeOnOverlayClick?: boolean;
 }
 
@@ -16,7 +16,7 @@ export function Modal({
   onClose,
   title,
   children,
-  size = 'md',
+  size = "md",
   closeOnOverlayClick = true,
 }: ModalProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -34,13 +34,13 @@ export function Modal({
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
   }, [isOpen, onClose]);
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -54,9 +54,9 @@ export function Modal({
   return (
     <dialog
       ref={dialogRef}
-      className={clsx('modal', `modal--${size}`)}
+      className={clsx("modal", `modal--${size}`)}
       onClick={handleOverlayClick}
-      aria-labelledby={title ? 'modal-title' : undefined}
+      aria-labelledby={title ? "modal-title" : undefined}
     >
       <FocusTrap active={isOpen}>
         <div className="modal__content">

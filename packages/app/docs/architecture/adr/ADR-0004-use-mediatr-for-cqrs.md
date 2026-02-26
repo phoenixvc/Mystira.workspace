@@ -21,7 +21,7 @@ After adopting CQRS (ADR-0001), we needed a mechanism to route Commands and Quer
 
 ###
 
- Considered Alternatives
+Considered Alternatives
 
 1. **Manual Handler Registration**
    - ✅ No third-party dependencies
@@ -58,11 +58,13 @@ We will use **MediatR** (v12.4.1) as the mediator library for routing Commands a
 ### Implementation Approach
 
 1. **Install MediatR** via NuGet:
+
    ```bash
    dotnet add package MediatR
    ```
 
 2. **Register in DI** (Program.cs):
+
    ```csharp
    builder.Services.AddMediatR(cfg => {
        cfg.RegisterServicesFromAssembly(typeof(CreateScenarioCommand).Assembly);
@@ -70,17 +72,20 @@ We will use **MediatR** (v12.4.1) as the mediator library for routing Commands a
    ```
 
 3. **Define marker interfaces** (Application layer):
+
    ```csharp
    public interface ICommand<T> : IRequest<T> { }
    public interface IQuery<T> : IRequest<T> { }
    ```
 
 4. **Commands and Queries** implement marker interfaces:
+
    ```csharp
    public record CreateScenarioCommand(CreateScenarioRequest Request) : ICommand<Scenario>;
    ```
 
 5. **Handlers** implement `IRequestHandler<TRequest, TResponse>`:
+
    ```csharp
    public class CreateScenarioCommandHandler : IRequestHandler<CreateScenarioCommand, Scenario>
    {
@@ -92,6 +97,7 @@ We will use **MediatR** (v12.4.1) as the mediator library for routing Commands a
    ```
 
 6. **Controllers** inject `IMediator`:
+
    ```csharp
    public class ScenariosController : ControllerBase
    {

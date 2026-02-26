@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
-import { Alert } from './Alert';
-import { Button } from './Button';
-import clsx from 'clsx';
+import { useEffect } from "react";
+import { Alert } from "./Alert";
+import { Button } from "./Button";
+import clsx from "clsx";
 
-export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
+export type ToastVariant = "success" | "error" | "warning" | "info";
 
 export interface ToastProps {
   id: string;
@@ -14,7 +14,14 @@ export interface ToastProps {
   onClose: (id: string) => void;
 }
 
-export function Toast({ id, variant, title, message, duration = 5000, onClose }: ToastProps) {
+export function Toast({
+  id,
+  variant,
+  title,
+  message,
+  duration = 5000,
+  onClose,
+}: ToastProps) {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(() => {
@@ -26,7 +33,11 @@ export function Toast({ id, variant, title, message, duration = 5000, onClose }:
   }, [id, duration, onClose]);
 
   return (
-    <div className={clsx('toast', `toast--${variant}`)} role="alert" aria-live="polite">
+    <div
+      className={clsx("toast", `toast--${variant}`)}
+      role="alert"
+      aria-live="polite"
+    >
       <Alert variant={variant} title={title} className="toast__alert">
         {message && <p>{message}</p>}
       </Alert>
@@ -42,4 +53,3 @@ export function Toast({ id, variant, title, message, duration = 5000, onClose }:
     </div>
   );
 }
-
