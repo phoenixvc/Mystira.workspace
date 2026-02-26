@@ -361,6 +361,12 @@ public class GameSessionsController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+        catch (OperationCanceledException ex)
+        {
+            // Client disconnected - let ASP.NET Core handle gracefully
+            _logger.LogWarning(ex, "Session end was cancelled");
+            throw;
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error ending session {SessionId}", id);

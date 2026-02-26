@@ -100,7 +100,7 @@
       rel="stylesheet"
     />
     <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
       rel="stylesheet"
     />
 
@@ -444,8 +444,9 @@
           window.location.href = window.location.pathname + "?t=" + timestamp;
         } catch (error) {
           console.error("Error clearing cache:", error);
-          // Fallback to simple reload
-          window.location.reload(true);
+          // Fallback to cache-busting reload
+          const timestamp = new Date().getTime();
+          window.location.href = window.location.pathname + "?t=" + timestamp;
         }
       }
 

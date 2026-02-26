@@ -13,10 +13,10 @@
 }
 
 <div class="status-controls">
-  <button class="pill" data-active="@(Mode=="info")" @onclick="@(() => Mode = "info")">Info</button>
-  <button class="pill" data-active="@(Mode=="success")" @onclick="@(() => Mode = "success")">Success</button>
-  <button class="pill" data-active="@(Mode=="warning")" @onclick="@(() => Mode = "warning")">Warning</button>
-  <button class="pill" data-active="@(Mode=="danger")" @onclick="@(() => Mode = "danger")">Error</button>
+  <button type="button" class="pill" data-active="@(Mode=="info")" @onclick="@(() => Mode = "info")">Info</button>
+  <button type="button" class="pill" data-active="@(Mode=="success")" @onclick="@(() => Mode = "success")">Success</button>
+  <button type="button" class="pill" data-active="@(Mode=="warning")" @onclick="@(() => Mode = "warning")">Warning</button>
+  <button type="button" class="pill" data-active="@(Mode=="danger")" @onclick="@(() => Mode = "danger")">Error</button>
 </div>
 
 <div class="status-card" data-kind="@Mode">

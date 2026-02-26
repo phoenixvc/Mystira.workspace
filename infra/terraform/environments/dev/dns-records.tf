@@ -24,7 +24,7 @@
 variable "subscription_id" {
   description = "Azure Subscription ID for DNS zone resources. Must match the subscription where the DNS zone exists."
   type        = string
-  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe"  # ⚠️ Update this to match your subscription
+  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe" # ⚠️ Update this to match your subscription
 
   validation {
     condition     = can(regex("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$", var.subscription_id))
@@ -43,9 +43,9 @@ locals {
 # =============================================================================
 # Import blocks for existing DNS records
 # These records were created by previous CI/CD runs and need to be imported
-# ⚠️  SECURITY NOTE: These import blocks contain hardcoded subscription IDs.
-# If moving to a different subscription, update the subscription_id variable above
-# and regenerate these import statements.
+# ⚠️  SECURITY NOTE: Import blocks use local.subscription_path which is derived
+# from var.subscription_id. If moving to a different subscription, update
+# var.subscription_id in the environment config and regenerate these import statements.
 # =============================================================================
 
 import {

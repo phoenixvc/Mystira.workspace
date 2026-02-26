@@ -136,6 +136,7 @@ public class RedisCacheService : ICacheService
             {
                 await foreach (var key in server.KeysAsync(database: database.Database, pattern: redisPattern))
                 {
+                    cancellationToken.ThrowIfCancellationRequested();
                     keysToRemove.Add(key);
                     totalKeys++;
                 }
@@ -157,6 +158,8 @@ public class RedisCacheService : ICacheService
 
             for (var i = 0; i < keysToRemove.Count; i += batchSize)
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var batch = keysToRemove.Skip(i).Take(batchSize).ToArray();
                 await database.KeyDeleteAsync(batch);
                 removedCount += batch.Length;

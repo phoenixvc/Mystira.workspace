@@ -61,6 +61,10 @@
   /* Dark focus */
   --m-focus: #c7b8ff;
 
+  /* Dark selected */
+  --m-selected: #c7b8ff;
+  --m-selected-border: #8b7fc7;
+
   /* Dark status */
   --m-error-bg: #2a1515;
   --m-error: #ff6b6b;
@@ -99,8 +103,16 @@
   padding: 2.5rem 2rem;
   border-radius: 24px;
   background:
-    radial-gradient(1200px circle at 20% 10%, color-mix(in srgb, var(--m-primary) 25%, transparent), transparent 55%),
-    radial-gradient(900px circle at 70% 35%, color-mix(in srgb, var(--m-teal) 16%, transparent), transparent 60%),
+    radial-gradient(
+      1200px circle at 20% 10%,
+      color-mix(in srgb, var(--m-primary) 25%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      900px circle at 70% 35%,
+      color-mix(in srgb, var(--m-teal) 16%, transparent),
+      transparent 60%
+    ),
     var(--m-surface);
   border: 1px solid var(--m-border);
 }
@@ -112,34 +124,82 @@
   justify-content: space-between;
 }
 
-.brand-hero h1 { margin: 0; }
-.hero-tagline { margin: .5rem 0 0 0; color: var(--m-text-2); }
-.hero-blurb { margin: 1rem 0 0 0; max-width: 70ch; color: var(--m-text-2); }
+.brand-hero h1 {
+  margin: 0;
+}
+.hero-tagline {
+  margin: 0.5rem 0 0 0;
+  color: var(--m-text-2);
+}
+.hero-blurb {
+  margin: 1rem 0 0 0;
+  max-width: 70ch;
+  color: var(--m-text-2);
+}
 
-.brand-section { margin-top: 3rem; }
-.brand-section h2 { margin-bottom: 1rem; }
+.brand-section {
+  margin-top: 3rem;
+}
+.brand-section h2 {
+  margin-bottom: 1rem;
+}
 
 /* =========
    TYPOGRAPHY
    (wire your actual font-family imports in your app)
    ========= */
 
-.h1 { font-size: 2.2rem; line-height: 1.1; font-weight: 700; }
-.h2 { font-size: 1.6rem; line-height: 1.2; font-weight: 600; }
-.h3 { font-size: 1.3rem; line-height: 1.25; font-weight: 600; }
-.h4 { font-size: 1.1rem; line-height: 1.3; font-weight: 600; }
+.h1 {
+  font-size: 2.2rem;
+  line-height: 1.1;
+  font-weight: 700;
+}
+.h2 {
+  font-size: 1.6rem;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.h3 {
+  font-size: 1.3rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.h4 {
+  font-size: 1.1rem;
+  line-height: 1.3;
+  font-weight: 600;
+}
 
-.body { font-size: 1rem; line-height: 1.6; font-weight: 400; color: var(--m-text); }
-.body2, .text-2 { font-size: .95rem; line-height: 1.5; font-weight: 500; color: var(--m-text-2); }
+.body {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--m-text);
+}
+.body2,
+.text-2 {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--m-text-2);
+}
 
-.type-demo { display: grid; gap: 1rem; }
+.type-demo {
+  display: grid;
+  gap: 1rem;
+}
 .type-row {
   background: var(--m-surface);
   border: 1px solid var(--m-border);
   border-radius: 18px;
   padding: 1rem 1.25rem;
 }
-.type-meta { margin-top: .35rem; color: var(--m-text-2); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .85rem; }
+.type-meta {
+  margin-top: 0.35rem;
+  color: var(--m-text-2);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85rem;
+}
 
 /* =========
    BUTTONS
@@ -153,12 +213,15 @@
 
 .btn {
   border-radius: 999px;
-  padding: .75rem 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid transparent;
   background: transparent;
   color: var(--m-text);
   cursor: pointer;
-  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+  transition:
+    transform 0.12s ease,
+    background 0.12s ease,
+    border-color 0.12s ease;
 }
 .btn:focus-visible {
   outline: 3px solid var(--m-focus);
@@ -197,22 +260,36 @@
   background: var(--m-surface-hover);
 }
 
-.btn-success { background: var(--m-success); color: #0b1a12; }
-.btn-warning { background: var(--m-warning); color: #1b1405; }
-.btn-danger  { background: var(--m-error);   color: #1f0a0a; }
+.btn-success {
+  background: var(--m-success);
+  color: #0b1a12;
+}
+.btn-warning {
+  background: var(--m-warning);
+  color: #1b1405;
+}
+.btn-danger {
+  background: var(--m-error);
+  color: #1f0a0a;
+}
 
 /* =========
    STATUS DEMO
    ========= */
 
-.status-controls { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+.status-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
 
 .pill {
   border-radius: 999px;
   border: 1px solid var(--m-border);
   background: var(--m-surface);
   color: var(--m-text);
-  padding: .5rem .85rem;
+  padding: 0.5rem 0.85rem;
   cursor: pointer;
 }
 .pill[data-active="True"] {
@@ -244,9 +321,19 @@
   border-color: var(--m-error-border);
 }
 
-.status-title { font-weight: 700; margin-bottom: .25rem; }
-.status-message { color: var(--m-text-2); margin-bottom: 1rem; }
-.status-actions { display: flex; gap: .75rem; flex-wrap: wrap; }
+.status-title {
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.status-message {
+  color: var(--m-text-2);
+  margin-bottom: 1rem;
+}
+.status-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
 
 /* =========
    MOTION (respect reduced motion)
@@ -265,17 +352,28 @@
   padding: 1rem;
 }
 
-.motion-title { font-weight: 700; margin-bottom: .75rem; }
+.motion-title {
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
 
 .glow-orb {
   height: 90px;
   border-radius: 18px;
   background:
-    radial-gradient(circle at 30% 35%, color-mix(in srgb, var(--m-primary) 45%, transparent), transparent 55%),
-    radial-gradient(circle at 70% 55%, color-mix(in srgb, var(--m-teal) 28%, transparent), transparent 60%),
+    radial-gradient(
+      circle at 30% 35%,
+      color-mix(in srgb, var(--m-primary) 45%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 70% 55%,
+      color-mix(in srgb, var(--m-teal) 28%, transparent),
+      transparent 60%
+    ),
     var(--m-surface-elevated);
   border: 1px solid var(--m-border);
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
   animation: glowPulse 2.8s ease-in-out infinite;
 }
 
@@ -286,36 +384,59 @@
   background: var(--m-surface-elevated);
   display: grid;
   place-items: center;
-  margin-bottom: .75rem;
-  transition: transform .14s ease, background .14s ease;
+  margin-bottom: 0.75rem;
+  transition:
+    transform 0.14s ease,
+    background 0.14s ease;
 }
-.lift-tile:hover { transform: translateY(-3px); background: var(--m-surface-hover); }
+.lift-tile:hover {
+  transform: translateY(-3px);
+  background: var(--m-surface-hover);
+}
 
 .shimmer-bar {
   height: 16px;
   border-radius: 999px;
   border: 1px solid var(--m-border);
-  background:
-    linear-gradient(90deg,
-      color-mix(in srgb, var(--m-surface) 70%, transparent),
-      color-mix(in srgb, var(--m-surface-elevated) 70%, transparent),
-      color-mix(in srgb, var(--m-surface) 70%, transparent));
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--m-surface) 70%, transparent),
+    color-mix(in srgb, var(--m-surface-elevated) 70%, transparent),
+    color-mix(in srgb, var(--m-surface) 70%, transparent)
+  );
   background-size: 240% 100%;
   animation: shimmer 1.2s linear infinite;
-  margin-bottom: .75rem;
+  margin-bottom: 0.75rem;
 }
 
 @keyframes glowPulse {
-  0%, 100% { filter: saturate(1); transform: translateY(0); }
-  50% { filter: saturate(1.12); transform: translateY(-1px); }
+  0%,
+  100% {
+    filter: saturate(1);
+    transform: translateY(0);
+  }
+  50% {
+    filter: saturate(1.12);
+    transform: translateY(-1px);
+  }
 }
 
 @keyframes shimmer {
-  0% { background-position: 0% 0; }
-  100% { background-position: 100% 0; }
+  0% {
+    background-position: 0% 0;
+  }
+  100% {
+    background-position: 100% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .btn, .lift-tile { transition: none; }
-  .glow-orb, .shimmer-bar { animation: none; }
+  .btn,
+  .lift-tile {
+    transition: none;
+  }
+  .glow-orb,
+  .shimmer-bar {
+    animation: none;
+  }
 }
