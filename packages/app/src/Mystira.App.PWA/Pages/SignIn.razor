@@ -191,9 +191,9 @@
             errorMessage = string.Empty;
 
             var result = await AuthService.RequestMagicLinkAsync(magicEmail.Trim(), null);
-            if (!result.IsSuccess)
+            if (result == null || !result.IsSuccess)
             {
-                errorMessage = result.ErrorMessage ?? "Unable to send magic link right now. Please try again.";
+                errorMessage = result?.ErrorMessage ?? "Unable to send magic link right now. Please try again.";
                 return;
             }
 
