@@ -7,10 +7,12 @@ interface AuthState {
   logout: () => void;
 }
 
+const AUTH_STORAGE_KEY = "auth-storage";
+
 // Simple localStorage-based persistence
 const loadAuthFromStorage = (): { token: string | null } => {
   try {
-    const stored = localStorage.getItem("auth-storage");
+    const stored = localStorage.getItem(AUTH_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       return { token: parsed.token || null };
@@ -23,7 +25,7 @@ const loadAuthFromStorage = (): { token: string | null } => {
 
 const saveAuthToStorage = (token: string | null) => {
   try {
-    localStorage.setItem("auth-storage", JSON.stringify({ token }));
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({ token }));
   } catch {
     // Ignore errors
   }
@@ -31,7 +33,7 @@ const saveAuthToStorage = (token: string | null) => {
 
 const initialState = loadAuthFromStorage();
 
-export const useAuthStore = create<AuthState>(set => ({
+export const useAuthStore = create<AuthState>((set) => ({
   token: initialState.token,
   isAuthenticated: !!initialState.token,
   login: (token: string) => {
@@ -39,7 +41,12 @@ export const useAuthStore = create<AuthState>(set => ({
     set({ token, isAuthenticated: true });
   },
   logout: () => {
-    localStorage.removeItem("auth-storage");
+    localStorage.removeItem(AUTH_STORAGE_KEY);
     set({ token: null, isAuthenticated: false });
   },
 }));
+
+export const getAuthToken = (): string | null => {
+  const state = useAuthStore.getState();
+  return state.token;
+};

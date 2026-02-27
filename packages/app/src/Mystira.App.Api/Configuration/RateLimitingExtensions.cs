@@ -54,6 +54,21 @@ public static class RateLimitingExtensions
                     });
             });
 
+            // Magic auth limiter: 10 requests per 15 minutes per IP
+            options.AddPolicy("magicAuth", context =>
+            {
+                var ipAddress = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+                return RateLimitPartition.GetSlidingWindowLimiter(ipAddress, _ =>
+                    new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 10,
+                        Window = TimeSpan.FromMinutes(15),
+                        SegmentsPerWindow = 3,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    });
+            });
+
             options.OnRejected = async (context, cancellationToken) =>
             {
                 var securityMetrics = context.HttpContext.RequestServices.GetService<ISecurityMetrics>();

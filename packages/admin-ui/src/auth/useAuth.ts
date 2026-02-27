@@ -1,107 +1,102 @@
-import { useMsal, useIsAuthenticated, useAccount } from "@azure/msal-react";
-import { InteractionStatus, AccountInfo } from "@azure/msal-browser";
-import { useCallback, useMemo } from "react";
-import { loginRequest, tokenRequest, BYPASS_AUTH } from "./msalConfig";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { authApi } from "../api/auth";
+import { useAuthStore } from "../state/authStore";
 
-// Mock account for bypass mode
-const mockAccount: AccountInfo = {
-  homeAccountId: "dev-home-account-id",
-  localAccountId: "dev-local-account-id",
-  environment: "dev",
-  tenantId: "dev-tenant-id",
-  username: "dev@local",
-  name: "Development User",
-} as AccountInfo;
+interface AuthUser {
+  username: string | null;
+  roles: string[];
+}
 
 export function useAuth() {
-  // Always call hooks unconditionally (React rules)
-  const { instance, inProgress, accounts } = useMsal();
-  const isAuthenticated = useIsAuthenticated();
-  const account = useAccount(accounts[0]);
+  const token = useAuthStore((state) => state.token);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const setLoggedIn = useAuthStore((state) => state.login);
+  const clearAuth = useAuthStore((state) => state.logout);
 
-  const login = useCallback(async () => {
-    if (BYPASS_AUTH) {
-      console.warn("Login called but BYPASS_AUTH is enabled");
-      return;
-    }
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<AuthUser>({ username: null, roles: [] });
 
-    if (inProgress !== InteractionStatus.None) return;
+  useEffect(() => {
+    let isMounted = true;
 
-    try {
-      // Try popup first, fall back to redirect if blocked
-      await instance.loginPopup(loginRequest);
-    } catch (popupError) {
-      console.warn("Popup login failed, trying redirect:", popupError);
-      await instance.loginRedirect(loginRequest);
-    }
-  }, [instance, inProgress]);
+    const hydrateAuthState = async () => {
+      if (!token) {
+        if (isMounted) {
+          setUser({ username: null, roles: [] });
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      try {
+        const status = await authApi.status();
+        if (status.isAuthenticated) {
+          if (isMounted) {
+            setUser({
+              username: status.username ?? null,
+              roles: status.roles ?? [],
+            });
+          }
+        } else {
+          clearAuth();
+          if (isMounted) {
+            setUser({ username: null, roles: [] });
+          }
+        }
+      } catch {
+        clearAuth();
+        if (isMounted) {
+          setUser({ username: null, roles: [] });
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    hydrateAuthState();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [token, clearAuth]);
+
+  const login = useCallback(
+    async (username: string, password: string) => {
+      const result = await authApi.login(username, password);
+      if (!result.accessToken) {
+        throw new Error(
+          "Authentication succeeded but access token is missing."
+        );
+      }
+
+      setLoggedIn(result.accessToken);
+      setUser({ username, roles: result.roles ?? [] });
+    },
+    [setLoggedIn]
+  );
 
   const logout = useCallback(async () => {
-    if (BYPASS_AUTH) {
-      console.warn("Logout called but BYPASS_AUTH is enabled");
-      return;
-    }
-
-    if (inProgress !== InteractionStatus.None) return;
-
     try {
-      await instance.logoutPopup({
-        mainWindowRedirectUri: "/login",
-      });
-    } catch (popupError) {
-      console.warn("Popup logout failed, trying redirect:", popupError);
-      await instance.logoutRedirect({
-        postLogoutRedirectUri: "/login",
-      });
+      await authApi.logout();
+    } finally {
+      clearAuth();
+      setUser({ username: null, roles: [] });
     }
-  }, [instance, inProgress]);
+  }, [clearAuth]);
 
-  const getAccessToken = useCallback(async () => {
-    if (BYPASS_AUTH) {
-      return "dev-token";
-    }
+  const getAccessToken = useCallback(async () => token, [token]);
 
-    if (!account) return null;
-
-    try {
-      const response = await instance.acquireTokenSilent({
-        ...tokenRequest,
-        account,
-      });
-      return response.accessToken;
-    } catch (error) {
-      console.error("Silent token acquisition failed:", error);
-      // Fall back to interactive method
-      try {
-        const response = await instance.acquireTokenPopup(tokenRequest);
-        return response.accessToken;
-      } catch (interactiveError) {
-        console.error("Interactive token acquisition failed:", interactiveError);
-        return null;
-      }
-    }
-  }, [instance, account]);
-
-  // Return appropriate values based on bypass mode
-  return useMemo(() => {
-    if (BYPASS_AUTH) {
-      return {
-        isAuthenticated: true,
-        isLoading: false,
-        user: mockAccount,
-        login,
-        logout,
-        getAccessToken,
-      };
-    }
-
-    return {
+  return useMemo(
+    () => ({
       isAuthenticated,
-      isLoading: inProgress !== InteractionStatus.None,
-      user: account,
+      isLoading,
+      user,
       login,
       logout,
       getAccessToken,
-    };
-  }, [isAuthenticated, inProgress, account, login, logout, getAccessToken]);
+    }),
+    [isAuthenticated, isLoading, user, login, logout, getAccessToken]
+  );
 }

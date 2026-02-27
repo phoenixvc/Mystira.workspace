@@ -108,6 +108,14 @@ try
             });
         });
 
+    var identityApiBaseUrl = builder.Configuration["IdentityApi:BaseUrl"] ?? "http://localhost:7100";
+    builder.Services.AddHttpClient("IdentityAuth", client =>
+    {
+        client.BaseAddress = new Uri(identityApiBaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
+    builder.Services.AddScoped<IIdentityAuthGateway, IdentityAuthGateway>();
+
     // Swagger, Database, Auth, Repos, UseCases, CORS, Rate Limiting
     builder.Services.AddMystiraSwagger();
     var (useCosmosDb, usePostgres) = builder.Services.AddMystiraDatabase(builder.Configuration);
@@ -117,6 +125,8 @@ try
     builder.Services.Configure<AudioTranscodingOptions>(builder.Configuration.GetSection(AudioTranscodingOptions.SectionName));
     builder.Services.AddSingleton<IAudioTranscodingService, FfmpegAudioTranscodingService>();
     builder.Services.AddSingleton<Mystira.App.Application.Services.ConsentEmailBuilder>();
+    builder.Services.AddSingleton<Mystira.App.Application.Services.MagicSignupEmailBuilder>();
+    builder.Services.AddScoped<IApiTokenService, ApiTokenService>();
     builder.Services.AddPaymentServices(builder.Configuration);
 
     builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);

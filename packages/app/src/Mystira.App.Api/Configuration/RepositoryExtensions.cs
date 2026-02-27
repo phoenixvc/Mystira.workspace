@@ -36,6 +36,7 @@ public static class RepositoryExtensions
         // COPPA compliance repositories
         services.AddScoped<ICoppaConsentRepository, CoppaConsentRepository>();
         services.AddScoped<IDataDeletionRepository, DataDeletionRepository>();
+        services.AddScoped<IPendingSignupRepository, PendingSignupRepository>();
 
         return services;
     }

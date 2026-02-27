@@ -1,14 +1,8 @@
 {
+  "extends": "../../configs/typescript/tsconfig.vite-node.json",
   "compilerOptions": {
-    "composite": true,
     "target": "ES2022",
-    "lib": ["ES2023"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "bundler",
-    "isolatedModules": true,
+    "lib": ["ES2022"],
     "moduleDetection": "force",
 
     /* Linting */

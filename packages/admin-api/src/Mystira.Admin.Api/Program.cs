@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -134,6 +134,14 @@ try
         http.AddStandardResilienceHandler();
     });
 
+    var identityApiBaseUrl = builder.Configuration["IdentityApi:BaseUrl"] ?? "http://localhost:7100";
+    builder.Services.AddHttpClient("IdentityAuth", client =>
+    {
+        client.BaseAddress = new Uri(identityApiBaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(30);
+    });
+    builder.Services.AddScoped<Mystira.Admin.Api.Services.IIdentityAuthGateway, Mystira.Admin.Api.Services.IdentityAuthGateway>();
+
     // Configure OpenAPI/Swagger
     builder.Services.AddEndpointsApiExplorer();
     // Register API description provider to handle IFormFile parameters
@@ -163,18 +171,11 @@ try
             Scheme = "Bearer"
         });
 
-        c.AddSecurityRequirement(new OpenApiSecurityRequirement
+        c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
         {
             {
-                new OpenApiSecurityScheme
-                {
-                    Reference = new OpenApiReference
-                    {
-                        Type = ReferenceType.SecurityScheme,
-                        Id = "Bearer"
-                    }
-                },
-                Array.Empty<string>()
+                new OpenApiSecuritySchemeReference("Bearer", null, null),
+                []
             }
         });
 
@@ -247,19 +248,19 @@ try
         });
 
         // Handle Dictionary<string, object> for Swagger schema generation
-        c.MapType<Dictionary<string, object>>(() => new Microsoft.OpenApi.Models.OpenApiSchema
+        c.MapType<Dictionary<string, object>>(() => new OpenApiSchema
         {
-            Type = "object",
-            AdditionalProperties = new Microsoft.OpenApi.Models.OpenApiSchema
+            Type = JsonSchemaType.Object,
+            AdditionalProperties = new OpenApiSchema
             {
-                Type = "object"
+                Type = JsonSchemaType.Object
             }
         });
 
         // Configure to handle IFormFile as binary in schema (must be before operation filter)
         c.MapType<IFormFile>(() => new OpenApiSchema
         {
-            Type = "string",
+            Type = JsonSchemaType.String,
             Format = "binary"
         });
 
@@ -368,24 +369,9 @@ try
 
     builder.Services.AddAuthentication(options =>
         {
-            options.DefaultScheme = "Cookies";
-            options.DefaultSignInScheme = "Cookies";
-            options.DefaultChallengeScheme = "Cookies";
-        })
-        .AddCookie("Cookies", options =>
-        {
-            options.Cookie.Name = "Mystira.Admin.Auth";
-            options.Cookie.HttpOnly = true;
-            // In development we must allow cookies over HTTP and avoid overly strict SameSite,
-            // otherwise the auth cookie is rejected and login appears to do nothing.
-            var isDev = builder.Environment.IsDevelopment();
-            options.Cookie.SameSite = isDev ? SameSiteMode.Lax : SameSiteMode.Strict;
-            options.Cookie.SecurePolicy = isDev ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
-            options.ExpireTimeSpan = TimeSpan.FromDays(7);
-            options.SlidingExpiration = true;
-            options.LoginPath = "/admin/login";
-            options.LogoutPath = "/admin/logout";
-            options.AccessDeniedPath = "/admin/forbidden";
+            options.DefaultScheme = "Bearer";
+            options.DefaultAuthenticateScheme = "Bearer";
+            options.DefaultChallengeScheme = "Bearer";
         })
         .AddJwtBearer(options =>
         {

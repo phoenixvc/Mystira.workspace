@@ -111,7 +111,11 @@ public static class AuthenticationExtensions
                             "/api/auth/refresh",
                             "/api/auth/signin",
                             "/api/auth/verify",
-                            "/api/auth",
+                            "/api/auth/config",
+                            "/api/auth/magic/request",
+                            "/api/auth/magic/resend",
+                            "/api/auth/magic/verify",
+                            "/api/auth/magic/consume",
                             "/api/discord/status"
                         ];
 

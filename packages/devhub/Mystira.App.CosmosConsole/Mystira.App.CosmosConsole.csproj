@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\app\src\Mystira.App.Domain\Mystira.App.Domain.csproj" />
+    <ProjectReference Include="..\..\app\src\Mystira.App.Domain\Mystira.App.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

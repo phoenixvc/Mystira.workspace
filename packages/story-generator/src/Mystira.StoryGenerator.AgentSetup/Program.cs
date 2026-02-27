@@ -9,7 +9,6 @@
 //   - Azure.AI.Projects
 //   - Azure.AI.Agents.Persistent
 //   - Azure.Identity
-//   - System.CommandLine (optional but recommended)
 //
 // Docs (method signatures):
 //   PersistentAgentsAdministrationClient.CreateAgent / UpdateAgent / DeleteAgent
@@ -18,57 +17,148 @@
 //   https://learn.microsoft.com/en-us/dotnet/api/azure.ai.agents.persistent.persistentagentsadministrationclient.deleteagent
 //
 
-using System.CommandLine;
 using Azure;
 using Azure.AI.Agents.Persistent;
 using Azure.AI.Projects;
 using Azure.Identity;
 using Mystira.StoryGenerator.AgentSetup;
 
-var endpointOption = new Option<string>(
-    name: "--endpoint",
-    description: "Azure AI Foundry Project endpoint URL, e.g. https://<resource>.services.ai.azure.com/api/projects/<project>")
-{ IsRequired = true };
-
-var modelOption = new Option<string>(
-    name: "--model",
-    description: "Model deployment name as configured in Foundry (Models + endpoints), e.g. gpt-4.1")
-{ IsRequired = false };
-
-var idOption = new Option<string>(
-    name: "--id",
-    description: "Agent ID (preferred when updating/deleting).")
-{ IsRequired = false };
-
-var nameOption = new Option<string>(
-    name: "--name",
-    description: "Agent name (used to find the agent if --id is not provided).")
-{ IsRequired = false };
-
-var instructionsOption = new Option<string>(
-    name: "--instructions",
-    description: "Agent instructions (string).")
-{ IsRequired = false };
-
-var descriptionOption = new Option<string>(
-    name: "--description",
-    description: "Agent description (string).")
-{ IsRequired = false };
-
-var forceOption = new Option<bool>(
-    name: "--force",
-    description: "Skip confirmation prompts.")
-{ IsRequired = false };
-
-var root = new RootCommand("Mystira Foundry AgentSetup (Persistent Agents)");
-
 // ----------------------
-// LIST
+// Entrypoint and argument parsing
 // ----------------------
-var listCmd = new Command("list", "List persistent agents in the project");
-listCmd.AddOption(endpointOption);
-listCmd.SetHandler((string endpoint) =>
+
+if (args.Length == 0 || args[0] is "-h" or "--help")
 {
+    PrintUsage();
+    return 0;
+}
+
+var command = args[0].ToLowerInvariant();
+var options = ParseOptions(args.Skip(1).ToArray());
+
+switch (command)
+{
+    case "list":
+        return HandleList(options);
+    case "create":
+        return HandleCreate(options);
+    case "update":
+        return HandleUpdate(options);
+    case "delete":
+        return HandleDelete(options);
+    default:
+        Console.WriteLine($"Unknown command: {command}");
+        Console.WriteLine();
+        PrintUsage();
+        return 1;
+}
+
+// ----------------------
+// Helpers
+// ----------------------
+
+static PersistentAgentsClient CreatePersistentClient(string projectEndpoint)
+{
+    // You can swap to AzureCliCredential if you prefer:
+    // var cred = new AzureCliCredential();
+    var cred = new DefaultAzureCredential();
+
+    // AIProjectClient gives you the authenticated PersistentAgentsClient for that project endpoint.
+    var projectClient = new AIProjectClient(new Uri(projectEndpoint), cred);
+    return projectClient.GetPersistentAgentsClient();
+}
+
+static PersistentAgent? ResolveAgent(PersistentAgentsClient client, string? id, string? name)
+{
+    if (!string.IsNullOrWhiteSpace(id))
+    {
+        try
+        {
+            return client.Administration.GetAgent(id).Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    if (!string.IsNullOrWhiteSpace(name))
+    {
+        // Exact match first, then case-insensitive match
+        PersistentAgent? exact = null;
+        PersistentAgent? ci = null;
+
+        foreach (var a in client.Administration.GetAgents())
+        {
+            if (a.Name == name) exact ??= a;
+            if (string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)) ci ??= a;
+        }
+
+        return exact ?? ci;
+    }
+
+    return null;
+}
+
+static Dictionary<string, string?> ParseOptions(string[] args)
+{
+    var result = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase);
+
+    string? currentKey = null;
+    for (var i = 0; i < args.Length; i++)
+    {
+        var token = args[i];
+        if (token.StartsWith("--", StringComparison.Ordinal))
+        {
+            currentKey = token;
+
+            // Default bool flags to "true" if no explicit value follows.
+            if (i + 1 >= args.Length || args[i + 1].StartsWith("--", StringComparison.Ordinal))
+            {
+                result[currentKey] = "true";
+                currentKey = null;
+            }
+        }
+        else if (currentKey != null)
+        {
+            result[currentKey] = token;
+            currentKey = null;
+        }
+    }
+
+    return result;
+}
+
+static string? GetOption(Dictionary<string, string?> options, string name)
+{
+    options.TryGetValue(name, out var value);
+    return value;
+}
+
+static bool GetBoolOption(Dictionary<string, string?> options, string name)
+{
+    if (!options.TryGetValue(name, out var value) || value is null)
+    {
+        return false;
+    }
+
+    if (bool.TryParse(value, out var parsed))
+    {
+        return parsed;
+    }
+
+    return true;
+}
+
+static int HandleList(Dictionary<string, string?> options)
+{
+    var endpoint = GetOption(options, "--endpoint");
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        Console.WriteLine("ERROR: --endpoint is required.");
+        return 1;
+    }
+
     var client = CreatePersistentClient(endpoint);
 
     Console.WriteLine("Persistent Agents (Administration.GetAgents):");
@@ -92,22 +182,25 @@ listCmd.SetHandler((string endpoint) =>
         Console.WriteLine("If you see agents in the portal but none here, those were created in the *classic* agent plane.");
         Console.WriteLine("This tool creates *persistent* agents, which are separate.");
     }
-}, endpointOption);
 
-root.AddCommand(listCmd);
+    return 0;
+}
 
-// ----------------------
-// CREATE (Mystira 4 agents)
-// ----------------------
-var createCmd = new Command("create", "Create the 4 Mystira persistent agents (writer/judge/refiner/rubric)");
-createCmd.AddOption(endpointOption);
-createCmd.AddOption(modelOption);
-createCmd.SetHandler((string endpoint, string? model) =>
+static int HandleCreate(Dictionary<string, string?> options)
 {
+    var endpoint = GetOption(options, "--endpoint");
+    var model = GetOption(options, "--model");
+
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        Console.WriteLine("ERROR: --endpoint is required for create.");
+        return 1;
+    }
+
     if (string.IsNullOrWhiteSpace(model))
     {
         Console.WriteLine("ERROR: --model is required for create.");
-        Environment.Exit(1);
+        return 1;
     }
 
     var client = CreatePersistentClient(endpoint);
@@ -182,7 +275,7 @@ Return the required structured output ONLY (JSON if requested)."
         {
             Console.WriteLine("✗ Failed");
             Console.WriteLine(ex);
-            Environment.Exit(1);
+            return 1;
         }
     }
 
@@ -201,30 +294,32 @@ Return the required structured output ONLY (JSON if requested)."
     Console.WriteLine($"  \"RubricSummaryAgentId\": \"{createdIds["mystira-rubric-v01"]}\",");
     Console.WriteLine("  ...");
     Console.WriteLine("}");
-}, endpointOption, modelOption);
 
-root.AddCommand(createCmd);
+    return 0;
+}
 
-// ----------------------
-// UPDATE
-// ----------------------
-var updateCmd = new Command("update", "Update a persistent agent (by --id or --name)");
-updateCmd.AddOption(endpointOption);
-updateCmd.AddOption(idOption);
-updateCmd.AddOption(nameOption);
-updateCmd.AddOption(modelOption);
-updateCmd.AddOption(instructionsOption);
-updateCmd.AddOption(descriptionOption);
-
-updateCmd.SetHandler((string endpoint, string? id, string? name, string? model, string? instructions, string? description) =>
+static int HandleUpdate(Dictionary<string, string?> options)
 {
+    var endpoint = GetOption(options, "--endpoint");
+    var id = GetOption(options, "--id");
+    var name = GetOption(options, "--name");
+    var model = GetOption(options, "--model");
+    var instructions = GetOption(options, "--instructions");
+    var description = GetOption(options, "--description");
+
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        Console.WriteLine("ERROR: --endpoint is required for update.");
+        return 1;
+    }
+
     var client = CreatePersistentClient(endpoint);
 
     var agent = ResolveAgent(client, id, name);
     if (agent is null)
     {
         Console.WriteLine("ERROR: Agent not found. Provide --id or a --name that exists in Administration.GetAgents().");
-        Environment.Exit(1);
+        return 1;
     }
 
     Console.WriteLine($"Updating agent: {agent.Id} ({agent.Name})");
@@ -256,30 +351,32 @@ updateCmd.SetHandler((string endpoint, string? id, string? name, string? model, 
     {
         Console.WriteLine("✗ Update failed");
         Console.WriteLine(ex);
-        Environment.Exit(1);
+        return 1;
     }
-}, endpointOption, idOption, nameOption, modelOption, instructionsOption, descriptionOption);
 
-root.AddCommand(updateCmd);
+    return 0;
+}
 
-// ----------------------
-// DELETE
-// ----------------------
-var deleteCmd = new Command("delete", "Delete a persistent agent (by --id or --name)");
-deleteCmd.AddOption(endpointOption);
-deleteCmd.AddOption(idOption);
-deleteCmd.AddOption(nameOption);
-deleteCmd.AddOption(forceOption);
-
-deleteCmd.SetHandler((string endpoint, string? id, string? name, bool force) =>
+static int HandleDelete(Dictionary<string, string?> options)
 {
+    var endpoint = GetOption(options, "--endpoint");
+    var id = GetOption(options, "--id");
+    var name = GetOption(options, "--name");
+    var force = GetBoolOption(options, "--force");
+
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        Console.WriteLine("ERROR: --endpoint is required for delete.");
+        return 1;
+    }
+
     var client = CreatePersistentClient(endpoint);
 
     var agent = ResolveAgent(client, id, name);
     if (agent is null)
     {
         Console.WriteLine("ERROR: Agent not found. Provide --id or a --name that exists in Administration.GetAgents().");
-        Environment.Exit(1);
+        return 1;
     }
 
     if (!force)
@@ -289,7 +386,7 @@ deleteCmd.SetHandler((string endpoint, string? id, string? name, bool force) =>
         if (!string.Equals(confirm, "yes", StringComparison.OrdinalIgnoreCase))
         {
             Console.WriteLine("Cancelled.");
-            return;
+            return 0;
         }
     }
 
@@ -302,62 +399,21 @@ deleteCmd.SetHandler((string endpoint, string? id, string? name, bool force) =>
     {
         Console.WriteLine("✗ Delete failed");
         Console.WriteLine(ex);
-        Environment.Exit(1);
+        return 1;
     }
-}, endpointOption, idOption, nameOption, forceOption);
 
-root.AddCommand(deleteCmd);
-
-// ----------------------
-// Entrypoint
-// ----------------------
-return await root.InvokeAsync(args);
-
-// ----------------------
-// Helpers
-// ----------------------
-
-static PersistentAgentsClient CreatePersistentClient(string projectEndpoint)
-{
-    // You can swap to AzureCliCredential if you prefer:
-    // var cred = new AzureCliCredential();
-    var cred = new DefaultAzureCredential();
-
-    // AIProjectClient gives you the authenticated PersistentAgentsClient for that project endpoint.
-    var projectClient = new AIProjectClient(new Uri(projectEndpoint), cred);
-    return projectClient.GetPersistentAgentsClient();
+    return 0;
 }
 
-static PersistentAgent? ResolveAgent(PersistentAgentsClient client, string? id, string? name)
+static void PrintUsage()
 {
-    if (!string.IsNullOrWhiteSpace(id))
-    {
-        try
-        {
-            return client.Administration.GetAgent(id).Value;
-        }
-        catch
-        {
-            return null;
-        }
-    }
-
-    if (!string.IsNullOrWhiteSpace(name))
-    {
-        // Exact match first, then case-insensitive match
-        PersistentAgent? exact = null;
-        PersistentAgent? ci = null;
-
-        foreach (var a in client.Administration.GetAgents())
-        {
-            if (a.Name == name) exact ??= a;
-            if (string.Equals(a.Name, name, StringComparison.OrdinalIgnoreCase)) ci ??= a;
-        }
-
-        return exact ?? ci;
-    }
-
-    return null;
+    Console.WriteLine("Mystira Foundry AgentSetup (Persistent Agents)");
+    Console.WriteLine();
+    Console.WriteLine("Usage:");
+    Console.WriteLine("  agent-setup list   --endpoint <url>");
+    Console.WriteLine("  agent-setup create --endpoint <url> --model <deployment-name>");
+    Console.WriteLine("  agent-setup update --endpoint <url> [--id <id> | --name <name>] [--model <model>] [--instructions <text>] [--description <text>]");
+    Console.WriteLine("  agent-setup delete --endpoint <url> [--id <id> | --name <name>] [--force]");
 }
 
 namespace Mystira.StoryGenerator.AgentSetup

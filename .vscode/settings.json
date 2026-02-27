@@ -111,6 +111,7 @@
   "dotnet.defaultSolution": "Mystira.sln",
 
   "turbo.useLocalTurbo": true,
+  "cSpell.words": ["devhub"],
   "[csharp]": {
     "editor.defaultFormatter": "ms-dotnettools.csharp"
   },

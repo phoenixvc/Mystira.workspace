@@ -5,8 +5,8 @@ namespace Mystira.App.PWA.Services;
 public class LocalStorageTokenProvider : ITokenProvider
 {
     private readonly IJSRuntime _jsRuntime;
-    private const string TokenStorageKey = "auth_token";
-    private const string AccountStorageKey = "auth_account";
+    private const string TokenStorageKey = "mystira_entra_token";
+    private const string AccountStorageKey = "mystira_entra_account";
 
     public LocalStorageTokenProvider(IJSRuntime jsRuntime)
     {

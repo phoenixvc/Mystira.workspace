@@ -27,5 +27,8 @@ public interface IAuthService
     /// </summary>
     event EventHandler? TokenExpiryWarning;
 
+    Task SetAuthenticatedSessionAsync(string accessToken, Account account);
+    Task SetCurrentAccountAsync(Account account);
+
     event EventHandler<bool>? AuthenticationStateChanged;
 }

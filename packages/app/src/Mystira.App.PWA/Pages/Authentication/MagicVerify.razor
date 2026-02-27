@@ -1,0 +1,137 @@
+@page "/authentication/magic-verify"
+@inject IMagicAuthApiClient MagicAuthApiClient
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<MagicVerify> Logger
+
+<PageTitle>Verify Magic Link</PageTitle>
+
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 640px;">
+        <div class="card-body p-4">
+            @if (isLoading)
+            {
+                <p class="mb-0">Verifying your link...</p>
+            }
+            else
+            {
+                <h2 class="h4 mb-3">@statusTitle</h2>
+                <p class="text-muted">@statusMessage</p>
+
+                @if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    <div class="alert alert-danger">@errorMessage</div>
+                }
+
+                <div class="d-flex gap-2 flex-wrap mt-3">
+                    @if (canContinueWithEmail)
+                    {
+                        <button class="btn btn-primary" @onclick="ContinueWithEmailAsync" disabled="@isBusy">
+                            @(isBusy ? "Signing in..." : "Continue with Email")
+                        </button>
+                    }
+
+                    <button class="btn btn-outline-secondary" @onclick="ContinueWithGoogleAsync" disabled="@isBusy">
+                        Continue with Google
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? Token { get; set; }
+
+    private bool isLoading = true;
+    private bool isBusy;
+    private bool canContinueWithEmail;
+    private string statusTitle = "Magic link verification";
+    private string statusMessage = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Token))
+        {
+            statusTitle = "Invalid link";
+            statusMessage = "No token was provided.";
+            isLoading = false;
+            return;
+        }
+
+        try
+        {
+            var result = await MagicAuthApiClient.VerifyMagicLinkAsync(Token);
+            if (result == null)
+            {
+                statusTitle = "Verification failed";
+                statusMessage = "We could not verify your link. Please request a new one.";
+                return;
+            }
+
+            statusTitle = result.Status switch
+            {
+                "Verified" => "Email verified",
+                "Expired" => "Link expired",
+                "Invalid" => "Invalid link",
+                "Consumed" => "Link already used",
+                _ => "Verification status"
+            };
+
+            statusMessage = result.Message;
+            canContinueWithEmail = result.CanContinueWithEmail;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error verifying magic token");
+            statusTitle = "Verification failed";
+            statusMessage = "We could not verify your link. Please request a new one.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ContinueWithEmailAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Token))
+        {
+            return;
+        }
+
+        try
+        {
+            isBusy = true;
+            errorMessage = string.Empty;
+
+            var result = await MagicAuthApiClient.ConsumeMagicLinkAsync(Token);
+            if (result?.AccessToken == null || result.Account == null)
+            {
+                errorMessage = result?.Message ?? "Unable to complete sign-in. Please request a new link.";
+                return;
+            }
+
+            await AuthService.SetAuthenticatedSessionAsync(result.AccessToken, result.Account);
+            Navigation.NavigateTo("/", forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error consuming magic signup token");
+            errorMessage = "Unable to complete sign-in. Please request a new link.";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task ContinueWithGoogleAsync()
+    {
+        if (AuthService is EntraExternalIdAuthService entraService)
+        {
+            await entraService.LoginWithEntraAsync("Google");
+        }
+    }
+}

@@ -18,5 +18,5 @@
     "subshell"
   ],
   "ignoreWords": [],
-  "import": []
+  "import": ["./cspell.app.json"]
 }

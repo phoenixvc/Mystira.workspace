@@ -1,6 +1,0 @@
-packages:
-  - "packages/*"
-  - "packages/app/*"
-  - "packages/devhub/Mystira.DevHub"
-  - "infra"
-  - "tools/*"

@@ -57,6 +57,7 @@ public partial class MystiraAppDbContext : DbContext
     // COPPA Compliance
     public DbSet<ParentalConsent> ParentalConsents { get; set; }
     public DbSet<DataDeletionRequest> DataDeletionRequests { get; set; }
+    public DbSet<PendingSignup> PendingSignups { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -930,6 +931,19 @@ public partial class MystiraAppDbContext : DbContext
                       c => c.ToList()));
         });
 
+        // Configure PendingSignup (magic link auth)
+        modelBuilder.Entity<PendingSignup>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            if (!isInMemoryDatabase)
+            {
+                entity.Property(e => e.Id).ToJsonProperty("id");
+                entity.ToContainer("PendingSignups")
+                      .HasPartitionKey(e => e.Email);
+            }
+        });
+
         // Configure CompassTracking as a separate container for analytics
         modelBuilder.Entity<CompassTracking>(entity =>
         {
@@ -959,7 +973,9 @@ public partial class MystiraAppDbContext : DbContext
         public static Dictionary<string, float> Deserialize(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
+            {
                 return new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+            }
 
             var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float>>(json, Options);
             return dict == null
@@ -971,10 +987,14 @@ public partial class MystiraAppDbContext : DbContext
     private static Dictionary<string, List<string>> DeserializeDictionary(object? input)
     {
         if (input == null)
+        {
             return new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        }
 
         if (input is Dictionary<string, List<string>> dict)
+        {
             return dict;
+        }
 
         string? s;
         try

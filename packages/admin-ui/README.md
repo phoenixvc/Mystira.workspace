@@ -76,7 +76,7 @@ Mystira Admin UI is a modern single-page application (SPA) built with React, Typ
 - **Form Handling**: React Hook Form 7.53 + Zod 3.23
 - **Routing**: React Router DOM 6.28
 - **HTTP Client**: Axios 1.7
-- **Authentication**: MSAL (Microsoft Authentication Library) for Azure AD / Entra ID
+- **Authentication**: Token-based auth via Mystira.Identity.Api (through Admin API)
 - **Validation**: Ajv 8.17 (JSON Schema validator)
 - **YAML Parsing**: js-yaml 4.1
 
@@ -143,12 +143,6 @@ Create a `.env.local` file in the root directory:
 # API Configuration
 VITE_API_BASE_URL=http://localhost:5000
 
-# Azure AD / Entra ID Authentication (Required)
-VITE_AZURE_CLIENT_ID=your-client-id
-VITE_AZURE_TENANT_ID=your-tenant-id
-VITE_AZURE_REDIRECT_URI=http://localhost:7001
-VITE_AZURE_API_SCOPE=api://your-backend-app-id/access_as_user
-
 # Optional: Environment
 VITE_ENV=development
 ```
@@ -167,7 +161,7 @@ The application will be available at `http://localhost:7001`
 - [ ] pnpm installed
 - [ ] Repository cloned
 - [ ] Dependencies installed (`pnpm install`)
-- [ ] Azure AD app registration configured (see [Authentication Setup](#authentication-setup))
+- [ ] Identity API + Admin API auth config is running and reachable
 - [ ] Environment variables configured (`.env.local`)
 - [ ] Admin API running on configured URL
 - [ ] Development server started (`pnpm dev`)
@@ -175,19 +169,13 @@ The application will be available at `http://localhost:7001`
 
 ### Authentication Setup
 
-This application uses **Microsoft Entra ID (Azure AD)** for authentication via MSAL. To set up authentication:
+Admin UI now uses centralized auth via **Mystira.Identity.Api** and proxies via
+**Mystira.Admin.Api**.
 
-1. **Register an application** in Azure Portal > App Registrations
-2. **Configure the application**:
-   - Set the application type to **Single-Page Application (SPA)**
-   - Add redirect URI: `http://localhost:7001` (for development)
-   - Enable **ID tokens** and **Access tokens** in Authentication settings
-3. **Set up API permissions** for your backend API
-4. **Copy the values** to your `.env.local`:
-   - `VITE_AZURE_CLIENT_ID`: Application (client) ID
-   - `VITE_AZURE_TENANT_ID`: Directory (tenant) ID
-   - `VITE_AZURE_REDIRECT_URI`: Your redirect URI
-   - `VITE_AZURE_API_SCOPE`: Your backend API scope
+1. Set `IdentityApi:BaseUrl` in `Mystira.Admin.Api` config
+2. Configure `JwtSettings` consistently between Identity API and Admin API
+3. Start Identity API and Admin API
+4. Use valid admin credentials on `/login`
 
 ## 💻 Development
 
@@ -303,17 +291,15 @@ mystira-admin-ui/
 ├── public/                      # Static assets
 ├── src/
 │   ├── api/                     # API client modules
-│   │   ├── client.ts           # Axios client with MSAL token injection
+│   │   ├── client.ts           # Axios client with bearer token injection
 │   │   ├── scenarios.ts        # Scenarios API
 │   │   ├── media.ts            # Media API
 │   │   ├── badges.ts           # Badges API
 │   │   ├── bundles.ts          # Bundles API
 │   │   ├── avatars.ts          # Avatars API
 │   │   └── ...                 # Other API modules
-│   ├── auth/                    # MSAL Authentication
-│   │   ├── AuthProvider.tsx    # React context provider for MSAL
-│   │   ├── msalConfig.ts       # MSAL configuration
-│   │   ├── msalInstance.ts     # PublicClientApplication instance
+│   ├── auth/                    # Centralized auth integration
+│   │   ├── AuthProvider.tsx    # Auth wrapper
 │   │   ├── useAuth.ts          # Custom hook for auth operations
 │   │   └── index.ts            # Barrel export
 │   ├── components/              # Reusable UI components
@@ -377,7 +363,7 @@ mystira-admin-ui/
 ### Key Directories
 
 - **`src/api/`**: API client modules using Axios for HTTP requests
-- **`src/auth/`**: MSAL authentication (AuthProvider, useAuth hook, config)
+- **`src/auth/`**: Centralized auth hook/provider and legacy compatibility stubs
 - **`src/components/`**: Reusable UI components (Alert, Card, FileInput, etc.)
 - **`src/hooks/`**: Custom React hooks for business logic
 - **`src/pages/`**: Page-level components for routing
@@ -395,12 +381,6 @@ Create a `.env.local` file for local development:
 # Required: API base URL
 VITE_API_BASE_URL=http://localhost:5000
 
-# Required: Azure AD / Entra ID Authentication
-VITE_AZURE_CLIENT_ID=your-client-id
-VITE_AZURE_TENANT_ID=your-tenant-id
-VITE_AZURE_REDIRECT_URI=http://localhost:7001
-VITE_AZURE_API_SCOPE=api://your-backend-app-id/access_as_user
-
 # Optional: Environment identifier
 VITE_ENV=development
 
@@ -410,15 +390,11 @@ VITE_DEBUG=true
 
 **Available Variables:**
 
-| Variable                  | Description                      | Default                  | Required |
-| ------------------------- | -------------------------------- | ------------------------ | -------- |
-| `VITE_API_BASE_URL`       | Backend API URL                  | -                        | Yes      |
-| `VITE_AZURE_CLIENT_ID`    | Azure AD Application (client) ID | -                        | Yes      |
-| `VITE_AZURE_TENANT_ID`    | Azure AD Directory (tenant) ID   | `common`                 | Yes      |
-| `VITE_AZURE_REDIRECT_URI` | OAuth redirect URI               | `window.location.origin` | No       |
-| `VITE_AZURE_API_SCOPE`    | API scope for backend access     | `User.Read`              | Yes      |
-| `VITE_ENV`                | Environment name                 | `development`            | No       |
-| `VITE_DEBUG`              | Enable debug logs                | `false`                  | No       |
+| Variable            | Description       | Default       | Required |
+| ------------------- | ----------------- | ------------- | -------- |
+| `VITE_API_BASE_URL` | Backend API URL   | -             | Yes      |
+| `VITE_ENV`          | Environment name  | `development` | No       |
+| `VITE_DEBUG`        | Enable debug logs | `false`       | No       |
 
 ### Vite Configuration
 

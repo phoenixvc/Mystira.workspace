@@ -1,0 +1,102 @@
+@page "/authentication/magic-link-sent"
+@inject IMagicAuthApiClient MagicAuthApiClient
+@inject NavigationManager Navigation
+@inject ILogger<MagicLinkSent> Logger
+
+<PageTitle>Magic Link Sent</PageTitle>
+
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 560px;">
+        <div class="card-body p-4">
+            <h2 class="h4 mb-3">Check your inbox</h2>
+            <p class="text-muted mb-4">
+                We sent a secure magic link to <strong>@(maskedEmail ?? "your email")</strong>.
+                The link expires in 30 minutes.
+            </p>
+
+            @if (!string.IsNullOrWhiteSpace(message))
+            {
+                <div class="alert alert-info">@message</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-outline-primary" @onclick="ResendAsync" disabled="@isBusy">
+                    @(isBusy ? "Resending..." : "Resend link")
+                </button>
+                <button class="btn btn-link" @onclick="ChangeEmail">Change email</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [SupplyParameterFromQuery] public string? Email { get; set; }
+
+    private string? maskedEmail;
+    private bool isBusy;
+    private string message = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        if (!string.IsNullOrWhiteSpace(Email))
+        {
+            maskedEmail = MaskEmail(Email);
+        }
+    }
+
+    private async Task ResendAsync()
+    {
+        if (string.IsNullOrWhiteSpace(Email))
+        {
+            errorMessage = "No email address found. Please go back and enter your email again.";
+            return;
+        }
+
+        try
+        {
+            isBusy = true;
+            errorMessage = string.Empty;
+            message = string.Empty;
+
+            var result = await MagicAuthApiClient.ResendMagicLinkAsync(Email);
+            if (result == null)
+            {
+                errorMessage = "Unable to resend link right now. Please try again.";
+                return;
+            }
+
+            message = "If the email is valid, a new magic link has been sent.";
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error resending magic link");
+            errorMessage = "Unable to resend link right now. Please try again.";
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private void ChangeEmail()
+    {
+        Navigation.NavigateTo("/signup");
+    }
+
+    private static string MaskEmail(string email)
+    {
+        var parts = email.Split('@');
+        if (parts.Length != 2 || parts[0].Length < 2)
+        {
+            return "***";
+        }
+
+        return $"{parts[0][0]}***@{parts[1]}";
+    }
+}

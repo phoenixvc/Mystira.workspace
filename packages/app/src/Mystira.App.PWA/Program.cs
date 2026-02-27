@@ -185,6 +185,11 @@ builder.Services.AddHttpClient<ICoppaApiClient, CoppaApiClient>(ConfigureApiHttp
     .AddHttpMessageHandler<AuthHeaderHandler>()
     .AddResilienceHandler("CoppaApi", ConfigureStandardResilience("CoppaApi"));
 
+builder.Services.AddHttpClient<IMagicAuthApiClient, MagicAuthApiClient>(ConfigureApiHttpClient)
+    .AddHttpMessageHandler<ApiBaseAddressHandler>()
+    .AddHttpMessageHandler<AuthHeaderHandler>()
+    .AddResilienceHandler("MagicAuthApi", ConfigureStandardResilience("MagicAuthApi"));
+
 // Register main ApiClient that composes all domain clients
 builder.Services.AddScoped<IApiClient, ApiClient>();
 
@@ -277,7 +282,8 @@ static void SetDevelopmentModeForApiClients(IServiceProvider services, bool isDe
         typeof(IDiscordApiClient),
         typeof(IAttributionApiClient),
         typeof(IBadgesApiClient),
-        typeof(ICoppaApiClient)
+        typeof(ICoppaApiClient),
+        typeof(IMagicAuthApiClient)
         };
 
     foreach (var interfaceType in apiClientTypes)

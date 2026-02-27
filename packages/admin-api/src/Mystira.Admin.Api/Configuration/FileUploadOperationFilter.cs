@@ -2,7 +2,7 @@ using System.Linq;
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -37,7 +37,7 @@ public class FileUploadOperationFilter : IOperationFilter
         {
             var paramNamesToRemove = formParameters.Select(p => p.Name).ToHashSet();
             operation.Parameters = operation.Parameters
-                .Where(p => !paramNamesToRemove.Contains(p.Name))
+                .Where(p => !string.IsNullOrWhiteSpace(p.Name) && !paramNamesToRemove.Contains(p.Name))
                 .ToList();
         }
 
@@ -50,8 +50,8 @@ public class FileUploadOperationFilter : IOperationFilter
                 {
                     Schema = new OpenApiSchema
                     {
-                        Type = "object",
-                        Properties = new Dictionary<string, OpenApiSchema>()
+                        Type = JsonSchemaType.Object,
+                        Properties = new Dictionary<string, IOpenApiSchema>()
                     }
                 }
             }
@@ -60,13 +60,13 @@ public class FileUploadOperationFilter : IOperationFilter
         // Add all form parameters (including IFormFile) to request body
         foreach (var param in formParameters)
         {
-            OpenApiSchema schema;
+            IOpenApiSchema schema;
 
             if (param.ParameterType == typeof(IFormFile))
             {
                 schema = new OpenApiSchema
                 {
-                    Type = "string",
+                    Type = JsonSchemaType.String,
                     Format = "binary"
                 };
             }
@@ -74,10 +74,10 @@ public class FileUploadOperationFilter : IOperationFilter
             {
                 schema = new OpenApiSchema
                 {
-                    Type = "array",
+                    Type = JsonSchemaType.Array,
                     Items = new OpenApiSchema
                     {
-                        Type = "string",
+                        Type = JsonSchemaType.String,
                         Format = "binary"
                     }
                 };
@@ -87,35 +87,40 @@ public class FileUploadOperationFilter : IOperationFilter
                 schema = GetSchemaForType(param.ParameterType);
             }
 
-            requestBody.Content["multipart/form-data"].Schema.Properties[param.Name] = schema;
+            var requestSchema = requestBody.Content["multipart/form-data"].Schema;
+            var schemaProperties = requestSchema?.Properties;
+            if (!string.IsNullOrWhiteSpace(param.Name) && schemaProperties != null)
+            {
+                schemaProperties[param.Name] = schema;
+            }
         }
 
         operation.RequestBody = requestBody;
     }
 
-    private static OpenApiSchema GetSchemaForType(Type type)
+    private static IOpenApiSchema GetSchemaForType(Type type)
     {
         if (type == typeof(string))
         {
-            return new OpenApiSchema { Type = "string" };
+            return new OpenApiSchema { Type = JsonSchemaType.String };
         }
         if (type == typeof(bool) || type == typeof(bool?))
         {
-            return new OpenApiSchema { Type = "boolean" };
+            return new OpenApiSchema { Type = JsonSchemaType.Boolean };
         }
         if (type == typeof(int) || type == typeof(int?))
         {
-            return new OpenApiSchema { Type = "integer", Format = "int32" };
+            return new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32" };
         }
         if (type.IsEnum)
         {
-            return new OpenApiSchema { Type = "string" };
+            return new OpenApiSchema { Type = JsonSchemaType.String };
         }
         if (Nullable.GetUnderlyingType(type) != null)
         {
             return GetSchemaForType(Nullable.GetUnderlyingType(type)!);
         }
 
-        return new OpenApiSchema { Type = "string" };
+        return new OpenApiSchema { Type = JsonSchemaType.String };
     }
 }

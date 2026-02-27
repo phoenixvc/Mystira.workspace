@@ -1,5 +1,6 @@
 @page "/signup"
 @inject IAuthService AuthService
+@inject IMagicAuthApiClient MagicAuthApiClient
 @inject NavigationManager Navigation
 @inject ILogger<SignUp> Logger
 
@@ -76,6 +77,25 @@
                         <span>Secure sign-up powered by Microsoft</span>
                     </div>
 
+                    <div class="mt-3">
+                        <label for="magic-email" class="form-label">Or get a magic sign-in link</label>
+                        <div class="input-group">
+                            <input id="magic-email"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="you@example.com"
+                                   @bind="magicEmail"
+                                   @bind:event="oninput"
+                                   disabled="@isSendingMagicLink" />
+                            <button class="btn btn-outline-primary"
+                                    type="button"
+                                    @onclick="SendMagicLinkAsync"
+                                    disabled="@isSendingMagicLink">
+                                @(isSendingMagicLink ? "Sending..." : "Send Link")
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- Security Badge -->
                     <div class="security-info">
                         <i class="fas fa-shield-alt"></i>
@@ -103,7 +123,9 @@
 
 @code {
     private bool isLoading = false;
+    private bool isSendingMagicLink = false;
     private string errorMessage = string.Empty;
+    private string magicEmail = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
@@ -148,6 +170,41 @@
             Logger.LogError(ex, "Error initiating Google sign-up");
             errorMessage = "Unable to connect to sign-up service. Please check your connection and try again.";
             isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendMagicLinkAsync()
+    {
+        if (string.IsNullOrWhiteSpace(magicEmail) || !magicEmail.Contains('@'))
+        {
+            errorMessage = "Please enter a valid email address.";
+            return;
+        }
+
+        try
+        {
+            isSendingMagicLink = true;
+            errorMessage = string.Empty;
+
+            var result = await MagicAuthApiClient.RequestMagicLinkAsync(magicEmail.Trim(), null);
+            if (result == null)
+            {
+                errorMessage = "Unable to send magic link right now. Please try again.";
+                return;
+            }
+
+            var encodedEmail = Uri.EscapeDataString(magicEmail.Trim());
+            Navigation.NavigateTo($"/authentication/magic-link-sent?email={encodedEmail}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error requesting magic signup link");
+            errorMessage = "Unable to send magic link right now. Please try again.";
+        }
+        finally
+        {
+            isSendingMagicLink = false;
             StateHasChanged();
         }
     }

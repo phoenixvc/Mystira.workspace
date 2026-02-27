@@ -1,6 +1,7 @@
 @page "/authentication/login-callback"
 @using Mystira.App.PWA.Services
 @inject IAuthService AuthService
+@inject IMagicAuthApiClient MagicAuthApiClient
 @inject NavigationManager Navigation
 @inject ILogger<LoginCallback> Logger
 
@@ -45,9 +46,15 @@
             if (AuthService is EntraExternalIdAuthService entraService)
             {
                 var success = await entraService.HandleLoginCallbackAsync();
-                
+
                 if (success)
                 {
+                    var account = await MagicAuthApiClient.BootstrapAccountAsync();
+                    if (account != null)
+                    {
+                        await AuthService.SetCurrentAccountAsync(account);
+                    }
+
                     Logger.LogInformation("Login callback successful, redirecting to home");
                     Navigation.NavigateTo("/", forceLoad: true);
                 }

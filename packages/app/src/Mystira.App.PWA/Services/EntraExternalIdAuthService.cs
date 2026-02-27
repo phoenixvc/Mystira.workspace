@@ -220,6 +220,37 @@ public class EntraExternalIdAuthService : IAuthService
         }
     }
 
+    public async Task SetAuthenticatedSessionAsync(string accessToken, Account account)
+    {
+        if (string.IsNullOrWhiteSpace(accessToken))
+        {
+            throw new ArgumentException("Access token is required", nameof(accessToken));
+        }
+
+        if (account == null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        _currentToken = accessToken;
+        _isAuthenticated = true;
+        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", TokenStorageKey, accessToken);
+        await SetStoredAccountAsync(account);
+        AuthenticationStateChanged?.Invoke(this, true);
+    }
+
+    public async Task SetCurrentAccountAsync(Account account)
+    {
+        if (account == null)
+        {
+            throw new ArgumentNullException(nameof(account));
+        }
+
+        await SetStoredAccountAsync(account);
+        _isAuthenticated = !string.IsNullOrWhiteSpace(_currentToken);
+        AuthenticationStateChanged?.Invoke(this, _isAuthenticated);
+    }
+
     #endregion
 
     #region Entra External ID Specific Methods

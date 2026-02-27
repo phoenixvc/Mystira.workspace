@@ -32,14 +32,21 @@
       "internalConsoleOptions": "neverOpen"
     },
     {
-      "name": "Debug Admin API",
-      "type": "node",
+      "name": "Debug Admin API (.NET)",
+      "type": "coreclr",
       "request": "launch",
-      "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/tsx",
-      "args": ["watch", "${workspaceFolder}/packages/admin-api/src/index.ts"],
-      "cwd": "${workspaceFolder}/packages/admin-api",
-      "console": "integratedTerminal",
-      "envFile": "${workspaceFolder}/.env.admin-api"
+      "preLaunchTask": "Build Admin API (.NET)",
+      "program": "${workspaceFolder}/packages/admin-api/src/Mystira.Admin.Api/bin/Debug/net10.0/Mystira.Admin.Api.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/packages/admin-api/src/Mystira.Admin.Api",
+      "stopAtEntry": false,
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      },
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     },
     {
       "name": "Debug Publisher",
@@ -77,7 +84,7 @@
     {
       "name": "Debug All Services",
       "configurations": [
-        "Debug Admin API",
+        "Debug Admin API (.NET)",
         "Debug Publisher",
         "Debug Story Generator"
       ]

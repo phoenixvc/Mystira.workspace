@@ -28,7 +28,7 @@ Mystira Admin UI is a modern single-page application (SPA) built with React and 
 
 **Global State**: Zustand 5.0 manages application-wide state such as UI preferences. Zustand's simple API and minimal boilerplate make it easy to create and consume stores without complex setup.
 
-**Authentication State**: MSAL (Microsoft Authentication Library) manages authentication state including user sessions, tokens, and login/logout flows. MSAL handles token caching, refresh, and silent authentication automatically.
+**Authentication State**: Zustand stores authentication state for token-based login/logout flows. Access tokens issued by Mystira.Identity.Api are persisted in browser storage and injected into API requests by Axios interceptors.
 
 **Server State**: TanStack React Query 5.60 handles all server-side data fetching, caching, and synchronization. React Query automatically manages loading states, error handling, and cache invalidation, reducing boilerplate and improving data consistency.
 
@@ -72,7 +72,7 @@ The data management layer handles application state and data persistence.
 
 **React Query Cache** stores server-side data with automatic caching, background refetching, and stale-while-revalidate behavior. React Query reduces network requests and improves perceived performance by serving cached data while fetching fresh data in the background.
 
-**Session Storage** is used by MSAL for token caching. Tokens are stored securely in the browser's session storage and automatically refreshed when they expire. This provides a balance between security (tokens don't persist after browser close) and user experience (no re-authentication during a session).
+**Browser Storage** is used for persisted auth state in the admin UI store. The API client reads the token from the store and attaches it as a bearer token for authenticated requests.
 
 ## Component Architecture
 
@@ -134,18 +134,22 @@ Errors are handled at multiple levels:
 
 ### Authentication
 
-Authentication is handled via **Microsoft Entra ID (Azure AD)** using the **MSAL (Microsoft Authentication Library)** for React. The authentication flow works as follows:
+Authentication is handled via centralized **Mystira.Identity.Api** through
+the Admin API auth endpoints. The flow works as follows:
 
-1. **Login**: Users authenticate via Microsoft's identity platform using popup or redirect flows
-2. **Token Management**: MSAL automatically handles token acquisition, caching (sessionStorage), and refresh
-3. **API Authorization**: Access tokens are silently acquired and attached to API requests via Axios interceptors
-4. **Session State**: The `AuthProvider` component initializes MSAL and manages the authentication state globally
+1. **Login**: Users submit credentials to `/api/auth/login` in Admin API
+2. **Token Management**: Identity API issues JWT tokens; Admin UI persists
+   auth state in the Zustand auth store
+3. **API Authorization**: Axios attaches bearer tokens from the auth store
+4. **Session State**: `useAuth` hydrates state from `/api/auth/status` and
+   handles logout/401 transitions
 
 Key authentication files:
 
-- `src/auth/AuthProvider.tsx` - MSAL provider wrapper with initialization logic
-- `src/auth/useAuth.ts` - Custom hook exposing `login()`, `logout()`, `getAccessToken()`, `isAuthenticated`
-- `src/auth/msalConfig.ts` - MSAL configuration with environment variables
+- `src/auth/AuthProvider.tsx` - Minimal auth wrapper used by the app shell
+- `src/auth/useAuth.ts` - Hook exposing `login()`, `logout()`, status checks,
+  and auth state
+- `src/state/authStore.ts` - Persisted auth token/state storage
 - `src/api/client.ts` - Axios interceptor that automatically attaches bearer tokens
 
 ### Authorization
