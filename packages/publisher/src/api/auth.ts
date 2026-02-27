@@ -1,19 +1,44 @@
-import { request, apiClient } from "./client";
+import { env } from "@/config/env";
+import { logger } from "@/utils/logger";
+import { apiClient, request } from "./client";
 import type {
-  User,
   LoginRequest,
   LoginResponse,
   RefreshTokenRequest,
+  User,
 } from "./types";
-import { env } from "@/config/env";
-import { logger } from "@/utils/logger";
 
 const AUTH_PATH = "/auth";
 
+export interface EntraLoginRequest {
+  provider: "entra";
+  token: string; // JWT token from Entra
+}
+
+export interface MagicLinkRequest {
+  provider: "magic";
+  email: string;
+}
+
+export interface DualPathLoginRequest extends LoginRequest {
+  provider?: "credentials" | "entra" | "magic";
+  entraToken?: string;
+}
+
 export const authApi = {
-  // Login with credentials (with fake login fallback for development)
-  login: async (data: LoginRequest): Promise<LoginResponse> => {
-    // Fake login for development - accept any credentials
+  // Dual-path login - supports credentials, Entra, and Magic Link
+  login: async (data: DualPathLoginRequest): Promise<LoginResponse> => {
+    // Handle Entra login
+    if (data.provider === "entra" && data.entraToken) {
+      return await authApi.loginWithEntra(data.entraToken);
+    }
+
+    // Handle Magic Link login
+    if (data.provider === "magic" && data.email) {
+      return await authApi.loginWithMagicLink(data.email);
+    }
+
+    // Handle fake login for development
     const useFakeLogin = env.useFakeAuth;
 
     if (useFakeLogin) {
@@ -47,6 +72,122 @@ export const authApi = {
       data,
     });
     // Store tokens
+    localStorage.setItem("accessToken", response.accessToken);
+    localStorage.setItem("refreshToken", response.refreshToken);
+    return response;
+  },
+
+  // Login with Entra JWT token
+  loginWithEntra: async (token: string): Promise<LoginResponse> => {
+    const useFakeLogin = env.useFakeAuth;
+
+    if (useFakeLogin) {
+      // Parse JWT token (fake validation for development)
+      try {
+        const tokenParts = token.split(".");
+        if (tokenParts.length !== 3 || !tokenParts[1]) {
+          throw new Error("Invalid JWT token format");
+        }
+
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const fakeUser: LoginResponse = {
+          user: {
+            id: payload.sub || "entra-user-" + Date.now(),
+            name: payload.name || payload.email?.split("@")[0] || "Entra User",
+            email: payload.email || "user@entra.com",
+            roles: ["author"] as const,
+            createdAt: new Date().toISOString(),
+          },
+          accessToken: token, // Use the provided JWT token
+          refreshToken: "fake-refresh-token-" + Date.now(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
+      } catch (parseError) {
+        console.error("Error parsing JWT token in fake login:", parseError);
+        // Fallback to safe defaults
+        const fakeUser: LoginResponse = {
+          user: {
+            id: "entra-user-" + Date.now(),
+            name: "Entra User",
+            email: "user@entra.com",
+            roles: ["author"] as const,
+            createdAt: new Date().toISOString(),
+          },
+          accessToken: token,
+          refreshToken: "fake-refresh-token-" + Date.now(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+        };
+      }
+
+      localStorage.setItem("accessToken", fakeUser.accessToken);
+      localStorage.setItem("refreshToken", fakeUser.refreshToken);
+
+      return fakeUser;
+    }
+
+    const response = await request<LoginResponse>({
+      method: "POST",
+      url: `${AUTH_PATH}/entra-login`,
+      data: { token },
+    });
+
+    localStorage.setItem("accessToken", response.accessToken);
+    localStorage.setItem("refreshToken", response.refreshToken);
+    return response;
+  },
+
+  // Request Magic Link
+  requestMagicLink: async (email: string): Promise<void> => {
+    const useFakeLogin = env.useFakeAuth;
+
+    if (useFakeLogin) {
+      // Simulate sending magic link
+      const maskedEmail =
+        email.length > 0
+          ? `${email[0]}***${email.substring(email.lastIndexOf("@"))}`
+          : "[no-email]";
+      logger.debug(`Fake magic link sent to ${maskedEmail}`);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return;
+    }
+
+    await request<void>({
+      method: "POST",
+      url: `${AUTH_PATH}/magic-link`,
+      data: { email },
+    });
+  },
+
+  // Login with Magic Link
+  loginWithMagicLink: async (email: string): Promise<LoginResponse> => {
+    const useFakeLogin = env.useFakeAuth;
+
+    if (useFakeLogin) {
+      const fakeUser: LoginResponse = {
+        user: {
+          id: "magic-user-" + Date.now(),
+          name: email.split("@")[0] || "User",
+          email: email,
+          roles: ["author"] as const,
+          createdAt: new Date().toISOString(),
+        },
+        accessToken: "fake-magic-token-" + Date.now(),
+        refreshToken: "fake-refresh-token-" + Date.now(),
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      };
+
+      localStorage.setItem("accessToken", fakeUser.accessToken);
+      localStorage.setItem("refreshToken", fakeUser.refreshToken);
+
+      return fakeUser;
+    }
+
+    const response = await request<LoginResponse>({
+      method: "POST",
+      url: `${AUTH_PATH}/magic-login`,
+      data: { email },
+    });
+
     localStorage.setItem("accessToken", response.accessToken);
     localStorage.setItem("refreshToken", response.refreshToken);
     return response;

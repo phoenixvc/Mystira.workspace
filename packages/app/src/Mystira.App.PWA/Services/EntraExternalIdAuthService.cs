@@ -13,7 +13,7 @@ namespace Mystira.App.PWA.Services;
 /// Supports Google social login and email+password authentication
 /// Uses Authorization Code Flow with PKCE (Proof Key for Code Exchange)
 /// </summary>
-public class EntraExternalIdAuthService : IAuthService
+public class EntraExternalIdAuthService
 {
     private readonly ILogger<EntraExternalIdAuthService> _logger;
     private readonly IApiClient _apiClient;
@@ -55,7 +55,7 @@ public class EntraExternalIdAuthService : IAuthService
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
     }
 
-    #region IAuthService Implementation
+    #region Public Methods (used by UnifiedAuthService)
 
     public async Task<bool> IsAuthenticatedAsync()
     {
@@ -137,11 +137,6 @@ public class EntraExternalIdAuthService : IAuthService
             _logger.LogWarning("Get token operation was canceled");
             return null;
         }
-    }
-
-    public async Task<string?> GetCurrentTokenAsync()
-    {
-        return await GetTokenAsync();
     }
 
     public void SetRememberMe(bool rememberMe)
@@ -249,6 +244,45 @@ public class EntraExternalIdAuthService : IAuthService
         await SetStoredAccountAsync(account);
         _isAuthenticated = !string.IsNullOrWhiteSpace(_currentToken);
         AuthenticationStateChanged?.Invoke(this, _isAuthenticated);
+    }
+
+    /// <summary>
+    /// Logs out the current user by clearing all authentication state and tokens.
+    /// </summary>
+    /// <returns>A task representing the asynchronous logout operation.</returns>
+    public async Task LogoutAsync()
+    {
+        try
+        {
+            // Clear local storage
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", TokenStorageKey);
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", AccountStorageKey);
+            await _jsRuntime.InvokeVoidAsync("localStorage.removeItem", IdTokenStorageKey);
+
+            // Clear session storage (matching ClearAuthStateAsync behavior)
+            await _jsRuntime.InvokeVoidAsync("sessionStorage.removeItem", AuthStateKey);
+            await _jsRuntime.InvokeVoidAsync("sessionStorage.removeItem", AuthNonceKey);
+            await _jsRuntime.InvokeVoidAsync("sessionStorage.removeItem", AuthCodeVerifierKey);
+
+            // Clear in-memory state
+            _currentToken = null;
+            _currentAccount = null;
+            _isAuthenticated = false;
+
+            AuthenticationStateChanged?.Invoke(this, false);
+
+            _logger.LogInformation("Successfully logged out from Entra External ID");
+        }
+        catch (JSException ex)
+        {
+            _logger.LogError(ex, "JavaScript error during logout");
+            throw new InvalidOperationException("Failed to clear authentication data", ex);
+        }
+        catch (OperationCanceledException)
+        {
+            _logger.LogWarning("Logout operation was canceled");
+            throw;
+        }
     }
 
     #endregion
@@ -396,39 +430,6 @@ public class EntraExternalIdAuthService : IAuthService
         finally
         {
             _authLock.Release();
-        }
-    }
-
-    public async Task LogoutAsync()
-    {
-        try
-        {
-            _logger.LogInformation("Logging out user from Entra External ID");
-
-            var authority = _configuration["MicrosoftEntraExternalId:Authority"];
-            var postLogoutRedirectUri = _configuration["MicrosoftEntraExternalId:PostLogoutRedirectUri"]
-                ?? await GetCurrentOriginAsync();
-
-            // Perform local-only logout without redirecting to Entra
-            // This provides instant logout without any Entra UI or redirects
-            // The Entra session remains active, enabling SSO on next login
-
-            await ClearLocalStorageAsync();
-            ClearAuthenticationState();
-
-            _logger.LogInformation("Local logout successful - user logged out of application");
-            AuthenticationStateChanged?.Invoke(this, false);
-
-            // Redirect to home page after logout
-            _navigationManager.NavigateTo("/", forceLoad: true);
-        }
-        catch (JSException ex)
-        {
-            _logger.LogError(ex, "JavaScript error during logout");
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogWarning("Logout operation was canceled");
         }
     }
 

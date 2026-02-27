@@ -64,6 +64,20 @@ public class AchievementsPageTests : BunitContext
         public Task<bool> GetRememberMeAsync() => Task.FromResult(false);
         public DateTime? GetTokenExpiryTime() => null;
         public Task<bool> EnsureTokenValidAsync(int expiryBufferMinutes = 5) => Task.FromResult(true);
+
+        // Dual-path authentication methods
+        public Task<AuthResult> SignInWithEntraAsync() => Task.FromResult(new AuthResult(false, ErrorMessage: "Not implemented in test"));
+        public Task<AuthResult> SignInWithMagicLinkAsync(string email, string? displayName = null) => Task.FromResult(new AuthResult(false, ErrorMessage: "Not implemented in test"));
+        public Task<AuthResult> CompleteMagicLinkSignInAsync(string token) => Task.FromResult(new AuthResult(false, ErrorMessage: "Not implemented in test"));
+        public Task<MagicSignupResult?> RequestMagicLinkAsync(string email, string? displayName = null) => Task.FromResult<MagicSignupResult?>(null);
+        public Task<MagicSignupResult?> ResendMagicLinkAsync(string email) => Task.FromResult<MagicSignupResult?>(null);
+        public Task<VerifyMagicSignupResult?> VerifyMagicLinkAsync(string token) => Task.FromResult<VerifyMagicSignupResult?>(null);
+        public Task<AuthResult> RefreshAuthAsync() => Task.FromResult(new AuthResult(false, ErrorMessage: "Not implemented in test"));
+
+        // Additional methods needed for interface compatibility
+        public Task SetAuthenticatedSessionAsync(string token, Account account) => Task.CompletedTask;
+        public Task SetCurrentAccountAsync(Account account) => Task.CompletedTask;
+
 #pragma warning disable CS0067 // Event is never used
         public event EventHandler? TokenExpiryWarning;
         public event EventHandler<bool>? AuthenticationStateChanged;

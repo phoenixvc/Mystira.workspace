@@ -158,18 +158,18 @@ public class ChatOrchestrationServiceTests
              .Setup(x => x.DetectPrimaryInstructionTypeAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
              .ReturnsAsync("story_generate_initial");
 
-         // Mock the LLM service for parameter checking
-         var mockLlmService = new Mock<ILLMService>();
-         mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
-         mockLlmService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
-         mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
+        // Mock the LLM service for parameter checking
+        var mockLlmService = new Mock<ILLMService>();
+        mockLlmService.Setup(x => x.ProviderName).Returns("test-llm");
+        mockLlmService.Setup(x => x.DeploymentNameOrModelId).Returns((string?)null);
+        mockLlmService.Setup(x => x.IsAvailable()).Returns(true);
 
-         var parameterCheckResponse = new ChatCompletionResponse
-         {
-             Success = true,
-             Content = "[]", // No missing parameters
-             Provider = "test-llm"
-         };
+        var parameterCheckResponse = new ChatCompletionResponse
+        {
+            Success = true,
+            Content = "[]", // No missing parameters
+            Provider = "test-llm"
+        };
 
         mockLlmService
             .Setup(x => x.CompleteAsync(It.Is<ChatCompletionRequest>(r =>
@@ -186,8 +186,8 @@ public class ChatOrchestrationServiceTests
             Json = @"{""title"": ""Generated Story"", ""scenes"": []}"
         };
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(mockStoryResponse);
+            .Setup(x => x.InvokeAsync<GenerateJsonStoryResponse>(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((GenerateStoryCommand cmd, CancellationToken ct) => mockStoryResponse);
 
         // Act
         var result = await _service.CompleteAsync(context, CancellationToken.None);
@@ -218,8 +218,8 @@ public class ChatOrchestrationServiceTests
         var helpResponse = new ChatCompletionResponse { Success = true, Content = "Help details" };
 
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(helpResponse);
+            .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((HelpCommand cmd, CancellationToken ct) => helpResponse);
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);
 
@@ -247,8 +247,8 @@ public class ChatOrchestrationServiceTests
         var fallbackResponse = new ChatCompletionResponse { Success = true, Content = "fallback" };
 
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(fallbackResponse);
+            .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((FreeTextCommand cmd, CancellationToken ct) => fallbackResponse);
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);
 

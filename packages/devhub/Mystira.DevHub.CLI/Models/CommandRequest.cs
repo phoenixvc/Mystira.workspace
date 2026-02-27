@@ -10,6 +10,9 @@ public class CommandRequest
 
     [JsonPropertyName("args")]
     public JsonElement Args { get; set; }
+
+    [JsonPropertyName("authToken")]
+    public string? AuthToken { get; set; } // JWT token for authentication
 }
 
 public class CosmosExportArgs

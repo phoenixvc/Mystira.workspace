@@ -9,6 +9,7 @@ using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services;
 using Xunit;
 
 namespace Mystira.StoryGenerator.Infrastructure.Tests;
@@ -47,7 +48,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         _testConfig = new FoundryAgentConfig
         {
             WriterAgentId = "test-writer-agent",
-            JudgeAgentId = "test-judge-agent", 
+            JudgeAgentId = "test-judge-agent",
             RefinerAgentId = "test-refiner-agent",
             MaxIterations = 5,
             RunTimeout = TimeSpan.FromMinutes(5)
@@ -99,7 +100,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         Assert.True(result.UpdatedAt <= DateTime.UtcNow);
 
         _mockFoundryClient.Verify(
-            x => x.CreateThreadAsync(_testConfig.WriterAgentId, It.IsAny<CancellationToken>()), 
+            x => x.CreateThreadAsync(_testConfig.WriterAgentId, It.IsAny<CancellationToken>()),
             Times.Once);
         _mockSessionRepository.Verify(x => x.UpdateAsync(It.IsAny<StorySession>(), It.IsAny<CancellationToken>()), Times.Once);
         _mockEventPublisher.Verify(
@@ -112,7 +113,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         // Arrange
         var sessionId = "test-session-456";
         var storyPrompt = "A story about a brave little mouse";
-        
+
         var session = new StorySession
         {
             SessionId = sessionId,
@@ -205,7 +206,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         // Assert
         Assert.True(success);
         Assert.Equal("Story generated successfully", message);
-        
+
         Assert.NotNull(updatedSession);
         Assert.Equal(StorySessionStage.Validating, updatedSession.Stage);
         Assert.Equal(1, updatedSession.IterationCount);
@@ -215,7 +216,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         Assert.Equal("Generating", updatedSession.StoryVersions[0].StageWhenCreated);
 
         _mockFoundryClient.Verify(
-            x => x.CreateRunAsync(session.ThreadId, _testConfig.WriterAgentId, It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            x => x.CreateRunAsync(session.ThreadId, _testConfig.WriterAgentId, It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -225,7 +226,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         // Arrange
         var sessionId = "test-session-789";
         var invalidStoryJson = "{ invalid json }";
-        
+
         var session = new StorySession
         {
             SessionId = sessionId,
@@ -276,7 +277,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             "image": "cover.jpg",
             "tags": ["original"],
             "difficulty": "Easy",
-            "session_length": "Short", 
+            "session_length": "Short",
             "age_group": "6-9",
             "minimum_age": 6,
             "core_axes": ["test"],
@@ -313,7 +314,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
                 {
                     "id": "scene_2",
                     "title": "Scene 2 - Target",
-                    "type": "narrative", 
+                    "type": "narrative",
                     "active_character": "hero",
                     "description": "Scene 2 description - should be modified",
                     "next_scene": null,
@@ -334,7 +335,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             "tags": ["original"],
             "difficulty": "Easy",
             "session_length": "Short",
-            "age_group": "6-9", 
+            "age_group": "6-9",
             "minimum_age": 6,
             "core_axes": ["test"],
             "archetypes": ["hero"],
@@ -371,7 +372,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
                     "id": "scene_2",
                     "title": "Scene 2 - Target",
                     "type": "narrative",
-                    "active_character": "hero", 
+                    "active_character": "hero",
                     "description": "Scene 2 description - refined and improved",
                     "next_scene": null,
                     "difficulty": null,
@@ -448,13 +449,13 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         // Assert
         Assert.True(success);
         Assert.Equal("Story refined successfully; re-evaluation required", message);
-        
+
         Assert.NotNull(updatedSession);
         Assert.Equal(StorySessionStage.Validating, updatedSession.Stage); // Should go back to validating
         Assert.Equal(2, updatedSession.IterationCount);
         Assert.Equal(focus, updatedSession.UserFocus);
         Assert.Equal(2, updatedSession.StoryVersions.Count);
-        
+
         var refinedVersion = updatedSession.StoryVersions[1];
         Assert.Equal(2, refinedVersion.VersionNumber);
         Assert.Equal("Refining", refinedVersion.StageWhenCreated);
@@ -462,10 +463,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
 
         // Verify refiner was called with targeted instructions
         _mockFoundryClient.Verify(
-            x => x.CreateRunAsync(session.ThreadId, _testConfig.RefinerAgentId, It.Is<string>(prompt => 
-                prompt.Contains("ONLY edit scenes: scene_2") && 
+            x => x.CreateRunAsync(session.ThreadId, _testConfig.RefinerAgentId, It.Is<string>(prompt =>
+                prompt.Contains("ONLY edit scenes: scene_2") &&
                 prompt.Contains("ONLY modify aspects: description, dialogue")),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -474,7 +475,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
     {
         // Arrange
         var sessionId = "test-session-loop";
-        
+
         var initialStory = """
         {
             "title": "Test Story",
@@ -539,7 +540,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         var passingEvaluationReport = """
         {
             "iteration_number": 2,
-            "overall_status": "Pass", 
+            "overall_status": "Pass",
             "safety_gate_passed": true,
             "axes_alignment_score": 0.9,
             "dev_principles_score": 0.8,
@@ -670,7 +671,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         Assert.True(refineSuccess);
         Assert.True(evalSuccess);
         Assert.Equal(EvaluationStatus.Pass, evalReport.OverallStatus);
-        
+
         Assert.NotNull(finalSession);
         Assert.Equal(StorySessionStage.Evaluated, finalSession.Stage); // Should be evaluated (pass)
         Assert.Equal(2, finalSession.IterationCount); // Iteration count should be incremented
@@ -719,7 +720,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
             .ReturnsAsync(new RunCompletionResult
             {
                 RunId = "run-max",
-                Status = "completed", 
+                Status = "completed",
                 Completed = true,
                 Messages = new List<Message>
                 {
@@ -739,14 +740,14 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         // Assert
         Assert.False(success);
         Assert.Contains($"Maximum iterations ({maxIterations}) reached", message);
-        
+
         Assert.NotNull(finalSession);
         Assert.Equal(StorySessionStage.StuckNeedsReview, finalSession.Stage);
         Assert.Equal(maxIterations, finalSession.IterationCount);
 
         // Verify max iterations event was published
         _mockEventPublisher.Verify(
-            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt => 
+            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt =>
                 evt.Type == AgentStreamEvent.EventType.MaxIterationsReached)),
             Times.Once);
     }

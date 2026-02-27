@@ -4,6 +4,7 @@ public class Account
 {
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string ExternalUserId { get; set; } = string.Empty; // External identity provider user identifier (Entra External ID)
+    public string? EntraObjectId { get; set; } // Entra user object ID for provisioning linkage
     public string Email { get; set; } = string.Empty;
     public string DisplayName { get; set; } = string.Empty;
     public string Role { get; set; } = "Guest"; // Default role is Guest, can be Admin

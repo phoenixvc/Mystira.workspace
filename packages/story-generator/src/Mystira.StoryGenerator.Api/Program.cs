@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using Wolverine;
 using Mystira.StoryGenerator.Api.Infrastructure.Agents;
 using Mystira.StoryGenerator.Api.Services;
@@ -21,40 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
-    {
-        Title = "Story Generator Agent API",
-        Version = "v1",
-        Description = "API for agentic story generation with Foundry agents"
-    });
-
-    // Add API key authentication if needed
-    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-    {
-        Description = "Authorization header using the Bearer scheme",
-        Name = "Authorization",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
-    });
-
-    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-    {
-        {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 builder.Host.UseWolverine(opts =>
 {
@@ -182,6 +152,65 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
+// Add JWT authentication
+var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "mystira-identity-api";
+var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "mystira-platform";
+var jwtRsaPublicKey = builder.Configuration["JwtSettings:RsaPublicKey"];
+var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
+
+if (string.IsNullOrWhiteSpace(jwtRsaPublicKey) && string.IsNullOrWhiteSpace(jwtKey))
+{
+    if (builder.Environment.IsDevelopment())
+    {
+        // Use stable dev secret instead of generating new GUID each startup
+        var devSecret = Environment.GetEnvironmentVariable("DEV_JWT_SECRET") ?? "StoryGenDevKey-StableSecretForDevelopment-2024";
+        jwtKey = devSecret;
+        builder.Configuration["JwtSettings:SecretKey"] = jwtKey;
+
+        var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+        logger.LogWarning("Using stable development JWT secret. Set DEV_JWT_SECRET environment variable for custom key.");
+    }
+    else
+    {
+        throw new InvalidOperationException("JWT signing key not configured. Set JwtSettings:RsaPublicKey or JwtSettings:SecretKey.");
+    }
+}
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    var tokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        ClockSkew = TimeSpan.FromMinutes(5)
+    };
+
+    if (!string.IsNullOrWhiteSpace(jwtRsaPublicKey))
+    {
+        using var rsa = System.Security.Cryptography.RSA.Create();
+        rsa.ImportFromPem(jwtRsaPublicKey);
+        var rsaParams = rsa.ExportParameters(false);
+        tokenValidationParameters.IssuerSigningKey = new RsaSecurityKey(rsaParams);
+    }
+    else if (!string.IsNullOrWhiteSpace(jwtKey))
+    {
+        tokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
+    }
+
+    options.TokenValidationParameters = tokenValidationParameters;
+});
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
@@ -198,6 +227,9 @@ app.MapGet("/", () => Results.Redirect("/swagger"));
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.UseRateLimiter();
 
 app.MapControllers();
@@ -205,7 +237,8 @@ app.MapHealthChecks("/health").WithName("Health");
 
 app.MapGet("/ping", () => Results.Ok(new { status = "ok" }))
    .WithName("Ping")
-   .WithOpenApi();
+   .WithOpenApi()
+   .AllowAnonymous(); // Keep ping endpoint public for health checks
 
 app.MapPost("/stories/preview", (GenerateStoryRequest request, IOptions<AiSettings> aiOptions) =>
     {
@@ -219,7 +252,8 @@ app.MapPost("/stories/preview", (GenerateStoryRequest request, IOptions<AiSettin
         return Results.Ok(response);
     })
    .WithName("GenerateStoryPreview")
-   .WithOpenApi();
+   .RequireAuthorization()
+   .RequireRateLimiting("story-agent");
 
 app.Run();
 

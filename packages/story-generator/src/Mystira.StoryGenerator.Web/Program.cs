@@ -65,6 +65,9 @@ builder.Services.AddScoped<IAgentSessionService, AgentSessionService>();
 // Add SSE JavaScript Interop Service
 builder.Services.AddScoped<SseJsInteropService>();
 
+// Add Authentication Service
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped(sp =>
 {
     var configuration = sp.GetRequiredService<IConfiguration>();

@@ -204,8 +204,9 @@ builder.Services.Configure<JsonSerializerOptions>(options =>
 // Register services
 builder.Services.AddScoped<ITokenProvider, LocalStorageTokenProvider>();
 
-// Register authentication service (Entra External ID)
-builder.Services.AddScoped<IAuthService, EntraExternalIdAuthService>();
+// Register authentication service (Unified dual-path auth)
+builder.Services.AddScoped<EntraExternalIdAuthService>(); // Keep for dependency injection
+builder.Services.AddScoped<IAuthService, UnifiedAuthService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
 builder.Services.AddScoped<IGameSessionService, GameSessionService>();
 builder.Services.AddScoped<ICharacterAssignmentService, CharacterAssignmentService>();

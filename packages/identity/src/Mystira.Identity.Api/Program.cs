@@ -45,6 +45,11 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IIdentityTokenService, IdentityTokenService>();
 
+// Add Entra provisioning services
+builder.Services.AddSingleton<IProvisioningQueue, InMemoryProvisioningQueue>();
+builder.Services.AddScoped<IEntraProvisioningService, EntraProvisioningService>();
+builder.Services.AddHostedService<ProvisioningBackgroundWorker>();
+
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "mystira-identity-api";
 var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "mystira-platform";
 var jwtRsaPrivateKey = builder.Configuration["JwtSettings:RsaPrivateKey"];

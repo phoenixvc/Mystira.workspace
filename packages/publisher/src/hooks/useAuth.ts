@@ -1,8 +1,8 @@
-import { useCallback } from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authApi } from "@/api";
-import type { LoginRequest } from "@/api/types";
+import type { DualPathLoginRequest } from "@/api/auth";
 import { useAuthStore } from "@/state/authStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -21,7 +21,27 @@ export function useAuth() {
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: LoginRequest) => authApi.login(data),
+    mutationFn: (data: DualPathLoginRequest) => authApi.login(data),
+    onSuccess: (response) => {
+      setUser(response.user);
+      queryClient.invalidateQueries();
+    },
+  });
+
+  const entraLoginMutation = useMutation({
+    mutationFn: (token: string) => authApi.loginWithEntra(token),
+    onSuccess: (response) => {
+      setUser(response.user);
+      queryClient.invalidateQueries();
+    },
+  });
+
+  const magicLinkRequestMutation = useMutation({
+    mutationFn: (email: string) => authApi.requestMagicLink(email),
+  });
+
+  const magicLinkLoginMutation = useMutation({
+    mutationFn: (email: string) => authApi.loginWithMagicLink(email),
     onSuccess: (response) => {
       setUser(response.user);
       queryClient.invalidateQueries();
@@ -37,10 +57,31 @@ export function useAuth() {
   });
 
   const login = useCallback(
-    async (data: LoginRequest) => {
+    async (data: DualPathLoginRequest) => {
       await loginMutation.mutateAsync(data);
     },
     [loginMutation]
+  );
+
+  const loginWithEntra = useCallback(
+    async (token: string) => {
+      await entraLoginMutation.mutateAsync(token);
+    },
+    [entraLoginMutation]
+  );
+
+  const requestMagicLink = useCallback(
+    async (email: string) => {
+      await magicLinkRequestMutation.mutateAsync(email);
+    },
+    [magicLinkRequestMutation]
+  );
+
+  const loginWithMagicLink = useCallback(
+    async (email: string) => {
+      await magicLinkLoginMutation.mutateAsync(email);
+    },
+    [magicLinkLoginMutation]
   );
 
   const logout = useCallback(async () => {
@@ -52,9 +93,20 @@ export function useAuth() {
     isAuthenticated,
     isCheckingAuth,
     login,
+    loginWithEntra,
+    requestMagicLink,
+    loginWithMagicLink,
     logout,
-    isLoggingIn: loginMutation.isPending,
+    isLoggingIn:
+      loginMutation.isPending ||
+      entraLoginMutation.isPending ||
+      magicLinkLoginMutation.isPending,
     isLoggingOut: logoutMutation.isPending,
-    loginError: loginMutation.error,
+    loginError:
+      loginMutation.error ||
+      entraLoginMutation.error ||
+      magicLinkLoginMutation.error,
+    isRequestingMagicLink: magicLinkRequestMutation.isPending,
+    magicLinkRequestError: magicLinkRequestMutation.error,
   };
 }

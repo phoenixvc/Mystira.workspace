@@ -36,6 +36,10 @@ body {
     color 0.3s ease;
 }
 
+.admin-full-height {
+  min-height: 100vh;
+}
+
 .footer {
   margin-top: auto;
   padding: 1rem 0;
