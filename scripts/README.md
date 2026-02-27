@@ -2,6 +2,37 @@
 
 Utility scripts for managing the Mystira workspace and repositories.
 
+## Migration Parity Manifest Capture
+
+### `Get-MonorepoMigrationManifests.ps1`
+
+Captures GitHub API manifests for legacy PhoenixVC repositories and the mapped
+`Mystira.workspace` targets to support migration parity audits.
+
+**Reads token from:**
+
+- `.env.local` key `PHOENIXVC_GITHUB_PAT` (preferred)
+- `.env.local` key `GITHUB_TOKEN` (fallback)
+
+**Output:**
+
+- `docs/analysis/evidence/github-manifests/*.json`
+
+**Usage (PowerShell):**
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\Get-MonorepoMigrationManifests.ps1
+```
+
+**Optional parameters:**
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\Get-MonorepoMigrationManifests.ps1 `
+  -Organization "phoenixvc" `
+  -Monorepo "Mystira.workspace" `
+  -MonorepoRef "dev"
+```
+
 ## Repository Metadata Sync
 
 ### `sync-repo-metadata.sh`

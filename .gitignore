@@ -15,6 +15,19 @@ nupkg-test/
 test-nupkg/
 publish/
 
+# .NET build outputs
+bin/
+obj/
+*.nupkg
+*.snupkg
+.nuget/
+project.lock.json
+
+# Rust / WASM
+target/
+pkg/
+wasm-pack.log
+
 # Cache
 .cache/
 *.tsbuildinfo
@@ -22,20 +35,40 @@ publish/
 
 # Environment variables
 .env
-.env.local
-.env.*.local
-.env.development
-.env.production
+.env.*
+!.env.example
+!.env.*.example
 
 # Allow template .env files for debug configurations at workspace root
 !.env.admin-api
 !.env.publisher
 !.env.story-generator
 
-# IDE - User-specific files (keep shared configs)
+# IDE - JetBrains
+.idea/
+*.DotSettings.user
+
+# IDE - Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDE - VS Code / Windsurf / Cursor
+.vscode/
+.windsurf/
+.cascade/
+
+# IDE - Vim
 *.swp
 *.swo
+
+# OS
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # VS Code / Cursor / Windsurf - Keep shared settings, ignore user-specific
 .vscode/*
@@ -97,17 +130,22 @@ coverage/
 *.trx
 cypress/videos/
 cypress/screenshots/
-[Tt]est[Rr]esult*/
+TestResults/
 [Bb]uild[Ll]og.*
 *.coverage
 *.coveragexml
 
-# Blockchain specific
+# Blockchain - Hardhat
 artifacts/
 cache/
+cache_hardhat/
 typechain/
 typechain-types/
 deployments/localhost/
+gasReporterOutput.json
+
+# Blockchain - Foundry
+forge-cache/
 
 # Terraform
 *.tfstate
@@ -116,22 +154,23 @@ deployments/localhost/
 .terraform.lock.hcl
 *.tfvars
 !*.tfvars.example
-*.zip
 
 # Docker
-*.pem
 docker-compose.override.yml
 
-# Secrets
+# Secrets & certificates
+*.pem
 *.key
 *.p12
-*.pem
+*.pfx
 secrets/
 .secrets/
+# Allow public CA certs committed intentionally
+!letsencrypt-*.pem
 
-# OS
-Thumbs.db
-ehthumbs.db
+# Archives
+*.zip
+*.tar.gz
 
 # Mobile
 *.apk
@@ -227,11 +266,10 @@ packages/devhub/Mystira.DevHub/MEDIA_*.md
 packages/devhub/Mystira.DevHub/PWA_*.md
 packages/devhub/Mystira.DevHub/SRI_*.md
 
-gasReporterOutput.json
-
 # Temporary documentation files
-SUBMODULE_SETUP_SUMMARY.md
 CHAIN_COMPARISON.md
 REPO_SETUP_COMPLETE.md
-.submodule-update
 package-lock.json
+
+# Generated parity evidence payloads (large, reproducible)
+docs/analysis/evidence/github-manifests/workflow-files/

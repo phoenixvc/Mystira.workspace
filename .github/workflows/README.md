@@ -1,28 +1,29 @@
-# Workflow Organization Strategy
+# Workflow Inventory
 
-This document explains the CI/CD workflow organization for the Mystira workspace monorepo.
+This document tracks the current GitHub Actions workflows in this repo.
+It reflects the workflow files present under `.github/workflows/`.
 
-## Overview
+## Current workflows (13)
 
-The workspace uses a **hybrid approach** where:
+### Deployment
 
 - **Development workflows** run per-package with path-based triggers for fast feedback
 - **Release and deployment workflows** run centrally from the workspace for controlled releases
+- `deploy-app-api-production.yml` - App API blue/green production deploy
+- `deploy-app-api-rollback.yml` - App API manual rollback
 
-## Workflow Categories
+### Infrastructure
 
-### 🔧 Component CI Workflows (6 components)
+- `infra-deploy.yml` - Terraform apply + infra deployment pipeline
+- `infra-validate.yml` - Terraform/K8s/Docker/security validation
 
-These workflows run when respective component files change in workspace PRs and pushes:
+### Reusable workflow templates
 
-- **`admin-api-ci.yml`** - Admin API (.NET) linting, testing, building
-- **`admin-ui-ci.yml`** - Admin UI (React/TypeScript) linting, testing, building
-- **`chain-ci.yml`** - Chain (Python) linting, testing, Docker builds, K8s validation
-- **`devhub-ci.yml`** - Devhub (Node.js) linting, testing, building
-- **`publisher-ci.yml`** - Publisher (Node.js) linting, testing, Docker builds, K8s validation
-- **`story-generator-ci.yml`** - Story Generator (.NET) linting, testing, Docker builds, NuGet publishing
+- `reusable-docker-build.yml`
+- `reusable-security-scan.yml`
+- `reusable-terraform.yml`
 
-**Trigger:** Changes to `packages/{component}/**` on dev/main branches
+### Security
 
 **Why in workspace?** All packages live in this monorepo. The workspace provides their CI/CD.
 
@@ -211,3 +212,39 @@ rm .github/workflows/mystira-app-pwa-cicd-dev.yml
 ## Questions?
 
 If you have questions about workflow organization or need to add new workflows, refer to this document or discuss in the team.
+
+- `security-keyvault-secrets.yml` - Key Vault secret sync/validation (manual)
+- `security-scan-scheduled.yml` - Weekly security scan + on-demand run
+
+### Utilities
+
+- `utilities-link-checker.yml` - Markdown link checking
+
+### Workspace
+
+- `workspace-ci.yml` - Main workspace CI for dev/main
+
+## Trigger summary
+
+| Workflow                        | Push                              | Pull Request                      | Manual | Schedule | Reusable        |
+| ------------------------------- | --------------------------------- | --------------------------------- | ------ | -------- | --------------- |
+| `workspace-ci.yml`              | `dev`, `main`                     | `dev`, `main`                     | Yes    | -        | -               |
+| `deploy-staging.yml`            | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
+| `deploy-production.yml`         | -                                 | -                                 | Yes    | -        | -               |
+| `deploy-app-api-production.yml` | -                                 | -                                 | Yes    | -        | -               |
+| `deploy-app-api-rollback.yml`   | -                                 | -                                 | Yes    | -        | -               |
+| `infra-validate.yml`            | `main`, `staging` (path-filtered) | `main`, `staging` (path-filtered) | Yes    | -        | -               |
+| `infra-deploy.yml`              | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
+| `security-scan-scheduled.yml`   | -                                 | -                                 | Yes    | Weekly   | -               |
+| `security-keyvault-secrets.yml` | -                                 | -                                 | Yes    | -        | -               |
+| `utilities-link-checker.yml`    | `main` (markdown paths)           | `dev`, `main` (markdown paths)    | Yes    | Weekly   | -               |
+| `reusable-docker-build.yml`     | -                                 | -                                 | -      | -        | `workflow_call` |
+| `reusable-security-scan.yml`    | -                                 | -                                 | -      | -        | `workflow_call` |
+| `reusable-terraform.yml`        | -                                 | -                                 | -      | -        | `workflow_call` |
+
+## Usage notes
+
+1. Prefer reusing `reusable-*` templates for shared CI logic.
+2. Use path filters to avoid unnecessary workflow runs.
+3. Require explicit confirmations for production-impacting workflows.
+4. Keep workflow names in `Category: Name` format for consistency.

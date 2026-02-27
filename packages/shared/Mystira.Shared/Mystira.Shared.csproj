@@ -77,22 +77,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.3" />
     <!-- Polyglot Persistence: Ardalis.Specification -->
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
-    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <!-- Polyglot Persistence: Wolverine EF Core for saga/outbox -->
     <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.16.2" />
-    <!-- CodeAnalysis version alignment: All pinned to 4.14.0 for JasperFx.RuntimeCompiler compatibility -->
-    <PackageReference Include="Microsoft.CodeAnalysis" Version="5.0.0" />
-    <!-- Pin Microsoft.Build.Tasks.Core to patched version (CVE-2025-26646, CVE-2025-55247 fixes) -->
-    <PackageReference Include="Microsoft.Build.Tasks.Core" Version="18.3.3" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.MSBuild" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.VisualBasic.Workspaces" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="5.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Scripting.Common" Version="5.0.0" />
+    <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
   </ItemGroup>
 
   <ItemGroup>

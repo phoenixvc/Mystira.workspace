@@ -8,14 +8,17 @@ Mystira is an AI-powered interactive storytelling platform combining blockchain 
 
 The workspace consists of multiple packages:
 
-- **Mystira.Chain** (Python, gRPC) - Blockchain integration & Story Protocol
-- **Mystira.App** (C#, .NET) - Main storytelling application
-- **Mystira.StoryGenerator** (C#, .NET) - AI-powered story generation engine
-- **Mystira.Publisher** (TypeScript, Node.js) - Content publishing service
-- **Mystira.DevHub** (TypeScript) - Developer portal and tools
-- **Mystira.Admin.Api** (C#, ASP.NET Core) - Admin backend API
-- **Mystira.Admin.UI** (TypeScript, React) - Admin dashboard frontend
-- **Infrastructure** (Terraform, Kubernetes) - Infrastructure as Code
+- **packages/chain** (Python, gRPC) - Blockchain integration & Story Protocol
+- **packages/app** (C#, .NET) - Main storytelling application
+- **packages/story-generator** (C#, .NET) - AI-powered story generation engine
+- **packages/publisher** (TypeScript, Node.js) - Content publishing service
+- **packages/devhub** (TypeScript) - Developer portal and tools
+- **packages/admin-api** (C#, ASP.NET Core) - Admin backend API
+- **packages/admin-ui** (TypeScript, React) - Admin dashboard frontend
+- **packages/contracts** (TypeScript + .NET) - Shared contracts
+- **packages/shared** (.NET) - Shared .NET libraries
+- **packages/shared-utils** (TypeScript) - Shared TypeScript utilities
+- **infra/** (Terraform, Kubernetes) - Infrastructure as Code
 
 ## Technology Stack
 
@@ -255,7 +258,7 @@ All PRs must pass:
 
 ## Common Pitfalls to Avoid
 
-- Don't commit `node_modules/`, `dist/`, or build artifacts
+- Don't commit `node_modules/`, `dist/`, `bin/`, `obj/`, or build artifacts
 - Don't bypass pre-commit hooks
 - Don't merge without PR approval
 - Don't make changes directly to `main` branch
