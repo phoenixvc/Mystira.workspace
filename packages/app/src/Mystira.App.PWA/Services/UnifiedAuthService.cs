@@ -194,7 +194,9 @@ public class UnifiedAuthService : IAuthService, IDisposable
             if (_currentAuthProvider == "entra")
             {
                 _stateLock.Release();
-                return await _entraAuthService.EnsureTokenValidAsync();
+                var result = await _entraAuthService.EnsureTokenValidAsync();
+                await _stateLock.WaitAsync(cancellationToken);
+                return result;
             }
 
             // For magic auth, check if token is expired

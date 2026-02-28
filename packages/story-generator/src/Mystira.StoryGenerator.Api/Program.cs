@@ -167,11 +167,16 @@ if (string.IsNullOrWhiteSpace(jwtRsaPublicKey) && string.IsNullOrWhiteSpace(jwtK
         jwtKey = devSecret;
         builder.Configuration["JwtSettings:SecretKey"] = jwtKey;
 
-        var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
-        logger.LogWarning("Using stable development JWT secret. Set DEV_JWT_SECRET environment variable for custom key.");
+        // Configure logging for development warning
+        builder.Logging.AddConsole();
+        builder.Logging.AddDebug();
     }
     else
     {
+        // Configure logging for production
+        builder.Logging.AddConsole();
+        builder.Logging.AddDebug();
+
         throw new InvalidOperationException("JWT signing key not configured. Set JwtSettings:RsaPublicKey or JwtSettings:SecretKey.");
     }
 }
@@ -237,7 +242,6 @@ app.MapHealthChecks("/health").WithName("Health");
 
 app.MapGet("/ping", () => Results.Ok(new { status = "ok" }))
    .WithName("Ping")
-   .WithOpenApi()
    .AllowAnonymous(); // Keep ping endpoint public for health checks
 
 app.MapPost("/stories/preview", (GenerateStoryRequest request, IOptions<AiSettings> aiOptions) =>

@@ -30,31 +30,6 @@ public abstract class BaseApiClient
         IsDevelopment = false;
     }
 
-    protected async Task SetAuthorizationHeaderAsync()
-    {
-        try
-        {
-            HttpClient.DefaultRequestHeaders.Authorization = null;
-
-            var isAuthenticated = await TokenProvider.IsAuthenticatedAsync();
-            if (!isAuthenticated)
-            {
-                return;
-            }
-
-            var token = await TokenProvider.GetCurrentTokenAsync();
-            if (!string.IsNullOrEmpty(token))
-            {
-                HttpClient.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogWarning(ex, "Error setting authorization header");
-        }
-    }
-
     protected async Task<T?> SendGetAsync<T>(
         string endpoint,
         string operationName,
@@ -63,11 +38,6 @@ public abstract class BaseApiClient
     {
         try
         {
-            if (requireAuth)
-            {
-                await SetAuthorizationHeaderAsync();
-            }
-
             var response = await HttpClient.GetAsync(endpoint);
 
             if (response.IsSuccessStatusCode)
@@ -104,11 +74,6 @@ public abstract class BaseApiClient
     {
         try
         {
-            if (requireAuth)
-            {
-                await SetAuthorizationHeaderAsync();
-            }
-
             var response = await HttpClient.PostAsJsonAsync(endpoint, requestData, JsonOptions);
 
             if (response.IsSuccessStatusCode)
@@ -141,11 +106,6 @@ public abstract class BaseApiClient
     {
         try
         {
-            if (requireAuth)
-            {
-                await SetAuthorizationHeaderAsync();
-            }
-
             var response = await HttpClient.PutAsJsonAsync(endpoint, requestData, JsonOptions);
 
             if (response.IsSuccessStatusCode)
@@ -180,11 +140,6 @@ public abstract class BaseApiClient
     {
         try
         {
-            if (requireAuth)
-            {
-                await SetAuthorizationHeaderAsync();
-            }
-
             var response = await HttpClient.DeleteAsync(endpoint);
 
             if (response.IsSuccessStatusCode)
