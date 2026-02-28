@@ -1,6 +1,20 @@
-import { expect, afterEach, vi } from "vitest";
-import { cleanup } from "@testing-library/react";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup } from "@testing-library/react";
+import { afterEach, expect, vi } from "vitest";
+
+// Setup jsdom environment
+import { JSDOM } from "jsdom";
+
+// Mock window and document globals
+const dom = new JSDOM("<!DOCTYPE html><html><body></body></html>", {
+  url: "http://localhost:3000",
+  pretendToBeVisual: true,
+  resources: "usable",
+});
+
+global.window = dom.window as any;
+global.document = dom.window.document;
+global.navigator = dom.window.navigator;
 
 expect.extend(matchers);
 

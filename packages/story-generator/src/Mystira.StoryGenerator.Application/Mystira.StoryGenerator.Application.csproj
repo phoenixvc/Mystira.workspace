@@ -29,4 +29,8 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
 </Project>

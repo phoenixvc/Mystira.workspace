@@ -377,7 +377,9 @@ public class IdentityAuthController : ControllerBase
                 return null;
             }
 
-            return result.ClaimsPrincipal;
+            // Convert the claims dictionary to a ClaimsIdentity
+            var claims = result.Claims.Select(kvp => new Claim(kvp.Key, kvp.Value?.ToString() ?? ""));
+            return new ClaimsPrincipal(new ClaimsIdentity(claims, "JwtBearer"));
         }
         catch (SecurityTokenValidationException ex)
         {

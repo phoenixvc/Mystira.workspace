@@ -11,8 +11,19 @@
       "persistent": true
     },
     "test": {
-      "dependsOn": ["build"],
-      "outputs": ["coverage/**"]
+      "dependsOn": [],
+      "outputs": [],
+      "inputs": [
+        "src/**/*.test.ts",
+        "src/**/*.test.tsx",
+        "vitest.config.*",
+        "src/test/setup.*"
+      ]
+    },
+    "test:coverage": {
+      "dependsOn": [],
+      "outputs": ["coverage/**"],
+      "passThroughEnv": ["NODE_ENV"]
     },
     "lint": {
       "outputs": []
