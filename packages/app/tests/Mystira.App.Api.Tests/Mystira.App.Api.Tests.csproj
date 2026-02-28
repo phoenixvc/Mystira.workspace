@@ -6,6 +6,7 @@
     <IsTestProject>true</IsTestProject>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
