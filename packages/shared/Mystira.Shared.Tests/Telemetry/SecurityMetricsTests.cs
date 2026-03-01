@@ -17,8 +17,9 @@ public class SecurityMetricsTests : IDisposable
 
     public SecurityMetricsTests()
     {
-        // AppInsights 3.x: ITelemetryChannel is internal; use CreateDefault + connection string
-        _configuration = TelemetryConfiguration.CreateDefault();
+        // AppInsights 3.x: CreateDefault() returns the shared singleton which is already built.
+        // Use a fresh instance so ConnectionString can still be set for tests.
+        _configuration = new TelemetryConfiguration();
         _configuration.ConnectionString = "InstrumentationKey=00000000-0000-0000-0000-000000000000;IngestionEndpoint=https://localhost";
         _telemetryClient = new TelemetryClient(_configuration);
         _loggerMock = new Mock<ILogger<SecurityMetrics>>();
