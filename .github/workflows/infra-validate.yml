@@ -1,5 +1,9 @@
-name: "Infrastructure: Validate"
+name: "[CI] Infra Validate (Legacy)"
 
+# LEGACY: Superseded by infra-terragrunt-validate.yml (product-based Terragrunt structure, TF 1.10.3)
+# This workflow uses the old infra/terraform/environments/ path structure and TF 1.5.0.
+# TODO: Migrate remaining consumers to infra-terragrunt-validate.yml and remove this workflow.
+#
 # Infrastructure Validation: Validates Terraform, Kubernetes, and Docker configurations
 # Checks: Terraform format/validate, K8s manifest validation, Dockerfile linting, security scans
 # Triggers: PRs and pushes to main/staging with infrastructure changes

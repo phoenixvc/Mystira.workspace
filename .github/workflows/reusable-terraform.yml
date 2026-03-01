@@ -1,5 +1,9 @@
-name: "Reusable: Terraform"
+name: "[Reusable] Terraform (Legacy)"
 
+# LEGACY: Uses AZURE_CREDENTIALS JSON secret and old path structure (TF 1.5.0).
+# New infra workflows use OIDC authentication and Terragrunt (TF 1.10.3).
+# TODO: Migrate callers to OIDC + Terragrunt and remove this workflow.
+#
 # Reusable workflow for Terraform plan and apply operations
 # Usage: Call from other workflows with workflow_call trigger
 

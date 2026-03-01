@@ -1,5 +1,9 @@
-name: "Infrastructure: Deploy"
+name: "[CD] Infra Deploy (Legacy)"
 
+# LEGACY: Superseded by infra-terragrunt-deploy.yml (product-based Terragrunt structure, TF 1.10.3)
+# This workflow uses the old infra/terraform/environments/ path structure and TF 1.5.0.
+# TODO: Migrate remaining consumers to infra-terragrunt-deploy.yml and remove this workflow.
+#
 # Infrastructure Deployment: Flexible deployment to dev/staging/prod environments
 # Steps: Validate prerequisites, bootstrap infrastructure, Terraform apply, build images, deploy K8s
 # Supports: Selective component deployment, skip validation, manual triggers
