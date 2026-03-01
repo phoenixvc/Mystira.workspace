@@ -3,8 +3,12 @@ interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
 }
 
-function LoadingSpinner({ message = "Loading...", size = "md" }: LoadingSpinnerProps) {
-  const sizeClass = size === "sm" ? "spinner-border-sm" : size === "lg" ? "" : "";
+function LoadingSpinner({
+  message = "Loading...",
+  size = "md",
+}: LoadingSpinnerProps) {
+  const sizeClass =
+    size === "sm" ? "spinner-border-sm" : size === "lg" ? "" : "";
 
   return (
     <div className="text-center py-5">

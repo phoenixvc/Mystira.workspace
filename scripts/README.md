@@ -9,6 +9,7 @@ Utility scripts for managing the Mystira workspace and repositories.
 Creates standardized documentation templates for completed PRs and implementations.
 
 **Usage:**
+
 ```powershell
 # Create implementation documentation
 ./create-doc.ps1 implementation "TreatWarningsAsErrors=true" 1234
@@ -21,12 +22,14 @@ Creates standardized documentation templates for completed PRs and implementatio
 ```
 
 **Parameters:**
+
 - `Type`: Documentation type (implementation, bugfix, feature)
 - `Title`: Title of the work being documented
 - `PR`: Pull request number (optional)
 - `Date`: Date of completion (defaults to today)
 
 **Output:**
+
 - Implementation docs: `docs/history/implementations/YYYY-MM-DD-title-implementation.md`
 - Bug fix docs: `docs/history/bug-fixes/YYYY-MM-DD-title-bugfix.md`
 - Feature docs: `docs/history/features/YYYY-MM-DD-title-feature.md`
@@ -44,6 +47,7 @@ Validates that documentation files follow the required structure and contain all
 ```
 
 **Features:**
+
 - Checks required sections by document type
 - Validates filename format and sequential numbering
 - Identifies unfilled placeholders
@@ -60,6 +64,7 @@ Validates commit message format according to our standards.
 ```
 
 **Validates:**
+
 - Proper format: `<type>(<scope>): <subject>`
 - Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 - Allowed scopes: chain, app, story-generator, infra, workspace, deps
@@ -71,6 +76,7 @@ Validates commit message format according to our standards.
 Bash version of commit message validation (for Unix/Linux environments).
 
 **Usage:**
+
 ```bash
 ./validate-commit-message.sh "feat(app): add user authentication system"
 ```
@@ -80,6 +86,7 @@ Bash version of commit message validation (for Unix/Linux environments).
 Runs pre-commit validation including documentation requirement assessment.
 
 **Usage:**
+
 ```bash
 # Run as standalone check
 ./pre-commit-check.sh
@@ -89,6 +96,7 @@ Runs pre-commit validation including documentation requirement assessment.
 ```
 
 **Features:**
+
 - Analyzes staged files for documentation requirements
 - Identifies high-impact changes
 - Validates commit message format

@@ -5,7 +5,8 @@ interface ErrorAlertProps {
 }
 
 function ErrorAlert({ error, title = "Error", onRetry }: ErrorAlertProps) {
-  const message = error instanceof Error ? error.message : "An unknown error occurred";
+  const message =
+    error instanceof Error ? error.message : "An unknown error occurred";
 
   return (
     <div className="alert alert-danger" role="alert">

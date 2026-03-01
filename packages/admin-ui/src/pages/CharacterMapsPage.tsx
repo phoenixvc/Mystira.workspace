@@ -13,7 +13,10 @@ function CharacterMapsPage() {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(20);
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: string | null }>({
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    isOpen: boolean;
+    id: string | null;
+  }>({
     isOpen: false,
     id: null,
   });
@@ -73,7 +76,9 @@ function CharacterMapsPage() {
       <ErrorAlert
         error={error}
         title="Error loading character maps"
-        onRetry={() => queryClient.invalidateQueries({ queryKey: ["characterMaps"] })}
+        onRetry={() =>
+          queryClient.invalidateQueries({ queryKey: ["characterMaps"] })
+        }
       />
     );
   }
@@ -96,10 +101,16 @@ function CharacterMapsPage() {
         <h1 className="h2">🗺️ Character Maps</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            <Link to="/admin/character-maps/create" className="btn btn-sm btn-primary">
+            <Link
+              to="/admin/character-maps/create"
+              className="btn btn-sm btn-primary"
+            >
               <i className="bi bi-plus-circle"></i> Create Character Map
             </Link>
-            <Link to="/admin/character-maps/import" className="btn btn-sm btn-outline-primary">
+            <Link
+              to="/admin/character-maps/import"
+              className="btn btn-sm btn-outline-primary"
+            >
               <i className="bi bi-upload"></i> Import Character Map
             </Link>
           </div>
@@ -108,7 +119,7 @@ function CharacterMapsPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={value => {
+        onChange={(value) => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -131,7 +142,7 @@ function CharacterMapsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.characterMaps.map(map => (
+                    {data.characterMaps.map((map) => (
                       <tr key={map.id}>
                         <td>{map.name}</td>
                         <td>{map.description || "-"}</td>
@@ -159,16 +170,26 @@ function CharacterMapsPage() {
                 </table>
               </div>
 
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </>
           ) : (
             <div className="text-center py-5">
               <p className="text-muted">No character maps found.</p>
               <div className="d-flex gap-2 justify-content-center">
-                <Link to="/admin/character-maps/create" className="btn btn-primary">
+                <Link
+                  to="/admin/character-maps/create"
+                  className="btn btn-primary"
+                >
                   Create Your First Character Map
                 </Link>
-                <Link to="/admin/character-maps/import" className="btn btn-outline-primary">
+                <Link
+                  to="/admin/character-maps/import"
+                  className="btn btn-outline-primary"
+                >
                   Import Character Map
                 </Link>
               </div>

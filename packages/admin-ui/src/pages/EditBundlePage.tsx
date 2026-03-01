@@ -13,9 +13,18 @@ import TextInput from "../components/TextInput";
 import { showToast } from "../utils/toast";
 
 const bundleSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
-  version: z.string().max(50, "Version must be less than 50 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
+  version: z
+    .string()
+    .max(50, "Version must be less than 50 characters")
+    .optional(),
 });
 
 type BundleFormData = z.infer<typeof bundleSchema>;
@@ -63,8 +72,10 @@ function EditBundlePage() {
       showToast.success("Bundle updated successfully!");
       navigate("/admin/bundles");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to update bundle");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error ? error.message : "Failed to update bundle"
+      );
     },
   });
 
@@ -91,7 +102,9 @@ function EditBundlePage() {
       <ErrorAlert
         error={error}
         title="Error loading bundle"
-        onRetry={() => queryClient.invalidateQueries({ queryKey: ["bundle", id] })}
+        onRetry={() =>
+          queryClient.invalidateQueries({ queryKey: ["bundle", id] })
+        }
       />
     );
   }
@@ -121,15 +134,27 @@ function EditBundlePage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea id="description" rows={5} {...register("description")} />
+              <Textarea
+                id="description"
+                rows={5}
+                {...register("description")}
+              />
             </FormField>
 
             <FormField label="Version" error={errors.version?.message}>
-              <TextInput id="version" {...register("version")} placeholder="e.g., 1.0.0" />
+              <TextInput
+                id="version"
+                {...register("version")}
+                placeholder="e.g., 1.0.0"
+              />
             </FormField>
 
             <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <>
                     <span

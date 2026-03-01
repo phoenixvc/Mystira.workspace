@@ -48,10 +48,15 @@ export interface ProfileQueryResponse {
 
 // Read-only API for user administration
 export const accountsApi = {
-  getAccounts: async (request?: AccountQueryRequest): Promise<AccountQueryResponse> => {
-    const response = await apiClient.get<AccountQueryResponse>("/api/admin/accounts", {
-      params: request,
-    });
+  getAccounts: async (
+    request?: AccountQueryRequest
+  ): Promise<AccountQueryResponse> => {
+    const response = await apiClient.get<AccountQueryResponse>(
+      "/api/admin/accounts",
+      {
+        params: request,
+      }
+    );
     return response.data;
   },
 
@@ -62,15 +67,22 @@ export const accountsApi = {
 };
 
 export const profilesApi = {
-  getProfiles: async (request?: ProfileQueryRequest): Promise<ProfileQueryResponse> => {
-    const response = await apiClient.get<ProfileQueryResponse>("/api/admin/profiles", {
-      params: request,
-    });
+  getProfiles: async (
+    request?: ProfileQueryRequest
+  ): Promise<ProfileQueryResponse> => {
+    const response = await apiClient.get<ProfileQueryResponse>(
+      "/api/admin/profiles",
+      {
+        params: request,
+      }
+    );
     return response.data;
   },
 
   getProfile: async (id: string): Promise<UserProfile> => {
-    const response = await apiClient.get<UserProfile>(`/api/admin/profiles/${id}`);
+    const response = await apiClient.get<UserProfile>(
+      `/api/admin/profiles/${id}`
+    );
     return response.data;
   },
 };
