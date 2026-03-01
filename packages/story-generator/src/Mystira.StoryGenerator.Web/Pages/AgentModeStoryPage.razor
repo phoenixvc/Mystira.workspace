@@ -46,7 +46,7 @@
                     InitialRefinementText="@autoPopulatedRefinementText" />
             }
 
-            @if (!string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson) &&
+            @if (currentSession != null && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson) &&
                  (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating" ||
                   currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested" ||
                   currentSession.Stage == "Complete"))
@@ -70,7 +70,7 @@
             }
 
             @* Show completion button on Evaluated stage as well *@
-            @if (currentSession.Stage == "Evaluated" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
+            @if (currentSession != null && currentSession.Stage == "Evaluated" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
             {
                 <div class="complete-story-actions mb-4">
                     <button @onclick="CompleteAndMoveToChat" class="btn btn-primary complete-btn">
@@ -80,7 +80,7 @@
             }
 
             @* Show diff viewer if there are multiple versions *@
-            @if (currentSession.StoryVersions != null && currentSession.StoryVersions.Count > 1)
+            @if (currentSession != null && currentSession.StoryVersions != null && currentSession.StoryVersions.Count > 1)
             {
                 <StoryVersionDiffViewer Versions="@currentSession.StoryVersions" />
             }

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * SignalR connection configuration options
  */
@@ -60,7 +61,9 @@ export enum SignalRConnectionState {
 /**
  * Event handler type for SignalR events
  */
-export type SignalREventHandler<T = any> = (data: T) => void | Promise<void>;
+export type SignalREventHandler<T = unknown> = (
+  data: T
+) => void | Promise<void>;
 
 /**
  * SignalR connection interface
@@ -115,7 +118,7 @@ export interface ISignalRConnection {
    * @param methodName Name of the hub method to invoke
    * @param args Arguments to pass to the method
    */
-  invoke<T = any>(methodName: string, ...args: any[]): Promise<T>;
+  invoke<T = unknown>(methodName: string, ...args: unknown[]): Promise<T>;
 
   /**
    * Send a message to the hub without waiting for a response
@@ -140,7 +143,7 @@ export interface ISignalRConnection {
 /**
  * Event payload with timestamp
  */
-export interface SignalREvent<T = any> {
+export interface SignalREvent<T = unknown> {
   data: T;
   timestamp: string;
 }
@@ -150,7 +153,7 @@ export interface SignalREvent<T = any> {
  */
 export interface ScenarioUpdatedEvent {
   scenarioId: string;
-  data: any;
+  data: unknown;
   timestamp: string;
 }
 
@@ -159,7 +162,7 @@ export interface ScenarioUpdatedEvent {
  */
 export interface ContentPublishedEvent {
   contentId: string;
-  data: any;
+  data: unknown;
   timestamp: string;
 }
 

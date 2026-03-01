@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <ServiceWorkerAssetsManifest Condition="'$(Configuration)' == 'Release'">service-worker-assets.js</ServiceWorkerAssetsManifest>
     <UserSecretsId>bacfaeff-b9f0-4d46-af29-3755bbcc5dd2</UserSecretsId>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>

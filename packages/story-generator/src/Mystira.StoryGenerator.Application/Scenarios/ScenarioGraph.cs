@@ -127,7 +127,8 @@ public sealed class ScenarioGraph : IScenarioGraph
         }
 
         var finalPaths = compress
-            ? PathAlgorithms.CompressBySharedSuffixes(dominatorPaths.Select(p => {
+            ? PathAlgorithms.CompressBySharedSuffixes(dominatorPaths.Select(p =>
+            {
                 var nodes = new List<Scene> { root };
                 nodes.AddRange(p.Select(e => e.To));
                 return (IReadOnlyList<Scene>)nodes;
@@ -144,11 +145,12 @@ public sealed class ScenarioGraph : IScenarioGraph
                 for (int i = 0; i < nodePath.Count - 1; i++)
                 {
                     var from = nodePath[i];
-                    var to = nodePath[i+1];
+                    var to = nodePath[i + 1];
                     var edge = GetOutgoingEdges(from).First(e => e.To.Equals(to));
                     edgePath.Add(edge);
                 }
-                if (edgePath.Count > 0) edgePaths.Add(edgePath);
+                if (edgePath.Count > 0)
+                    edgePaths.Add(edgePath);
             }
             return CreateScenarioPaths(root, edgePaths);
         }
@@ -202,7 +204,8 @@ public sealed class ScenarioGraph : IScenarioGraph
         while (queue.Count > 0)
         {
             var (current, path) = queue.Dequeue();
-            if (current.Equals(end)) return path;
+            if (current.Equals(end))
+                return path;
 
             foreach (var edge in GetOutgoingEdges(current))
             {
@@ -223,7 +226,8 @@ public sealed class ScenarioGraph : IScenarioGraph
         foreach (var path in edgePaths)
         {
             var pathList = path.ToList();
-            if (pathList.Count == 0) continue;
+            if (pathList.Count == 0)
+                continue;
 
             var sb = new StringBuilder();
             sb.AppendLine(GetCharactersString());
@@ -231,7 +235,8 @@ public sealed class ScenarioGraph : IScenarioGraph
             foreach (var edge in pathList)
             {
                 sb.AppendLine($"Scene {edge.From.Id}: " + edge.From.Description);
-                if (edge.From.Type is SceneType.Choice or SceneType.Roll) sb.AppendLine("Answer: " + edge.Label);
+                if (edge.From.Type is SceneType.Choice or SceneType.Roll)
+                    sb.AppendLine("Answer: " + edge.Label);
             }
 
             sb.AppendLine($"Scene {pathList[^1].To.Id}: " + pathList[^1].To.Description);
@@ -248,7 +253,14 @@ public sealed class ScenarioGraph : IScenarioGraph
 
     private string GetCharactersString()
     {
-        return "The main player characters are: " +
-               string.Join(",", _scenario.Characters?.Select(x => x.Name) ?? []);
+        if (_scenario == null)
+            return "The main player characters are undefined";
+
+        var characterNames = _scenario.Characters?
+            .Where(x => x != null)
+            .Select(x => x.Name ?? "Unknown")
+            .ToList() ?? new List<string>();
+
+        return "The main player characters are: " + string.Join(",", characterNames);
     }
 }

@@ -159,7 +159,8 @@ public class SecurityMetrics : ISecurityMetrics
 
     private void CheckAndTrackBruteForce(string? clientIp)
     {
-        if (string.IsNullOrEmpty(clientIp)) return;
+        if (string.IsNullOrEmpty(clientIp))
+            return;
 
         CleanupOldEntries();
         var timestamps = _authFailuresByIp.GetOrAdd(clientIp, _ => new List<DateTime>());
@@ -182,7 +183,8 @@ public class SecurityMetrics : ISecurityMetrics
 
     private void CheckAndTrackSustainedRateLimit(string? clientIp)
     {
-        if (string.IsNullOrEmpty(clientIp)) return;
+        if (string.IsNullOrEmpty(clientIp))
+            return;
 
         CleanupOldEntries();
         var timestamps = _rateLimitsByIp.GetOrAdd(clientIp, _ => new List<DateTime>());
@@ -206,6 +208,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackAuthenticationFailed(string method, string? clientIp, string? reason = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+
         var properties = new Dictionary<string, string>
         {
             ["Method"] = method,
@@ -231,6 +235,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackAuthenticationSuccess(string method, string? userId = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(method);
+
         var properties = new Dictionary<string, string>
         {
             ["Method"] = method,
@@ -250,6 +256,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackTokenValidationFailed(string? clientIp, string reason)
     {
+        ArgumentException.ThrowIfNullOrEmpty(reason);
+
         var properties = new Dictionary<string, string>
         {
             ["Reason"] = reason,
@@ -270,6 +278,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackRateLimitHit(string? clientIp, string endpoint)
     {
+        ArgumentException.ThrowIfNullOrEmpty(endpoint);
+
         var properties = new Dictionary<string, string>
         {
             ["Endpoint"] = endpoint,
@@ -311,6 +321,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackSuspiciousRequest(string? clientIp, string pattern, string? details = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(pattern);
+
         var properties = new Dictionary<string, string>
         {
             ["Pattern"] = pattern,
@@ -334,6 +346,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackAuthorizationFailed(string? userId, string resource, string? reason = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(resource);
+
         var properties = new Dictionary<string, string>
         {
             ["Resource"] = resource,
@@ -378,6 +392,8 @@ public class SecurityMetrics : ISecurityMetrics
     /// <inheritdoc />
     public void TrackInvalidInput(string inputType, string? clientIp, string? details = null)
     {
+        ArgumentException.ThrowIfNullOrEmpty(inputType);
+
         var properties = new Dictionary<string, string>
         {
             ["InputType"] = inputType,

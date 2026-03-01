@@ -209,13 +209,18 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     const root = document.documentElement;
     const isDark =
       theme === "dark" ||
-      (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     root.classList.toggle("dark", isDark);
     localStorage.setItem("admin-theme", theme);
   }, [theme]);
 
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export const useTheme = () => useContext(ThemeContext);
@@ -231,7 +236,7 @@ export function ThemeSelector() {
   const { theme, setTheme } = useTheme();
 
   return (
-    <select value={theme} onChange={e => setTheme(e.target.value as any)}>
+    <select value={theme} onChange={(e) => setTheme(e.target.value as any)}>
       <option value="light">Light</option>
       <option value="dark">Dark</option>
       <option value="system">System</option>
@@ -273,7 +278,10 @@ export const loginRequest = {
 
 ```typescript
 // After Entra External ID migration
-const apiScopes = ["api://admin-api/Content.Read", "api://admin-api/Content.Write"];
+const apiScopes = [
+  "api://admin-api/Content.Read",
+  "api://admin-api/Content.Write",
+];
 ```
 
 ---

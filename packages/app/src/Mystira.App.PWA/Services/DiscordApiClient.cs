@@ -64,7 +64,6 @@ public class DiscordApiClient : BaseApiClient, IDiscordApiClient
                 Message = message
             };
 
-            await SetAuthorizationHeaderAsync();
             var response = await HttpClient.PostAsJsonAsync("api/discord/send", request, JsonOptions);
             return response.IsSuccessStatusCode;
         }
@@ -79,7 +78,6 @@ public class DiscordApiClient : BaseApiClient, IDiscordApiClient
     {
         try
         {
-            await SetAuthorizationHeaderAsync();
             var response = await HttpClient.PostAsJsonAsync("api/discord/send-embed", request, JsonOptions);
             return response.IsSuccessStatusCode;
         }

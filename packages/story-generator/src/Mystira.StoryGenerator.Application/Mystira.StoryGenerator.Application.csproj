@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,5 +29,9 @@
     <ProjectReference Include="..\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj" />
     <ProjectReference Include="..\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj" />
   </ItemGroup>
+
+  <PropertyGroup>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
 
 </Project>

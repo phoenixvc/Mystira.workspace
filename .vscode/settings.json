@@ -117,5 +117,7 @@
   },
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
-  }
+  },
+
+  "vitest.maximumConfigs": 10
 }

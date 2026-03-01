@@ -23,10 +23,15 @@ export interface BundleQueryResponse {
 }
 
 export const bundlesApi = {
-  getBundles: async (request?: BundleQueryRequest): Promise<BundleQueryResponse> => {
-    const response = await apiClient.get<BundleQueryResponse>("/api/admin/bundles", {
-      params: request,
-    });
+  getBundles: async (
+    request?: BundleQueryRequest
+  ): Promise<BundleQueryResponse> => {
+    const response = await apiClient.get<BundleQueryResponse>(
+      "/api/admin/bundles",
+      {
+        params: request,
+      }
+    );
     return response.data;
   },
 
@@ -35,7 +40,9 @@ export const bundlesApi = {
     return response.data;
   },
 
-  validateBundle: async (file: File): Promise<{ success: boolean; result: unknown }> => {
+  validateBundle: async (
+    file: File
+  ): Promise<{ success: boolean; result: unknown }> => {
     const formData = new FormData();
     formData.append("bundleFile", file);
 
@@ -71,7 +78,9 @@ export const bundlesApi = {
     return response.data;
   },
 
-  createBundle: async (bundle: Omit<Bundle, "id" | "createdAt" | "updatedAt">): Promise<Bundle> => {
+  createBundle: async (
+    bundle: Omit<Bundle, "id" | "createdAt" | "updatedAt">
+  ): Promise<Bundle> => {
     const response = await apiClient.post<Bundle>("/api/admin/bundles", bundle);
     return response.data;
   },
@@ -80,7 +89,10 @@ export const bundlesApi = {
     id: string,
     bundle: Omit<Bundle, "id" | "createdAt" | "updatedAt">
   ): Promise<Bundle> => {
-    const response = await apiClient.put<Bundle>(`/api/admin/bundles/${id}`, bundle);
+    const response = await apiClient.put<Bundle>(
+      `/api/admin/bundles/${id}`,
+      bundle
+    );
     return response.data;
   },
 

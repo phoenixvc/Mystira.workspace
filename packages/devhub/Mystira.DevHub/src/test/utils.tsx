@@ -1,5 +1,5 @@
-import { ReactElement } from "react";
 import { render, RenderOptions } from "@testing-library/react";
+import { ReactElement } from "react";
 import { vi } from "vitest";
 
 /**
@@ -16,8 +16,9 @@ export function renderWithProviders(
  * Mock Tauri invoke function
  */
 export async function mockTauriInvoke(command: string, response: any) {
-  const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
-  invoke.mockImplementation((cmd: string) => {
+  const { invoke } = await import("@tauri-apps/api/core");
+  const mockInvoke = invoke as any;
+  mockInvoke.mockImplementation((cmd: string) => {
     if (cmd === command) {
       return Promise.resolve(response);
     }

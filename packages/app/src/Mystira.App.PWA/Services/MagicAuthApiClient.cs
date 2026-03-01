@@ -60,14 +60,6 @@ public class MagicAuthApiClient : BaseApiClient, IMagicAuthApiClient
     }
 }
 
-public record MagicSignupResult(string PendingSignupId, string Status, string Message);
-
-public record VerifyMagicSignupResult(
-    string Status,
-    string Message,
-    bool CanContinueWithEmail,
-    bool CanContinueWithEntra);
-
 public record MagicConsumeResponse(
     string? AccessToken,
     DateTime? ExpiresAtUtc,

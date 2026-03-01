@@ -1677,17 +1677,20 @@
                     // Strip any JSON code blocks from assistant content before displaying (chat should never contain JSON)
                     var sanitized = RemoveJsonCodeBlocks(content);
                     // Add assistant response normally
-                    CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                    if (CurrentChat?.Messages != null)
                     {
-                        Role = "assistant",
-                        Content = sanitized,
-                        Timestamp = DateTime.Now
-                    });
+                        CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                        {
+                            Role = "assistant",
+                            Content = sanitized,
+                            Timestamp = DateTime.Now
+                        });
+                    }
                     await SaveChatsAsync();
                 }
 
                 // Update title if it's a new chat
-                if (CurrentChat.Title == "New Story")
+                if (CurrentChat?.Title == "New Story")
                 {
                     CurrentChat.Title = message.Length > 30 ? message[..30] + "..." : message;
                     await SaveChatsAsync();
@@ -1709,7 +1712,7 @@
                         if (!validation.IsValid)
                         {
                             // Inform user and retry generation with validation feedback
-                            CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                            CurrentChat!.Messages?.Add(new StoryGeneratorChatMessage
                             {
                                 Role = "system",
                                 Content = $"Generated story did not pass validation. Retrying with fixes. Issues: {BuildValidationSummary(validation)}",
@@ -1743,7 +1746,7 @@
 
                                 // Add a concise system message instead of dumping YAML in chat
                                 var summary = BuildYamlSummaryMessage(fixedYaml);
-                                CurrentChat!.Messages.Add(new StoryGeneratorChatMessage
+                                CurrentChat!.Messages?.Add(new StoryGeneratorChatMessage
                                 {
                                     Role = "system",
                                     Content = revalidation.IsValid
@@ -1760,12 +1763,15 @@
             else
             {
                 var err = response.Error ?? "Failed to get response from AI";
-                CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                if (CurrentChat?.Messages != null)
                 {
-                    Role = "assistant",
-                    Content = $"Error: {err}",
-                    Timestamp = DateTime.Now
-                });
+                    CurrentChat.Messages.Add(new StoryGeneratorChatMessage
+                    {
+                        Role = "assistant",
+                        Content = $"Error: {err}",
+                        Timestamp = DateTime.Now
+                    });
+                }
                 await SaveChatsAsync();
             }
         }
@@ -2659,20 +2665,28 @@
             showImportMenu = false;
             var result = await JSRuntime.InvokeAsync<dynamic>("mystiraClipboard.readText");
 
-            if (result != null && result["success"] == true)
+            if (result != null)
             {
-                var yamlContent = (string?)result["text"]?.ToString();
-                if (yamlContent != null)
+                var successValue = result["success"];
+                if (successValue != null && successValue == true)
                 {
-                    importResult = await YamlImportService.ImportYamlAsync(yamlContent);
-                }
-                else
-                {
-                    importResult = new YamlImportResult
+                    var textValue = result["text"];
+                    if (textValue != null)
                     {
-                        IsValid = false,
-                        ErrorMessage = "Clipboard content is empty"
-                    };
+                        var yamlContent = textValue.ToString();
+                        if (yamlContent != null)
+                        {
+                            importResult = await YamlImportService.ImportYamlAsync(yamlContent);
+                        }
+                        else
+                        {
+                            importResult = new YamlImportResult
+                            {
+                                IsValid = false,
+                                ErrorMessage = "Clipboard content is empty"
+                            };
+                        }
+                    }
                 }
             }
             else

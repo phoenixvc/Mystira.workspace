@@ -2,374 +2,195 @@
 
 ## Status
 
-**Proposed** - 2025-12-19
+**Implemented** - 2026-02-27
 
 ## Context
 
-Building on [ADR-0010: Authentication and Authorization Strategy](./0010-authentication-and-authorization-strategy.md), this ADR specifically addresses the integration of Microsoft Entra ID (formerly Azure Active Directory) as the enterprise identity provider for the Mystira platform.
+Building on [ADR-0010: Authentication and Authorization Strategy](./0010-authentication-and-authorization-strategy.md), this ADR documents the implementation of Microsoft Entra ID integration through our centralized Identity API service. The Mystira platform now uses a unified authentication architecture with a dedicated Identity service handling both workforce (Entra ID) and consumer (magic link + optional Entra) authentication flows.
 
-### Current State
+### Current Architecture
 
-The Mystira platform currently uses:
+The Mystira platform now uses:
 
-- **Cookie-based authentication** for Admin UI (internal sessions)
-- **JWT tokens** for Public API (stateless authentication)
-- **Shared JWT services** in `Mystira.App.Shared` NuGet package
+- **Centralized Identity API** (`packages/identity/src/Mystira.Identity.Api`) for all authentication
+- **UnifiedAuthService** in client applications for dual-path authentication
+- **Magic link authentication** as primary consumer flow with optional Entra ID
+- **Entra ID integration** for workforce authentication and optional consumer social login
+- **JWT token service** for cross-service authentication
 
 ### Business Drivers
 
-1. **Enterprise SSO**: Organizations managing Mystira installations need single sign-on
-2. **Admin Security**: Admin users require stronger authentication (MFA, conditional access)
-3. **Azure Integration**: Platform runs on Azure, making Entra ID a natural choice
-4. **Compliance**: Enterprise customers require identity provider integration for audit/compliance
-
-### Requirements
-
-1. **Admin Authentication**: Admin API and Admin UI must support Entra ID sign-in
-2. **Service-to-Service**: Azure services must authenticate using Managed Identities
-3. **Multi-tenant Support**: Support both single-tenant (enterprise) and multi-tenant (SaaS) scenarios
-4. **External ID Option**: Consumer-facing apps may use Microsoft Entra External ID for social login
-5. **Backward Compatibility**: Maintain existing auth for non-enterprise deployments
+1. **Unified Auth**: Single authentication authority across all services
+2. **Consumer-First**: Magic link authentication with optional social providers
+3. **Enterprise Ready**: Entra ID integration for workforce scenarios
+4. **Service-to-Service**: Managed identity authentication for Azure services
+5. **Flexibility**: Support both B2C and B2E scenarios in the same platform
 
 ## Decision
 
-We adopt **Microsoft Entra ID** as the enterprise identity provider with the following architecture:
+We implement a **Centralized Identity Service** with Microsoft Entra ID integration using the following architecture:
 
-### 1. Authentication Tiers
+### 1. Authentication Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Authentication Tiers                          │
+│                    Centralized Identity                       │
 ├─────────────────────────────────────────────────────────────────┤
 │                                                                  │
-│  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────┐  │
-│  │   Tier 1    │    │   Tier 2    │    │      Tier 3         │  │
-│  │  Internal   │    │  Consumer   │    │    Enterprise       │  │
-│  ├─────────────┤    ├─────────────┤    ├─────────────────────┤  │
-│  │ Admin API   │    │ Public API  │    │ Enterprise SSO      │  │
-│  │ Admin UI    │    │ PWA         │    │ B2B Collaboration   │  │
-│  │ DevHub      │    │ Publisher   │    │ Managed Partners    │  │
-│  ├─────────────┤    ├─────────────┤    ├─────────────────────┤  │
-│  │ Entra ID    │    │ External ID │    │ Entra ID External   │  │
-│  │ (Workforce) │    │ (Consumer)  │    │ (Guests)            │  │
-│  └─────────────┘    └─────────────┘    └─────────────────────┘  │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │              Identity API Service                          │  │
+│  │  packages/identity/src/Mystira.Identity.Api               │  │
+│  ├─────────────────────────────────────────────────────────────┤  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │  │
+│  │  │   Magic     │  │   Entra     │  │   Token Service     │  │  │
+│  │  │   Auth      │  │   ID        │  │   (JWT)             │  │  │
+│  │  │             │  │             │  │                     │  │  │
+│  │  │ • Email     │  │ • Workforce │  │ • Access Tokens     │  │  │
+│  │  │ • Magic     │  │ • Social    │  │ • Refresh Tokens    │  │  │
+│  │  │ • TTL 30m   │  │ • Optional  │  │ • Validation        │  │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────────────┘  │  │
+│  └─────────────────────────────────────────────────────────────┘  │
 │                                                                  │
+│  ┌─────────────────────────────────────────────────────────────┐  │
+│  │                 Client Applications                         │  │
+│  │  UnifiedAuthService (dual-path auth)                       │  │
+│  │  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │  │
+│  │  │    App PWA  │  │ Admin UI    │  │   Publisher UI      │  │  │
+│  │  │             │  │             │  │                     │  │  │
+│  │  │ • Magic     │  │ • Entra     │  │ • Magic + Entra     │  │  │
+│  │  │ • Entra     │  │ • Workforce │  │ • Optional Social   │  │  │
+│  │  └─────────────┘  └─────────────┘  └─────────────────────┘  │  │
+│  └─────────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-### 2. App Registration Strategy
+### 2. Centralized Identity API
 
-#### Admin Applications (Tier 1)
+**Location**: `packages/identity/src/Mystira.Identity.Api`
 
-**App Registration: `mystira-admin-api`**
+**Core Services**:
 
-```
-Display Name: Mystira Admin API
-Application ID URI: api://mystira-admin-api
-Supported Account Types: Single tenant (organization only)
-```
+- `IdentityAuthController` - Authentication endpoints
+- `IIdentityTokenService` - JWT token management
+- `IEntraProvisioningService` - Entra ID user provisioning
+- `IProvisioningQueue` - Background provisioning queue
+- `ProvisioningBackgroundWorker` - Async user provisioning
 
-**Exposed API Scopes**:
+**Authentication Flows**:
 
-| Scope              | Description           | Admin Consent |
-| ------------------ | --------------------- | ------------- |
-| `Admin.Read`       | Read admin data       | Yes           |
-| `Admin.Write`      | Modify admin data     | Yes           |
-| `Users.Manage`     | Manage platform users | Yes           |
-| `Content.Moderate` | Moderate content      | Yes           |
+1. **Magic Link**: Email-based authentication (primary consumer flow)
+2. **Entra ID**: Workforce authentication (admin/enterprise)
+3. **Hybrid**: Magic link + optional Entra social login
 
-**App Registration: `mystira-admin-ui`**
+### 3. Client-Side Unified Authentication
 
-```
-Display Name: Mystira Admin UI
-Redirect URIs:
-  - https://admin.mystira.app/auth/callback
-  - http://localhost:7001/auth/callback (dev)
-Supported Account Types: Single tenant
-```
+**UnifiedAuthService** Features:
 
-#### Consumer Applications (Tier 2)
+- Dual-path authentication (Magic + Entra)
+- Automatic token refresh and expiry handling
+- Provider switching without session loss
+- Centralized auth state management
+- Event-driven auth state notifications
 
-**Microsoft Entra External ID Tenant: `mystira.ciamlogin.com`**
-
-**Sign-in Experience**:
-
-| Feature          | Description                                                |
-| ---------------- | ---------------------------------------------------------- |
-| Sign-up/Sign-in  | Combined email/password and social provider authentication |
-| Password Reset   | Self-service via email verification                        |
-| Profile Edit     | User can update display name and avatar                    |
-| Social Providers | Google OAuth 2.0, Discord OpenID Connect                   |
-
-**App Registration: `mystira-public-api`**
-
-```
-Display Name: Mystira Public API
-Application ID URI: api://mystira-api
-Supported Account Types: External ID tenant accounts (AzureADandPersonalMicrosoftAccount)
-```
-
-### 3. Authentication Flows
-
-#### Admin OIDC Flow (PKCE)
-
-```
-┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
-│Admin UI │     │   Entra ID   │     │  Admin API  │     │ Cosmos DB│
-└────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
-     │                 │                    │                  │
-     │  1. Redirect to /authorize           │                  │
-     │────────────────▶│                    │                  │
-     │                 │                    │                  │
-     │  2. User signs in + MFA              │                  │
-     │◀────────────────│                    │                  │
-     │                 │                    │                  │
-     │  3. Auth code + code_verifier        │                  │
-     │────────────────▶│                    │                  │
-     │                 │                    │                  │
-     │  4. ID token + access token          │                  │
-     │◀────────────────│                    │                  │
-     │                 │                    │                  │
-     │  5. API request with access token    │                  │
-     │─────────────────────────────────────▶│                  │
-     │                 │                    │                  │
-     │                 │  6. Validate token │                  │
-     │                 │◀───────────────────│                  │
-     │                 │                    │                  │
-     │                 │                    │  7. Query data   │
-     │                 │                    │─────────────────▶│
-     │                 │                    │                  │
-     │  8. Response                         │◀─────────────────│
-     │◀─────────────────────────────────────│                  │
-```
-
-#### Service-to-Service (Managed Identity)
-
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Admin API  │     │   Entra ID   │     │  Cosmos DB  │
-│ (App Svc)   │     │   (IMDS)     │     │             │
-└──────┬──────┘     └──────┬───────┘     └──────┬──────┘
-       │                   │                    │
-       │ 1. Request token  │                    │
-       │   (Managed ID)    │                    │
-       │──────────────────▶│                    │
-       │                   │                    │
-       │ 2. Access token   │                    │
-       │◀──────────────────│                    │
-       │                   │                    │
-       │ 3. Request with token                  │
-       │───────────────────────────────────────▶│
-       │                   │                    │
-       │ 4. Response       │                    │
-       │◀───────────────────────────────────────│
-```
-
-#### External ID Sign-Up/Sign-In Flow (Consumer)
-
-```
-┌─────────┐     ┌──────────────┐     ┌─────────────┐     ┌──────────┐
-│   PWA   │     │  External ID │     │  Public API │     │ Cosmos DB│
-│ (Blazor)│     │  (Consumer)  │     │             │     │          │
-└────┬────┘     └──────┬───────┘     └──────┬──────┘     └────┬─────┘
-     │                 │                    │                  │
-     │  1. User clicks "Sign In"            │                  │
-     │────────────────▶│                    │                  │
-     │                 │                    │                  │
-     │  2. Redirect to External ID login    │                  │
-     │◀────────────────│                    │                  │
-     │                 │                    │                  │
-     │  ┌──────────────────────────────┐    │                  │
-     │  │  External ID Hosted UI       │    │                  │
-     │  │  ┌────────────────────────┐  │    │                  │
-     │  │  │ Sign in with:         │  │    │                  │
-     │  │  │ [Google] [Discord]    │  │    │                  │
-     │  │  │ ─────────────────────  │  │    │                  │
-     │  │  │ Email: [          ]   │  │    │                  │
-     │  │  │ Password: [       ]   │  │    │                  │
-     │  │  │ [Sign In] [Sign Up]   │  │    │                  │
-     │  │  └────────────────────────┘  │    │                  │
-     │  └──────────────────────────────┘    │                  │
-     │                 │                    │                  │
-     │  3. User authenticates (email/social)│                  │
-     │────────────────▶│                    │                  │
-     │                 │                    │                  │
-     │  4. External ID validates user        │                  │
-     │                 │                    │                  │
-     │  5. Redirect with auth code          │                  │
-     │◀────────────────│                    │                  │
-     │                 │                    │                  │
-     │  6. Exchange code for tokens         │                  │
-     │────────────────▶│                    │                  │
-     │                 │                    │                  │
-     │  7. ID token + access token + refresh│                  │
-     │◀────────────────│                    │                  │
-     │                 │                    │                  │
-     │  8. API request with access token    │                  │
-     │─────────────────────────────────────▶│                  │
-     │                 │                    │                  │
-     │                 │  9. Validate External ID token        │
-     │                 │◀───────────────────│                  │
-     │                 │                    │                  │
-     │                 │                    │ 10. Query user   │
-     │                 │                    │─────────────────▶│
-     │                 │                    │                  │
-     │ 11. Response with user data          │◀─────────────────│
-     │◀─────────────────────────────────────│                  │
-```
-
-#### External ID Token Refresh Flow
-
-```
-┌─────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │  External ID │     │  Public API │
-│         │     │   (CIAM)     │     │             │
-└────┬────┘     └──────┬───────┘     └──────┬──────┘
-     │                 │                    │
-     │  1. Access token expired             │
-     │  (401 from API)                      │
-     │◀─────────────────────────────────────│
-     │                 │                    │
-     │  2. POST /token with refresh_token   │
-     │────────────────▶│                    │
-     │                 │                    │
-     │  3. Validate refresh token           │
-     │                 │                    │
-     │  4. New access token + refresh token │
-     │◀────────────────│                    │
-     │                 │                    │
-     │  5. Retry API request                │
-     │─────────────────────────────────────▶│
-     │                 │                    │
-     │  6. Success response                 │
-     │◀─────────────────────────────────────│
-```
-
-#### External ID Social Login Flow (Google/Discord)
-
-```
-┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌─────────────┐
-│   PWA   │     │ Ext. ID  │     │   Identity   │     │  Public API │
-│         │     │   UI     │     │   Provider   │     │             │
-└────┬────┘     └────┬─────┘     └──────┬───────┘     └──────┬──────┘
-     │               │                  │                    │
-     │ 1. Click social login button     │                    │
-     │──────────────▶│                  │                    │
-     │               │                  │                    │
-     │               │ 2. Redirect to IdP                    │
-     │               │─────────────────▶│                    │
-     │               │                  │                    │
-     │               │ 3. User authenticates with IdP        │
-     │               │                  │                    │
-     │               │ 4. IdP returns auth code              │
-     │               │◀─────────────────│                    │
-     │               │                  │                    │
-     │               │ 5. Exchange for IdP tokens            │
-     │               │─────────────────▶│                    │
-     │               │                  │                    │
-     │               │ 6. IdP tokens (user info)             │
-     │               │◀─────────────────│                    │
-     │               │                  │                    │
-     │ 7. External ID creates/links user, issues tokens       │
-     │◀──────────────│                  │                    │
-     │               │                  │                    │
-     │ 8. API call with External ID token                    │
-     │──────────────────────────────────────────────────────▶│
-     │               │                  │                    │
-     │ 9. Success                       │                    │
-     │◀──────────────────────────────────────────────────────│
-```
+**Implementation**: `packages/app/src/Mystira.App.PWA/Services/UnifiedAuthService.cs`
 
 ### 4. Implementation Details
 
-#### ASP.NET Core Configuration
+#### Magic Link Authentication Flow (Primary Consumer)
 
-**Admin API (appsettings.json)**:
+```text
+┌─────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌──────────┐
+│   PWA   │     │  Identity API   │     │   Email Service │     │ Database │
+└────┬────┘     └────────┬────────┘     └────────┬────────┘     └────┬─────┘
+     │                  │                        │                    │
+     │ 1. Request magic token                     │                    │
+     │──────────────────▶│                        │                    │
+     │                  │                        │                    │
+     │ 2. Generate token + send email             │                    │
+     │                  │────────────────────────▶│                    │
+     │                  │                        │                    │
+     │ 3. Email with magic link                    │                    │
+     │◀──────────────────│─────────────────────────│                    │
+     │                  │                        │                    │
+     │ 4. User clicks link, validates token       │                    │
+     │──────────────────▶│                        │                    │
+     │                  │ 5. Validate token      │                    │
+     │                  │────────────────────────▶│                    │
+     │                  │                        │                    │
+     │ 6. Return JWT tokens                      │                    │
+     │◀──────────────────│                        │                    │
+```
+
+#### Entra ID Workforce Authentication Flow
+
+```text
+┌─────────┐     ┌─────────────────┐     ┌─────────────────┐     ┌──────────┐
+│Admin UI │     │  Identity API   │     │   Entra ID      │     │ Database │
+└────┬────┘     └────────┬────────┘     └────────┬────────┘     └────┬─────┘
+     │                  │                        │                    │
+     │ 1. Redirect to Entra ID                   │                    │
+     │──────────────────▶│                        │                    │
+     │                  │                        │                    │
+     │ 2. User authenticates + MFA               │                    │
+     │◀──────────────────│─────────────────────────│                    │
+     │                  │                        │                    │
+     │ 3. Exchange code for tokens                │                    │
+     │──────────────────▶│                        │                    │
+     │                  │ 4. Validate with Entra │                    │
+     │                  │────────────────────────▶│                    │
+     │                  │                        │                    │
+     │ 5. Provision user (if needed)              │                    │
+     │                  │────────────────────────▶│                    │
+     │                  │                        │                    │
+     │ 6. Return JWT tokens                      │                    │
+     │◀──────────────────│                        │                    │
+```
+
+#### Centralized Identity API Configuration
+
+**appsettings.json**:
 
 ```json
 {
-  "AzureAd": {
+  "EntraId": {
     "Instance": "https://login.microsoftonline.com/",
-    "TenantId": "YOUR_TENANT_ID",
-    "ClientId": "YOUR_CLIENT_ID",
-    "Audience": "api://mystira-admin-api",
-    "CallbackPath": "/signin-oidc"
+    "TenantId": "${ENTRA_TENANT_ID}",
+    "ClientId": "${ENTRA_CLIENT_ID}",
+    "ClientSecret": "${ENTRA_CLIENT_SECRET}",
+    "Domain": "${ENTRA_DOMAIN}"
+  },
+  "MagicAuth": {
+    "TokenExpirationMinutes": 30,
+    "PendingSignupExpirationDays": 7
+  },
+  "Jwt": {
+    "Issuer": "Mystira.Identity",
+    "Audience": "Mystira.Services",
+    "ExpirationMinutes": 60,
+    "RefreshExpirationDays": 7
   }
 }
 ```
 
-**Program.cs Configuration**:
+#### UnifiedAuthService Client Implementation
+
+**Key Features**:
 
 ```csharp
-// Add Microsoft Identity Platform authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-
-// Add authorization policies
-builder.Services.AddAuthorization(options =>
+public class UnifiedAuthService : IAuthService
 {
-    options.AddPolicy("AdminOnly", policy =>
-        policy.RequireRole("Admin", "SuperAdmin"));
+    // Dual authentication providers
+    private readonly EntraExternalIdAuthService _entraAuthService;
+    private readonly IMagicAuthApiClient _magicAuthClient;
 
-    options.AddPolicy("ContentModerator", policy =>
-        policy.RequireClaim("extension_role", "Moderator", "Admin"));
-});
-```
+    // Automatic token management
+    public async Task<bool> EnsureTokenValidAsync();
+    public event EventHandler<bool>? AuthenticationStateChanged;
+    public event EventHandler? TokenExpiryWarning;
 
-#### React Admin UI Configuration
-
-**MSAL Configuration (authConfig.ts)**:
-
-```typescript
-import { Configuration, LogLevel } from "@azure/msal-browser";
-
-export const msalConfig: Configuration = {
-  auth: {
-    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
-    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
-    redirectUri: import.meta.env.VITE_REDIRECT_URI,
-    postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI,
-  },
-  cache: {
-    cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
-  },
-  system: {
-    loggerOptions: {
-      logLevel: LogLevel.Warning,
-    },
-  },
-};
-
-export const loginRequest = {
-  scopes: ["api://mystira-admin-api/Admin.Read"],
-};
-
-export const apiScopes = {
-  admin: [
-    "api://mystira-admin-api/Admin.Read",
-    "api://mystira-admin-api/Admin.Write",
-  ],
-  users: ["api://mystira-admin-api/Users.Manage"],
-  content: ["api://mystira-admin-api/Content.Moderate"],
-};
-```
-
-**Auth Provider (App.tsx)**:
-
-```typescript
-import { MsalProvider } from '@azure/msal-react';
-import { PublicClientApplication } from '@azure/msal-browser';
-import { msalConfig } from './authConfig';
-
-const msalInstance = new PublicClientApplication(msalConfig);
-
-function App() {
-  return (
-    <MsalProvider instance={msalInstance}>
-      <AuthenticatedApp />
-    </MsalProvider>
-  );
+    // Provider switching
+    public async Task<bool> SwitchToEntraAsync();
+    public async Task<bool> SwitchToMagicAsync(string email);
 }
 ```
 
@@ -950,98 +771,125 @@ function calculatePasswordStrength(password) {
 }
 ```
 
-### 6. Blazor WASM External ID Configuration
+## Implementation Status
 
-**wwwroot/appsettings.json**:
+### ✅ Completed
+
+- **Centralized Identity API** - Implemented in `packages/identity/src/Mystira.Identity.Api`
+- **UnifiedAuthService** - Client-side dual-path authentication (Magic + Entra)
+- **Magic Link Authentication** - Primary consumer flow with 30min TTL, 7-day pending signup validity
+- **Entra ID Integration** - Workforce authentication with provisioning service
+- **JWT Token Service** - Cross-service authentication with refresh tokens
+- **Background Provisioning** - Async user provisioning via `ProvisioningBackgroundWorker`
+
+### 🔄 In Progress
+
+- **Admin UI Entra Integration** - MSAL configuration for workforce authentication
+- **Conditional Access Policies** - MFA requirements for admin users
+- **Service-to-Service Auth** - Managed identity configuration for Azure services
+
+### 📋 Pending
+
+- **Social Provider Integration** - Google/Discord via Entra External ID (optional)
+- **Advanced Role Mapping** - Group-to-role mapping for enterprise scenarios
+
+## Consequences
+
+### Positive
+
+1. **Unified Authentication**: Single authority across all services and applications
+2. **Consumer-First**: Magic link authentication reduces friction for primary users
+3. **Enterprise Ready**: Entra ID integration supports workforce scenarios
+4. **Flexible**: Optional Entra social login while maintaining email-first approach
+5. **Scalable**: Background provisioning handles user creation asynchronously
+6. **Secure**: JWT tokens with proper expiration and refresh mechanisms
+
+### Negative
+
+1. **Complexity**: Dual-path authentication increases implementation complexity
+2. **Dependency**: Centralized Identity API is a critical dependency for all services
+3. **Migration**: Existing authentication methods need to be migrated
+4. **Provisioning Lag**: Background provisioning may cause temporary user state inconsistencies
+
+### Mitigations
+
+1. **Fallback Mechanisms**: Graceful degradation when Identity API is unavailable
+2. **Health Checks**: Service health monitoring for authentication endpoints
+3. **Documentation**: Comprehensive setup and troubleshooting guides
+4. **Testing**: End-to-end testing for all authentication flows
+
+## Technical Implementation
+
+### Core Components
+
+```csharp
+// Identity API Controller
+[ApiController]
+[Route("api/auth")]
+public class IdentityAuthController : ControllerBase
+{
+    [HttpPost("magic/request")]
+    public async Task<IActionResult> RequestMagicToken(MagicTokenRequest request);
+
+    [HttpPost("magic/verify")]
+    public async Task<IActionResult> VerifyMagicToken(MagicTokenVerification request);
+
+    [HttpPost("entra/callback")]
+    public async Task<IActionResult> EntraCallback(EntraCallbackRequest request);
+}
+
+// Unified Client Service
+public class UnifiedAuthService : IAuthService
+{
+    public async Task<bool> SignInWithMagicAsync(string email);
+    public async Task<bool> SignInWithEntraAsync();
+    public async Task<bool> EnsureTokenValidAsync();
+    public async Task SignOutAsync();
+}
+```
+
+### Configuration
 
 ```json
 {
-  "AzureAdB2C": {
-    "Authority": "https://mystirab2c.b2clogin.com/mystirab2c.onmicrosoft.com/B2C_1_SignUpSignIn",
-    "ClientId": "YOUR_B2C_CLIENT_ID",
-    "ValidateAuthority": false
+  "EntraId": {
+    "Instance": "https://login.microsoftonline.com/",
+    "TenantId": "${ENTRA_TENANT_ID}",
+    "ClientId": "${ENTRA_CLIENT_ID}",
+    "ClientSecret": "${ENTRA_CLIENT_SECRET}"
+  },
+  "MagicAuth": {
+    "TokenExpirationMinutes": 30,
+    "PendingSignupExpirationDays": 7
   }
 }
 ```
 
-**Program.cs**:
+## Related Documentation
 
-```csharp
-builder.Services.AddMsalAuthentication(options =>
-{
-    builder.Configuration.Bind("AzureAdB2C", options.ProviderOptions.Authentication);
-    options.ProviderOptions.DefaultAccessTokenScopes.Add(
-        "https://mystirab2c.onmicrosoft.com/mystira-api/API.Access");
-    options.ProviderOptions.LoginMode = "redirect";
-});
-```
-
-## Setup Documentation Links
-
-### Secrets Management
-
-- **[Secrets Management Guide](../../packages/app/docs/setup/secrets-management.md)** - How to manage secrets locally and in production
-- **[Quick Secrets Reference](../../packages/app/docs/setup/quick-secrets-reference.md)** - Quick lookup for common secrets
-- **[Kubernetes Secrets](../infrastructure/kubernetes-secrets-management.md)** - K8s secret management for deployed services
-- **[GitHub Secrets/Variables](../../packages/app/docs/setup/github-secrets-variables.md)** - CI/CD secrets configuration
-
-### Infrastructure Setup
-
-- **[Infrastructure Quick Start](../infrastructure/QUICK_START_DEPLOY.md)** - Quick deployment guide
-- **[Terraform Backend Setup](../infrastructure/TERRAFORM_BACKEND_SETUP.md)** - IaC backend configuration
-- **[Shared Resources](../infrastructure/shared-resources.md)** - Shared Azure resources
-
-### Application Setup
-
-- **[Environment Configuration](../ENVIRONMENT.md)** - Environment variable reference
-- **[Database Setup](../../packages/app/docs/setup/database-setup.md)** - Cosmos DB configuration
-- **[Email Setup](../../packages/app/docs/setup/email-setup.md)** - Azure Communication Services
-
-### Security
-
-- **[Security Policy](../../SECURITY.md)** - Security guidelines and contacts
+- **[BACKLOG.md](../../../BACKLOG.md)** - Current implementation status and open work
+- **[Identity API README](../../../packages/identity/README.md)** - Service-specific documentation
+- **[ENTRA_MAGIC_AUTH_SETUP.md](../../../docs/ENTRA_MAGIC_AUTH_SETUP.md)** - Setup guide
 - **[ADR-0010: Auth Strategy](./0010-authentication-and-authorization-strategy.md)** - Overall authentication strategy
-
-## Related ADRs
-
-- [ADR-0010: Authentication and Authorization Strategy](./0010-authentication-and-authorization-strategy.md) - Overall auth strategy
-- [ADR-0005: Service Networking and Communication](./0005-service-networking-and-communication.md) - Service security
-- [ADR-0006: Admin API Repository Extraction](./0006-admin-api-repository-extraction.md) - Admin service architecture
-
-## Related Infrastructure
-
-- [Entra ID Terraform Module](../../../infra/terraform/modules/entra-id/README.md) - App registrations, scopes, roles
-- [External ID Terraform Module](../../../infra/terraform/modules/external-id/README.md) - Consumer auth with social login
-- [Shared Identity Module](../../../infra/terraform/modules/shared/identity/README.md) - RBAC and workload identity
-- [Kubernetes ServiceAccounts](../../../infra/kubernetes/README.md) - Workload identity for pods
-- [Admin API Module](../../../infra/terraform/modules/admin-api/README.md) - Admin API managed identity
-- [PostgreSQL Module](../../../infra/terraform/modules/shared/postgresql/README.md) - Database with Azure AD auth
-- [Implementation Roadmap - Phase 5.0](../../planning/implementation-roadmap.md#phase-50-authentication-implementation-entra-id--b2c) - Implementation status
-
-### PostgreSQL Azure AD Authentication
-
-Services can authenticate to PostgreSQL using Azure AD tokens (passwordless), eliminating the need to store database credentials:
-
-```hcl
-# In environments/dev/main.tf
-module "shared_postgresql" {
-  # ... other config ...
 
   aad_auth_enabled = true
   aad_admin_identities = {
-    "admin-api" = {
-      principal_id   = module.admin_api.identity_principal_id
-      principal_name = "mys-dev-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
+  "admin-api" = {
+  principal_id = module.admin_api.identity_principal_id
+  principal_name = "mys-dev-admin-api-identity-san"
+  principal_type = "ServicePrincipal"
   }
-}
+  }
+  }
+
 ```
 
 **Connection String** (no password):
 
 ```
+
 Host=<server>.postgres.database.azure.com;Database=adminapi;Username=mys-dev-admin-api-identity-san;Ssl Mode=Require
+
 ```
 
 See the [PostgreSQL Module README](../../../infra/terraform/modules/shared/postgresql/README.md) for detailed configuration.
@@ -1056,3 +904,4 @@ See the [PostgreSQL Module README](../../../infra/terraform/modules/shared/postg
 - [External ID Identity Providers](https://learn.microsoft.com/en-us/entra/external-id/customers/how-to-google-federation-customers)
 - [Managed Identities](https://docs.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/)
 - [Conditional Access](https://docs.microsoft.com/en-us/azure/active-directory/conditional-access/)
+```

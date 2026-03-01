@@ -527,6 +527,6 @@ public class ProductRepositoryTests
 
 ## Related Documentation
 
-- [Repository Architecture](../architecture/migrations/repository-architecture.md) - Dual-database strategy
 - [Ardalis Specification Migration](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.Shared Migration Guide](./mystira-shared-migration.md)
+- [Workspace Backlog](../../../BACKLOG.md) - Technical debt and implementation status

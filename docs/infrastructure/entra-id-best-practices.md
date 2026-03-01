@@ -1,6 +1,6 @@
 # Entra ID Best Practices Guide
 
-This guide provides best practices for configuring Microsoft Entra ID (Azure AD) across multiple environments, including external entity access, app registrations, and security considerations.
+This guide provides best practices for configuring Microsoft Entra ID across multiple environments, including external entity access, app registrations, and security considerations.
 
 ## Overview
 
@@ -51,11 +51,17 @@ module "entra_id" {
 
 ### Environment-Specific Redirect URIs
 
-| Environment | Redirect URIs                                           |
-| ----------- | ------------------------------------------------------- |
-| Dev         | `http://localhost:*`, `https://dev.admin.mystira.app/*` |
-| Staging     | `https://admin.staging.mystira.app/*`                   |
-| Prod        | `https://admin.mystira.app/*`                           |
+| Environment | Redirect URIs |
+| ----------- | ------------- |
+
+<<<<<<< HEAD
+| Dev | `http://localhost:*`, `https://dev.admin.mystira.app/*` |
+=======
+| Dev | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
+
+> > > > > > > origin/feat/consolidate_backlog
+> > > > > > > | Staging | `https://admin.staging.mystira.app/*` |
+> > > > > > > | Prod | `https://admin.mystira.app/*` |
 
 ## External Entities
 
@@ -241,7 +247,7 @@ resource "azurerm_key_vault_secret" "admin_entra_tenant_id" {
 
 ### Audit and Monitoring
 
-1. **Enable sign-in logs** in Azure AD
+1. **Enable sign-in logs** in Entra ID
 2. **Stream to Log Analytics** for long-term retention
 3. **Alert on suspicious activity**:
    - Multiple failed sign-ins

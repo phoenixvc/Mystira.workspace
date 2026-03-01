@@ -24,32 +24,62 @@ type MasterDataType =
   | "fantasy-themes";
 
 const ageGroupSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
   minAge: z.number().min(0).max(100).optional(),
   maxAge: z.number().min(0).max(100).optional(),
 });
 
 const archetypeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 const compassAxisSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
   positiveLabel: z.string().max(100).optional(),
   negativeLabel: z.string().max(100).optional(),
 });
 
 const echoTypeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 const fantasyThemeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 type AgeGroupFormData = z.infer<typeof ageGroupSchema>;
@@ -65,7 +95,13 @@ type FormData =
   | EchoTypeFormData
   | FantasyThemeFormData;
 
-const validTypes = ["age-groups", "archetypes", "compass-axes", "echo-types", "fantasy-themes"];
+const validTypes = [
+  "age-groups",
+  "archetypes",
+  "compass-axes",
+  "echo-types",
+  "fantasy-themes",
+];
 
 function CreateMasterDataPage() {
   const { type } = useParams<{ type: MasterDataType }>();
@@ -130,11 +166,21 @@ function CreateMasterDataPage() {
     if (!type) return { name: "", description: "" };
     switch (type) {
       case "age-groups":
-        return { name: "", description: "", minAge: undefined, maxAge: undefined };
+        return {
+          name: "",
+          description: "",
+          minAge: undefined,
+          maxAge: undefined,
+        };
       case "archetypes":
         return { name: "", description: "" };
       case "compass-axes":
-        return { name: "", description: "", positiveLabel: "", negativeLabel: "" };
+        return {
+          name: "",
+          description: "",
+          positiveLabel: "",
+          negativeLabel: "",
+        };
       case "echo-types":
         return { name: "", description: "" };
       case "fantasy-themes":
@@ -169,9 +215,11 @@ function CreateMasterDataPage() {
       showToast.success(`${title} created successfully!`);
       navigate(`/admin/master-data/${type}`);
     },
-    onError: error => {
+    onError: (error) => {
       showToast.error(
-        error instanceof Error ? error.message : `Failed to create ${title.toLowerCase()}`
+        error instanceof Error
+          ? error.message
+          : `Failed to create ${title.toLowerCase()}`
       );
     },
   });
@@ -192,7 +240,10 @@ function CreateMasterDataPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">➕ Create {title}</h1>
-        <Link to={`/admin/master-data/${type}`} className="btn btn-sm btn-outline-secondary">
+        <Link
+          to={`/admin/master-data/${type}`}
+          className="btn btn-sm btn-outline-secondary"
+        >
           <i className="bi bi-arrow-left"></i> Back to {title}s
         </Link>
       </div>
@@ -205,7 +256,11 @@ function CreateMasterDataPage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea id="description" rows={5} {...register("description")} />
+              <Textarea
+                id="description"
+                rows={5}
+                {...register("description")}
+              />
             </FormField>
 
             {type === "age-groups" && (
@@ -213,7 +268,8 @@ function CreateMasterDataPage() {
                 <FormField
                   label="Minimum Age"
                   error={
-                    (errors as Record<string, { message?: string } | undefined>).minAge?.message
+                    (errors as Record<string, { message?: string } | undefined>)
+                      .minAge?.message
                   }
                   helpText="Minimum age for this group (0-100)"
                 >
@@ -228,7 +284,8 @@ function CreateMasterDataPage() {
                 <FormField
                   label="Maximum Age"
                   error={
-                    (errors as Record<string, { message?: string } | undefined>).maxAge?.message
+                    (errors as Record<string, { message?: string } | undefined>)
+                      .maxAge?.message
                   }
                   helpText="Maximum age for this group (0-100)"
                 >
@@ -247,23 +304,29 @@ function CreateMasterDataPage() {
                 <FormField
                   label="Positive Label"
                   error={
-                    (errors as Record<string, { message?: string } | undefined>).positiveLabel
-                      ?.message
+                    (errors as Record<string, { message?: string } | undefined>)
+                      .positiveLabel?.message
                   }
                   helpText="Label for the positive end of the axis"
                 >
-                  <TextInput id="positiveLabel" {...register("positiveLabel")} />
+                  <TextInput
+                    id="positiveLabel"
+                    {...register("positiveLabel")}
+                  />
                 </FormField>
 
                 <FormField
                   label="Negative Label"
                   error={
-                    (errors as Record<string, { message?: string } | undefined>).negativeLabel
-                      ?.message
+                    (errors as Record<string, { message?: string } | undefined>)
+                      .negativeLabel?.message
                   }
                   helpText="Label for the negative end of the axis"
                 >
-                  <TextInput id="negativeLabel" {...register("negativeLabel")} />
+                  <TextInput
+                    id="negativeLabel"
+                    {...register("negativeLabel")}
+                  />
                 </FormField>
               </>
             )}
@@ -289,7 +352,10 @@ function CreateMasterDataPage() {
                   </>
                 )}
               </button>
-              <Link to={`/admin/master-data/${type}`} className="btn btn-secondary">
+              <Link
+                to={`/admin/master-data/${type}`}
+                className="btn btn-secondary"
+              >
                 Cancel
               </Link>
             </div>

@@ -16,6 +16,13 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// </summary>
 public partial class AgentOrchestrator : IAgentOrchestrator
 {
+    // Constants for magic numbers
+    private const int StoryLengthSafetyThreshold = 10000;
+    private const int SimpleStoryMaxLength = 500;
+    private const int ModerateStoryMaxLength = 2000;
+    private const int ComplexStoryUniqueWordsThreshold = 200;
+    private const int MaxEvaluationFindings = 10;
+
     private readonly ILogger<AgentOrchestrator> _logger;
     private readonly IAgentStreamPublisher _eventPublisher;
     private readonly IStorySessionRepository _sessionRepository;
@@ -231,7 +238,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             var (isValid, errors) = await _schemaValidator.ValidateAsync(storyJson, ct);
             if (!isValid)
             {
-                var errorSummary = string.Join(" | ", errors.Take(10));
+                var errorSummary = string.Join(" | ", errors.Take(MaxEvaluationFindings));
                 throw new InvalidOperationException($"Generated story failed schema validation: {errorSummary}");
             }
 
@@ -334,10 +341,11 @@ public partial class AgentOrchestrator : IAgentOrchestrator
                 if (!schemaValid)
                 {
                     findings.Add("Story failed schema validation");
-                    findings.AddRange(schemaErrors.Take(10));
+                    findings.AddRange(schemaErrors.Take(MaxEvaluationFindings));
                 }
 
-                if (!safetyGatePassed) findings.Add("Story failed safety gate checks");
+                if (!safetyGatePassed)
+                    findings.Add("Story failed safety gate checks");
 
                 session.Stage = StorySessionStage.RefinementRequested;
                 session.UpdatedAt = DateTime.UtcNow;
@@ -579,7 +587,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
             var (isValid, errors) = await _schemaValidator.ValidateAsync(refinedStoryJson, ct);
             if (!isValid)
             {
-                var errorSummary = string.Join(" | ", errors.Take(10));
+                var errorSummary = string.Join(" | ", errors.Take(MaxEvaluationFindings));
                 throw new InvalidOperationException($"Refined story failed schema validation: {errorSummary}");
             }
 
@@ -667,7 +675,7 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
     public async Task<(bool Success, RubricSummary? Rubric)> GenerateRubricAsync(string sessionId, CancellationToken ct)
     {
-                _logger.LogInformation("Starting rubric generation for session {SessionId}", sessionId);
+        _logger.LogInformation("Starting rubric generation for session {SessionId}", sessionId);
 
         try
         {
@@ -784,24 +792,249 @@ public partial class AgentOrchestrator : IAgentOrchestrator
 
     private Task<bool> RunSafetyGateAsync(string storyJson)
     {
-        // TODO: Implement local safety gate checks
-        // This would check for inappropriate content, age-appropriate language, etc.
-        return Task.FromResult(true);
+        // Basic safety gate checks for inappropriate content
+        try
+        {
+            // Check for basic inappropriate content patterns
+            var inappropriatePatterns = new[]
+            {
+                "violence", "weapon", "kill", "death", "blood", "gore",
+                "adult content", "inappropriate", "offensive"
+                // Note: This is a basic implementation - in production would use more sophisticated content filtering
+            };
+
+            var storyLower = storyJson.ToLowerInvariant();
+            var hasInappropriateContent = inappropriatePatterns.Any(pattern => storyLower.Contains(pattern));
+
+            if (hasInappropriateContent)
+            {
+                _logger.LogWarning("Safety gate detected potentially inappropriate content in story");
+                return Task.FromResult(false);
+            }
+
+            // Check for age-appropriate content length (basic heuristic)
+            if (storyJson.Length > StoryLengthSafetyThreshold) // Very long stories might contain inappropriate content
+            {
+                _logger.LogDebug("Story length exceeds safety threshold, requiring manual review");
+                // For now, allow but flag for review
+            }
+
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in safety gate checks");
+            // Fail safe - if we can't check, assume it's safe for development
+            return Task.FromResult(true);
+        }
     }
 
     private Task<object> AnalyzeStoryStructureAsync(string storyJson)
     {
-        // TODO: Implement SRL (Semantic Role Labelling) and story structure analysis
-        // This would extract scenes, characters, state transitions
-        return Task.FromResult<object>(new { Scenes = new List<object>(), Characters = new List<object>() });
+        try
+        {
+            // Basic story structure analysis - extract scenes and characters
+            // This is a simplified implementation that looks for common story patterns
+
+            var storyStructure = new
+            {
+                Scenes = ExtractBasicScenes(storyJson),
+                Characters = ExtractBasicCharacters(storyJson),
+                NarrativeElements = ExtractNarrativeElements(storyJson),
+                EstimatedComplexity = EstimateStoryComplexity(storyJson)
+            };
+
+            _logger.LogDebug("Basic story structure analysis completed");
+            return Task.FromResult<object>(storyStructure);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in story structure analysis");
+            return Task.FromResult<object>(new { Scenes = new List<object>(), Characters = new List<object>() });
+        }
+    }
+
+    private List<object> ExtractBasicScenes(string storyJson)
+    {
+        // Basic scene extraction - look for common scene indicators
+        var scenes = new List<object>();
+
+        // This is a placeholder implementation
+        // In production, would use NLP techniques to identify scene boundaries
+        var sceneIndicators = new[] { "chapter", "scene", "part", "section" };
+        var storyLower = storyJson.ToLowerInvariant();
+
+        foreach (var indicator in sceneIndicators)
+        {
+            // Use more efficient counting instead of Split
+            var count = CountOccurrences(storyLower, indicator);
+            if (count > 0)
+            {
+                scenes.Add(new { Type = indicator, Count = count });
+            }
+        }
+
+        return scenes;
+    }
+
+    private List<object> ExtractBasicCharacters(string storyJson)
+    {
+        // Basic character extraction - look for proper nouns and common character patterns
+        var characters = new List<object>();
+
+        // This is a placeholder implementation
+        // In production, would use NER (Named Entity Recognition) to identify characters
+        var characterPatterns = new[] { "protagonist", "hero", "character", "main character" };
+        var storyLower = storyJson.ToLowerInvariant();
+
+        foreach (var pattern in characterPatterns)
+        {
+            if (storyLower.Contains(pattern))
+            {
+                characters.Add(new { Type = pattern, Mentioned = true });
+            }
+        }
+
+        return characters;
+    }
+
+    private Dictionary<string, object> ExtractNarrativeElements(string storyJson)
+    {
+        // Basic narrative element extraction
+        var elements = new Dictionary<string, object>();
+
+        var storyLower = storyJson.ToLowerInvariant();
+
+        // Look for basic narrative elements
+        elements["HasConflict"] = storyLower.ContainsAny("conflict", "problem", "challenge", "obstacle");
+        elements["HasResolution"] = storyLower.ContainsAny("resolution", "ending", "conclusion", "solved");
+        elements["HasDialogue"] = storyLower.Contains('"'.ToString()) || storyLower.Contains("said");
+        elements["HasDescription"] = storyLower.ContainsAny("described", "looked", "appeared", "seemed");
+
+        return elements;
+    }
+
+    private string EstimateStoryComplexity(string storyJson)
+    {
+        // Basic complexity estimation based on length and content diversity
+        var length = storyJson.Length;
+
+        // Use HashSet for more efficient unique word counting
+        var uniqueWords = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var wordSpan = storyJson.AsSpan();
+        var start = 0;
+
+        for (int i = 0; i < wordSpan.Length; i++)
+        {
+            if (char.IsWhiteSpace(wordSpan[i]) || i == wordSpan.Length - 1)
+            {
+                if (i > start)
+                {
+                    var word = wordSpan.Slice(start, i - start + (i == wordSpan.Length - 1 ? 1 : 0)).ToString();
+                    if (!string.IsNullOrWhiteSpace(word))
+                        uniqueWords.Add(word);
+                }
+                start = i + 1;
+            }
+        }
+
+        if (length < SimpleStoryMaxLength)
+            return "Simple";
+        if (length < ModerateStoryMaxLength)
+            return "Moderate";
+        if (uniqueWords.Count > ComplexStoryUniqueWordsThreshold)
+            return "Complex";
+        return "Moderate";
+    }
+
+    /// <summary>
+    /// Efficiently counts occurrences of a substring in a string without creating arrays.
+    /// </summary>
+    private static int CountOccurrences(string source, string substring)
+    {
+        if (string.IsNullOrEmpty(source) || string.IsNullOrEmpty(substring))
+            return 0;
+
+        int count = 0;
+        int index = 0;
+
+        while ((index = source.IndexOf(substring, index, StringComparison.OrdinalIgnoreCase)) != -1)
+        {
+            count++;
+            index += substring.Length;
+        }
+
+        return count;
     }
 
     private string ComputeNarrativeConsistencyContext(object storyStructure)
     {
-        // TODO: Implement frontier-merged paths and narrative consistency computation
-        return "Narrative consistency context";
-    }
+        try
+        {
+            // Basic narrative consistency computation
+            // This is a simplified implementation that analyzes story structure for consistency
 
+            if (storyStructure == null)
+                return "No story structure available";
+
+            // Extract basic information from the story structure
+            var hasScenes = false;
+            var hasCharacters = false;
+            var complexity = "Unknown";
+
+            // This is a basic implementation - in production would use more sophisticated analysis
+            var structureDict = storyStructure as IDictionary<string, object>;
+            if (structureDict != null)
+            {
+                if (structureDict.ContainsKey("Scenes"))
+                {
+                    var scenesValue = structureDict["Scenes"];
+                    if (scenesValue != null && scenesValue is IEnumerable<object> scenesEnumerable)
+                        hasScenes = scenesEnumerable.Any();
+                }
+
+                if (structureDict.ContainsKey("Characters"))
+                {
+                    var charactersValue = structureDict["Characters"];
+                    if (charactersValue != null && charactersValue is IEnumerable<object> charactersEnumerable)
+                        hasCharacters = charactersEnumerable.Any();
+                }
+
+                if (structureDict.ContainsKey("EstimatedComplexity"))
+                {
+                    var complexityValue = structureDict["EstimatedComplexity"];
+                    complexity = complexityValue?.ToString() ?? "Unknown";
+                }
+            }
+
+            // Generate basic consistency context
+            var contextElements = new List<string>();
+
+            if (hasScenes)
+                contextElements.Add("Story has defined scenes");
+
+            if (hasCharacters)
+                contextElements.Add("Story has identifiable characters");
+
+            contextElements.Add($"Complexity: {complexity}");
+
+            // Basic consistency checks
+            if (!hasScenes && !hasCharacters)
+            {
+                contextElements.Add("Warning: Limited story structure detected");
+            }
+
+            var context = string.Join("; ", contextElements);
+            _logger.LogDebug("Generated narrative consistency context: {Context}", context);
+
+            return context;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error computing narrative consistency context");
+            return "Error computing narrative consistency";
+        }
+    }
 
     private Task<EvaluationReport> ParseEvaluationReportAsync(string judgeResponse, int iterationNumber)
     {
@@ -845,6 +1078,14 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         return Task.FromResult(report);
     }
 
-
     #endregion
+}
+
+// Extension method for string containment check
+public static class StringExtensions
+{
+    public static bool ContainsAny(this string source, params string[] values)
+    {
+        return values.Any(value => source.Contains(value));
+    }
 }

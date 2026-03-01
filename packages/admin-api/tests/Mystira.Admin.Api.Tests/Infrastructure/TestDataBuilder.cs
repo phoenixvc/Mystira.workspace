@@ -147,7 +147,7 @@ public class CreateScenarioRequestBuilder
             Title = _title,
             Description = _description,
             MinimumAge = _minimumAge,
-            AgeGroup = _ageGroup,
+            AgeGroup = _ageGroup ?? "All Ages",
             Tags = _tags
         };
     }

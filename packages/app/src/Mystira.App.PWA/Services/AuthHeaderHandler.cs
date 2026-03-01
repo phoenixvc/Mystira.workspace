@@ -30,7 +30,7 @@ public class AuthHeaderHandler : DelegatingHandler
             try
             {
                 // Proactively ensure token is valid before making request
-                await authService.EnsureTokenValidAsync(5);
+                await authService.EnsureTokenValidAsync();
 
                 var token = await authService.GetTokenAsync();
 
@@ -73,7 +73,7 @@ public class AuthHeaderHandler : DelegatingHandler
                     try
                     {
                         // Force token refresh
-                        var refreshSuccess = await authService.EnsureTokenValidAsync(expiryBufferMinutes: 999); // Force refresh
+                        var refreshSuccess = await authService.EnsureTokenValidAsync(); // Force refresh
 
                         if (refreshSuccess)
                         {

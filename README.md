@@ -83,8 +83,23 @@ Mystira.workspace/
 - **.NET SDK** 10.0+ (C# components)
 - **Python** 3.11+ (Chain component)
 - **Docker** (local development)
+- **Azure AD Tenant** (for Entra authentication)
+- **Email Service** (SendGrid/SMTP for Magic Link authentication)
 
 > **Note**: For .NET development, you'll need to configure GitHub Packages authentication. See [Setup Guide](./docs/guides/setup.md#nuget-packages-github-packages) for NuGet configuration including Package Source Mapping.
+
+### Authentication Setup
+
+The Mystira platform uses unified dual-path authentication (Entra + Magic Link). For complete setup instructions:
+
+📖 **[Entra-Magic Auth Setup Guide](./docs/ENTRA_MAGIC_AUTH_SETUP.md)**
+🔖 **[Quick Reference](./docs/ENTRA_MAGIC_AUTH_QUICK_REFERENCE.md)**
+
+Key requirements:
+
+- Azure AD app registration for Entra SSO
+- Email service configuration for Magic Link
+- JWT token configuration across all applications
 
 ### Common Tasks
 
@@ -298,7 +313,27 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  │  ┌─────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐ │  │
 │  │  │ Microsoft Entra │  │ Entra External ID │  │   Managed Identity      │ │  │
 │  │  │  ID (Admins)    │  │ (Consumer Users)  │  │  (Service-to-Service)   │ │  │
-│  │  └─────────────────┘  └───────────────────┘  └─────────────────────────┘ │  │
+│  │  │                 │  │  + Magic Link    │  │                         │ │  │
+│  │  │  • OAuth 2.0    │  │  • OAuth 2.0      │  │  • Azure AD Auth       │ │  │
+│  │  │  • JWT Tokens   │  │  • Magic Links    │  │  • Service Principals  │ │  │
+│  │  │  • SSO          │  │  • JWT Tokens     │  │                         │ │  │
+│  │  │                 │  │  • Email Service  │  │                         │ │  │
+│  │  └─────────┬───────┘  └─────────┬─────────┘  └─────────────────────────┘ │  │
+│  │            │                    │                                            │  │
+│  │            └──────────┬─────────┘                                            │  │
+│  │                       │ JWT Token Flow                                       │  │
+│  │                       ▼                                                      │  │
+│  │              ┌─────────────────┐                                            │  │
+│  │              │  Identity API   │                                            │  │
+│  │              │  (Token Issuer  │                                            │  │
+│  │              │   & Validator)   │                                            │  │
+│  │              │                 │                                            │  │
+│  │              │ • JWT issuance  │                                            │  │
+│  │              │ • Token validation│                                           │  │
+│  │              │ • Magic link auth│                                           │  │
+│  │              │ • Entra ID integration│                                      │  │
+│  │              │ • Centralized auth authority│                               │  │
+│  │              └─────────────────┘                                            │  │
 │  └──────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -354,6 +389,7 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 | Development | Web App         | dev.mystira.app               |
 |             | Admin UI        | dev.admin.mystira.app         |
 |             | Admin API       | dev.admin-api.mystira.app     |
+|             | Identity API    | dev.identity.mystira.app      |
 |             | Publisher       | dev.publisher.mystira.app     |
 |             | Story Generator | dev.story-api.mystira.app     |
 |             | Story Web       | dev.story.mystira.app         |
@@ -361,6 +397,7 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 | Staging     | Web App         | staging.mystira.app           |
 |             | Admin UI        | staging.admin.mystira.app     |
 |             | Admin API       | staging.admin-api.mystira.app |
+|             | Identity API    | staging.identity.mystira.app  |
 |             | Publisher       | staging.publisher.mystira.app |
 |             | Story Generator | staging.story-api.mystira.app |
 |             | Story Web       | staging.story.mystira.app     |
@@ -368,6 +405,7 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 | Production  | Web App         | mystira.app                   |
 |             | Admin UI        | admin.mystira.app             |
 |             | Admin API       | admin-api.mystira.app         |
+|             | Identity API    | identity.mystira.app          |
 |             | Publisher       | publisher.mystira.app         |
 |             | Story Generator | story-api.mystira.app         |
 |             | Story Web       | story.mystira.app             |

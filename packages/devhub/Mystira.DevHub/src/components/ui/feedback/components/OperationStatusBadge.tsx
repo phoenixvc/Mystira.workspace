@@ -63,10 +63,9 @@ const SIZE_CLASSES = {
 export function OperationStatusBadge({
   status,
   showIcon = true,
-  size = "md",
 }: OperationStatusBadgeProps) {
   const config = STATUS_CONFIG[status.toLowerCase()] || STATUS_CONFIG.unknown;
-  const sizeClass = SIZE_CLASSES[size];
+  const sizeClass = SIZE_CLASSES["md"];
 
   return (
     <span

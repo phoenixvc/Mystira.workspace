@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Logging;
 
 namespace Mystira.Infrastructure.Data.Caching;
 
@@ -22,6 +23,27 @@ public static class CachingServiceCollectionExtensions
         var cacheOptions = new CacheOptions();
         configuration.GetSection(CacheOptions.SectionName).Bind(cacheOptions);
 
+        // Validate Redis configuration if enabled
+        if (cacheOptions.Enabled)
+        {
+            if (string.IsNullOrEmpty(cacheOptions.ConnectionString))
+            {
+                throw new InvalidOperationException("Redis caching is enabled but ConnectionString is not configured. Please set CacheOptions:ConnectionString in configuration.");
+            }
+
+            // Basic connection string validation
+            if (!IsValidRedisConnectionString(cacheOptions.ConnectionString))
+            {
+                throw new InvalidOperationException($"Invalid Redis connection string format: {cacheOptions.ConnectionString}. Expected format: 'server:port' or 'server:port,password=xxx'");
+            }
+
+            // Validate instance name
+            if (string.IsNullOrEmpty(cacheOptions.InstanceName))
+            {
+                throw new InvalidOperationException("Redis InstanceName is required when Redis caching is enabled. Please set CacheOptions:InstanceName in configuration.");
+            }
+        }
+
         if (!cacheOptions.Enabled || string.IsNullOrEmpty(cacheOptions.ConnectionString))
         {
             // Use in-memory cache as fallback
@@ -36,16 +58,72 @@ public static class CachingServiceCollectionExtensions
             options.InstanceName = cacheOptions.InstanceName;
         });
 
-        // Add health check (requires AspNetCore.HealthChecks.Redis package)
-        // TODO: Add package reference: AspNetCore.HealthChecks.Redis
-        // services.AddHealthChecks()
-        //     .AddRedis(
-        //         cacheOptions.ConnectionString,
-        //         name: "redis",
-        //         failureStatus: HealthStatus.Degraded,
-        //         tags: new[] { "cache", "redis" });
+        // Add Redis health check if Redis is enabled
+        if (cacheOptions.Enabled && !string.IsNullOrEmpty(cacheOptions.ConnectionString))
+        {
+            // Note: This requires AspNetCore.HealthChecks.Redis package to be added
+            try
+            {
+                // Check if the health checks package is available by attempting to add the service
+                services.AddHealthChecks()
+                    .AddRedis(
+                        cacheOptions.ConnectionString,
+                        name: "redis",
+                        failureStatus: HealthStatus.Degraded,
+                        tags: new[] { "cache", "redis" });
+            }
+            catch (Exception ex)
+            {
+                // Log warning if health checks package is not available
+                // This allows the application to continue without health checks
+                var loggerFactory = services.BuildServiceProvider().GetService<ILoggerFactory>();
+                var logger = loggerFactory?.CreateLogger("CachingServiceCollectionExtensions");
+                logger?.LogWarning(ex, "Redis health checks not available. Add AspNetCore.HealthChecks.Redis package to enable.");
+            }
+        }
 
         return services;
+    }
+
+    /// <summary>
+    /// Validates basic Redis connection string format.
+    /// </summary>
+    /// <param name="connectionString">The Redis connection string to validate.</param>
+    /// <returns>True if the connection string appears valid, false otherwise.</returns>
+    private static bool IsValidRedisConnectionString(string connectionString)
+    {
+        if (string.IsNullOrWhiteSpace(connectionString))
+            return false;
+
+        // Basic validation for common Redis connection string formats:
+        // - server:port
+        // - server:port,password=xxx
+        // - server:port,ssl=true,sslHost=xxx
+
+        var trimmed = connectionString.Trim();
+        if (string.IsNullOrEmpty(trimmed))
+            return false;
+
+        var parts = trimmed.Split(',', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 0)
+            return false;
+
+        // Check the main server:port part
+        var serverPort = parts[0].Trim();
+        var serverPortParts = serverPort.Split(':');
+
+        if (serverPortParts.Length != 2)
+            return false;
+
+        // Validate server name (non-empty)
+        if (string.IsNullOrWhiteSpace(serverPortParts[0]))
+            return false;
+
+        // Validate port (numeric and in valid range)
+        if (!int.TryParse(serverPortParts[1], out var port) || port <= 0 || port > 65535)
+            return false;
+
+        return true;
     }
 
     /// <summary>

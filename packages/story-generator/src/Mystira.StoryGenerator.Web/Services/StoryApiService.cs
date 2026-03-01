@@ -8,11 +8,13 @@ namespace Mystira.StoryGenerator.Web.Services;
 public class StoryApiService : IStoryApiService
 {
     private readonly HttpClient _httpClient;
+    private readonly IAuthService _authService;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    public StoryApiService(HttpClient httpClient)
+    public StoryApiService(HttpClient httpClient, IAuthService authService)
     {
         _httpClient = httpClient;
+        _authService = authService;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -20,20 +22,43 @@ public class StoryApiService : IStoryApiService
         };
     }
 
+    /// <summary>
+    /// Gets authentication header for API requests without modifying shared HttpClient headers.
+    /// </summary>
+    /// <returns>Authentication header if token is available; null otherwise.</returns>
+    private async Task<System.Net.Http.Headers.AuthenticationHeaderValue?> GetAuthHeaderAsync()
+    {
+        var token = await _authService.GetTokenAsync();
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            return new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        }
+        return null;
+    }
+
     public async Task<ValidationResponse> ValidateStoryAsync(string storyContent, string format = "json")
     {
         try
         {
-            var request = new ValidateStoryRequest
+            var authHeader = await GetAuthHeaderAsync();
+
+            using var request = new HttpRequestMessage(HttpMethod.Post, "api/stories/validate");
+
+            if (authHeader != null)
+            {
+                request.Headers.Authorization = authHeader;
+            }
+
+            var validateRequest = new ValidateStoryRequest
             {
                 StoryContent = storyContent,
                 Format = format
             };
 
-            var json = JsonSerializer.Serialize(request, _jsonOptions);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var json = JsonSerializer.Serialize(validateRequest, _jsonOptions);
+            request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync("api/stories/validate", content);
+            using var response = await _httpClient.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -129,7 +154,8 @@ public class StoryApiService : IStoryApiService
                     // Re-serialize and deserialize into the expected type
                     var reJson = JsonSerializer.Serialize(orchestration.Result, _jsonOptions);
                     var mapped = JsonSerializer.Deserialize<GenerateJsonStoryResponse>(reJson, _jsonOptions);
-                    if (mapped != null) return mapped;
+                    if (mapped != null)
+                        return mapped;
                 }
                 catch
                 {
@@ -271,7 +297,7 @@ public class StoryApiService : IStoryApiService
             return new ChatCompletionResponse
             {
                 Success = orchestration.Success,
-                Content = orchestration.Success ? (contentText ?? orchestration.Prompt ?? string.Empty) : null,
+                Content = orchestration.Success ? (contentText ?? orchestration.Prompt ?? string.Empty) : string.Empty,
                 Error = orchestration.Success ? null : orchestration.Error
             };
         }

@@ -4,9 +4,21 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.DevHub.CLI.Commands;
 using Mystira.DevHub.CLI.Models;
+using Mystira.DevHub.CLI.Services;
 using Mystira.DevHub.Services.Migration;
 
 namespace Mystira.DevHub.CLI;
+
+/// <summary>
+/// Centralized authentication role constants for the DevHub CLI.
+/// </summary>
+public static class AuthRoles
+{
+    /// <summary>
+    /// Administrator role with full system access.
+    /// </summary>
+    public const string Admin = "admin";
+}
 
 /// <summary>
 /// CLI entry point for Cosmos DB migration operations.
@@ -40,6 +52,9 @@ internal class Program
 
             // Add migration service
             services.AddScoped<IMigrationService, MigrationService>();
+
+            // Add authentication service
+            services.AddScoped<IAuthService, AuthService>();
 
             // Add command handler
             services.AddScoped<MigrationCommands>();
@@ -89,11 +104,29 @@ internal class Program
             CommandResponse response;
             try
             {
-                response = request.Command.ToLower() switch
+                // Validate authentication for sensitive operations
+                var authService = serviceProvider.GetRequiredService<IAuthService>();
+                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
+
+                if (string.IsNullOrWhiteSpace(request.AuthToken))
                 {
-                    "migration.run" => await serviceProvider.GetRequiredService<MigrationCommands>().RunAsync(request.Args),
-                    _ => CommandResponse.Fail($"Unknown command: {request.Command}. Available commands: migration.run")
-                };
+                    logger.LogWarning("Authentication failed: No token provided for command {Command}", request.Command);
+                    response = CommandResponse.Fail("Authentication token is required for DevHub operations");
+                }
+                else if (!await authService.IsAuthorizedAsync(request.AuthToken, AuthRoles.Admin))
+                {
+                    logger.LogWarning("Authentication failed: Invalid token or insufficient permissions for command {Command}", request.Command);
+                    response = CommandResponse.Fail("Authentication failed or insufficient permissions.");
+                }
+                else
+                {
+                    logger.LogWarning("Authentication successful for command {Command}", request.Command);
+                    response = request.Command.ToLower() switch
+                    {
+                        "migration.run" => await serviceProvider.GetRequiredService<MigrationCommands>().RunAsync(request.Args),
+                        _ => CommandResponse.Fail($"Unknown command: {request.Command}. Available commands: migration.run")
+                    };
+                }
             }
             catch (Exception ex)
             {

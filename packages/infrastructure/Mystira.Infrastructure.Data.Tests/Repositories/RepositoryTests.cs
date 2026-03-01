@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
 using Mystira.Infrastructure.Data;
 using Mystira.Infrastructure.Data.Repositories;
 
@@ -80,11 +81,11 @@ public class RepositoryTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repository.FindAsync(e => e.Axis == targetAxis);
+        var result = await _repository.FindAsync(e => e.Axis == CoreAxis.Courage);
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().OnlyContain(e => e.Axis == targetAxis);
+        result.Should().OnlyContain(e => e.Axis == CoreAxis.Courage);
     }
 
     [Fact]
@@ -177,12 +178,19 @@ public class RepositoryTests : IDisposable
 
     private static BadgeConfiguration CreateTestBadgeConfig(string? axis = null)
     {
+        CoreAxis axisValue = axis switch
+        {
+            "courage" => CoreAxis.Courage,
+            "wisdom" => CoreAxis.Wisdom,
+            _ => CoreAxis.Courage
+        };
+
         return new BadgeConfiguration
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Test Badge",
-            Axis = axis ?? "default",
-            Threshold = 3.0f,
+            Axis = axisValue,
+            Threshold = (int?)3.0f,
             Message = "Test message"
         };
     }

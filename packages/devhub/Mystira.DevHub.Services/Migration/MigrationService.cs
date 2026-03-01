@@ -590,7 +590,7 @@ public class MigrationService : IMigrationService
                 // Get the value we would use for this partition key
                 var value = GetPartitionKeyValue(item, path);
                 doc[propertyName] = value;
-                _logger.LogDebug("Injected partition key field '{Field}' with value '{Value}'", propertyName, value);
+                _logger.LogDebug("Injected partition key field '{Field}' with value '{Value}'", (object)propertyName, (object)value);
             }
         }
 
