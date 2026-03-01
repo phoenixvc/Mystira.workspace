@@ -5,8 +5,6 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
-using Mystira.Shared.Data.Repositories;
-using Mystira.Shared.Locking;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -15,7 +13,6 @@ public class MakeChoiceUseCaseTests
     private readonly Mock<IGameSessionRepository> _repository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-    private readonly Mock<IDistributedLockService> _distributedLockService;
     private readonly Mock<ILogger<MakeChoiceUseCase>> _logger;
     private readonly MakeChoiceUseCase _useCase;
 
@@ -24,11 +21,10 @@ public class MakeChoiceUseCaseTests
         _repository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-        _distributedLockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<MakeChoiceUseCase>>();
         _useCase = new MakeChoiceUseCase(
             _repository.Object, _scenarioRepository.Object,
-            _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _unitOfWork.Object, _logger.Object);
     }
 
     [Fact]
@@ -63,11 +59,8 @@ public class MakeChoiceUseCaseTests
         var session = CreateTestSession();
         session.CompassValues["courage"] = new CompassTracking
         {
-            Axis = "courage",
-            CurrentValue = 0,
-            StartingValue = 0,
-            History = new List<CompassChange>(),
-            LastUpdated = DateTime.UtcNow
+            Axis = "courage", CurrentValue = 0, StartingValue = 0,
+            History = new List<CompassChange>(), LastUpdated = DateTime.UtcNow
         };
         var scenario = CreateTestScenarioWithCompassChange();
         SetupRepositories(session, scenario);
@@ -132,10 +125,8 @@ public class MakeChoiceUseCaseTests
 
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "scene-1",
-            ChoiceText = "Be brave",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "scene-1",
+            ChoiceText = "Be brave", NextSceneId = "scene-2"
         };
 
         var act = () => _useCase.ExecuteAsync(request);
@@ -154,10 +145,8 @@ public class MakeChoiceUseCaseTests
 
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "scene-1",
-            ChoiceText = "Be brave",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "scene-1",
+            ChoiceText = "Be brave", NextSceneId = "scene-2"
         };
 
         var act = () => _useCase.ExecuteAsync(request);
@@ -174,10 +163,8 @@ public class MakeChoiceUseCaseTests
 
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "nonexistent-scene",
-            ChoiceText = "Be brave",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "nonexistent-scene",
+            ChoiceText = "Be brave", NextSceneId = "scene-2"
         };
 
         var act = () => _useCase.ExecuteAsync(request);
@@ -194,10 +181,8 @@ public class MakeChoiceUseCaseTests
 
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "scene-1",
-            ChoiceText = "Invalid choice text",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "scene-1",
+            ChoiceText = "Invalid choice text", NextSceneId = "scene-2"
         };
 
         var act = () => _useCase.ExecuteAsync(request);
@@ -215,10 +200,8 @@ public class MakeChoiceUseCaseTests
         // scene-2 has no branches and no NextSceneId => final scene
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "scene-1",
-            ChoiceText = "Be brave",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "scene-1",
+            ChoiceText = "Be brave", NextSceneId = "scene-2"
         };
 
         var result = await _useCase.ExecuteAsync(request);
@@ -250,10 +233,8 @@ public class MakeChoiceUseCaseTests
 
         var request = new MakeChoiceRequest
         {
-            SessionId = "session-1",
-            SceneId = "scene-1",
-            ChoiceText = "Be brave",
-            NextSceneId = "scene-2"
+            SessionId = "session-1", SceneId = "scene-1",
+            ChoiceText = "Be brave", NextSceneId = "scene-2"
         };
 
         var result = await _useCase.ExecuteAsync(request);

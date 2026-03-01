@@ -1,0 +1,242 @@
+[
+  {
+    "name": ".env.example",
+    "path": "packages/admin-ui/.env.example",
+    "sha": "7f4344c9e5f8390fdf2584c667870b6ad6caa0fb",
+    "size": 3035,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.env.example?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.env.example",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7f4344c9e5f8390fdf2584c667870b6ad6caa0fb",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/.env.example",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.env.example?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7f4344c9e5f8390fdf2584c667870b6ad6caa0fb",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.env.example"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": "packages/admin-ui/.gitignore",
+    "sha": "99529791a6f1ba0bcbf3495c623ebaff7e5f1fc7",
+    "size": 466,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.gitignore?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.gitignore",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/99529791a6f1ba0bcbf3495c623ebaff7e5f1fc7",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.gitignore?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/99529791a6f1ba0bcbf3495c623ebaff7e5f1fc7",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.gitignore"
+    }
+  },
+  {
+    "name": ".prettierrc",
+    "path": "packages/admin-ui/.prettierrc",
+    "sha": "029fe76e0f3d16b65c3c1e81e64bbdc0d57ac5b6",
+    "size": 180,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.prettierrc?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.prettierrc",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/029fe76e0f3d16b65c3c1e81e64bbdc0d57ac5b6",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/.prettierrc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/.prettierrc?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/029fe76e0f3d16b65c3c1e81e64bbdc0d57ac5b6",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/.prettierrc"
+    }
+  },
+  {
+    "name": "CHANGELOG.md",
+    "path": "packages/admin-ui/CHANGELOG.md",
+    "sha": "933a56112baf895a590b9fa4ac6eb415fe51b65e",
+    "size": 3704,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/CHANGELOG.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/CHANGELOG.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/933a56112baf895a590b9fa4ac6eb415fe51b65e",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/CHANGELOG.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/CHANGELOG.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/933a56112baf895a590b9fa4ac6eb415fe51b65e",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/CHANGELOG.md"
+    }
+  },
+  {
+    "name": "CONTRIBUTING.md",
+    "path": "packages/admin-ui/CONTRIBUTING.md",
+    "sha": "4ccb03458d113cf8487c67f01492b4b2cc71dce5",
+    "size": 10455,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/CONTRIBUTING.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/CONTRIBUTING.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4ccb03458d113cf8487c67f01492b4b2cc71dce5",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/CONTRIBUTING.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/CONTRIBUTING.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4ccb03458d113cf8487c67f01492b4b2cc71dce5",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/CONTRIBUTING.md"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "packages/admin-ui/README.md",
+    "sha": "db0d6cb5d2f1dbafcbe499e0f0c9d2d067a1cb00",
+    "size": 21759,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/README.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/README.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/db0d6cb5d2f1dbafcbe499e0f0c9d2d067a1cb00",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/README.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/db0d6cb5d2f1dbafcbe499e0f0c9d2d067a1cb00",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/README.md"
+    }
+  },
+  {
+    "name": "docs",
+    "path": "packages/admin-ui/docs",
+    "sha": "a88942c5e7a0257dc43b80190be43f2b928be704",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/docs?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/tree/dev/packages/admin-ui/docs",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a88942c5e7a0257dc43b80190be43f2b928be704",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/docs?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a88942c5e7a0257dc43b80190be43f2b928be704",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/tree/dev/packages/admin-ui/docs"
+    }
+  },
+  {
+    "name": "eslint.config.mjs",
+    "path": "packages/admin-ui/eslint.config.mjs",
+    "sha": "a36c11aee236a92fbde56b634fd4bc180c564359",
+    "size": 1154,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/eslint.config.mjs?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/eslint.config.mjs",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a36c11aee236a92fbde56b634fd4bc180c564359",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/eslint.config.mjs",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/eslint.config.mjs?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a36c11aee236a92fbde56b634fd4bc180c564359",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/eslint.config.mjs"
+    }
+  },
+  {
+    "name": "index.html",
+    "path": "packages/admin-ui/index.html",
+    "sha": "2cde97fbb40ab07323d755a5d8efde2f8e4fda8b",
+    "size": 362,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/index.html?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/index.html",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cde97fbb40ab07323d755a5d8efde2f8e4fda8b",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/index.html",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/index.html?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cde97fbb40ab07323d755a5d8efde2f8e4fda8b",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/index.html"
+    }
+  },
+  {
+    "name": "package-lock.json",
+    "path": "packages/admin-ui/package-lock.json",
+    "sha": "5ca2512196059edeafd4c85ddfc9e8fa5caf3350",
+    "size": 227282,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/package-lock.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/package-lock.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5ca2512196059edeafd4c85ddfc9e8fa5caf3350",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/package-lock.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/package-lock.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5ca2512196059edeafd4c85ddfc9e8fa5caf3350",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/package-lock.json"
+    }
+  },
+  {
+    "name": "package.json",
+    "path": "packages/admin-ui/package.json",
+    "sha": "f617ee50f9201d0a9e5e16e430049d653caf352f",
+    "size": 2136,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/package.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/package.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f617ee50f9201d0a9e5e16e430049d653caf352f",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/package.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/package.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f617ee50f9201d0a9e5e16e430049d653caf352f",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/package.json"
+    }
+  },
+  {
+    "name": "src",
+    "path": "packages/admin-ui/src",
+    "sha": "e5e9dae8338c4ae1caae57bfdb80302927373c6f",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/src?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/tree/dev/packages/admin-ui/src",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e5e9dae8338c4ae1caae57bfdb80302927373c6f",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/src?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e5e9dae8338c4ae1caae57bfdb80302927373c6f",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/tree/dev/packages/admin-ui/src"
+    }
+  },
+  {
+    "name": "tsconfig.json",
+    "path": "packages/admin-ui/tsconfig.json",
+    "sha": "5bd1d7ea08966ca92bf128add99dd42990e033ba",
+    "size": 1026,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/tsconfig.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/tsconfig.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5bd1d7ea08966ca92bf128add99dd42990e033ba",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/tsconfig.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/tsconfig.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5bd1d7ea08966ca92bf128add99dd42990e033ba",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/tsconfig.json"
+    }
+  },
+  {
+    "name": "tsconfig.node.json",
+    "path": "packages/admin-ui/tsconfig.node.json",
+    "sha": "97ede7ee6f2d37bd2d76e60c0b6a447bee718b05",
+    "size": 233,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/tsconfig.node.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/tsconfig.node.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/97ede7ee6f2d37bd2d76e60c0b6a447bee718b05",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/tsconfig.node.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/tsconfig.node.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/97ede7ee6f2d37bd2d76e60c0b6a447bee718b05",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/tsconfig.node.json"
+    }
+  },
+  {
+    "name": "vite.config.ts",
+    "path": "packages/admin-ui/vite.config.ts",
+    "sha": "482e5c99f88feffc0fd9ea6d317f70af111f5a62",
+    "size": 589,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/vite.config.ts?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/vite.config.ts",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/482e5c99f88feffc0fd9ea6d317f70af111f5a62",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.workspace/dev/packages/admin-ui/vite.config.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.workspace/contents/packages/admin-ui/vite.config.ts?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/482e5c99f88feffc0fd9ea6d317f70af111f5a62",
+      "html": "https://github.com/phoenixvc/Mystira.workspace/blob/dev/packages/admin-ui/vite.config.ts"
+    }
+  }
+]

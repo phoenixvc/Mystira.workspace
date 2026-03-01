@@ -102,10 +102,7 @@ function BundlesPage() {
             <Link to="/admin/bundles/create" className="btn btn-sm btn-primary">
               <i className="bi bi-plus-circle"></i> Create
             </Link>
-            <Link
-              to="/admin/bundles/import"
-              className="btn btn-sm btn-outline-primary"
-            >
+            <Link to="/admin/bundles/import" className="btn btn-sm btn-outline-primary">
               <i className="bi bi-upload"></i> Import
             </Link>
           </div>
@@ -114,7 +111,7 @@ function BundlesPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={(value) => {
+        onChange={value => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -137,7 +134,7 @@ function BundlesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.bundles.map((bundle) => (
+                    {data.bundles.map(bundle => (
                       <tr key={bundle.id}>
                         <td>{bundle.name}</td>
                         <td>{bundle.description || "-"}</td>
@@ -165,11 +162,7 @@ function BundlesPage() {
                 </table>
               </div>
 
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           ) : (
             <div className="text-center py-5">
@@ -177,10 +170,7 @@ function BundlesPage() {
               <Link to="/admin/bundles/create" className="btn btn-primary me-2">
                 Create Your First Bundle
               </Link>
-              <Link
-                to="/admin/bundles/import"
-                className="btn btn-outline-primary"
-              >
+              <Link to="/admin/bundles/import" className="btn btn-outline-primary">
                 Or Import Bundle
               </Link>
             </div>

@@ -7,14 +7,7 @@ interface CheckboxProps {
   disabled?: boolean;
 }
 
-function Checkbox({
-  id,
-  label,
-  helpText,
-  checked,
-  onChange,
-  disabled = false,
-}: CheckboxProps) {
+function Checkbox({ id, label, helpText, checked, onChange, disabled = false }: CheckboxProps) {
   return (
     <div className="mb-3">
       <div className="form-check">
@@ -23,7 +16,7 @@ function Checkbox({
           type="checkbox"
           id={id}
           checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
+          onChange={e => onChange(e.target.checked)}
           disabled={disabled}
         />
         <label className="form-check-label" htmlFor={id}>

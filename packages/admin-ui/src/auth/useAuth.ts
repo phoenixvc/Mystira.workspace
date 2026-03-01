@@ -8,10 +8,10 @@ interface AuthUser {
 }
 
 export function useAuth() {
-  const token = useAuthStore((state) => state.token);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const setLoggedIn = useAuthStore((state) => state.login);
-  const clearAuth = useAuthStore((state) => state.logout);
+  const token = useAuthStore(state => state.token);
+  const isAuthenticated = useAuthStore(state => state.isAuthenticated);
+  const setLoggedIn = useAuthStore(state => state.login);
+  const clearAuth = useAuthStore(state => state.logout);
 
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState<AuthUser>({ username: null, roles: [] });
@@ -66,9 +66,7 @@ export function useAuth() {
     async (username: string, password: string) => {
       const result = await authApi.login(username, password);
       if (!result.accessToken) {
-        throw new Error(
-          "Authentication succeeded but access token is missing."
-        );
+        throw new Error("Authentication succeeded but access token is missing.");
       }
 
       setLoggedIn(result.accessToken);

@@ -40,6 +40,11 @@ on:
         default: false
         type: boolean
 
+<<<<<<< HEAD
+=======
+# Use shared K8s concurrency group for dev to prevent conflicts
+# Other environments use isolated groups
+>>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
 concurrency:
   group: infra-deploy-${{ github.event.inputs.environment || 'dev' }}
   cancel-in-progress: false
@@ -1014,7 +1019,11 @@ jobs:
   # ============================================
   # Deploy to Kubernetes
   # ============================================
+<<<<<<< HEAD
   # NOTE: Docker images are built by package CI/CD pipelines (see ADR-0019)
+=======
+  # NOTE: Docker images are built by component CI/CD pipelines (see ADR-0019)
+>>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
   # This job deploys existing images from ACR
   deploy-kubernetes:
     name: Deploy to Kubernetes
@@ -1147,7 +1156,11 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Deployments for these services will fail until images are built.**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
+<<<<<<< HEAD
             echo "Images should be built by package CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+=======
+            echo "Images should be built by component CI/CD pipelines. See:" >> $GITHUB_STEP_SUMMARY
+>>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
             echo "- \`docs/adr/ADR-0019-dockerfile-location-standardization.md\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "::warning::Missing Docker images:${MISSING_IMAGES}"

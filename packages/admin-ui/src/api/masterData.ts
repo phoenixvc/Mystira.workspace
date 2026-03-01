@@ -59,28 +59,17 @@ export const ageGroupsApi = {
   },
 
   getAgeGroup: async (id: string): Promise<AgeGroup> => {
-    const response = await apiClient.get<AgeGroup>(
-      `/api/admin/agegroups/${id}`
-    );
+    const response = await apiClient.get<AgeGroup>(`/api/admin/agegroups/${id}`);
     return response.data;
   },
 
   createAgeGroup: async (ageGroup: Partial<AgeGroup>): Promise<AgeGroup> => {
-    const response = await apiClient.post<AgeGroup>(
-      "/api/admin/agegroups",
-      ageGroup
-    );
+    const response = await apiClient.post<AgeGroup>("/api/admin/agegroups", ageGroup);
     return response.data;
   },
 
-  updateAgeGroup: async (
-    id: string,
-    ageGroup: Partial<AgeGroup>
-  ): Promise<AgeGroup> => {
-    const response = await apiClient.put<AgeGroup>(
-      `/api/admin/agegroups/${id}`,
-      ageGroup
-    );
+  updateAgeGroup: async (id: string, ageGroup: Partial<AgeGroup>): Promise<AgeGroup> => {
+    const response = await apiClient.put<AgeGroup>(`/api/admin/agegroups/${id}`, ageGroup);
     return response.data;
   },
 
@@ -101,30 +90,17 @@ export const archetypesApi = {
   },
 
   getArchetype: async (id: string): Promise<Archetype> => {
-    const response = await apiClient.get<Archetype>(
-      `/api/admin/archetypes/${id}`
-    );
+    const response = await apiClient.get<Archetype>(`/api/admin/archetypes/${id}`);
     return response.data;
   },
 
-  createArchetype: async (
-    archetype: Partial<Archetype>
-  ): Promise<Archetype> => {
-    const response = await apiClient.post<Archetype>(
-      "/api/admin/archetypes",
-      archetype
-    );
+  createArchetype: async (archetype: Partial<Archetype>): Promise<Archetype> => {
+    const response = await apiClient.post<Archetype>("/api/admin/archetypes", archetype);
     return response.data;
   },
 
-  updateArchetype: async (
-    id: string,
-    archetype: Partial<Archetype>
-  ): Promise<Archetype> => {
-    const response = await apiClient.put<Archetype>(
-      `/api/admin/archetypes/${id}`,
-      archetype
-    );
+  updateArchetype: async (id: string, archetype: Partial<Archetype>): Promise<Archetype> => {
+    const response = await apiClient.put<Archetype>(`/api/admin/archetypes/${id}`, archetype);
     return response.data;
   },
 
@@ -145,19 +121,12 @@ export const compassAxesApi = {
   },
 
   getCompassAxis: async (id: string): Promise<CompassAxis> => {
-    const response = await apiClient.get<CompassAxis>(
-      `/api/admin/compassaxes/${id}`
-    );
+    const response = await apiClient.get<CompassAxis>(`/api/admin/compassaxes/${id}`);
     return response.data;
   },
 
-  createCompassAxis: async (
-    compassAxis: Partial<CompassAxis>
-  ): Promise<CompassAxis> => {
-    const response = await apiClient.post<CompassAxis>(
-      "/api/admin/compassaxes",
-      compassAxis
-    );
+  createCompassAxis: async (compassAxis: Partial<CompassAxis>): Promise<CompassAxis> => {
+    const response = await apiClient.post<CompassAxis>("/api/admin/compassaxes", compassAxis);
     return response.data;
   },
 
@@ -165,10 +134,7 @@ export const compassAxesApi = {
     id: string,
     compassAxis: Partial<CompassAxis>
   ): Promise<CompassAxis> => {
-    const response = await apiClient.put<CompassAxis>(
-      `/api/admin/compassaxes/${id}`,
-      compassAxis
-    );
+    const response = await apiClient.put<CompassAxis>(`/api/admin/compassaxes/${id}`, compassAxis);
     return response.data;
   },
 
@@ -189,28 +155,17 @@ export const echoTypesApi = {
   },
 
   getEchoType: async (id: string): Promise<EchoType> => {
-    const response = await apiClient.get<EchoType>(
-      `/api/admin/echotypes/${id}`
-    );
+    const response = await apiClient.get<EchoType>(`/api/admin/echotypes/${id}`);
     return response.data;
   },
 
   createEchoType: async (echoType: Partial<EchoType>): Promise<EchoType> => {
-    const response = await apiClient.post<EchoType>(
-      "/api/admin/echotypes",
-      echoType
-    );
+    const response = await apiClient.post<EchoType>("/api/admin/echotypes", echoType);
     return response.data;
   },
 
-  updateEchoType: async (
-    id: string,
-    echoType: Partial<EchoType>
-  ): Promise<EchoType> => {
-    const response = await apiClient.put<EchoType>(
-      `/api/admin/echotypes/${id}`,
-      echoType
-    );
+  updateEchoType: async (id: string, echoType: Partial<EchoType>): Promise<EchoType> => {
+    const response = await apiClient.put<EchoType>(`/api/admin/echotypes/${id}`, echoType);
     return response.data;
   },
 
@@ -231,19 +186,12 @@ export const fantasyThemesApi = {
   },
 
   getFantasyTheme: async (id: string): Promise<FantasyTheme> => {
-    const response = await apiClient.get<FantasyTheme>(
-      `/api/admin/fantasythemes/${id}`
-    );
+    const response = await apiClient.get<FantasyTheme>(`/api/admin/fantasythemes/${id}`);
     return response.data;
   },
 
-  createFantasyTheme: async (
-    fantasyTheme: Partial<FantasyTheme>
-  ): Promise<FantasyTheme> => {
-    const response = await apiClient.post<FantasyTheme>(
-      "/api/admin/fantasythemes",
-      fantasyTheme
-    );
+  createFantasyTheme: async (fantasyTheme: Partial<FantasyTheme>): Promise<FantasyTheme> => {
+    const response = await apiClient.post<FantasyTheme>("/api/admin/fantasythemes", fantasyTheme);
     return response.data;
   },
 

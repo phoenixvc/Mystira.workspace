@@ -1,8 +1,4 @@
-import {
-  useRouteError,
-  isRouteErrorResponse,
-  useNavigate,
-} from "react-router-dom";
+import { useRouteError, isRouteErrorResponse, useNavigate } from "react-router-dom";
 import Card from "../components/Card";
 import Alert from "../components/Alert";
 import { useState } from "react";
@@ -62,7 +58,7 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
       .then(() => {
         alert("Error details copied to clipboard");
       })
-      .catch((err) => {
+      .catch(err => {
         console.error("Failed to copy to clipboard:", err);
         // Fallback for non-secure contexts or clipboard access denied
         try {
@@ -77,15 +73,11 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
           if (success) {
             alert("Error details copied to clipboard");
           } else {
-            alert(
-              "Failed to copy error details. Please copy manually from the console."
-            );
+            alert("Failed to copy error details. Please copy manually from the console.");
             console.log("Error details:", errorText);
           }
         } catch (fallbackErr) {
-          alert(
-            "Failed to copy error details. Please copy manually from the console."
-          );
+          alert("Failed to copy error details. Please copy manually from the console.");
           console.log("Error details:", errorText);
           console.error("Fallback copy failed:", fallbackErr);
         }
@@ -98,17 +90,10 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
         <div className="col-lg-8">
           <Card>
             <div className="text-center mb-4">
-              <i
-                className="bi bi-bug-fill text-danger"
-                style={{ fontSize: "4rem" }}
-              ></i>
-              <h1 className="display-4 fw-bold text-danger mt-3">
-                {errorInfo.status}
-              </h1>
+              <i className="bi bi-bug-fill text-danger" style={{ fontSize: "4rem" }}></i>
+              <h1 className="display-4 fw-bold text-danger mt-3">{errorInfo.status}</h1>
               <h2 className="h3 mb-3">{errorInfo.statusText}</h2>
-              <p className="text-muted">
-                We encountered an error while processing your request.
-              </p>
+              <p className="text-muted">We encountered an error while processing your request.</p>
             </div>
 
             <Alert variant="danger" title="Error Message">
@@ -121,9 +106,7 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
                   className="btn btn-sm btn-outline-secondary mb-2"
                   onClick={() => setShowDetails(!showDetails)}
                 >
-                  <i
-                    className={`bi bi-chevron-${showDetails ? "up" : "down"} me-2`}
-                  ></i>
+                  <i className={`bi bi-chevron-${showDetails ? "up" : "down"} me-2`}></i>
                   {showDetails ? "Hide" : "Show"} Stack Trace
                 </button>
 
@@ -156,10 +139,7 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
                 <i className="bi bi-house me-2"></i>
                 Go to Dashboard
               </button>
-              <button
-                className="btn btn-outline-secondary"
-                onClick={handleReload}
-              >
+              <button className="btn btn-outline-secondary" onClick={handleReload}>
                 <i className="bi bi-arrow-clockwise me-2"></i>
                 Reload Page
               </button>
@@ -167,8 +147,7 @@ ${errorInfo.stack ? `Stack Trace:\n${errorInfo.stack}` : "No stack trace availab
 
             <div className="mt-4 text-center">
               <small className="text-muted">
-                If this problem persists, please contact support with the error
-                details above.
+                If this problem persists, please contact support with the error details above.
               </small>
             </div>
           </Card>

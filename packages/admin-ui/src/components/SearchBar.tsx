@@ -5,12 +5,7 @@ interface SearchBarProps {
   onSearchReset?: () => void;
 }
 
-function SearchBar({
-  value,
-  onChange,
-  placeholder = "Search...",
-  onSearchReset,
-}: SearchBarProps) {
+function SearchBar({ value, onChange, placeholder = "Search...", onSearchReset }: SearchBarProps) {
   return (
     <div className="mb-3">
       <div className="input-group">
@@ -22,14 +17,10 @@ function SearchBar({
           className="form-control"
           placeholder={placeholder}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={e => onChange(e.target.value)}
         />
         {value && onSearchReset && (
-          <button
-            className="btn btn-outline-secondary"
-            type="button"
-            onClick={onSearchReset}
-          >
+          <button className="btn btn-outline-secondary" type="button" onClick={onSearchReset}>
             <i className="bi bi-x"></i>
           </button>
         )}

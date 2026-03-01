@@ -194,8 +194,7 @@ public class AzureBlobServiceTests
                 It.IsAny<BlobStates>(),
                 It.Is<string>(s => s == prefix),
                 It.IsAny<CancellationToken>()))
-            .Returns(() =>
-            {
+            .Returns(() => {
                 // Only return blob items that match the prefix
                 var filteredItems = blobNames
                     .Where(name => name.StartsWith(prefix))
@@ -238,8 +237,7 @@ public class AzureBlobServiceTests
 
         enumeratorMock
             .Setup(e => e.MoveNextAsync())
-            .Returns(() =>
-            {
+            .Returns(() => {
                 index++;
                 return new ValueTask<bool>(index < blobItems.Count);
             });
@@ -362,17 +360,9 @@ public class AzureBlobServiceTests
         var mockPageable = Mock.Of<AsyncPageable<BlobItem>>();
         Mock.Get(mockPageable)
             .Setup(x => x.AsPages(It.IsAny<string>(), It.IsAny<int?>()))
-            .Returns(CreateAsyncEnumerable(pages));
+            .Returns(pages.ToAsyncEnumerable());
 
         return mockPageable;
-    }
-
-    private static async IAsyncEnumerable<Page<BlobItem>> CreateAsyncEnumerable(IEnumerable<Page<BlobItem>> pages)
-    {
-        foreach (var page in pages)
-        {
-            yield return page;
-        }
     }
 
     // Add this inside your test class

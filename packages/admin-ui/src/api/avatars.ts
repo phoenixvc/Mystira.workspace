@@ -11,15 +11,12 @@ export interface AvatarConfigurationFile {
 
 export const avatarsApi = {
   getAllAvatars: async (): Promise<AvatarConfigurationFile> => {
-    const response =
-      await apiClient.get<AvatarConfigurationFile>("/api/admin/avatars");
+    const response = await apiClient.get<AvatarConfigurationFile>("/api/admin/avatars");
     return response.data;
   },
 
   getAvatarsForAgeGroup: async (ageGroup: string): Promise<string[]> => {
-    const response = await apiClient.get<string[]>(
-      `/api/admin/avatars/${ageGroup}`
-    );
+    const response = await apiClient.get<string[]>(`/api/admin/avatars/${ageGroup}`);
     return response.data;
   },
 

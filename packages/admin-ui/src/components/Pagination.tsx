@@ -4,11 +4,7 @@ interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
-function Pagination({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: PaginationProps) {
+function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
   if (totalPages <= 1) return null;
 
   return (
@@ -28,9 +24,7 @@ function Pagination({
             Page {currentPage} of {totalPages}
           </span>
         </li>
-        <li
-          className={`page-item ${currentPage >= totalPages ? "disabled" : ""}`}
-        >
+        <li className={`page-item ${currentPage >= totalPages ? "disabled" : ""}`}>
           <button
             className="page-link"
             onClick={() => onPageChange(currentPage + 1)}

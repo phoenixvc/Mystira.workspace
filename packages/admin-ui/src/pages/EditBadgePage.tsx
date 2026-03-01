@@ -13,14 +13,8 @@ import TextInput from "../components/TextInput";
 import { showToast } from "../utils/toast";
 
 const badgeSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(200, "Name must be less than 200 characters"),
-  description: z
-    .string()
-    .max(1000, "Description must be less than 1000 characters")
-    .optional(),
+  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   imageId: z.string().optional(),
 });
 
@@ -69,10 +63,8 @@ function EditBadgePage() {
       showToast.success("Badge updated successfully!");
       navigate("/admin/badges");
     },
-    onError: (error) => {
-      showToast.error(
-        error instanceof Error ? error.message : "Failed to update badge"
-      );
+    onError: error => {
+      showToast.error(error instanceof Error ? error.message : "Failed to update badge");
     },
   });
 
@@ -99,9 +91,7 @@ function EditBadgePage() {
       <ErrorAlert
         error={error}
         title="Error loading badge"
-        onRetry={() =>
-          queryClient.invalidateQueries({ queryKey: ["badge", id] })
-        }
+        onRetry={() => queryClient.invalidateQueries({ queryKey: ["badge", id] })}
       />
     );
   }
@@ -131,11 +121,7 @@ function EditBadgePage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea
-                id="description"
-                rows={5}
-                {...register("description")}
-              />
+              <Textarea id="description" rows={5} {...register("description")} />
             </FormField>
 
             <FormField

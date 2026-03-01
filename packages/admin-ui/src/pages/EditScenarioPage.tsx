@@ -14,14 +14,8 @@ import TextInput from "../components/TextInput";
 import { showToast } from "../utils/toast";
 
 const scenarioSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(200, "Title must be less than 200 characters"),
-  description: z
-    .string()
-    .max(1000, "Description must be less than 1000 characters")
-    .optional(),
+  title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   ageRating: z.number().min(0).max(18),
   tags: z.string().optional(), // Comma-separated tags
 });
@@ -63,8 +57,8 @@ function EditScenarioPage() {
       const tags = data.tags
         ? data.tags
             .split(",")
-            .map((tag) => tag.trim())
-            .filter((tag) => tag.length > 0)
+            .map(tag => tag.trim())
+            .filter(tag => tag.length > 0)
         : [];
       return scenariosApi.updateScenario(id!, {
         title: data.title,
@@ -79,10 +73,8 @@ function EditScenarioPage() {
       showToast.success("Scenario updated successfully!");
       navigate("/admin/scenarios");
     },
-    onError: (error) => {
-      showToast.error(
-        error instanceof Error ? error.message : "Failed to update scenario"
-      );
+    onError: error => {
+      showToast.error(error instanceof Error ? error.message : "Failed to update scenario");
     },
   });
 
@@ -110,9 +102,7 @@ function EditScenarioPage() {
       <ErrorAlert
         error={error}
         title="Error loading scenario"
-        onRetry={() =>
-          queryClient.invalidateQueries({ queryKey: ["scenario", id] })
-        }
+        onRetry={() => queryClient.invalidateQueries({ queryKey: ["scenario", id] })}
       />
     );
   }
@@ -129,10 +119,7 @@ function EditScenarioPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">✏️ Edit Scenario</h1>
-        <Link
-          to="/admin/scenarios"
-          className="btn btn-sm btn-outline-secondary"
-        >
+        <Link to="/admin/scenarios" className="btn btn-sm btn-outline-secondary">
           <i className="bi bi-arrow-left"></i> Back to Scenarios
         </Link>
       </div>
@@ -145,11 +132,7 @@ function EditScenarioPage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea
-                id="description"
-                rows={5}
-                {...register("description")}
-              />
+              <Textarea id="description" rows={5} {...register("description")} />
             </FormField>
 
             <FormField

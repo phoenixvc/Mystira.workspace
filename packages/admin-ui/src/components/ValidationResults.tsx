@@ -47,9 +47,7 @@ function ValidationResults({ valid, errors }: ValidationResultsProps) {
                   aria-controls={pathId}
                 >
                   <strong>{path === "root" ? "Root Level" : path}</strong>
-                  <span className="badge bg-danger ms-2">
-                    {pathErrors.length}
-                  </span>
+                  <span className="badge bg-danger ms-2">{pathErrors.length}</span>
                 </button>
               </h2>
               <div
@@ -59,15 +57,10 @@ function ValidationResults({ valid, errors }: ValidationResultsProps) {
                 <div className="accordion-body">
                   <ul className="list-group">
                     {pathErrors.map((error, idx) => (
-                      <li
-                        key={idx}
-                        className="list-group-item list-group-item-danger"
-                      >
+                      <li key={idx} className="list-group-item list-group-item-danger">
                         {error.message}
                         {error.keyword && (
-                          <small className="text-muted d-block mt-1">
-                            Rule: {error.keyword}
-                          </small>
+                          <small className="text-muted d-block mt-1">Rule: {error.keyword}</small>
                         )}
                       </li>
                     ))}
@@ -80,9 +73,7 @@ function ValidationResults({ valid, errors }: ValidationResultsProps) {
       </div>
 
       <details>
-        <summary className="btn btn-sm btn-outline-secondary">
-          View All Errors as Text
-        </summary>
+        <summary className="btn btn-sm btn-outline-secondary">View All Errors as Text</summary>
         <pre className="mt-2 p-3 bg-light border rounded">
           <code>{formatValidationErrors(errors)}</code>
         </pre>

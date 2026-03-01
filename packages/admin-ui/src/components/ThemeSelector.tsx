@@ -20,16 +20,12 @@ export function ThemeSelector() {
       >
         <i
           className={`bi ${
-            theme === "light"
-              ? "bi-sun"
-              : theme === "dark"
-                ? "bi-moon-stars"
-                : "bi-display"
+            theme === "light" ? "bi-sun" : theme === "dark" ? "bi-moon-stars" : "bi-display"
           }`}
         />
       </button>
       <ul className="dropdown-menu dropdown-menu-end">
-        {themeOptions.map((option) => (
+        {themeOptions.map(option => (
           <li key={option.value}>
             <button
               className={`dropdown-item d-flex align-items-center gap-2 ${

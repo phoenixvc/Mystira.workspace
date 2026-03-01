@@ -1,6 +1,6 @@
 # Operations Runbooks Index
 
-**Last Updated**: 2026-02-27
+**Last Updated**: 2025-12-22
 **Owner**: Platform Engineering Team
 **On-Call Escalation**: See [Escalation Matrix](#escalation-matrix)
 
@@ -15,21 +15,34 @@ This directory contains operational runbooks for the Mystira platform. Each runb
 | Scenario            | Runbook                                          | Estimated Time | Approval Required   |
 | ------------------- | ------------------------------------------------ | -------------- | ------------------- |
 | Production rollback | [emergency-rollback.md](./emergency-rollback.md) | 5-15 minutes   | On-call lead        |
-| Service rollback    | [service-rollback.md](./service-rollback.md)     | 5-10 minutes   | On-call lead        |
 | Disaster recovery   | [disaster-recovery.md](./disaster-recovery.md)   | 30-120 minutes | Engineering Manager |
+| Database failover   | [database-failover.md](./database-failover.md)   | 15-30 minutes  | DBA + On-call lead  |
+| Security incident   | [security-incident.md](./security-incident.md)   | Varies         | Security Team       |
 
-### Infrastructure Operations
+### Routine Operations
 
-| Scenario                | Runbook                                                    | Estimated Time | Approval Required |
-| ----------------------- | ---------------------------------------------------------- | -------------- | ----------------- |
-| Terraform state cleanup | [terraform-state-cleanup.md](./terraform-state-cleanup.md) | 15-30 minutes  | On-call lead      |
-| Workflow naming fix     | [workflow-naming-fix.md](./workflow-naming-fix.md)         | 5-10 minutes   | None              |
+| Scenario            | Runbook                                            | Estimated Time | Approval Required     |
+| ------------------- | -------------------------------------------------- | -------------- | --------------------- |
+| Planned maintenance | [planned-maintenance.md](./planned-maintenance.md) | Varies         | Change Advisory Board |
+| Certificate renewal | [certificate-renewal.md](./certificate-renewal.md) | 15-30 minutes  | None                  |
+| Scaling operations  | [scaling-operations.md](./scaling-operations.md)   | 10-20 minutes  | On-call lead          |
+| Log rotation        | [log-management.md](./log-management.md)           | 5-10 minutes   | None                  |
+
+### Infrastructure Maintenance
+
+| Scenario                | Runbook                                                    | Estimated Time  | Approval Required |
+| ----------------------- | ---------------------------------------------------------- | --------------- | ----------------- |
+| Terraform state cleanup | [terraform-state-cleanup.md](./terraform-state-cleanup.md) | 30-60 minutes   | Engineering Lead  |
+| Fix workflow naming     | [workflow-naming-fix.md](./workflow-naming-fix.md)         | 5 min/submodule | None              |
 
 ### Troubleshooting
 
-| Scenario                | Runbook                         | Priority |
-| ----------------------- | ------------------------------- | -------- |
-| Service-specific issues | See individual service runbooks | P1/P2    |
+| Scenario                   | Runbook                                                            | Priority |
+| -------------------------- | ------------------------------------------------------------------ | -------- |
+| High latency investigation | [troubleshooting-latency.md](./troubleshooting-latency.md)         | P1/P2    |
+| Error rate spike           | [troubleshooting-errors.md](./troubleshooting-errors.md)           | P1/P2    |
+| Memory issues              | [troubleshooting-memory.md](./troubleshooting-memory.md)           | P2/P3    |
+| Connection issues          | [troubleshooting-connections.md](./troubleshooting-connections.md) | P1/P2    |
 
 ---
 
@@ -40,15 +53,36 @@ This directory contains operational runbooks for the Mystira platform. Each runb
 Critical procedures for immediate incident response. These runbooks are designed for speed and should be executable within minutes.
 
 - **[Emergency Rollback](./emergency-rollback.md)**: Quickly revert production to a known-good state
-- **[Service Rollback](./service-rollback.md)**: Roll back specific service deployments
 - **[Disaster Recovery](./disaster-recovery.md)**: Full recovery procedures for catastrophic failures
+- **Database Failover**: Switch to replica database in case of primary failure
+- **Security Incident Response**: Initial containment and escalation procedures
 
-### 2. Infrastructure Runbooks
+### 2. Deployment Runbooks
+
+Procedures for deploying and managing application releases.
+
+- **Blue-Green Deployment**: Standard production deployment procedure
+- **Canary Release**: Gradual rollout with monitoring
+- **Hotfix Deployment**: Emergency fix deployment process
+- **Configuration Updates**: Updating environment variables and secrets
+
+### 3. Infrastructure Runbooks
 
 Procedures for managing infrastructure components.
 
-- **[Terraform State Cleanup](./terraform-state-cleanup.md)**: Clean up corrupted or locked Terraform state
-- **[Workflow Naming Fix](./workflow-naming-fix.md)**: Fix GitHub Actions workflow naming issues
+- **AKS Node Maintenance**: Draining and updating cluster nodes
+- **Database Maintenance**: Backup, restore, and optimization procedures
+- **Storage Management**: Blob storage operations and cleanup
+- **Network Troubleshooting**: DNS, firewall, and connectivity issues
+
+### 4. Monitoring Runbooks
+
+Procedures for investigating and resolving monitoring alerts.
+
+- **High Error Rate Investigation**: Steps to diagnose elevated error rates
+- **Latency Investigation**: Diagnosing performance degradation
+- **Resource Exhaustion**: Handling CPU, memory, or disk pressure
+- **Alert Tuning**: Adjusting alert thresholds
 
 ---
 
@@ -87,21 +121,13 @@ Procedures for managing infrastructure components.
 
 ### Contact Information
 
-<<<<<<< HEAD
-| Role | Primary | Backup | Method |
-| ---------------- | -------------------- | -------------------- | ------ |
-| Technical Lead | jurie@phoenixvc.tech | eben@phoenixvc.tech | Email |
-| Founder/Business | eben@phoenixvc.tech | jurie@phoenixvc.tech | Email |
-=======
-| Role | Primary | Backup | Method |
+| Role                | Primary            | Backup               | Method        |
 | ------------------- | ------------------ | -------------------- | ------------- |
-| On-call Engineer | PagerDuty rotation | - | PagerDuty |
-| On-call Lead | PagerDuty rotation | - | PagerDuty |
-| Engineering Manager | @eng-manager | @eng-director | Slack + Phone |
-| DBA | @dba-team | @platform-team | Slack |
-| Security | @security-team | security@mystira.app | Slack + Email |
-
-> > > > > > > origin/feat/consolidate_backlog
+| On-call Engineer    | PagerDuty rotation | -                    | PagerDuty     |
+| On-call Lead        | PagerDuty rotation | -                    | PagerDuty     |
+| Engineering Manager | @eng-manager       | @eng-director        | Slack + Phone |
+| DBA                 | @dba-team          | @platform-team       | Slack         |
+| Security            | @security-team     | security@mystira.app | Slack + Email |
 
 ---
 

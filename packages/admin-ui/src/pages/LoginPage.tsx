@@ -56,9 +56,7 @@ function LoginPage() {
           <div className="card shadow mt-5">
             <div className="card-body p-5">
               <h2 className="card-title text-center mb-4">Mystira Admin</h2>
-              <p className="text-center text-muted mb-4">
-                Sign in with your admin credentials
-              </p>
+              <p className="text-center text-muted mb-4">Sign in with your admin credentials</p>
               <form onSubmit={handleLogin}>
                 <div className="mb-3">
                   <label htmlFor="username" className="form-label">
@@ -69,7 +67,7 @@ function LoginPage() {
                     type="text"
                     className="form-control"
                     value={username}
-                    onChange={(event) => setUsername(event.target.value)}
+                    onChange={event => setUsername(event.target.value)}
                     autoComplete="username"
                     disabled={loginInProgress}
                     required
@@ -85,7 +83,7 @@ function LoginPage() {
                     type="password"
                     className="form-control"
                     value={password}
-                    onChange={(event) => setPassword(event.target.value)}
+                    onChange={event => setPassword(event.target.value)}
                     autoComplete="current-password"
                     disabled={loginInProgress}
                     required
@@ -98,11 +96,7 @@ function LoginPage() {
                   </div>
                 ) : null}
 
-                <button
-                  type="submit"
-                  className="btn btn-primary w-100"
-                  disabled={loginInProgress}
-                >
+                <button type="submit" className="btn btn-primary w-100" disabled={loginInProgress}>
                   {loginInProgress ? (
                     <>
                       <span
