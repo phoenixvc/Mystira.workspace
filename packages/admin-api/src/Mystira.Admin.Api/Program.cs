@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 
-using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -84,21 +83,16 @@ try
     // ═══════════════════════════════════════════════════════════════════════════════
     builder.Services.AddApplicationInsightsTelemetry(options =>
     {
-        // Enable adaptive sampling only in production to reduce telemetry volume
-        options.EnableAdaptiveSampling = builder.Environment.IsProduction();
         options.EnableDependencyTrackingTelemetryModule = true;
         options.EnableQuickPulseMetricStream = true; // Live Metrics
         options.EnablePerformanceCounterCollectionModule = true;
         options.EnableRequestTrackingTelemetryModule = true;
-        options.EnableEventCounterCollectionModule = true;
     });
 
-    // Configure cloud role name for Application Map and distributed tracing
-    builder.Services.AddSingleton<ITelemetryInitializer>(sp =>
-    {
-        var env = sp.GetRequiredService<IWebHostEnvironment>();
-        return new CloudRoleNameInitializer("Mystira.Admin.Api", env.EnvironmentName);
-    });
+    // Configure cloud role name via OpenTelemetry resource attributes (AppInsights 3.x)
+    builder.Services.AddOpenTelemetry()
+        .ConfigureResource(resource => resource
+            .AddCloudRoleAttributes("Mystira.Admin.Api", builder.Environment.EnvironmentName));
 
     // Register custom metrics service for business KPIs
     builder.Services.AddCustomMetrics(builder.Environment.EnvironmentName);

@@ -1,4 +1,3 @@
-using Microsoft.ApplicationInsights.Extensibility;
 using Mystira.App.Api.Adapters;
 using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;

@@ -1,50 +1,37 @@
-using Microsoft.ApplicationInsights.Channel;
-using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.Extensions.DependencyInjection;
+using OpenTelemetry.Resources;
 
 namespace Mystira.Shared.Telemetry;
 
 /// <summary>
-/// Telemetry initializer that sets the cloud role name for Application Insights.
-/// This helps identify which service generated the telemetry in distributed tracing scenarios.
+/// Extension methods for configuring cloud role name via OpenTelemetry resource attributes.
+/// In Application Insights 3.x, cloud role name is set through OpenTelemetry resource
+/// attributes (service.name, service.namespace, service.instance.id) instead of the
+/// removed ITelemetryInitializer.
 /// </summary>
-public class CloudRoleNameInitializer : ITelemetryInitializer
+public static class CloudRoleNameConfiguration
 {
-    private readonly string _roleName;
-    private readonly string _environment;
-
     /// <summary>
-    /// Creates a new CloudRoleNameInitializer.
+    /// Configures OpenTelemetry resource attributes for cloud role identification.
+    /// Sets service.name (used as Cloud Role Name in Application Map) and
+    /// service.instance.id (used as Cloud Role Instance).
     /// </summary>
+    /// <param name="builder">The resource builder to configure.</param>
     /// <param name="roleName">The name of the service (e.g., "Mystira.App.Api")</param>
     /// <param name="environment">The environment name (e.g., "Development", "Production")</param>
-    public CloudRoleNameInitializer(string roleName, string environment)
+    /// <returns>The resource builder for chaining.</returns>
+    public static ResourceBuilder AddCloudRoleAttributes(
+        this ResourceBuilder builder,
+        string roleName,
+        string environment)
     {
-        _roleName = roleName ?? throw new ArgumentNullException(nameof(roleName));
-        _environment = environment ?? "Unknown";
-    }
+        ArgumentNullException.ThrowIfNull(roleName);
 
-    /// <summary>
-    /// Initializes the telemetry item with cloud role information.
-    /// </summary>
-    public void Initialize(ITelemetry telemetry)
-    {
-        if (telemetry?.Context?.Cloud == null)
-            return;
-
-        // Set the cloud role name - this appears in Application Insights Application Map
-        telemetry.Context.Cloud.RoleName = _roleName;
-
-        // Set the role instance to include environment for easier filtering
-        if (string.IsNullOrEmpty(telemetry.Context.Cloud.RoleInstance))
+        return builder.AddAttributes(new Dictionary<string, object>
         {
-            telemetry.Context.Cloud.RoleInstance = $"{_roleName}-{_environment}";
-        }
-
-        // Add environment as a custom property for filtering
-        if (telemetry.Context.GlobalProperties != null &&
-            !telemetry.Context.GlobalProperties.ContainsKey("Environment"))
-        {
-            telemetry.Context.GlobalProperties["Environment"] = _environment;
-        }
+            ["service.name"] = roleName,
+            ["service.instance.id"] = $"{roleName}-{environment ?? "Unknown"}",
+            ["deployment.environment"] = environment ?? "Unknown"
+        });
     }
 }
