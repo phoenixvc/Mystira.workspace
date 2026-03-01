@@ -5,7 +5,6 @@ This guide explains the comprehensive package management strategy for the Mystir
 ## Overview
 
 The Mystira workspace is a complex polyglot monorepo that includes:
-
 - **TypeScript/JavaScript** (React, Node.js, Vite, etc.)
 - **.NET/C#** (Web APIs, class libraries, test projects)
 - **Python** (Blockchain integration)
@@ -41,16 +40,14 @@ The Mystira workspace is a complex polyglot monorepo that includes:
 **Package Manager**: pnpm (exclusively)
 
 **Workspace Structure**:
-
 ```yaml
 # pnpm-workspace.yaml
 packages:
-  - "packages/*"
-  - "packages/*/src/*" # For nested projects like StoryGenerator.Web
+  - 'packages/*'
+  - 'packages/*/src/*'  # For nested projects like StoryGenerator.Web
 ```
 
 **Scripts**:
-
 ```json
 {
   "scripts": {
@@ -65,7 +62,6 @@ packages:
 ```
 
 **Turbo Integration**:
-
 ```json
 // turbo.json
 {
@@ -90,13 +86,11 @@ packages:
 **Package Manager**: NuGet (via `dotnet CLI`)
 
 **Integration with pnpm**:
-
 - .NET projects are managed independently but coordinated through workspace scripts
 - Use `Directory.Build.props` for shared configuration
 - Central package management via `NuGet.config`
 
 **Key Files**:
-
 ```xml
 <!-- Directory.Build.props -->
 <Project>
@@ -110,7 +104,6 @@ packages:
 ```
 
 **Scripts**:
-
 ```bash
 # Run from workspace root
 dotnet build                    # Build all .NET projects
@@ -123,7 +116,6 @@ dotnet pack                     # Package all .NET projects
 **Package Manager**: Poetry (recommended) or pip + requirements.txt
 
 **Current Setup**:
-
 ```toml
 # packages/chain/pyproject.toml
 [build-system]
@@ -139,7 +131,6 @@ python = "^3.11"
 ```
 
 **Integration**:
-
 - Python projects are managed independently
 - Use workspace scripts to coordinate with other languages
 - Virtual environments managed per project
@@ -149,7 +140,6 @@ python = "^3.11"
 **Package Manager**: Cargo
 
 **Current Setup**:
-
 ```toml
 # packages/devhub/Mystira.DevHub/src-tauri/Cargo.toml
 [package]
@@ -163,7 +153,6 @@ reqwest = { version = "0.13", features = ["rustls-tls-native-roots"] }
 ```
 
 **Integration**:
-
 - Rust projects (Tauri apps) are managed independently
 - Use workspace scripts for coordination
 - Cross-compilation handled by Cargo
@@ -183,7 +172,6 @@ We provide both Bash and PowerShell scripts for comprehensive quality checks:
 ```
 
 **Features**:
-
 - Runs linting, formatting, and tests across all languages
 - Security audits for all package managers
 - Dependency validation
@@ -193,7 +181,6 @@ We provide both Bash and PowerShell scripts for comprehensive quality checks:
 ### Individual Language Commands
 
 **TypeScript/JavaScript**:
-
 ```bash
 pnpm install          # Install dependencies
 pnpm run lint         # ESLint + Prettier
@@ -204,7 +191,6 @@ pnpm audit            # Security audit
 ```
 
 **.NET**:
-
 ```bash
 dotnet restore         # Restore NuGet packages
 dotnet build          # Build projects
@@ -213,7 +199,6 @@ dotnet pack          # Create packages
 ```
 
 **Python**:
-
 ```bash
 poetry install        # Install dependencies
 poetry run pytest     # Run tests
@@ -221,7 +206,6 @@ poetry build          # Build package
 ```
 
 **Rust**:
-
 ```bash
 cargo build           # Build project
 cargo test            # Run tests
@@ -233,20 +217,17 @@ cargo audit           # Security audit (if installed)
 ### 1. Version Pinning
 
 **pnpm**: Use `pnpm-lock.yaml` (automatically generated)
-
 ```bash
 pnpm install --frozen-lockfile  # CI/CD
 pnpm update                    # Update dependencies
 ```
 
 **.NET**: Use `Directory.Package.props` for central package management
-
 ```xml
 <PackageVersion Include="Microsoft.AspNetCore.App" Version="8.0.0" />
 ```
 
 **Python**: Pin versions in `pyproject.toml`
-
 ```toml
 [tool.poetry.dependencies]
 requests = "^2.31.0"
@@ -257,7 +238,6 @@ requests = "^2.31.0"
 ### 2. Security Updates
 
 **Automated**: Use Dependabot and Renovate
-
 ```yaml
 # .github/dependabot.yml
 version: 2
@@ -269,7 +249,6 @@ updates:
 ```
 
 **Manual**: Regular audits
-
 ```bash
 pnpm audit              # Node.js
 cargo audit             # Rust
@@ -279,7 +258,6 @@ safety check            # Python (if using safety)
 ### 3. Monorepo Coordination
 
 **Root Scripts**: Coordinate all languages from workspace root
-
 ```json
 {
   "scripts": {
@@ -294,7 +272,6 @@ safety check            # Python (if using safety)
 ```
 
 **Turbo Caching**: Efficient build caching
-
 ```json
 {
   "pipeline": {
@@ -324,23 +301,23 @@ jobs:
           version: 8.0.0
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
-          cache: "pnpm"
-
+          node-version: '18'
+          cache: 'pnpm'
+      
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
+      
       - name: Run quality checks
         run: ./scripts/quality-check.sh
-
+      
       - name: .NET tests
         run: dotnet test --no-build --verbosity normal
-
+      
       - name: Python tests
         run: |
           cd packages/chain
           python -m pytest tests/
-
+      
       - name: Rust tests
         run: |
           cd packages/devhub/Mystira.DevHub/src-tauri
@@ -368,25 +345,21 @@ jobs:
 ### Common Issues
 
 **pnpm lockfile out of sync**:
-
 ```bash
 pnpm install  # Regenerates lockfile
 ```
 
 **.NET restore failures**:
-
 ```bash
 dotnet restore --force
 ```
 
 **Python dependency conflicts**:
-
 ```bash
 poetry install --no-dev  # Skip dev dependencies
 ```
 
 **Rust compilation errors**:
-
 ```bash
 cargo clean && cargo build  # Clean build
 ```
