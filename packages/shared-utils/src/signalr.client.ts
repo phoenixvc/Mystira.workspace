@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type {
   SignalROptions,
   SignalREventHandler,
@@ -11,7 +12,7 @@ import { SignalRConnectionState } from "./signalr.types";
  * and handles connection lifecycle, reconnection, and event management.
  */
 export class SignalRConnection implements ISignalRConnection {
-  private _connection: any = null; // Will be HubConnection from @microsoft/signalr
+  private _connection: any = null;
   private _state: SignalRConnectionState = SignalRConnectionState.Disconnected;
   private _connectionId: string | null = null;
   private _error: Error | null = null;
@@ -225,7 +226,7 @@ export class SignalRConnection implements ISignalRConnection {
     if (!this._eventHandlers.has(eventName)) {
       this._eventHandlers.set(eventName, new Set());
     }
-    this._eventHandlers.get(eventName)!.add(handler);
+    this._eventHandlers.get(eventName)!.add(handler as SignalREventHandler);
 
     // Register with connection if connected
     if (this._connection) {

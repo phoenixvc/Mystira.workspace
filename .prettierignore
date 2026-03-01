@@ -1,0 +1,5 @@
+node_modules
+dist
+coverage
+*.min.js
+docs/history/.index.json

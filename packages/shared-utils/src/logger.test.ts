@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { createLogger, type LogLevel, type LogEntry } from "./logger";
+import { createLogger } from "./logger";
 
 describe("createLogger", () => {
   let consoleSpy: {
