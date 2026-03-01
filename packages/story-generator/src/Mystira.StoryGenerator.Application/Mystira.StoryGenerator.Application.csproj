@@ -15,7 +15,7 @@
     <PackageReference Include="Azure.Search.Documents" Version="11.7.0" />
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-      <PackageReference Include="Azure.Identity" Version="1.17.1" />
+      <PackageReference Include="Azure.Identity" Version="1.18.0" />
   </ItemGroup>
 
   <ItemGroup>
