@@ -41,7 +41,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
     <PackageReference Include="Syncfusion.Blazor.Navigations" Version="32.2.7" />
     <PackageReference Include="Syncfusion.Blazor.Themes" Version="32.2.7" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.3.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
