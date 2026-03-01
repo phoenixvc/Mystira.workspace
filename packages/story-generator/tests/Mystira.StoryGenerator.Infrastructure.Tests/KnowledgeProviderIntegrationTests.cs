@@ -104,7 +104,6 @@ public class KnowledgeProviderIntegrationTests
     {
         // Arrange
         var provider = new MockAISearchKnowledgeProvider();
-        var expectedIndexName = "mystira-knowledge-index";
 
         // Act
         await provider.AttachToAgentAsync("agent-789");
@@ -186,14 +185,14 @@ public class KnowledgeProviderIntegrationTests
         {
             if (agentId == null)
                 throw new ArgumentNullException(nameof(agentId));
-            
+
             if (string.IsNullOrWhiteSpace(agentId))
                 throw new ArgumentException("Agent ID cannot be empty", nameof(agentId));
 
             _attachedAgentId = agentId;
             var storeId = $"vs-{Guid.NewGuid():N}";
             _vectorStores[agentId] = storeId;
-            
+
             return await Task.FromResult(storeId);
         }
 
@@ -203,7 +202,7 @@ public class KnowledgeProviderIntegrationTests
                 throw new InvalidOperationException("Must call AttachToAgentAsync first");
 
             var storeId = _vectorStores[_attachedAgentId];
-            
+
             return await Task.FromResult(new ToolDefinition
             {
                 Type = "file_search",
@@ -225,12 +224,12 @@ public class KnowledgeProviderIntegrationTests
         {
             if (agentId == null)
                 throw new ArgumentNullException(nameof(agentId));
-            
+
             if (string.IsNullOrWhiteSpace(agentId))
                 throw new ArgumentException("Agent ID cannot be empty", nameof(agentId));
 
             _attachedAgentId = agentId;
-            
+
             return await Task.FromResult(IndexName);
         }
 

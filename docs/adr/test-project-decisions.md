@@ -11,9 +11,8 @@ Based on ADR-0022 and our comprehensive analysis, here are the specific decision
 Our C# test organization already follows best practices perfectly. No changes needed to the project structure.
 
 #### Single Test Projects (7 projects) - KEEP AS IS
-
 - `Mystira.Core.Tests` ✅
-- `Mystira.Shared.Tests` ✅
+- `Mystira.Shared.Tests` ✅  
 - `Mystira.Contracts.Tests` ✅
 - `Mystira.Authoring.Tests` ✅
 - `Mystira.Ai.Tests` ✅
@@ -23,7 +22,6 @@ Our C# test organization already follows best practices perfectly. No changes ne
 #### Multiple Test Projects (21 projects) - KEEP AS IS
 
 **Story Generator Suite (6 projects):**
-
 - `Mystira.StoryGenerator.Domain.Tests` ✅
 - `Mystira.StoryGenerator.Application.Tests` ✅
 - `Mystira.StoryGenerator.Infrastructure.Tests` ✅
@@ -32,7 +30,6 @@ Our C# test organization already follows best practices perfectly. No changes ne
 - `Mystira.StoryGenerator.GraphTheory.Tests` ✅
 
 **App Infrastructure Suite (9 projects):**
-
 - `Mystira.App.Api.Tests` ✅
 - `Mystira.App.PWA.Tests` ✅
 - `Mystira.App.Domain.Tests` ✅
@@ -44,7 +41,6 @@ Our C# test organization already follows best practices perfectly. No changes ne
 - `Mystira.App.Infrastructure.Discord.Tests` ✅
 
 **Infrastructure Suite (6 projects):**
-
 - `Mystira.Infrastructure.WhatsApp.Tests` ✅
 - `Mystira.Infrastructure.Data.Tests` ✅
 - `Mystira.Infrastructure.Payments.Tests` ✅
@@ -55,7 +51,6 @@ Our C# test organization already follows best practices perfectly. No changes ne
 ### 🔄 Minor Enhancements Only
 
 **Add Performance Test Projects (NEW):**
-
 - `Mystira.StoryGenerator.Performance.Tests` (NEW)
 - `Mystira.App.Api.Performance.Tests` (NEW)
 
@@ -69,7 +64,6 @@ Add Unit/Integration/Functional subfolders to existing test projects.
 #### High Priority - Add Complete Test Setup (3 projects)
 
 **1. `@mystira/contracts`**
-
 ```
 contracts/
 ├── src/
@@ -84,7 +78,6 @@ contracts/
 ```
 
 **2. `@mystira/shared-utils`**
-
 ```
 shared-utils/
 ├── src/
@@ -100,7 +93,6 @@ shared-utils/
 ```
 
 **3. `@mystira/core-types`**
-
 ```
 core-types/
 ├── src/
@@ -118,7 +110,6 @@ core-types/
 #### Medium Priority - Add Integration/E2E Tests (3 projects)
 
 **4. `@mystira/admin-ui`**
-
 ```
 admin-ui/
 ├── src/
@@ -140,7 +131,6 @@ admin-ui/
 ```
 
 **5. `@mystira/devhub`**
-
 ```
 devhub/
 ├── src/
@@ -164,7 +154,6 @@ devhub/
 ```
 
 **6. `@mystira/publisher`**
-
 ```
 publisher/
 ├── src/
@@ -188,7 +177,6 @@ publisher/
 #### Low Priority - Add Basic Test Setup (6 projects)
 
 **7. `@mystira/design-tokens`**
-
 ```
 design-tokens/
 ├── src/
@@ -201,7 +189,6 @@ design-tokens/
 ```
 
 **8. `@mystira/domain`**
-
 ```
 domain/
 ├── src/
@@ -214,7 +201,6 @@ domain/
 ```
 
 **9. `@mystira/chain`**
-
 ```
 chain/
 ├── src/
@@ -236,7 +222,6 @@ chain/
 ### 📋 Shared Configuration
 
 **Create `configs/vitest/`:**
-
 ```
 configs/vitest/
 ├── base.config.ts
@@ -250,7 +235,6 @@ configs/vitest/
 ### 🔄 Add Complete Test Infrastructure (1 project)
 
 **`mystira-devhub` (Tauri Application)**
-
 ```
 src-tauri/
 ├── src/
@@ -271,13 +255,11 @@ src-tauri/
 ```
 
 **Test Categories:**
-
 1. **Unit Tests**: `#[cfg(test)]` modules in `src/`
 2. **Integration Tests**: `tests/` directory
 3. **Benchmarks**: `benches/` directory
 
 **Cargo.toml additions:**
-
 ```toml
 [dev-dependencies]
 tokio-test = "0.4"
@@ -290,30 +272,27 @@ harness = false
 
 ## Implementation Priority Matrix
 
-| Priority | Projects                                              | Effort | Impact | Timeline |
-| -------- | ----------------------------------------------------- | ------ | ------ | -------- |
-| P0       | C# Enhancements                                       | Low    | High   | Week 1   |
-| P1       | TypeScript Core (contracts, shared-utils, core-types) | Medium | High   | Week 2   |
-| P2       | TypeScript Apps (admin-ui, devhub, publisher)         | High   | High   | Week 3   |
-| P3       | Rust Test Setup                                       | Medium | Medium | Week 4   |
-| P4       | TypeScript Utilities (design-tokens, domain, chain)   | Low    | Low    | Week 5   |
+| Priority | Projects | Effort | Impact | Timeline |
+|----------|----------|--------|--------|----------|
+| P0 | C# Enhancements | Low | High | Week 1 |
+| P1 | TypeScript Core (contracts, shared-utils, core-types) | Medium | High | Week 2 |
+| P2 | TypeScript Apps (admin-ui, devhub, publisher) | High | High | Week 3 |
+| P3 | Rust Test Setup | Medium | Medium | Week 4 |
+| P4 | TypeScript Utilities (design-tokens, domain, chain) | Low | Low | Week 5 |
 
 ## Success Criteria
 
 ### C# Projects
-
 - [x] All 28 existing test projects maintain current structure
 - [ ] Add 2 new performance test projects
 - [ ] Standardize internal folder structure
 
 ### TypeScript Projects
-
 - [ ] Increase test coverage from 33% to 80% (12/15 packages)
 - [ ] Standardize all test configurations
 - [ ] Add E2E testing for 3 main applications
 
 ### Rust Projects
-
 - [ ] Achieve 80% test coverage for Tauri application
 - [ ] Set up benchmark infrastructure
 - [ ] Establish integration testing

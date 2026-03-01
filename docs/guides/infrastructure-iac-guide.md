@@ -13,7 +13,6 @@ This guide establishes the complete infrastructure and IaC strategy for the Myst
 ### 📊 **Infrastructure Assessment**
 
 #### **Current Architecture Components**
-
 - **Terraform/Terragrunt**: 48+ .tf files for Azure resource provisioning
 - **Kubernetes**: 36+ YAML manifests with Kustomize structure
 - **Docker**: 5 service-specific Dockerfiles
@@ -21,7 +20,6 @@ This guide establishes the complete infrastructure and IaC strategy for the Myst
 - **Azure Services**: AKS, PostgreSQL, Redis, Service Bus, Key Vault, AI services
 
 #### **Infrastructure Strengths**
-
 - **Well-Organized Structure**: 3-tier resource group organization
 - **Comprehensive Modules**: Terraform modules for all services
 - **Kubernetes Integration**: Proper service accounts and networking
@@ -29,7 +27,6 @@ This guide establishes the complete infrastructure and IaC strategy for the Myst
 - **Documentation**: Existing ADRs covering infrastructure decisions
 
 #### **Current Gaps**
-
 - **No Unified IaC Documentation**: Missing comprehensive guide
 - **Security Best Practices**: Limited security documentation
 - **Monitoring Strategy**: No comprehensive monitoring guide
@@ -72,7 +69,6 @@ This guide establishes the complete infrastructure and IaC strategy for the Myst
 Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md):
 
 #### **Tier 1: Core Resource Group** (`mys-{env}-core-rg-san`)
-
 - Virtual Network and Subnets
 - AKS Cluster
 - PostgreSQL Flexible Server (shared)
@@ -81,7 +77,6 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 - Log Analytics Workspace
 
 #### **Tier 2: Service Resource Groups** (`mys-{env}-{service}-rg-san`)
-
 - **chain-rg**: Chain service (Identity, Key Vault, App Insights)
 - **publisher-rg**: Publisher service (Identity, Key Vault, App Insights)
 - **story-rg**: Story Generator (Identity, Key Vault, App Insights)
@@ -89,7 +84,6 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 - **app-rg**: App (Static Web App, App Service)
 
 #### **Tier 3: Cross-Environment Shared**
-
 - DNS zones and certificates
 - Shared monitoring resources
 - Cross-environment networking
@@ -99,7 +93,6 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 ### 🔷 **Terraform/Terragrunt**
 
 #### **Current Implementation**
-
 - **Terragrunt**: For dependency management and configuration
 - **Terraform Modules**: Reusable infrastructure components
 - **State Management**: Remote state storage in Azure
@@ -108,7 +101,6 @@ Per [ADR-0017](../architecture/adr/0017-resource-group-organization-strategy.md)
 #### **Best Practices**
 
 ##### **Module Structure**
-
 ```hcl
 # terragrunt.hcl
 terraform {
@@ -119,7 +111,7 @@ inputs = {
   resource_group_name = dependency.core.outputs.resource_group_name
   location           = local.env_vars.location
   cluster_name       = "${local.env_vars.prefix}-aks"
-
+  
   node_count = local.env_vars.aks.node_count
   vm_size    = local.env_vars.aks.vm_size
 }
@@ -130,16 +122,15 @@ dependency "core" {
 ```
 
 ##### **Variable Management**
-
 ```hcl
 # env_vars.hcl
 locals {
   env_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
-
+  
   inputs = {
     resource_group_name = "${local.env_vars.locals.prefix}-core-rg-san"
     location           = local.env_vars.locals.location
-
+    
     aks = {
       node_count = local.env_vars.locals.aks.node_count
       vm_size    = local.env_vars.locals.aks.vm_size
@@ -149,7 +140,6 @@ locals {
 ```
 
 ##### **State Management**
-
 ```hcl
 # remote_state.tf
 terraform {
@@ -165,7 +155,6 @@ terraform {
 ### 🟨 **Kubernetes and Kustomize**
 
 #### **Current Implementation**
-
 - **Base Manifests**: Shared Kubernetes configurations
 - **Environment Overlays**: Environment-specific customizations
 - **Service Mesh**: Istio integration for service communication
@@ -174,7 +163,6 @@ terraform {
 #### **Best Practices**
 
 ##### **Base Structure**
-
 ```yaml
 # kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -195,7 +183,6 @@ commonLabels:
 ```
 
 ##### **Environment Overlay**
-
 ```yaml
 # overlays/prod/kustomization.yaml
 apiVersion: kustomize.config.k8s.io/v1beta1
@@ -218,7 +205,6 @@ images:
 ```
 
 ##### **Service Account Configuration**
-
 ```yaml
 # service-accounts.yaml
 apiVersion: v1
@@ -243,7 +229,6 @@ metadata:
 ### 🐳 **Docker Containerization**
 
 #### **Current Implementation**
-
 - **Multi-stage Builds**: Optimized Docker images
 - **Service-Specific Dockerfiles**: Customized per service
 - **Base Images**: Standardized base images
@@ -252,7 +237,6 @@ metadata:
 #### **Best Practices**
 
 ##### **Multi-stage Dockerfile**
-
 ```dockerfile
 # Dockerfile for Admin API
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -279,14 +263,13 @@ ENTRYPOINT ["dotnet", "Mystira.Admin.Api.dll"]
 ```
 
 ##### **Security Scanning Integration**
-
 ```yaml
 # .github/workflows/docker-security.yml
 name: Docker Security Scan
 
 on:
   push:
-    branches: [main, develop]
+    branches: [ main, develop ]
 
 jobs:
   security-scan:
@@ -294,24 +277,23 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      
       - name: Run Trivy Scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: "mystira/admin-api:latest"
-          format: "sarif"
-          output: "trivy-results.sarif"
-
+          image-ref: 'mystira/admin-api:latest'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+      
       - name: Upload Results
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: 'trivy-results.sarif'
 ```
 
 ### 🔧 **Harness GitOps Integration**
 
 #### **Current Implementation**
-
 - **Git Repository**: Single source of truth for Kubernetes manifests
 - **Automated Sync**: Git changes automatically sync to Kubernetes
 - **Rollback Support**: Automated rollback capabilities
@@ -320,7 +302,6 @@ jobs:
 #### **Best Practices**
 
 ##### **GitOps Configuration**
-
 ```yaml
 # harness-agent.yaml
 apiVersion: v1
@@ -349,19 +330,19 @@ spec:
         app: harness-delegate
     spec:
       containers:
-        - name: harness-delegate
-          image: harness/delegate:latest
-          env:
-            - name: ACCOUNT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: harness-agent-secret
-                  key: ACCOUNT_ID
-            - name: API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: harness-agent-secret
-                  key: API_KEY
+      - name: harness-delegate
+        image: harness/delegate:latest
+        env:
+        - name: ACCOUNT_ID
+          valueFrom:
+            secretKeyRef:
+              name: harness-agent-secret
+              key: ACCOUNT_ID
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: harness-agent-secret
+              key: API_KEY
 ```
 
 ## Multi-Cloud Strategy
@@ -369,7 +350,6 @@ spec:
 ### 🌍 **Multi-Cloud Vision**
 
 #### **Current State: Azure-Centric**
-
 - **Primary Provider**: Microsoft Azure
 - **Services**: AKS, PostgreSQL, Redis, Service Bus, Key Vault
 - **Management**: Terraform/Terragrunt for Azure resources
@@ -378,21 +358,18 @@ spec:
 #### **Future Multi-Cloud Strategy**
 
 ##### **Phase 1: Azure Optimization (Current)**
-
 - Optimize existing Azure infrastructure
 - Implement advanced Azure services
 - Enhance security and compliance
 - Improve cost management
 
 ##### **Phase 2: Hybrid Cloud (6-12 months)**
-
 - **AWS Integration**: Add AWS for specific workloads
 - **Google Cloud**: Integrate GCP for AI/ML workloads
 - **Multi-Cluster Management**: Cross-cloud Kubernetes management
 - **Data Replication**: Cross-cloud data strategies
 
 ##### **Phase 3: Full Multi-Cloud (12-24 months)**
-
 - **Workload Distribution**: Optimal cloud provider per workload
 - **Disaster Recovery**: Multi-cloud disaster recovery
 - **Cost Optimization**: Dynamic cloud cost management
@@ -401,7 +378,6 @@ spec:
 ### 🔧 **Multi-Cloud Tool Strategy**
 
 #### **Infrastructure as Code**
-
 ```hcl
 # Multi-cloud provider configuration
 terraform {
@@ -437,7 +413,6 @@ provider "google" {
 ```
 
 #### **Multi-Cloud Kubernetes**
-
 ```yaml
 # Multi-cluster management
 apiVersion: cluster.x-k8s.io/v1beta1
@@ -465,21 +440,20 @@ spec:
 
 ### 📊 **Multi-Cloud Decision Matrix**
 
-| Workload Type        | Primary Cloud      | Secondary Cloud | Rationale                     |
-| -------------------- | ------------------ | --------------- | ----------------------------- |
-| **Web Applications** | Azure (AKS)        | AWS (EKS)       | Azure integration, AWS backup |
-| **AI/ML Workloads**  | Google Cloud       | Azure           | GCP AI superiority            |
-| **Data Analytics**   | AWS (Redshift)     | Azure           | AWS analytics maturity        |
-| **Edge Computing**   | Azure (Edge Zones) | AWS (Outposts)  | Azure edge presence           |
-| **Blockchain**       | Azure              | AWS             | Azure blockchain services     |
-| **Mobile Backend**   | Azure              | Google Cloud    | Azure mobile integration      |
+| Workload Type | Primary Cloud | Secondary Cloud | Rationale |
+|---------------|---------------|------------------|-----------|
+| **Web Applications** | Azure (AKS) | AWS (EKS) | Azure integration, AWS backup |
+| **AI/ML Workloads** | Google Cloud | Azure | GCP AI superiority |
+| **Data Analytics** | AWS (Redshift) | Azure | AWS analytics maturity |
+| **Edge Computing** | Azure (Edge Zones) | AWS (Outposts) | Azure edge presence |
+| **Blockchain** | Azure | AWS | Azure blockchain services |
+| **Mobile Backend** | Azure | Google Cloud | Azure mobile integration |
 
 ## Infrastructure Components Deep Dive
 
 ### 🔷 **Azure Infrastructure**
 
 #### **AKS Cluster Configuration**
-
 ```hcl
 # modules/aks/main.tf
 resource "azurerm_kubernetes_cluster" "aks" {
@@ -487,23 +461,23 @@ resource "azurerm_kubernetes_cluster" "aks" {
   location            = var.location
   resource_group_name = var.resource_group_name
   dns_prefix          = var.dns_prefix
-
+  
   default_node_pool {
     name       = "system"
     node_count = var.system_node_count
     vm_size    = var.system_vm_size
-
+    
     upgrade_settings {
       max_surge = "10%"
     }
   }
-
+  
   node_resource_group = "${var.resource_group_name}-nrg"
-
+  
   identity {
     type = "SystemAssigned"
   }
-
+  
   network_profile {
     network_plugin    = "azure"
     network_policy    = "calico"
@@ -511,23 +485,23 @@ resource "azurerm_kubernetes_cluster" "aks" {
     service_cidr      = "10.0.0.0/16"
     docker_bridge_cidr = "172.17.0.1/16"
   }
-
+  
   addon_profile {
     oms_agent {
       enabled = true
       log_analytics_workspace_id = var.log_analytics_workspace_id
     }
-
+    
     azure_policy {
       enabled = true
     }
-
+    
     ingress_application_gateway {
       enabled = true
       gateway_name = "${var.cluster_name}-agw"
     }
   }
-
+  
   azure_active_directory_role_based_access_control {
     enabled = true
     azure_rbac_enabled = true
@@ -537,37 +511,36 @@ resource "azurerm_kubernetes_cluster" "aks" {
 ```
 
 #### **Database Configuration**
-
 ```hcl
 # modules/postgresql/main.tf
 resource "azurerm_postgresql_flexible_server" "postgres" {
   name                = var.server_name
   resource_group_name = var.resource_group_name
   location            = var.location
-
+  
   version            = var.postgres_version
   administrator_login = var.admin_username
   administrator_password = var.admin_password
-
+  
   storage_mb = var.storage_mb
   sku_name   = var.sku_name
-
+  
   backup_retention_days        = var.backup_retention_days
   geo_redundant_backup_enabled = var.geo_redundant_backup_enabled
-
+  
   high_availability {
     mode = var.high_availability_mode
   }
-
+  
   maintenance_window {
     day_of_week  = var.maintenance_day
     start_hour   = var.maintenance_hour
     start_minute = var.maintenance_minute
   }
-
+  
   delegated_subnet_id = var.subnet_id
   private_dns_zone_id  = var.private_dns_zone_id
-
+  
   tags = var.tags
 }
 
@@ -581,7 +554,6 @@ resource "azurerm_postgresql_flexible_server_database" "database" {
 ```
 
 #### **Networking Configuration**
-
 ```hcl
 # modules/vnet/main.tf
 resource "azurerm_virtual_network" "vnet" {
@@ -589,7 +561,7 @@ resource "azurerm_virtual_network" "vnet" {
   address_space       = var.address_space
   location            = var.location
   resource_group_name = var.resource_group_name
-
+  
   tags = var.tags
 }
 
@@ -598,7 +570,7 @@ resource "azurerm_subnet" "aks" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.aks_subnet_address_prefixes
-
+  
   delegation {
     name = "aks-delegation"
     service_delegation {
@@ -613,7 +585,7 @@ resource "azurerm_subnet" "postgres" {
   resource_group_name  = var.resource_group_name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.postgres_subnet_address_prefixes
-
+  
   delegation {
     name = "postgres-delegation"
     service_delegation {
@@ -627,7 +599,6 @@ resource "azurerm_subnet" "postgres" {
 ### 🟨 **Kubernetes Infrastructure**
 
 #### **Service Mesh Configuration**
-
 ```yaml
 # service-mesh/destination-rules.yaml
 apiVersion: networking.istio.io/v1beta1
@@ -670,7 +641,6 @@ spec:
 ```
 
 #### **Network Policies**
-
 ```yaml
 # network-policy.yaml
 apiVersion: networking.k8s.io/v1
@@ -683,41 +653,40 @@ spec:
     matchLabels:
       app: admin-api
   policyTypes:
-    - Ingress
-    - Egress
+  - Ingress
+  - Egress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-        - podSelector:
-            matchLabels:
-              app: story-generator
-      ports:
-        - protocol: TCP
-          port: 80
-        - protocol: TCP
-          port: 443
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - podSelector:
+        matchLabels:
+          app: story-generator
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
   egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              app: postgres
-      ports:
-        - protocol: TCP
-          port: 5432
-    - to: []
-      ports:
-        - protocol: TCP
-          port: 53
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 443
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
 ```
 
 #### **Ingress Configuration**
-
 ```yaml
 # ingress.yaml
 apiVersion: networking.k8s.io/v1
@@ -736,26 +705,25 @@ metadata:
     nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization"
 spec:
   tls:
-    - hosts:
-        - api.mystira.dev
-      secretName: admin-api-tls
+  - hosts:
+    - api.mystira.dev
+    secretName: admin-api-tls
   rules:
-    - host: api.mystira.dev
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: admin-api
-                port:
-                  number: 80
+  - host: api.mystira.dev
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: admin-api
+            port:
+              number: 80
 ```
 
 ### 🐳 **Container Infrastructure**
 
 #### **Multi-Stage Build Optimization**
-
 ```dockerfile
 # Optimized Dockerfile for Story Generator
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
@@ -800,7 +768,6 @@ ENTRYPOINT ["dotnet", "Mystira.StoryGenerator.dll"]
 ```
 
 #### **Container Security**
-
 ```yaml
 # pod-security-policy.yaml
 apiVersion: policy/v1beta1
@@ -813,18 +780,18 @@ spec:
   requiredDropCapabilities:
     - ALL
   volumes:
-    - "configMap"
-    - "emptyDir"
-    - "projected"
-    - "secret"
-    - "downwardAPI"
-    - "persistentVolumeClaim"
+    - 'configMap'
+    - 'emptyDir'
+    - 'projected'
+    - 'secret'
+    - 'downwardAPI'
+    - 'persistentVolumeClaim'
   runAsUser:
-    rule: "MustRunAsNonRoot"
+    rule: 'MustRunAsNonRoot'
   seLinux:
-    rule: "RunAsAny"
+    rule: 'RunAsAny'
   fsGroup:
-    rule: "RunAsAny"
+    rule: 'RunAsAny'
   readOnlyRootFilesystem: false
 ```
 
@@ -833,14 +800,13 @@ spec:
 ### 🔒 **Infrastructure Security**
 
 #### **Network Security**
-
 ```hcl
 # modules/network-security/main.tf
 resource "azurerm_network_security_group" "nsg" {
   name                = var.nsg_name
   location            = var.location
   resource_group_name = var.resource_group_name
-
+  
   security_rule {
     name                       = "AllowHTTPSInbound"
     priority                   = 100
@@ -852,7 +818,7 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
+  
   security_rule {
     name                       = "AllowAKSInbound"
     priority                   = 110
@@ -864,7 +830,7 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "AzureLoadBalancer"
     destination_address_prefix = "*"
   }
-
+  
   security_rule {
     name                       = "DenyAllInbound"
     priority                   = 4096
@@ -876,20 +842,19 @@ resource "azurerm_network_security_group" "nsg" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
-
+  
   tags = var.tags
 }
 ```
 
 #### **Identity and Access Management**
-
 ```hcl
 # modules/identity/main.tf
 resource "azurerm_user_assigned_identity" "identity" {
   location            = var.location
   resource_group_name = var.resource_group_name
   name                = var.identity_name
-
+  
   tags = var.tags
 }
 
@@ -903,7 +868,7 @@ resource "azurerm_federated_identity_credential" "federated_credential" {
   name                = var.federated_credential_name
   resource_group_name = var.resource_group_name
   parent_id           = azurerm_user_assigned_identity.identity.id
-
+  
   audience = ["api://AzureADTokenExchange"]
   issuer   = "https://sts.windows.net/${var.tenant_id}/"
   subject  = "system:serviceaccount:${var.namespace}:${var.service_account_name}"
@@ -911,7 +876,6 @@ resource "azurerm_federated_identity_credential" "federated_credential" {
 ```
 
 #### **Secret Management**
-
 ```yaml
 # secret-management.yaml
 apiVersion: v1
@@ -943,14 +907,13 @@ spec:
         - type: secret
           name: database-connection
           data:
-            - key: connection-string
-              isSecret: true
+          - key: connection-string
+            isSecret: true
 ```
 
 ### 🛡️ **Compliance Framework**
 
 #### **Policy as Code**
-
 ```hcl
 # policy-as-code/main.tf
 resource "azurerm_policy_definition" "policy_definition" {
@@ -958,7 +921,7 @@ resource "azurerm_policy_definition" "policy_definition" {
   display_name        = var.policy_display_name
   policy_type         = "Custom"
   mode                = "Indexed"
-
+  
   policy_rule = jsonencode({
     if = {
       field = "type"
@@ -978,7 +941,7 @@ resource "azurerm_policy_definition" "policy_definition" {
       }
     }
   })
-
+  
   metadata = jsonencode({
     version = "1.0.0"
     category = "Storage"
@@ -989,7 +952,7 @@ resource "azurerm_policy_assignment" "policy_assignment" {
   name                 = var.policy_assignment_name
   scope                = var.scope
   policy_definition_id = azurerm_policy_definition.policy_definition.id
-
+  
   parameters = {
     effect = {
       value = "Deny"
@@ -999,7 +962,6 @@ resource "azurerm_policy_assignment" "policy_assignment" {
 ```
 
 #### **Compliance Monitoring**
-
 ```yaml
 # compliance-monitoring.yaml
 apiVersion: v1
@@ -1038,7 +1000,6 @@ data:
 ### 📊 **Monitoring and Observability**
 
 #### **Application Monitoring**
-
 ```yaml
 # application-monitoring.yaml
 apiVersion: v1
@@ -1051,10 +1012,10 @@ data:
     global:
       scrape_interval: 15s
       evaluation_interval: 15s
-
+    
     rule_files:
       - "mystira_rules.yml"
-
+    
     scrape_configs:
       - job_name: 'kubernetes-pods'
         kubernetes_sd_configs:
@@ -1076,7 +1037,6 @@ data:
 ```
 
 #### **Logging Infrastructure**
-
 ```yaml
 # logging-infrastructure.yaml
 apiVersion: v1
@@ -1097,11 +1057,11 @@ data:
         time_format %Y-%m-%dT%H:%M:%S.%NZ
       </parse>
     </source>
-
+    
     <filter kubernetes.**>
       @type kubernetes_metadata
     </filter>
-
+    
     <match kubernetes.**>
       @type azureloganalytics
       customer_id "#{ENV['AZURE_LOG_ANALYTICS_WORKSPACE_ID']}"
@@ -1111,7 +1071,6 @@ data:
 ```
 
 #### **Alerting Configuration**
-
 ```yaml
 # alerting.yaml
 apiVersion: v1
@@ -1155,7 +1114,6 @@ data:
 ### 🔄 **Backup and Disaster Recovery**
 
 #### **Database Backup Strategy**
-
 ```hcl
 # modules/backup/main.tf
 resource "azurerm_backup_policy_vm_workload" "backup_policy" {
@@ -1163,26 +1121,26 @@ resource "azurerm_backup_policy_vm_workload" "backup_policy" {
   resource_group_name = var.resource_group_name
   vault_name          = var.recovery_vault_name
   workload_type       = "SQLDatabase"
-
+  
   backup {
     frequency = "Daily"
     time      = "02:00"
   }
-
+  
   retention_daily {
     count = 30
   }
-
+  
   retention_weekly {
     count    = 4
     weekdays = ["Sunday"]
   }
-
+  
   retention_monthly {
     count    = 12
     days     = 1
   }
-
+  
   retention_yearly {
     count    = 10
     months   = 1
@@ -1194,13 +1152,12 @@ resource "azurerm_backup_protected_vm_sql" "database_backup" {
   resource_group_name = var.resource_group_name
   recovery_vault_name = var.recovery_vault_name
   backup_policy_id    = azurerm_backup_policy_vm_workload.backup_policy.id
-
+  
   database_id = var.database_id
 }
 ```
 
 #### **Disaster Recovery Plan**
-
 ```yaml
 # disaster-recovery.yaml
 apiVersion: v1
@@ -1251,14 +1208,13 @@ data:
 ### 💰 **Cost Management**
 
 #### **Cost Optimization Strategy**
-
 ```hcl
 # cost-optimization/main.tf
 resource "azurerm_management_group_policy_assignment" "cost_policy" {
   name                 = "cost-optimization-policy"
   management_group_id  = var.management_group_id
   policy_definition_id = azurerm_policy_definition.cost_optimization.id
-
+  
   parameters = {
     allowed_vm_sizes = {
       value = [
@@ -1268,11 +1224,11 @@ resource "azurerm_management_group_policy_assignment" "cost_policy" {
         "Standard_D4s_v3"
       ]
     }
-
+    
     max_disk_size_gb = {
       value = 1024
     }
-
+    
     required_tags = {
       value = [
         "environment",
@@ -1288,7 +1244,7 @@ resource "azurerm_policy_definition" "cost_optimization" {
   display_name        = "Cost Optimization Policy"
   policy_type         = "Custom"
   mode                = "Indexed"
-
+  
   policy_rule = jsonencode({
     if = {
       anyOf = [
@@ -1318,7 +1274,7 @@ resource "azurerm_policy_definition" "cost_optimization" {
       effect = "deny"
     }
   })
-
+  
   metadata = jsonencode({
     version = "1.0.0"
     category = "Cost"
@@ -1327,7 +1283,6 @@ resource "azurerm_policy_definition" "cost_optimization" {
 ```
 
 #### **Cost Monitoring Dashboard**
-
 ```yaml
 # cost-monitoring.yaml
 apiVersion: v1
@@ -1381,7 +1336,6 @@ data:
 ### 🔄 **Infrastructure Development Lifecycle**
 
 #### **Development Process**
-
 ```mermaid
 graph TD
     A[Feature Request] --> B[Design Review]
@@ -1399,7 +1353,6 @@ graph TD
 ```
 
 #### **Testing Strategy**
-
 ```hcl
 # terraform-test/main.tf
 terraform {
@@ -1430,11 +1383,11 @@ resource "random_string" "suffix" {
 # Test modules
 module "test_aks" {
   source = "../../modules/aks"
-
+  
   resource_group_name = azurerm_resource_group.test.name
   location           = azurerm_resource_group.test.location
   cluster_name       = "test-aks-${random_string.suffix.result}"
-
+  
   node_count = 1
   vm_size    = "Standard_B2s"
 }
@@ -1442,7 +1395,7 @@ module "test_aks" {
 # Test validation
 resource "null_resource" "validation" {
   depends_on = [module.test_aks]
-
+  
   provisioner "local-exec" {
     command = "kubectl get nodes --context=test-context"
   }
@@ -1450,7 +1403,6 @@ resource "null_resource" "validation" {
 ```
 
 #### **Code Review Process**
-
 ```yaml
 # .github/workflows/infra-review.yml
 name: Infrastructure Code Review
@@ -1458,8 +1410,8 @@ name: Infrastructure Code Review
 on:
   pull_request:
     paths:
-      - "infra/terraform/**"
-      - "infra/kubernetes/**"
+      - 'infra/terraform/**'
+      - 'infra/kubernetes/**'
 
 jobs:
   terraform-review:
@@ -1467,34 +1419,34 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
+      
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: "1.5.0"
-
+      
       - name: Terraform Format Check
         run: terraform fmt -check -recursive infra/terraform/
-
+      
       - name: Terraform Validate
         run: terraform validate -no-color
-
+      
       - name: Terraform Plan
         run: terraform plan -no-color -out=tfplan
-
+      
       - name: Terraform Security Scan
         uses: bridgecrewio/checkov-action@master
         with:
           directory: infra/terraform/
           framework: terraform
           output_format: sarif
-
+      
       - name: Cost Analysis
         run: |
           infracost breakdown --path infra/terraform/ \
             --format json \
             --output-file infracost.json
-
+      
       - name: Comment PR
         uses: actions/github-script@v6
         with:
@@ -1502,7 +1454,7 @@ jobs:
             const fs = require('fs');
             const plan = fs.readFileSync('tfplan', 'utf8');
             const cost = JSON.parse(fs.readFileSync('infracost.json', 'utf8'));
-
+            
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -1514,7 +1466,6 @@ jobs:
 ### 🧪 **Infrastructure Testing**
 
 #### **Unit Testing**
-
 ```python
 # tests/test_aks_module.py
 import pytest
@@ -1522,19 +1473,19 @@ from terraform_validate import TerraformValidator
 
 def test_aks_module():
     validator = TerraformValidator("infra/terraform/modules/aks")
-
+    
     # Test required variables
     validator.required_variable("resource_group_name")
     validator.required_variable("location")
     validator.required_variable("cluster_name")
     validator.required_variable("node_count")
     validator.required_variable("vm_size")
-
+    
     # Test required outputs
     validator.required_output("cluster_id")
     validator.required_output("kube_config")
     validator.required_output("node_resource_group")
-
+    
     # Test resource configuration
     validator.resource("azurerm_kubernetes_cluster", "aks")
     validator.attribute_eq("default_node_pool.0.node_count", 3)
@@ -1542,14 +1493,14 @@ def test_aks_module():
 
 def test_postgres_module():
     validator = TerraformValidator("infra/terraform/modules/postgresql")
-
+    
     # Test required variables
     validator.required_variable("server_name")
     validator.required_variable("resource_group_name")
     validator.required_variable("location")
     validator.required_variable("admin_username")
     validator.required_variable("admin_password")
-
+    
     # Test resource configuration
     validator.resource("azurerm_postgresql_flexible_server", "postgres")
     validator.attribute_eq("version", "14")
@@ -1558,7 +1509,6 @@ def test_postgres_module():
 ```
 
 #### **Integration Testing**
-
 ```python
 # tests/test_integration.py
 import pytest
@@ -1571,17 +1521,17 @@ def test_aks_cluster_creation():
     result = subprocess.run([
         "terraform", "apply", "-auto-approve", "-input=false"
     ], cwd="tests/integration", capture_output=True, text=True)
-
+    
     assert result.returncode == 0, f"Terraform apply failed: {result.stderr}"
-
+    
     # Wait for cluster to be ready
     time.sleep(300)
-
+    
     # Test cluster connectivity
     result = subprocess.run([
         "kubectl", "get", "nodes"
     ], capture_output=True, text=True)
-
+    
     assert result.returncode == 0, f"kubectl get nodes failed: {result.stderr}"
     assert "Ready" in result.stdout, "Cluster nodes are not ready"
 
@@ -1591,23 +1541,22 @@ def test_service_deployment():
     result = subprocess.run([
         "kubectl", "apply", "-f", "test-service.yaml"
     ], capture_output=True, text=True)
-
+    
     assert result.returncode == 0, f"Service deployment failed: {result.stderr}"
-
+    
     # Wait for service to be ready
     time.sleep(60)
-
+    
     # Test service health
     result = subprocess.run([
         "kubectl", "get", "pods", "-l", "app=test-service"
     ], capture_output=True, text=True)
-
+    
     assert result.returncode == 0, f"Pod check failed: {result.stderr}"
     assert "Running" in result.stdout, "Service pods are not running"
 ```
 
 #### **Performance Testing**
-
 ```python
 # tests/test_performance.py
 import pytest
@@ -1618,11 +1567,11 @@ import time
 def test_api_response_time():
     """Test API response time under load"""
     url = "https://api.mystira.dev/health"
-
+    
     # Warm up
     for _ in range(10):
         requests.get(url)
-
+    
     # Measure response times
     response_times = []
     for _ in range(100):
@@ -1630,13 +1579,13 @@ def test_api_response_time():
         response = requests.get(url)
         response_time = time.time() - start_time
         response_times.append(response_time)
-
+        
         assert response.status_code == 200
-
+    
     # Calculate statistics
     avg_response_time = sum(response_times) / len(response_times)
     max_response_time = max(response_times)
-
+    
     # Assert performance requirements
     assert avg_response_time < 0.200, f"Average response time {avg_response_time}s exceeds 200ms"
     assert max_response_time < 1.000, f"Max response time {max_response_time}s exceeds 1000ms"
@@ -1654,7 +1603,6 @@ def test_database_performance():
 ### 📋 **Coding Standards**
 
 #### **Terraform Standards**
-
 ```hcl
 # Standard module structure
 # main.tf - Main resources
@@ -1673,7 +1621,7 @@ variable "resource_group_name" {
 resource "azurerm_resource_group" "main" {
   name     = var.resource_group_name
   location = var.location
-
+  
   tags = var.tags
 }
 
@@ -1685,7 +1633,6 @@ output "resource_group_id" {
 ```
 
 #### **Kubernetes Standards**
-
 ```yaml
 # Standard metadata
 metadata:
@@ -1704,53 +1651,52 @@ spec:
     matchLabels:
       app.kubernetes.io/name: mystira
       app.kubernetes.io/component: admin-api
-
+  
   template:
     metadata:
       labels:
         app.kubernetes.io/name: mystira
         app.kubernetes.io/component: admin-api
         version: v1.2.0
-
+    
     spec:
       serviceAccountName: admin-api-sa
       securityContext:
         runAsNonRoot: true
         runAsUser: 1001
         fsGroup: 1001
-
+      
       containers:
-        - name: admin-api
-          image: mystira/admin-api:v1.2.0
-          ports:
-            - containerPort: 80
-              name: http
-
-          resources:
-            requests:
-              memory: "128Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "500m"
-
-          livenessProbe:
-            httpGet:
-              path: /health
-              port: 80
-            initialDelaySeconds: 30
-            periodSeconds: 10
-
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 80
-            initialDelaySeconds: 5
-            periodSeconds: 5
+      - name: admin-api
+        image: mystira/admin-api:v1.2.0
+        ports:
+        - containerPort: 80
+          name: http
+        
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
 ```
 
 #### **Docker Standards**
-
 ```dockerfile
 # Multi-stage build standard
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
@@ -1791,7 +1737,6 @@ ENTRYPOINT ["dotnet", "Application.dll"]
 ### 🏷️ **Naming Conventions**
 
 #### **Azure Resources** (per [ADR-0008](../architecture/adr/0008-azure-resource-naming-conventions.md))
-
 ```
 Resource Group: mys-{env}-{service}-rg-san
 AKS Cluster: mys-{env}-aks-{region}
@@ -1801,7 +1746,6 @@ Service Bus: mys-{env}-{service}-sb-{region}
 ```
 
 #### **Kubernetes Resources**
-
 ```
 Namespace: mystira
 Service Account: {service}-sa
@@ -1813,7 +1757,6 @@ Secret: {service}-secrets
 ```
 
 #### **Docker Images**
-
 ```
 Repository: mystira/{service}
 Tag: {version}
@@ -1823,49 +1766,42 @@ Example: mystira/admin-api:v1.2.0
 ### 📚 **Documentation Standards**
 
 #### **Module Documentation**
-
-````markdown
+```markdown
 # AKS Module
 
 ## Description
-
 This module creates an Azure Kubernetes Service cluster with best practices configuration.
 
 ## Usage
-
 ```hcl
 module "aks" {
   source = "./modules/aks"
-
+  
   resource_group_name = "rg-test"
   location           = "East US"
   cluster_name       = "test-aks"
-
+  
   node_count = 3
   vm_size    = "Standard_D2s_v3"
 }
 ```
-````
 
 ## Inputs
-
-| Name                | Description                     | Type   | Default         | Required |
-| ------------------- | ------------------------------- | ------ | --------------- | -------- |
-| resource_group_name | Name of the resource group      | string | n/a             | yes      |
-| location            | Azure region                    | string | n/a             | yes      |
-| cluster_name        | Name of the AKS cluster         | string | n/a             | yes      |
-| node_count          | Number of nodes in default pool | number | 3               | no       |
-| vm_size             | VM size for nodes               | string | Standard_D2s_v3 | no       |
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|----------|
+| resource_group_name | Name of the resource group | string | n/a | yes |
+| location | Azure region | string | n/a | yes |
+| cluster_name | Name of the AKS cluster | string | n/a | yes |
+| node_count | Number of nodes in default pool | number | 3 | no |
+| vm_size | VM size for nodes | string | Standard_D2s_v3 | no |
 
 ## Outputs
-
-| Name                | Description                     |
-| ------------------- | ------------------------------- |
-| cluster_id          | ID of the AKS cluster           |
-| kube_config         | Kubeconfig for the cluster      |
+| Name | Description |
+|------|-------------|
+| cluster_id | ID of the AKS cluster |
+| kube_config | Kubeconfig for the cluster |
 | node_resource_group | Name of the node resource group |
-
-````
+```
 
 #### **Infrastructure Documentation**
 ```markdown
@@ -1890,17 +1826,14 @@ graph TD
     C --> E[Redis]
     C --> F[Service Bus]
     C --> G[Key Vault]
-````
+```
 
 ## Procedures
-
 ### Adding a New Service
-
 1. Create Terraform module
 2. Add Kubernetes manifests
 3. Update CI/CD pipeline
 4. Update documentation
-
 ```
 
 ## Implementation Roadmap
@@ -2042,8 +1975,7 @@ By implementing this guide, we can achieve world-class infrastructure excellence
 
 ---
 
-**Infrastructure Team**: Development Team
-**Review Schedule**: Monthly
-**Last Review**: 2026-03-01
+**Infrastructure Team**: Development Team  
+**Review Schedule**: Monthly  
+**Last Review**: 2026-03-01  
 **Next Review**: 2026-04-01
-```

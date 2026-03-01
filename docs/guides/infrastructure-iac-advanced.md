@@ -13,7 +13,6 @@ This guide covers advanced infrastructure and IaC practices for the Mystira mono
 ### 🔄 **Progressive Deployment Strategies**
 
 #### **Blue-Green Deployments**
-
 ```yaml
 # blue-green-deployment.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -31,16 +30,16 @@ spec:
       scaleDownDelaySeconds: 30
       prePromotionAnalysis:
         templates:
-          - templateName: success-rate
+        - templateName: success-rate
         args:
-          - name: service-name
-            value: admin-api-preview
+        - name: service-name
+          value: admin-api-preview
       postPromotionAnalysis:
         templates:
-          - templateName: success-rate
+        - templateName: success-rate
         args:
-          - name: service-name
-            value: admin-api-active
+        - name: service-name
+          value: admin-api-active
   selector:
     matchLabels:
       app: admin-api
@@ -51,20 +50,19 @@ spec:
         version: blue-green
     spec:
       containers:
-        - name: admin-api
-          image: mystira/admin-api:v1.2.0
-          ports:
-            - containerPort: 80
-          readinessProbe:
-            httpGet:
-              path: /ready
-              port: 80
-            initialDelaySeconds: 10
-            periodSeconds: 5
+      - name: admin-api
+        image: mystira/admin-api:v1.2.0
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 5
 ```
 
 #### **Canary Deployments**
-
 ```yaml
 # canary-deployment.yaml
 apiVersion: argoproj.io/v1alpha1
@@ -77,14 +75,14 @@ spec:
   strategy:
     canary:
       steps:
-        - setWeight: 20
-        - pause: { duration: 10m }
-        - setWeight: 40
-        - pause: { duration: 10m }
-        - setWeight: 60
-        - pause: { duration: 10m }
-        - setWeight: 80
-        - pause: { duration: 10m }
+      - setWeight: 20
+      - pause: {duration: 10m}
+      - setWeight: 40
+      - pause: {duration: 10m}
+      - setWeight: 60
+      - pause: {duration: 10m}
+      - setWeight: 80
+      - pause: {duration: 10m}
       canaryService: story-generator-canary
       stableService: story-generator-stable
       trafficRouting:
@@ -92,14 +90,14 @@ spec:
           virtualService:
             name: story-generator-vsvc
             routes:
-              - primary
+            - primary
       analysis:
         templates:
-          - templateName: success-rate
-          - templateName: latency
+        - templateName: success-rate
+        - templateName: latency
         args:
-          - name: service-name
-            value: story-generator-canary
+        - name: service-name
+          value: story-generator-canary
         startingStep: 2
         interval: 5m
   selector:
@@ -112,14 +110,13 @@ spec:
         version: canary
     spec:
       containers:
-        - name: story-generator
-          image: mystira/story-generator:v2.0.0
-          ports:
-            - containerPort: 80
+      - name: story-generator
+        image: mystira/story-generator:v2.0.0
+        ports:
+        - containerPort: 80
 ```
 
 #### **A/B Testing Infrastructure**
-
 ```yaml
 # ab-testing.yaml
 apiVersion: v1
@@ -131,8 +128,8 @@ spec:
   selector:
     app: admin-api
   ports:
-    - port: 80
-      targetPort: 80
+  - port: 80
+    targetPort: 80
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
@@ -141,41 +138,40 @@ metadata:
   namespace: mystira
 spec:
   http:
-    - match:
-        - headers:
-            ab-test:
-              exact: "variant-a"
-      route:
-        - destination:
-            host: admin-api
-            subset: variant-a
-    - match:
-        - headers:
-            ab-test:
-              exact: "variant-b"
-      route:
-        - destination:
-            host: admin-api
-            subset: variant-b
-    - route:
-        - destination:
-            host: admin-api
-            subset: stable
-          weight: 90
-        - destination:
-            host: admin-api
-            subset: variant-a
-          weight: 5
-        - destination:
-            host: admin-api
-            subset: variant-b
-          weight: 5
+  - match:
+    - headers:
+        ab-test:
+          exact: "variant-a"
+    route:
+    - destination:
+        host: admin-api
+        subset: variant-a
+  - match:
+    - headers:
+        ab-test:
+          exact: "variant-b"
+    route:
+    - destination:
+        host: admin-api
+        subset: variant-b
+  - route:
+    - destination:
+        host: admin-api
+        subset: stable
+      weight: 90
+    - destination:
+        host: admin-api
+        subset: variant-a
+      weight: 5
+    - destination:
+        host: admin-api
+        subset: variant-b
+      weight: 5
 ```
 
 ### 🚀 **Auto-Scaling Strategies**
 
 #### **Horizontal Pod Autoscaling**
-
 ```yaml
 # hpa-advanced.yaml
 apiVersion: autoscaling/v2
@@ -191,53 +187,52 @@ spec:
   minReplicas: 2
   maxReplicas: 20
   metrics:
-    - type: Resource
-      resource:
-        name: cpu
-        target:
-          type: Utilization
-          averageUtilization: 70
-    - type: Resource
-      resource:
-        name: memory
-        target:
-          type: Utilization
-          averageUtilization: 80
-    - type: Pods
-      pods:
-        metric:
-          name: http_requests_per_second
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 80
+  - type: Pods
+    pods:
+      metric:
+        name: http_requests_per_second
+      target:
+        type: AverageValue
+        averageValue: "100"
+  - type: External
+    external:
+      metric:
+        name: queue_messages_ready
         target:
           type: AverageValue
-          averageValue: "100"
-    - type: External
-      external:
-        metric:
-          name: queue_messages_ready
-          target:
-            type: AverageValue
-            averageValue: "30"
+          averageValue: "30"
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 300
       policies:
-        - type: Percent
-          value: 10
-          periodSeconds: 60
+      - type: Percent
+        value: 10
+        periodSeconds: 60
     scaleUp:
       stabilizationWindowSeconds: 60
       policies:
-        - type: Percent
-          value: 50
-          periodSeconds: 60
-        - type: Pods
-          value: 4
-          periodSeconds: 60
+      - type: Percent
+        value: 50
+        periodSeconds: 60
+      - type: Pods
+        value: 4
+        periodSeconds: 60
       selectPolicy: Max
 ```
 
 #### **Cluster Autoscaling**
-
 ```hcl
 # modules/cluster-autoscaler/main.tf
 resource "azurerm_kubernetes_cluster_node_pool" "autoscale_pool" {
@@ -248,17 +243,17 @@ resource "azurerm_kubernetes_cluster_node_pool" "autoscale_pool" {
   min_count           = 1
   max_count           = 10
   node_count          = 2
-
+  
   upgrade_settings {
     max_surge = "10%"
   }
-
+  
   tags = var.tags
 }
 
 resource "azurerm_kubernetes_cluster" "aks" {
   # ... other configuration
-
+  
   auto_scaler_profile {
     balance_similar_node_groups      = true
     max_graceful_termination_sec    = 600
@@ -273,7 +268,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
 ```
 
 #### **Custom Metrics Scaling**
-
 ```yaml
 # custom-metrics.yaml
 apiVersion: v1
@@ -289,8 +283,8 @@ spec:
   selector:
     app: admin-api
   ports:
-    - port: 9090
-      targetPort: 9090
+  - port: 9090
+    targetPort: 9090
 ---
 apiVersion: k8s.io/v1
 kind: ServiceMonitor
@@ -302,22 +296,21 @@ spec:
     matchLabels:
       app: admin-api
   endpoints:
-    - port: metrics
-      path: /metrics
-      interval: 30s
+  - port: metrics
+    path: /metrics
+    interval: 30s
 ```
 
 ### 🌐 **Multi-Region Deployment**
 
 #### **Global Load Balancing**
-
 ```hcl
 # modules/global-load-balancer/main.tf
 resource "azurerm_front_door" "front_door" {
   name                = var.front_door_name
   resource_group_name = var.resource_group_name
   location            = var.location
-
+  
   routing_rule {
     name               = "default"
     accepted_protocols = ["Http", "Https"]
@@ -331,7 +324,7 @@ resource "azurerm_front_door" "front_door" {
       }
     }
   }
-
+  
   backend_pool {
     name = "default-backend"
     backend {
@@ -359,7 +352,7 @@ resource "azurerm_front_door" "front_door" {
       interval_in_seconds = 30
     }
   }
-
+  
   frontend_endpoint {
     name                              = "default_frontend"
     host_name                         = "api.mystira.dev"
@@ -371,7 +364,6 @@ resource "azurerm_front_door" "front_door" {
 ```
 
 #### **Cross-Region Replication**
-
 ```hcl
 # modules/cross-region-replication/main.tf
 resource "azurerm_sql_database" "primary" {
@@ -379,13 +371,13 @@ resource "azurerm_sql_database" "primary" {
   resource_group_name = var.primary_resource_group
   location            = var.primary_location
   server_name         = var.primary_server_name
-
+  
   sku {
     name = "S2"
   }
-
+  
   auto_pause_delay_in_minutes = -1
-
+  
   tags = var.tags
 }
 
@@ -394,14 +386,14 @@ resource "azurerm_sql_database" "secondary" {
   resource_group_name = var.secondary_resource_group
   location            = var.secondary_location
   server_name         = var.secondary_server_name
-
+  
   sku {
     name = "S2"
   }
-
+  
   create_mode = "Secondary"
   source_database_id = azurerm_sql_database.primary.id
-
+  
   tags = var.tags
 }
 
@@ -410,15 +402,15 @@ resource "azurerm_sql_failover_group" "failover_group" {
   server_name = var.primary_server_name
   resource_group_name = var.primary_resource_group
   databases  = [azurerm_sql_database.primary.id]
-
+  
   partner_servers {
     id = var.secondary_server_id
   }
-
+  
   read_write_endpoint_failover_policy {
     mode = "Automatic"
   }
-
+  
   readonly_endpoint_failover_policy {
     mode = "Enabled"
   }
@@ -430,7 +422,6 @@ resource "azurerm_sql_failover_group" "failover_group" {
 ### 🔒 **Zero Trust Architecture**
 
 #### **Network Segmentation**
-
 ```yaml
 # zero-trust-network.yaml
 apiVersion: networking.k8s.io/v1
@@ -441,50 +432,49 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-    - Ingress
-    - Egress
+  - Ingress
+  - Egress
   ingress:
-    - from:
-        - namespaceSelector:
-            matchLabels:
-              name: ingress-nginx
-        - podSelector:
-            matchLabels:
-              app: admin-api
-      ports:
-        - protocol: TCP
-          port: 80
-        - protocol: TCP
-          port: 443
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: ingress-nginx
+    - podSelector:
+        matchLabels:
+          app: admin-api
+    ports:
+    - protocol: TCP
+      port: 80
+    - protocol: TCP
+      port: 443
   egress:
-    - to:
-        - podSelector:
-            matchLabels:
-              app: postgres
-      ports:
-        - protocol: TCP
-          port: 5432
-    - to:
-        - podSelector:
-            matchLabels:
-              app: redis
-      ports:
-        - protocol: TCP
-          port: 6379
-    - to: []
-      ports:
-        - protocol: TCP
-          port: 53
-        - protocol: UDP
-          port: 53
-        - protocol: TCP
-          port: 443
-        - protocol: TCP
-          port: 80
+  - to:
+    - podSelector:
+        matchLabels:
+          app: postgres
+    ports:
+    - protocol: TCP
+      port: 5432
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+  - to: []
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
 ```
 
 #### **Service Mesh Security**
-
 ```yaml
 # service-mesh-security.yaml
 apiVersion: security.istio.io/v1beta1
@@ -506,15 +496,15 @@ spec:
     matchLabels:
       app: admin-api
   rules:
-    - from:
-        - source:
-            principals: ["cluster.local/ns/mystira/sa/admin-api-sa"]
-    - to:
-        - operation:
-            methods: ["GET", "POST", "PUT", "DELETE"]
+  - from:
+    - source:
+        principals: ["cluster.local/ns/mystira/sa/admin-api-sa"]
+  - to:
+    - operation:
+        methods: ["GET", "POST", "PUT", "DELETE"]
   when:
-    - key: request.headers[authorization]
-      values: ["Bearer *"]
+  - key: request.headers[authorization]
+    values: ["Bearer *"]
 ---
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
@@ -526,13 +516,12 @@ spec:
     matchLabels:
       app: admin-api
   jwtRules:
-    - issuer: "https://sts.windows.net/${TENANT_ID}/"
-      jwksUri: "https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys"
-      forwardOriginalToken: true
+  - issuer: "https://sts.windows.net/${TENANT_ID}/"
+    jwksUri: "https://login.microsoftonline.com/${TENANT_ID}/discovery/v2.0/keys"
+    forwardOriginalToken: true
 ```
 
 #### **Advanced Threat Detection**
-
 ```yaml
 # threat-detection.yaml
 apiVersion: v1
@@ -554,7 +543,7 @@ data:
         (user=%user.name command=%proc.cmdline container=%container.name)
       priority: WARNING
       tags: [process, shell, container]
-
+    
     - rule: Unauthorized Network Connection
       desc: Detect unauthorized network connections
       condition: >
@@ -571,7 +560,7 @@ data:
         (user=%user.name command=%proc.cmdline connection=%fd.name)
       priority: WARNING
       tags: [network, connection, container]
-
+    
     - rule: File System Anomaly
       desc: Detect unusual file system activity
       condition: >
@@ -588,7 +577,6 @@ data:
 ### 🛡️ **Advanced Compliance**
 
 #### **Automated Compliance Checking**
-
 ```hcl
 # compliance-automation/main.tf
 resource "azurerm_policy_set_definition" "compliance_set" {
@@ -596,21 +584,21 @@ resource "azurerm_policy_set_definition" "compliance_set" {
   display_name        = "Mystira Compliance Policy Set"
   policy_type         = "Custom"
   description         = "Comprehensive compliance policies for Mystira"
-
+  
   policy_definition_reference {
     policy_definition_id = azurerm_policy_definition.encryption_at_rest.id
     parameter_values = jsonencode({
       effect = "Deny"
     })
   }
-
+  
   policy_definition_reference {
     policy_definition_id = azurerm_policy_definition.network_security.id
     parameter_values = jsonencode({
       effect = "Deny"
     })
   }
-
+  
   policy_definition_reference {
     policy_definition_id = azurerm_policy_definition.access_control.id
     parameter_values = jsonencode({
@@ -623,7 +611,7 @@ resource "azurerm_policy_assignment" "compliance_assignment" {
   name                 = "mystira-compliance"
   scope                = var.scope
   policy_set_definition_id = azurerm_policy_set_definition.compliance_set.id
-
+  
   parameters = {
     encryption_at_rest_effect = {
       value = "Deny"
@@ -635,7 +623,7 @@ resource "azurerm_policy_assignment" "compliance_assignment" {
       value = "Deny"
     }
   }
-
+  
   non_compliance_messages = {
     encryption_at_rest = "Storage accounts must be encrypted at rest"
     network_security = "Network security groups must deny all inbound traffic by default"
@@ -645,7 +633,6 @@ resource "azurerm_policy_assignment" "compliance_assignment" {
 ```
 
 #### **Continuous Compliance Monitoring**
-
 ```yaml
 # compliance-monitoring.yaml
 apiVersion: v1
@@ -697,7 +684,7 @@ data:
                 required: true
                 parameters:
                   principle_applied: true
-
+    
     reporting:
       schedule: "daily"
       formats: ["json", "pdf", "csv"]
@@ -713,7 +700,6 @@ data:
 ### ⚡ **Resource Optimization**
 
 #### **Right-Sizing Automation**
-
 ```python
 # rightsizing-automation.py
 import azure.mgmt.compute as compute
@@ -725,24 +711,24 @@ class ResourceOptimizer:
     def __init__(self, subscription_id, credential):
         self.compute_client = compute.ComputeManagementClient(credential, subscription_id)
         self.monitor_client = monitor.MonitorManagementClient(credential, subscription_id)
-
+    
     def analyze_vm_usage(self, resource_group, vm_name):
         """Analyze VM usage patterns and recommend optimal size"""
         vm = self.compute_client.virtual_machines.get(resource_group, vm_name)
-
+        
         # Get performance metrics
         cpu_metrics = self.get_metrics(vm.id, "Percentage CPU", days=7)
         memory_metrics = self.get_metrics(vm.id, "Available Memory", days=7)
-
+        
         # Analyze usage patterns
         cpu_avg = np.mean([m.average for m in cpu_metrics])
         cpu_max = np.max([m.maximum for m in cpu_metrics])
         memory_avg = np.mean([m.average for m in memory_metrics])
-
+        
         # Recommend optimal size
         current_size = vm.hardware_profile.vm_size
         recommended_size = self.recommend_vm_size(cpu_avg, cpu_max, memory_avg)
-
+        
         return {
             "current_size": current_size,
             "recommended_size": recommended_size,
@@ -755,7 +741,7 @@ class ResourceOptimizer:
             },
             "cost_impact": self.calculate_cost_impact(current_size, recommended_size)
         }
-
+    
     def recommend_vm_size(self, cpu_avg, cpu_max, memory_avg):
         """Recommend optimal VM size based on usage patterns"""
         size_recommendations = {
@@ -763,19 +749,19 @@ class ResourceOptimizer:
             "medium_usage": {"cpu_threshold": 50, "memory_threshold": 60, "sizes": ["Standard_D2s_v3", "Standard_D4s_v3"]},
             "high_usage": {"cpu_threshold": 80, "memory_threshold": 80, "sizes": ["Standard_D8s_v3", "Standard_D16s_v3"]}
         }
-
+        
         if cpu_avg < 20 and memory_avg < 30:
             return size_recommendations["low_usage"]["sizes"][0]
         elif cpu_avg < 50 and memory_avg < 60:
             return size_recommendations["medium_usage"]["sizes"][0]
         else:
             return size_recommendations["high_usage"]["sizes"][0]
-
+    
     def get_metrics(self, resource_id, metric_name, days=7):
         """Get performance metrics for a resource"""
         end_time = datetime.now()
         start_time = end_time - timedelta(days=days)
-
+        
         metrics_data = self.monitor_client.metrics.list(
             resource_uri=resource_id,
             timespan=f"{start_time.isoformat()}/{end_time.isoformat()}",
@@ -783,12 +769,11 @@ class ResourceOptimizer:
             metricnames=metric_name,
             aggregation="Average,Maximum"
         )
-
+        
         return metrics_data.value
 ```
 
 #### **Container Resource Optimization**
-
 ```yaml
 # resource-optimization.yaml
 apiVersion: v1
@@ -798,25 +783,25 @@ metadata:
   namespace: mystira
 spec:
   limits:
-    - default:
-        cpu: "100m"
-        memory: "128Mi"
-      defaultRequest:
-        cpu: "50m"
-        memory: "64Mi"
-      type: Container
-    - max:
-        cpu: "2"
-        memory: "4Gi"
-      min:
-        cpu: "10m"
-        memory: "16Mi"
-      type: Container
-    - max:
-        storage: "10Gi"
-      min:
-        storage: "1Gi"
-      type: PersistentVolumeClaim
+  - default:
+      cpu: "100m"
+      memory: "128Mi"
+    defaultRequest:
+      cpu: "50m"
+      memory: "64Mi"
+    type: Container
+  - max:
+      cpu: "2"
+      memory: "4Gi"
+    min:
+      cpu: "10m"
+      memory: "16Mi"
+    type: Container
+  - max:
+      storage: "10Gi"
+    min:
+      storage: "1Gi"
+    type: PersistentVolumeClaim
 ---
 apiVersion: v1
 kind: ResourceQuota
@@ -836,7 +821,6 @@ spec:
 ```
 
 #### **Performance Monitoring**
-
 ```yaml
 # performance-monitoring.yaml
 apiVersion: v1
@@ -889,7 +873,6 @@ data:
 ### 🚀 **Caching Strategies**
 
 #### **Multi-Level Caching**
-
 ```yaml
 # multi-level-caching.yaml
 apiVersion: v1
@@ -902,7 +885,7 @@ data:
     # Redis configuration for multi-level caching
     maxmemory: 2gb
     maxmemory-policy: allkeys-lru
-
+    
     # Cache tiers
     cache-tiers:
       - name: "hot"
@@ -919,7 +902,7 @@ data:
         ttl: 86400  # 24 hours
         max_size: 1gb
         eviction_policy: "allkeys-lru"
-
+    
     # Cache patterns
     patterns:
       - name: "user_sessions"
@@ -953,31 +936,30 @@ spec:
         app: redis-cache
     spec:
       containers:
-        - name: redis
-          image: redis:7-alpine
-          ports:
-            - containerPort: 6379
-          resources:
-            requests:
-              memory: "256Mi"
-              cpu: "100m"
-            limits:
-              memory: "512Mi"
-              cpu: "200m"
-          volumeMounts:
-            - name: redis-config
-              mountPath: /usr/local/etc/redis
-          command:
-            - redis-server
-            - /usr/local/etc/redis/redis.conf
-      volumes:
+      - name: redis
+        image: redis:7-alpine
+        ports:
+        - containerPort: 6379
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200m"
+        volumeMounts:
         - name: redis-config
-          configMap:
-            name: caching-config
+          mountPath: /usr/local/etc/redis
+        command:
+        - redis-server
+        - /usr/local/etc/redis/redis.conf
+      volumes:
+      - name: redis-config
+        configMap:
+          name: caching-config
 ```
 
 #### **CDN Integration**
-
 ```hcl
 # modules/cdn/main.tf
 resource "azurerm_cdn_profile" "cdn" {
@@ -985,7 +967,7 @@ resource "azurerm_cdn_profile" "cdn" {
   resource_group_name = var.resource_group_name
   location            = var.location
   sku                 = "Standard_Microsoft"
-
+  
   tags = var.tags
 }
 
@@ -994,37 +976,37 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint" {
   profile_name        = azurerm_cdn_profile.cdn.name
   resource_group_name = var.resource_group_name
   location            = var.location
-
+  
   origin {
     name      = "mystira-origin"
     host_name = var.origin_host_name
     http_port = 80
     https_port = 443
   }
-
+  
   is_http_allowed          = true
   is_https_allowed         = true
   query_string_caching_behavior = "IgnoreQueryString"
-
+  
   optimization_type = "DynamicSiteAcceleration"
-
+  
   geo_filter {
     relative_path = "/"
     action         = "Allow"
     country_codes  = ["US", "CA", "GB", "AU", "DE", "FR", "JP"]
   }
-
+  
   delivery_rule {
     name  = "cache-static-content"
     order = 1
-
+    
     conditions {
       request_uri_condition {
         operator = "Contains"
         match_values = [".css", ".js", ".png", ".jpg", ".gif", ".ico"]
       }
     }
-
+    
     actions {
       cache_expiration_action {
         behavior = "Override"
@@ -1032,18 +1014,18 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint" {
       }
     }
   }
-
+  
   delivery_rule {
     name  = "cache-api-responses"
     order = 2
-
+    
     conditions {
       request_uri_condition {
         operator = "Contains"
         match_values = ["/api/"]
       }
     }
-
+    
     actions {
       cache_expiration_action {
         behavior = "Override"
@@ -1061,7 +1043,6 @@ resource "azurerm_cdn_endpoint" "cdn_endpoint" {
 #### **Terraform Issues**
 
 ##### **State File Conflicts**
-
 ```bash
 #!/bin/bash
 # terraform-state-fix.sh
@@ -1086,12 +1067,11 @@ terraform apply tfplan
 ```
 
 ##### **Resource Dependency Issues**
-
 ```hcl
 # Fix dependency issues with explicit depends_on
 resource "azurerm_kubernetes_cluster" "aks" {
   # ... configuration
-
+  
   depends_on = [
     azurerm_virtual_network.vnet,
     azurerm_subnet.aks_subnet,
@@ -1103,18 +1083,17 @@ resource "azurerm_role_assignment" "aks_contributor" {
   scope                = azurerm_kubernetes_cluster.aks.id
   role_definition_name = "Contributor"
   principal_id         = var.service_principal_object_id
-
+  
   depends_on = [azurerm_kubernetes_cluster.aks]
 }
 ```
 
 ##### **Provider Version Conflicts**
-
 ```hcl
 # versions.tf
 terraform {
   required_version = ">= 1.0"
-
+  
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -1135,7 +1114,6 @@ terraform {
 #### **Kubernetes Issues**
 
 ##### **Pod Crashing Issues**
-
 ```bash
 #!/bin/bash
 # debug-pod-crash.sh
@@ -1160,7 +1138,6 @@ kubectl debug -it $POD_NAME -n $NAMESPACE --image=busybox -- sh
 ```
 
 ##### **Network Connectivity Issues**
-
 ```bash
 #!/bin/bash
 # debug-networking.sh
@@ -1186,7 +1163,6 @@ kubectl run dns-test --image=busybox --rm -it -- nslookup kubernetes.default
 ```
 
 ##### **Resource Exhaustion**
-
 ```bash
 #!/bin/bash
 # debug-resources.sh
@@ -1210,7 +1186,6 @@ kubectl get events --all-namespaces --sort-by='.lastTimestamp' | tail -20
 #### **Performance Issues**
 
 ##### **High CPU Usage**
-
 ```bash
 #!/bin/bash
 # debug-cpu-usage.sh
@@ -1226,7 +1201,6 @@ kubectl exec -it <pod-name> -- cat /sys/fs/cgroup/cpu/cpu.stat
 ```
 
 ##### **Memory Leaks**
-
 ```bash
 #!/bin/bash
 # debug-memory-usage.sh
@@ -1244,7 +1218,6 @@ kubectl describe pod <pod-name> | grep -i oom
 ### 🚨 **Emergency Procedures**
 
 #### **Disaster Recovery**
-
 ```bash
 #!/bin/bash
 # disaster-recovery.sh
@@ -1272,7 +1245,6 @@ kubectl get services
 ```
 
 #### **Security Incident Response**
-
 ```bash
 #!/bin/bash
 # security-incident-response.sh
@@ -1303,7 +1275,6 @@ kubectl get pods --field-selector=spec.nodeName!=affected-node
 ```
 
 #### **Service Outage Recovery**
-
 ```bash
 #!/bin/bash
 # service-outage-recovery.sh
@@ -1337,7 +1308,6 @@ curl http://localhost:8080/health
 ### 🤖 **Infrastructure Automation**
 
 #### **Self-Healing Infrastructure**
-
 ```yaml
 # self-healing.yaml
 apiVersion: v1
@@ -1382,32 +1352,31 @@ metadata:
   name: self-healing-monitor
   namespace: mystira
 spec:
-  schedule: "*/2 * * * *" # Every 2 minutes
+  schedule: "*/2 * * * *"  # Every 2 minutes
   jobTemplate:
     spec:
       template:
         spec:
           containers:
-            - name: healer
-              image: mystira/infrastructure-healer:latest
-              env:
-                - name: CONFIG_PATH
-                  value: "/etc/healing/config.yaml"
-              volumeMounts:
-                - name: config
-                  mountPath: /etc/healing
-              command:
-                - python
-                - /app/healer.py
-          volumes:
+          - name: healer
+            image: mystira/infrastructure-healer:latest
+            env:
+            - name: CONFIG_PATH
+              value: "/etc/healing/config.yaml"
+            volumeMounts:
             - name: config
-              configMap:
-                name: self-healing-config
+              mountPath: /etc/healing
+            command:
+            - python
+            - /app/healer.py
+          volumes:
+          - name: config
+            configMap:
+              name: self-healing-config
           restartPolicy: OnFailure
 ```
 
 #### **Automated Scaling**
-
 ```python
 # auto-scaling.py
 import kubernetes
@@ -1421,40 +1390,40 @@ class AutoScaler:
         self.v1 = kubernetes.client.CoreV1Api()
         self.apps_v1 = kubernetes.client.AppsV1Api()
         self.custom_api = kubernetes.client.CustomObjectsApi()
-
+        
     def monitor_and_scale(self):
         """Monitor metrics and scale resources automatically"""
         while True:
             try:
                 # Get all deployments
                 deployments = self.apps_v1.list_namespaced_deployment("mystira")
-
+                
                 for deployment in deployments.items:
                     self.check_and_scale_deployment(deployment)
-
+                
                 time.sleep(60)  # Check every minute
-
+                
             except Exception as e:
                 logging.error(f"Error in auto-scaling: {e}")
                 time.sleep(30)
-
+    
     def check_and_scale_deployment(self, deployment):
         """Check metrics and scale deployment if needed"""
         deployment_name = deployment.metadata.name
-
+        
         # Get current metrics
         cpu_usage = self.get_cpu_usage(deployment_name)
         memory_usage = self.get_memory_usage(deployment_name)
-
+        
         # Check scaling conditions
         if cpu_usage > 80 and deployment.spec.replicas < 10:
             self.scale_deployment(deployment_name, deployment.spec.replicas + 2)
             logging.info(f"Scaled up {deployment_name} due to high CPU usage")
-
+        
         elif cpu_usage < 20 and deployment.spec.replicas > 2:
             self.scale_deployment(deployment_name, deployment.spec.replicas - 1)
             logging.info(f"Scaled down {deployment_name} due to low CPU usage")
-
+    
     def get_cpu_usage(self, deployment_name):
         """Get CPU usage for deployment"""
         try:
@@ -1464,22 +1433,22 @@ class AutoScaler:
                 namespace="mystira",
                 plural="pods"
             )
-
+            
             total_cpu = 0
             pod_count = 0
-
+            
             for item in metrics["items"]:
                 if deployment_name in item["metadata"]["name"]:
                     cpu_usage = item["containers"][0]["usage"]["cpu"]
                     total_cpu += self.parse_cpu(cpu_usage)
                     pod_count += 1
-
+            
             return total_cpu / pod_count if pod_count > 0 else 0
-
+            
         except Exception as e:
             logging.error(f"Error getting CPU usage: {e}")
             return 0
-
+    
     def parse_cpu(self, cpu_str):
         """Parse CPU string to millicores"""
         if cpu_str.endswith("n"):
@@ -1490,11 +1459,11 @@ class AutoScaler:
             return int(cpu_str[:-1])
         else:
             return int(cpu_str) * 1000
-
+    
     def scale_deployment(self, deployment_name, replicas):
         """Scale deployment to specified replica count"""
         patch = {"spec": {"replicas": replicas}}
-
+        
         self.apps_v1.patch_namespaced_deployment(
             name=deployment_name,
             namespace="mystira",
@@ -1503,7 +1472,6 @@ class AutoScaler:
 ```
 
 #### **Automated Backup**
-
 ```python
 # automated-backup.py
 import subprocess
@@ -1514,16 +1482,16 @@ import logging
 class BackupManager:
     def __init__(self):
         self.backup_config = self.load_backup_config()
-
+        
     def load_backup_config(self):
         """Load backup configuration"""
         with open("/etc/backup/config.json", "r") as f:
             return json.load(f)
-
+    
     def perform_backup(self):
         """Perform automated backup"""
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-
+        
         for backup_type in self.backup_config["backup_types"]:
             if backup_type == "terraform":
                 self.backup_terraform_state(timestamp)
@@ -1531,10 +1499,10 @@ class BackupManager:
                 self.backup_kubernetes_resources(timestamp)
             elif backup_type == "databases":
                 self.backup_databases(timestamp)
-
+        
         # Cleanup old backups
         self.cleanup_old_backups()
-
+    
     def backup_terraform_state(self, timestamp):
         """Backup Terraform state files"""
         for env in self.backup_config["environments"]:
@@ -1544,12 +1512,12 @@ class BackupManager:
                     "terraform", "state", "pull",
                     f"backups/terraform/{env}_{timestamp}.tfstate"
                 ], check=True, cwd=f"infra/terraform/environments/{env}")
-
+                
                 logging.info(f"Backed up Terraform state for {env}")
-
+                
             except subprocess.CalledProcessError as e:
                 logging.error(f"Failed to backup Terraform state for {env}: {e}")
-
+    
     def backup_kubernetes_resources(self, timestamp):
         """Backup Kubernetes resources"""
         for namespace in self.backup_config["namespaces"]:
@@ -1559,12 +1527,12 @@ class BackupManager:
                     "kubectl", "get", "all", "-n", namespace, "-o", "yaml",
                     f">", f"backups/kubernetes/{namespace}_{timestamp}.yaml"
                 ], check=True, shell=True)
-
+                
                 logging.info(f"Backed up Kubernetes resources for {namespace}")
-
+                
             except subprocess.CalledProcessError as e:
                 logging.error(f"Failed to backup Kubernetes resources for {namespace}: {e}")
-
+    
     def backup_databases(self, timestamp):
         """Backup databases"""
         for db in self.backup_config["databases"]:
@@ -1573,10 +1541,10 @@ class BackupManager:
                     self.backup_postgresql(db, timestamp)
                 elif db["type"] == "redis":
                     self.backup_redis(db, timestamp)
-
+                
             except Exception as e:
                 logging.error(f"Failed to backup database {db['name']}: {e}")
-
+    
     def backup_postgresql(self, db_config, timestamp):
         """Backup PostgreSQL database"""
         cmd = [
@@ -1587,10 +1555,10 @@ class BackupManager:
             f"--dbname={db_config['database']}",
             f"--file=backups/databases/{db_config['name']}_{timestamp}.sql"
         ]
-
+        
         subprocess.run(cmd, check=True)
         logging.info(f"Backed up PostgreSQL database {db_config['name']}")
-
+    
     def backup_redis(self, db_config, timestamp):
         """Backup Redis database"""
         cmd = [
@@ -1600,15 +1568,15 @@ class BackupManager:
             "--rdb",
             f"backups/databases/{db_config['name']}_{timestamp}.rdb"
         ]
-
+        
         subprocess.run(cmd, check=True)
         logging.info(f"Backed up Redis database {db_config['name']}")
-
+    
     def cleanup_old_backups(self):
         """Clean up old backup files"""
         retention_days = self.backup_config["retention_days"]
         cutoff_date = datetime.datetime.now() - datetime.timedelta(days=retention_days)
-
+        
         for backup_dir in ["terraform", "kubernetes", "databases"]:
             # Implementation for cleaning up old backups
             pass
@@ -1619,7 +1587,6 @@ class BackupManager:
 ### 📈 **Performance Monitoring**
 
 #### **Infrastructure KPIs**
-
 ```yaml
 # infrastructure-kpis.yaml
 apiVersion: v1
@@ -1668,7 +1635,6 @@ data:
 ```
 
 #### **Automated Performance Testing**
-
 ```python
 # performance-testing.py
 import asyncio
@@ -1680,11 +1646,11 @@ from datetime import datetime
 class PerformanceTester:
     def __init__(self):
         self.test_config = self.load_test_config()
-
+        
     async def run_performance_tests(self):
         """Run comprehensive performance tests"""
         results = {}
-
+        
         for test in self.test_config["tests"]:
             if test["type"] == "load":
                 results[test["name"]] = await self.run_load_test(test)
@@ -1692,18 +1658,18 @@ class PerformanceTester:
                 results[test["name"]] = await self.run_stress_test(test)
             elif test["type"] == "endurance":
                 results[test["name"]] = await self.run_endurance_test(test)
-
+        
         # Generate report
         self.generate_performance_report(results)
-
+        
         return results
-
+    
     async def run_load_test(self, test_config):
         """Run load test"""
         url = test_config["url"]
         concurrent_users = test_config["concurrent_users"]
         duration = test_config["duration"]
-
+        
         async with aiohttp.ClientSession() as session:
             tasks = []
             for _ in range(concurrent_users):
@@ -1711,13 +1677,13 @@ class PerformanceTester:
                     self.simulate_user(session, url, duration)
                 )
                 tasks.append(task)
-
+            
             results = await asyncio.gather(*tasks)
-
+            
             # Calculate metrics
             response_times = [r["response_time"] for r in results]
             success_rate = sum(1 for r in results if r["success"]) / len(results)
-
+            
             return {
                 "avg_response_time": statistics.mean(response_times),
                 "p95_response_time": statistics.quantiles(response_times, n=20)[18],
@@ -1726,36 +1692,36 @@ class PerformanceTester:
                 "total_requests": len(results),
                 "errors": sum(1 for r in results if not r["success"])
             }
-
+    
     async def simulate_user(self, session, url, duration):
         """Simulate a single user"""
         end_time = time.time() + duration
         results = []
-
+        
         while time.time() < end_time:
             start_time = time.time()
-
+            
             try:
                 async with session.get(url) as response:
                     await response.text()
-
+                    
                     response_time = time.time() - start_time
                     results.append({
                         "response_time": response_time,
                         "success": response.status == 200
                     })
-
+                    
             except Exception as e:
                 results.append({
                     "response_time": time.time() - start_time,
                     "success": False
                 })
-
+            
             # Wait between requests
             await asyncio.sleep(1)
-
+        
         return results
-
+    
     def generate_performance_report(self, results):
         """Generate performance report"""
         report = {
@@ -1763,20 +1729,20 @@ class PerformanceTester:
             "results": results,
             "summary": self.calculate_summary(results)
         }
-
+        
         # Save report
         with open(f"performance-report-{datetime.now().strftime('%Y%m%d_%H%M%S')}.json", "w") as f:
             json.dump(report, f, indent=2)
-
+        
         # Send alerts if thresholds exceeded
         self.check_performance_thresholds(results)
-
+    
     def check_performance_thresholds(self, results):
         """Check if performance thresholds are exceeded"""
         for test_name, test_results in results.items():
             if test_results["avg_response_time"] > 2.0:
                 self.send_alert("High response time", test_name, test_results["avg_response_time"])
-
+            
             if test_results["success_rate"] < 0.99:
                 self.send_alert("Low success rate", test_name, test_results["success_rate"])
 ```
@@ -1784,7 +1750,6 @@ class PerformanceTester:
 ### 🔄 **Continuous Optimization**
 
 #### **Resource Optimization Loop**
-
 ```python
 # optimization-loop.py
 import logging
@@ -1793,29 +1758,29 @@ from datetime import datetime, timedelta
 class InfrastructureOptimizer:
     def __init__(self):
         self.optimization_config = self.load_optimization_config()
-
+        
     def run_optimization_cycle(self):
         """Run continuous optimization cycle"""
         while True:
             try:
                 # Analyze current state
                 current_state = self.analyze_infrastructure_state()
-
+                
                 # Identify optimization opportunities
                 opportunities = self.identify_opportunities(current_state)
-
+                
                 # Apply optimizations
                 for opportunity in opportunities:
                     if opportunity["confidence"] > 0.8:
                         self.apply_optimization(opportunity)
-
+                
                 # Wait for next cycle
                 time.sleep(self.optimization_config["cycle_interval_hours"] * 3600)
-
+                
             except Exception as e:
                 logging.error(f"Error in optimization cycle: {e}")
                 time.sleep(300)  # Wait 5 minutes before retry
-
+    
     def analyze_infrastructure_state(self):
         """Analyze current infrastructure state"""
         state = {
@@ -1824,13 +1789,13 @@ class InfrastructureOptimizer:
             "performance": self.get_performance_metrics(),
             "security": self.get_security_status()
         }
-
+        
         return state
-
+    
     def identify_opportunities(self, state):
         """Identify optimization opportunities"""
         opportunities = []
-
+        
         # Resource optimization opportunities
         for resource in state["resources"]:
             if resource["cpu_utilization"] < 20:
@@ -1840,7 +1805,7 @@ class InfrastructureOptimizer:
                     "confidence": 0.9,
                     "potential_savings": resource["monthly_cost"] * 0.5
                 })
-
+            
             elif resource["cpu_utilization"] > 80:
                 opportunities.append({
                     "type": "upscale",
@@ -1848,7 +1813,7 @@ class InfrastructureOptimizer:
                     "confidence": 0.95,
                     "performance_impact": "high"
                 })
-
+        
         # Cost optimization opportunities
         for cost_item in state["costs"]:
             if cost_item["cost_trend"] == "increasing" and cost_item["utilization"] < 50:
@@ -1858,9 +1823,9 @@ class InfrastructureOptimizer:
                     "confidence": 0.85,
                     "potential_savings": cost_item["monthly_cost"] * 0.3
                 })
-
+        
         return opportunities
-
+    
     def apply_optimization(self, opportunity):
         """Apply optimization recommendation"""
         if opportunity["type"] == "downsize":
@@ -1869,7 +1834,7 @@ class InfrastructureOptimizer:
             self.upscale_resource(opportunity["resource"])
         elif opportunity["type"] == "cost_optimization":
             self.optimize_cost(opportunity["resource"])
-
+        
         # Record optimization
         self.record_optimization(opportunity)
 ```
@@ -1877,7 +1842,6 @@ class InfrastructureOptimizer:
 ### 📚 **Knowledge Management**
 
 #### **Infrastructure Documentation Automation**
-
 ```python
 # documentation-generator.py
 import yaml
@@ -1887,7 +1851,7 @@ from datetime import datetime
 class DocumentationGenerator:
     def __init__(self):
         self.doc_config = self.load_documentation_config()
-
+        
     def generate_infrastructure_documentation(self):
         """Generate comprehensive infrastructure documentation"""
         docs = {
@@ -1897,16 +1861,16 @@ class DocumentationGenerator:
             "troubleshooting": self.generate_troubleshooting_docs(),
             "metrics": self.generate_metrics_docs()
         }
-
+        
         # Generate markdown documentation
         self.generate_markdown_docs(docs)
-
+        
         # Update API documentation
         self.update_api_docs()
-
+        
         # Generate diagrams
         self.generate_diagrams()
-
+    
     def generate_overview(self):
         """Generate infrastructure overview"""
         return {
@@ -1917,7 +1881,7 @@ class DocumentationGenerator:
             "total_resources": self.get_total_resources(),
             "monthly_cost": self.get_monthly_cost()
         }
-
+    
     def generate_architecture_docs(self):
         """Generate architecture documentation"""
         return {
@@ -1926,7 +1890,7 @@ class DocumentationGenerator:
             "security_model": self.get_security_model(),
             "network_topology": self.get_network_topology()
         }
-
+    
     def generate_procedure_docs(self):
         """Generate procedure documentation"""
         procedures = [
@@ -1936,18 +1900,18 @@ class DocumentationGenerator:
             "security_incident_procedures",
             "maintenance_procedures"
         ]
-
+        
         docs = {}
         for procedure in procedures:
             docs[procedure] = self.generate_procedure_doc(procedure)
-
+        
         return docs
-
+    
     def generate_markdown_docs(self, docs):
         """Generate markdown documentation files"""
         for section, content in docs.items():
             filename = f"infrastructure-{section}.md"
-
+            
             with open(f"docs/infrastructure/{filename}", "w") as f:
                 f.write(self.convert_to_markdown(content))
 ```
@@ -1963,7 +1927,6 @@ This advanced Infrastructure and IaC guide provides comprehensive coverage of so
 5. **Continuous Improvement**: Ongoing optimization and knowledge management
 
 The success of these advanced practices depends on:
-
 - **Team Expertise**: Skilled infrastructure team with advanced knowledge
 - **Tool Investment**: Proper automation and monitoring tools
 - **Process Maturity**: Mature processes for continuous improvement

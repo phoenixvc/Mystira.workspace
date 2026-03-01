@@ -4,10 +4,24 @@ import { fileURLToPath } from "url";
 import { defineConfig } from "vitest/config";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
+    plugins: [react()],
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
+        },
+    },
+    server: {
+        port: 3000,
+        open: true,
+    },
+    build: {
+        outDir: "dist",
+        sourcemap: true,
+    },
+    test: {
+        globals: true,
+        environment: "jsdom",
+        setupFiles: ["./src/tests/setup.ts"],
     },
   },
   server: {
