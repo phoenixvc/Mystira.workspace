@@ -222,9 +222,6 @@ jobs:
         with:
           sarif_file: trivy-iac-results.sarif
 
-<<<<<<< HEAD
-      # --- Checkov ---
-=======
       - name: Trivy Summary
         if: always()
         run: |
@@ -371,8 +368,6 @@ jobs:
     if: ${{ vars.ENABLE_CHECKOV != 'false' }}
     steps:
       - uses: actions/checkout@v6
-
->>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
       - name: Run Checkov
         if: ${{ vars.ENABLE_CHECKOV != 'false' }}
         uses: bridgecrewio/checkov-action@v12
