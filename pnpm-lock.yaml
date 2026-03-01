@@ -9,7 +9,7 @@ overrides:
   '@types/react-dom': ^19.0.0
   fast-xml-parser: '>=5.3.6'
   minimatch: '>=10.2.1'
-  ajv@<6.12.3: ^6.12.6
+  ajv@<6.12.3: ^8.0.0
 
 importers:
 
@@ -1822,7 +1822,7 @@ packages:
     resolution: {integrity: sha512-UW+IsFycygIo7bclP9h5ugkNH8EjCSgqyFB/yQ4Hqqa1OEYDtb0uFIkYE0b6+CjkgJYVM5UKI/pJPxjYe9EZlA==}
     engines: {node: '>= 12.13.0'}
     peerDependencies:
-      ajv: ^6.12.6
+      ajv: ^8.0.0
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
