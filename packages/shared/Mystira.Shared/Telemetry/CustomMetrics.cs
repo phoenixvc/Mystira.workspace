@@ -292,11 +292,12 @@ public partial class CustomMetrics : ICustomMetrics
             }
         }
 
+        // AppInsights 3.x removed EventTelemetry.Metrics; store as string properties
         if (metrics != null)
         {
             foreach (var metric in metrics)
             {
-                eventTelemetry.Metrics[metric.Key] = metric.Value;
+                eventTelemetry.Properties[metric.Key] = metric.Value.ToString("G");
             }
         }
 
