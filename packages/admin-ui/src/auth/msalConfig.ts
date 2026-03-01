@@ -21,15 +21,13 @@ export const msalConfig: Configuration = {
     authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID || "common"}`,
     redirectUri: import.meta.env.VITE_AZURE_REDIRECT_URI || window.location.origin,
     postLogoutRedirectUri: window.location.origin,
-    navigateToLoginRequestUrl: true,
   },
   cache: {
     cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
   },
   system: {
     loggerOptions: {
-      loggerCallback: (level, message, containsPii) => {
+      loggerCallback: (level: LogLevel, message: string, containsPii: boolean) => {
         if (containsPii) return;
         switch (level) {
           case LogLevel.Error:

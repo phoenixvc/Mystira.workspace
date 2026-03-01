@@ -102,10 +102,7 @@ function BadgesPage() {
             <Link to="/admin/badges/create" className="btn btn-sm btn-primary">
               <i className="bi bi-plus-circle"></i> Create Badge
             </Link>
-            <Link
-              to="/admin/badges/import"
-              className="btn btn-sm btn-outline-primary"
-            >
+            <Link to="/admin/badges/import" className="btn btn-sm btn-outline-primary">
               <i className="bi bi-upload"></i> Import Badge
             </Link>
           </div>
@@ -114,7 +111,7 @@ function BadgesPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={(value) => {
+        onChange={value => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -137,7 +134,7 @@ function BadgesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.badges.map((badge) => (
+                    {data.badges.map(badge => (
                       <tr key={badge.id}>
                         <td>{badge.name}</td>
                         <td>{badge.description || "-"}</td>
@@ -165,11 +162,7 @@ function BadgesPage() {
                 </table>
               </div>
 
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           ) : (
             <div className="text-center py-5">
@@ -178,10 +171,7 @@ function BadgesPage() {
                 <Link to="/admin/badges/create" className="btn btn-primary">
                   Create Your First Badge
                 </Link>
-                <Link
-                  to="/admin/badges/import"
-                  className="btn btn-outline-primary"
-                >
+                <Link to="/admin/badges/import" className="btn btn-outline-primary">
                   Import Badge
                 </Link>
               </div>

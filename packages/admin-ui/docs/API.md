@@ -24,15 +24,15 @@ const api = axios.create({
 });
 
 // Request interceptor for adding auth tokens
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(config => {
   // Add any custom headers here
   return config;
 });
 
 // Response interceptor for error handling
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
+  response => response,
+  error => {
     // Handle errors globally
     return Promise.reject(error);
   }
@@ -258,10 +258,8 @@ import { validateScenarios } from "./api/scenarios";
 const scenarioIds = ["id1", "id2", "id3"];
 const results = await validateScenarios(scenarioIds);
 
-results.forEach((result) => {
-  console.log(
-    `Scenario ${result.scenarioId}: ${result.valid ? "Valid" : "Invalid"}`
-  );
+results.forEach(result => {
+  console.log(`Scenario ${result.scenarioId}: ${result.valid ? "Valid" : "Invalid"}`);
   if (!result.valid) {
     console.log("Errors:", result.errors);
   }

@@ -37,24 +37,12 @@
     "music_continuity": {
       "type": "string",
       "description": "How strongly this scene prefers to continue the current track vs switching to another track/profile.",
-      "enum": [
-        "prefer_continue",
-        "allow_change",
-        "force_change",
-        "force_silence"
-      ]
+      "enum": ["prefer_continue", "allow_change", "force_change", "force_silence"]
     },
     "music_transition_hint": {
       "type": "string",
       "description": "Hint for how to transition from the previous scene's music to this scene's music. 'auto' lets the engine decide based on scene type and mood change.",
-      "enum": [
-        "auto",
-        "keep",
-        "crossfade_short",
-        "crossfade_normal",
-        "crossfade_long",
-        "hard_cut"
-      ]
+      "enum": ["auto", "keep", "crossfade_short", "crossfade_normal", "crossfade_long", "hard_cut"]
     },
     "music_priority": {
       "type": "string",
@@ -264,14 +252,7 @@
           "metadata": {
             "type": "object",
             "additionalProperties": false,
-            "required": [
-              "role",
-              "archetype",
-              "species",
-              "age",
-              "traits",
-              "backstory"
-            ],
+            "required": ["role", "archetype", "species", "age", "traits", "backstory"],
             "description": "Metadata used to keep characters consistent in generation and presentation.",
             "properties": {
               "role": {

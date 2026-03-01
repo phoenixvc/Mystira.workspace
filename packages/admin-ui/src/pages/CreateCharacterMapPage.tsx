@@ -10,14 +10,8 @@ import TextInput from "../components/TextInput";
 import { showToast } from "../utils/toast";
 
 const characterMapSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Name is required")
-    .max(200, "Name must be less than 200 characters"),
-  description: z
-    .string()
-    .max(1000, "Description must be less than 1000 characters")
-    .optional(),
+  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
+  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
   imageId: z.string().optional(),
 });
 
@@ -53,12 +47,8 @@ function CreateCharacterMapPage() {
       showToast.success("Character map created successfully!");
       navigate("/admin/character-maps");
     },
-    onError: (error) => {
-      showToast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to create character map"
-      );
+    onError: error => {
+      showToast.error(error instanceof Error ? error.message : "Failed to create character map");
     },
   });
 
@@ -70,10 +60,7 @@ function CreateCharacterMapPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">➕ Create Character Map</h1>
-        <Link
-          to="/admin/character-maps"
-          className="btn btn-sm btn-outline-secondary"
-        >
+        <Link to="/admin/character-maps" className="btn btn-sm btn-outline-secondary">
           <i className="bi bi-arrow-left"></i> Back to Character Maps
         </Link>
       </div>
@@ -86,11 +73,7 @@ function CreateCharacterMapPage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea
-                id="description"
-                rows={5}
-                {...register("description")}
-              />
+              <Textarea id="description" rows={5} {...register("description")} />
             </FormField>
 
             <FormField

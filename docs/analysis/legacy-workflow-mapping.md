@@ -126,7 +126,7 @@ Infra capability is represented in monorepo by `infra-validate.yml`,
 ## Verification checklist
 
 - [x] Every legacy workflow has a disposition (`mapped` /
-  `retired-intentional` / `needs-confirmation`).
+      `retired-intentional` / `needs-confirmation`).
 - [ ] Every `mapped` row links to concrete monorepo workflow file and job.
 - [x] Every `retired-intentional` row contains replacement/deprecation note.
 - [x] No staging/prod/rollback critical workflow remains `needs-confirmation`.

@@ -78,42 +78,27 @@ function Layout() {
                   </a>
                   <ul className="dropdown-menu">
                     <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/admin/master-data/age-groups"
-                      >
+                      <Link className="dropdown-item" to="/admin/master-data/age-groups">
                         Age Groups
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/admin/master-data/archetypes"
-                      >
+                      <Link className="dropdown-item" to="/admin/master-data/archetypes">
                         Archetypes
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/admin/master-data/compass-axes"
-                      >
+                      <Link className="dropdown-item" to="/admin/master-data/compass-axes">
                         Compass Axes
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/admin/master-data/echo-types"
-                      >
+                      <Link className="dropdown-item" to="/admin/master-data/echo-types">
                         Echo Types
                       </Link>
                     </li>
                     <li>
-                      <Link
-                        className="dropdown-item"
-                        to="/admin/master-data/fantasy-themes"
-                      >
+                      <Link className="dropdown-item" to="/admin/master-data/fantasy-themes">
                         Fantasy Themes
                       </Link>
                     </li>

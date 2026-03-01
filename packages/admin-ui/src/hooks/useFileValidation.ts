@@ -9,8 +9,7 @@ interface UseFileValidationOptions {
 
 export function useFileValidation(options?: UseFileValidationOptions) {
   const [validating, setValidating] = useState(false);
-  const [validationResult, setValidationResult] =
-    useState<ValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
 
   const validateFile = async (file: File) => {
     if (!file) {
@@ -32,13 +31,10 @@ export function useFileValidation(options?: UseFileValidationOptions) {
       if (result.valid) {
         showToast.success("Validation passed!");
       } else {
-        showToast.error(
-          `Validation failed with ${result.errors.length} error(s)`
-        );
+        showToast.error(`Validation failed with ${result.errors.length} error(s)`);
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to parse file";
+      const errorMessage = error instanceof Error ? error.message : "Failed to parse file";
       showToast.error(`Parse error: ${errorMessage}`);
 
       const errorResult: ValidationResult = {
@@ -74,7 +70,5 @@ function parseFileContent(content: string, filename: string): unknown {
     return yaml.load(content);
   }
 
-  throw new Error(
-    "Unsupported file format. Please use .json, .yaml, or .yml files."
-  );
+  throw new Error("Unsupported file format. Please use .json, .yaml, or .yml files.");
 }

@@ -17,10 +17,8 @@ function ImportMediaPage() {
       showToast.success("Media uploaded successfully!");
       navigate("/admin/media");
     },
-    onError: (error) => {
-      showToast.error(
-        error instanceof Error ? error.message : "Failed to upload media file"
-      );
+    onError: error => {
+      showToast.error(error instanceof Error ? error.message : "Failed to upload media file");
       setUploading(false);
     },
   });
@@ -71,26 +69,19 @@ function ImportMediaPage() {
                 disabled={uploading}
                 required
               />
-              <div className="form-text">
-                Select an image, audio, or video file to upload
-              </div>
+              <div className="form-text">Select an image, audio, or video file to upload</div>
             </div>
 
             {file && (
               <div className="mb-3">
                 <div className="alert alert-info">
-                  <strong>Selected file:</strong> {file.name} (
-                  {(file.size / 1024).toFixed(2)} KB)
+                  <strong>Selected file:</strong> {file.name} ({(file.size / 1024).toFixed(2)} KB)
                 </div>
               </div>
             )}
 
             <div className="d-flex gap-2">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={!file || uploading}
-              >
+              <button type="submit" className="btn btn-primary" disabled={!file || uploading}>
                 {uploading ? (
                   <>
                     <span

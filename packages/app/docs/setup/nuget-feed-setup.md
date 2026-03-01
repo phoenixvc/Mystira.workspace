@@ -38,6 +38,7 @@ dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
 ```
 
 Replace:
+
 - `YOUR_GITHUB_USERNAME`: Your GitHub username
 - `YOUR_GITHUB_PAT`: Personal Access Token created above
 
@@ -76,6 +77,7 @@ GitHub Actions workflows automatically authenticate with GitHub Packages using `
 **No secrets configuration required!**
 
 The workflow automatically:
+
 1. Uses `GITHUB_TOKEN` (provided by GitHub Actions)
 2. Configures the feed before restoring/publishing packages
 3. Publishes packages on push to `main` branch
@@ -123,6 +125,7 @@ dotnet add package Mystira.App.Domain --version 1.1.0
 **Error**: `Unable to load the service index for source` or `401 Unauthorized`
 
 **Solution**:
+
 1. Verify PAT has correct permissions (`read:packages`, `write:packages` for publishing)
 2. Check PAT hasn't expired
 3. Verify GitHub username is correct
@@ -141,6 +144,7 @@ dotnet add package Mystira.App.Domain --version 1.1.0
 **Error**: `NU1101: Unable to find package`
 
 **Solution**:
+
 1. Verify package name is correct
 2. Check package version exists in GitHub Packages
 3. Ensure you have access to phoenixvc organization
@@ -153,7 +157,8 @@ dotnet add package Mystira.App.Domain --version 1.1.0
 
 **Error**: Package version conflicts with project references
 
-**Solution**: 
+**Solution**:
+
 - Remove project references when migrating to NuGet packages
 - Ensure all projects use NuGet packages consistently
 
@@ -162,5 +167,3 @@ dotnet add package Mystira.App.Domain --version 1.1.0
 - [NuGet Setup Guide (Detailed)](./nuget/NUGET_SETUP.md)
 - [Implementation Status](./nuget/IMPLEMENTATION_STATUS.md)
 - [GitHub Packages Documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry)
-
-

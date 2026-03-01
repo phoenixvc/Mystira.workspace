@@ -97,6 +97,7 @@ Since `NuGet.config` uses package source mapping without embedded credentials, y
 Set the token as an environment variable. NuGet will automatically use it for authentication:
 
 **Windows (PowerShell):**
+
 ```powershell
 $env:NUGET_AUTH_TOKEN = "your-github-pat-here"
 # Or use GITHUB_TOKEN (both work)
@@ -104,6 +105,7 @@ $env:GITHUB_TOKEN = "your-github-pat-here"
 ```
 
 **macOS/Linux (Bash):**
+
 ```bash
 export NUGET_AUTH_TOKEN="your-github-pat-here"
 # Or use GITHUB_TOKEN (both work)
@@ -165,23 +167,27 @@ The following packages are hosted on GitHub Packages:
 ### Authentication Errors
 
 **401 Unauthorized:**
+
 ```
 error NU1301: Unable to load the service index for source https://nuget.pkg.github.com/phoenixvc/index.json
 error NU1301: Response status code does not indicate success: 401 (Unauthorized).
 ```
 
-**Solution:** 
+**Solution:**
+
 - For CI: Ensure the workflow has `packages: read` permission
 - For local: Verify your `GITHUB_TOKEN` environment variable is set correctly with a valid PAT
 
 ### Package Not Found
 
 **NU1101:**
+
 ```
 error NU1101: Unable to find package Mystira.Domain. No packages exist with this id in source(s): nuget.org, github
 ```
 
-**Solution:** 
+**Solution:**
+
 - Verify the package has been published to GitHub Packages
 - Check the package version in your `.csproj` matches an available version
 - Ensure you have access to the phoenixvc organization packages
@@ -191,11 +197,13 @@ error NU1101: Unable to find package Mystira.Domain. No packages exist with this
 This repository has been migrated from Azure DevOps to GitHub Packages. The following changes were made:
 
 ### Removed
+
 - ❌ Azure DevOps feed configuration
 - ❌ Azure DevOps secrets (`MYSTIRA_DEVOPS_AZURE_ORG`, `MYSTIRA_DEVOPS_AZURE_PAT`, etc.)
 - ❌ Conditional Azure DevOps feed setup in CI workflow
 
 ### Added
+
 - ✅ GitHub Packages feed configuration in `NuGet.config`
 - ✅ Automatic `GITHUB_TOKEN` authentication in CI workflow
 - ✅ Workflow permissions for package access
@@ -221,4 +229,3 @@ This repository has been migrated from Azure DevOps to GitHub Packages. The foll
 - `NuGet.config` - Package source configuration
 - `README.md` - Setup instructions
 - `docs/cicd/README.md` - CI/CD documentation
-

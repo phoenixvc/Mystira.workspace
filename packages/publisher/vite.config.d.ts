@@ -1,2 +1,2 @@
-declare const _default: import("vitest/config.js").UserWorkspaceConfig;
+declare const _default: import("vite").UserConfig;
 export default _default;

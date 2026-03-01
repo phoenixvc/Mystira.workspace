@@ -39,13 +39,9 @@
         "infra",
         "workspace",
         "deps",
-<<<<<<< HEAD
         "ci",
         "workflows",
         "docs"
-=======
-        "ci"
->>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
       ]
     ],
     "scope-empty": [0],

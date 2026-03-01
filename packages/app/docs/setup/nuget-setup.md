@@ -37,6 +37,7 @@ dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
 ```
 
 Replace:
+
 - `YOUR_GITHUB_USERNAME`: Your GitHub username
 - `YOUR_GITHUB_PAT`: Personal Access Token created above
 
@@ -92,6 +93,7 @@ Packages should restore from both nuget.org and GitHub Packages.
 GitHub Actions workflows automatically use `GITHUB_TOKEN` for authentication - **no additional secrets required**.
 
 The workflow is configured in `.github/workflows/publish-shared-packages.yml` and uses:
+
 - `GITHUB_TOKEN` - Automatically provided by GitHub Actions
 - `github.actor` - The GitHub username triggering the workflow
 
@@ -149,6 +151,7 @@ dotnet build
 When a new version is published:
 
 1. Update `Version` in consuming project's `.csproj`:
+
    ```xml
    <PackageReference Include="Mystira.App.Domain" Version="1.1.0" />
    ```
@@ -166,6 +169,7 @@ When a new version is published:
 **Error**: `401 (Unauthorized)` or authentication errors
 
 **Solutions**:
+
 - Verify PAT has correct permissions (`read:packages` and `write:packages` for publishing)
 - Check PAT hasn't expired
 - Verify GitHub username is correct
@@ -176,6 +180,7 @@ When a new version is published:
 **Error**: `404 (Not Found)` when restoring
 
 **Solutions**:
+
 - Verify package was published successfully (check GitHub Packages)
 - Check package name matches exactly (case-sensitive)
 - Verify version number matches
@@ -186,6 +191,7 @@ When a new version is published:
 **Error**: `404` or connection errors
 
 **Solutions**:
+
 - Verify feed URL is: `https://nuget.pkg.github.com/phoenixvc/index.json`
 - Check you have access to phoenixvc organization
 - Verify authentication is configured correctly
@@ -196,6 +202,7 @@ When a new version is published:
 **Error**: Version resolution conflicts
 
 **Solutions**:
+
 - Ensure all packages use compatible versions
 - Check dependency graph (Domain → Application → Infrastructure)
 - Update all related packages together
@@ -212,11 +219,13 @@ When a new version is published:
 ### Versioning Process
 
 1. **Update Version** in `.csproj`:
+
    ```xml
    <Version>1.1.0</Version>
    ```
 
 2. **Commit and Push**:
+
    ```bash
    git add src/Mystira.App.Domain/Mystira.App.Domain.csproj
    git commit -m "chore: bump Mystira.App.Domain to 1.1.0"
@@ -233,5 +242,3 @@ When a new version is published:
 - [Package Publishing Checklist](./PACKAGE_PUBLISHING_CHECKLIST.md)
 - [NuGet.config Template](../../NuGet.config.template)
 - [GitHub Packages Documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry)
-
-
