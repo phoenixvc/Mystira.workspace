@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Collections.Concurrent;
 using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Contracts.Models;
+using Mystira.StoryGenerator.Application.Services.Prompting;
 
 namespace Mystira.StoryGenerator.Api.Controllers;
 
@@ -23,17 +24,20 @@ public class StoryAgentController : ControllerBase
     private readonly IStorySessionRepository _sessionRepository;
     private readonly ILogger<StoryAgentController> _logger;
     private readonly JsonSerializerOptions _jsonOptions;
+    private readonly IPromptGenerator _promptGenerator;
 
     public StoryAgentController(
         IAgentOrchestrator agentOrchestrator,
         IAgentStreamPublisher streamPublisher,
         IStorySessionRepository sessionRepository,
-        ILogger<StoryAgentController> logger)
+        ILogger<StoryAgentController> logger,
+        IPromptGenerator promptGenerator)
     {
         _agentOrchestrator = agentOrchestrator;
         _streamPublisher = streamPublisher;
         _sessionRepository = sessionRepository;
         _logger = logger;
+        _promptGenerator = promptGenerator;
         _jsonOptions = new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -468,12 +472,39 @@ public class StoryAgentController : ControllerBase
                 return Conflict(new { error = "Session is not in RefinementRequested, Evaluated, or Complete state", sessionId, currentStage = session.Stage.ToString() });
             }
 
-            // TODO: Call rubric generator here before completing
-            // This should:
-            // 1. Call IPromptGenerator.GenerateRubricPrompt(session.CurrentStoryVersion, session.LastEvaluationReport, session.IterationCount)
-            // 2. Send the prompt to an LLM agent
-            // 3. Parse and store the rubric response in the session
-            // 4. Return the rubric to the frontend for display
+            // Generate rubric for completed story
+            try
+            {
+                _logger.LogInformation("Generating rubric for session {SessionId}", sessionId);
+
+                // Generate rubric using the orchestrator
+                var rubricResult = await _agentOrchestrator.GenerateRubricAsync(sessionId, cancellationToken);
+
+                if (rubricResult.Success && rubricResult.Rubric != null)
+                {
+                    // Store rubric in session
+                    session.RubricSummary = rubricResult.Rubric;
+                    session.UpdatedAt = DateTime.UtcNow;
+
+                    _logger.LogInformation("Rubric generated successfully for session {SessionId}", sessionId);
+                }
+                else
+                {
+                    _logger.LogWarning("Rubric generation returned no result for session {SessionId}", sessionId);
+                    // Set rubric generation error state but allow completion
+                    session.ErrorMessage = session.ErrorMessage != null
+                        ? $"{session.ErrorMessage}; Rubric generation failed"
+                        : "Rubric generation failed";
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate rubric for session {SessionId}", sessionId);
+                // Set rubric generation error state but allow completion
+                session.ErrorMessage = session.ErrorMessage != null
+                    ? $"{session.ErrorMessage}; Rubric generation error: {ex.Message}"
+                    : $"Rubric generation error: {ex.Message}";
+            }
 
             // Mark session as complete
             session.Stage = StorySessionStage.Complete;

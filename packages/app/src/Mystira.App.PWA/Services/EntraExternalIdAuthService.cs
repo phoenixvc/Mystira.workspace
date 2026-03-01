@@ -462,10 +462,8 @@ public class EntraExternalIdAuthService
 
     private static void ValidateEntraConfiguration(string? authority, string? clientId)
     {
-        if (string.IsNullOrEmpty(authority) || string.IsNullOrEmpty(clientId))
-        {
-            throw new InvalidOperationException("Entra External ID is not configured. Missing Authority or ClientId.");
-        }
+        ArgumentException.ThrowIfNullOrEmpty(authority, "Entra External ID is not configured. Missing Authority.");
+        ArgumentException.ThrowIfNullOrEmpty(clientId, "Entra External ID is not configured. Missing ClientId.");
     }
 
     #endregion

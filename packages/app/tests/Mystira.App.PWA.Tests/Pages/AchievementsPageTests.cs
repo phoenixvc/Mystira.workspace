@@ -63,7 +63,7 @@ public class AchievementsPageTests : BunitContext
         public void SetRememberMe(bool rememberMe) { }
         public Task<bool> GetRememberMeAsync() => Task.FromResult(false);
         public DateTime? GetTokenExpiryTime() => null;
-        public Task<bool> EnsureTokenValidAsync(int expiryBufferMinutes = 5) => Task.FromResult(true);
+        public Task<bool> EnsureTokenValidAsync(CancellationToken cancellationToken = default) => Task.FromResult(true);
 
         // Dual-path authentication methods
         public Task<AuthResult> SignInWithEntraAsync() => Task.FromResult(new AuthResult(false, ErrorMessage: "Not implemented in test"));

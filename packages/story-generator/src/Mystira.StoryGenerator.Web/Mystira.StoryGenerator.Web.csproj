@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- Ensure publish output goes to a clear location and simplify for Rider/Azure -->
     <PublishDir>publish\</PublishDir>
     <InvariantGlobalization>true</InvariantGlobalization>

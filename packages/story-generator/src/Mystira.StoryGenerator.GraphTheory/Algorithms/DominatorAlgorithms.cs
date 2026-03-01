@@ -49,7 +49,8 @@ public static class DominatorAlgorithms
 
         TNode Eval(TNode v)
         {
-            if (EqualityComparer<TNode>.Default.Equals(ancestor[v], default)) return v;
+            if (EqualityComparer<TNode>.Default.Equals(ancestor[v], default))
+                return v;
             Compress(v);
             return best[v];
         }
@@ -57,14 +58,17 @@ public static class DominatorAlgorithms
         void Compress(TNode v)
         {
             var a = ancestor[v];
-            if (!EqualityComparer<TNode>.Default.Equals(a, default) && !EqualityComparer<TNode>.Default.Equals(ancestor[a], default))
+            if (!EqualityComparer<TNode>.Default.Equals(a, default) && a != null)
             {
-                Compress(a!);
-                if (semi[best[a!]] < semi[best[v]])
+                if (ancestor.TryGetValue(a, out var ancestorOfA) && ancestorOfA != null && !EqualityComparer<TNode>.Default.Equals(ancestorOfA, default))
                 {
-                    best[v] = best[a!];
+                    Compress(a);
+                    if (semi[best[a!]] < semi[best[v]])
+                    {
+                        best[v] = best[a!];
+                    }
+                    ancestor[v] = ancestorOfA!;
                 }
-                ancestor[v] = ancestor[a!]!;
             }
         }
 
@@ -79,7 +83,8 @@ public static class DominatorAlgorithms
             var w = vertex[i];
             foreach (var v in graph.GetPredecessors(w))
             {
-                if (!dfnum.ContainsKey(v)) continue;
+                if (!dfnum.ContainsKey(v))
+                    continue;
                 var u = Eval(v);
                 if (semi[u] < semi[w])
                 {

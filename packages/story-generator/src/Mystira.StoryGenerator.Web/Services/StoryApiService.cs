@@ -297,7 +297,7 @@ public class StoryApiService : IStoryApiService
             return new ChatCompletionResponse
             {
                 Success = orchestration.Success,
-                Content = orchestration.Success ? (contentText ?? orchestration.Prompt ?? string.Empty) : null,
+                Content = orchestration.Success ? (contentText ?? orchestration.Prompt ?? string.Empty) : string.Empty,
                 Error = orchestration.Success ? null : orchestration.Error
             };
         }

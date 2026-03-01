@@ -139,7 +139,8 @@ public class AnthropicAIService : ILLMService
 
     public async Task<ChatCompletionResponse> CompleteAsync(ChatCompletionRequest request, CancellationToken cancellationToken = default)
     {
-        if (!IsAvailable()) return CreateErrorResponse("Anthropic service is not properly configured");
+        if (!IsAvailable())
+            return CreateErrorResponse("Anthropic service is not properly configured");
 
         try
         {
@@ -173,14 +174,24 @@ public class AnthropicAIService : ILLMService
 
             var systemPrompt = request.SystemPrompt ?? string.Empty;
 
-            var response = await client.Messages.Create(new MessageCreateParams
-            {
-                Model = modelName,
-                MaxTokens = request.MaxTokens,
-                Temperature = (float)request.Temperature,
-                Messages = messages,
-                System = string.IsNullOrWhiteSpace(systemPrompt) ? null : systemPrompt
-            }, cancellationToken: cancellationToken);
+            var response = await client.Messages.Create(
+                !string.IsNullOrWhiteSpace(systemPrompt)
+                    ? new MessageCreateParams
+                    {
+                        Model = modelName,
+                        MaxTokens = request.MaxTokens,
+                        Temperature = (float)request.Temperature,
+                        Messages = messages,
+                        System = systemPrompt
+                    }
+                    : new MessageCreateParams
+                    {
+                        Model = modelName,
+                        MaxTokens = request.MaxTokens,
+                        Temperature = (float)request.Temperature,
+                        Messages = messages
+                    },
+                cancellationToken: cancellationToken);
 
             var content = ExtractTextContent(response.Content);
             var cleanContent = Sanitize(content);
@@ -204,9 +215,10 @@ public class AnthropicAIService : ILLMService
                 IsIncomplete = isIncomplete
             };
 
-            string? Sanitize(string? input)
+            static string? Sanitize(string? input)
             {
-                if (input == null) return null;
+                if (input == null)
+                    return null;
 
                 var sb = new StringBuilder(input.Length);
                 foreach (var ch in input)
@@ -238,7 +250,8 @@ public class AnthropicAIService : ILLMService
             return request.Model;
         }
 
-        if (!string.IsNullOrWhiteSpace(_modelNameOrId)) return _modelNameOrId;
+        if (!string.IsNullOrWhiteSpace(_modelNameOrId))
+            return _modelNameOrId;
 
         _modelNameOrId = _settings.Anthropic.ModelName;
         return _settings.Anthropic.ModelName;
@@ -247,10 +260,12 @@ public class AnthropicAIService : ILLMService
     // Returns a model-specific endpoint if configured; otherwise empty string.
     private string ResolveEndpoint(string? modelName)
     {
-        if (string.IsNullOrWhiteSpace(modelName)) return string.Empty;
+        if (string.IsNullOrWhiteSpace(modelName))
+            return string.Empty;
 
         var models = _settings.Anthropic.Models;
-        if (models == null || models.Count == 0) return string.Empty;
+        if (models == null || models.Count == 0)
+            return string.Empty;
 
         var match = models.FirstOrDefault(m => string.Equals(m.Name, modelName, StringComparison.OrdinalIgnoreCase));
         return match?.Endpoint ?? string.Empty;

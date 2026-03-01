@@ -177,7 +177,7 @@ public class AzureOpenAIService : ILLMService
             }
 
             var azureClient = new AzureOpenAIClient(
-                new Uri(endpoint),
+                new Uri(endpoint!),
                 new ApiKeyCredential(apiKey),
                 new AzureOpenAIClientOptions
                 {
