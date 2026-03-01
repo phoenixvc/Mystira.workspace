@@ -300,7 +300,7 @@ If the rollback doesn't resolve the issue:
 │                                                                  │
 │  1. CONFIRM: curl https://mystira.app/api/health                │
 │                                                                  │
-│  2. NOTIFY: jurie@phoenixvc.tech                                 │
+│  2. NOTIFY: @oncall-lead in Slack                               │
 │                                                                  │
 │  3. ROLLBACK:                                                   │
 │     gh workflow run mystira-app-api-rollback.yml \              │

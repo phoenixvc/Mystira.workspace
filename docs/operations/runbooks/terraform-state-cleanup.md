@@ -18,7 +18,6 @@ Error: Module not found
 ```
 
 Additional related errors:
-
 ```
 Error: User Assigned Identity was not found
   mys-dev-admin-api-identity-san
@@ -30,7 +29,6 @@ Error: Invalid for_each argument
 ## Root Cause
 
 The Terraform state contains references to modules and resources that:
-
 1. Were removed from the codebase
 2. Were never created in Azure but are in the state
 3. Have dependencies on resources that don't exist
@@ -144,14 +142,12 @@ for_each = { for k, v in var.service_identities : k => v if v.key_vault_id != ""
 **Solution Options:**
 
 1. **Use static keys:**
-
    ```hcl
    for_each = { for k, v in var.service_identities : k => v }
    # Move the condition to the resource attributes
    ```
 
 2. **Use targeted apply:**
-
    ```bash
    # First apply the dependencies
    terraform apply -target=module.identity.azurerm_user_assigned_identity.main
@@ -178,7 +174,6 @@ This occurs when data sources reference identities that don't exist.
 
 1. Create the identity first (if needed)
 2. Or remove the data source reference from state:
-
    ```bash
    terraform state rm 'module.shared_postgresql.data.azurerm_user_assigned_identity.aad_admins["admin-api"]'
    ```
@@ -217,7 +212,6 @@ terraform state list
 To prevent future orphaned state:
 
 1. **Always remove from code first, then state:**
-
    ```bash
    # 1. Remove module from .tf file
    # 2. Run terraform plan (should show destroy)
@@ -225,7 +219,6 @@ To prevent future orphaned state:
    ```
 
 2. **Use `terraform destroy` for full cleanup:**
-
    ```bash
    terraform destroy -target=module.module_name
    ```

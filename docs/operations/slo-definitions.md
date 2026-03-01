@@ -11,11 +11,11 @@ This document defines the Service Level Objectives (SLOs), Service Level Indicat
 
 ## Service Tier Definitions
 
-| Tier                  | Services                 | Availability Target | Error Budget (monthly) |
-| --------------------- | ------------------------ | ------------------- | ---------------------- |
-| **Tier 1 (Critical)** | App API, Story Generator | 99.9%               | 43.2 minutes           |
-| **Tier 2 (High)**     | Publisher, Chain         | 99.5%               | 3.6 hours              |
-| **Tier 3 (Standard)** | Admin API, DevHub        | 99.0%               | 7.2 hours              |
+| Tier | Services | Availability Target | Error Budget (monthly) |
+|------|----------|---------------------|------------------------|
+| **Tier 1 (Critical)** | App API, Story Generator | 99.9% | 43.2 minutes |
+| **Tier 2 (High)** | Publisher, Chain | 99.5% | 3.6 hours |
+| **Tier 3 (Standard)** | Admin API, DevHub | 99.0% | 7.2 hours |
 
 ---
 
@@ -27,52 +27,48 @@ This document defines the Service Level Objectives (SLOs), Service Level Indicat
 
 #### Availability SLO
 
-| Metric           | Target             | Measurement Window |
-| ---------------- | ------------------ | ------------------ |
-| **Uptime**       | 99.9%              | 30-day rolling     |
-| **Error Budget** | 43.2 minutes/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.9% | 30-day rolling |
+| **Error Budget** | 43.2 minutes/month | Monthly reset |
 
 **SLI Formula**:
-
 ```
 Availability = (Total Requests - 5xx Errors) / Total Requests × 100
 ```
 
 **Measurement**:
-
 - Source: Application Insights / Azure Monitor
 - Query interval: 1 minute
 - Aggregation: 30-day rolling average
 
 #### Latency SLO
 
-| Percentile | Target   | Endpoint Category |
-| ---------- | -------- | ----------------- |
-| **p50**    | < 100ms  | Read operations   |
-| **p95**    | < 500ms  | Read operations   |
-| **p99**    | < 1000ms | Read operations   |
-| **p50**    | < 200ms  | Write operations  |
-| **p95**    | < 750ms  | Write operations  |
-| **p99**    | < 1500ms | Write operations  |
+| Percentile | Target | Endpoint Category |
+|------------|--------|-------------------|
+| **p50** | < 100ms | Read operations |
+| **p95** | < 500ms | Read operations |
+| **p99** | < 1000ms | Read operations |
+| **p50** | < 200ms | Write operations |
+| **p95** | < 750ms | Write operations |
+| **p99** | < 1500ms | Write operations |
 
 **SLI Formula**:
-
 ```
 Latency_P95 = Percentile(request_duration, 95)
 ```
 
 **Measurement**:
-
 - Source: Application Insights request telemetry
 - Exclude: Health check endpoints, warming requests
 - Include: All user-facing API endpoints
 
 #### Throughput SLO
 
-| Metric             | Target                | Notes            |
-| ------------------ | --------------------- | ---------------- |
-| **Requests/sec**   | 1000 rps sustained    | Normal operation |
-| **Burst capacity** | 3000 rps (60 seconds) | Peak handling    |
+| Metric | Target | Notes |
+|--------|--------|-------|
+| **Requests/sec** | 1000 rps sustained | Normal operation |
+| **Burst capacity** | 3000 rps (60 seconds) | Peak handling |
 
 ### Story Generator Service
 
@@ -80,20 +76,20 @@ Latency_P95 = Percentile(request_duration, 95)
 
 #### Availability SLO
 
-| Metric           | Target             | Measurement Window |
-| ---------------- | ------------------ | ------------------ |
-| **Uptime**       | 99.9%              | 30-day rolling     |
-| **Error Budget** | 43.2 minutes/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.9% | 30-day rolling |
+| **Error Budget** | 43.2 minutes/month | Monthly reset |
 
 #### Latency SLO
 
-| Percentile | Target    | Operation Type    |
-| ---------- | --------- | ----------------- |
-| **p50**    | < 2000ms  | Story generation  |
-| **p95**    | < 5000ms  | Story generation  |
-| **p99**    | < 10000ms | Story generation  |
-| **p50**    | < 500ms   | Choice evaluation |
-| **p95**    | < 1500ms  | Choice evaluation |
+| Percentile | Target | Operation Type |
+|------------|--------|----------------|
+| **p50** | < 2000ms | Story generation |
+| **p95** | < 5000ms | Story generation |
+| **p99** | < 10000ms | Story generation |
+| **p50** | < 500ms | Choice evaluation |
+| **p95** | < 1500ms | Choice evaluation |
 
 **Notes**: Story generation latency depends on AI model response times. Targets account for external AI service dependencies.
 
@@ -107,19 +103,19 @@ Latency_P95 = Percentile(request_duration, 95)
 
 #### Availability SLO
 
-| Metric           | Target          | Measurement Window |
-| ---------------- | --------------- | ------------------ |
-| **Uptime**       | 99.5%           | 30-day rolling     |
-| **Error Budget** | 3.6 hours/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.5% | 30-day rolling |
+| **Error Budget** | 3.6 hours/month | Monthly reset |
 
 #### Latency SLO
 
-| Percentile | Target   | Operation          |
-| ---------- | -------- | ------------------ |
-| **p50**    | < 200ms  | Content retrieval  |
-| **p95**    | < 800ms  | Content retrieval  |
-| **p50**    | < 500ms  | Content publishing |
-| **p95**    | < 2000ms | Content publishing |
+| Percentile | Target | Operation |
+|------------|--------|-----------|
+| **p50** | < 200ms | Content retrieval |
+| **p95** | < 800ms | Content retrieval |
+| **p50** | < 500ms | Content publishing |
+| **p95** | < 2000ms | Content publishing |
 
 ### Chain Service
 
@@ -127,19 +123,19 @@ Latency_P95 = Percentile(request_duration, 95)
 
 #### Availability SLO
 
-| Metric           | Target          | Measurement Window |
-| ---------------- | --------------- | ------------------ |
-| **Uptime**       | 99.5%           | 30-day rolling     |
-| **Error Budget** | 3.6 hours/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.5% | 30-day rolling |
+| **Error Budget** | 3.6 hours/month | Monthly reset |
 
 #### Latency SLO
 
-| Percentile | Target    | Operation                        |
-| ---------- | --------- | -------------------------------- |
-| **p50**    | < 1000ms  | Read operations                  |
-| **p95**    | < 3000ms  | Read operations                  |
-| **p50**    | < 5000ms  | Write operations (blockchain tx) |
-| **p95**    | < 15000ms | Write operations (blockchain tx) |
+| Percentile | Target | Operation |
+|------------|--------|-----------|
+| **p50** | < 1000ms | Read operations |
+| **p95** | < 3000ms | Read operations |
+| **p50** | < 5000ms | Write operations (blockchain tx) |
+| **p95** | < 15000ms | Write operations (blockchain tx) |
 
 **Notes**: Blockchain write operations include confirmation time.
 
@@ -151,19 +147,19 @@ Latency_P95 = Percentile(request_duration, 95)
 
 #### Availability SLO
 
-| Metric           | Target          | Measurement Window |
-| ---------------- | --------------- | ------------------ |
-| **Uptime**       | 99.0%           | 30-day rolling     |
-| **Error Budget** | 7.2 hours/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.0% | 30-day rolling |
+| **Error Budget** | 7.2 hours/month | Monthly reset |
 
 ### DevHub
 
 #### Availability SLO
 
-| Metric           | Target          | Measurement Window |
-| ---------------- | --------------- | ------------------ |
-| **Uptime**       | 99.0%           | 30-day rolling     |
-| **Error Budget** | 7.2 hours/month | Monthly reset      |
+| Metric | Target | Measurement Window |
+|--------|--------|-------------------|
+| **Uptime** | 99.0% | 30-day rolling |
+| **Error Budget** | 7.2 hours/month | Monthly reset |
 
 ---
 
@@ -171,39 +167,36 @@ Latency_P95 = Percentile(request_duration, 95)
 
 ### Budget Consumption Thresholds
 
-| Consumption Level | Status       | Actions Required                                              |
-| ----------------- | ------------ | ------------------------------------------------------------- |
-| **0-50%**         | ✅ Green     | Normal operations, feature development prioritized            |
-| **50-75%**        | 🟡 Yellow    | Increased monitoring, consider pausing risky changes          |
-| **75-90%**        | 🟠 Orange    | Feature freeze, focus on stability improvements               |
-| **90-100%**       | 🔴 Red       | Full freeze, all hands on reliability                         |
-| **>100%**         | ⛔ Exhausted | Incident retrospective required, mandatory reliability sprint |
+| Consumption Level | Status | Actions Required |
+|-------------------|--------|------------------|
+| **0-50%** | ✅ Green | Normal operations, feature development prioritized |
+| **50-75%** | 🟡 Yellow | Increased monitoring, consider pausing risky changes |
+| **75-90%** | 🟠 Orange | Feature freeze, focus on stability improvements |
+| **90-100%** | 🔴 Red | Full freeze, all hands on reliability |
+| **>100%** | ⛔ Exhausted | Incident retrospective required, mandatory reliability sprint |
 
 ### Budget Calculation
 
 **Monthly Error Budget (minutes)**:
-
 ```
 Error_Budget = (1 - SLO_Target) × 30 × 24 × 60
 ```
 
 | SLO Target | Monthly Budget (minutes) | Daily Budget (minutes) |
-| ---------- | ------------------------ | ---------------------- |
-| 99.9%      | 43.2                     | 1.44                   |
-| 99.5%      | 216                      | 7.2                    |
-| 99.0%      | 432                      | 14.4                   |
+|------------|--------------------------|------------------------|
+| 99.9% | 43.2 | 1.44 |
+| 99.5% | 216 | 7.2 |
+| 99.0% | 432 | 14.4 |
 
 ### Budget Consumption Events
 
 Events that consume error budget:
-
 - Service unavailability (5xx errors)
 - Response times exceeding SLO thresholds
 - Failed health checks
 - Unplanned maintenance windows
 
 Events that do NOT consume error budget:
-
 - Planned maintenance (with proper notice)
 - External dependency failures (documented)
 - Client-side errors (4xx)
@@ -214,29 +207,29 @@ Events that do NOT consume error budget:
 
 ### Critical Alerts (Page On-Call)
 
-| Condition             | Threshold     | Duration   | Severity |
-| --------------------- | ------------- | ---------- | -------- |
-| Error rate            | > 5%          | 5 minutes  | Critical |
-| Availability          | < 99%         | 5 minutes  | Critical |
-| P95 latency           | > 2x target   | 10 minutes | Critical |
-| Health check failures | 3 consecutive | Immediate  | Critical |
+| Condition | Threshold | Duration | Severity |
+|-----------|-----------|----------|----------|
+| Error rate | > 5% | 5 minutes | Critical |
+| Availability | < 99% | 5 minutes | Critical |
+| P95 latency | > 2x target | 10 minutes | Critical |
+| Health check failures | 3 consecutive | Immediate | Critical |
 
 ### Warning Alerts (Notify Team)
 
-| Condition                | Threshold     | Duration    | Severity |
-| ------------------------ | ------------- | ----------- | -------- |
-| Error rate               | > 1%          | 15 minutes  | Warning  |
-| Availability             | < 99.5%       | 15 minutes  | Warning  |
-| P95 latency              | > 1.5x target | 15 minutes  | Warning  |
-| Error budget consumption | > 50% monthly | Daily check | Warning  |
+| Condition | Threshold | Duration | Severity |
+|-----------|-----------|----------|----------|
+| Error rate | > 1% | 15 minutes | Warning |
+| Availability | < 99.5% | 15 minutes | Warning |
+| P95 latency | > 1.5x target | 15 minutes | Warning |
+| Error budget consumption | > 50% monthly | Daily check | Warning |
 
 ### Informational Alerts
 
-| Condition                | Threshold     | Duration    | Severity |
-| ------------------------ | ------------- | ----------- | -------- |
-| Traffic anomaly          | > 2 std dev   | 30 minutes  | Info     |
-| Error budget consumption | > 25% monthly | Daily check | Info     |
-| New error patterns       | Any           | Continuous  | Info     |
+| Condition | Threshold | Duration | Severity |
+|-----------|-----------|----------|----------|
+| Traffic anomaly | > 2 std dev | 30 minutes | Info |
+| Error budget consumption | > 25% monthly | Daily check | Info |
+| New error patterns | Any | Continuous | Info |
 
 ---
 
@@ -345,7 +338,6 @@ requests
 ### SLO Status Widget
 
 Visual indicator for each service:
-
 - 🟢 Green: Within SLO
 - 🟡 Yellow: Warning threshold
 - 🔴 Red: SLO breach
@@ -354,20 +346,20 @@ Visual indicator for each service:
 
 ## Review Cadence
 
-| Review Type      | Frequency | Participants      | Focus                       |
-| ---------------- | --------- | ----------------- | --------------------------- |
-| Daily SLO Check  | Daily     | On-call engineer  | Error budget status         |
-| Weekly Review    | Weekly    | Platform team     | Trends, incidents           |
-| Monthly Review   | Monthly   | Engineering leads | SLO adjustments, capacity   |
-| Quarterly Review | Quarterly | Leadership        | Strategic reliability goals |
+| Review Type | Frequency | Participants | Focus |
+|-------------|-----------|--------------|-------|
+| Daily SLO Check | Daily | On-call engineer | Error budget status |
+| Weekly Review | Weekly | Platform team | Trends, incidents |
+| Monthly Review | Monthly | Engineering leads | SLO adjustments, capacity |
+| Quarterly Review | Quarterly | Leadership | Strategic reliability goals |
 
 ---
 
 ## Revision History
 
-| Version | Date       | Author        | Changes                 |
-| ------- | ---------- | ------------- | ----------------------- |
-| 1.0     | 2025-12-22 | Platform Team | Initial SLO definitions |
+| Version | Date | Author | Changes |
+|---------|------|--------|---------|
+| 1.0 | 2025-12-22 | Platform Team | Initial SLO definitions |
 
 ---
 

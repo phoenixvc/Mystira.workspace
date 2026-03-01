@@ -1,0 +1,2146 @@
+{
+  "repo": "Mystira.workspace",
+  "tree": [
+    {
+      "path": "infra",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "134dd23031e861c827b61daa8d958dc4b5871f92",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/134dd23031e861c827b61daa8d958dc4b5871f92"
+    },
+    {
+      "path": "infra/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8278fe2a1ef871928f72dc0ae7c8df9466777771",
+      "size": 21459,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8278fe2a1ef871928f72dc0ae7c8df9466777771"
+    },
+    {
+      "path": "infra/azure-setup.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e8860cfccae32338d5a383d97a4f2062854971d9",
+      "size": 15579,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e8860cfccae32338d5a383d97a4f2062854971d9"
+    },
+    {
+      "path": "infra/docker",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a64fa41c32e60baa779980b4a7a15b47dba05103",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a64fa41c32e60baa779980b4a7a15b47dba05103"
+    },
+    {
+      "path": "infra/docker/admin-api",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "228fd34a2bc6916f04e019912f4e2f36b4fa7af7",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/228fd34a2bc6916f04e019912f4e2f36b4fa7af7"
+    },
+    {
+      "path": "infra/docker/admin-api/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fd1452950cacb30ad158604019b5d6b6dd87d06",
+      "size": 3705,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1fd1452950cacb30ad158604019b5d6b6dd87d06"
+    },
+    {
+      "path": "infra/docker/app",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c0598ef23a9e4979a262b7dfc6f58ad7494f2d1c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c0598ef23a9e4979a262b7dfc6f58ad7494f2d1c"
+    },
+    {
+      "path": "infra/docker/app/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "225b19d4fa7982e3928f462ad179f19afb5f6bbe",
+      "size": 4150,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/225b19d4fa7982e3928f462ad179f19afb5f6bbe"
+    },
+    {
+      "path": "infra/docker/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bf7f1fac5df09a71490f3dd69c7c8ce08e57f48d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bf7f1fac5df09a71490f3dd69c7c8ce08e57f48d"
+    },
+    {
+      "path": "infra/docker/chain/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7cd574629cc013e715545643d627bfac74b49e2a",
+      "size": 1808,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7cd574629cc013e715545643d627bfac74b49e2a"
+    },
+    {
+      "path": "infra/docker/publisher",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1fb08b8bb811cf13f024f023f08225afe4511dd6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1fb08b8bb811cf13f024f023f08225afe4511dd6"
+    },
+    {
+      "path": "infra/docker/publisher/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b2f0c6e77ea2d455af1df70605d7e90fa94097e3",
+      "size": 1881,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b2f0c6e77ea2d455af1df70605d7e90fa94097e3"
+    },
+    {
+      "path": "infra/docker/story-generator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "cb6a490aea99c08a8e814b820fc61ea6f015fae1",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/cb6a490aea99c08a8e814b820fc61ea6f015fae1"
+    },
+    {
+      "path": "infra/docker/story-generator/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a21d39336a584515eb0f2f9610bf58b57cd82945",
+      "size": 2233,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a21d39336a584515eb0f2f9610bf58b57cd82945"
+    },
+    {
+      "path": "infra/gitops",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d1c8e2b1b08ff62f963f618dae4acb7aadc31eec",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d1c8e2b1b08ff62f963f618dae4acb7aadc31eec"
+    },
+    {
+      "path": "infra/gitops/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba1663a02141baeebe8558894fbce5c1f2ce3962",
+      "size": 5307,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ba1663a02141baeebe8558894fbce5c1f2ce3962"
+    },
+    {
+      "path": "infra/gitops/applications",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aefdab9806a4d265a773b34a84bf07f5ad87137e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/aefdab9806a4d265a773b34a84bf07f5ad87137e"
+    },
+    {
+      "path": "infra/gitops/applications/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79738271d09a95071294ea387a502029a32bf356",
+      "size": 109,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/79738271d09a95071294ea387a502029a32bf356"
+    },
+    {
+      "path": "infra/gitops/harness-agent.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "57a0195ebab58aeded7284528d82fbb76636dde3",
+      "size": 1459470,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/57a0195ebab58aeded7284528d82fbb76636dde3"
+    },
+    {
+      "path": "infra/gitops/harness-agent.yaml.example",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ebdfbd93e891956f8db83891cc1996e6c7901dcf",
+      "size": 601,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ebdfbd93e891956f8db83891cc1996e6c7901dcf"
+    },
+    {
+      "path": "infra/kubernetes",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e61c32bf2237b5623e24d3e04f4804f094545755",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e61c32bf2237b5623e24d3e04f4804f094545755"
+    },
+    {
+      "path": "infra/kubernetes/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce8af1be706349c2b5676b89aafb9b0881370ece",
+      "size": 6841,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ce8af1be706349c2b5676b89aafb9b0881370ece"
+    },
+    {
+      "path": "infra/kubernetes/base",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "39618b7dde3af933a8a1df3a239952089377137f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/39618b7dde3af933a8a1df3a239952089377137f"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-api",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7aee9d532914a44786cbc1b30a03a4f14623247b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7aee9d532914a44786cbc1b30a03a4f14623247b"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-api/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55f7de353b7543ea5ec106214188dcb12eaac606",
+      "size": 5207,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/55f7de353b7543ea5ec106214188dcb12eaac606"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-api/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ce2191d4c9626c799a0bdeb5fe1c29a18fc13c2",
+      "size": 678,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3ce2191d4c9626c799a0bdeb5fe1c29a18fc13c2"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-api/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02ead35b967e9ac8d6020c59918f467860c8cc83",
+      "size": 477,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/02ead35b967e9ac8d6020c59918f467860c8cc83"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-api/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "005f0690c1c7439eb9e6715327ec7dd968701b11",
+      "size": 1762,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/005f0690c1c7439eb9e6715327ec7dd968701b11"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b5422fefca260e2f2fe5e8bf02009d8cf80b2e4e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b5422fefca260e2f2fe5e8bf02009d8cf80b2e4e"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-ui/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb6f2ad6ffbc9b6f2b77c233cee61601ccb1e84c",
+      "size": 3713,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cb6f2ad6ffbc9b6f2b77c233cee61601ccb1e84c"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-ui/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "190604011601bed2f32c7a4036edaf831521c63b",
+      "size": 666,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/190604011601bed2f32c7a4036edaf831521c63b"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-ui/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7136c1ccd539dc4edd6c5a42a02bf0d632f1d156",
+      "size": 473,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7136c1ccd539dc4edd6c5a42a02bf0d632f1d156"
+    },
+    {
+      "path": "infra/kubernetes/base/admin-ui/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56baee94324de9bc13f083bb5d543eeddce4a384",
+      "size": 1330,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/56baee94324de9bc13f083bb5d543eeddce4a384"
+    },
+    {
+      "path": "infra/kubernetes/base/cert-manager",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "146e60df74dc5a0e83259a46536a07290254f0f5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/146e60df74dc5a0e83259a46536a07290254f0f5"
+    },
+    {
+      "path": "infra/kubernetes/base/cert-manager/cluster-issuer.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2d8d80c84e753c67c2744af052c23a55c6afea0",
+      "size": 676,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d2d8d80c84e753c67c2744af052c23a55c6afea0"
+    },
+    {
+      "path": "infra/kubernetes/base/cert-manager/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6463ba2de4f89230d61f2932535a82e01f13748b",
+      "size": 271,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6463ba2de4f89230d61f2932535a82e01f13748b"
+    },
+    {
+      "path": "infra/kubernetes/base/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1500b19627f5a2e1bb2055f5723578aa6c1817a9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1500b19627f5a2e1bb2055f5723578aa6c1817a9"
+    },
+    {
+      "path": "infra/kubernetes/base/chain/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a0809e9bf15dffa6d3d2763526d653fbce392afb",
+      "size": 4575,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a0809e9bf15dffa6d3d2763526d653fbce392afb"
+    },
+    {
+      "path": "infra/kubernetes/base/chain/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "78573dd8d864fae76e1bbf652c590fa3ef56d59f",
+      "size": 711,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/78573dd8d864fae76e1bbf652c590fa3ef56d59f"
+    },
+    {
+      "path": "infra/kubernetes/base/chain/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3f26bcf9589d5e7ba6769dce3f66d2cf413a6022",
+      "size": 466,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3f26bcf9589d5e7ba6769dce3f66d2cf413a6022"
+    },
+    {
+      "path": "infra/kubernetes/base/chain/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "257d9d46b1d013ad6e10209fa04a0aa21e76eb7a",
+      "size": 2162,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/257d9d46b1d013ad6e10209fa04a0aa21e76eb7a"
+    },
+    {
+      "path": "infra/kubernetes/base/devhub",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9f1102b2d5325b95e12286f2eefc91bf610bfb9e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9f1102b2d5325b95e12286f2eefc91bf610bfb9e"
+    },
+    {
+      "path": "infra/kubernetes/base/devhub/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b477aceeb4e0e834b7ea497d35600538f9bdb4eb",
+      "size": 3577,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b477aceeb4e0e834b7ea497d35600538f9bdb4eb"
+    },
+    {
+      "path": "infra/kubernetes/base/devhub/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81f47842a3f1b0772c7f86b44558fb7d76b64bb4",
+      "size": 850,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/81f47842a3f1b0772c7f86b44558fb7d76b64bb4"
+    },
+    {
+      "path": "infra/kubernetes/base/devhub/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce0122f92cab8f7ca13c67894c44c9abc6579791",
+      "size": 225,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ce0122f92cab8f7ca13c67894c44c9abc6579791"
+    },
+    {
+      "path": "infra/kubernetes/base/devhub/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6cbc2993b00c9d323e4d8f78f4a798a249c6cff",
+      "size": 1124,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c6cbc2993b00c9d323e4d8f78f4a798a249c6cff"
+    },
+    {
+      "path": "infra/kubernetes/base/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca73c0f02ba0b0075f2dd3ffc11f89cd475a9b35",
+      "size": 275,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca73c0f02ba0b0075f2dd3ffc11f89cd475a9b35"
+    },
+    {
+      "path": "infra/kubernetes/base/namespace.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f94908083d672f87a1ca187e566a8b697638bd50",
+      "size": 147,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f94908083d672f87a1ca187e566a8b697638bd50"
+    },
+    {
+      "path": "infra/kubernetes/base/publisher",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "74578f46f41036783e906499b4f6a62daa799e3e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/74578f46f41036783e906499b4f6a62daa799e3e"
+    },
+    {
+      "path": "infra/kubernetes/base/publisher/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80a58de009fbc8d6a6c993725f9e11d8b1e13cba",
+      "size": 4679,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/80a58de009fbc8d6a6c993725f9e11d8b1e13cba"
+    },
+    {
+      "path": "infra/kubernetes/base/publisher/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4333b7103feb511c5b7013a5b6e0707b28244e0",
+      "size": 678,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e4333b7103feb511c5b7013a5b6e0707b28244e0"
+    },
+    {
+      "path": "infra/kubernetes/base/publisher/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "442f45c7b3e24dc1b65249de58781a3c12dac28a",
+      "size": 477,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/442f45c7b3e24dc1b65249de58781a3c12dac28a"
+    },
+    {
+      "path": "infra/kubernetes/base/publisher/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a345e7c6e3f68353b7e0fe6a892caf19fc9bc930",
+      "size": 1562,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a345e7c6e3f68353b7e0fe6a892caf19fc9bc930"
+    },
+    {
+      "path": "infra/kubernetes/base/service-accounts.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ba7653388dcddfccc90f4fcf974e99effeb420c",
+      "size": 2546,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4ba7653388dcddfccc90f4fcf974e99effeb420c"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e990f096c8f6fc3d526dbac83b9ad0d932816a40",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e990f096c8f6fc3d526dbac83b9ad0d932816a40"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7e204711bf5be8b00f66b83069f27ad8821ed27d",
+      "size": 8054,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7e204711bf5be8b00f66b83069f27ad8821ed27d"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh/authorization-policies.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "636fdf3836f0f77a26a73763c391423f01be369f",
+      "size": 4603,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/636fdf3836f0f77a26a73763c391423f01be369f"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh/destination-rules.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a358423e323edfdb4ca17255e9415f454b0c082",
+      "size": 3321,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6a358423e323edfdb4ca17255e9415f454b0c082"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aafc2de0b50d4353c984d6de841b493d2b2f82c8",
+      "size": 257,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aafc2de0b50d4353c984d6de841b493d2b2f82c8"
+    },
+    {
+      "path": "infra/kubernetes/base/service-mesh/peer-authentication.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02c9e1ce9da94c78b51d2fc828650dc906c7d667",
+      "size": 1694,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/02c9e1ce9da94c78b51d2fc828650dc906c7d667"
+    },
+    {
+      "path": "infra/kubernetes/base/story-generator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ed2c6be71281a6541af32e102f1769dce82e771c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ed2c6be71281a6541af32e102f1769dce82e771c"
+    },
+    {
+      "path": "infra/kubernetes/base/story-generator/deployment.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44edbaaec36551e968091f1220f922a20d0ddffa",
+      "size": 5989,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/44edbaaec36551e968091f1220f922a20d0ddffa"
+    },
+    {
+      "path": "infra/kubernetes/base/story-generator/ingress.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "593a9ddbc60669b65feb513dce6e834af24dad6d",
+      "size": 839,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/593a9ddbc60669b65feb513dce6e834af24dad6d"
+    },
+    {
+      "path": "infra/kubernetes/base/story-generator/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0f86e1c1e65a7b3a9e3f6aaa262d2d24803820e",
+      "size": 622,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d0f86e1c1e65a7b3a9e3f6aaa262d2d24803820e"
+    },
+    {
+      "path": "infra/kubernetes/base/story-generator/network-policy.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f2166a77d6642b6ab0d926c9d1650202bf2f668",
+      "size": 1607,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2f2166a77d6642b6ab0d926c9d1650202bf2f668"
+    },
+    {
+      "path": "infra/kubernetes/overlays",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "466d7988d8145f90ae696607ece94c2e0b131d3d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/466d7988d8145f90ae696607ece94c2e0b131d3d"
+    },
+    {
+      "path": "infra/kubernetes/overlays/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1e17b2d99bb8d05ab40c220a2b4e41078d31e065",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1e17b2d99bb8d05ab40c220a2b4e41078d31e065"
+    },
+    {
+      "path": "infra/kubernetes/overlays/dev/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e15dbf526c10d23f66de2b463f23bd126a73c7b",
+      "size": 7296,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9e15dbf526c10d23f66de2b463f23bd126a73c7b"
+    },
+    {
+      "path": "infra/kubernetes/overlays/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "39cde65d19b044be7b190c01ffff8bb33acf3a5c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/39cde65d19b044be7b190c01ffff8bb33acf3a5c"
+    },
+    {
+      "path": "infra/kubernetes/overlays/prod/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ddf63813ff42bc8904944d865936c09bd23e9804",
+      "size": 6610,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ddf63813ff42bc8904944d865936c09bd23e9804"
+    },
+    {
+      "path": "infra/kubernetes/overlays/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "18808c8b44ad076bda2c5b0d7839d2db0a54c485",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/18808c8b44ad076bda2c5b0d7839d2db0a54c485"
+    },
+    {
+      "path": "infra/kubernetes/overlays/staging/kustomization.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb99f1e5867a695869ff08b45c51274f2d6a7860",
+      "size": 6143,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb99f1e5867a695869ff08b45c51274f2d6a7860"
+    },
+    {
+      "path": "infra/package.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b49d94572cbc8e4ca0f7b6aa08ae2f96ba22744c",
+      "size": 507,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b49d94572cbc8e4ca0f7b6aa08ae2f96ba22744c"
+    },
+    {
+      "path": "infra/quick-access.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2026b0387e2097a27ca5a1ec30657a2878e4036f",
+      "size": 5544,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2026b0387e2097a27ca5a1ec30657a2878e4036f"
+    },
+    {
+      "path": "infra/scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c6b209e73cc88aa6313a1601b1fe417688888301",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c6b209e73cc88aa6313a1601b1fe417688888301"
+    },
+    {
+      "path": "infra/scripts/.gitkeep",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e69de29bb2d1d6434b8b29ae775ad8c2e48c5391",
+      "size": 0,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e69de29bb2d1d6434b8b29ae775ad8c2e48c5391"
+    },
+    {
+      "path": "infra/scripts/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e625e991011e1aa024aaf92d3266884abe542044",
+      "size": 1529,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e625e991011e1aa024aaf92d3266884abe542044"
+    },
+    {
+      "path": "infra/scripts/bootstrap-gitops.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "def2835651541fa42d09d958abc342f9c46ccbb3",
+      "size": 2557,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/def2835651541fa42d09d958abc342f9c46ccbb3"
+    },
+    {
+      "path": "infra/scripts/bootstrap-terraform-backend.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "265f0ae98ddcd64f762501ca4f114fa727148709",
+      "size": 4141,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/265f0ae98ddcd64f762501ca4f114fa727148709"
+    },
+    {
+      "path": "infra/scripts/deploy-claude-models.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "63a9ed8c8094d21b5ecea1bb02dcbd5a29998719",
+      "size": 13962,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/63a9ed8c8094d21b5ecea1bb02dcbd5a29998719"
+    },
+    {
+      "path": "infra/scripts/validate-infrastructure.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc6202a9caaf0a042d2b549a009ac0db5607508f",
+      "size": 5777,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cc6202a9caaf0a042d2b549a009ac0db5607508f"
+    },
+    {
+      "path": "infra/scripts/validate-infrastructure.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aa463615fdc93398049f6ce015b7548679770817",
+      "size": 5325,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aa463615fdc93398049f6ce015b7548679770817"
+    },
+    {
+      "path": "infra/terraform",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "977b676094ebfe27388abf0f45ad3afdc105ec25",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/977b676094ebfe27388abf0f45ad3afdc105ec25"
+    },
+    {
+      "path": "infra/terraform/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00e33ec5e2503e88911b69ab2a961df9271d63a6",
+      "size": 1143,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/00e33ec5e2503e88911b69ab2a961df9271d63a6"
+    },
+    {
+      "path": "infra/terraform/.tflint.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0d235d63ef8ed7ed7e6810ea7704bc9ca1422070",
+      "size": 2011,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0d235d63ef8ed7ed7e6810ea7704bc9ca1422070"
+    },
+    {
+      "path": "infra/terraform/MIGRATION_EXECUTION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2005588427fb586ca9894eb37811acf87f13993e",
+      "size": 6727,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2005588427fb586ca9894eb37811acf87f13993e"
+    },
+    {
+      "path": "infra/terraform/MIGRATION_PLAN.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8b10d1c497d9b100bd239fd7676ca3b61ef40b43",
+      "size": 6430,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8b10d1c497d9b100bd239fd7676ca3b61ef40b43"
+    },
+    {
+      "path": "infra/terraform/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23503afc39faabcba212719a7c32dcd6e8f3a50f",
+      "size": 4098,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/23503afc39faabcba212719a7c32dcd6e8f3a50f"
+    },
+    {
+      "path": "infra/terraform/TERRAGRUNT_README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cd656f2babe4602382381032b5404e2436ac7aef",
+      "size": 5122,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cd656f2babe4602382381032b5404e2436ac7aef"
+    },
+    {
+      "path": "infra/terraform/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "768d6ffb9fc42d1bf39b28c2097c5ac9e4cb3765",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/768d6ffb9fc42d1bf39b28c2097c5ac9e4cb3765"
+    },
+    {
+      "path": "infra/terraform/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0e7a9662e934feb8401003f1a4c92c3af8ce0ab0",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0e7a9662e934feb8401003f1a4c92c3af8ce0ab0"
+    },
+    {
+      "path": "infra/terraform/environments/dev/dns-records.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ddb4750ef1075858cc3a400e41dd279e8fc61a4d",
+      "size": 27247,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ddb4750ef1075858cc3a400e41dd279e8fc61a4d"
+    },
+    {
+      "path": "infra/terraform/environments/dev/front-door.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d16f4934d85d78e680332308d62418c21e5224af",
+      "size": 16285,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d16f4934d85d78e680332308d62418c21e5224af"
+    },
+    {
+      "path": "infra/terraform/environments/dev/github-oidc.tfvars.example",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6420bdbd320cd43c3f25f5cb3515d923bf7f5f8a",
+      "size": 2429,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6420bdbd320cd43c3f25f5cb3515d923bf7f5f8a"
+    },
+    {
+      "path": "infra/terraform/environments/dev/import-mystira-app.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "8b2e7fdb9cc270c3a367691e38237c51778968d6",
+      "size": 7163,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8b2e7fdb9cc270c3a367691e38237c51778968d6"
+    },
+    {
+      "path": "infra/terraform/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9616eba52b2b72da19b6dfdcfb7c3d69f3bf9658",
+      "size": 41418,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9616eba52b2b72da19b6dfdcfb7c3d69f3bf9658"
+    },
+    {
+      "path": "infra/terraform/environments/dev/mystira-app.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6e51470c7162ee82f4019cccf46cf39256e28aa",
+      "size": 8285,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b6e51470c7162ee82f4019cccf46cf39256e28aa"
+    },
+    {
+      "path": "infra/terraform/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c6abbf66664d52255527e48263f1f8813c2e1b05",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c6abbf66664d52255527e48263f1f8813c2e1b05"
+    },
+    {
+      "path": "infra/terraform/environments/prod/dns-records.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "120d6c16782fb8f513bba7e1fa04b4abe55d7c94",
+      "size": 17157,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/120d6c16782fb8f513bba7e1fa04b4abe55d7c94"
+    },
+    {
+      "path": "infra/terraform/environments/prod/front-door.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86b5fea5de5b8a687f6ed99bae2bb19dd370f3a7",
+      "size": 10081,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/86b5fea5de5b8a687f6ed99bae2bb19dd370f3a7"
+    },
+    {
+      "path": "infra/terraform/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90f2bfb59d2eaacc9186dc4f576151d61ac462cd",
+      "size": 36347,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/90f2bfb59d2eaacc9186dc4f576151d61ac462cd"
+    },
+    {
+      "path": "infra/terraform/environments/prod/mystira-app.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e049bcd5cb8f8828fb08a36913af525ac1a302ae",
+      "size": 6289,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e049bcd5cb8f8828fb08a36913af525ac1a302ae"
+    },
+    {
+      "path": "infra/terraform/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f5cfb085cc333b2dfe307a994e790aea37904a94",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f5cfb085cc333b2dfe307a994e790aea37904a94"
+    },
+    {
+      "path": "infra/terraform/environments/staging/dns-records.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "11435f997e5b499838e9ac0d646a50c3439c0c54",
+      "size": 16414,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/11435f997e5b499838e9ac0d646a50c3439c0c54"
+    },
+    {
+      "path": "infra/terraform/environments/staging/front-door.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1343633f46379cbbf673284607cfb128632ca144",
+      "size": 3897,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1343633f46379cbbf673284607cfb128632ca144"
+    },
+    {
+      "path": "infra/terraform/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "924179a8e4ff7232880800cd2c3e00621ab0792c",
+      "size": 34620,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/924179a8e4ff7232880800cd2c3e00621ab0792c"
+    },
+    {
+      "path": "infra/terraform/environments/staging/mystira-app.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "356ae1b38439d55e151d34cacaf62bf77728c825",
+      "size": 6629,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/356ae1b38439d55e151d34cacaf62bf77728c825"
+    },
+    {
+      "path": "infra/terraform/modules",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2a1c354bddf9b81f73904923b10a6cd95ac33e8b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/2a1c354bddf9b81f73904923b10a6cd95ac33e8b"
+    },
+    {
+      "path": "infra/terraform/modules/admin-api",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3875d518995401f97eb122779ef20c0f5da3b3ea",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/3875d518995401f97eb122779ef20c0f5da3b3ea"
+    },
+    {
+      "path": "infra/terraform/modules/admin-api/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13c0437f0632ece598faffe648de3bdac4a747be",
+      "size": 3294,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/13c0437f0632ece598faffe648de3bdac4a747be"
+    },
+    {
+      "path": "infra/terraform/modules/admin-api/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "24e6062d7917bb060ce0f35d69415a14b36cd020",
+      "size": 4024,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/24e6062d7917bb060ce0f35d69415a14b36cd020"
+    },
+    {
+      "path": "infra/terraform/modules/admin-api/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f38aa4c3c0a492cb15f1bf995762b818043c398b",
+      "size": 1390,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f38aa4c3c0a492cb15f1bf995762b818043c398b"
+    },
+    {
+      "path": "infra/terraform/modules/admin-api/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92e25554b04d30b579f49e79fe440803a58be22b",
+      "size": 1714,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/92e25554b04d30b579f49e79fe440803a58be22b"
+    },
+    {
+      "path": "infra/terraform/modules/admin-ui",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "49879a059b03cf30d10d5edd9b53051363b86342",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/49879a059b03cf30d10d5edd9b53051363b86342"
+    },
+    {
+      "path": "infra/terraform/modules/admin-ui/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9647da763d7c21fc73963a1691f46565cebda39",
+      "size": 2303,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e9647da763d7c21fc73963a1691f46565cebda39"
+    },
+    {
+      "path": "infra/terraform/modules/admin-ui/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a829a0ef3ed381a8410422b1cd6ae4f6f016c56c",
+      "size": 2329,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a829a0ef3ed381a8410422b1cd6ae4f6f016c56c"
+    },
+    {
+      "path": "infra/terraform/modules/admin-ui/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d726b5a5f9b31970c40262f68c53bdd793ba7f9",
+      "size": 1128,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7d726b5a5f9b31970c40262f68c53bdd793ba7f9"
+    },
+    {
+      "path": "infra/terraform/modules/admin-ui/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "56c1714324f38a71623ce716c6a4f3316ede96a7",
+      "size": 1401,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/56c1714324f38a71623ce716c6a4f3316ede96a7"
+    },
+    {
+      "path": "infra/terraform/modules/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "48daa34cb934dde4222891f6ea3a735d64ed6faa",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/48daa34cb934dde4222891f6ea3a735d64ed6faa"
+    },
+    {
+      "path": "infra/terraform/modules/chain/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "61ceb51f0a3836d413a1297158eb855a33a5b8c7",
+      "size": 7883,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/61ceb51f0a3836d413a1297158eb855a33a5b8c7"
+    },
+    {
+      "path": "infra/terraform/modules/chain/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6f9b92108c13321299e718209a80e9e09a0d8d1f",
+      "size": 7342,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6f9b92108c13321299e718209a80e9e09a0d8d1f"
+    },
+    {
+      "path": "infra/terraform/modules/chain/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9b236663db5a291549eb1b43657e3a4753fe4a1",
+      "size": 1510,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e9b236663db5a291549eb1b43657e3a4753fe4a1"
+    },
+    {
+      "path": "infra/terraform/modules/chain/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbb4c695832a1f24076d28512edbdddba6655f46",
+      "size": 2099,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dbb4c695832a1f24076d28512edbdddba6655f46"
+    },
+    {
+      "path": "infra/terraform/modules/dns",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "041c0acf326526a7f5d2ae7f532d25f422079c53",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/041c0acf326526a7f5d2ae7f532d25f422079c53"
+    },
+    {
+      "path": "infra/terraform/modules/dns/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b27b6e667a491938ce59c500b3f8b296add70917",
+      "size": 4463,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b27b6e667a491938ce59c500b3f8b296add70917"
+    },
+    {
+      "path": "infra/terraform/modules/dns/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80294a576a50e9fa2ef51f4af75a81d8bafd4c25",
+      "size": 11567,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/80294a576a50e9fa2ef51f4af75a81d8bafd4c25"
+    },
+    {
+      "path": "infra/terraform/modules/dns/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72c6ea42f339b64d43efc24370486a99b7bd06aa",
+      "size": 1821,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/72c6ea42f339b64d43efc24370486a99b7bd06aa"
+    },
+    {
+      "path": "infra/terraform/modules/dns/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f2af40ab4e797fbd380135e4e89e5b4de2a44f9",
+      "size": 4015,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f2af40ab4e797fbd380135e4e89e5b4de2a44f9"
+    },
+    {
+      "path": "infra/terraform/modules/entra-external-id",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ae8b4067ac78d106be0373c26edeef53b8367fba",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ae8b4067ac78d106be0373c26edeef53b8367fba"
+    },
+    {
+      "path": "infra/terraform/modules/entra-external-id/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e5f67c00aaed09da811c6b469a25dbbbfda0166",
+      "size": 18893,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1e5f67c00aaed09da811c6b469a25dbbbfda0166"
+    },
+    {
+      "path": "infra/terraform/modules/entra-external-id/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fb512349738092fa966f2d31291cf7802e8c13b1",
+      "size": 7150,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fb512349738092fa966f2d31291cf7802e8c13b1"
+    },
+    {
+      "path": "infra/terraform/modules/entra-external-id/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0126236077669659e6457da6306669f189e23b26",
+      "size": 3073,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0126236077669659e6457da6306669f189e23b26"
+    },
+    {
+      "path": "infra/terraform/modules/entra-external-id/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f792609d8882f40929fb41f366a5c5d83a55657b",
+      "size": 780,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f792609d8882f40929fb41f366a5c5d83a55657b"
+    },
+    {
+      "path": "infra/terraform/modules/entra-id",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6e198dde005b3ab3d1281b2f788f406649bdd7fa",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6e198dde005b3ab3d1281b2f788f406649bdd7fa"
+    },
+    {
+      "path": "infra/terraform/modules/entra-id/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9422138693c489c5cd1522c410f7b1fe722abff0",
+      "size": 6553,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9422138693c489c5cd1522c410f7b1fe722abff0"
+    },
+    {
+      "path": "infra/terraform/modules/entra-id/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "79ac57045cb8f74c35b521d209ff879b407a9b4c",
+      "size": 8473,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/79ac57045cb8f74c35b521d209ff879b407a9b4c"
+    },
+    {
+      "path": "infra/terraform/modules/entra-id/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41ddd1214c33912e7d0a1b538e042bc31c6d4b1a",
+      "size": 2573,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/41ddd1214c33912e7d0a1b538e042bc31c6d4b1a"
+    },
+    {
+      "path": "infra/terraform/modules/entra-id/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a76f4406bfaf49971ffa7a83f8b23c743e83e1b",
+      "size": 727,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a76f4406bfaf49971ffa7a83f8b23c743e83e1b"
+    },
+    {
+      "path": "infra/terraform/modules/front-door",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "948e9acd17db4688aa29201677c3dd578f7fdfaa",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/948e9acd17db4688aa29201677c3dd578f7fdfaa"
+    },
+    {
+      "path": "infra/terraform/modules/front-door/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d0eb7deec0fdd7ae242f459226574e987cde811",
+      "size": 13343,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4d0eb7deec0fdd7ae242f459226574e987cde811"
+    },
+    {
+      "path": "infra/terraform/modules/front-door/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "588bd099f8e51ab2cb14f091f2554c0c0bd7288f",
+      "size": 59818,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/588bd099f8e51ab2cb14f091f2554c0c0bd7288f"
+    },
+    {
+      "path": "infra/terraform/modules/front-door/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07135051a0f93b6a017aa45c81bc61698c3463dd",
+      "size": 13014,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/07135051a0f93b6a017aa45c81bc61698c3463dd"
+    },
+    {
+      "path": "infra/terraform/modules/front-door/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f9aa30858f9c70b1a25acb1b46e4135956aba9c4",
+      "size": 8846,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f9aa30858f9c70b1a25acb1b46e4135956aba9c4"
+    },
+    {
+      "path": "infra/terraform/modules/github-oidc",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "774ee0d08af1dd9b26d207e867e22cd50c389e4a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/774ee0d08af1dd9b26d207e867e22cd50c389e4a"
+    },
+    {
+      "path": "infra/terraform/modules/github-oidc/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c717058d038345ece6bb5278211567c86a24ad20",
+      "size": 3321,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c717058d038345ece6bb5278211567c86a24ad20"
+    },
+    {
+      "path": "infra/terraform/modules/github-oidc/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7234127ff8bcef598ff6869b661526872519534a",
+      "size": 4758,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7234127ff8bcef598ff6869b661526872519534a"
+    },
+    {
+      "path": "infra/terraform/modules/github-oidc/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "22fdbac12d7b0569eb29c625f7a2ca4a02c01bad",
+      "size": 1664,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/22fdbac12d7b0569eb29c625f7a2ca4a02c01bad"
+    },
+    {
+      "path": "infra/terraform/modules/github-oidc/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "afcfc9791a327a486ae7f006186b76ba7bd755de",
+      "size": 1469,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/afcfc9791a327a486ae7f006186b76ba7bd755de"
+    },
+    {
+      "path": "infra/terraform/modules/mystira-app",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "93210e4a3181e940934d91e6bc705f65a020ee77",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/93210e4a3181e940934d91e6bc705f65a020ee77"
+    },
+    {
+      "path": "infra/terraform/modules/mystira-app/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dbe47eec8206666fd800b33f411d0ab999c978c4",
+      "size": 12032,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dbe47eec8206666fd800b33f411d0ab999c978c4"
+    },
+    {
+      "path": "infra/terraform/modules/mystira-app/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3af437ff7bd3615dcd21f56190be8453f560d4e7",
+      "size": 27564,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3af437ff7bd3615dcd21f56190be8453f560d4e7"
+    },
+    {
+      "path": "infra/terraform/modules/mystira-app/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0fcc2f517d62039bfa8254f8420d0048d6490f0f",
+      "size": 12755,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0fcc2f517d62039bfa8254f8420d0048d6490f0f"
+    },
+    {
+      "path": "infra/terraform/modules/mystira-app/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4fa40fcd25108c11e11b43c4283d13346e557f4",
+      "size": 14091,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f4fa40fcd25108c11e11b43c4283d13346e557f4"
+    },
+    {
+      "path": "infra/terraform/modules/publisher",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1b7c7fd3968392effe6613ed33d4328967936f8c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1b7c7fd3968392effe6613ed33d4328967936f8c"
+    },
+    {
+      "path": "infra/terraform/modules/publisher/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1b0d709bf402ea7081724930f0848635ef0cf85",
+      "size": 5168,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d1b0d709bf402ea7081724930f0848635ef0cf85"
+    },
+    {
+      "path": "infra/terraform/modules/publisher/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bd4ca606262262751cb1d0e4a696db6140754d4",
+      "size": 6048,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5bd4ca606262262751cb1d0e4a696db6140754d4"
+    },
+    {
+      "path": "infra/terraform/modules/publisher/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47f502149fa5f70339f02d1aeb7f25d535dc1a4e",
+      "size": 1847,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/47f502149fa5f70339f02d1aeb7f25d535dc1a4e"
+    },
+    {
+      "path": "infra/terraform/modules/publisher/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1040319f5931f955160365afcf77b3acaa37cccb",
+      "size": 2407,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1040319f5931f955160365afcf77b3acaa37cccb"
+    },
+    {
+      "path": "infra/terraform/modules/shared",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4cf9697a040a4c8503fc949b357ef789d1833cb6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4cf9697a040a4c8503fc949b357ef789d1833cb6"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-ai",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7c3cb23bdd3104d8813cf3c44f7bc54e34ae0adf",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7c3cb23bdd3104d8813cf3c44f7bc54e34ae0adf"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-ai/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e22703f6298d502ad618f82d36a3899d92d9a249",
+      "size": 25097,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e22703f6298d502ad618f82d36a3899d92d9a249"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-ai/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d5b4d1f9b60638fa298f53627f5ae80bcc51fd28",
+      "size": 14801,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d5b4d1f9b60638fa298f53627f5ae80bcc51fd28"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-ai/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "008e8d54aa6603b96102c486c684b07f944b5dc8",
+      "size": 16758,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/008e8d54aa6603b96102c486c684b07f944b5dc8"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-search",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d292b932cefce3ba18e564589f7f16892a25a503",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d292b932cefce3ba18e564589f7f16892a25a503"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-search/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "77c0ae5fd0f66c857c53fccac31dc37f2ce95807",
+      "size": 4134,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/77c0ae5fd0f66c857c53fccac31dc37f2ce95807"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-search/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "92ae3f343f60c731cf8663c092fa222208640365",
+      "size": 1965,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/92ae3f343f60c731cf8663c092fa222208640365"
+    },
+    {
+      "path": "infra/terraform/modules/shared/azure-search/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1445eaa4f5a62c1953fe119f514a0ac37150542a",
+      "size": 3391,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1445eaa4f5a62c1953fe119f514a0ac37150542a"
+    },
+    {
+      "path": "infra/terraform/modules/shared/communications",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dbb6cee3a3514dd2ce29a02683607ae57ede7faf",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/dbb6cee3a3514dd2ce29a02683607ae57ede7faf"
+    },
+    {
+      "path": "infra/terraform/modules/shared/communications/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9424f66dabeb49b46d5e58f056b2da225162879",
+      "size": 5055,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c9424f66dabeb49b46d5e58f056b2da225162879"
+    },
+    {
+      "path": "infra/terraform/modules/shared/container-registry",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0b68488e1468d1c72f2f46c28fb831cfb6cd0027",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0b68488e1468d1c72f2f46c28fb831cfb6cd0027"
+    },
+    {
+      "path": "infra/terraform/modules/shared/container-registry/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad47bad832d25016adff8c270fd1c298471ace66",
+      "size": 8715,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ad47bad832d25016adff8c270fd1c298471ace66"
+    },
+    {
+      "path": "infra/terraform/modules/shared/cosmos-db",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "13a263f3b84d0c33eb387d699f58eb092ebf11a2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/13a263f3b84d0c33eb387d699f58eb092ebf11a2"
+    },
+    {
+      "path": "infra/terraform/modules/shared/cosmos-db/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e6e41f93dcdf24fcb0da088d545ab63badd2a2c6",
+      "size": 7234,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e6e41f93dcdf24fcb0da088d545ab63badd2a2c6"
+    },
+    {
+      "path": "infra/terraform/modules/shared/identity",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d7e09b048e38f71e6ce058daaa041a2e557ed9ee",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d7e09b048e38f71e6ce058daaa041a2e557ed9ee"
+    },
+    {
+      "path": "infra/terraform/modules/shared/identity/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc359228aeb12550ebdf5cf56108c14a16f72891",
+      "size": 4785,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc359228aeb12550ebdf5cf56108c14a16f72891"
+    },
+    {
+      "path": "infra/terraform/modules/shared/identity/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7b64fb3114cb146ce896bfce05b5e20b1fa4ea4d",
+      "size": 7295,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7b64fb3114cb146ce896bfce05b5e20b1fa4ea4d"
+    },
+    {
+      "path": "infra/terraform/modules/shared/identity/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a7f919c8eab71360f1606527ac1f107edd0f5f5",
+      "size": 1308,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3a7f919c8eab71360f1606527ac1f107edd0f5f5"
+    },
+    {
+      "path": "infra/terraform/modules/shared/identity/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c87362bc887a2790757a760da46256f30150580",
+      "size": 2809,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2c87362bc887a2790757a760da46256f30150580"
+    },
+    {
+      "path": "infra/terraform/modules/shared/monitoring",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "940b1f05c830af9c100a8d8f4dd061d428f936ae",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/940b1f05c830af9c100a8d8f4dd061d428f936ae"
+    },
+    {
+      "path": "infra/terraform/modules/shared/monitoring/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a82e08d9db957e523d1fc6d539d6f92320f142d2",
+      "size": 2782,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a82e08d9db957e523d1fc6d539d6f92320f142d2"
+    },
+    {
+      "path": "infra/terraform/modules/shared/monitoring/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbcf379e970c92e400f9fb2efac989f80d73e9d7",
+      "size": 15919,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fbcf379e970c92e400f9fb2efac989f80d73e9d7"
+    },
+    {
+      "path": "infra/terraform/modules/shared/postgresql",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7c62926b38dd4c0ffef5513454551e5b1c67353b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7c62926b38dd4c0ffef5513454551e5b1c67353b"
+    },
+    {
+      "path": "infra/terraform/modules/shared/postgresql/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "baaed0786c528c86156f488c4838b45730e626e5",
+      "size": 5916,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/baaed0786c528c86156f488c4838b45730e626e5"
+    },
+    {
+      "path": "infra/terraform/modules/shared/postgresql/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3b27b7fe4cc1e987e7b61aa31341cc3434bd1122",
+      "size": 11254,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3b27b7fe4cc1e987e7b61aa31341cc3434bd1122"
+    },
+    {
+      "path": "infra/terraform/modules/shared/redis",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e54a6d1b0a956012f87cc325138f29825569bda9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e54a6d1b0a956012f87cc325138f29825569bda9"
+    },
+    {
+      "path": "infra/terraform/modules/shared/redis/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d11f6117670f664e9e3306ffcc93c5c3beb2911",
+      "size": 2997,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5d11f6117670f664e9e3306ffcc93c5c3beb2911"
+    },
+    {
+      "path": "infra/terraform/modules/shared/redis/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f4ced11bc7fac122be88e7dd8b7e4e2ab96a2a6c",
+      "size": 5068,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f4ced11bc7fac122be88e7dd8b7e4e2ab96a2a6c"
+    },
+    {
+      "path": "infra/terraform/modules/shared/servicebus",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "89bb4b31f4b17cdb05e72b7ae118b6fb8ff61b5e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/89bb4b31f4b17cdb05e72b7ae118b6fb8ff61b5e"
+    },
+    {
+      "path": "infra/terraform/modules/shared/servicebus/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "963cc46f694d78d92f2892ea85ee6bbf23279c6a",
+      "size": 10099,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/963cc46f694d78d92f2892ea85ee6bbf23279c6a"
+    },
+    {
+      "path": "infra/terraform/modules/shared/storage",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "057288c1e55818b292e3fe442e9fd92f9d5284c3",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/057288c1e55818b292e3fe442e9fd92f9d5284c3"
+    },
+    {
+      "path": "infra/terraform/modules/shared/storage/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c02c6b2e1563fbe6604344576b599c14db526859",
+      "size": 7333,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c02c6b2e1563fbe6604344576b599c14db526859"
+    },
+    {
+      "path": "infra/terraform/modules/story-generator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5a626e399eae66454148335f48dd4270cc4f98f5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/5a626e399eae66454148335f48dd4270cc4f98f5"
+    },
+    {
+      "path": "infra/terraform/modules/story-generator/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "935048f962b4e023d01b2a2779c4709a71ada7d5",
+      "size": 6685,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/935048f962b4e023d01b2a2779c4709a71ada7d5"
+    },
+    {
+      "path": "infra/terraform/modules/story-generator/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1058d9cae3cf6402b3d5b033ef40953ef1d9ddbb",
+      "size": 13006,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1058d9cae3cf6402b3d5b033ef40953ef1d9ddbb"
+    },
+    {
+      "path": "infra/terraform/modules/story-generator/outputs.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cd1fb04d9082213f7515f3a69a531f5176a911f",
+      "size": 3629,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cd1fb04d9082213f7515f3a69a531f5176a911f"
+    },
+    {
+      "path": "infra/terraform/modules/story-generator/variables.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a23c0dce3c4d8ac5000ce0a462b2a05f8921528",
+      "size": 3839,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a23c0dce3c4d8ac5000ce0a462b2a05f8921528"
+    },
+    {
+      "path": "infra/terraform/products",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0d38476fecb0e997a44cd1309a232a47af16ec02",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0d38476fecb0e997a44cd1309a232a47af16ec02"
+    },
+    {
+      "path": "infra/terraform/products/admin",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6786fbd17d729aecefa86447c1844ecc5f441c25",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6786fbd17d729aecefa86447c1844ecc5f441c25"
+    },
+    {
+      "path": "infra/terraform/products/admin/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d28d237a58efa8f20abee04105fbd4a3a7fc71cd",
+      "size": 1917,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d28d237a58efa8f20abee04105fbd4a3a7fc71cd"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7801fef1f7322390aa7e4c49cf60a05bb6870507",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7801fef1f7322390aa7e4c49cf60a05bb6870507"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a849f6f6970dcfaa821889f4da151e0c980b16c3",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a849f6f6970dcfaa821889f4da151e0c980b16c3"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ed8a2ebd01d9f8ceb656a2245c68cd0928ec8541",
+      "size": 2985,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ed8a2ebd01d9f8ceb656a2245c68cd0928ec8541"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aea90ef6fbd3c828eda3fafd1b1a9e8ea162d52f",
+      "size": 773,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aea90ef6fbd3c828eda3fafd1b1a9e8ea162d52f"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c3708e042769ad135bffc3b4ed7903cf79a0c5d5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c3708e042769ad135bffc3b4ed7903cf79a0c5d5"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d607d9e96ccbb2f0b28fd5bc942d5f5b813978a2",
+      "size": 2995,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d607d9e96ccbb2f0b28fd5bc942d5f5b813978a2"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c19a4594a1bfde2a4570ce0faf5c3dacb91565aa",
+      "size": 773,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c19a4594a1bfde2a4570ce0faf5c3dacb91565aa"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "de46b03156e0f91495997c2a45730d03edf821a4",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/de46b03156e0f91495997c2a45730d03edf821a4"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b53b8d81780b7689d325db8d9cdd3c65af5f680",
+      "size": 2992,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5b53b8d81780b7689d325db8d9cdd3c65af5f680"
+    },
+    {
+      "path": "infra/terraform/products/admin/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "faf0b2db1c9df9b2a6cffa80e8857806e918bf07",
+      "size": 793,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/faf0b2db1c9df9b2a6cffa80e8857806e918bf07"
+    },
+    {
+      "path": "infra/terraform/products/chain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c9f744624234e3618528edbcb003d6c40cb12190",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c9f744624234e3618528edbcb003d6c40cb12190"
+    },
+    {
+      "path": "infra/terraform/products/chain/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26c9cd9548d94d626f8156d60548ddee93472b8b",
+      "size": 2010,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/26c9cd9548d94d626f8156d60548ddee93472b8b"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e1a835948d74044d70bb1e689765c50b176a6fc2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e1a835948d74044d70bb1e689765c50b176a6fc2"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "97cc3092fabac84537936f57a6899ffc4706675d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/97cc3092fabac84537936f57a6899ffc4706675d"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "510244ba5347fb3c48dd0ca839c2260996bb9f84",
+      "size": 1570,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/510244ba5347fb3c48dd0ca839c2260996bb9f84"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f2fdf9c087933853555b6d2af94bf09586622d7",
+      "size": 687,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f2fdf9c087933853555b6d2af94bf09586622d7"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c190581a4a05c3b276fac3e014e01a9e0b5ddd1a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c190581a4a05c3b276fac3e014e01a9e0b5ddd1a"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "90fd9be26fbd163e762e5cf27289ffdddd8fb704",
+      "size": 1577,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/90fd9be26fbd163e762e5cf27289ffdddd8fb704"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31b0918e3a0e82622dfe0877fa4e5cbaaa0813b1",
+      "size": 764,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/31b0918e3a0e82622dfe0877fa4e5cbaaa0813b1"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "345dd37bc576c20bc5ee8024e607ad363455e4ca",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/345dd37bc576c20bc5ee8024e607ad363455e4ca"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a377f931d530402609d405315d2828eeea519e5",
+      "size": 1574,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a377f931d530402609d405315d2828eeea519e5"
+    },
+    {
+      "path": "infra/terraform/products/chain/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "53ee8e4de0ca607fa511ce68c263915ee721544b",
+      "size": 695,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/53ee8e4de0ca607fa511ce68c263915ee721544b"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "041e1d7bd20ce73ca6267de80ef0d3c57ede5541",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/041e1d7bd20ce73ca6267de80ef0d3c57ede5541"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "44a5718f63b94c3993d2f3386f10e7019c57c64e",
+      "size": 3813,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/44a5718f63b94c3993d2f3386f10e7019c57c64e"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9316f90eeaeb1915e1721e76ca962ba4993ef139",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9316f90eeaeb1915e1721e76ca962ba4993ef139"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "acf54bd8833c40e691919f2fcafb86a9e593b837",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/acf54bd8833c40e691919f2fcafb86a9e593b837"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "304cccdcbcc7703cb89d0967cfffcddef1a22079",
+      "size": 2449,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/304cccdcbcc7703cb89d0967cfffcddef1a22079"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e12c65e8353c0f7afe2035635516464299d080b6",
+      "size": 1162,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e12c65e8353c0f7afe2035635516464299d080b6"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e67bb8f424806f91279c546f54dc40ae5a909553",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e67bb8f424806f91279c546f54dc40ae5a909553"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bcbca386b26f5f5d1ed552ba531b4758bbd5d361",
+      "size": 2684,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bcbca386b26f5f5d1ed552ba531b4758bbd5d361"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b540ce522badc384142b646ab433acbd95954795",
+      "size": 1003,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b540ce522badc384142b646ab433acbd95954795"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4d7458188eaf0d687c7f092bddaf807b0d11321f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4d7458188eaf0d687c7f092bddaf807b0d11321f"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75bc38c691cd9aea6b5f176503fc172e7b4e2689",
+      "size": 4086,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/75bc38c691cd9aea6b5f176503fc172e7b4e2689"
+    },
+    {
+      "path": "infra/terraform/products/mystira-app/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "794c671be8b42914e51606123a2629387780f087",
+      "size": 890,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/794c671be8b42914e51606123a2629387780f087"
+    },
+    {
+      "path": "infra/terraform/products/publisher",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1045867450359694b9e9cee73f89805c007adb52",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1045867450359694b9e9cee73f89805c007adb52"
+    },
+    {
+      "path": "infra/terraform/products/publisher/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccd4bff638a01091280bcf56b219f49471b70136",
+      "size": 2192,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ccd4bff638a01091280bcf56b219f49471b70136"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7d13bbc7ea4e290e969224565432f436cd32c3dd",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7d13bbc7ea4e290e969224565432f436cd32c3dd"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a96601ace206126a6353dcd5d96f2df528d43234",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a96601ace206126a6353dcd5d96f2df528d43234"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0a77f608d55927a658f0491179d2f8e877761c41",
+      "size": 1743,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0a77f608d55927a658f0491179d2f8e877761c41"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "710a8688e804dacf3d9a25f4baf11c6c0263f472",
+      "size": 661,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/710a8688e804dacf3d9a25f4baf11c6c0263f472"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "99539275c728d03d465deec4a34440e9f33b7de6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/99539275c728d03d465deec4a34440e9f33b7de6"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16cb7adac2a692ae3a4ce1bfbbfca9d04beb9524",
+      "size": 1750,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/16cb7adac2a692ae3a4ce1bfbbfca9d04beb9524"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a33959c553d9b34a37728dbde5699cae36f8110b",
+      "size": 738,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a33959c553d9b34a37728dbde5699cae36f8110b"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fb5cd011b5f88052611094d4257c83695a84f370",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fb5cd011b5f88052611094d4257c83695a84f370"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0f554af9b4a56de4ac998c7df579fdb4a2fe64f",
+      "size": 1747,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d0f554af9b4a56de4ac998c7df579fdb4a2fe64f"
+    },
+    {
+      "path": "infra/terraform/products/publisher/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f46e969b43e97c60260b5ac315b90d207b91b67a",
+      "size": 669,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f46e969b43e97c60260b5ac315b90d207b91b67a"
+    },
+    {
+      "path": "infra/terraform/products/story-generator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "25cbc2bcaed45a918a457a3918be589d3a557403",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/25cbc2bcaed45a918a457a3918be589d3a557403"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76c8d858dcb27cf49d2f9fe65f638c1cfc7f87be",
+      "size": 2717,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/76c8d858dcb27cf49d2f9fe65f638c1cfc7f87be"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1b13771766eff221bd65c9529a107fc366866b26",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1b13771766eff221bd65c9529a107fc366866b26"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d16e1dbf980e6dd33e06dd560bfae1d9b8f2014d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d16e1dbf980e6dd33e06dd560bfae1d9b8f2014d"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e20c18433b23025a254c3a405ebad758ad1349ca",
+      "size": 2094,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e20c18433b23025a254c3a405ebad758ad1349ca"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83671e78884ea5e827de158611eee2d23416e7b6",
+      "size": 802,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/83671e78884ea5e827de158611eee2d23416e7b6"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b47ca65f8f58587e12c7fd4ff63ac61d12e85891",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b47ca65f8f58587e12c7fd4ff63ac61d12e85891"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ff4735813988b6e9c70ed81739259ce08a0fe66",
+      "size": 2992,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9ff4735813988b6e9c70ed81739259ce08a0fe66"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a52f17bbdd8e61bb142788c82d481bb13b5389eb",
+      "size": 936,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a52f17bbdd8e61bb142788c82d481bb13b5389eb"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "11aac231ae6682468e3953af62ff0e521bacf8ff",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/11aac231ae6682468e3953af62ff0e521bacf8ff"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8784168ed48af0c1edc1953e07847c61204795f7",
+      "size": 2219,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8784168ed48af0c1edc1953e07847c61204795f7"
+    },
+    {
+      "path": "infra/terraform/products/story-generator/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2cdc5ea55c584fa9be2d83800a0c5d0490e739dc",
+      "size": 813,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2cdc5ea55c584fa9be2d83800a0c5d0490e739dc"
+    },
+    {
+      "path": "infra/terraform/scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c5a0131ad5f5a8990b1a137919902c09dac672c7",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c5a0131ad5f5a8990b1a137919902c09dac672c7"
+    },
+    {
+      "path": "infra/terraform/scripts/migrate-state.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "550e0f959716e2220f85db4a18f37bb25a4a48e7",
+      "size": 13290,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/550e0f959716e2220f85db4a18f37bb25a4a48e7"
+    },
+    {
+      "path": "infra/terraform/shared-infra",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7ac9fda52b3b3c170b484bbd401094b88345e891",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7ac9fda52b3b3c170b484bbd401094b88345e891"
+    },
+    {
+      "path": "infra/terraform/shared-infra/_product.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9c97dac64f9739eb3adb7e26fa5d15df51a6b23c",
+      "size": 911,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9c97dac64f9739eb3adb7e26fa5d15df51a6b23c"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4465d6918440d7681a31a375628abda25a521a3d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4465d6918440d7681a31a375628abda25a521a3d"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/dev",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bcba1d7b0df8c853c72f92c3505dd234b89dc797",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bcba1d7b0df8c853c72f92c3505dd234b89dc797"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/dev/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e723a0f267d54d801e85a014769e8c4e7cd6aa70",
+      "size": 5930,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e723a0f267d54d801e85a014769e8c4e7cd6aa70"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/dev/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "05dd3086e6781dd829acc4a7e1df216ba7fcc943",
+      "size": 1065,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/05dd3086e6781dd829acc4a7e1df216ba7fcc943"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/prod",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "afa35c4997f96403bd9137bafc641b4a7b8ee598",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/afa35c4997f96403bd9137bafc641b4a7b8ee598"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/prod/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8c137599bd060fbe042fb70ac3e3d65ab18eca6",
+      "size": 6938,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f8c137599bd060fbe042fb70ac3e3d65ab18eca6"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/prod/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "012b9519b28613aa09e2ba958b0068422504c440",
+      "size": 1186,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/012b9519b28613aa09e2ba958b0068422504c440"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/staging",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "587e2e83b52bf79c239714ceaf150f71e3480402",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/587e2e83b52bf79c239714ceaf150f71e3480402"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/staging/main.tf",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c11183f852415ed67b4fe347cb69e6453e1b368d",
+      "size": 5963,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c11183f852415ed67b4fe347cb69e6453e1b368d"
+    },
+    {
+      "path": "infra/terraform/shared-infra/environments/staging/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6314a864e9b82d74abfdfc7a8be029ee36c7fbb3",
+      "size": 1096,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6314a864e9b82d74abfdfc7a8be029ee36c7fbb3"
+    },
+    {
+      "path": "infra/terraform/stacks",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e00284be30dfc5a4966d87b75c4afcc9e2cc6845",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e00284be30dfc5a4966d87b75c4afcc9e2cc6845"
+    },
+    {
+      "path": "infra/terraform/stacks/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c2153b0e06df537d914133b19d03f82cd4360fc",
+      "size": 7184,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2c2153b0e06df537d914133b19d03f82cd4360fc"
+    },
+    {
+      "path": "infra/terraform/stacks/dev.stack.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "419fed9588d126bd7055d806be0c1c416ddd4708",
+      "size": 3805,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/419fed9588d126bd7055d806be0c1c416ddd4708"
+    },
+    {
+      "path": "infra/terraform/stacks/prod.stack.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41f7c6f031ba834407c481c7464ead6822bf3c45",
+      "size": 4411,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/41f7c6f031ba834407c481c7464ead6822bf3c45"
+    },
+    {
+      "path": "infra/terraform/stacks/staging.stack.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6268b5ff512686aaea904841e54871d37a80b7fa",
+      "size": 3952,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6268b5ff512686aaea904841e54871d37a80b7fa"
+    },
+    {
+      "path": "infra/terraform/stacks/terragrunt.stack.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ad6147da3b61d980bdfdf06e0e601b982385794",
+      "size": 3449,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7ad6147da3b61d980bdfdf06e0e601b982385794"
+    },
+    {
+      "path": "infra/terraform/terragrunt.hcl",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8386f8e049d16b60c61be7748baba2446285965e",
+      "size": 4769,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8386f8e049d16b60c61be7748baba2446285965e"
+    }
+  ],
+  "targetPath": "infra",
+  "sha": "ac8859da6ac3a510253fbace6294a6ba56ac7a8f",
+  "ref": "dev"
+}

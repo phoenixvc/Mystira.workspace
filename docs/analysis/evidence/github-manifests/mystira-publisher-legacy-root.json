@@ -1,0 +1,434 @@
+[
+  {
+    "name": ".dockerignore",
+    "path": ".dockerignore",
+    "sha": "0b550e8ef5c9e11b21d90ad381fd51c057c3646f",
+    "size": 321,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.dockerignore?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.dockerignore",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/0b550e8ef5c9e11b21d90ad381fd51c057c3646f",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/.dockerignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.dockerignore?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/0b550e8ef5c9e11b21d90ad381fd51c057c3646f",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.dockerignore"
+    }
+  },
+  {
+    "name": ".env.development",
+    "path": ".env.development",
+    "sha": "04a755311554229cc7e5dac7be59df69155eb7cb",
+    "size": 200,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.env.development?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.env.development",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/04a755311554229cc7e5dac7be59df69155eb7cb",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/.env.development",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.env.development?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/04a755311554229cc7e5dac7be59df69155eb7cb",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.env.development"
+    }
+  },
+  {
+    "name": ".env.example",
+    "path": ".env.example",
+    "sha": "3e330557b6a4f044615b6671b59a65a4f878c468",
+    "size": 240,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.env.example?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.env.example",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/3e330557b6a4f044615b6671b59a65a4f878c468",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/.env.example",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.env.example?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/3e330557b6a4f044615b6671b59a65a4f878c468",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.env.example"
+    }
+  },
+  {
+    "name": ".github",
+    "path": ".github",
+    "sha": "e8c63fadec4ced00fa3fe0632c96679584e23244",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.github?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/.github",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/e8c63fadec4ced00fa3fe0632c96679584e23244",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.github?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/e8c63fadec4ced00fa3fe0632c96679584e23244",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/.github"
+    }
+  },
+  {
+    "name": ".gitignore",
+    "path": ".gitignore",
+    "sha": "5bc4a610e4c1d86154a20419fd85d3b429a451a3",
+    "size": 440,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.gitignore?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.gitignore",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/5bc4a610e4c1d86154a20419fd85d3b429a451a3",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/.gitignore",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.gitignore?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/5bc4a610e4c1d86154a20419fd85d3b429a451a3",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.gitignore"
+    }
+  },
+  {
+    "name": ".prettierrc",
+    "path": ".prettierrc",
+    "sha": "c8ad74eae62d224dddb4e21f47bf120f99cc259c",
+    "size": 179,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.prettierrc?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.prettierrc",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/c8ad74eae62d224dddb4e21f47bf120f99cc259c",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/.prettierrc",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/.prettierrc?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/c8ad74eae62d224dddb4e21f47bf120f99cc259c",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/.prettierrc"
+    }
+  },
+  {
+    "name": "ANALYSIS_ISSUES.md",
+    "path": "ANALYSIS_ISSUES.md",
+    "sha": "f5861c7ad6ed008a8b158b269f83b9bb23fcc721",
+    "size": 8986,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/ANALYSIS_ISSUES.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/ANALYSIS_ISSUES.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f5861c7ad6ed008a8b158b269f83b9bb23fcc721",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/ANALYSIS_ISSUES.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/ANALYSIS_ISSUES.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f5861c7ad6ed008a8b158b269f83b9bb23fcc721",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/ANALYSIS_ISSUES.md"
+    }
+  },
+  {
+    "name": "Dockerfile",
+    "path": "Dockerfile",
+    "sha": "93aa6e787d6ad239d0c3cc22354c64627610ffc9",
+    "size": 1490,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/Dockerfile?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/Dockerfile",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/93aa6e787d6ad239d0c3cc22354c64627610ffc9",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/Dockerfile",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/Dockerfile?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/93aa6e787d6ad239d0c3cc22354c64627610ffc9",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/Dockerfile"
+    }
+  },
+  {
+    "name": "IMPLEMENTATION_STATUS.md",
+    "path": "IMPLEMENTATION_STATUS.md",
+    "sha": "f19e780a253b1d90a2799f82b2906e139d10218d",
+    "size": 5966,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/IMPLEMENTATION_STATUS.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/IMPLEMENTATION_STATUS.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f19e780a253b1d90a2799f82b2906e139d10218d",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/IMPLEMENTATION_STATUS.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/IMPLEMENTATION_STATUS.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f19e780a253b1d90a2799f82b2906e139d10218d",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/IMPLEMENTATION_STATUS.md"
+    }
+  },
+  {
+    "name": "IMPROVEMENTS.md",
+    "path": "IMPROVEMENTS.md",
+    "sha": "df68d62443b3be826b4bb01a28dc992d2a88e076",
+    "size": 12937,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/IMPROVEMENTS.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/IMPROVEMENTS.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/df68d62443b3be826b4bb01a28dc992d2a88e076",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/IMPROVEMENTS.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/IMPROVEMENTS.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/df68d62443b3be826b4bb01a28dc992d2a88e076",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/IMPROVEMENTS.md"
+    }
+  },
+  {
+    "name": "PHASE_COMPLETION_SUMMARY.md",
+    "path": "PHASE_COMPLETION_SUMMARY.md",
+    "sha": "27d215dcc7c46ba275e7d24a459bae456679ad38",
+    "size": 6078,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/PHASE_COMPLETION_SUMMARY.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/PHASE_COMPLETION_SUMMARY.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/27d215dcc7c46ba275e7d24a459bae456679ad38",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/PHASE_COMPLETION_SUMMARY.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/PHASE_COMPLETION_SUMMARY.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/27d215dcc7c46ba275e7d24a459bae456679ad38",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/PHASE_COMPLETION_SUMMARY.md"
+    }
+  },
+  {
+    "name": "README.md",
+    "path": "README.md",
+    "sha": "b29ed7e8244886d288b9bb27111b07ae6c345d39",
+    "size": 7625,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/README.md?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/README.md",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/b29ed7e8244886d288b9bb27111b07ae6c345d39",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/README.md",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/README.md?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/b29ed7e8244886d288b9bb27111b07ae6c345d39",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/README.md"
+    }
+  },
+  {
+    "name": "cypress.config.ts",
+    "path": "cypress.config.ts",
+    "sha": "e974448d790c349cfb2ba4024bcbce573d493df8",
+    "size": 328,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/cypress.config.ts?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/cypress.config.ts",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/e974448d790c349cfb2ba4024bcbce573d493df8",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/cypress.config.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/cypress.config.ts?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/e974448d790c349cfb2ba4024bcbce573d493df8",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/cypress.config.ts"
+    }
+  },
+  {
+    "name": "cypress",
+    "path": "cypress",
+    "sha": "6bd669b36a1cee784ab3150647843b2712e8d5c7",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/cypress?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/cypress",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/6bd669b36a1cee784ab3150647843b2712e8d5c7",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/cypress?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/6bd669b36a1cee784ab3150647843b2712e8d5c7",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/cypress"
+    }
+  },
+  {
+    "name": "docs",
+    "path": "docs",
+    "sha": "b09c2d6bb0a553156eb829ff7170e6089b408d96",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/docs?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/docs",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/b09c2d6bb0a553156eb829ff7170e6089b408d96",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/docs?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/b09c2d6bb0a553156eb829ff7170e6089b408d96",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/docs"
+    }
+  },
+  {
+    "name": "eslint.config.js",
+    "path": "eslint.config.js",
+    "sha": "d7538dfde1dc149ffba58cf6ad6b5954dafbeffb",
+    "size": 1049,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/eslint.config.js?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/eslint.config.js",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/d7538dfde1dc149ffba58cf6ad6b5954dafbeffb",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/eslint.config.js",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/eslint.config.js?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/d7538dfde1dc149ffba58cf6ad6b5954dafbeffb",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/eslint.config.js"
+    }
+  },
+  {
+    "name": "index.html",
+    "path": "index.html",
+    "sha": "821a3a236ab9434fe79721a97a3c632b506389ef",
+    "size": 512,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/index.html?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/index.html",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/821a3a236ab9434fe79721a97a3c632b506389ef",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/index.html",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/index.html?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/821a3a236ab9434fe79721a97a3c632b506389ef",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/index.html"
+    }
+  },
+  {
+    "name": "nginx.conf",
+    "path": "nginx.conf",
+    "sha": "b8ba0fc403316f670bde0d4291239834f79b799f",
+    "size": 1288,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/nginx.conf?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/nginx.conf",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/b8ba0fc403316f670bde0d4291239834f79b799f",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/nginx.conf",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/nginx.conf?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/b8ba0fc403316f670bde0d4291239834f79b799f",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/nginx.conf"
+    }
+  },
+  {
+    "name": "package-lock.json",
+    "path": "package-lock.json",
+    "sha": "2758b69b4b7a63dd1dd7cabedd6afe4b4e6f7f23",
+    "size": 438954,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/package-lock.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/package-lock.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2758b69b4b7a63dd1dd7cabedd6afe4b4e6f7f23",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/package-lock.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/package-lock.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2758b69b4b7a63dd1dd7cabedd6afe4b4e6f7f23",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/package-lock.json"
+    }
+  },
+  {
+    "name": "package.json",
+    "path": "package.json",
+    "sha": "2f2d89d6a8fc85168933063858e6c0a5693f0c20",
+    "size": 2168,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/package.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/package.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2f2d89d6a8fc85168933063858e6c0a5693f0c20",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/package.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/package.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2f2d89d6a8fc85168933063858e6c0a5693f0c20",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/package.json"
+    }
+  },
+  {
+    "name": "pnpm-lock.yaml",
+    "path": "pnpm-lock.yaml",
+    "sha": "12a4c794c9596ac81a5871b336e68ed48be7e8a0",
+    "size": 151013,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/pnpm-lock.yaml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/pnpm-lock.yaml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/12a4c794c9596ac81a5871b336e68ed48be7e8a0",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/pnpm-lock.yaml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/pnpm-lock.yaml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/12a4c794c9596ac81a5871b336e68ed48be7e8a0",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/pnpm-lock.yaml"
+    }
+  },
+  {
+    "name": "public",
+    "path": "public",
+    "sha": "d4cc76a37b91ee1f5696f2b1b5dd7397adbb8bc4",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/public?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/public",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/d4cc76a37b91ee1f5696f2b1b5dd7397adbb8bc4",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/public?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/d4cc76a37b91ee1f5696f2b1b5dd7397adbb8bc4",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/public"
+    }
+  },
+  {
+    "name": "renovate.json",
+    "path": "renovate.json",
+    "sha": "5db72dd6a94fc07d18b0e6c0cf76e67ce982f1f9",
+    "size": 114,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/renovate.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/renovate.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/5db72dd6a94fc07d18b0e6c0cf76e67ce982f1f9",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/renovate.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/renovate.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/5db72dd6a94fc07d18b0e6c0cf76e67ce982f1f9",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/renovate.json"
+    }
+  },
+  {
+    "name": "src",
+    "path": "src",
+    "sha": "8df99e6f460a6407ce444f16e1014a3c12d20789",
+    "size": 0,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/src?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/src",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/8df99e6f460a6407ce444f16e1014a3c12d20789",
+    "download_url": null,
+    "type": "dir",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/src?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/trees/8df99e6f460a6407ce444f16e1014a3c12d20789",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/tree/dev/src"
+    }
+  },
+  {
+    "name": "tsconfig.json",
+    "path": "tsconfig.json",
+    "sha": "f9b7da48c82284115c31a5535ecf4809b47e7287",
+    "size": 1037,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/tsconfig.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/tsconfig.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f9b7da48c82284115c31a5535ecf4809b47e7287",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/tsconfig.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/tsconfig.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/f9b7da48c82284115c31a5535ecf4809b47e7287",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/tsconfig.json"
+    }
+  },
+  {
+    "name": "tsconfig.node.json",
+    "path": "tsconfig.node.json",
+    "sha": "a7755cb51b0901e8b857dde916fe157e0b5311b1",
+    "size": 442,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/tsconfig.node.json?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/tsconfig.node.json",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/a7755cb51b0901e8b857dde916fe157e0b5311b1",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/tsconfig.node.json",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/tsconfig.node.json?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/a7755cb51b0901e8b857dde916fe157e0b5311b1",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/tsconfig.node.json"
+    }
+  },
+  {
+    "name": "vite.config.ts",
+    "path": "vite.config.ts",
+    "sha": "2bb78ad84be1acafb9d0dcd9c03783c47157c6b4",
+    "size": 463,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/vite.config.ts?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/vite.config.ts",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2bb78ad84be1acafb9d0dcd9c03783c47157c6b4",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Publisher/dev/vite.config.ts",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/contents/vite.config.ts?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Publisher/git/blobs/2bb78ad84be1acafb9d0dcd9c03783c47157c6b4",
+      "html": "https://github.com/phoenixvc/Mystira.Publisher/blob/dev/vite.config.ts"
+    }
+  }
+]
