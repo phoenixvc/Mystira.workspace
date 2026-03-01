@@ -83,6 +83,8 @@ export const authApi = {
 
     if (useFakeLogin) {
       // Parse JWT token (fake validation for development)
+      let fakeUser: LoginResponse;
+
       try {
         const tokenParts = token.split(".");
         if (tokenParts.length !== 3 || !tokenParts[1]) {
@@ -90,7 +92,7 @@ export const authApi = {
         }
 
         const payload = JSON.parse(atob(tokenParts[1]));
-        const fakeUser: LoginResponse = {
+        fakeUser = {
           user: {
             id: payload.sub || "entra-user-" + Date.now(),
             name: payload.name || payload.email?.split("@")[0] || "Entra User",
@@ -105,7 +107,7 @@ export const authApi = {
       } catch (parseError) {
         console.error("Error parsing JWT token in fake login:", parseError);
         // Fallback to safe defaults
-        const fakeUser: LoginResponse = {
+        fakeUser = {
           user: {
             id: "entra-user-" + Date.now(),
             name: "Entra User",
