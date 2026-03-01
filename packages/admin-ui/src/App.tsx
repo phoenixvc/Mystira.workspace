@@ -49,7 +49,11 @@ function App() {
             errorElement={<ErrorPage />}
           >
             <Route index element={<Navigate to="/admin" replace />} />
-            <Route path="admin" element={<DashboardPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin"
+              element={<DashboardPage />}
+              errorElement={<ErrorPage />}
+            />
             <Route
               path="admin/scenarios"
               element={<ScenariosPage />}
@@ -75,7 +79,11 @@ function App() {
               element={<ValidateScenariosPage />}
               errorElement={<ErrorPage />}
             />
-            <Route path="admin/media" element={<MediaPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin/media"
+              element={<MediaPage />}
+              errorElement={<ErrorPage />}
+            />
             <Route
               path="admin/media/import"
               element={<ImportMediaPage />}
@@ -86,7 +94,11 @@ function App() {
               element={<ImportMediaZipPage />}
               errorElement={<ErrorPage />}
             />
-            <Route path="admin/badges" element={<BadgesPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin/badges"
+              element={<BadgesPage />}
+              errorElement={<ErrorPage />}
+            />
             <Route
               path="admin/badges/import"
               element={<ImportBadgePage />}
@@ -102,7 +114,11 @@ function App() {
               element={<EditBadgePage />}
               errorElement={<ErrorPage />}
             />
-            <Route path="admin/bundles" element={<BundlesPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin/bundles"
+              element={<BundlesPage />}
+              errorElement={<ErrorPage />}
+            />
             <Route
               path="admin/bundles/create"
               element={<CreateBundlePage />}
@@ -118,7 +134,11 @@ function App() {
               element={<ImportBundlePage />}
               errorElement={<ErrorPage />}
             />
-            <Route path="admin/avatars" element={<AvatarsPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin/avatars"
+              element={<AvatarsPage />}
+              errorElement={<ErrorPage />}
+            />
             <Route
               path="admin/character-maps"
               element={<CharacterMapsPage />}
@@ -154,8 +174,16 @@ function App() {
               element={<EditMasterDataPage />}
               errorElement={<ErrorPage />}
             />
-            <Route path="admin/accounts" element={<AccountsPage />} errorElement={<ErrorPage />} />
-            <Route path="admin/profiles" element={<ProfilesPage />} errorElement={<ErrorPage />} />
+            <Route
+              path="admin/accounts"
+              element={<AccountsPage />}
+              errorElement={<ErrorPage />}
+            />
+            <Route
+              path="admin/profiles"
+              element={<ProfilesPage />}
+              errorElement={<ErrorPage />}
+            />
           </Route>
           {/* 404 catch-all route */}
           <Route path="*" element={<NotFoundPage />} />

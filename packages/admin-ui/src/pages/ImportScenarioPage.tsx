@@ -17,21 +17,27 @@ function ImportScenarioPage() {
   const [overwriteExisting, setOverwriteExisting] = useState(false);
   const navigate = useNavigate();
 
-  const { validating, validationResult, validateFile, resetValidation } = useFileValidation();
+  const { validating, validationResult, validateFile, resetValidation } =
+    useFileValidation();
 
   const uploadMutation = useMutation({
-    mutationFn: (file: File) => scenariosApi.uploadScenario(file, overwriteExisting),
-    onSuccess: data => {
+    mutationFn: (file: File) =>
+      scenariosApi.uploadScenario(file, overwriteExisting),
+    onSuccess: (data) => {
       showToast.success(data.message || "Scenario uploaded successfully!");
       navigate("/admin/scenarios");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to upload scenario file");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to upload scenario file"
+      );
     },
   });
 
   const { uploading, uploadFile, confirmationProps } = useFileUpload({
-    onUpload: async file => {
+    onUpload: async (file) => {
       await uploadMutation.mutateAsync(file);
     },
     validationResult,
@@ -61,7 +67,10 @@ function ImportScenarioPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">📥 Import Scenario</h1>
-        <Link to="/admin/scenarios" className="btn btn-sm btn-outline-secondary">
+        <Link
+          to="/admin/scenarios"
+          className="btn btn-sm btn-outline-secondary"
+        >
           <i className="bi bi-arrow-left"></i> Back to Scenarios
         </Link>
       </div>
@@ -72,8 +81,8 @@ function ImportScenarioPage() {
         className="mb-3"
       >
         <Alert variant="info">
-          Validation checks for required fields, correct data types, valid enums, and schema
-          constraints.
+          Validation checks for required fields, correct data types, valid
+          enums, and schema constraints.
         </Alert>
       </Card>
 
@@ -123,7 +132,11 @@ function ImportScenarioPage() {
           />
 
           <div className="d-flex gap-2">
-            <button type="submit" className="btn btn-primary" disabled={!file || isProcessing}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={!file || isProcessing}
+            >
               {uploading ? (
                 <>
                   <span
@@ -148,7 +161,10 @@ function ImportScenarioPage() {
 
       {validationResult && (
         <Card title="Validation Results">
-          <ValidationResults valid={validationResult.valid} errors={validationResult.errors} />
+          <ValidationResults
+            valid={validationResult.valid}
+            errors={validationResult.errors}
+          />
         </Card>
       )}
 

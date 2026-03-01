@@ -44,7 +44,10 @@ function NotFoundPage() {
                   <i className="bi bi-house me-2"></i>
                   Go to Dashboard
                 </button>
-                <button className="btn btn-outline-secondary" onClick={handleGoBack}>
+                <button
+                  className="btn btn-outline-secondary"
+                  onClick={handleGoBack}
+                >
                   <i className="bi bi-arrow-left me-2"></i>
                   Go Back
                 </button>

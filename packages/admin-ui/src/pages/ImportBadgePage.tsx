@@ -29,8 +29,10 @@ function ImportBadgePage() {
       showToast.success("Badge uploaded successfully!");
       navigate("/admin/badges");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to upload badge file");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error ? error.message : "Failed to upload badge file"
+      );
       setUploading(false);
     },
   });
@@ -87,13 +89,16 @@ function ImportBadgePage() {
                 disabled={uploading}
                 required
               />
-              <div className="form-text">Select an image file for the badge</div>
+              <div className="form-text">
+                Select an image file for the badge
+              </div>
             </div>
 
             {file && (
               <div className="mb-3">
                 <div className="alert alert-info">
-                  <strong>Selected file:</strong> {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                  <strong>Selected file:</strong> {file.name} (
+                  {(file.size / 1024).toFixed(2)} KB)
                 </div>
                 {file.type.startsWith("image/") && (
                   <div className="mt-2">
@@ -113,7 +118,11 @@ function ImportBadgePage() {
             )}
 
             <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-primary" disabled={!file || uploading}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={!file || uploading}
+              >
                 {uploading ? (
                   <>
                     <span

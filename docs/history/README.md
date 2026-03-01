@@ -31,7 +31,7 @@ Use the provided script to create standardized documentation templates:
 # Create implementation documentation
 ./scripts/create-doc.ps1 implementation "Feature Name" 1234
 
-# Create bug fix documentation  
+# Create bug fix documentation
 ./scripts/create-doc.ps1 bugfix "Bug Description"
 
 # Create feature documentation
@@ -41,6 +41,7 @@ Use the provided script to create standardized documentation templates:
 ## Documentation Types
 
 ### Implementations
+
 - Major refactoring affecting >5 projects or >10k lines
 - ADR implementations
 - Performance improvements
@@ -48,16 +49,19 @@ Use the provided script to create standardized documentation templates:
 - Breaking changes
 
 ### Bug Fixes
+
 - Complex or critical bug resolutions
 - Security fixes
 - Multi-component bug fixes
 
 ### Features
+
 - New feature launches
 - Significant enhancements
 - User-facing functionality
 
 ### Migrations
+
 - Major version upgrades
 - Database migrations
 - Platform migrations
@@ -71,6 +75,7 @@ Use the provided script to create standardized documentation templates:
 ## Index Management
 
 The `.index.json` file tracks:
+
 - Sequential numbering for each document type
 - Document metadata and descriptions
 - Last updated timestamp

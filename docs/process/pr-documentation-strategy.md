@@ -11,6 +11,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ## When to Create Documentation
 
 ### ✅ **Required Documentation** (High Impact)
+
 - **Architecture Decisions**: Any ADR implementation
 - **Major Refactoring**: Changes affecting >5 projects or >10k lines of code
 - **New Features**: Significant new functionality or services
@@ -20,6 +21,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 - **Breaking Changes**: API changes that require client updates
 
 ### 🔄 **Recommended Documentation** (Medium Impact)
+
 - **Bug Fixes**: Complex or critical bug resolutions
 - **Library Upgrades**: Major version upgrades with migration challenges
 - **Tooling Changes**: New development tools or process improvements
@@ -27,6 +29,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 - **Documentation Updates**: Major documentation reorganization
 
 ### ⚪ **Optional Documentation** (Low Impact)
+
 - **Minor Features**: Small enhancements or UI improvements
 - **Simple Bug Fixes**: Straightforward fixes with minimal impact
 - **Configuration Changes**: Minor configuration or environment updates
@@ -35,6 +38,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ## Documentation Templates
 
 ### Template 1: Implementation Summary (Major Changes)
+
 ```markdown
 # [Feature/Change Name] Implementation - Historical Summary
 
@@ -44,60 +48,75 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 **PR**: [PR Number] - [PR Title]
 
 ## Overview
+
 [Brief description of what was implemented and why]
 
 ## Implementation Summary
 
 ### Projects/Components Affected
+
 - ✅ **[Component 1]** - [Description]
 - ✅ **[Component 2]** - [Description]
 - ...
 
 ### Key Changes Made
+
 1. **[Change 1]** - [Description and impact]
 2. **[Change 2]** - [Description and impact]
 3. ...
 
 ### Issues Resolved
+
 - **[Issue 1]**: [Description of problem and solution]
 - **[Issue 2]**: [Description of problem and solution]
 
 ## Implementation Approach
+
 [Description of the methodology and phases]
 
 ### Phase 1: [Phase Name]
+
 [What was done in this phase]
 
 ### Phase 2: [Phase Name]
+
 [What was done in this phase]
 
 ## Results
+
 [Quantitative and qualitative results]
 
 ### Metrics
+
 - **Build Status**: [Status]
 - **Performance**: [Improvements]
 - **Coverage**: [Changes]
 - **Tests**: [Pass/fail status]
 
 ### Impact
+
 [Description of the impact on the system/users]
 
 ## Lessons Learned
 
 ### Technical Insights
+
 [Technical lessons and discoveries]
 
 ### Process Improvements
+
 [Process improvements made during implementation]
 
 ### Best Practices Established
+
 [Best practices that can be applied elsewhere]
 
 ## Future Considerations
+
 [Maintenance needs, potential enhancements, follow-up work]
 
 ## Related Documentation
+
 - **[ADR-XXXX]**: [Related architecture decision]
 - **[Other docs]**: [Related documentation]
 
@@ -109,6 +128,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ```
 
 ### Template 2: Bug Fix Summary (Complex Fixes)
+
 ```markdown
 # [Bug Description] Resolution - Historical Summary
 
@@ -118,39 +138,50 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 **Severity**: [Critical/High/Medium/Low]
 
 ## Problem Description
+
 [What was the bug and its impact]
 
 ## Root Cause Analysis
+
 [Why the bug occurred]
 
 ## Solution Implemented
+
 [How the bug was fixed]
 
 ### Code Changes
+
 - **File 1**: [Description of changes]
 - **File 2**: [Description of changes]
 
 ### Testing
+
 - **Unit Tests**: [Test coverage added]
 - **Integration Tests**: [Test scenarios]
 - **Manual Testing**: [Manual verification steps]
 
 ## Verification
+
 [How the fix was validated]
 
 ### Before/After Comparison
+
 [Metrics or behavior comparison]
 
 ### Regression Testing
+
 [Steps taken to prevent regression]
 
 ## Impact Assessment
+
 [Who was affected and how]
 
 ## Prevention Measures
+
 [How to prevent similar bugs]
 
 ## Lessons Learned
+
 [What we learned from this bug]
 
 ---
@@ -161,6 +192,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ```
 
 ### Template 3: Feature Summary (New Features)
+
 ```markdown
 # [Feature Name] Launch - Historical Summary
 
@@ -169,58 +201,75 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 **Feature Type**: [New Feature/Enhancement]
 
 ## Feature Overview
+
 [Description of the new feature]
 
 ## User Problem Solved
+
 [What user problem this addresses]
 
 ## Implementation Details
 
 ### Architecture
+
 [High-level architecture description]
 
 ### Components
+
 - **[Component 1]**: [Description]
 - **[Component 2]**: [Description]
 
 ### API Changes
+
 [New endpoints, parameters, etc.]
 
 ### Database Changes
+
 [Schema changes, migrations, etc.]
 
 ## User Experience
+
 [How users interact with the feature]
 
 ### UI Changes
+
 [Interface changes]
 
 ### Documentation
+
 [User-facing documentation created]
 
 ## Rollout Plan
+
 [How the feature was rolled out]
 
 ### Phasing
+
 - **Phase 1**: [Description]
 - **Phase 2**: [Description]
 
 ### Monitoring
+
 [What metrics are being tracked]
 
 ## Results
+
 [Success metrics and user feedback]
 
 ### Usage Statistics
+
 [Adoption and usage metrics]
 
 ### User Feedback
+
 [Summary of user reactions]
 
 ## Future Enhancements
+
 [Planned improvements or follow-up features]
 
 ## Related Work
+
 [Related features or dependencies]
 
 ---
@@ -233,21 +282,25 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ## Documentation Process
 
 ### 1. Pre-PR Planning
+
 - **Assess Impact**: Determine if documentation is required
 - **Select Template**: Choose appropriate template based on change type
 - **Create Draft**: Start documentation during development
 
 ### 2. During Development
+
 - **Track Progress**: Update documentation as milestones are reached
 - **Record Decisions**: Document important technical decisions
 - **Capture Issues**: Note problems encountered and solutions
 
 ### 3. PR Completion
+
 - **Finalize Documentation**: Complete all sections
 - **Review Content**: Ensure accuracy and completeness
 - **Add to History**: Move to appropriate location in `docs/history/`
 
 ### 4. Post-Merge
+
 - **Update References**: Link from related ADRs or documentation
 - **Team Review**: Ensure team is aware of new documentation
 - **Archive Planning**: Determine long-term retention needs
@@ -255,6 +308,7 @@ To maintain comprehensive historical context and enable knowledge transfer, we s
 ## File Organization
 
 ### Directory Structure
+
 ```
 docs/
 ├── history/
@@ -279,11 +333,13 @@ All documentation files will use a sequential numbering system to ensure proper 
 - **[type]**: Document type (implementation, bugfix, feature, migration)
 
 #### Number Tracking
+
 - **Master Index**: `docs/history/.index.json` maintains next available number
 - **Type Tracking**: Separate sequences per document type
 - **Collision Prevention**: Script checks for existing numbers before assignment
 
 #### Example Files:
+
 ```
 docs/history/implementations/0001-2026-02-28-treat-warnings-as-errors-implementation.md
 docs/history/implementations/0002-2026-03-01-test-project-organization-implementation.md
@@ -292,6 +348,7 @@ docs/history/features/0001-2026-03-01-user-authentication-feature.md
 ```
 
 ### Naming Convention
+
 - **Implementations**: `XXXX-YYYY-MM-DD-[feature-name]-implementation.md`
 - **Bug Fixes**: `XXXX-YYYY-MM-DD-[bug-description]-bugfix.md`
 - **Features**: `XXXX-YYYY-MM-DD-[feature-name]-feature.md`
@@ -302,7 +359,9 @@ docs/history/features/0001-2026-03-01-user-authentication-feature.md
 ### 1. Git Templates Integration
 
 #### Commit Message Template
+
 Create `.gitmessage` template for standardized commit messages:
+
 ```
 # <type>(<scope>): <subject>
 #
@@ -318,7 +377,9 @@ Create `.gitmessage` template for standardized commit messages:
 ```
 
 #### Branch Name Template
+
 Create `.git/hooks/prepare-commit-msg` hook to validate branch names and documentation:
+
 ```bash
 #!/bin/bash
 # Check for documentation requirement based on commit message
@@ -329,11 +390,14 @@ fi
 ```
 
 ### 2. PR Template Integration
+
 Enhanced PR template with documentation validation:
+
 ```markdown
 ## Documentation Requirements
 
 ### 📋 Documentation Checklist
+
 - [ ] **Documentation Required**: Based on change impact assessment
 - [ ] **Template Created**: Using `./scripts/create-doc.ps1`
 - [ ] **Sequential Number**: Assigned from index system
@@ -344,12 +408,14 @@ Enhanced PR template with documentation validation:
 - [ ] **Filed in History**: Proper location and naming
 
 ### 📝 Documentation Type
+
 - [ ] **Implementation**: Major changes, ADR implementations
 - [ ] **Bug Fix**: Complex or critical bug resolutions
 - [ ] **Feature**: New feature launches
 - [ ] **Migration**: Major migrations/upgrades
 
 ### 🔗 Documentation Link
+
 [Link to created documentation file]
 
 ---
@@ -357,11 +423,13 @@ Enhanced PR template with documentation validation:
 ## Change Impact Assessment
 
 ### Scope
+
 - [ ] **High**: Affects >5 projects or >10k lines
 - [ ] **Medium**: Affects 2-5 projects or 1-10k lines
 - [ ] **Low**: Affects <2 projects or <1k lines
 
 ### Impact Type
+
 - [ ] **Architecture**: Structural changes
 - [ ] **API**: Breaking or significant API changes
 - [ ] **Performance**: Major optimizations
@@ -372,7 +440,8 @@ Enhanced PR template with documentation validation:
 ### 3. GitHub Actions Enforcement
 
 #### Documentation Validation Workflow
-```yaml
+
+````yaml
 # .github/workflows/documentation-validation.yml
 name: Documentation Validation
 
@@ -417,9 +486,10 @@ jobs:
               repo: context.repo.repo,
               body: '📋 **Documentation Required**\n\nThis PR requires documentation. Please run:\n```bash\n./scripts/create-doc.ps1 <type> <title> <pr>\n```\n\nSee [PR Documentation Strategy](docs/process/pr-documentation-strategy.md) for details.'
             })
-```
+````
 
 #### Documentation Quality Check
+
 ```yaml
 # .github/workflows/documentation-quality.yml
 name: Documentation Quality
@@ -427,7 +497,7 @@ name: Documentation Quality
 on:
   push:
     paths:
-      - 'docs/history/**'
+      - "docs/history/**"
 
 jobs:
   quality-check:
@@ -452,6 +522,7 @@ jobs:
 ### 4. Pre-commit Hooks
 
 #### Husky Configuration
+
 ```json
 // package.json
 {
@@ -470,6 +541,7 @@ jobs:
 ```
 
 #### Documentation Requirement Script
+
 ```bash
 #!/bin/bash
 # scripts/check-documentation-requirement.sh
@@ -495,7 +567,9 @@ fi
 ```
 
 ### 5. Template Generation
+
 Create CLI tool or script to generate documentation templates:
+
 ```bash
 # Create new implementation documentation
 ./scripts/create-doc.sh implementation "Feature Name"
@@ -505,7 +579,9 @@ Create CLI tool or script to generate documentation templates:
 ```
 
 ### 4. Documentation Validation
+
 Automated checks for documentation quality:
+
 - Required sections present
 - Links to related ADRs
 - Proper formatting and structure
@@ -514,16 +590,19 @@ Automated checks for documentation quality:
 ## Integration with Existing Processes
 
 ### 1. ADR Integration
+
 - Link implementations back to their ADRs
 - Update ADR status when implementation is complete
 - Cross-reference between ADRs and implementation docs
 
 ### 2. Project Management
+
 - Link documentation to project tickets
 - Update project status based on implementation completion
 - Use documentation for project retrospectives
 
 ### 3. Knowledge Management
+
 - Index documentation in team knowledge base
 - Include in new team member onboarding
 - Reference in technical training materials
@@ -531,18 +610,21 @@ Automated checks for documentation quality:
 ## Quality Standards
 
 ### Content Requirements
+
 - **Clear Description**: What was done and why
 - **Technical Details**: Sufficient technical depth for future reference
 - **Lessons Learned**: Key takeaways and insights
 - **Future Context**: Maintenance needs and follow-up work
 
 ### Format Standards
+
 - **Markdown Format**: Consistent markdown formatting
 - **Internal Links**: Proper cross-references
 - **External Links**: Relevant external resources
 - **Code Examples**: Where appropriate for clarity
 
 ### Review Process
+
 - **Technical Review**: Ensure technical accuracy
 - **Clarity Review**: Ensure readability and understanding
 - **Completeness Review**: Verify all required sections present
@@ -550,16 +632,19 @@ Automated checks for documentation quality:
 ## Success Metrics
 
 ### Adoption Metrics
+
 - **Documentation Coverage**: Percentage of required PRs with documentation
 - **Template Usage**: Consistency in template application
 - **Quality Scores**: Peer review ratings of documentation
 
 ### Effectiveness Metrics
+
 - **Reference Frequency**: How often documentation is consulted
 - **Knowledge Transfer**: Success in onboarding new team members
 - **Issue Reduction**: Reduction in repeated questions or issues
 
 ### Process Metrics
+
 - **Creation Time**: Time to create documentation
 - **Review Time**: Time for review and approval
 - **Update Frequency**: How often documentation is maintained
@@ -567,21 +652,25 @@ Automated checks for documentation quality:
 ## Rollout Plan
 
 ### Phase 1: Foundation (Week 1)
+
 - Create templates and examples
 - Establish file organization
 - Define process guidelines
 
 ### Phase 2: Integration (Week 2)
+
 - Integrate with PR template
 - Create automation tools
 - Train team on process
 
 ### Phase 3: Implementation (Week 3-4)
+
 - Apply to new PRs
 - Create documentation for recent major changes
 - Gather feedback and refine process
 
 ### Phase 4: Optimization (Week 5-6)
+
 - Analyze effectiveness metrics
 - Refine templates and process
 - Establish long-term maintenance plan

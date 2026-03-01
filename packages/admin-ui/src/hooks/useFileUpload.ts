@@ -12,7 +12,10 @@ interface UseFileUploadOptions {
   validationResult?: ValidationResult | null;
 }
 
-export function useFileUpload({ onUpload, validationResult }: UseFileUploadOptions) {
+export function useFileUpload({
+  onUpload,
+  validationResult,
+}: UseFileUploadOptions) {
   const [uploading, setUploading] = useState(false);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [confirmation, setConfirmation] = useState<UploadConfirmation>({
@@ -77,7 +80,9 @@ export function useFileUpload({ onUpload, validationResult }: UseFileUploadOptio
   const confirmationProps = {
     isOpen: confirmation.isOpen,
     title:
-      confirmation.type === "no-validation" ? "Upload Without Validation?" : "Upload With Errors?",
+      confirmation.type === "no-validation"
+        ? "Upload Without Validation?"
+        : "Upload With Errors?",
     message:
       confirmation.type === "no-validation"
         ? "You haven't validated the file yet. Do you want to upload without validation?"

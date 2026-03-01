@@ -45,7 +45,10 @@ function ConfirmationDialog({
       style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}
       onClick={onCancel}
     >
-      <div className="modal-dialog modal-dialog-centered" onClick={e => e.stopPropagation()}>
+      <div
+        className="modal-dialog modal-dialog-centered"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="modal-content">
           <div className="modal-header">
             <h5 className="modal-title">{title}</h5>
@@ -60,10 +63,18 @@ function ConfirmationDialog({
             <p>{message}</p>
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onCancel}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onCancel}
+            >
               {cancelText}
             </button>
-            <button type="button" className={`btn ${variantClasses[variant]}`} onClick={onConfirm}>
+            <button
+              type="button"
+              className={`btn ${variantClasses[variant]}`}
+              onClick={onConfirm}
+            >
               {confirmText}
             </button>
           </div>

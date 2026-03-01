@@ -52,27 +52,30 @@ export function useConfirmation() {
   });
   const resolveRef = useRef<((value: boolean) => void) | null>(null);
 
-  const confirm = useCallback((options: Partial<ConfirmationOptions> = {}): Promise<boolean> => {
-    return new Promise(resolve => {
-      resolveRef.current = resolve;
-      setState({
-        ...defaultOptions,
-        ...options,
-        isOpen: true,
+  const confirm = useCallback(
+    (options: Partial<ConfirmationOptions> = {}): Promise<boolean> => {
+      return new Promise((resolve) => {
+        resolveRef.current = resolve;
+        setState({
+          ...defaultOptions,
+          ...options,
+          isOpen: true,
+        });
       });
-    });
-  }, []);
+    },
+    []
+  );
 
   const handleConfirm = useCallback(() => {
     resolveRef.current?.(true);
     resolveRef.current = null;
-    setState(prev => ({ ...prev, isOpen: false }));
+    setState((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const handleCancel = useCallback(() => {
     resolveRef.current?.(false);
     resolveRef.current = null;
-    setState(prev => ({ ...prev, isOpen: false }));
+    setState((prev) => ({ ...prev, isOpen: false }));
   }, []);
 
   const confirmationProps = {

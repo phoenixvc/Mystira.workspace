@@ -301,6 +301,7 @@ src-tauri/
 ### Coverage Goals by Language
 
 #### C# Projects - Target: 85% Overall Coverage
+
 - **Core Libraries** (Core, Shared, Contracts): 90% minimum
 - **Application Layer** (StoryGenerator, App): 85% minimum
 - **Infrastructure Layer** (Infrastructure packages): 80% minimum
@@ -308,12 +309,14 @@ src-tauri/
 - **Performance Tests**: Coverage not required, but benchmarking mandatory
 
 #### TypeScript Projects - Target: 80% Overall Coverage
+
 - **Core Libraries** (contracts, core-types, shared-utils): 85% minimum
 - **Applications** (admin-ui, devhub, publisher): 75% minimum
 - **Utility Packages** (design-tokens, domain, chain): 70% minimum
 - **E2E Tests**: Coverage not applicable, but critical path coverage mandatory
 
 #### Rust Projects - Target: 80% Overall Coverage
+
 - **Core Application Logic**: 85% minimum
 - **Tauri Commands**: 80% minimum
 - **Integration Tests**: 75% minimum
@@ -322,12 +325,14 @@ src-tauri/
 ### Coverage Tools Configuration
 
 #### C# - Coverlet Configuration
+
 ```xml
 <PackageReference Include="coverlet.collector" Version="8.0.0" />
 <PackageReference Include="coverlet.msbuild" Version="8.0.0" />
 ```
 
 **RunSettings.xml:**
+
 ```xml
 <RunSettings>
   <DataCollectionRunSettings>
@@ -347,19 +352,20 @@ src-tauri/
 ```
 
 #### TypeScript - Vitest Coverage Configuration
+
 ```typescript
 // vitest.config.base.ts
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
+      provider: "v8",
+      reporter: ["text", "json", "html", "lcov"],
       exclude: [
-        'node_modules/',
-        'dist/',
-        '**/*.d.ts',
-        '**/*.config.*',
-        '**/coverage/**',
+        "node_modules/",
+        "dist/",
+        "**/*.d.ts",
+        "**/*.config.*",
+        "**/coverage/**",
       ],
       thresholds: {
         global: {
@@ -375,6 +381,7 @@ export default defineConfig({
 ```
 
 #### Rust - Tarpaulin Configuration
+
 ```toml
 # Cargo.toml
 [dev-dependencies]
@@ -395,11 +402,13 @@ threshold = 80.0
 ### Coverage Reporting Strategy
 
 #### 1. Real-time Coverage Monitoring
+
 - **Local Development**: Coverage reports on every test run
 - **Pre-commit Hooks**: Coverage validation for changed files
 - **PR Validation**: Coverage delta analysis and gates
 
 #### 2. CI/CD Integration
+
 ```yaml
 # GitHub Actions Coverage Pipeline
 - name: Run C# Tests with Coverage
@@ -418,12 +427,14 @@ threshold = 80.0
 ```
 
 #### 3. Coverage Dashboard
+
 - **Codecov Integration**: Unified coverage across all languages
 - **Coverage Badges**: Per-project and overall coverage badges
 - **Trend Analysis**: Coverage trends over time
 - **PR Coverage**: Coverage impact visualization for changes
 
 #### 4. Coverage Gates
+
 - **Minimum Thresholds**: Enforce minimum coverage percentages
 - **Coverage Delta**: Prevent coverage regression in PRs
 - **Critical Path Coverage**: Ensure critical components maintain high coverage
@@ -432,18 +443,21 @@ threshold = 80.0
 ### Coverage Exclusions
 
 #### C# Exclusions
+
 - Generated files (`*.Generated.cs`, `*.g.cs`)
 - Test infrastructure files (`*TestHelpers.cs`, `*TestData.cs`)
 - Configuration and registration files
 - External API models and DTOs
 
 #### TypeScript Exclusions
+
 - Type definition files (`*.d.ts`)
 - Configuration files (`*.config.ts`, `*.config.js`)
 - Build and bundler files
 - Storybook and demo files
 
 #### Rust Exclusions
+
 - Test modules and test utilities
 - Benchmark files
 - Generated code from macros
@@ -452,18 +466,21 @@ threshold = 80.0
 ### Coverage Quality Assurance
 
 #### 1. Coverage Quality Metrics
+
 - **Branch Coverage**: Ensure all code branches are tested
 - **Mutation Testing**: Use tools like Stryker.NET for C# to test test quality
 - **Critical Path Analysis**: Identify and ensure coverage of critical business logic
 - **Test Complexity**: Monitor cyclomatic complexity of test code
 
 #### 2. Coverage Review Process
+
 - **Weekly Coverage Reports**: Review coverage trends and regressions
 - **Monthly Coverage Audits**: Deep dive into low-coverage areas
 - **Quarterly Coverage Goals**: Set and review coverage improvement targets
 - **Coverage Debt Tracking**: Track and prioritize coverage improvements
 
 #### 3. Coverage Incentives
+
 - **Coverage Badges**: Display coverage achievements in README files
 - **Coverage Leaderboard**: Track coverage improvements by team/feature
 - **Coverage Challenges**: Set coverage improvement goals and celebrate achievements
@@ -483,6 +500,7 @@ threshold = 80.0
 ### Coverage Targets by Project Type
 
 #### C# Coverage Targets
+
 - **Core Libraries** (Core, Shared, Contracts): 90% minimum
 - **Application Layer** (StoryGenerator, App): 85% minimum
 - **Infrastructure Layer** (Infrastructure packages): 80% minimum
@@ -490,12 +508,14 @@ threshold = 80.0
 - **Performance Tests**: Benchmark coverage mandatory
 
 #### TypeScript Coverage Targets
+
 - **Core Libraries** (contracts, core-types, shared-utils): 85% minimum
 - **Applications** (admin-ui, devhub, publisher): 75% minimum
 - **Utility Packages** (design-tokens, domain, chain): 70% minimum
 - **E2E Tests**: Critical path coverage mandatory
 
 #### Rust Coverage Targets
+
 - **Core Application Logic**: 85% minimum
 - **Tauri Commands**: 80% minimum
 - **Integration Tests**: 75% minimum

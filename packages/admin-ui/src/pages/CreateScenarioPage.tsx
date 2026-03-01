@@ -11,8 +11,14 @@ import TextInput from "../components/TextInput";
 import { showToast } from "../utils/toast";
 
 const scenarioSchema = z.object({
-  title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  title: z
+    .string()
+    .min(1, "Title is required")
+    .max(200, "Title must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
   ageRating: z.number().min(0).max(18),
   tags: z.string().optional(),
 });
@@ -42,8 +48,8 @@ function CreateScenarioPage() {
       const tags = data.tags
         ? data.tags
             .split(",")
-            .map(tag => tag.trim())
-            .filter(tag => tag.length > 0)
+            .map((tag) => tag.trim())
+            .filter((tag) => tag.length > 0)
         : [];
       return scenariosApi.createScenario({
         title: data.title,
@@ -57,8 +63,10 @@ function CreateScenarioPage() {
       showToast.success("Scenario created successfully!");
       navigate("/admin/scenarios");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to create scenario");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error ? error.message : "Failed to create scenario"
+      );
     },
   });
 
@@ -70,7 +78,10 @@ function CreateScenarioPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">➕ Create Scenario</h1>
-        <Link to="/admin/scenarios" className="btn btn-sm btn-outline-secondary">
+        <Link
+          to="/admin/scenarios"
+          className="btn btn-sm btn-outline-secondary"
+        >
           <i className="bi bi-arrow-left"></i> Back to Scenarios
         </Link>
       </div>
@@ -83,7 +94,11 @@ function CreateScenarioPage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea id="description" rows={5} {...register("description")} />
+              <Textarea
+                id="description"
+                rows={5}
+                {...register("description")}
+              />
             </FormField>
 
             <FormField

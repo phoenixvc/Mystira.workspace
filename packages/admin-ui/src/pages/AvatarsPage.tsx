@@ -27,27 +27,41 @@ function AvatarsPage() {
   });
 
   const addMutation = useMutation({
-    mutationFn: ({ ageGroup, mediaId }: { ageGroup: string; mediaId: string }) =>
-      avatarsApi.addAvatarToAgeGroup(ageGroup, mediaId),
+    mutationFn: ({
+      ageGroup,
+      mediaId,
+    }: {
+      ageGroup: string;
+      mediaId: string;
+    }) => avatarsApi.addAvatarToAgeGroup(ageGroup, mediaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["avatars"] });
       showToast.success("Avatar added successfully");
       setNewMediaId("");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to add avatar");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error ? error.message : "Failed to add avatar"
+      );
     },
   });
 
   const removeMutation = useMutation({
-    mutationFn: ({ ageGroup, mediaId }: { ageGroup: string; mediaId: string }) =>
-      avatarsApi.removeAvatarFromAgeGroup(ageGroup, mediaId),
+    mutationFn: ({
+      ageGroup,
+      mediaId,
+    }: {
+      ageGroup: string;
+      mediaId: string;
+    }) => avatarsApi.removeAvatarFromAgeGroup(ageGroup, mediaId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["avatars"] });
       showToast.success("Avatar removed successfully");
     },
-    onError: error => {
-      showToast.error(error instanceof Error ? error.message : "Failed to remove avatar");
+    onError: (error) => {
+      showToast.error(
+        error instanceof Error ? error.message : "Failed to remove avatar"
+      );
     },
   });
 
@@ -116,15 +130,15 @@ function AvatarsPage() {
       <div className="card mb-3">
         <div className="card-body">
           <p className="text-muted mb-0">
-            Manage avatar media IDs for different age groups. Each age group can have multiple
-            avatars that users can choose from.
+            Manage avatar media IDs for different age groups. Each age group can
+            have multiple avatars that users can choose from.
           </p>
         </div>
       </div>
 
       {avatarConfigs.length > 0 ? (
         <div className="accordion" id="avatarAccordion">
-          {avatarConfigs.map(config => (
+          {avatarConfigs.map((config) => (
             <div className="accordion-item" key={config.ageGroup}>
               <h2 className="accordion-header">
                 <button
@@ -133,12 +147,16 @@ function AvatarsPage() {
                   onClick={() => {
                     setNewMediaId("");
                     setSelectedAgeGroup(
-                      selectedAgeGroup === config.ageGroup ? "" : config.ageGroup
+                      selectedAgeGroup === config.ageGroup
+                        ? ""
+                        : config.ageGroup
                     );
                   }}
                 >
                   <strong>{config.ageGroup}</strong>
-                  <span className="badge bg-primary ms-2">{config.avatarMediaIds.length}</span>
+                  <span className="badge bg-primary ms-2">
+                    {config.avatarMediaIds.length}
+                  </span>
                 </button>
               </h2>
               <div
@@ -155,7 +173,7 @@ function AvatarsPage() {
                           </tr>
                         </thead>
                         <tbody>
-                          {config.avatarMediaIds.map(mediaId => (
+                          {config.avatarMediaIds.map((mediaId) => (
                             <tr key={mediaId}>
                               <td>
                                 <code>{mediaId}</code>
@@ -163,7 +181,9 @@ function AvatarsPage() {
                               <td>
                                 <button
                                   className="btn btn-sm btn-outline-danger"
-                                  onClick={() => handleRemoveClick(config.ageGroup, mediaId)}
+                                  onClick={() =>
+                                    handleRemoveClick(config.ageGroup, mediaId)
+                                  }
                                   disabled={removeMutation.isPending}
                                 >
                                   <i className="bi bi-trash"></i>
@@ -186,8 +206,12 @@ function AvatarsPage() {
                       <div className="input-group">
                         <TextInput
                           id={`mediaId-${config.ageGroup}`}
-                          value={selectedAgeGroup === config.ageGroup ? newMediaId : ""}
-                          onChange={e => setNewMediaId(e.target.value)}
+                          value={
+                            selectedAgeGroup === config.ageGroup
+                              ? newMediaId
+                              : ""
+                          }
+                          onChange={(e) => setNewMediaId(e.target.value)}
                           placeholder="Enter media ID"
                           disabled={addMutation.isPending}
                         />
