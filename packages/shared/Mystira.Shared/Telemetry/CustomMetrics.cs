@@ -260,17 +260,20 @@ public partial class CustomMetrics : ICustomMetrics
             return;
         }
 
-        var metric = new MetricTelemetry(name, value);
+        // AppInsights 3.x: MetricTelemetry.Properties is null.
+        // Use EventTelemetry which supports Properties and store the metric value there.
+        var telemetry = new EventTelemetry(name);
+        telemetry.Properties["MetricValue"] = value.ToString("G");
 
         if (properties != null)
         {
             foreach (var prop in properties)
             {
-                metric.Properties[prop.Key] = prop.Value;
+                telemetry.Properties[prop.Key] = prop.Value;
             }
         }
 
-        _telemetryClient.TrackMetric(metric);
+        _telemetryClient.TrackEvent(telemetry);
     }
 
     /// <inheritdoc/>

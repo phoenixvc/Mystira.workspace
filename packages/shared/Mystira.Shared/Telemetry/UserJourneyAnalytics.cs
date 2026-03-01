@@ -347,16 +347,19 @@ public class UserJourneyAnalytics : IUserJourneyAnalytics
     {
         if (_telemetryClient == null) return;
 
-        var metric = new MetricTelemetry(name, value);
+        // AppInsights 3.x: MetricTelemetry.Properties is null.
+        // Use EventTelemetry which supports Properties and store the metric value there.
+        var telemetry = new EventTelemetry(name);
+        telemetry.Properties["MetricValue"] = value.ToString("G");
         if (properties != null)
         {
             foreach (var kvp in properties)
             {
-                metric.Properties[kvp.Key] = kvp.Value;
+                telemetry.Properties[kvp.Key] = kvp.Value;
             }
         }
 
-        _telemetryClient.TrackMetric(metric);
+        _telemetryClient.TrackEvent(telemetry);
     }
 }
 
