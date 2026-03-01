@@ -7,7 +7,6 @@ using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
-using Mystira.Shared.Locking;
 
 namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 
@@ -16,7 +15,6 @@ public class MakeChoiceCommandHandlerTests
     private readonly Mock<IGameSessionRepository> _repository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-    private readonly Mock<IDistributedLockService> _distributedLockService;
     private readonly Mock<ILogger<MakeChoiceUseCase>> _logger;
 
     public MakeChoiceCommandHandlerTests()
@@ -24,7 +22,6 @@ public class MakeChoiceCommandHandlerTests
         _repository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-        _distributedLockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<MakeChoiceUseCase>>();
     }
 
@@ -41,7 +38,7 @@ public class MakeChoiceCommandHandlerTests
             .ReturnsAsync(scenario);
 
         var useCase = new MakeChoiceUseCase(
-            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
         var request = new MakeChoiceRequest
         {
@@ -69,7 +66,7 @@ public class MakeChoiceCommandHandlerTests
             .ReturnsAsync(default(GameSession));
 
         var useCase = new MakeChoiceUseCase(
-            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
         var request = new MakeChoiceRequest
         {
@@ -95,7 +92,7 @@ public class MakeChoiceCommandHandlerTests
             .ReturnsAsync(session);
 
         var useCase = new MakeChoiceUseCase(
-            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
         var request = new MakeChoiceRequest
         {
@@ -121,7 +118,7 @@ public class MakeChoiceCommandHandlerTests
             .ReturnsAsync(default(Scenario));
 
         var useCase = new MakeChoiceUseCase(
-            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
         var request = new MakeChoiceRequest
         {
@@ -155,7 +152,7 @@ public class MakeChoiceCommandHandlerTests
             .ReturnsAsync(scenario);
 
         var useCase = new MakeChoiceUseCase(
-            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
+            _repository.Object, _scenarioRepository.Object, _unitOfWork.Object, _logger.Object);
 
         var request = new MakeChoiceRequest
         {

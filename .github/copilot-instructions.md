@@ -258,7 +258,11 @@ All PRs must pass:
 
 ## Common Pitfalls to Avoid
 
+<<<<<<< HEAD
 - Don't commit `node_modules/`, `dist/`, `bin/`, `obj/`, or build artifacts
+=======
+- Don't commit `node_modules/`, `dist/`, or build artifacts
+>>>>>>> origin/claude/feat-app-test-gaps-refactor-y59W7
 - Don't bypass pre-commit hooks
 - Don't merge without PR approval
 - Don't make changes directly to `main` branch

@@ -37,6 +37,12 @@ public class ScenarioApiClientTests
 
     private void SetupResponse(HttpStatusCode statusCode, string content)
     {
+        var response = new HttpResponseMessage
+        {
+            StatusCode = statusCode,
+            Content = new StringContent(content)
+        };
+
         _httpMessageHandlerMock
             .Protected()
             .Setup<Task<HttpResponseMessage>>(
@@ -44,11 +50,7 @@ public class ScenarioApiClientTests
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
             )
-            .ReturnsAsync(() => new HttpResponseMessage
-            {
-                StatusCode = statusCode,
-                Content = new StringContent(content)
-            });
+            .ReturnsAsync(response);
     }
 
     [Fact]

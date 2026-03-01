@@ -7,7 +7,6 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <!-- Avoid assembly name collision with the product library 'Mystira.StoryGenerator.GraphTheory' -->
         <AssemblyName>Mystira.StoryGenerator.GraphTheory.Tests</AssemblyName>
         <RootNamespace>Mystira.StoryGenerator.GraphTheory.Tests</RootNamespace>
@@ -15,7 +14,7 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="8.0.0"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
         <PackageReference Include="xunit" Version="2.9.3"/>
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5"/>
         <PackageReference Include="YamlDotNet" Version="16.3.0" />

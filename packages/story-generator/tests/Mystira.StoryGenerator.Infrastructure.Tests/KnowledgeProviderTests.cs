@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
-using Mystira.StoryGenerator.Contracts.Configuration;
 
 namespace Mystira.StoryGenerator.Infrastructure.Tests;
 
@@ -20,7 +19,9 @@ public class KnowledgeProviderTests
     public void IKnowledgeProvider_Interface_ShouldBeImplemented()
     {
         // Arrange
-        var fileSearchConfig = new FileSearchConfig();
+        #pragma warning disable CS0618 // Type or member is obsolete
+        var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration();
+        #pragma warning restore CS0618 // Type or member is obsolete
         var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration();
 
         // We can't instantiate the concrete classes without mocking the FoundryAgentClient
@@ -37,7 +38,8 @@ public class KnowledgeProviderTests
     public void FileSearchConfiguration_ShouldAcceptCustomValues()
     {
         // Arrange & Act
-        var config = new FileSearchConfig
+        #pragma warning disable CS0618 // Type or member is obsolete
+        var config = new FileSearchKnowledgeProvider.FileSearchConfiguration
         {
             VectorStoresByAgentAndAge = new Dictionary<string, Dictionary<string, string>>
             {
@@ -52,6 +54,7 @@ public class KnowledgeProviderTests
             MaxFiles = 50,
             MaxTokens = 10000
         };
+        #pragma warning restore CS0618 // Type or member is obsolete
 
         // Assert
         Assert.NotNull(config.VectorStoresByAgentAndAge);
@@ -141,7 +144,9 @@ public class KnowledgeProviderTests
     {
         // The ProviderName property should be implemented by concrete classes
         // We test that the configuration classes exist and can be used
-        var fileSearchConfig = new FileSearchConfig();
+        #pragma warning disable CS0618 // Type or member is obsolete
+        var fileSearchConfig = new FileSearchKnowledgeProvider.FileSearchConfiguration();
+        #pragma warning restore CS0618 // Type or member is obsolete
         var aiSearchConfig = new AISearchKnowledgeProvider.AISearchConfiguration();
 
         Assert.NotNull(fileSearchConfig);
