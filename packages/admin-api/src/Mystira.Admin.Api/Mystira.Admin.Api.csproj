@@ -22,7 +22,7 @@
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
     <PackageReference Include="Azure.Communication.Email" Version="1.1.0" />
     <!-- Application Insights for monitoring and telemetry -->
-    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.DependencyCollector" Version="2.21.0" />
 
     <!-- PostgreSQL support for hybrid data strategy (Phase 2+) -->
