@@ -1,4 +1,4 @@
-name: "[Test] Unit"
+name: "[Reusable] Unit Tests"
 
 # Reusable workflow for running unit tests
 # Supports both TypeScript (Vitest) and .NET (xUnit/NUnit) test frameworks

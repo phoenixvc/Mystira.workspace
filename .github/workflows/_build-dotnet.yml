@@ -1,4 +1,4 @@
-name: "[Build] .NET"
+name: "[Reusable] .NET Build"
 
 # Reusable workflow for building and testing .NET projects
 # Consolidates duplicated .NET build logic from ci.yml, packages-*.yml

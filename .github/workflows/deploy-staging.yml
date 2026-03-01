@@ -13,7 +13,6 @@ on:
       - "infra/**"
       - "packages/**"
       - ".github/workflows/staging-release.yml"
-      - ".github/workflows/infra-deploy.yml"
   workflow_dispatch:
 
 concurrency:

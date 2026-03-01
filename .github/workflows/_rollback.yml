@@ -1,4 +1,4 @@
-name: "[Rollback] Service"
+name: "[Reusable] Service Rollback"
 
 # Reusable rollback workflow for Azure services
 # Supports App Service slot swaps and Kubernetes rollbacks

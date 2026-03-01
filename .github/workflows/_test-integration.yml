@@ -1,4 +1,4 @@
-name: "[Test] Integration"
+name: "[Reusable] Integration Tests"
 
 # Reusable workflow for running integration tests
 # Tests service interactions with real dependencies (databases, caches, queues)

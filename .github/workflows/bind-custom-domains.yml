@@ -1,7 +1,7 @@
 name: "[Deploy] Bind Custom Domains"
 
 # Binds custom domains to SWAs and App Services after DNS propagation
-# Run this AFTER infra-deploy.yml completes and DNS records have propagated
+# Run this AFTER infrastructure deploy completes and DNS records have propagated
 #
 # Prerequisites:
 #   1. DNS zone exists with CNAME/A records

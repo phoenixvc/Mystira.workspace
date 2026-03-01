@@ -12,16 +12,10 @@ It reflects the workflow files present under `.github/workflows/`.
 - `deploy-app-api-production.yml` - App API blue/green production deploy
 - `deploy-app-api-rollback.yml` - App API manual rollback
 
-### Infrastructure
-
-- `infra-deploy.yml` - Terraform apply + infra deployment pipeline
-- `infra-validate.yml` - Terraform/K8s/Docker/security validation
-
 ### Reusable workflow templates
 
 - `reusable-docker-build.yml`
 - `reusable-security-scan.yml`
-- `reusable-terraform.yml`
 
 ### Security
 
@@ -43,18 +37,6 @@ It reflects the workflow files present under `.github/workflows/`.
   - Triggers: Manual only (workflow_dispatch with confirmation)
   - Requires: Typing "DEPLOY TO PRODUCTION" to confirm
   - Environment: https://mystira.app
-
-### 🏗️ Infrastructure Workflows
-
-- **`infra-validate.yml`** - Validates infrastructure configurations
-  - Validates: Terraform, Kubernetes manifests, Dockerfiles
-  - Runs: Security scans (Checkov), format checks
-  - Environments: dev, staging, prod
-
-- **`infra-deploy.yml`** - Deploys infrastructure to environments
-  - Handles: Terraform apply, Docker builds, Kubernetes deployments
-  - Supports: Selective component deployment, manual triggers
-  - Environments: dev (auto), staging/prod (manual)
 
 ### 📋 Workspace-Level Workflows
 
@@ -102,16 +84,14 @@ It reflects the workflow files present under `.github/workflows/`.
 
 ## Trigger Summary
 
-| Workflow                | Push (dev/main)  | Pull Request     | Manual  | Schedule  |
-| ----------------------- | ---------------- | ---------------- | ------- | --------- |
-| Component CIs (6)       | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
-| Staging Release         | ✅ Main only     | -                | ✅      | -         |
-| Production Release      | -                | -                | ✅ Only | -         |
-| Infrastructure Validate | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
-| Infrastructure Deploy   | ✅ Main only     | -                | ✅      | -         |
-| Workspace CI            | ✅               | ✅               | ✅      | -         |
-| Workspace Release       | ✅ Main only     | -                | ✅      | -         |
-| Link Checker            | ✅ Markdown only | ✅ Markdown only | ✅      | ✅ Weekly |
+| Workflow           | Push (dev/main)  | Pull Request     | Manual  | Schedule  |
+| ------------------ | ---------------- | ---------------- | ------- | --------- |
+| Component CIs (6)  | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
+| Staging Release    | ✅ Main only     | -                | ✅      | -         |
+| Production Release | -                | -                | ✅ Only | -         |
+| Workspace CI       | ✅               | ✅               | ✅      | -         |
+| Workspace Release  | ✅ Main only     | -                | ✅      | -         |
+| Link Checker       | ✅ Markdown only | ✅ Markdown only | ✅      | ✅ Weekly |
 
 ## Advantages of This Approach
 
@@ -226,25 +206,22 @@ If you have questions about workflow organization or need to add new workflows, 
 
 ## Trigger summary
 
-| Workflow                        | Push                              | Pull Request                      | Manual | Schedule | Reusable        |
-| ------------------------------- | --------------------------------- | --------------------------------- | ------ | -------- | --------------- |
-| `workspace-ci.yml`              | `dev`, `main`                     | `dev`, `main`                     | Yes    | -        | -               |
-| `deploy-staging.yml`            | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
-| `deploy-production.yml`         | -                                 | -                                 | Yes    | -        | -               |
-| `deploy-app-api-production.yml` | -                                 | -                                 | Yes    | -        | -               |
-| `deploy-app-api-rollback.yml`   | -                                 | -                                 | Yes    | -        | -               |
-| `infra-validate.yml`            | `main`, `staging` (path-filtered) | `main`, `staging` (path-filtered) | Yes    | -        | -               |
-| `infra-deploy.yml`              | `main` (path-filtered)            | -                                 | Yes    | -        | -               |
-| `security-scan-scheduled.yml`   | -                                 | -                                 | Yes    | Weekly   | -               |
-| `security-keyvault-secrets.yml` | -                                 | -                                 | Yes    | -        | -               |
-| `utilities-link-checker.yml`    | `main` (markdown paths)           | `dev`, `main` (markdown paths)    | Yes    | Weekly   | -               |
-| `reusable-docker-build.yml`     | -                                 | -                                 | -      | -        | `workflow_call` |
-| `reusable-security-scan.yml`    | -                                 | -                                 | -      | -        | `workflow_call` |
-| `reusable-terraform.yml`        | -                                 | -                                 | -      | -        | `workflow_call` |
+| Workflow                        | Push                    | Pull Request                   | Manual | Schedule | Reusable        |
+| ------------------------------- | ----------------------- | ------------------------------ | ------ | -------- | --------------- |
+| `workspace-ci.yml`              | `dev`, `main`           | `dev`, `main`                  | Yes    | -        | -               |
+| `deploy-staging.yml`            | `main` (path-filtered)  | -                              | Yes    | -        | -               |
+| `deploy-production.yml`         | -                       | -                              | Yes    | -        | -               |
+| `deploy-app-api-production.yml` | -                       | -                              | Yes    | -        | -               |
+| `deploy-app-api-rollback.yml`   | -                       | -                              | Yes    | -        | -               |
+| `security-scan-scheduled.yml`   | -                       | -                              | Yes    | Weekly   | -               |
+| `security-keyvault-secrets.yml` | -                       | -                              | Yes    | -        | -               |
+| `utilities-link-checker.yml`    | `main` (markdown paths) | `dev`, `main` (markdown paths) | Yes    | Weekly   | -               |
+| `reusable-docker-build.yml`     | -                       | -                              | -      | -        | `workflow_call` |
+| `reusable-security-scan.yml`    | -                       | -                              | -      | -        | `workflow_call` |
 
 ## Usage notes
 
 1. Prefer reusing `reusable-*` templates for shared CI logic.
 2. Use path filters to avoid unnecessary workflow runs.
 3. Require explicit confirmations for production-impacting workflows.
-4. Keep workflow names in `Category: Name` format for consistency.
+4. Keep workflow names in `[Category] Name` format for consistency.
