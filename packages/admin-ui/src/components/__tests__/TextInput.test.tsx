@@ -24,7 +24,7 @@ describe("TextInput", () => {
   });
 
   it("passes through HTML attributes", async () => {
-    const user = userEvent.setup();
+    const _user = userEvent.setup();
     render(<TextInput placeholder="Enter text" disabled />);
     const input = screen.getByPlaceholderText("Enter text");
 
