@@ -16,13 +16,13 @@ The Mystira platform has evolved with multiple package repositories (submodules)
 
 ### Current State
 
-| Package                              | Location                   | Type  | Published To                |
-| ------------------------------------ | -------------------------- | ----- | --------------------------- |
-| `@mystira/app-contracts`             | `packages/app`             | NPM   | npmjs.org                   |
-| `@mystira/story-generator-contracts` | `packages/story-generator` | NPM   | npmjs.org                   |
-| `Mystira.App.Contracts`              | `packages/app`             | NuGet | GitHub Packages + NuGet.org |
-| `Mystira.StoryGenerator.Contracts`   | `packages/story-generator` | NuGet | GitHub Packages + NuGet.org |
-| `@mystira/shared-utils`              | `packages/publisher`       | NPM   | npmjs.org                   |
+| Package | Location | Type | Published To |
+|---------|----------|------|--------------|
+| `@mystira/app-contracts` | `packages/app` | NPM | npmjs.org |
+| `@mystira/story-generator-contracts` | `packages/story-generator` | NPM | npmjs.org |
+| `Mystira.App.Contracts` | `packages/app` | NuGet | GitHub Packages + NuGet.org |
+| `Mystira.StoryGenerator.Contracts` | `packages/story-generator` | NuGet | GitHub Packages + NuGet.org |
+| `@mystira/shared-utils` | `packages/publisher` | NPM | npmjs.org |
 
 ### Problems
 
@@ -144,14 +144,14 @@ packages/
 
 The following should NOT be consolidated:
 
-| Package                        | Reason                                     |
-| ------------------------------ | ------------------------------------------ |
-| `@mystira/app`                 | Core service - independent evolution       |
-| `@mystira/story-generator`     | Core service - independent evolution       |
-| `@mystira/publisher`           | Core service - independent evolution       |
-| `Mystira.App.Domain`           | Domain logic - tightly coupled to App      |
-| `Mystira.App.Application`      | Application layer - tightly coupled to App |
-| `Mystira.App.Infrastructure.*` | Infrastructure - service-specific          |
+| Package | Reason |
+|---------|--------|
+| `@mystira/app` | Core service - independent evolution |
+| `@mystira/story-generator` | Core service - independent evolution |
+| `@mystira/publisher` | Core service - independent evolution |
+| `Mystira.App.Domain` | Domain logic - tightly coupled to App |
+| `Mystira.App.Application` | Application layer - tightly coupled to App |
+| `Mystira.App.Infrastructure.*` | Infrastructure - service-specific |
 
 ## Implementation Plan
 
@@ -180,13 +180,11 @@ Extract `Mystira.App.Shared` to workspace-level `Mystira.Shared`:
 
 **Rationale**: `Mystira.App.Shared` contains cross-cutting concerns (JWT auth,
 authorization, telemetry) used by 3+ services. Moving it to workspace level:
-
 - Removes misleading "App" prefix
 - Enables all .NET services to share auth infrastructure
 - Maintains consistency with `@mystira/shared-utils` (TypeScript equivalent)
 
 **Package Structure**:
-
 ```
 packages/
 └── shared/
@@ -203,10 +201,10 @@ Code-level analysis of App and StoryGenerator submodules revealed additional con
 
 #### 4a: Resilience Patterns (High Priority)
 
-| Service        | Current Implementation                                         | Lines of Code            |
-| -------------- | -------------------------------------------------------------- | ------------------------ |
-| App (PWA)      | `Microsoft.Extensions.Http.Polly` with retry + circuit breaker | 11 clients × same config |
-| StoryGenerator | Custom `RetryPolicyService` with manual exponential backoff    | ~50 lines                |
+| Service | Current Implementation | Lines of Code |
+|---------|----------------------|---------------|
+| App (PWA) | `Microsoft.Extensions.Http.Polly` with retry + circuit breaker | 11 clients × same config |
+| StoryGenerator | Custom `RetryPolicyService` with manual exponential backoff | ~50 lines |
 
 **Recommendation**: Create `Mystira.Shared.Resilience` with standardized Polly policies:
 
@@ -243,7 +241,6 @@ public static class PolicyFactory
 ```
 
 **Migration Path**:
-
 1. Add `Mystira.Shared.Resilience` namespace to `Mystira.Shared`
 2. Update App PWA to use `PolicyFactory.CreateStandardPolicy()`
 3. Update StoryGenerator to use Polly instead of custom retry
@@ -251,10 +248,10 @@ public static class PolicyFactory
 
 #### 4b: Error Handling (Medium Priority)
 
-| Service        | Pattern                                         | Issues                                    |
-| -------------- | ----------------------------------------------- | ----------------------------------------- |
-| App            | `ExceptionDetailsHelper` + per-client try-catch | No ProblemDetails, inconsistent responses |
-| StoryGenerator | Response object pattern (`{ Success, Error }`)  | No standard HTTP error codes              |
+| Service | Pattern | Issues |
+|---------|---------|--------|
+| App | `ExceptionDetailsHelper` + per-client try-catch | No ProblemDetails, inconsistent responses |
+| StoryGenerator | Response object pattern (`{ Success, Error }`) | No standard HTTP error codes |
 
 **Recommendation**: Add `Mystira.Shared.ErrorHandling`:
 
@@ -280,10 +277,10 @@ public class GlobalExceptionHandler : IExceptionHandler
 
 #### 4c: Caching Infrastructure (Medium Priority)
 
-| Service        | Current                                    | Limitation             |
-| -------------- | ------------------------------------------ | ---------------------- |
-| App            | `IMemoryCache` with `QueryCachingBehavior` | Single-instance only   |
-| StoryGenerator | `ConcurrentDictionary` stores              | No distributed support |
+| Service | Current | Limitation |
+|---------|---------|------------|
+| App | `IMemoryCache` with `QueryCachingBehavior` | Single-instance only |
+| StoryGenerator | `ConcurrentDictionary` stores | No distributed support |
 
 **Recommendation**: Add `Mystira.Shared.Caching` with Redis support:
 
@@ -315,7 +312,6 @@ public static IServiceCollection AddMystiraCaching(
 #### 4d: Base Entity Patterns (Low Priority - App Only)
 
 App has a well-designed 3-level entity hierarchy:
-
 - `Entity` → base with ID
 - `AuditableEntity` → adds CreatedAt/UpdatedAt/CreatedBy/UpdatedBy
 - `SoftDeletableEntity` → adds IsDeleted/DeletedAt/DeletedBy
@@ -323,7 +319,6 @@ App has a well-designed 3-level entity hierarchy:
 **StoryGenerator** uses service-based architecture without ORM entities.
 
 **Recommendation**: Move to `Mystira.Shared.Domain` only if future services need it:
-
 ```csharp
 // Mystira.Shared/Domain/BaseEntity.cs (future)
 // Only migrate if admin-api or devhub needs entity persistence
@@ -331,14 +326,14 @@ App has a well-designed 3-level entity hierarchy:
 
 #### Submodule Analysis Notes
 
-| Submodule                  | Status               | Notes                                                    |
-| -------------------------- | -------------------- | -------------------------------------------------------- |
-| `packages/app`             | ✅ Initialized       | 23 repositories, 11 HTTP clients, Polly policies         |
-| `packages/story-generator` | ✅ Initialized       | Custom retry, in-memory stores, LLM services             |
-| `packages/publisher`       | ⚠️ Not initialized   | Requires `git submodule update --init`                   |
-| `packages/admin-api`       | ⚠️ Empty placeholder | Actual code in `packages/app/src/Mystira.App.Admin.Api/` |
-| `packages/devhub`          | ⚠️ Not initialized   | Requires `git submodule update --init`                   |
-| `packages/admin-ui`        | ⚠️ Empty placeholder | Will be React frontend submodule                         |
+| Submodule | Status | Notes |
+|-----------|--------|-------|
+| `packages/app` | ✅ Initialized | 23 repositories, 11 HTTP clients, Polly policies |
+| `packages/story-generator` | ✅ Initialized | Custom retry, in-memory stores, LLM services |
+| `packages/publisher` | ⚠️ Not initialized | Requires `git submodule update --init` |
+| `packages/admin-api` | ⚠️ Empty placeholder | Actual code in `packages/app/src/Mystira.App.Admin.Api/` |
+| `packages/devhub` | ⚠️ Not initialized | Requires `git submodule update --init` |
+| `packages/admin-ui` | ⚠️ Empty placeholder | Will be React frontend submodule |
 
 ---
 
@@ -346,50 +341,50 @@ App has a well-designed 3-level entity hierarchy:
 
 #### High-Priority Opportunities (⭐⭐⭐)
 
-| Pattern                         | Description                        | Current State                  | Recommended Package         |
-| ------------------------------- | ---------------------------------- | ------------------------------ | --------------------------- |
-| **Repository + Specifications** | Base CRUD, specification pattern   | App: 23 repos + ISpecification | `Mystira.Shared.Data`       |
-| **Resilience/Polly Pipelines**  | Retry, circuit breaker, timeout    | App: Polly, StoryGen: custom   | `Mystira.Shared.Resilience` |
-| **Redis Caching**               | Distributed cache, decorated repos | None (IMemoryCache only)       | `Mystira.Shared.Caching`    |
-| **Error/Result Pattern**        | Result<T,Error>, exceptions        | App: ErrorResponse hierarchy   | `Mystira.Shared.Exceptions` |
+| Pattern | Description | Current State | Recommended Package |
+|---------|-------------|---------------|---------------------|
+| **Repository + Specifications** | Base CRUD, specification pattern | App: 23 repos + ISpecification | `Mystira.Shared.Data` |
+| **Resilience/Polly Pipelines** | Retry, circuit breaker, timeout | App: Polly, StoryGen: custom | `Mystira.Shared.Resilience` |
+| **Redis Caching** | Distributed cache, decorated repos | None (IMemoryCache only) | `Mystira.Shared.Caching` |
+| **Error/Result Pattern** | Result<T,Error>, exceptions | App: ErrorResponse hierarchy | `Mystira.Shared.Exceptions` |
 
 #### Medium-Priority Opportunities (⭐⭐)
 
-| Pattern                        | Description                      | Current State                   | Recommended Package         |
-| ------------------------------ | -------------------------------- | ------------------------------- | --------------------------- |
-| **Migration Phase Management** | Dual-write, phase routing        | Not implemented                 | `Mystira.Shared.Migration`  |
-| **Domain Base Classes**        | BaseEntity, AggregateRoot        | App: 3-level hierarchy          | `Mystira.Shared.Domain`     |
-| **HTTP Client Config**         | Typed clients, Polly integration | App: BaseApiClient + 11 clients | `Mystira.Shared.Http`       |
-| **Validation**                 | FluentValidation helpers         | App: FluentValidation 11.11     | `Mystira.Shared.Validation` |
-| **API Response Wrappers**      | ApiResponse<T>, ProblemDetails   | Contracts: ApiResponse<T>       | `Mystira.Shared.Api`        |
+| Pattern | Description | Current State | Recommended Package |
+|---------|-------------|---------------|---------------------|
+| **Migration Phase Management** | Dual-write, phase routing | Not implemented | `Mystira.Shared.Migration` |
+| **Domain Base Classes** | BaseEntity, AggregateRoot | App: 3-level hierarchy | `Mystira.Shared.Domain` |
+| **HTTP Client Config** | Typed clients, Polly integration | App: BaseApiClient + 11 clients | `Mystira.Shared.Http` |
+| **Validation** | FluentValidation helpers | App: FluentValidation 11.11 | `Mystira.Shared.Validation` |
+| **API Response Wrappers** | ApiResponse<T>, ProblemDetails | Contracts: ApiResponse<T> | `Mystira.Shared.Api` |
 
 #### Cross-Service Pattern Analysis
 
-| Pattern          | App               | StoryGenerator     | Admin-Api   | Publisher  | DevHub     |
-| ---------------- | ----------------- | ------------------ | ----------- | ---------- | ---------- |
-| Repository       | ✅ 23 repos       | ❌ Service-based   | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
-| Polly            | ✅ 11 clients     | ❌ Custom retry    | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
-| Caching          | 🟡 IMemoryCache   | 🟡 ConcurrentDict  | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
-| Entities         | ✅ 3-level        | ❌ None            | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
-| JWT Auth         | ✅ Custom + Entra | ❌ None            | ✅ Entra ID | ❓ Unknown | ❓ Unknown |
-| FluentValidation | ✅ v11.11         | ❌ DataAnnotations | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
-| MediatR/CQRS     | ✅ v12.4.1        | ✅ v12.1.1         | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| Pattern | App | StoryGenerator | Admin-Api | Publisher | DevHub |
+|---------|-----|----------------|-----------|-----------|--------|
+| Repository | ✅ 23 repos | ❌ Service-based | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| Polly | ✅ 11 clients | ❌ Custom retry | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| Caching | 🟡 IMemoryCache | 🟡 ConcurrentDict | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| Entities | ✅ 3-level | ❌ None | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| JWT Auth | ✅ Custom + Entra | ❌ None | ✅ Entra ID | ❓ Unknown | ❓ Unknown |
+| FluentValidation | ✅ v11.11 | ❌ DataAnnotations | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
+| MediatR/CQRS | ✅ v12.4.1 | ✅ v12.1.1 | 🔗 Uses App | ❓ Unknown | ❓ Unknown |
 
 **Legend**: ✅ Implemented | 🟡 Partial | ❌ Not used | 🔗 References | ❓ Submodule not initialized
 
 #### Updated Cross-Service Analysis (All Submodules Initialized)
 
-| Pattern          | App               | StoryGenerator     | Admin-Api                  | Publisher        | DevHub             | Admin-UI        |
-| ---------------- | ----------------- | ------------------ | -------------------------- | ---------------- | ------------------ | --------------- |
-| Repository       | ✅ 23 repos       | ❌ Service-based   | ✅ Uses App NuGet          | ❌ None          | 🟡 Service pattern | ❌ None         |
-| Polly            | ✅ 11 clients     | ❌ Custom retry    | ❌ None                    | ❌ None          | ❌ Custom retry    | ❌ None         |
-| Caching          | 🟡 IMemoryCache   | 🟡 ConcurrentDict  | ✅ Redis                   | 🟡 React Query   | 🟡 Zustand         | 🟡 React Query  |
-| Entities         | ✅ 3-level        | ❌ None            | ✅ Uses App NuGet          | ❌ TS types      | ❌ TS types        | ❌ TS types     |
-| JWT Auth         | ✅ Custom + Entra | ❌ None            | ✅ Full (JWT+Entra+Cookie) | 🟡 Custom JWT    | ❌ CLI-based       | 🟡 Cookie-based |
-| FluentValidation | ✅ v11.11         | ❌ DataAnnotations | ❌ JSON Schema             | ✅ Zod           | ❌ None            | ✅ Zod          |
-| MediatR/CQRS     | ✅ v12.4.1        | ✅ v12.1.1         | ✅ Use Cases               | ❌ None          | ❌ None            | ❌ None         |
-| Design Tokens    | 🟡 Partial CSS    | 🟡 Tailwind        | N/A                        | ✅ Comprehensive | 🟡 Tailwind        | 🟡 Bootstrap    |
-| State Mgmt       | ❌ Server-side    | ❌ Server-side     | N/A                        | ✅ Zustand v5    | ✅ Zustand v4      | ✅ Zustand v5   |
+| Pattern | App | StoryGenerator | Admin-Api | Publisher | DevHub | Admin-UI |
+|---------|-----|----------------|-----------|-----------|--------|----------|
+| Repository | ✅ 23 repos | ❌ Service-based | ✅ Uses App NuGet | ❌ None | 🟡 Service pattern | ❌ None |
+| Polly | ✅ 11 clients | ❌ Custom retry | ❌ None | ❌ None | ❌ Custom retry | ❌ None |
+| Caching | 🟡 IMemoryCache | 🟡 ConcurrentDict | ✅ Redis | 🟡 React Query | 🟡 Zustand | 🟡 React Query |
+| Entities | ✅ 3-level | ❌ None | ✅ Uses App NuGet | ❌ TS types | ❌ TS types | ❌ TS types |
+| JWT Auth | ✅ Custom + Entra | ❌ None | ✅ Full (JWT+Entra+Cookie) | 🟡 Custom JWT | ❌ CLI-based | 🟡 Cookie-based |
+| FluentValidation | ✅ v11.11 | ❌ DataAnnotations | ❌ JSON Schema | ✅ Zod | ❌ None | ✅ Zod |
+| MediatR/CQRS | ✅ v12.4.1 | ✅ v12.1.1 | ✅ Use Cases | ❌ None | ❌ None | ❌ None |
+| Design Tokens | 🟡 Partial CSS | 🟡 Tailwind | N/A | ✅ Comprehensive | 🟡 Tailwind | 🟡 Bootstrap |
+| State Mgmt | ❌ Server-side | ❌ Server-side | N/A | ✅ Zustand v5 | ✅ Zustand v4 | ✅ Zustand v5 |
 
 ---
 
@@ -399,13 +394,13 @@ Analysis revealed **fragmented design systems** across 5 frontend packages:
 
 #### Color Palette Inconsistency
 
-| Package         | Primary Color        | Framework         |
-| --------------- | -------------------- | ----------------- |
-| App/PWA         | `#7c3aed` (Purple)   | Custom CSS        |
-| Publisher       | `#9333ea` (Purple)   | Custom CSS Tokens |
-| DevHub          | `#0ea5e9` (Sky Blue) | Tailwind          |
-| Story Generator | `#3b82f6` (Blue)     | Tailwind          |
-| Admin UI        | `#4e73df` (Blue)     | Bootstrap         |
+| Package | Primary Color | Framework |
+|---------|--------------|-----------|
+| App/PWA | `#7c3aed` (Purple) | Custom CSS |
+| Publisher | `#9333ea` (Purple) | Custom CSS Tokens |
+| DevHub | `#0ea5e9` (Sky Blue) | Tailwind |
+| Story Generator | `#3b82f6` (Blue) | Tailwind |
+| Admin UI | `#4e73df` (Blue) | Bootstrap |
 
 **Recommendation**: Create `@mystira/design-tokens` package:
 
@@ -426,7 +421,6 @@ packages/
 ```
 
 **Migration Path**:
-
 1. Extract Publisher's `variables.css` as base (most comprehensive)
 2. Standardize on purple primary (`#7c3aed`) across all packages
 3. Create Tailwind preset for DevHub, Story Generator
@@ -434,28 +428,28 @@ packages/
 
 #### Component Duplication Analysis
 
-| Component | Publisher | Admin-UI        | App/PWA    | DevHub       |
-| --------- | --------- | --------------- | ---------- | ------------ |
-| Button    | React TSX | Bootstrap       | Blazor CSS | Tailwind TSX |
-| Card      | React TSX | Bootstrap       | Blazor CSS | Tailwind TSX |
-| Modal     | React TSX | Bootstrap       | Blazor CSS | N/A          |
-| Toast     | Custom    | react-hot-toast | Blazor     | Custom       |
-| Spinner   | React TSX | Bootstrap       | Blazor CSS | React TSX    |
+| Component | Publisher | Admin-UI | App/PWA | DevHub |
+|-----------|-----------|----------|---------|--------|
+| Button | React TSX | Bootstrap | Blazor CSS | Tailwind TSX |
+| Card | React TSX | Bootstrap | Blazor CSS | Tailwind TSX |
+| Modal | React TSX | Bootstrap | Blazor CSS | N/A |
+| Toast | Custom | react-hot-toast | Blazor | Custom |
+| Spinner | React TSX | Bootstrap | Blazor CSS | React TSX |
 
 **Recommendation**: Consider `@mystira/ui-react` for React apps (Publisher, Admin-UI, DevHub).
 
 #### Infrastructure Consolidation Summary
 
-| Pattern             | Priority  | Effort   | Impact                            |
-| ------------------- | --------- | -------- | --------------------------------- |
-| Polly Resilience    | 🔴 High   | 2-3 days | Eliminates 100+ lines duplication |
-| Repository Base     | 🔴 High   | 3-4 days | Reusable across all .NET services |
-| Error Handling      | 🟡 Medium | 2-3 days | Standardizes API responses        |
-| Redis Caching       | 🟡 Medium | 1-2 days | Enables multi-instance            |
-| HTTP Client Base    | 🟡 Medium | 2 days   | Standardizes typed clients        |
-| Validation Pipeline | 🟡 Medium | 1-2 days | MediatR validation behaviors      |
-| Base Entities       | 🟢 Low    | 1 day    | Only if needed                    |
-| Migration Helpers   | 🟢 Low    | 2 days   | For future dual-write scenarios   |
+| Pattern | Priority | Effort | Impact |
+|---------|----------|--------|--------|
+| Polly Resilience | 🔴 High | 2-3 days | Eliminates 100+ lines duplication |
+| Repository Base | 🔴 High | 3-4 days | Reusable across all .NET services |
+| Error Handling | 🟡 Medium | 2-3 days | Standardizes API responses |
+| Redis Caching | 🟡 Medium | 1-2 days | Enables multi-instance |
+| HTTP Client Base | 🟡 Medium | 2 days | Standardizes typed clients |
+| Validation Pipeline | 🟡 Medium | 1-2 days | MediatR validation behaviors |
+| Base Entities | 🟢 Low | 1 day | Only if needed |
+| Migration Helpers | 🟢 Low | 2 days | For future dual-write scenarios |
 
 ### Phase 5: Cleanup
 
@@ -475,15 +469,15 @@ packages/
 
 ```typescript
 // Before
-import { StoryRequest } from "@mystira/app-contracts";
-import { GeneratorConfig } from "@mystira/story-generator-contracts";
+import { StoryRequest } from '@mystira/app-contracts';
+import { GeneratorConfig } from '@mystira/story-generator-contracts';
 
 // After
-import { StoryRequest } from "@mystira/contracts/app";
-import { GeneratorConfig } from "@mystira/contracts/story-generator";
+import { StoryRequest } from '@mystira/contracts/app';
+import { GeneratorConfig } from '@mystira/contracts/story-generator';
 
 // Or unified import
-import { App, StoryGenerator } from "@mystira/contracts";
+import { App, StoryGenerator } from '@mystira/contracts';
 ```
 
 ### C#/NuGet
