@@ -53,19 +53,6 @@ variable "enable_custom_domain" {
   default     = false
 }
 
-# Admin API scaling
-variable "admin_api_min_replicas" {
-  description = "Minimum number of API replicas"
-  type        = number
-  default     = 1
-}
-
-variable "admin_api_max_replicas" {
-  description = "Maximum number of API replicas"
-  type        = number
-  default     = 2
-}
-
 # =============================================================================
 # Admin API Module
 # =============================================================================
@@ -79,11 +66,6 @@ module "admin_api" {
   tags                = var.tags
 
   shared_log_analytics_workspace_id = var.shared_log_analytics_workspace_id
-  shared_postgresql_server_id       = var.shared_postgresql_server_id
-
-  # Scaling configuration
-  min_replicas = var.admin_api_min_replicas
-  max_replicas = var.admin_api_max_replicas
 }
 
 # =============================================================================

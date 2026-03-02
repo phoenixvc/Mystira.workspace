@@ -294,10 +294,7 @@ module "chain" {
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 1
-  chain_vm_size                     = "Standard_B2s"
   chain_storage_size_gb             = 100 # Premium file shares require minimum 100 GB
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.chain.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
@@ -313,16 +310,12 @@ module "publisher" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.publisher.name
-  publisher_replica_count           = 1
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-dev.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   # Use shared Service Bus (in core-rg per ADR-0017)
-  use_shared_servicebus          = true
-  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
-  shared_servicebus_queue_name   = "publisher-events"
+  use_shared_servicebus        = true
+  shared_servicebus_queue_name = "publisher-events"
 
   tags = {
     CostCenter = "development"
@@ -517,9 +510,7 @@ module "story_generator" {
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
   fallback_location        = "eastus2" # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.workspace"
-  github_branch            = "dev"
-  enable_swa_custom_domain = false # Enable after DNS is configured
+  enable_swa_custom_domain = false     # Enable after DNS is configured
   swa_custom_domain        = "dev.story.mystira.app"
 
   tags = {
@@ -535,10 +526,7 @@ module "admin_api" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.admin.name
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
-  shared_postgresql_server_id       = module.shared_postgresql.server_id
 
   tags = {
     CostCenter = "development"
@@ -553,7 +541,6 @@ module "admin_ui" {
   environment         = "dev"
   location            = var.location
   fallback_location   = "eastus2" # SWA not available in South Africa North
-  region_code         = "san"
   resource_group_name = azurerm_resource_group.admin.name
 
   static_web_app_sku   = "Free"

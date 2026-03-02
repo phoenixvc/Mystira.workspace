@@ -29,29 +29,6 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "publisher_replica_count" {
-  description = "Number of publisher service replicas"
-  type        = number
-  default     = 2
-
-  validation {
-    condition     = var.publisher_replica_count >= 1 && var.publisher_replica_count <= 10
-    error_message = "Publisher replica count must be between 1 and 10."
-  }
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for publisher deployment"
-  type        = string
-  default     = null
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for publisher service"
-  type        = string
-  default     = null
-}
-
 variable "chain_rpc_endpoint" {
   description = "RPC endpoint for Mystira Chain"
   type        = string
@@ -75,12 +52,6 @@ variable "use_shared_servicebus" {
   description = "Use shared Service Bus namespace instead of creating one"
   type        = bool
   default     = false
-}
-
-variable "shared_servicebus_namespace_id" {
-  description = "ID of shared Service Bus namespace (required when use_shared_servicebus = true)"
-  type        = string
-  default     = null
 }
 
 variable "shared_servicebus_queue_name" {

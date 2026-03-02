@@ -102,18 +102,6 @@ variable "fallback_location" {
   default     = "eastus2"
 }
 
-variable "github_repository_url" {
-  description = "GitHub repository URL for Static Web App deployment (optional - for GitHub integration)"
-  type        = string
-  default     = ""
-}
-
-variable "github_branch" {
-  description = "GitHub branch for Static Web App deployment"
-  type        = string
-  default     = "dev"
-}
-
 variable "swa_custom_domain" {
   description = "Custom domain for Static Web App (e.g., story.mystira.app)"
   type        = string

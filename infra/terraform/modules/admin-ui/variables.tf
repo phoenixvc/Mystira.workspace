@@ -19,12 +19,6 @@ variable "fallback_location" {
   default     = "eastus2"
 }
 
-variable "region_code" {
-  description = "Short region code for naming (san, eus, etc.)"
-  type        = string
-  default     = "san"
-}
-
 variable "resource_group_name" {
   description = "Name of the resource group"
   type        = string
