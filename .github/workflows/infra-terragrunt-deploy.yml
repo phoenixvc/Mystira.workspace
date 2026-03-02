@@ -213,7 +213,7 @@ jobs:
           fi
 
       - name: Download Plan Artifact
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
           path: ${{ steps.get-dir.outputs.dir }}
