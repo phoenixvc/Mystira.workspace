@@ -21,7 +21,7 @@
 variable "subscription_id" {
   description = "Azure Subscription ID for DNS zone resources. Must match the subscription where the DNS zone exists."
   type        = string
-  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe"  # ⚠️ Update this to match your subscription
+  default     = "22f9eb18-6553-4b7d-9451-47d0195085fe" # ⚠️ Update this to match your subscription
 
   validation {
     condition     = can(regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", var.subscription_id))

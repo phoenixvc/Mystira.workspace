@@ -40,12 +40,6 @@ variable "chain_node_count" {
   }
 }
 
-variable "chain_vm_size" {
-  description = "Azure VM size for chain nodes"
-  type        = string
-  default     = "Standard_D2s_v3"
-}
-
 variable "chain_storage_size_gb" {
   description = "Storage size in GB for chain data (minimum 100 GB for Premium file shares)"
   type        = number
@@ -55,18 +49,6 @@ variable "chain_storage_size_gb" {
     condition     = var.chain_storage_size_gb >= 100
     error_message = "Premium file shares require a minimum quota of 100 GB."
   }
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for chain deployment"
-  type        = string
-  default     = null
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for chain nodes"
-  type        = string
-  default     = null
 }
 
 variable "tags" {

@@ -222,10 +222,7 @@ module "chain" {
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 2
-  chain_vm_size                     = "Standard_D2s_v3"
   chain_storage_size_gb             = 100
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.chain.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
@@ -241,16 +238,12 @@ module "publisher" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.publisher.name
-  publisher_replica_count           = 2
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-staging.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   # Use shared Service Bus (in core-rg per ADR-0017)
-  use_shared_servicebus          = true
-  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
-  shared_servicebus_queue_name   = "publisher-events"
+  use_shared_servicebus        = true
+  shared_servicebus_queue_name = "publisher-events"
 
   tags = {
     CostCenter = "staging"
@@ -489,9 +482,7 @@ module "story_generator" {
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
   fallback_location        = "eastus2" # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.workspace"
-  github_branch            = "main" # staging uses main branch
-  enable_swa_custom_domain = false  # Disabled until CNAME DNS records are created
+  enable_swa_custom_domain = false     # Disabled until CNAME DNS records are created
   swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {
@@ -507,10 +498,7 @@ module "admin_api" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.admin.name
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
-  shared_postgresql_server_id       = module.shared_postgresql.server_id
 
   tags = {
     CostCenter = "staging"
