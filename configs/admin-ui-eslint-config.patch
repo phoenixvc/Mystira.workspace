@@ -1,0 +1,61 @@
+From b32a79a56384d72d3ccd65fa307c86435dc407dd Mon Sep 17 00:00:00 2001
+From: GitHub Copilot <copilot@github.com>
+Date: Sun, 14 Dec 2025 23:28:00 +0000
+Subject: [PATCH] feat: add ESLint configuration for React and browser
+ environment
+
+This configuration adds:
+- Browser and ES2020 environment support
+- React Hooks linting rules
+- TypeScript ESLint configuration
+- Node.js environment for config files
+
+Fixes lint errors related to:
+- React undefined
+- Browser APIs (window, document, localStorage, File, FormData, Blob)
+- Node.js APIs (__dirname in config files)
+---
+ .eslintrc.cjs | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+ create mode 100644 .eslintrc.cjs
+
+diff --git a/.eslintrc.cjs b/.eslintrc.cjs
+new file mode 100644
+index 0000000..2b7ecb4
+--- /dev/null
++++ b/.eslintrc.cjs
+@@ -0,0 +1,31 @@
++module.exports = {
++  root: true,
++  env: { browser: true, es2020: true },
++  extends: [
++    'eslint:recommended',
++    'plugin:@typescript-eslint/recommended',
++    'plugin:react-hooks/recommended',
++  ],
++  ignorePatterns: ['dist', '.eslintrc.cjs'],
++  parser: '@typescript-eslint/parser',
++  plugins: ['react-refresh'],
++  rules: {
++    'react-refresh/only-export-components': [
++      'warn',
++      { allowConstantExport: true },
++    ],
++    '@typescript-eslint/no-explicit-any': 'warn',
++    '@typescript-eslint/no-unused-vars': [
++      'warn',
++      { argsIgnorePattern: '^_' },
++    ],
++  },
++  overrides: [
++    {
++      files: ['vite.config.ts', '*.config.ts'],
++      env: {
++        node: true,
++      },
++    },
++  ],
++}
+-- 
+2.52.0
+
