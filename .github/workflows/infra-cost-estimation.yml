@@ -158,7 +158,7 @@ jobs:
             --tag="infracost-dev"
 
       - name: Upload Infracost output
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: infracost-output
           path: /tmp/infracost-diff.json

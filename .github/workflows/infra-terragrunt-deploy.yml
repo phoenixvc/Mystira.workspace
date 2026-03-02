@@ -142,7 +142,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.environment }}
 
       - name: Upload Plan Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ inputs.product }}-${{ inputs.environment }}
           path: |

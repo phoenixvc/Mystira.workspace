@@ -93,7 +93,7 @@ jobs:
           pnpm run generate:ts
 
       - name: Upload TypeScript artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: typescript-contracts
           path: packages/contracts/src/generated/
@@ -145,7 +145,7 @@ jobs:
           pnpm run generate:csharp
 
       - name: Upload C# artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: csharp-contracts
           path: packages/contracts/dotnet/Mystira.Contracts/Generated/

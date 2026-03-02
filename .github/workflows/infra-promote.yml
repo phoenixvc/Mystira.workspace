@@ -206,7 +206,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: promote-plan-shared-infra-${{ inputs.target_environment }}
           path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}/promote.tfplan
@@ -283,7 +283,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
           path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}/promote.tfplan
