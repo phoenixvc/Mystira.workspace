@@ -1,0 +1,26 @@
+extends: default
+
+rules:
+  line-length: disable
+  truthy:
+    allowed-values: ["true", "false", "on"]
+    check-keys: false
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: disable
+  document-start: disable
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+  empty-lines:
+    max: 1
+  trailing-spaces: enable
+
+ignore:
+  - node_modules/
+  - .terragrunt-cache/
+  - pnpm-lock.yaml
+  - infra/gitops/
+  - infra/kubernetes/
+  - packages/story-generator/test-data/
+  - packages/story-generator/tests/
