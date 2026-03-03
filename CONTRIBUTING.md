@@ -235,6 +235,42 @@ dotnet restore
 
 ## Development Workflow
 
+### Branching Strategy
+
+We use a **feature → dev → main** branching model:
+
+```
+main          ─────────────────●────────────────●──────
+                              ↑                ↑
+dev           ──●──●──●──●───●────●──●──●──●──●──────
+                ↑  ↑     ↑                ↑
+feature/*     ──●  ●     ●                ●
+fix/*              ●
+```
+
+| Branch  | Purpose                         | Protected | Merge Target |
+| ------- | ------------------------------- | --------- | ------------ |
+| `main`  | Production-ready code           | Yes       | —            |
+| `dev`   | Integration branch for features | Yes       | `main`       |
+| Feature | Individual features or fixes    | No        | `dev`        |
+
+**Rules:**
+
+1. **Never push directly to `main` or `dev`** — all changes go through pull requests
+2. **Feature branches** are created from `dev` and merged back into `dev`
+3. **`dev` → `main`** merges happen via PR when `dev` is stable and tested
+4. **Hotfixes** may be created from `main` and merged into both `main` and `dev`
+
+### Branch Protection (main)
+
+The `main` branch has the following protections:
+
+- **Require pull request reviews** before merging (minimum 1 approval)
+- **Dismiss stale pull request approvals** when new commits are pushed
+- **Require branches to be up-to-date** before merging
+- **Require status checks to pass** (CI: lint, test, build, build-dotnet)
+- **Restrict direct pushes** — only admins may push directly (emergency only)
+
 ### Branch Naming
 
 Use descriptive branch names with prefixes:
@@ -307,24 +343,34 @@ See [Commit Conventions](./docs/guides/commit-conventions.md) for detailed guide
 
 ### Pull Requests
 
-1. Create a feature branch from `dev` branch
-2. Make your changes with clear commits
-3. Write/update tests as needed
-4. Ensure all checks pass:
-
+1. Create a feature branch from `dev`:
    ```bash
-   pnpm test
-   pnpm lint
-   pnpm build
+   git checkout dev
+   git pull origin dev
+   git checkout -b feature/my-feature
    ```
-
-5. Create a changeset if your change affects packages:
-
+2. Make your changes with clear, conventional commits
+3. Write/update tests as needed
+4. Ensure all checks pass locally:
+   ```bash
+   pnpm lint
+   pnpm test
+   pnpm build
+   dotnet build
+   dotnet test
+   ```
+5. Create a changeset if your change affects published packages:
    ```bash
    pnpm changeset
    ```
-
-6. Submit a PR to the `dev` branch with a clear description
+6. Push your branch and open a PR **targeting `dev`**:
+   ```bash
+   git push -u origin feature/my-feature
+   # Open PR via GitHub UI or gh CLI
+   gh pr create --base dev
+   ```
+7. After review and approval, squash-merge into `dev`
+8. When `dev` is stable, a maintainer opens a PR from `dev` → `main`
 
 ### Code Review
 
