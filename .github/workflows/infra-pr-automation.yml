@@ -795,7 +795,7 @@ jobs:
 
       - name: Download Plan Artifact
         if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           pattern: tfplan-*
           path: ./plans
