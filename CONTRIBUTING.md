@@ -103,17 +103,135 @@ dotnet --version  # Should be 10.0+
 
 This is a monorepo managed with pnpm workspaces and Turborepo. Each package has its own README with specific instructions.
 
-- `packages/chain/` - Blockchain and smart contracts (Python, gRPC)
-- `packages/app/` - Main storytelling application (.NET)
-- `packages/story-generator/` - AI story generation engine (.NET)
-- `packages/publisher/` - Publisher web application (TypeScript, React)
-- `packages/devhub/` - Developer portal and tools (TypeScript)
-- `packages/admin-api/` - Admin backend API (ASP.NET Core)
-- `packages/admin-ui/` - Admin dashboard frontend (TypeScript, React)
-- `packages/contracts/` - Shared contracts (TypeScript + .NET)
-- `packages/shared/` - Shared .NET libraries
-- `packages/shared-utils/` - Shared TypeScript utilities
-- `infra/` - Infrastructure as Code (Terraform, Kubernetes)
+### Application Packages
+
+| Package                | Path                        | Technology         | Description         |
+| ---------------------- | --------------------------- | ------------------ | ------------------- |
+| Mystira.Chain          | `packages/chain/`           | Python, gRPC       | Blockchain service  |
+| Mystira.App            | `packages/app/`             | .NET, Blazor       | Main application    |
+| Mystira.StoryGenerator | `packages/story-generator/` | .NET               | AI story generation |
+| Mystira.Publisher      | `packages/publisher/`       | TypeScript, React  | Content publishing  |
+| Mystira.DevHub         | `packages/devhub/`          | TypeScript         | Developer portal    |
+| Mystira.Admin.Api      | `packages/admin-api/`       | .NET, ASP.NET Core | Admin backend       |
+| Mystira.Admin.UI       | `packages/admin-ui/`        | TypeScript, React  | Admin dashboard     |
+
+### Shared Packages
+
+| Package                | Path                      | Type        | Description                |
+| ---------------------- | ------------------------- | ----------- | -------------------------- |
+| Mystira.Contracts      | `packages/contracts/`     | NPM + NuGet | Shared API contracts       |
+| Mystira.Shared         | `packages/shared/`        | NuGet       | .NET shared infrastructure |
+| Mystira.Core           | `packages/core/`          | NuGet       | Core functionality         |
+| Mystira.Domain         | `packages/domain/`        | NuGet       | Domain models              |
+| Mystira.Application    | `packages/application/`   | NuGet       | Application services       |
+| @mystira/core-types    | `packages/core-types/`    | NPM         | TypeScript types           |
+| @mystira/shared-utils  | `packages/shared-utils/`  | NPM         | Utility functions          |
+| @mystira/design-tokens | `packages/design-tokens/` | NPM         | Design system tokens       |
+| @mystira/api-spec      | `packages/api-spec/`      | NPM         | API specifications         |
+
+### Infrastructure Packages
+
+| Package                              | Path                                                            | Description          |
+| ------------------------------------ | --------------------------------------------------------------- | -------------------- |
+| Mystira.Infrastructure.Data          | `packages/infrastructure/Mystira.Infrastructure.Data/`          | Data access layer    |
+| Mystira.Infrastructure.Azure         | `packages/infrastructure/Mystira.Infrastructure.Azure/`         | Azure integrations   |
+| Mystira.Infrastructure.Discord       | `packages/infrastructure/Mystira.Infrastructure.Discord/`       | Discord integration  |
+| Mystira.Infrastructure.Teams         | `packages/infrastructure/Mystira.Infrastructure.Teams/`         | Teams integration    |
+| Mystira.Infrastructure.Payments      | `packages/infrastructure/Mystira.Infrastructure.Payments/`      | Payment processing   |
+| Mystira.Infrastructure.WhatsApp      | `packages/infrastructure/Mystira.Infrastructure.WhatsApp/`      | WhatsApp integration |
+| Mystira.Infrastructure.StoryProtocol | `packages/infrastructure/Mystira.Infrastructure.StoryProtocol/` | Story Protocol       |
+
+### Infrastructure (IaC)
+
+The `infra/` directory contains infrastructure code directly in the workspace:
+
+- `infra/terraform/` - Terraform modules for Azure
+- `infra/kubernetes/` - Kubernetes manifests and overlays
+- `infra/docker/` - Dockerfiles for services
+- `infra/scripts/` - Deployment scripts
+
+---
+
+## Package Management
+
+Mystira uses GitHub Packages for both NPM (`@mystira/*`) and NuGet (`Mystira.*`) packages.
+
+### NPM Packages
+
+The workspace `.npmrc` is pre-configured for the `@mystira` scope:
+
+```ini
+@mystira:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+**Local Development Authentication:**
+
+```bash
+# Add to your shell profile (~/.bashrc, ~/.zshrc)
+export NODE_AUTH_TOKEN=ghp_your_github_pat_here
+
+# Or use GitHub CLI
+export NODE_AUTH_TOKEN=$(gh auth token)
+```
+
+**Creating a Personal Access Token (PAT):**
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Name: `Mystira Package Access`
+4. Scopes: `read:packages`, `write:packages`, `repo`
+5. Copy and save the token
+
+### NuGet Packages
+
+NuGet packages are published to `https://nuget.pkg.github.com/phoenixvc/index.json`.
+
+**Local Development Authentication:**
+
+```bash
+# Add the GitHub Packages source globally
+dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
+  --name github-mystira \
+  --username phoenixvc \
+  --password ghp_your_github_pat_here \
+  --store-password-in-clear-text \
+  --configfile ~/.nuget/NuGet/NuGet configuration
+```
+
+**Package Source Mapping (Required in NuGet configuration):**
+
+To ensure NuGet resolves Mystira packages from GitHub (not nuget.org), add package source mapping:
+
+```xml
+<packageSourceMapping>
+  <packageSource key="nuget.org">
+    <package pattern="*" />
+  </packageSource>
+  <packageSource key="github">
+    <package pattern="Mystira.*" />
+    <package pattern="PhoenixVC.*" />
+  </packageSource>
+</packageSourceMapping>
+```
+
+> **Note**: Without this mapping, you may see "Unable to resolve 'Mystira.\*'" errors.
+
+**Verifying Access:**
+
+```bash
+# List NuGet sources
+dotnet nuget list source
+
+# Search for packages
+dotnet package search Mystira --source github-mystira
+
+# Restore packages (clear cache if issues)
+dotnet nuget locals all --clear
+dotnet restore
+```
+
+---
 
 ## Development Workflow
 

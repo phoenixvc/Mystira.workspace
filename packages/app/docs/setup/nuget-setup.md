@@ -41,12 +41,12 @@ Replace:
 - `YOUR_GITHUB_USERNAME`: Your GitHub username
 - `YOUR_GITHUB_PAT`: Personal Access Token created above
 
-**Option B: User-Level NuGet.Config** (Most Secure)
+**Option B: User-Level NuGet configuration** (Most Secure)
 
 Store credentials in user-level NuGet config to avoid committing credentials:
 
-**Windows**: `%APPDATA%\NuGet\NuGet.Config`
-**Linux/Mac**: `~/.nuget/NuGet/NuGet.Config`
+**Windows**: `%APPDATA%\NuGet\NuGet configuration`
+**Linux/Mac**: `~/.nuget/NuGet/NuGet configuration`
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -64,11 +64,11 @@ Store credentials in user-level NuGet config to avoid committing credentials:
 </configuration>
 ```
 
-**Option C: Repository NuGet.config**
+**Option C: Repository NuGet configuration**
 
-Copy `NuGet.config.template` to `NuGet.config` and add your credentials.
+Copy `NuGet template` to `NuGet configuration` and add your credentials.
 
-**⚠️ Security Note**: If using repository NuGet.config, ensure it's in `.gitignore` to prevent committing credentials.
+**⚠️ Security Note**: If using repository NuGet configuration, ensure it's in `.gitignore` to prevent committing credentials.
 
 ### 3. Verify Configuration
 
@@ -240,5 +240,5 @@ When a new version is published:
 
 - [Implementation Status](./IMPLEMENTATION_STATUS.md)
 - [Package Publishing Checklist](./PACKAGE_PUBLISHING_CHECKLIST.md)
-- [NuGet.config Template](../../NuGet.config.template)
+- [NuGet configuration Template](../../NuGet template)
 - [GitHub Packages Documentation](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-nuget-registry)
