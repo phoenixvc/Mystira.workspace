@@ -1,4 +1,4 @@
-name: "Deployment: App API - Production Blue-Green"
+name: "[Deploy] App API Blue-Green"
 
 # Production Blue-Green Deployment for Mystira App API
 # Strategy: Deploy to staging slot, health check, then swap to production
