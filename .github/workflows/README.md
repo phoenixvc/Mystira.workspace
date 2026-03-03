@@ -1,89 +1,30 @@
-# Workflow Organization Strategy
+# Workflow Inventory
 
-This document explains the CI/CD workflow organization for the Mystira workspace monorepo.
+This document tracks the current GitHub Actions workflows in this repo.
+It reflects the workflow files present under `.github/workflows/`.
 
-## Overview
+## Current workflows (13)
 
-The workspace uses a **hybrid approach** where:
+### Deployment
 
-- **Development workflows** run in component submodules for fast feedback
+- **Development workflows** run per-package with path-based triggers for fast feedback
 - **Release and deployment workflows** run centrally from the workspace for controlled releases
+- `deploy-app-api-production.yml` - App API blue/green production deploy
+- `deploy-app-api-rollback.yml` - App API manual rollback
 
-## Workflow Categories
+### Reusable workflow templates
 
-### 🔧 Component CI Workflows (6 components)
+- `reusable-docker-build.yml`
+- `reusable-security-scan.yml`
 
-These workflows run when respective component files change in workspace PRs and pushes:
+### Security
 
-- **`admin-api-ci.yml`** - Admin API (.NET) linting, testing, building
-- **`admin-ui-ci.yml`** - Admin UI (React/TypeScript) linting, testing, building
-- **`chain-ci.yml`** - Chain (Python) linting, testing, Docker builds, K8s validation
-- **`devhub-ci.yml`** - Devhub (Node.js) linting, testing, building
-- **`publisher-ci.yml`** - Publisher (Node.js) linting, testing, Docker builds, K8s validation
-- **`story-generator-ci.yml`** - Story Generator (.NET) linting, testing, Docker builds, NuGet publishing
+**Why in workspace?** All packages live in this monorepo. The workspace provides their CI/CD.
 
-**Trigger:** Changes to `packages/{component}/**` on dev/main branches
+### 📱 App Component
 
-**Why in workspace?** These submodules have NO workflows in their own repositories. The workspace provides their only CI/CD.
-
-### 📱 App Component (Special Case)
-
-**No workspace CI workflow** - The App submodule has its own CI/CD in ([Mystira.App](https://github.com/phoenixvc/Mystira.App)) repository:
-
-**App repo handles (KEEP these workflows):**
-
-- ✅ `ci-tests-codecov.yml` - CI tests & code coverage (runs on all App PRs)
-- ✅ `swa-preview-tests.yml` - Preview environment testing
-- ✅ `swa-cleanup-staging-environments.yml` - Preview cleanup
-- ✅ `infrastructure-deploy-dev.yml` - Dev infrastructure (optional, see below)
-- ✅ `mystira-app-*-dev.yml` - Dev deployments for API/PWA/Admin (optional, see below)
-
-**Workspace handles (for App):**
-
-- ✅ Staging releases (via `staging-release.yml`)
-- ✅ Production releases (via `production-release.yml`)
-- ✅ NuGet package publishing (centralized on workspace main)
-- ✅ Multi-service orchestration
-- ✅ Integration with other services
-
-**DELETE from App repo (11 workflows):**
-
-These workflows should be removed as workspace handles staging/prod releases:
-
-**Staging (6 workflows):**
-
-- ❌ `infrastructure-deploy-staging.yml`
-- ❌ `mystira-app-admin-api-cicd-staging.yml`
-- ❌ `mystira-app-api-cicd-staging.yml`
-- ❌ `mystira-app-pwa-cicd-staging.yml`
-- ❌ `mystira-app-pwa-cicd-staging.yml.disabled`
-- ❌ `staging-automated-setup.yml`
-
-**Production (4 workflows):**
-
-- ❌ `infrastructure-deploy-prod.yml`
-- ❌ `mystira-app-admin-api-cicd-prod.yml`
-- ❌ `mystira-app-api-cicd-prod.yml`
-- ❌ `mystira-app-pwa-cicd-prod.yml`
-
-**Package Publishing (1 workflow):**
-
-- ❌ `publish-shared-packages.yml` (move to workspace)
-
-**Dev Deployments (4 workflows - YOUR CHOICE):**
-
-Option A (Recommended): **KEEP** for fast dev iterations
-
-- ✅ `infrastructure-deploy-dev.yml`
-- ✅ `mystira-app-admin-api-cicd-dev.yml`
-- ✅ `mystira-app-api-cicd-dev.yml`
-- ✅ `mystira-app-pwa-cicd-dev.yml`
-
-Option B: **DELETE** for centralized control
-
-- ❌ Move all dev deployments to workspace
-
-**Rationale:** App has independent development lifecycle. Developers work in App repo with fast CI feedback. Staging/production releases are controlled from workspace to prevent accidental deployments and maintain consistency with other components.
+- **`app-ci.yml`** - App (C#, .NET) linting, testing, building
+- **Trigger:** Changes to `packages/app/**` on dev/main branches
 
 ### 🚀 Deployment Workflows
 
@@ -96,18 +37,6 @@ Option B: **DELETE** for centralized control
   - Triggers: Manual only (workflow_dispatch with confirmation)
   - Requires: Typing "DEPLOY TO PRODUCTION" to confirm
   - Environment: https://mystira.app
-
-### 🏗️ Infrastructure Workflows
-
-- **`infra-validate.yml`** - Validates infrastructure configurations
-  - Validates: Terraform, Kubernetes manifests, Dockerfiles
-  - Runs: Security scans (Checkov), format checks
-  - Environments: dev, staging, prod
-
-- **`infra-deploy.yml`** - Deploys infrastructure to environments
-  - Handles: Terraform apply, Docker builds, Kubernetes deployments
-  - Supports: Selective component deployment, manual triggers
-  - Environments: dev (auto), staging/prod (manual)
 
 ### 📋 Workspace-Level Workflows
 
@@ -122,11 +51,6 @@ Option B: **DELETE** for centralized control
   - Triggers: Pushes to main branch
 
 ### 🔧 Utility Workflows
-
-- **`check-submodules.yml`** - Validates submodule commit references
-  - Checks: All submodule commits exist on their remotes
-  - Purpose: Prevents broken submodule references
-  - Triggers: All PRs and pushes to dev/main
 
 - **`utilities-link-checker.yml`** - Checks documentation links
   - Validates: All links in markdown files
@@ -145,11 +69,11 @@ Option B: **DELETE** for centralized control
 
 ### Working on App
 
-1. **Development:** Work in [Mystira.App](https://github.com/phoenixvc/Mystira.App) repository
-2. **CI runs:** App repo's workflows validate changes
-3. **Dev deployment:** App repo deploys to dev environment
-4. **Update workspace:** Update submodule reference in workspace
-5. **Release:** Workspace staging/production workflows deploy
+1. Make changes in workspace: `packages/app/`
+2. Create PR to workspace
+3. Workspace CI runs automatically
+4. Tests, linting, builds validate changes
+5. Merge to main triggers deployments (if configured)
 
 ### Releasing to Production
 
@@ -160,17 +84,14 @@ Option B: **DELETE** for centralized control
 
 ## Trigger Summary
 
-| Workflow                | Push (dev/main)  | Pull Request     | Manual  | Schedule  |
-| ----------------------- | ---------------- | ---------------- | ------- | --------- |
-| Component CIs (6)       | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
-| Staging Release         | ✅ Main only     | -                | ✅      | -         |
-| Production Release      | -                | -                | ✅ Only | -         |
-| Infrastructure Validate | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
-| Infrastructure Deploy   | ✅ Main only     | -                | ✅      | -         |
-| Workspace CI            | ✅               | ✅               | ✅      | -         |
-| Workspace Release       | ✅ Main only     | -                | ✅      | -         |
-| Check Submodules        | ✅               | ✅               | ✅      | -         |
-| Link Checker            | ✅ Markdown only | ✅ Markdown only | ✅      | ✅ Weekly |
+| Workflow           | Push (dev/main)  | Pull Request     | Manual  | Schedule  |
+| ------------------ | ---------------- | ---------------- | ------- | --------- |
+| Component CIs (6)  | ✅ Path-based    | ✅ Path-based    | ✅      | -         |
+| Staging Release    | ✅ Main only     | -                | ✅      | -         |
+| Production Release | -                | -                | ✅ Only | -         |
+| Workspace CI       | ✅               | ✅               | ✅      | -         |
+| Workspace Release  | ✅ Main only     | -                | ✅      | -         |
+| Link Checker       | ✅ Markdown only | ✅ Markdown only | ✅      | ✅ Weekly |
 
 ## Advantages of This Approach
 
@@ -178,7 +99,7 @@ Option B: **DELETE** for centralized control
 ✅ **Controlled releases** - Only workspace can deploy to staging/production
 ✅ **No duplication** - Clear separation of concerns by environment
 ✅ **Consistent CI** - Other 6 components have uniform CI from workspace
-✅ **Clear ownership** - Development in submodule, releases from workspace
+✅ **Clear ownership** - Development in packages, releases from workspace
 
 ## Migration Notes
 
@@ -257,17 +178,50 @@ rm .github/workflows/mystira-app-pwa-cicd-dev.yml
 **Removed:** 11-15 duplicate/unnecessary workflows
 **Result:** Clear separation, no duplication, controlled releases
 
-## Related Repositories
+## Related Packages
 
 - **Mystira.workspace** (this repo) - Monorepo workspace, centralized releases
-- **Mystira.App** - App submodule with independent CI/CD
-- **Mystira.Admin.Api** - Admin API submodule (no CI/CD, uses workspace)
-- **Mystira.Admin.UI** - Admin UI submodule (no CI/CD, uses workspace)
-- **Mystira.Chain** - Chain submodule (no CI/CD, uses workspace)
-- **Mystira.DevHub** - DevHub submodule (no CI/CD, uses workspace)
-- **Mystira.Publisher** - Publisher submodule (no CI/CD, uses workspace)
-- **Mystira.StoryGenerator** - Story Generator submodule (no CI/CD, uses workspace)
+- **packages/Mystira.App** - App package with independent CI/CD
+- **packages/admin-api** - Admin API package (no CI/CD, uses workspace)
+- **packages/admin-ui** - Admin UI package (no CI/CD, uses workspace)
+- **packages/Mystira.Chain** - Chain package (no CI/CD, uses workspace)
+- **packages/Mystira.DevHub** - DevHub package (no CI/CD, uses workspace)
+- **packages/Mystira.Publisher** - Publisher package (no CI/CD, uses workspace)
+- **packages/Mystira.StoryGenerator** - Story Generator package (no CI/CD, uses workspace)
 
 ## Questions?
 
 If you have questions about workflow organization or need to add new workflows, refer to this document or discuss in the team.
+
+- `security-keyvault-secrets.yml` - Key Vault secret sync/validation (manual)
+- `security-scan-scheduled.yml` - Weekly security scan + on-demand run
+
+### Utilities
+
+- `utilities-link-checker.yml` - Markdown link checking
+
+### Workspace
+
+- `workspace-ci.yml` - Main workspace CI for dev/main
+
+## Trigger summary
+
+| Workflow                        | Push                    | Pull Request                   | Manual | Schedule | Reusable        |
+| ------------------------------- | ----------------------- | ------------------------------ | ------ | -------- | --------------- |
+| `workspace-ci.yml`              | `dev`, `main`           | `dev`, `main`                  | Yes    | -        | -               |
+| `deploy-staging.yml`            | `main` (path-filtered)  | -                              | Yes    | -        | -               |
+| `deploy-production.yml`         | -                       | -                              | Yes    | -        | -               |
+| `deploy-app-api-production.yml` | -                       | -                              | Yes    | -        | -               |
+| `deploy-app-api-rollback.yml`   | -                       | -                              | Yes    | -        | -               |
+| `security-scan-scheduled.yml`   | -                       | -                              | Yes    | Weekly   | -               |
+| `security-keyvault-secrets.yml` | -                       | -                              | Yes    | -        | -               |
+| `utilities-link-checker.yml`    | `main` (markdown paths) | `dev`, `main` (markdown paths) | Yes    | Weekly   | -               |
+| `reusable-docker-build.yml`     | -                       | -                              | -      | -        | `workflow_call` |
+| `reusable-security-scan.yml`    | -                       | -                              | -      | -        | `workflow_call` |
+
+## Usage notes
+
+1. Prefer reusing `reusable-*` templates for shared CI logic.
+2. Use path filters to avoid unnecessary workflow runs.
+3. Require explicit confirmations for production-impacting workflows.
+4. Keep workflow names in `[Category] Name` format for consistency.

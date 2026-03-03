@@ -1,7 +1,7 @@
-name: "Workspace: Release"
+name: "[Publish] GitHub Packages (Changesets)"
 
 # Unified Package Releases: Manages versioning and publishing via Changesets
-# Handles: Creating release PRs and publishing to npm registry + triggering NuGet releases
+# Handles: Creating release PRs and publishing to GitHub Packages + triggering NuGet releases
 # Note: For infrastructure deployments, see Deployment workflows
 # Runs on: Pushes to main branch
 
@@ -14,32 +14,20 @@ on:
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 # This workflow handles unified package releases via Changesets
-# - NPM packages: Published directly via changesets action
+# - NPM packages: Published to GitHub Packages via changesets action
 # - NuGet packages: Triggered via repository_dispatch after NPM release
 # For infrastructure deployments, see staging-release.yml and production-release.yml
-
-env:
-  # Provide empty token to prevent pnpm warnings about missing NODE_AUTH_TOKEN
-  # The actual token is set in the changesets action for publishing
-  NODE_AUTH_TOKEN: ""
 
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       published: ${{ steps.changesets.outputs.published }}
       publishedPackages: ${{ steps.changesets.outputs.publishedPackages }}
     steps:
       - uses: actions/checkout@v6
-        with:
-          submodules: recursive
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
-
-      - name: Setup admin-ui submodule
-        uses: ./.github/actions/setup-admin-ui
-        with:
-          token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
 
       - uses: pnpm/action-setup@v4
 
@@ -47,7 +35,8 @@ jobs:
         with:
           node-version: "24"
           cache: "pnpm"
-          registry-url: "https://registry.npmjs.org"
+          registry-url: "https://npm.pkg.github.com"
+          scope: "@mystira"
 
       - name: Install dependencies
         run: pnpm install --no-frozen-lockfile
@@ -62,14 +51,14 @@ jobs:
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # Trigger NuGet package releases after successful NPM release
+  # Trigger NuGet package releases after successful GitHub Packages release
   # This ensures synchronized versioning across package ecosystems
   trigger-nuget-release:
     name: Trigger NuGet Releases
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: release
     if: needs.release.outputs.published == 'true'
     strategy:
@@ -80,7 +69,7 @@ jobs:
           - name: story-generator-contracts
             npm_trigger: "@mystira/story-generator"
     steps:
-      - name: Check if related NPM package was published
+      - name: Check if related package was published
         id: check
         run: |
           PUBLISHED='${{ needs.release.outputs.publishedPackages }}'
@@ -107,6 +96,7 @@ jobs:
   trigger-contracts-nuget:
     name: Trigger Contracts NuGet Release
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     needs: release
     if: needs.release.outputs.published == 'true'
     steps:

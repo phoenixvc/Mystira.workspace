@@ -12,14 +12,14 @@ GitHub Actions workflows in submodule repositories are displaying as file paths 
 
 The following submodule repositories need their workflow names updated:
 
-| Repository | File Path | Current Display |
-|------------|-----------|-----------------|
-| admin-api | `.github/workflows/ci.yml` | `.github/workflows/admin-api-ci.yml` |
-| admin-ui | `.github/workflows/ci.yml` | `.github/workflows/admin-ui-ci.yml` |
-| app | `.github/workflows/ci.yml` | `.github/workflows/app-ci.yml` |
-| chain | `.github/workflows/ci.yml` | `.github/workflows/chain-ci.yml` |
-| devhub | `.github/workflows/ci.yml` | `.github/workflows/devhub-ci.yml` |
-| publisher | `.github/workflows/ci.yml` | `.github/workflows/publisher-ci.yml` |
+| Repository      | File Path                  | Current Display                            |
+| --------------- | -------------------------- | ------------------------------------------ |
+| admin-api       | `.github/workflows/ci.yml` | `.github/workflows/admin-api-ci.yml`       |
+| admin-ui        | `.github/workflows/ci.yml` | `.github/workflows/admin-ui-ci.yml`        |
+| app             | `.github/workflows/ci.yml` | `.github/workflows/app-ci.yml`             |
+| chain           | `.github/workflows/ci.yml` | `.github/workflows/chain-ci.yml`           |
+| devhub          | `.github/workflows/ci.yml` | `.github/workflows/devhub-ci.yml`          |
+| publisher       | `.github/workflows/ci.yml` | `.github/workflows/publisher-ci.yml`       |
 | story-generator | `.github/workflows/ci.yml` | `.github/workflows/story-generator-ci.yml` |
 
 ## Root Cause
@@ -39,6 +39,7 @@ Use the following naming convention for consistency:
 ```
 
 Examples:
+
 - `Admin API: CI`
 - `Admin UI: CI`
 - `Chain: CI`
@@ -50,6 +51,7 @@ Examples:
 For each submodule repository:
 
 1. **Clone or navigate to the repository**
+
    ```bash
    cd packages/admin-api  # Example
    git checkout main
@@ -57,13 +59,15 @@ For each submodule repository:
    ```
 
 2. **Edit the workflow file**
+
    ```bash
    # Open .github/workflows/ci.yml (or the relevant workflow file)
    ```
 
 3. **Add the name field** at the very top of the file:
+
    ```yaml
-   name: "Admin API: CI"  # Add this line FIRST
+   name: "Admin API: CI" # Add this line FIRST
 
    on:
      push:
@@ -74,6 +78,7 @@ For each submodule repository:
    ```
 
 4. **Commit and push**
+
    ```bash
    git add .github/workflows/ci.yml
    git commit -m "fix: Add descriptive name to CI workflow"
@@ -85,6 +90,7 @@ For each submodule repository:
 ### Example Before/After
 
 **Before:**
+
 ```yaml
 on:
   push:
@@ -99,6 +105,7 @@ jobs:
 ```
 
 **After:**
+
 ```yaml
 name: "Admin API: CI"
 
@@ -116,14 +123,14 @@ jobs:
 
 ## Recommended Workflow Names
 
-| Repository | Suggested Name |
-|------------|----------------|
-| admin-api | `Admin API: CI` |
-| admin-ui | `Admin UI: CI` |
-| app | `Mystira App: CI` |
-| chain | `Chain: CI` |
-| devhub | `DevHub: CI` |
-| publisher | `Publisher: CI` |
+| Repository      | Suggested Name        |
+| --------------- | --------------------- |
+| admin-api       | `Admin API: CI`       |
+| admin-ui        | `Admin UI: CI`        |
+| app             | `Mystira App: CI`     |
+| chain           | `Chain: CI`           |
+| devhub          | `DevHub: CI`          |
+| publisher       | `Publisher: CI`       |
 | story-generator | `Story Generator: CI` |
 
 ## Verification

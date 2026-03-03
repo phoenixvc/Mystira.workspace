@@ -1,0 +1,44 @@
+@* Tab content for guest player assignment *@
+
+<div class="mb-3">
+    <label class="form-label">Display Name *</label>
+    <input type="text" class="form-control" value="@GuestName"
+           @onchange="@(e => OnGuestNameChanged(e.Value?.ToString() ?? string.Empty))"
+           placeholder="Enter guest name" />
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Age Range</label>
+    <select class="form-select" value="@GuestAgeRange"
+            @onchange="@(e => OnGuestAgeRangeChanged(e.Value?.ToString() ?? string.Empty))">
+        <option value="">Prefer not to say</option>
+        @foreach (var ageRange in AgeRanges.All)
+        {
+            <option value="@ageRange">@AgeRanges.GetDisplayName(ageRange)</option>
+        }
+    </select>
+</div>
+
+@code {
+    [Parameter]
+    public string GuestName { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> GuestNameChanged { get; set; }
+
+    [Parameter]
+    public string GuestAgeRange { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> GuestAgeRangeChanged { get; set; }
+
+    private async Task OnGuestNameChanged(string value)
+    {
+        await GuestNameChanged.InvokeAsync(value);
+    }
+
+    private async Task OnGuestAgeRangeChanged(string value)
+    {
+        await GuestAgeRangeChanged.InvokeAsync(value);
+    }
+}

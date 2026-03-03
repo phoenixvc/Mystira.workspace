@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<code_scheme name="Project" version="173">
+  <option name="PREFERRED_PROJECT_CODE_STYLE" value="Rider" />
+
+  <!-- C# code style -->
+  <csharpCodeStyleSettings>
+    <option name="INDENT_SIZE" value="4" />
+    <option name="TAB_SIZE" value="4" />
+    <option name="USE_TAB_CHARACTER" value="false" />
+    <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+    <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+    <option name="PLACE_SIMPLE_BLOCKS_ON_SINGLE_LINE" value="false" />
+    <option name="WRAP_LINES" value="true" />
+    <option name="RIGHT_MARGIN" value="120" />
+  </csharpCodeStyleSettings>
+
+  <!-- .NET naming conventions -->
+  <option name="DOTNET_NAMING_RULE_0" value="1,3,T:N,A:N,I:N,D:N,O:N,P:N,E:N,M:N,S:N,F:N,C:N,R:N" />
+</code_scheme>

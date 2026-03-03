@@ -1,0 +1,115 @@
+/* CSS Custom Properties for theming */
+:root {
+  --admin-bg: #f8f9fa;
+  --admin-bg-alt: #ffffff;
+  --admin-text: #212529;
+  --admin-text-muted: #6c757d;
+  --admin-border: #dee2e6;
+  --admin-card-shadow: rgba(0, 0, 0, 0.1);
+  --admin-card-shadow-hover: rgba(0, 0, 0, 0.2);
+  --admin-primary: #4e73df;
+  --admin-success: #1cc88a;
+  --admin-info: #36b9cc;
+  --admin-warning: #f6c23e;
+}
+
+/* Dark mode variables */
+.dark,
+[data-bs-theme="dark"] {
+  --admin-bg: #1a1d21;
+  --admin-bg-alt: #212529;
+  --admin-text: #e9ecef;
+  --admin-text-muted: #adb5bd;
+  --admin-border: #495057;
+  --admin-card-shadow: rgba(0, 0, 0, 0.3);
+  --admin-card-shadow-hover: rgba(0, 0, 0, 0.5);
+}
+
+body {
+  background-color: var(--admin-bg);
+  color: var(--admin-text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+.admin-full-height {
+  min-height: 100vh;
+}
+
+.footer {
+  margin-top: auto;
+  padding: 1rem 0;
+  background-color: var(--admin-bg);
+}
+
+.card {
+  background-color: var(--admin-bg-alt);
+  box-shadow: 0 4px 8px var(--admin-card-shadow);
+  transition: all 0.3s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px var(--admin-card-shadow-hover);
+}
+
+.navbar-brand i {
+  font-size: 1.2rem;
+}
+
+.card-stat {
+  border-left: 4px solid;
+}
+
+.border-left-primary {
+  border-left-color: var(--admin-primary) !important;
+}
+
+.border-left-success {
+  border-left-color: var(--admin-success) !important;
+}
+
+.border-left-info {
+  border-left-color: var(--admin-info) !important;
+}
+
+.border-left-warning {
+  border-left-color: var(--admin-warning) !important;
+}
+
+.text-gray-800 {
+  color: #5a5c69 !important;
+}
+
+.text-gray-300 {
+  color: #dddfeb !important;
+}
+
+/* Dark mode specific overrides */
+.dark .text-gray-800,
+[data-bs-theme="dark"] .text-gray-800 {
+  color: #adb5bd !important;
+}
+
+.dark .text-gray-300,
+[data-bs-theme="dark"] .text-gray-300 {
+  color: #6c757d !important;
+}
+
+/* Theme transition for smooth switching */
+.card,
+.navbar,
+.btn,
+.form-control,
+.form-select,
+.dropdown-menu,
+.table {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease;
+}

@@ -1,0 +1,214 @@
+@page "/signin"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<SignIn> Logger
+
+<PageTitle>Sign In - Mystira</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card @(isLoading ? "loading" : "")">
+            <!-- Logo and Branding -->
+            <div class="auth-header">
+                <a href="/" class="auth-logo-link">
+                    <img src="images/mystira-logo.webp" alt="Mystira" class="auth-logo" />
+                </a>
+                <h1 class="auth-title">Welcome Back</h1>
+                <p class="auth-subtitle">Sign in to continue your adventure</p>
+            </div>
+
+            <!-- Error Message -->
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="auth-error" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>@errorMessage</span>
+                </div>
+            }
+
+            <!-- Sign In Content -->
+            <div class="auth-content">
+                @if (isLoading)
+                {
+                    <div class="auth-loading">
+                        <div class="auth-spinner">
+                            <div class="spinner-ring"></div>
+                            <i class="fas fa-spinner spinner-icon"></i>
+                        </div>
+                        <p class="loading-text">Signing you in...</p>
+                        <p class="loading-subtext">You'll be redirected shortly</p>
+                    </div>
+                }
+                else
+                {
+                    <!-- Entra Sign In Button -->
+                    <button type="button"
+                            class="entra-signin-btn"
+                            @onclick="SignInWithEntra"
+                            disabled="@isLoading">
+                        <svg class="entra-icon" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#0078D4" d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                        </svg>
+                        <span>Continue with Entra</span>
+                    </button>
+
+                    <!-- Magic Link Section -->
+                    <div class="mt-4">
+                        <div class="auth-divider">
+                            <span>or</span>
+                        </div>
+
+                        <div class="magic-link-section">
+                            <label for="signin-email" class="form-label">Sign in with a magic link</label>
+                            <div class="input-group">
+                                <input id="signin-email"
+                                       type="email"
+                                       class="form-control"
+                                       placeholder="you@example.com"
+                                       @bind="magicEmail"
+                                       @bind:event="oninput"
+                                       disabled="@isSendingMagicLink" />
+                                <button class="btn btn-outline-primary"
+                                        type="button"
+                                        @onclick="SendMagicLinkAsync"
+                                        disabled="@isSendingMagicLink">
+                                    @(isSendingMagicLink ? "Sending..." : "Send Link")
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                We'll email you a magic link for instant sign-in
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="auth-divider">
+                        <span>Secure sign-in powered by Microsoft</span>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="security-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Your data is protected with enterprise-grade security</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>
+                    Don't have an account?
+                    <a href="/signup" class="auth-link">Get Started</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home Link -->
+        <a href="/" class="back-home-link">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Home</span>
+        </a>
+    </div>
+</div>
+
+@code {
+    private bool isLoading = false;
+    private bool isSendingMagicLink = false;
+    private string errorMessage = string.Empty;
+    private string magicEmail = string.Empty;
+
+    private static bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+
+        try
+        {
+            var mailAddress = new System.Net.Mail.MailAddress(email);
+            return mailAddress.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error checking authentication status on SignIn page");
+        }
+    }
+
+    private async Task SignInWithEntra()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            Logger.LogInformation("Initiating Entra sign-in");
+
+            var result = await AuthService.SignInWithEntraAsync();
+            if (!result.IsSuccess)
+            {
+                errorMessage = result.ErrorMessage ?? "Unable to connect to sign-in service. Please try again later.";
+                isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initiating Entra sign-in");
+            errorMessage = "Unable to connect to sign-in service. Please check your connection and try again.";
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendMagicLinkAsync()
+    {
+        if (!IsValidEmail(magicEmail))
+        {
+            errorMessage = "Please enter a valid email address.";
+            StateHasChanged();
+            return;
+        }
+
+        try
+        {
+            isSendingMagicLink = true;
+            errorMessage = string.Empty;
+
+            var result = await AuthService.RequestMagicLinkAsync(magicEmail.Trim(), null);
+            if (result == null || !result.IsSuccess)
+            {
+                errorMessage = result?.ErrorMessage ?? "Unable to send magic link right now. Please try again.";
+                return;
+            }
+
+            var encodedEmail = Uri.EscapeDataString(magicEmail.Trim());
+            Navigation.NavigateTo($"/authentication/magic-link-sent?email={encodedEmail}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error requesting magic sign-in link");
+            errorMessage = "Unable to send magic link right now. Please try again.";
+        }
+        finally
+        {
+            isSendingMagicLink = false;
+            StateHasChanged();
+        }
+    }
+}

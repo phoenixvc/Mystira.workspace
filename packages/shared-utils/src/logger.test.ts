@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createLogger, type LogLevel, type LogEntry } from './logger';
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { createLogger } from "./logger";
 
-describe('createLogger', () => {
+describe("createLogger", () => {
   let consoleSpy: {
     log: ReturnType<typeof vi.spyOn>;
     warn: ReturnType<typeof vi.spyOn>;
@@ -11,10 +11,10 @@ describe('createLogger', () => {
 
   beforeEach(() => {
     consoleSpy = {
-      log: vi.spyOn(console, 'log').mockImplementation(() => {}),
-      warn: vi.spyOn(console, 'warn').mockImplementation(() => {}),
-      error: vi.spyOn(console, 'error').mockImplementation(() => {}),
-      debug: vi.spyOn(console, 'debug').mockImplementation(() => {}),
+      log: vi.spyOn(console, "log").mockImplementation(() => {}),
+      warn: vi.spyOn(console, "warn").mockImplementation(() => {}),
+      error: vi.spyOn(console, "error").mockImplementation(() => {}),
+      debug: vi.spyOn(console, "debug").mockImplementation(() => {}),
     };
   });
 
@@ -22,32 +22,32 @@ describe('createLogger', () => {
     vi.restoreAllMocks();
   });
 
-  it('should log info messages', () => {
-    const logger = createLogger({ level: 'info' });
-    logger.info('test message');
+  it("should log info messages", () => {
+    const logger = createLogger({ level: "info" });
+    logger.info("test message");
 
     expect(consoleSpy.log).toHaveBeenCalledTimes(1);
     expect(consoleSpy.log).toHaveBeenCalledWith(
-      expect.stringContaining('INFO: test message')
+      expect.stringContaining("INFO: test message")
     );
   });
 
-  it('should log with context', () => {
-    const logger = createLogger({ level: 'info' });
-    logger.info('test message', { key: 'value' });
+  it("should log with context", () => {
+    const logger = createLogger({ level: "info" });
+    logger.info("test message", { key: "value" });
 
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining('{"key":"value"}')
     );
   });
 
-  it('should respect log level', () => {
-    const logger = createLogger({ level: 'warn' });
+  it("should respect log level", () => {
+    const logger = createLogger({ level: "warn" });
 
-    logger.debug('debug message');
-    logger.info('info message');
-    logger.warn('warn message');
-    logger.error('error message');
+    logger.debug("debug message");
+    logger.info("info message");
+    logger.warn("warn message");
+    logger.error("error message");
 
     expect(consoleSpy.debug).not.toHaveBeenCalled();
     expect(consoleSpy.log).not.toHaveBeenCalled();
@@ -55,13 +55,13 @@ describe('createLogger', () => {
     expect(consoleSpy.error).toHaveBeenCalledTimes(1);
   });
 
-  it('should use correct console methods', () => {
-    const logger = createLogger({ level: 'debug' });
+  it("should use correct console methods", () => {
+    const logger = createLogger({ level: "debug" });
 
-    logger.debug('debug');
-    logger.info('info');
-    logger.warn('warn');
-    logger.error('error');
+    logger.debug("debug");
+    logger.info("info");
+    logger.warn("warn");
+    logger.error("error");
 
     expect(consoleSpy.debug).toHaveBeenCalledTimes(1);
     expect(consoleSpy.log).toHaveBeenCalledTimes(1);
@@ -69,11 +69,14 @@ describe('createLogger', () => {
     expect(consoleSpy.error).toHaveBeenCalledTimes(1);
   });
 
-  it('should create child logger with inherited context', () => {
-    const logger = createLogger({ level: 'info', context: { service: 'test' } });
-    const child = logger.child({ requestId: '123' });
+  it("should create child logger with inherited context", () => {
+    const logger = createLogger({
+      level: "info",
+      context: { service: "test" },
+    });
+    const child = logger.child({ requestId: "123" });
 
-    child.info('child message');
+    child.info("child message");
 
     expect(consoleSpy.log).toHaveBeenCalledWith(
       expect.stringContaining('"service":"test"')
@@ -83,18 +86,18 @@ describe('createLogger', () => {
     );
   });
 
-  it('should use custom output function', () => {
+  it("should use custom output function", () => {
     const customOutput = vi.fn();
-    const logger = createLogger({ level: 'info', output: customOutput });
+    const logger = createLogger({ level: "info", output: customOutput });
 
-    logger.info('test', { key: 'value' });
+    logger.info("test", { key: "value" });
 
     expect(customOutput).toHaveBeenCalledTimes(1);
     expect(customOutput).toHaveBeenCalledWith(
       expect.objectContaining({
-        level: 'info',
-        message: 'test',
-        context: { key: 'value' },
+        level: "info",
+        message: "test",
+        context: { key: "value" },
       })
     );
     expect(consoleSpy.log).not.toHaveBeenCalled();

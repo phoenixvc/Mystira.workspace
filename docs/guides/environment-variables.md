@@ -101,10 +101,10 @@ AZURE_EXTERNAL_ID_SCOPES=api://mystira-api/API.Access
 
 These are configured in Microsoft Entra External ID, not as environment variables:
 
-| Provider | Configuration Location |
-|----------|----------------------|
-| Google | Microsoft Entra admin center → External Identities → All identity providers → Google |
-| Discord | Microsoft Entra admin center → External Identities → All identity providers → Custom OIDC |
+| Provider | Configuration Location                                                                    |
+| -------- | ----------------------------------------------------------------------------------------- |
+| Google   | Microsoft Entra admin center → External Identities → All identity providers → Google      |
+| Discord  | Microsoft Entra admin center → External Identities → All identity providers → Custom OIDC |
 
 See [ADR-0011: Entra ID Integration](./architecture/adr/0011-entra-id-authentication-integration.md) for detailed setup instructions.
 
@@ -201,4 +201,3 @@ Environment variables are loaded in this order (later overrides earlier):
 3. `.env.local` file
 4. `.env.[NODE_ENV]` file
 5. `.env.[NODE_ENV].local` file
-

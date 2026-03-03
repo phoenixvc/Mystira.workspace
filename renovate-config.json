@@ -13,7 +13,7 @@
   "dependencyDashboard": true,
   "dependencyDashboardTitle": "Renovate Dependency Dashboard",
   "timezone": "Africa/Johannesburg",
-  "schedule": ["after 8am and before 6pm on weekdays"],
+  "schedule": ["after 8am and before 6pm every weekday"],
   "packageRules": [
     {
       "description": "Group all Mystira packages together",
@@ -96,6 +96,11 @@
       "matchManagers": ["github-actions"],
       "groupName": "GitHub Actions",
       "automerge": true
+    },
+    {
+      "description": "Pin Npgsql to 9.x - v10 requires .NET 10",
+      "matchPackagePatterns": ["^Npgsql"],
+      "allowedVersions": "<10.0.0"
     }
   ],
   "vulnerabilityAlerts": {

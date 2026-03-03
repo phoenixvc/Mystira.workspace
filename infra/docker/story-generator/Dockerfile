@@ -1,4 +1,4 @@
-# Multi-stage Dockerfile for Mystira Story Generator API (.NET 8)
+# Multi-stage Dockerfile for Mystira Story Generator API (.NET 10)
 #
 # IMPORTANT: This builds the API project (Mystira.StoryGenerator.Api), NOT the
 # Blazor WASM Web project (Mystira.StoryGenerator.Web).
@@ -10,7 +10,7 @@
 # See ADR-0019 for full documentation on the deployment architecture.
 
 # Stage 1: Build
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:d1823fecac3689a2eb959e02ee3bfe1c2142392808240039097ad70644566190 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:e362a8dbcd691522456da26a5198b8f3ca1d7641c95624fadc5e3e82678bd08a AS build
 WORKDIR /src
 
 # Copy project files
@@ -35,7 +35,7 @@ RUN dotnet publish "Mystira.StoryGenerator.Api.csproj" \
     /p:UseAppHost=false
 
 # Stage 3: Runtime
-FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:eaa79205c3ade4792a7f7bf310a3aac51fe0e1d91c44e40f70b7c6423d475fe0 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aec87aa74ddf129da573fa69f42f229a23c953a1c6fdecedea1aa6b1fe147d76 AS final
 WORKDIR /app
 
 # Create non-root user for security

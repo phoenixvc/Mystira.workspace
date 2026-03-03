@@ -283,7 +283,7 @@ Each requires different tooling and processes.
 ## Monitoring and Observability
 
 - GitHub Actions workflow status
-- Deployment notifications (Slack/Teams)
+- Deployment notifications (Email, GitHub Actions)
 - Application health checks post-deployment
 - Infrastructure deployment status
 

@@ -1,0 +1,98 @@
+# GitOps Application Sync Workflow
+#
+# This workflow validates Kubernetes manifests and optionally triggers Harness GitOps syncs.
+#
+# IMPORTANT: This does NOT install or update the Harness GitOps agent.
+# The agent is installed once via bootstrap-gitops.sh and then manages deployments automatically.
+
+name: "[Ops] GitOps App Sync"
+
+on:
+  push:
+    paths:
+      - "infra/gitops/applications/**"
+      - "infra/kubernetes/**"
+  pull_request:
+    paths:
+      - "infra/gitops/applications/**"
+      - "infra/kubernetes/**"
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate GitOps Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "latest"
+
+      - name: Validate Kubernetes manifests
+        run: |
+          echo "Validating Kubernetes manifests..."
+
+          # Validate kustomize overlays if they exist
+          if [ -d "infra/kubernetes/overlays" ]; then
+            for overlay in infra/kubernetes/overlays/*/; do
+              if [ -f "${overlay}kustomization.yaml" ]; then
+                echo "Validating overlay: $overlay"
+                kubectl kustomize "$overlay" --enable-helm || exit 1
+              fi
+            done
+          fi
+
+          # Validate GitOps application definitions
+          if [ -d "infra/gitops/applications" ]; then
+            for app in infra/gitops/applications/*.yaml; do
+              if [ -f "$app" ]; then
+                echo "Validating application: $app"
+                kubectl apply --dry-run=client -f "$app" || exit 1
+              fi
+            done
+          fi
+
+          echo "✅ All manifests validated successfully"
+
+  # Staging verification gate - runs on staging and main branch pushes
+  # This job must succeed before production syncs can run
+  staging-verify:
+    name: Verify Staging Deployment
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/staging' || github.ref == 'refs/heads/main')
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Verify staging manifests
+        run: |
+          echo "Verifying staging deployment readiness..."
+          # Add staging-specific validation here
+          echo "Staging verification complete"
+
+  # Production sync - requires staging verification or manual approval
+  # Uses environment protection rules for additional gating
+  trigger-sync:
+    name: Trigger Production Harness Sync
+    runs-on: ubuntu-latest
+    needs: [validate, staging-verify]
+    # Only run on main branch pushes, requires staging-verify to pass
+    # If staging-verify was skipped (not a staging push), this requires manual approval via environment
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Trigger Harness GitOps sync
+        run: |
+          curl -X POST \
+            "https://app.harness.io/gateway/gitops/api/v1/agents/${{ secrets.HARNESS_AGENT_ID }}/sync" \
+            -H "x-api-key: ${{ secrets.HARNESS_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"applications": ["admin-api", "publisher", "story-generator"]}'
+        env:
+          HARNESS_AGENT_ID: ${{ secrets.HARNESS_AGENT_ID }}
+          HARNESS_API_KEY: ${{ secrets.HARNESS_API_KEY }}

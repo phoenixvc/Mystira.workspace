@@ -22,7 +22,7 @@ Complete setup guide for the Mystira workspace covering all projects, CI/CD work
 
 - **Node.js**: v18.x or higher
 - **pnpm**: v8.10.0 or higher
-- **Git**: Latest version with submodule support
+- **Git**: Latest version
 - **Docker**: Latest version (for local development)
 - **Azure CLI**: Latest version (for infrastructure deployment)
 - **Terraform**: v1.5.0 or higher (for infrastructure)
@@ -101,39 +101,24 @@ sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 ## Initial Workspace Setup
 
-### 1. Clone Repository with Submodules
+### 1. Clone Repository
 
 ```bash
-# Clone with all submodules
-git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+git clone https://github.com/phoenixvc/Mystira.workspace.git
 cd Mystira.workspace
 ```
 
-If you already cloned without submodules:
+### 2. Verify Packages
 
-```bash
-git submodule update --init --recursive
-```
+All components are in `packages/`:
 
-### 2. Verify Submodules
-
-```bash
-# List all submodules
-git submodule status
-
-# Update all submodules to latest
-git submodule update --remote --recursive
-```
-
-Expected submodules:
-
-- `infra/` → `Mystira.Infra`
-- `packages/app/` → `Mystira.App`
-- `packages/chain/` → `Mystira.Chain`
-- `packages/publisher/` → `Mystira.Publisher`
-- `packages/story-generator/` → `Mystira.StoryGenerator`
-- `packages/devhub/` → `Mystira.DevHub`
-- `packages/admin-api/` → `Mystira.Admin.Api`
+- `packages/app/` — Mystira.App
+- `packages/chain/` — Mystira.Chain
+- `packages/publisher/` — Mystira.Publisher
+- `packages/story-generator/` — Mystira.StoryGenerator
+- `packages/devhub/` — Mystira.DevHub
+- `packages/admin-api/` — Mystira.Admin.Api
+- `packages/admin-ui/` — Mystira.Admin.UI
 
 ### 3. Install Dependencies
 
@@ -160,12 +145,6 @@ All secrets must be configured in GitHub repository settings: `Settings → Secr
 
 ### Required Secrets for Mystira.workspace
 
-#### Submodule Access
-
-| Secret Name                             | Description                                                            | How to Create                                                                                                                     |
-| --------------------------------------- | ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | Personal Access Token with `repo` scope for cloning private submodules | GitHub → Settings → Developer settings → Personal access tokens → Generate new token (classic) → Select `repo` scope → Copy token |
-
 #### Azure Infrastructure
 
 | Secret Name         | Description                                            | How to Create                                                                   |
@@ -183,11 +162,15 @@ All secrets must be configured in GitHub repository settings: `Settings → Secr
 }
 ```
 
-#### NPM Package Publishing (Optional)
+#### GitHub Packages (NPM & NuGet)
 
-| Secret Name | Description                              | How to Create                                                                          |
-| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------- |
-| `NPM_TOKEN` | NPM access token for publishing packages | npm → Account Settings → Access Tokens → Generate New Token → Select "Automation" type |
+All Mystira packages are published to GitHub Packages. The following secrets enable package publishing and consumption:
+
+| Secret Name         | Description                              | How to Create                                                                                         |
+| ------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `GH_PACKAGES_TOKEN` | GitHub PAT for package read/write access | GitHub → Settings → Developer settings → PATs → New token → Scopes: `read:packages`, `write:packages` |
+
+**Note**: CI/CD workflows use `secrets.GITHUB_TOKEN` for publishing, but consuming packages across the workspace requires `GH_PACKAGES_TOKEN`.
 
 ### Required Secrets for Mystira.Admin.Api
 
@@ -202,12 +185,12 @@ All secrets must be configured in GitHub repository settings: `Settings → Secr
 
 1. Go to GitHub → Your Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)
 2. Click "Generate new token (classic)"
-3. Name: `Mystira Submodule Access`
+3. Name: `Mystira Workspace Access`
 4. Expiration: Set appropriate expiration (90 days recommended)
 5. Scopes: Check `repo` (Full control of private repositories)
 6. Click "Generate token"
 7. Copy the token immediately (you won't see it again)
-8. Add as secret `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` in repository settings
+8. Add as secret in repository settings
 
 ---
 
@@ -254,23 +237,7 @@ ACR_ID=$(az acr show --name myssharedacr --resource-group mys-dev-core-rg-eus --
 # az role assignment create --assignee <service-principal-id> --role AcrPull --scope $ACR_ID
 ```
 
-### 3. Update Infra Submodule for Shared ACR
-
-The infra submodule has been updated to use shared ACR with environment tags. Ensure you have the latest:
-
-```bash
-# In workspace root
-cd infra
-git pull origin main
-cd ..
-
-# Update submodule reference
-git add infra
-git commit -m "chore: update infra submodule"
-git push origin dev
-```
-
-### 4. Deploy Staging Environment (Optional)
+### 3. Deploy Staging Environment (Optional)
 
 ```bash
 cd infra/terraform/environments/staging
@@ -279,7 +246,7 @@ terraform plan
 terraform apply
 ```
 
-### 5. Deploy Production Environment (Optional)
+### 4. Deploy Production Environment (Optional)
 
 ```bash
 cd infra/terraform/environments/prod
@@ -394,12 +361,12 @@ After setup, configure environment variables as documented in [Environment Varia
 
 **Required Secrets in Azure Key Vault**:
 
-| Secret Name               | Description                             |
-| ------------------------- | --------------------------------------- |
-| `azure-ad-client-secret`  | Admin API client secret                 |
+| Secret Name               | Description                                     |
+| ------------------------- | ----------------------------------------------- |
+| `azure-ad-client-secret`  | Admin API client secret                         |
 | `azure-b2c-client-secret` | External ID API client secret (if confidential) |
-| `google-client-secret`    | Google OAuth client secret              |
-| `discord-client-secret`   | Discord OAuth client secret             |
+| `google-client-secret`    | Google OAuth client secret                      |
+| `discord-client-secret`   | Discord OAuth client secret                     |
 
 ### 4. Verify Setup
 
@@ -511,6 +478,238 @@ dotnet run --project src/Mystira.App.Admin.Api
   </packageSourceCredentials>
 </configuration>
 ```
+
+---
+
+## GitHub Packages Authentication
+
+Mystira uses GitHub Packages for both NPM (`@mystira/*`) and NuGet packages. This section covers authentication setup for CI/CD and local development.
+
+### NPM Packages (@mystira/\*)
+
+The workspace `.npmrc` is pre-configured to use GitHub Packages for the `@mystira` scope:
+
+```ini
+@mystira:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
+```
+
+#### CI/CD (Automatic)
+
+CI workflows automatically authenticate using `secrets.GITHUB_TOKEN`:
+
+```yaml
+- uses: actions/setup-node@v4
+  with:
+    registry-url: "https://npm.pkg.github.com"
+    scope: "@mystira"
+env:
+  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+#### Local Development
+
+**Option 1: Environment Variable (Recommended)**
+
+```bash
+# Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
+export NODE_AUTH_TOKEN=ghp_your_token_here
+
+# Or set per-session
+export NODE_AUTH_TOKEN=$(gh auth token)  # If using GitHub CLI
+```
+
+**Option 2: Global npm config**
+
+```bash
+npm config set //npm.pkg.github.com/:_authToken ghp_your_token_here
+```
+
+### NuGet Packages (GitHub Packages)
+
+NuGet packages are published to GitHub Packages at `https://nuget.pkg.github.com/phoenixvc/index.json`.
+
+#### CI/CD Configuration
+
+Package `nuget.config` files use environment variables for authentication and **Package Source Mapping** to ensure Mystira packages are resolved from GitHub Packages (not nuget.org):
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
+  </packageSources>
+
+  <!-- IMPORTANT: Package Source Mapping tells NuGet where to find each package -->
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+      <package pattern="PhoenixVC.*" />
+    </packageSource>
+  </packageSourceMapping>
+
+  <packageSourceCredentials>
+    <github>
+      <add key="Username" value="phoenixvc" />
+      <add key="ClearTextPassword" value="%GH_PACKAGES_TOKEN%" />
+    </github>
+  </packageSourceCredentials>
+</configuration>
+```
+
+> **Why Package Source Mapping?** Without it, NuGet may try to resolve `Mystira.*` packages from nuget.org and fail with "Unable to resolve package" errors. The mapping ensures private packages are only fetched from GitHub Packages.
+
+CI workflows set `GH_PACKAGES_TOKEN` from secrets:
+
+```yaml
+- name: Restore NuGet packages
+  run: dotnet restore
+  env:
+    GH_PACKAGES_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+```
+
+#### Local Development Options
+
+**Option 1: Environment Variable**
+
+```bash
+# Add to your shell profile
+export GH_PACKAGES_TOKEN=ghp_your_token_here
+```
+
+**Option 2: Global NuGet Config (Recommended for Local Dev)**
+
+Store credentials once in your user profile so they persist across all projects:
+
+```bash
+# Add the GitHub Packages source globally
+dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
+  --name github-global \
+  --username phoenixvc \
+  --password ghp_your_token_here \
+  --store-password-in-clear-text \
+  --configfile ~/.nuget/NuGet/NuGet.Config
+```
+
+This way:
+
+- No environment variable needed locally
+- CI uses `GH_PACKAGES_TOKEN` from secrets
+- Token isn't stored in the repo
+
+**Option 3: dotnet user-secrets (For App Configuration Only)**
+
+Note: User secrets work for reading tokens in app code but **not** for NuGet package restore (NuGet uses environment variables or NuGet.Config).
+
+```bash
+# Initialize user secrets for a project
+cd src/Mystira.App.PWA
+dotnet user-secrets init
+
+# Store token (for app use only, not NuGet restore)
+dotnet user-secrets set "GH_PACKAGES_TOKEN" "ghp_your_token_here"
+```
+
+### Creating a GitHub Personal Access Token (PAT)
+
+1. Go to GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Click "Generate new token (classic)"
+3. Configure:
+   - **Name**: `Mystira Packages Access`
+   - **Expiration**: 90 days (or custom)
+   - **Scopes**:
+     - `read:packages` (required for consuming packages)
+     - `write:packages` (required for publishing)
+     - `repo` (if accessing private repos)
+4. Click "Generate token"
+5. Copy the token immediately (you won't see it again)
+
+### Verifying Package Access
+
+**NPM Packages:**
+
+```bash
+# List available @mystira packages
+npm search @mystira --registry=https://npm.pkg.github.com
+
+# Install a package
+pnpm add @mystira/contracts
+```
+
+**NuGet Packages:**
+
+```bash
+# List sources
+dotnet nuget list source
+
+# Search for packages
+dotnet package search Mystira --source github
+
+# Restore packages
+dotnet restore
+```
+
+### Troubleshooting
+
+**Problem**: `401 Unauthorized` when installing npm packages
+
+```bash
+# Verify token is set
+echo $NODE_AUTH_TOKEN
+
+# Re-authenticate
+npm login --scope=@mystira --registry=https://npm.pkg.github.com
+```
+
+**Problem**: `401 Unauthorized` when restoring NuGet packages
+
+```bash
+# Verify token is set
+echo $GH_PACKAGES_TOKEN
+
+# Check NuGet sources
+dotnet nuget list source
+
+# Clear NuGet cache and retry
+dotnet nuget locals all --clear
+dotnet restore
+```
+
+**Problem**: `Unable to resolve 'Mystira.Contracts'` or similar package errors
+
+This usually means NuGet is trying to find Mystira packages on nuget.org instead of GitHub Packages.
+
+**Solution**: Add Package Source Mapping to your `nuget.config`:
+
+```xml
+<packageSourceMapping>
+  <packageSource key="nuget.org">
+    <package pattern="*" />
+  </packageSource>
+  <packageSource key="github">
+    <package pattern="Mystira.*" />
+    <package pattern="PhoenixVC.*" />
+  </packageSource>
+</packageSourceMapping>
+```
+
+Then clear cache and retry:
+
+```bash
+dotnet nuget locals all --clear
+dotnet restore
+```
+
+**Problem**: CI fails with package authentication errors
+
+- Verify `GH_PACKAGES_TOKEN` secret is set in repository settings
+- Verify the token has `read:packages` and `write:packages` scopes
+- For private repos, ensure `repo` scope is also included
 
 ---
 
@@ -642,23 +841,7 @@ pnpm --filter mystira-publisher dev
    terraform apply
    ```
 
-2. **Update Infra Submodule** (if changes were made):
-
-   ```bash
-   # If you modified infra submodule locally
-   cd infra
-   git add .
-   git commit -m "your changes"
-   git push origin main
-
-   # Then update reference in workspace
-   cd ..
-   git add infra
-   git commit -m "chore: update infra submodule"
-   git push origin dev
-   ```
-
-3. **Verify ACR exists**:
+2. **Verify ACR exists**:
    ```bash
    az acr show --name myssharedacr --resource-group mys-dev-core-rg-eus
    ```
@@ -704,22 +887,6 @@ kubectl get services -n mystira-dev
 ---
 
 ## Troubleshooting
-
-### Submodule Issues
-
-**Problem**: Submodules not found or empty
-
-```bash
-# Re-initialize submodules
-git submodule deinit -f --all
-git submodule update --init --recursive
-```
-
-**Problem**: CI fails with "repository not found" for submodules
-
-- Verify `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret is configured
-- Verify PAT has `repo` scope
-- Check that all submodule repositories exist and are accessible
 
 ### ACR Login Issues
 
@@ -783,7 +950,7 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 
 **Problem**: Workflow fails with "Input required and not supplied: token"
 
-- Verify `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` secret exists
+- Verify required secrets exist in repository settings
 - Check workflow file has token validation step
 - Verify secret name matches exactly (case-sensitive)
 
@@ -812,4 +979,4 @@ kubectl get events -n mystira-dev --sort-by='.lastTimestamp'
 
 ---
 
-**Last Updated**: 2025-12-14
+**Last Updated**: 2025-12-28

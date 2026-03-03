@@ -18,15 +18,15 @@ As of December 2025, we migrated to a **distributed CI model** where:
 
 Each component repository now has its own `ci.yml` workflow:
 
-| Component | Repository | Runtime | PR Merged |
-|-----------|------------|---------|-----------|
-| Admin API | [Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api) | .NET 9.0 | #7 |
-| Admin UI | [Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI) | Node.js 20 | #12 |
-| Chain | [Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain) | Python 3.11 | #1 |
-| DevHub | [Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub) | Node.js 20 | #1 |
-| Publisher | [Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher) | Node.js 20 | #13 |
-| Story Generator | [Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0 | #56 |
-| App | [Mystira.App](https://github.com/phoenixvc/Mystira.App) | .NET 9.0 | (existing) |
+| Component       | Repository                                                                    | Runtime     | PR Merged  |
+| --------------- | ----------------------------------------------------------------------------- | ----------- | ---------- |
+| Admin API       | [Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api)           | .NET 9.0    | #7         |
+| Admin UI        | [Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI)             | Node.js 20  | #12        |
+| Chain           | [Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain)                   | Python 3.11 | #1         |
+| DevHub          | [Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub)                 | Node.js 20  | #1         |
+| Publisher       | [Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher)           | Node.js 20  | #13        |
+| Story Generator | [Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0    | #56        |
+| App             | [Mystira.App](https://github.com/phoenixvc/Mystira.App)                       | .NET 9.0    | (existing) |
 
 ### Workspace Workflows
 

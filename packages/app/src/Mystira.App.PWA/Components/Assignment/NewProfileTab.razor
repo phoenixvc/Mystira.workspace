@@ -1,0 +1,97 @@
+@* Tab content for creating a new profile *@
+@using Mystira.App.PWA.Models
+
+<div class="mb-3">
+    <label class="form-label">Profile Name *</label>
+    <input type="text" class="form-control" value="@ProfileName"
+           @onchange="@(e => OnProfileNameChanged(e.Value?.ToString() ?? string.Empty))"
+           placeholder="Enter profile name" />
+</div>
+
+<div class="mb-3">
+    <label class="form-label">Age Group *</label>
+    <select class="form-select" value="@AgeRange" @onchange="OnAgeRangeSelected">
+        <option value="">Select age range...</option>
+        @foreach (var ageRange in AgeRanges.All)
+        {
+            <option value="@ageRange">@AgeRanges.GetDisplayName(ageRange)</option>
+        }
+    </select>
+</div>
+
+@if (!string.IsNullOrEmpty(AgeRange))
+{
+    <div class="mb-3">
+        <label class="form-label">Choose Avatar</label>
+
+        @if (IsAvatarSelected && !string.IsNullOrEmpty(SelectedAvatarMediaId))
+        {
+            <div class="card">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <CachedMystiraImage MediaId="@SelectedAvatarMediaId" Alt="Selected Avatar"
+                            ImageClass="thumbnail-image" Width="150" Height="150" />
+                    </div>
+                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="HandleChangeAvatar">
+                        <i class="fas fa-sync-alt me-2"></i>Change Avatar
+                    </button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <AvatarCarousel AgeGroup="@AgeRange" OnAvatarSelected="HandleAvatarSelected" />
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string ProfileName { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ProfileNameChanged { get; set; }
+
+    [Parameter]
+    public string AgeRange { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> AgeRangeChanged { get; set; }
+
+    [Parameter]
+    public string? SelectedAvatarMediaId { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> SelectedAvatarMediaIdChanged { get; set; }
+
+    [Parameter]
+    public bool IsAvatarSelected { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> IsAvatarSelectedChanged { get; set; }
+
+    private async Task OnProfileNameChanged(string value)
+    {
+        await ProfileNameChanged.InvokeAsync(value);
+    }
+
+    private async Task OnAgeRangeSelected(ChangeEventArgs e)
+    {
+        var value = e.Value?.ToString() ?? string.Empty;
+        // Reset avatar when age range changes
+        await SelectedAvatarMediaIdChanged.InvokeAsync(null);
+        await IsAvatarSelectedChanged.InvokeAsync(false);
+        await AgeRangeChanged.InvokeAsync(value);
+    }
+
+    private async Task HandleAvatarSelected(string mediaId)
+    {
+        await SelectedAvatarMediaIdChanged.InvokeAsync(mediaId);
+        await IsAvatarSelectedChanged.InvokeAsync(true);
+    }
+
+    private async Task HandleChangeAvatar()
+    {
+        await IsAvatarSelectedChanged.InvokeAsync(false);
+    }
+}

@@ -1,0 +1,476 @@
+# =============================================================================
+# Atlantis Configuration
+# =============================================================================
+# PR-based Terraform/Terragrunt workflow automation.
+#
+# Atlantis enables:
+#   - Automatic terraform plan on PR open/update
+#   - Plan output as PR comments
+#   - Apply via PR comment commands (atlantis apply)
+#   - Policy enforcement via conftest
+#   - Multi-workspace support
+#
+# Setup:
+#   1. Deploy Atlantis server (self-hosted or Atlantis Cloud)
+#   2. Configure webhook to Atlantis server
+#   3. Set required secrets (ATLANTIS_GH_TOKEN, ARM_* credentials)
+#
+# Documentation: https://www.runatlantis.io/docs/
+# =============================================================================
+
+version: 3
+
+automerge: false
+parallel_plan: true
+parallel_apply: false  # Sequential applies for safety
+
+# =============================================================================
+# Global Settings
+# =============================================================================
+delete_source_branch_on_merge: false
+abort_on_execution_order_fail: true
+
+# =============================================================================
+# Terragrunt Workflows
+# =============================================================================
+workflows:
+  terragrunt:
+    plan:
+      steps:
+        - env:
+            name: TF_IN_AUTOMATION
+            value: "true"
+        - env:
+            name: TERRAGRUNT_TFPATH
+            command: "which terraform"
+        - run: terragrunt hclfmt --terragrunt-check
+        - run: terragrunt init --terragrunt-non-interactive
+        - run: terragrunt plan -out=$PLANFILE --terragrunt-non-interactive
+    apply:
+      steps:
+        - env:
+            name: TF_IN_AUTOMATION
+            value: "true"
+        - run: terragrunt apply $PLANFILE --terragrunt-non-interactive
+
+  terragrunt-stack:
+    plan:
+      steps:
+        - env:
+            name: TF_IN_AUTOMATION
+            value: "true"
+        - env:
+            name: STACK_CONFIG
+            value: "stacks/${ATLANTIS_TERRAFORM_WORKSPACE:-dev}.stack.hcl"
+        - run: |
+            terragrunt stack run plan \
+              --stack-config $STACK_CONFIG \
+              --out=stack.tfplan \
+              --terragrunt-non-interactive
+    apply:
+      steps:
+        - env:
+            name: TF_IN_AUTOMATION
+            value: "true"
+        - env:
+            name: STACK_CONFIG
+            value: "stacks/${ATLANTIS_TERRAFORM_WORKSPACE:-dev}.stack.hcl"
+        - run: |
+            terragrunt stack run apply \
+              --stack-config $STACK_CONFIG \
+              --terragrunt-non-interactive \
+              --auto-approve
+
+# =============================================================================
+# Project Definitions
+# =============================================================================
+projects:
+  # ---------------------------------------------------------------------------
+  # Shared Infrastructure
+  # ---------------------------------------------------------------------------
+  - name: shared-infra-dev
+    dir: infra/terraform/shared-infra/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../../modules/shared/**"
+        - "../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: shared-infra-staging
+    dir: infra/terraform/shared-infra/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../../modules/shared/**"
+        - "../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: shared-infra-prod
+    dir: infra/terraform/shared-infra/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../../modules/shared/**"
+        - "../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Admin Product
+  # ---------------------------------------------------------------------------
+  - name: admin-dev
+    dir: infra/terraform/products/admin/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/admin-*/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+
+  - name: admin-staging
+    dir: infra/terraform/products/admin/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/admin-*/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: admin-prod
+    dir: infra/terraform/products/admin/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/admin-*/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Chain Product
+  # ---------------------------------------------------------------------------
+  - name: chain-dev
+    dir: infra/terraform/products/chain/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+
+  - name: chain-staging
+    dir: infra/terraform/products/chain/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: chain-prod
+    dir: infra/terraform/products/chain/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/chain/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Mystira App Product
+  # ---------------------------------------------------------------------------
+  - name: mystira-app-dev
+    dir: infra/terraform/products/mystira-app/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+
+  - name: mystira-app-staging
+    dir: infra/terraform/products/mystira-app/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: mystira-app-prod
+    dir: infra/terraform/products/mystira-app/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/mystira-app/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Publisher Product
+  # ---------------------------------------------------------------------------
+  - name: publisher-dev
+    dir: infra/terraform/products/publisher/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+
+  - name: publisher-staging
+    dir: infra/terraform/products/publisher/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: publisher-prod
+    dir: infra/terraform/products/publisher/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/publisher/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Story Generator Product
+  # ---------------------------------------------------------------------------
+  - name: story-generator-dev
+    dir: infra/terraform/products/story-generator/environments/dev
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+
+  - name: story-generator-staging
+    dir: infra/terraform/products/story-generator/environments/staging
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+
+  - name: story-generator-prod
+    dir: infra/terraform/products/story-generator/environments/prod
+    workflow: terragrunt
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      when_modified:
+        - "*.tf"
+        - "*.tfvars"
+        - "terragrunt.hcl"
+        - "../../terragrunt.hcl"
+        - "../../../../modules/story-generator/**"
+        - "../../../../terragrunt.hcl"
+      enabled: true
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+
+  # ---------------------------------------------------------------------------
+  # Platform Stacks (Full Environment Deployment)
+  # ---------------------------------------------------------------------------
+  - name: platform-dev-stack
+    dir: infra/terraform
+    workflow: terragrunt-stack
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      enabled: false  # Manual trigger only for full stack
+    apply_requirements:
+      - approved
+    execution_order_group: 0
+
+  - name: platform-staging-stack
+    dir: infra/terraform
+    workflow: terragrunt-stack
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      enabled: false
+    apply_requirements:
+      - approved
+      - mergeable
+    execution_order_group: 1
+
+  - name: platform-prod-stack
+    dir: infra/terraform
+    workflow: terragrunt-stack
+    workspace: default
+    terraform_version: v1.10.3
+    autoplan:
+      enabled: false
+    apply_requirements:
+      - approved
+      - mergeable
+      - undiverged
+    execution_order_group: 2
+
+# =============================================================================
+# Allowed Regexp Commands
+# =============================================================================
+# Restrict what commands can be run via PR comments
+allowed_regexp_commands:
+  - "atlantis plan"
+  - "atlantis plan -d.*"
+  - "atlantis apply"
+  - "atlantis apply -d.*"
+  - "atlantis unlock"

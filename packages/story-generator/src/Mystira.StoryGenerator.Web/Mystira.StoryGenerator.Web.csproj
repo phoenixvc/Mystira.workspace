@@ -1,0 +1,60 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Ensure publish output goes to a clear location and simplify for Rider/Azure -->
+    <PublishDir>publish\</PublishDir>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
+    <HybridGlobalization>false</HybridGlobalization>
+    <EnableRequestDelegateGenerator>false</EnableRequestDelegateGenerator>
+    <RunAOTCompilation>false</RunAOTCompilation>
+  </PropertyGroup>
+
+  <Target Name="MoveWwwrootContents" AfterTargets="Publish">
+    <Message Text="Moving wwwroot contents to publish root for Rider deployment..." Importance="high" />
+    <ItemGroup>
+      <WwwrootFiles Include="$(PublishDir)wwwroot\**\*" />
+    </ItemGroup>
+    <Move SourceFiles="@(WwwrootFiles)" DestinationFiles="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)')" />
+    <ItemGroup>
+      <FilesToDelete Include="$(PublishDir)**\*" Exclude="@(WwwrootFiles->'$(PublishDir)%(RecursiveDir)%(Filename)%(Extension)');$(PublishDir)web.config" />
+    </ItemGroup>
+    <Delete Files="@(FilesToDelete)" />
+    <RemoveDir Directories="$(PublishDir)wwwroot" />
+    <!-- Also delete the .pdb files that might still be there if not in wwwroot -->
+    <ItemGroup>
+      <PdbFiles Include="$(PublishDir)*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(PdbFiles)" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="DiffPlex" Version="1.9.0" />
+    <PackageReference Include="Markdig" Version="0.45.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.3" PrivateAssets="all" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="32.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="32.2.7" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\staticwebapp.config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

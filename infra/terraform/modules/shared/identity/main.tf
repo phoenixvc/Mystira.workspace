@@ -7,7 +7,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
   }
 }
@@ -126,7 +126,7 @@ resource "azurerm_federated_identity_credential" "workload_identity" {
   for_each = { for k, v in var.workload_identities : k => v }
 
   name                = "${each.key}-federated-credential"
-  resource_group_name = each.value.resource_group_name  # Must match the identity's resource group
+  resource_group_name = each.value.resource_group_name # Must match the identity's resource group
   parent_id           = each.value.identity_id
   audience            = ["api://AzureADTokenExchange"]
   issuer              = each.value.aks_oidc_issuer_url

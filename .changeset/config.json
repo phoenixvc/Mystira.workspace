@@ -3,16 +3,10 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [
-    ["@mystira/contracts"],
-    ["@mystira/app", "@mystira/app-contracts"],
-    ["@mystira/story-generator", "@mystira/story-generator-contracts"],
-    ["@mystira/publisher"],
-    ["@mystira/shared-utils"]
-  ],
-  "access": "public",
+  "linked": [],
+  "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
   "ignore": [],
-  "___dependencies___": "Package versioning strategy: @mystira/contracts is the unified contracts package (replaces *-contracts packages during migration). Related packages are versioned together. @mystira/shared-utils is now workspace-level (previously in publisher submodule)."
+  "___note___": "All packages are now private and consumed via workspace protocol. Changesets is retained for changelog tracking only, not for publishing."
 }

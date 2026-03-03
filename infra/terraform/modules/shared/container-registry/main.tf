@@ -42,9 +42,9 @@ variable "admin_enabled" {
 }
 
 variable "public_network_access_enabled" {
-  description = "Allow public network access"
+  description = "Allow public network access (set to true only if private endpoints not available)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "zone_redundancy_enabled" {
@@ -74,6 +74,36 @@ variable "tags" {
   default     = {}
 }
 
+# Private Endpoint Configuration
+variable "private_endpoint_enabled" {
+  description = "Enable private endpoint for ACR (requires Premium SKU)"
+  type        = bool
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  description = "Subnet ID for the private endpoint (required if private_endpoint_enabled is true)"
+  type        = string
+  default     = null
+}
+
+variable "private_dns_zone_id" {
+  description = "Private DNS zone ID for ACR (azurecr.io). If null, a new zone will be created."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.private_dns_zone_id == null || can(length(trimspace(var.private_dns_zone_id)) > 0)
+    error_message = "private_dns_zone_id must be either null or a non-empty string. Empty strings are not allowed."
+  }
+}
+
+variable "virtual_network_id" {
+  description = "Virtual network ID for DNS zone link (required if creating new private DNS zone)"
+  type        = string
+  default     = null
+}
+
 locals {
   common_tags = merge(var.tags, {
     Component   = "container-registry"
@@ -83,6 +113,41 @@ locals {
     Project     = "Mystira"
     Shared      = "all-environments"
   })
+}
+
+# =============================================================================
+# Validation: Private Endpoint Configuration
+# =============================================================================
+# These checks ensure valid configuration at plan time rather than apply time.
+
+check "private_endpoint_requires_premium_sku" {
+  assert {
+    condition     = !var.private_endpoint_enabled || var.sku == "Premium"
+    error_message = "Private endpoints require Premium SKU. Set sku = \"Premium\" when private_endpoint_enabled = true."
+  }
+}
+
+check "private_endpoint_requires_subnet" {
+  assert {
+    condition     = !var.private_endpoint_enabled || (var.private_endpoint_subnet_id != null && var.private_endpoint_subnet_id != "")
+    error_message = "private_endpoint_subnet_id is required when private_endpoint_enabled = true."
+  }
+}
+
+check "network_access_validation" {
+  assert {
+    condition     = var.public_network_access_enabled || var.private_endpoint_enabled
+    error_message = "ACR must have at least one access path: enable public_network_access_enabled OR private_endpoint_enabled."
+  }
+}
+
+check "dns_zone_requires_vnet" {
+  assert {
+    # If creating a new private DNS zone (private_endpoint_enabled && private_dns_zone_id == null),
+    # virtual_network_id must be provided to link the zone for DNS resolution
+    condition     = !(var.private_endpoint_enabled && var.private_dns_zone_id == null) || (var.virtual_network_id != null && var.virtual_network_id != "")
+    error_message = "virtual_network_id is required when creating a new private DNS zone (private_endpoint_enabled = true and private_dns_zone_id = null). Provide the VNet ID to link the DNS zone for proper resolution."
+  }
 }
 
 # Container Registry
@@ -106,6 +171,57 @@ resource "azurerm_container_registry" "shared" {
 
   # Note: retention_policy block was removed in AzureRM 4.0
   # Retention is now managed via azurerm_container_registry_task or lifecycle policies
+
+  tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+# Private DNS Zone for ACR (optional - created if not provided)
+resource "azurerm_private_dns_zone" "acr" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null ? 1 : 0
+
+  name                = "privatelink.azurecr.io"
+  resource_group_name = var.resource_group_name
+  tags                = local.common_tags
+}
+
+# Link private DNS zone to VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "acr" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null && var.virtual_network_id != null ? 1 : 0
+
+  name                  = "${var.acr_name}-dns-link"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.acr[0].name
+  virtual_network_id    = var.virtual_network_id
+  registration_enabled  = false
+  tags                  = local.common_tags
+}
+
+# Private Endpoint for ACR
+resource "azurerm_private_endpoint" "acr" {
+  count = var.private_endpoint_enabled ? 1 : 0
+
+  name                = "${var.acr_name}-pe"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "${var.acr_name}-psc"
+    private_connection_resource_id = azurerm_container_registry.shared.id
+    is_manual_connection           = false
+    subresource_names              = ["registry"]
+  }
+
+  private_dns_zone_group {
+    name = "acr-dns-zone-group"
+    private_dns_zone_ids = [
+      var.private_dns_zone_id != null ? var.private_dns_zone_id : azurerm_private_dns_zone.acr[0].id
+    ]
+  }
 
   tags = local.common_tags
 }
@@ -136,4 +252,19 @@ output "acr_admin_password" {
   description = "Container Registry admin password"
   value       = azurerm_container_registry.shared.admin_password
   sensitive   = true
+}
+
+output "private_endpoint_id" {
+  description = "Private endpoint ID (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.acr[0].id : null
+}
+
+output "private_endpoint_ip" {
+  description = "Private endpoint IP address (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.acr[0].private_service_connection[0].private_ip_address : null
+}
+
+output "private_dns_zone_id" {
+  description = "Private DNS zone ID (if created by module)"
+  value       = var.private_endpoint_enabled && var.private_dns_zone_id == null ? azurerm_private_dns_zone.acr[0].id : var.private_dns_zone_id
 }

@@ -74,6 +74,37 @@ variable "tags" {
   default     = {}
 }
 
+# Private Endpoint Configuration
+variable "private_endpoint_enabled" {
+  description = "Enable private endpoint for Service Bus (requires Premium SKU)"
+  type        = bool
+  default     = false
+}
+
+variable "private_endpoint_subnet_id" {
+  description = "Subnet ID for the private endpoint (required if private_endpoint_enabled is true)"
+  type        = string
+  default     = null
+}
+
+variable "private_dns_zone_id" {
+  description = "Private DNS zone ID for Service Bus (servicebus.windows.net). If null, a new zone will be created."
+  type        = string
+  default     = null
+}
+
+variable "virtual_network_id" {
+  description = "Virtual network ID for DNS zone link (required if creating new private DNS zone)"
+  type        = string
+  default     = null
+}
+
+variable "public_network_access_enabled" {
+  description = "Allow public network access (set to false when using private endpoints)"
+  type        = bool
+  default     = false
+}
+
 locals {
   name_prefix = "mys-${var.environment}-core"
   region_code = "san"
@@ -84,6 +115,39 @@ locals {
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
+}
+
+# =============================================================================
+# Validation: Private Endpoint Configuration
+# =============================================================================
+# These checks ensure valid configuration at plan time rather than apply time.
+
+check "private_endpoint_requires_premium_sku" {
+  assert {
+    condition     = !var.private_endpoint_enabled || var.sku == "Premium"
+    error_message = "Private endpoints require Premium SKU. Set sku = \"Premium\" when private_endpoint_enabled = true."
+  }
+}
+
+check "private_endpoint_requires_subnet" {
+  assert {
+    condition     = !var.private_endpoint_enabled || (var.private_endpoint_subnet_id != null && var.private_endpoint_subnet_id != "")
+    error_message = "private_endpoint_subnet_id is required when private_endpoint_enabled = true."
+  }
+}
+
+check "private_endpoint_dns_requires_vnet" {
+  assert {
+    condition     = !var.private_endpoint_enabled || var.private_dns_zone_id != null || var.virtual_network_id != null
+    error_message = "virtual_network_id is required when private_endpoint_enabled = true and private_dns_zone_id = null (to link the created private DNS zone)."
+  }
+}
+
+check "network_access_validation" {
+  assert {
+    condition     = var.public_network_access_enabled || var.private_endpoint_enabled
+    error_message = "Service Bus namespace must have at least one access path: enable public_network_access_enabled OR private_endpoint_enabled."
+  }
 }
 
 # Service Bus Namespace
@@ -98,7 +162,14 @@ resource "azurerm_servicebus_namespace" "shared" {
   premium_messaging_partitions = var.sku == "Premium" ? 1 : null
   # Note: zone_redundant was removed in AzureRM 4.0 - zone redundancy is now automatic for Premium
 
+  # Network access control
+  public_network_access_enabled = var.public_network_access_enabled
+
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Dynamic queues based on variable
@@ -125,6 +196,53 @@ resource "azurerm_servicebus_topic" "topics" {
   default_message_ttl   = each.value.default_message_ttl
   partitioning_enabled  = var.sku != "Premium" ? each.value.partitioning_enabled : false
   max_size_in_megabytes = each.value.max_size_in_megabytes
+}
+
+# Private DNS Zone for Service Bus (optional - created if not provided)
+resource "azurerm_private_dns_zone" "servicebus" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null ? 1 : 0
+
+  name                = "privatelink.servicebus.windows.net"
+  resource_group_name = var.resource_group_name
+  tags                = local.common_tags
+}
+
+# Link private DNS zone to VNet
+resource "azurerm_private_dns_zone_virtual_network_link" "servicebus" {
+  count = var.private_endpoint_enabled && var.private_dns_zone_id == null && var.virtual_network_id != null ? 1 : 0
+
+  name                  = "${azurerm_servicebus_namespace.shared.name}-dns-link"
+  resource_group_name   = var.resource_group_name
+  private_dns_zone_name = azurerm_private_dns_zone.servicebus[0].name
+  virtual_network_id    = var.virtual_network_id
+  registration_enabled  = false
+  tags                  = local.common_tags
+}
+
+# Private Endpoint for Service Bus
+resource "azurerm_private_endpoint" "servicebus" {
+  count = var.private_endpoint_enabled ? 1 : 0
+
+  name                = "${azurerm_servicebus_namespace.shared.name}-pe"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+  subnet_id           = var.private_endpoint_subnet_id
+
+  private_service_connection {
+    name                           = "${azurerm_servicebus_namespace.shared.name}-psc"
+    private_connection_resource_id = azurerm_servicebus_namespace.shared.id
+    is_manual_connection           = false
+    subresource_names              = ["namespace"]
+  }
+
+  private_dns_zone_group {
+    name = "servicebus-dns-zone-group"
+    private_dns_zone_ids = [
+      var.private_dns_zone_id != null ? var.private_dns_zone_id : azurerm_private_dns_zone.servicebus[0].id
+    ]
+  }
+
+  tags = local.common_tags
 }
 
 # Outputs
@@ -169,4 +287,19 @@ output "queue_ids" {
 output "topic_ids" {
   description = "Map of topic names to their IDs"
   value       = { for k, v in azurerm_servicebus_topic.topics : k => v.id }
+}
+
+output "private_endpoint_id" {
+  description = "Private endpoint ID (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.servicebus[0].id : null
+}
+
+output "private_endpoint_ip" {
+  description = "Private endpoint IP address (if enabled)"
+  value       = var.private_endpoint_enabled ? azurerm_private_endpoint.servicebus[0].private_service_connection[0].private_ip_address : null
+}
+
+output "private_dns_zone_id" {
+  description = "Private DNS zone ID (if created by module)"
+  value       = var.private_endpoint_enabled && var.private_dns_zone_id == null ? azurerm_private_dns_zone.servicebus[0].id : var.private_dns_zone_id
 }

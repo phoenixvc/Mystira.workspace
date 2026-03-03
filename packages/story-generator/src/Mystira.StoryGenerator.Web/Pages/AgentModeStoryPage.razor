@@ -1,0 +1,714 @@
+@page "/story/agent"
+@using Mystira.StoryGenerator.Web.Services
+@using Mystira.StoryGenerator.Application.Infrastructure.Agents
+@using Mystira.StoryGenerator.Contracts.Models
+@using Mystira.StoryGenerator.Contracts.Agents
+@using System.Text.Json
+@using System.Threading.Channels
+@using System.Runtime.CompilerServices
+@inject IAgentSessionService sessionService
+@inject SseJsInteropService sseService
+@inject ILogger<AgentModeStoryPage> logger
+@inject NavigationManager navigationManager
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IConfiguration configuration
+@inject Mystira.StoryGenerator.Web.Services.IChatSessionService ChatSessionService
+
+<PageTitle>AI Story Generator</PageTitle>
+
+<div class="agent-story-container">
+    @if (!sessionStarted)
+    {
+        <AgentModePromptForm
+            OnStartSession="HandleStartSession"
+            IsLoading="isGenerating" />
+    }
+    else if (currentSession != null)
+    {
+        <div class="session-container">
+            <AgentModeProgressPanel
+                Session="currentSession"
+                EvaluationReport="lastEvaluation"
+                RubricSummary="currentSession?.RubricSummary"
+                Events="streamEvents"
+                StreamingContent="@streamingContent"
+                OnRefineRequested="HandleRefineFromRubric"
+                OnCompleteRequested="HandleComplete" />
+
+            @if (currentSession?.Stage == "Evaluated" || currentSession?.Stage == "RefinementRequested" || currentSession?.Stage == "Complete")
+            {
+                <AgentModeRefinementPanel
+                    Session="currentSession"
+                    OnRefine="HandleRefine"
+                    OnProceedToRubric="HandleProceedToRubric"
+                    OnComplete="HandleComplete"
+                    IsLoading="isRefining"
+                    InitialRefinementText="@autoPopulatedRefinementText" />
+            }
+
+            @if (currentSession != null && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryJson) &&
+                 (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating" ||
+                  currentSession.Stage == "Evaluated" || currentSession.Stage == "RefinementRequested" ||
+                  currentSession.Stage == "Complete"))
+            {
+                <div class="complete-story-actions mb-4">
+                    <button @onclick="CompleteAndMoveToChat" class="btn btn-primary complete-btn">
+                        ✨ Complete & Continue in Chat
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <StoryDisplayPanel Story="@currentSession.CurrentStoryJson" />
+                    </div>
+                    <div>
+                        <YamlPreviewPanel
+                            YamlContent="@currentSession.CurrentStoryYaml"
+                            ValidationResult="null" />
+                    </div>
+                </div>
+            }
+
+            @* Show completion button on Evaluated stage as well *@
+            @if (currentSession != null && currentSession.Stage == "Evaluated" && !string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
+            {
+                <div class="complete-story-actions mb-4">
+                    <button @onclick="CompleteAndMoveToChat" class="btn btn-primary complete-btn">
+                        ✨ Complete & Continue in Chat
+                    </button>
+                </div>
+            }
+
+            @* Show diff viewer if there are multiple versions *@
+            @if (currentSession != null && currentSession.StoryVersions != null && currentSession.StoryVersions.Count > 1)
+            {
+                <StoryVersionDiffViewer Versions="@currentSession.StoryVersions" />
+            }
+
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
+            {
+                <div class="alert alert-danger">
+                    <strong>Error:</strong> @errorMessage
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private bool sessionStarted = false;
+    private bool isGenerating = false;
+    private bool isRefining = false;
+    private SessionStateResponse? currentSession;
+    private EvaluationReport? lastEvaluation;
+    private List<AgentStreamEvent> streamEvents = new();
+    private string? errorMessage;
+    private string? autoPopulatedRefinementText;
+    private CancellationTokenSource? streamCts;
+    private string streamingContent = string.Empty;
+    private string? currentStreamingPhase = null;
+
+    private async Task HandleStartSession(StartSessionRequest request)
+    {
+        try
+        {
+            errorMessage = null;
+            isGenerating = true;
+
+            var startResponse = await sessionService.StartSessionAsync(request);
+            logger.LogInformation("Session started: {SessionId}", startResponse.SessionId);
+
+            // Initialize session state from start response
+            currentSession = new SessionStateResponse
+            {
+                SessionId = startResponse.SessionId,
+                ThreadId = startResponse.ThreadId,
+                Stage = startResponse.Stage,
+                IterationCount = 0,
+                CurrentStoryJson = string.Empty,
+                ErrorMessage = null
+            };
+
+            sessionStarted = true;
+            StateHasChanged();
+
+            // Start SSE stream
+            if (streamCts != null)
+            {
+                await streamCts.CancelAsync();
+                streamCts.Dispose();
+            }
+            streamCts = new CancellationTokenSource();
+            var cts = streamCts;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StreamEventsAsync(startResponse.SessionId);
+                }
+                catch (Exception ex)
+                {
+                    if (!cts.IsCancellationRequested)
+                    {
+                        logger.LogError(ex, "Error in StreamEventsAsync for session {SessionId}", startResponse.SessionId);
+                    }
+                }
+            });
+
+            // Poll for generation completion
+            await WaitForGenerationAsync(startResponse.SessionId);
+
+            isGenerating = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error starting session");
+            errorMessage = $"Failed to start session: {ex.Message}";
+            isGenerating = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task StreamEventsAsync(string sessionId)
+    {
+        try
+        {
+            logger.LogInformation("Starting SSE stream for session {SessionId}", sessionId);
+            Console.WriteLine($"[BLAZOR] Starting SSE stream for session {sessionId}");
+
+            // Get base URL from configuration
+            var baseUrl = configuration["Api:BaseUrl"];
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                baseUrl = navigationManager.BaseUri.TrimEnd('/');
+            }
+
+            Console.WriteLine($"[BLAZOR] Using base URL: {baseUrl}");
+
+            // Use JavaScript-based SSE connection
+            var eventStream = await sseService.ConnectAsync(sessionId, baseUrl, streamCts?.Token ?? default);
+
+            await foreach (var evt in eventStream.WithCancellation(streamCts?.Token ?? default))
+            {
+                streamEvents.Add(evt);
+                logger.LogInformation("Received event: {EventType}, Message: {Message}", evt.Type, evt.Message ?? "<null>");
+
+                // Accumulate streaming content
+                if (evt.Type == AgentStreamEvent.EventType.StreamingUpdate)
+                {
+                    if (!string.IsNullOrEmpty(evt.Message))
+                    {
+                        var oldLength = streamingContent.Length;
+                        streamingContent += evt.Message;
+                        logger.LogInformation("StreamingUpdate: Added {NewChars} chars ('{MessagePreview}'), total now {TotalChars} chars",
+                            evt.Message.Length,
+                            evt.Message.Length > 20 ? evt.Message.Substring(0, 20) + "..." : evt.Message,
+                            streamingContent.Length);
+                        Console.WriteLine($"[BLAZOR] StreamingUpdate: Added {evt.Message.Length} chars, total now {streamingContent.Length} chars");
+                    }
+                    else
+                    {
+                        logger.LogWarning("StreamingUpdate event received but Message field is null or empty!");
+                    }
+                }
+
+                // Clear streaming content when transitioning to a different phase
+                if (evt.Type == AgentStreamEvent.EventType.PhaseStarted)
+                {
+                    if (currentStreamingPhase != null && currentStreamingPhase != evt.Phase)
+                    {
+                        streamingContent = string.Empty;
+                        logger.LogInformation("Cleared streaming content for phase transition: {OldPhase} -> {NewPhase}", currentStreamingPhase, evt.Phase);
+                    }
+                    currentStreamingPhase = evt.Phase;
+                }
+
+                // Handle specific event types
+                if (evt.Type == AgentStreamEvent.EventType.EvaluationPassed ||
+                    evt.Type == AgentStreamEvent.EventType.EvaluationFailed)
+                {
+                    // Refresh session to get latest evaluation
+                    await RefreshSessionAsync(sessionId);
+                }
+
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("SSE stream cancelled");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error streaming events");
+        }
+        finally
+        {
+            // Cleanup SSE connection
+            try
+            {
+                await sseService.DisconnectAsync(sessionId);
+                logger.LogInformation("SSE connection closed for session {SessionId}", sessionId);
+            }
+            catch (Exception ex)
+            {                logger.LogError(ex, "Error closing SSE connection");
+            }
+        }
+    }
+
+    private async Task WaitForGenerationAsync(string sessionId)
+    {
+        try
+        {
+            // Poll for story generation completion
+            var maxAttempts = 600; // 10 minutes (600 attempts * 1 seconds)
+            var attempt = 0;
+
+            while (attempt < maxAttempts)
+            {
+                await Task.Delay(1000); // Poll every 1 second
+                currentSession = await sessionService.GetSessionAsync(sessionId);
+                StateHasChanged();
+
+                if (currentSession.Stage == "Validating" || currentSession.Stage == "Evaluating")
+                {
+                    break;
+                }
+
+                // Check if the session has failed
+                if (currentSession.Stage == "Failed")
+                {
+                    errorMessage = currentSession.ErrorMessage ?? "Story generation failed. Please try again.";
+                    logger.LogError("Session {SessionId} failed: {ErrorMessage}", sessionId, errorMessage);
+                    return;
+                }
+
+                attempt++;
+            }
+
+            // Check for timeout
+            if (attempt >= maxAttempts && currentSession?.Stage != "Validating" && currentSession?.Stage != "Evaluating")
+            {
+                errorMessage = "Story generation timed out after 10 minutes. Please try again.";
+                logger.LogWarning("Session {SessionId} timed out", sessionId);
+                return;
+            }
+
+            // If we reached Validating stage, trigger evaluation
+            if (currentSession?.Stage == "Validating")
+            {
+                logger.LogInformation("Story validation complete, starting evaluation");
+                await EvaluateStoryAsync(sessionId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error waiting for generation");
+            errorMessage = $"Error during generation: {ex.Message}";
+        }
+    }
+
+    private async Task EvaluateStoryAsync(string sessionId)
+    {
+        try
+        {
+            // Start the evaluation (this will set backend to "Evaluating" state)
+            var evaluateTask = sessionService.EvaluateAsync(sessionId);
+
+            // Give backend time to set state to "Evaluating" and publish event
+            await Task.Delay(500);
+
+            // Refresh session to show "Evaluating" state
+            await RefreshSessionAsync(sessionId);
+
+            // Ensure rubric is cleared if we're doing a new evaluation after refinement
+            if (currentSession != null)
+            {
+                currentSession.RubricSummary = null;
+                lastEvaluation = null;
+            }
+
+            StateHasChanged();
+
+            // Wait for evaluation to complete
+            var evalResponse = await evaluateTask;
+            lastEvaluation = evalResponse.EvaluationReport;
+
+            // Refresh session state to show final evaluation result
+            await RefreshSessionAsync(sessionId);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error evaluating story");
+            errorMessage = $"Error during evaluation: {ex.Message}";
+        }
+    }
+
+    private async Task HandleRefineFromRubric()
+    {
+        if (currentSession?.RubricSummary == null) return;
+
+        var concerns = string.Join("\n", currentSession.RubricSummary.Concerns.Select(c => "- " + c));
+        var nextSteps = string.Join("\n", currentSession.RubricSummary.SuggestedFocus.Select(s => "- " + s));
+
+        autoPopulatedRefinementText = $"What Needs Work:\n{concerns}\n\nNext Steps:\n{nextSteps}";
+
+        // If stage is already Complete, Rubric, or Evaluated, we must move it back to RefinementRequested
+        // so the API allows the RefineAsync call.
+        if (currentSession.Stage == "Complete" || currentSession.Stage == "Evaluated" || currentSession.Stage == "Rubric")
+        {
+            currentSession.Stage = "RefinementRequested";
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleRefine(RefineRequest request)
+    {
+        if (currentSession == null)
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isRefining = true;
+
+            // Clear previous results to return to "writing" phase view
+            lastEvaluation = null;
+            streamEvents.Clear();
+            streamingContent = string.Empty;
+            currentStreamingPhase = null;
+
+            if (currentSession != null)
+            {
+                currentSession.Stage = "Refining"; // Update local state for immediate feedback
+                currentSession.IterationCount++; // Increment local iteration count
+                currentSession.RubricSummary = null; // Clear old rubric
+                autoPopulatedRefinementText = null; // Clear auto-populated text
+            }
+            StateHasChanged();
+
+            // Start SSE stream for refinement
+            if (streamCts != null)
+            {
+                await streamCts.CancelAsync();
+                streamCts.Dispose();
+
+                // Add a small delay to allow JS to process the disconnect
+                await Task.Delay(100);
+            }
+
+            streamCts = new CancellationTokenSource();
+            var cts = streamCts; // Capture locally
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await StreamEventsAsync(currentSession!.SessionId);
+                }
+                catch (Exception ex)
+                {
+                    if (!cts.IsCancellationRequested)
+                    {
+                        logger.LogError(ex, "Error in StreamEventsAsync for refinement of session {SessionId}", currentSession?.SessionId);
+                    }
+                }
+            });
+
+            var response = await sessionService.RefineAsync(currentSession!.SessionId, request);
+
+            // Sync with server iteration count if possible
+            if (response != null && response.IterationCount > 0)
+            {
+                currentSession.IterationCount = response.IterationCount;
+            }
+
+            // Wait for refinement to complete
+            await WaitForRefinementAsync(currentSession.SessionId);
+
+            isRefining = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error refining story");
+            errorMessage = $"Failed to refine story: {ex.Message}";
+            isRefining = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task WaitForRefinementAsync(string sessionId)
+    {
+        try
+        {
+            var maxAttempts = 600; // 10 minutes (600 attempts * 1 seconds)
+            var attempt = 0;
+
+            while (attempt < maxAttempts)
+            {
+                await Task.Delay(1000); // Poll every 1 second
+                currentSession = await sessionService.GetSessionAsync(sessionId);
+                StateHasChanged();
+
+                // Break when refinement completes and reaches validation/evaluation stage
+                // Also break if already evaluated (in case refinement was very fast)
+                if (currentSession.Stage == "Validating" ||
+                    currentSession.Stage == "Evaluating" ||
+                    currentSession.Stage == "Evaluated" ||
+                    currentSession.Stage == "RefinementRequested")
+                {
+                    break;
+                }
+
+                // Check if the session has failed
+                if (currentSession.Stage == "Failed")
+                {
+                    errorMessage = currentSession.ErrorMessage ?? "Story refinement failed. Please try again.";
+                    logger.LogError("Session {SessionId} failed during refinement: {ErrorMessage}", sessionId, errorMessage);
+                    return;
+                }
+
+                attempt++;
+            }
+
+            // Check for timeout
+            if (attempt >= maxAttempts)
+            {
+                errorMessage = "Story refinement timed out after 10 minutes. Please try again.";
+                logger.LogWarning("Session {SessionId} refinement timed out", sessionId);
+                return;
+            }
+
+            // Trigger re-evaluation if we're at Validating stage
+            // If already Evaluated/RefinementRequested, evaluation already happened
+            if (currentSession?.Stage == "Validating")
+            {
+                logger.LogInformation("Refinement complete, starting re-evaluation for session {SessionId}", sessionId);
+                await EvaluateStoryAsync(sessionId);
+            }
+            else if (currentSession?.Stage == "Evaluating")
+            {
+                logger.LogInformation("Refinement complete, evaluation already in progress for session {SessionId}", sessionId);
+                // Wait for evaluation to complete
+                await WaitForEvaluationAsync(sessionId);
+            }
+            else
+            {
+                logger.LogInformation("Refinement and evaluation complete for session {SessionId}, stage: {Stage}",
+                    sessionId, currentSession?.Stage);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error waiting for refinement");
+            errorMessage = $"Error during refinement: {ex.Message}";
+        }
+    }
+
+    private async Task WaitForEvaluationAsync(string sessionId)
+    {
+        try
+        {
+            var maxAttempts = 600; // 10 minutes
+            var attempt = 0;
+
+            while (attempt < maxAttempts)
+            {
+                await Task.Delay(1000);
+                currentSession = await sessionService.GetSessionAsync(sessionId);
+                StateHasChanged();
+
+                if (currentSession.Stage == "Evaluated" ||
+                    currentSession.Stage == "RefinementRequested" ||
+                    currentSession.Stage == "Failed")
+                {
+                    break;
+                }
+
+                attempt++;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error waiting for evaluation");
+        }
+    }
+
+    private async Task HandleProceedToRubric()
+    {
+        if (currentSession == null)
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isRefining = true;
+
+            // Update stage to show spinner
+            currentSession.Stage = "GeneratingRubric";
+            StateHasChanged();
+
+            // Call rubric generation endpoint
+            currentSession = await sessionService.GenerateRubricAsync(currentSession.SessionId);
+
+            logger.LogInformation("Rubric generated for session {SessionId}", currentSession.SessionId);
+
+            isRefining = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error generating rubric");
+            errorMessage = $"Failed to generate rubric: {ex.Message}";
+            isRefining = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task HandleComplete()
+    {
+        if (currentSession == null)
+            return;
+
+        try
+        {
+            errorMessage = null;
+            isRefining = true;
+            StateHasChanged();
+
+            // Call complete endpoint
+            currentSession = await sessionService.CompleteAsync(currentSession.SessionId);
+
+            logger.LogInformation("Session {SessionId} completed successfully", currentSession.SessionId);
+
+            isRefining = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error completing session");
+            errorMessage = $"Failed to complete session: {ex.Message}";
+            isRefining = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task RefreshSessionAsync(string sessionId)
+    {
+        try
+        {
+            currentSession = await sessionService.GetSessionAsync(sessionId);
+
+            // Only update lastEvaluation if it's not null in the response,
+            // or if we are NOT in the Refining stage.
+            // This prevents the polling from bringing back old evaluations during refinement.
+            if (currentSession.LastEvaluationReport != null || currentSession.Stage != "Refining")
+            {
+                lastEvaluation = currentSession.LastEvaluationReport;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error refreshing session");
+        }
+    }
+
+    private async Task CompleteAndMoveToChat()
+    {
+        if (currentSession == null || string.IsNullOrWhiteSpace(currentSession.CurrentStoryYaml))
+            return;
+
+        try
+        {
+            // Save a dedicated Story Library entry for this completed agentic story.
+            var storyTitle = ExtractStoryTitle();
+            await ChatSessionService.EnsureInitializedAsync();
+            await ChatSessionService.CreateNewSessionAsync(storyTitle);
+            await ChatSessionService.SaveYamlSnapshotAsync(currentSession.CurrentStoryYaml);
+
+            // Pass the YAML to the chat page via localStorage so the YAML preview panel shows it.
+            await localStorage.SetItemAsStringAsync("prePopulatedMessage", currentSession.CurrentStoryYaml);
+
+            navigationManager.NavigateTo("/story-generator");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error navigating to chat");
+            errorMessage = $"Failed to navigate to chat: {ex.Message}";
+        }
+    }
+
+    private string ExtractStoryTitle()
+    {
+        // Try JSON first (most reliable)
+        if (!string.IsNullOrWhiteSpace(currentSession?.CurrentStoryJson))
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(currentSession.CurrentStoryJson);
+                if (doc.RootElement.TryGetProperty("title", out var titleProp))
+                {
+                    var t = titleProp.GetString();
+                    if (!string.IsNullOrWhiteSpace(t))
+                        return t.Length > 60 ? t[..60] : t;
+                }
+            }
+            catch { }
+        }
+
+        // Fallback: scan YAML for a title: line
+        if (!string.IsNullOrWhiteSpace(currentSession?.CurrentStoryYaml))
+        {
+            foreach (var line in currentSession.CurrentStoryYaml.Split('\n'))
+            {
+                var trimmed = line.Trim();
+                if (trimmed.StartsWith("title:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var value = trimmed["title:".Length..].Trim().Trim('"', '\'');
+                    if (!string.IsNullOrWhiteSpace(value))
+                        return value.Length > 60 ? value[..60] : value;
+                }
+            }
+        }
+
+        return "Completed Story";
+    }
+
+    public void Dispose()
+    {
+        streamCts?.Cancel();
+        streamCts?.Dispose();
+    }
+}
+
+<style>
+    .complete-story-actions {
+        display: flex;
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .complete-btn {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 0.5rem;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .complete-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    .complete-btn:active {
+        transform: translateY(0);
+    }
+</style>

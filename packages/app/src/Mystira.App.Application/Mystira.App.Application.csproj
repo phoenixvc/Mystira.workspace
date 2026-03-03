@@ -1,0 +1,39 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>Mystira.App.Application</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Mystira Team</Authors>
+    <Company>Phoenix VC</Company>
+    <Description>Mystira platform application layer. CQRS commands/queries, handlers, validators, and application services.</Description>
+    <RepositoryUrl>https://github.com/phoenixvc/Mystira.App</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>UNLICENSED</PackageLicenseExpression>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PackageTags>mystira;application;cqrs;internal</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Wolverine for event-driven messaging (ADR-0015 migration - replaced MediatR) -->
+    <PackageReference Include="WolverineFx" Version="5.16.4" />
+    <!-- Mapperly for compile-time object mapping (Roslyn source generator) -->
+    <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.3" />
+    <PackageReference Include="NJsonSchema" Version="11.5.2" />
+    <!-- Ardalis.Specification for composable query patterns (per workspace ADR-0014) -->
+    <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Mystira.App.Domain\Mystira.App.Domain.csproj" />
+    <ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+  </ItemGroup>
+</Project>

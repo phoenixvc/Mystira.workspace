@@ -1,0 +1,179 @@
+name: "[Reusable] Infra Notifications"
+
+# Reusable workflow for sending notifications to Slack and Teams
+# Called by other infrastructure workflows
+
+on:
+  workflow_call:
+    inputs:
+      status:
+        description: "Deployment status (success, failure, cancelled)"
+        required: true
+        type: string
+      environment:
+        description: "Target environment"
+        required: true
+        type: string
+      product:
+        description: "Product being deployed"
+        required: true
+        type: string
+      action:
+        description: "Action performed (plan, apply, drift-check, etc.)"
+        required: true
+        type: string
+      message:
+        description: "Additional message"
+        required: false
+        type: string
+        default: ""
+      run_url:
+        description: "URL to the workflow run"
+        required: false
+        type: string
+        default: ""
+    secrets:
+      SLACK_WEBHOOK_URL:
+        required: false
+      TEAMS_WEBHOOK_URL:
+        required: false
+
+jobs:
+  notify-slack:
+    name: Notify Slack
+    runs-on: ubuntu-latest
+    # Note: Can't check secrets in 'if' for reusable workflows - use step condition instead
+    steps:
+      - name: Check if Slack is configured
+        id: check
+        run: |
+          if [[ -n "$SLACK_WEBHOOK_URL" ]]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Slack webhook not configured - skipping notification"
+          fi
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Send Slack notification
+        if: steps.check.outputs.configured == 'true'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ inputs.status == 'success' && '✅' || inputs.status == 'failure' && '❌' || '⚠️' }} Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
+                    "emoji": true
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Product:*\n${{ inputs.product }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n${{ inputs.environment }}"
+                    }
+                  ]
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Action:*\n${{ inputs.action }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Status:*\n${{ inputs.status }}"
+                    }
+                  ]
+                },
+                ${{ inputs.message != '' && format('{{ "type": "section", "text": {{ "type": "mrkdwn", "text": "*Details:*\\n{0}" }} }},', inputs.message) || '' }}
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Workflow Run",
+                        "emoji": true
+                      },
+                      "url": "${{ inputs.run_url != '' && inputs.run_url || github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+  notify-teams:
+    name: Notify Teams
+    runs-on: ubuntu-latest
+    # Note: Can't check secrets in 'if' for reusable workflows - use step condition instead
+    steps:
+      - name: Check if Teams is configured
+        id: check
+        run: |
+          if [[ -n "$TEAMS_WEBHOOK_URL" ]]; then
+            echo "configured=true" >> $GITHUB_OUTPUT
+          else
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "::notice::Teams webhook not configured - skipping notification"
+          fi
+        env:
+          TEAMS_WEBHOOK_URL: ${{ secrets.TEAMS_WEBHOOK_URL }}
+
+      - name: Send Teams notification
+        if: steps.check.outputs.configured == 'true'
+        run: |
+          STATUS_COLOR="${{ inputs.status == 'success' && '00FF00' || inputs.status == 'failure' && 'FF0000' || 'FFFF00' }}"
+          STATUS_EMOJI="${{ inputs.status == 'success' && '✅' || inputs.status == 'failure' && '❌' || '⚠️' }}"
+
+          # Using unquoted EOF to allow shell variable expansion
+          cat > payload.json << EOF
+          {
+            "@type": "MessageCard",
+            "@context": "http://schema.org/extensions",
+            "themeColor": "${STATUS_COLOR}",
+            "summary": "Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
+            "sections": [{
+              "activityTitle": "${STATUS_EMOJI} Infrastructure ${{ inputs.action }}: ${{ inputs.status }}",
+              "facts": [{
+                "name": "Product",
+                "value": "${{ inputs.product }}"
+              }, {
+                "name": "Environment",
+                "value": "${{ inputs.environment }}"
+              }, {
+                "name": "Action",
+                "value": "${{ inputs.action }}"
+              }, {
+                "name": "Status",
+                "value": "${{ inputs.status }}"
+              }${{ inputs.message != '' && format(', {{ "name": "Details", "value": "{0}" }}', inputs.message) || '' }}],
+              "markdown": true
+            }],
+            "potentialAction": [{
+              "@type": "OpenUri",
+              "name": "View Workflow Run",
+              "targets": [{
+                "os": "default",
+                "uri": "${{ inputs.run_url != '' && inputs.run_url || format('{0}/{1}/actions/runs/{2}', github.server_url, github.repository, github.run_id) }}"
+              }]
+            }]
+          }
+          EOF
+
+          curl -H "Content-Type: application/json" -d @payload.json "${{ secrets.TEAMS_WEBHOOK_URL }}"

@@ -19,4 +19,4 @@
 
 // Re-export all Story Generator contract types
 // TODO: Migrate types from @mystira/story-generator-contracts
-export * from './types';
+export * from "./types";

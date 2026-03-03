@@ -2,13 +2,15 @@
 
 ## Status
 
-**Accepted** - 2025-12-14
+**Superseded** by [ADR-0024: True Monorepo Migration](./0024-true-monorepo-migration.md) - 2025-12-24
+
+> **Note**: This ADR was originally accepted but is now superseded. The monorepo migrated to a true monorepo structure where all .NET packages are consumed via `ProjectReference` rather than NuGet packages. The GitHub Packages NuGet feed is no longer used for internal packages.
 
 ## Context
 
 As we extract services from the `Mystira.App` monorepo (starting with Admin API), we need a strategy for managing shared libraries that are used across multiple repositories.
 
-### Current State
+### Historical State (Pre-ADR-0024)
 
 **Shared Libraries in Mystira.App**:
 
@@ -21,13 +23,13 @@ As we extract services from the `Mystira.App` monorepo (starting with Admin API)
 - `Mystira.App.Shared` - Shared services (JWT, telemetry, middleware)
 - `Mystira.App.Contracts` - Shared request/response DTOs
 
-**Current Usage**:
+**Historical Usage**:
 
 - Referenced via project references (`<ProjectReference>`) within `Mystira.App`
 - Both Public API and Admin API reference the same shared libraries
 - No version management required (same solution)
 
-### Problem Statement
+### Original Problem Statement
 
 When extracting Admin API to a separate repository:
 
@@ -42,17 +44,55 @@ When extracting Admin API to a separate repository:
 - NuGet packages (standard .NET practice)
 - Copy shared code (violates DRY principle)
 
-## Decision
+## Historical Decision
 
-We will use **NuGet packages** hosted on an **internal NuGet feed** for shared libraries.
+> **Superseded**: The approach below was the original decision but is no longer in use.
+
+We ~~will use~~ **used** **NuGet packages** hosted on an **internal NuGet feed** for shared libraries.
 
 ### NuGet Feed Provider
 
-**Selected**: GitHub Packages
+**Selected**: GitHub Packages (no longer used for internal packages)
 
 **Feed URL**: `https://nuget.pkg.github.com/phoenixvc/index.json`
 
-**Rationale**:
+**Original Rationale**:
+
+- ✅ Integrated with GitHub (our source control and CI/CD)
+- ✅ Built-in authentication via GITHUB_TOKEN in workflows
+- ✅ Free for public repositories, included storage for private
+- ✅ Simple CI/CD integration with GitHub Actions
+
+## Current State (Post-ADR-0024)
+
+All internal .NET packages are now consumed via `ProjectReference` within the monorepo. The GitHub Packages NuGet feed configuration has been removed from:
+
+- `.github/workflows/packages-*.yml` - Removed `source-url` and `NUGET_AUTH_TOKEN`
+- `packages/*/nuget.config` - Removed GitHub Packages feed and credentials
+- `release.yml` - Removed NuGet publishing triggers
+
+External dependencies (NuGet.org packages) are still restored via standard `dotnet restore`.
+
+## Migration Path
+
+1. **Completed**: Removed GitHub Packages authentication from CI workflows
+2. **Completed**: Simplified `nuget.config` files to only include nuget.org
+3. **Completed**: Removed NuGet publishing jobs from `release.yml`
+4. **Completed**: All .NET projects use `ProjectReference` for internal dependencies
+
+## References
+
+- [ADR-0024: True Monorepo Migration](./0024-true-monorepo-migration.md) - The superseding decision
+- [packages-publish.yml](../../../.github/workflows/packages-publish.yml) - CI validation (build only, no publish)
+- [ROADMAP.md](../../../ROADMAP.md) - Current platform status
+
+---
+
+## Historical Content (Preserved for Reference)
+
+The sections below document the original NuGet feed strategy design. This approach is no longer in use following ADR-0024, but is preserved for historical context.
+
+### Original Rationale for GitHub Packages
 
 - ✅ Integrated with GitHub (our source control and CI/CD)
 - ✅ Built-in authentication via GITHUB_TOKEN in workflows
@@ -250,6 +290,18 @@ Each shared library `.csproj` should include:
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
     <add key="github" value="https://nuget.pkg.github.com/phoenixvc/index.json" />
   </packageSources>
+
+  <!-- IMPORTANT: Package Source Mapping ensures Mystira packages are resolved from GitHub -->
+  <packageSourceMapping>
+    <packageSource key="nuget.org">
+      <package pattern="*" />
+    </packageSource>
+    <packageSource key="github">
+      <package pattern="Mystira.*" />
+      <package pattern="PhoenixVC.*" />
+    </packageSource>
+  </packageSourceMapping>
+
   <packageSourceCredentials>
     <github>
       <add key="Username" value="USERNAME" />
@@ -258,6 +310,8 @@ Each shared library `.csproj` should include:
   </packageSourceCredentials>
 </configuration>
 ```
+
+> **Why Package Source Mapping?** Without it, NuGet may try to resolve `Mystira.*` packages from nuget.org and fail with "Unable to resolve package" errors. The mapping ensures private packages are only fetched from GitHub Packages.
 
 **For CI/CD**: Use `GITHUB_TOKEN` secret (automatically available in GitHub Actions)
 

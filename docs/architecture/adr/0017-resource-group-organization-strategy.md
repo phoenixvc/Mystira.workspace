@@ -28,18 +28,18 @@ mys-shared-terraform-rg-san  # Terraform state (shared)
 
 This includes:
 
-| Category | Resources |
-|----------|-----------|
-| **Networking** | VNet, 7 Subnets, NSGs |
-| **Compute** | AKS Cluster (3 node pools) |
-| **Container Registry** | ACR (shared) |
-| **Databases** | PostgreSQL Flexible Server, Redis Cache |
-| **Monitoring** | Log Analytics, Application Insights (x5), Action Groups |
-| **Chain Service** | User Identity, Key Vault, NSG, Storage |
-| **Publisher Service** | User Identity, Key Vault, NSG, Storage, Service Bus |
-| **Story Generator** | User Identity, Key Vault, Storage |
-| **Admin API** | User Identity, Key Vault, NSG |
-| **Identity** | Entra ID Apps, Service Principals, Federated Credentials |
+| Category               | Resources                                                |
+| ---------------------- | -------------------------------------------------------- |
+| **Networking**         | VNet, 7 Subnets, NSGs                                    |
+| **Compute**            | AKS Cluster (3 node pools)                               |
+| **Container Registry** | ACR (shared)                                             |
+| **Databases**          | PostgreSQL Flexible Server, Redis Cache                  |
+| **Monitoring**         | Log Analytics, Application Insights (x5), Action Groups  |
+| **Chain Service**      | User Identity, Key Vault, NSG, Storage                   |
+| **Publisher Service**  | User Identity, Key Vault, NSG, Storage, Service Bus      |
+| **Story Generator**    | User Identity, Key Vault, Storage                        |
+| **Admin API**          | User Identity, Key Vault, NSG                            |
+| **Identity**           | Entra ID Apps, Service Principals, Federated Credentials |
 
 ### Problems with Current Approach
 
@@ -78,55 +78,55 @@ mys-prod-frontdoor-rg-glob          # Front Door, WAF (global, prod only)
 
 ### Resource Allocation Matrix
 
-| Resource Type | Resource Group | Rationale |
-|--------------|----------------|-----------|
-| **Shared Infrastructure (per-environment)** | | |
-| Virtual Network | `core-rg` | Core networking, rarely changes |
-| Subnets | `core-rg` | Part of VNet lifecycle |
-| NSGs (VNet-level) | `core-rg` | Network security rules |
-| Private DNS Zones | `core-rg` | VNet-linked DNS |
-| AKS Cluster | `core-rg` | Shared compute platform |
-| AKS Node Pools | `core-rg` | Part of AKS lifecycle |
-| PostgreSQL Server | `core-rg` | Shared database, long-lived |
-| PostgreSQL Databases | `core-rg` | Part of server lifecycle |
-| Redis Cache | `core-rg` | Shared cache, long-lived |
-| Service Bus Namespace | `core-rg` | Shared messaging (used by publisher, admin, app, future services) |
-| Cosmos DB Account | `core-rg` | Shared document store (used by App, Admin, future services) |
-| Shared Storage Account | `core-rg` | Media, content (used by multiple services) |
-| Log Analytics Workspace | `core-rg` | Central logging |
-| Action Groups | `core-rg` | Alert notifications |
-| **Chain Service** | | |
-| Chain Identity | `chain-rg` | Service-specific |
-| Chain Key Vault | `chain-rg` | Service secrets |
-| Chain App Insights | `chain-rg` | Service telemetry |
-| **Publisher Service** | | |
-| Publisher Identity | `publisher-rg` | Service-specific |
-| Publisher Key Vault | `publisher-rg` | Service secrets |
-| Publisher App Insights | `publisher-rg` | Service telemetry |
-| **Story Generator** | | |
-| Story Generator Identity | `story-rg` | Service-specific |
-| Story Generator Key Vault | `story-rg` | Service secrets |
-| Story Generator App Insights | `story-rg` | Service telemetry |
-| **Admin API** | | |
-| Admin API Identity | `admin-rg` | Service-specific |
-| Admin API Key Vault | `admin-rg` | Service secrets |
-| Admin API App Insights | `admin-rg` | Service telemetry |
-| **App (PWA + API)** | | |
-| App Service Plan | `app-rg` | API hosting |
-| App Service (API) | `app-rg` | .NET API backend |
-| Static Web App (PWA) | `app-rg` | Blazor WASM frontend |
-| App Key Vault | `app-rg` | App secrets |
-| App Insights | `app-rg` | App telemetry |
-| Azure Bot | `app-rg` | Teams integration (optional) |
-| **Cross-Environment Shared (like ACR)** | | |
-| Container Registry | `shared-acr-rg` | Container images (all envs) |
-| Communication Services | `shared-comms-rg` | Email/SMS (all envs) |
-| Email Communication Svc | `shared-comms-rg` | Email sending (all envs) |
-| Terraform State Storage | `shared-terraform-rg` | IaC state |
-| **Global Resources (prod only)** | | |
-| Front Door | `frontdoor-rg` | Global routing |
-| WAF Policy | `frontdoor-rg` | Security policy |
-| DNS Zone | `dns-rg` | Domain management |
+| Resource Type                               | Resource Group        | Rationale                                                         |
+| ------------------------------------------- | --------------------- | ----------------------------------------------------------------- |
+| **Shared Infrastructure (per-environment)** |                       |                                                                   |
+| Virtual Network                             | `core-rg`             | Core networking, rarely changes                                   |
+| Subnets                                     | `core-rg`             | Part of VNet lifecycle                                            |
+| NSGs (VNet-level)                           | `core-rg`             | Network security rules                                            |
+| Private DNS Zones                           | `core-rg`             | VNet-linked DNS                                                   |
+| AKS Cluster                                 | `core-rg`             | Shared compute platform                                           |
+| AKS Node Pools                              | `core-rg`             | Part of AKS lifecycle                                             |
+| PostgreSQL Server                           | `core-rg`             | Shared database, long-lived                                       |
+| PostgreSQL Databases                        | `core-rg`             | Part of server lifecycle                                          |
+| Redis Cache                                 | `core-rg`             | Shared cache, long-lived                                          |
+| Service Bus Namespace                       | `core-rg`             | Shared messaging (used by publisher, admin, app, future services) |
+| Cosmos DB Account                           | `core-rg`             | Shared document store (used by App, Admin, future services)       |
+| Shared Storage Account                      | `core-rg`             | Media, content (used by multiple services)                        |
+| Log Analytics Workspace                     | `core-rg`             | Central logging                                                   |
+| Action Groups                               | `core-rg`             | Alert notifications                                               |
+| **Chain Service**                           |                       |                                                                   |
+| Chain Identity                              | `chain-rg`            | Service-specific                                                  |
+| Chain Key Vault                             | `chain-rg`            | Service secrets                                                   |
+| Chain App Insights                          | `chain-rg`            | Service telemetry                                                 |
+| **Publisher Service**                       |                       |                                                                   |
+| Publisher Identity                          | `publisher-rg`        | Service-specific                                                  |
+| Publisher Key Vault                         | `publisher-rg`        | Service secrets                                                   |
+| Publisher App Insights                      | `publisher-rg`        | Service telemetry                                                 |
+| **Story Generator**                         |                       |                                                                   |
+| Story Generator Identity                    | `story-rg`            | Service-specific                                                  |
+| Story Generator Key Vault                   | `story-rg`            | Service secrets                                                   |
+| Story Generator App Insights                | `story-rg`            | Service telemetry                                                 |
+| **Admin API**                               |                       |                                                                   |
+| Admin API Identity                          | `admin-rg`            | Service-specific                                                  |
+| Admin API Key Vault                         | `admin-rg`            | Service secrets                                                   |
+| Admin API App Insights                      | `admin-rg`            | Service telemetry                                                 |
+| **App (PWA + API)**                         |                       |                                                                   |
+| App Service Plan                            | `app-rg`              | API hosting                                                       |
+| App Service (API)                           | `app-rg`              | .NET API backend                                                  |
+| Static Web App (PWA)                        | `app-rg`              | Blazor WASM frontend                                              |
+| App Key Vault                               | `app-rg`              | App secrets                                                       |
+| App Insights                                | `app-rg`              | App telemetry                                                     |
+| Azure Bot                                   | `app-rg`              | Teams integration (optional)                                      |
+| **Cross-Environment Shared (like ACR)**     |                       |                                                                   |
+| Container Registry                          | `shared-acr-rg`       | Container images (all envs)                                       |
+| Communication Services                      | `shared-comms-rg`     | Email/SMS (all envs)                                              |
+| Email Communication Svc                     | `shared-comms-rg`     | Email sending (all envs)                                          |
+| Terraform State Storage                     | `shared-terraform-rg` | IaC state                                                         |
+| **Global Resources (prod only)**            |                       |                                                                   |
+| Front Door                                  | `frontdoor-rg`        | Global routing                                                    |
+| WAF Policy                                  | `frontdoor-rg`        | Security policy                                                   |
+| DNS Zone                                    | `dns-rg`              | Domain management                                                 |
 
 ### Complete Resource Group Inventory
 
@@ -185,30 +185,30 @@ Follows ADR-0008 pattern:
 
 Where project values for resource groups are:
 
-| Project Code | Purpose |
-|-------------|---------|
-| `core` | Shared infrastructure (VNet, AKS, databases, Cosmos DB, Storage, monitoring) |
-| `chain` | Chain service (blockchain/ledger) |
-| `publisher` | Publisher service (content publishing) |
-| `story` | Story Generator service |
-| `admin` | Admin API service |
-| `app` | App service (PWA + API compute) |
-| `acr` | Container Registry (cross-environment) |
-| `comms` | Communication Services (cross-environment) |
-| `frontdoor` | Global edge/CDN |
-| `dns` | DNS management |
-| `terraform` | IaC state |
+| Project Code | Purpose                                                                      |
+| ------------ | ---------------------------------------------------------------------------- |
+| `core`       | Shared infrastructure (VNet, AKS, databases, Cosmos DB, Storage, monitoring) |
+| `chain`      | Chain service (blockchain/ledger)                                            |
+| `publisher`  | Publisher service (content publishing)                                       |
+| `story`      | Story Generator service                                                      |
+| `admin`      | Admin API service                                                            |
+| `app`        | App service (PWA + API compute)                                              |
+| `acr`        | Container Registry (cross-environment)                                       |
+| `comms`      | Communication Services (cross-environment)                                   |
+| `frontdoor`  | Global edge/CDN                                                              |
+| `dns`        | DNS management                                                               |
+| `terraform`  | IaC state                                                                    |
 
 ### Cross-Environment Resource Sharing
 
 Some resources are shared across all environments (dev, staging, prod) to reduce costs and simplify management:
 
-| Resource | Pattern | Separation Strategy |
-|----------|---------|---------------------|
-| Container Registry (ACR) | `mys-shared-acr-rg-san` | Image tags: `dev/*`, `staging/*`, `prod/*` |
-| Communication Services | `mys-shared-comms-rg-glob` | Configuration per environment |
-| Email Service | `mys-shared-comms-rg-glob` | Sender addresses per environment |
-| Terraform State | `mys-shared-terraform-rg-san` | State files: `dev/`, `staging/`, `prod/` |
+| Resource                 | Pattern                       | Separation Strategy                        |
+| ------------------------ | ----------------------------- | ------------------------------------------ |
+| Container Registry (ACR) | `mys-shared-acr-rg-san`       | Image tags: `dev/*`, `staging/*`, `prod/*` |
+| Communication Services   | `mys-shared-comms-rg-glob`    | Configuration per environment              |
+| Email Service            | `mys-shared-comms-rg-glob`    | Sender addresses per environment           |
+| Terraform State          | `mys-shared-terraform-rg-san` | State files: `dev/`, `staging/`, `prod/`   |
 
 **Why share these resources?**
 
@@ -217,6 +217,7 @@ Some resources are shared across all environments (dev, staging, prod) to reduce
 3. **Terraform State**: Single backend with environment-keyed state files.
 
 **RBAC for shared resources:**
+
 - Platform team has Contributor access
 - Service teams have Reader access (or specific role for pushing images to ACR)
 
@@ -258,11 +259,11 @@ DevOps           → Reader on all RGs
 
 ### Lifecycle Management
 
-| Tier | Change Frequency | Resources |
-|------|-----------------|-----------|
-| Core | Rarely (months) | VNet, AKS, PostgreSQL, Redis |
+| Tier     | Change Frequency        | Resources                         |
+| -------- | ----------------------- | --------------------------------- |
+| Core     | Rarely (months)         | VNet, AKS, PostgreSQL, Redis      |
 | Services | Frequently (days/weeks) | Key Vaults, Storage, App Insights |
-| Global | Rarely | DNS, Front Door |
+| Global   | Rarely                  | DNS, Front Door                   |
 
 ### Cost Attribution
 
@@ -293,11 +294,11 @@ With service-specific RGs:
 
 ### Mitigations
 
-| Risk | Mitigation |
-|------|------------|
-| Cross-RG references | Terraform data sources, output passing |
-| State migration | Phased approach, start with new resources |
-| Complexity | Clear naming, tagging, documentation |
+| Risk                | Mitigation                                |
+| ------------------- | ----------------------------------------- |
+| Cross-RG references | Terraform data sources, output passing    |
+| State migration     | Phased approach, start with new resources |
+| Complexity          | Clear naming, tagging, documentation      |
 
 ## Decision Analysis
 
@@ -305,38 +306,42 @@ With service-specific RGs:
 
 We evaluated four approaches against seven criteria, weighted by importance to Mystira's current needs:
 
-| Criteria | Weight | A: Status Quo | B: Proposed | C: Full Split | D: Per-Service |
-|----------|--------|---------------|-------------|---------------|----------------|
-| **Migration Effort** | 25% | 5 (none) | 4 (minimal) | 2 (significant) | 1 (massive) |
-| **RBAC/Security Isolation** | 25% | 1 (none) | 4 (secrets isolated) | 5 (full) | 5 (full) |
-| **Cost Visibility** | 15% | 1 (none) | 4 (per service) | 4 (per service) | 5 (complete) |
-| **Blast Radius** | 15% | 1 (entire env) | 3 (core + services) | 4 (component) | 5 (single service) |
-| **Operational Complexity** | 10% | 5 (simple) | 4 (manageable) | 2 (complex) | 1 (very complex) |
-| **Terraform Management** | 5% | 5 (simple) | 4 (modular) | 3 (many states) | 2 (fragmented) |
-| **Team Scalability** | 5% | 2 (poor) | 4 (good) | 4 (good) | 3 (overkill) |
-| **Weighted Score** | 100% | **2.45** | **3.85** | **3.30** | **2.95** |
+| Criteria                    | Weight | A: Status Quo  | B: Proposed          | C: Full Split   | D: Per-Service     |
+| --------------------------- | ------ | -------------- | -------------------- | --------------- | ------------------ |
+| **Migration Effort**        | 25%    | 5 (none)       | 4 (minimal)          | 2 (significant) | 1 (massive)        |
+| **RBAC/Security Isolation** | 25%    | 1 (none)       | 4 (secrets isolated) | 5 (full)        | 5 (full)           |
+| **Cost Visibility**         | 15%    | 1 (none)       | 4 (per service)      | 4 (per service) | 5 (complete)       |
+| **Blast Radius**            | 15%    | 1 (entire env) | 3 (core + services)  | 4 (component)   | 5 (single service) |
+| **Operational Complexity**  | 10%    | 5 (simple)     | 4 (manageable)       | 2 (complex)     | 1 (very complex)   |
+| **Terraform Management**    | 5%     | 5 (simple)     | 4 (modular)          | 3 (many states) | 2 (fragmented)     |
+| **Team Scalability**        | 5%     | 2 (poor)       | 4 (good)             | 4 (good)        | 3 (overkill)       |
+| **Weighted Score**          | 100%   | **2.45**       | **3.85**             | **3.30**        | **2.95**           |
 
 **Scoring**: 1 = Poor, 3 = Adequate, 5 = Excellent
 
 ### Score Breakdown
 
 **Option A: Status Quo (Score: 2.45)**
+
 - Easiest to maintain but fails on isolation, cost tracking, and blast radius
 - Not viable for multi-team or compliance scenarios
 
 **Option B: Proposed Strategy (Score: 3.85)** ✅ Selected
+
 - Best balance of migration effort vs. security isolation
 - Secrets (Key Vaults) are isolated per service - primary goal achieved
 - Core infrastructure stays together - minimal disruption
 - Cross-environment sharing reduces costs
 
 **Option C: Full 4-Tier Split (Score: 3.30)**
+
 - Better isolation but significantly more migration effort
 - 8+ RGs per environment creates operational overhead
 - Overkill for current team size (< 10 developers)
 - Consider if team grows beyond 20 or compliance requires it
 
 **Option D: Full Per-Service Isolation (Score: 2.95)**
+
 - Massive cost (duplicate VNets, AKS clusters, databases)
 - Extreme complexity with VNet peering
 - Only justified for completely independent business units
@@ -344,6 +349,7 @@ We evaluated four approaches against seven criteria, weighted by importance to M
 ### Honest Assessment of Proposed Strategy
 
 **Strengths:**
+
 1. ✅ **Solves the primary pain point** - Key Vault isolation per service
 2. ✅ **Minimal disruption** - Core infra unchanged
 3. ✅ **Right-sized for team** - Not over-engineered
@@ -351,12 +357,14 @@ We evaluated four approaches against seven criteria, weighted by importance to M
 5. ✅ **Cross-env sharing** - ACR/Comms pattern is proven
 
 **Acknowledged Trade-offs:**
+
 1. ⚠️ **core-rg remains large** - VNet + AKS + PostgreSQL + Redis + Cosmos DB + Storage
 2. ⚠️ **Blast radius for core** - Deleting core-rg still destroys environment
 3. ⚠️ **Shared data access** - All services can access Cosmos DB (no database-level RBAC)
 4. ⚠️ **Mixed patterns** - PaaS (App Service) and containers (AKS) in same structure
 
 **Why these trade-offs are acceptable:**
+
 1. **Core-rg size**: Platform team owns it entirely; no service team has write access
 2. **Blast radius**: Mitigated by Terraform state, Azure locks, and backup policies
 3. **Shared data**: Application-level auth handles data isolation; DB-level separation is future work
@@ -365,6 +373,7 @@ We evaluated four approaches against seven criteria, weighted by importance to M
 ### When to Reconsider
 
 Upgrade to **Option C (Full Split)** when:
+
 - Team grows beyond 20 developers
 - Multiple distinct platform teams form
 - Compliance requires network/data separation
@@ -386,10 +395,12 @@ mys-{env}-chain-rg-{region}     # Chain service
 ```
 
 **Pros**:
+
 - Maximum granularity
 - Separate RBAC for networking vs databases
 
 **Cons**:
+
 - More RGs (8+ per environment)
 - More migration effort
 - Overkill for current team size
@@ -401,10 +412,12 @@ mys-{env}-chain-rg-{region}     # Chain service
 **Approach**: Continue with `mys-{env}-core-rg-{region}` for everything.
 
 **Pros**:
+
 - No migration needed
 - Simple
 
 **Cons**:
+
 - No service isolation
 - Cannot track costs per service
 - Large blast radius
@@ -416,9 +429,11 @@ mys-{env}-chain-rg-{region}     # Chain service
 **Approach**: Each service gets its own VNet, AKS, databases.
 
 **Pros**:
+
 - Complete isolation
 
 **Cons**:
+
 - Massive duplication and cost
 - Network complexity
 
@@ -432,17 +447,17 @@ The infrastructure is **fully aligned** with this ADR. All environments (dev, st
 
 **Analysis (updated 2025-12-23):**
 
-| Component | Current State | Required State | Status |
-|-----------|---------------|----------------|--------|
-| **Resource Groups/Env** | 6 (core + 5 service) | 6 (core + 5 service) | ✅ All environments |
-| **ACR Location** | `mys-shared-acr-rg-san` | `mys-shared-acr-rg-san` | ✅ Shared module |
-| **Communication Svc** | `mys-shared-comms-rg-glob` | `mys-shared-comms-rg-glob` | ✅ Module created |
-| **Service Bus** | In core-rg (shared) | In core-rg (shared) | ✅ Shared module |
-| **Service Key Vaults** | In service-rg | In service-rg | ✅ All services |
-| **Module RG Params** | Modules use service RGs | Modules use service RGs | ✅ Updated |
-| **RBAC Configuration** | Explicit boolean flags | Explicit boolean flags | ✅ All environments |
-| **Service Bus RBAC** | Publisher has sender/receiver | Publisher has sender/receiver | ✅ Identity module |
-| **CI/CD Workflows** | Multi-RG support | Multi-RG support | ✅ Updated |
+| Component               | Current State                 | Required State                | Status              |
+| ----------------------- | ----------------------------- | ----------------------------- | ------------------- |
+| **Resource Groups/Env** | 6 (core + 5 service)          | 6 (core + 5 service)          | ✅ All environments |
+| **ACR Location**        | `mys-shared-acr-rg-san`       | `mys-shared-acr-rg-san`       | ✅ Shared module    |
+| **Communication Svc**   | `mys-shared-comms-rg-glob`    | `mys-shared-comms-rg-glob`    | ✅ Module created   |
+| **Service Bus**         | In core-rg (shared)           | In core-rg (shared)           | ✅ Shared module    |
+| **Service Key Vaults**  | In service-rg                 | In service-rg                 | ✅ All services     |
+| **Module RG Params**    | Modules use service RGs       | Modules use service RGs       | ✅ Updated          |
+| **RBAC Configuration**  | Explicit boolean flags        | Explicit boolean flags        | ✅ All environments |
+| **Service Bus RBAC**    | Publisher has sender/receiver | Publisher has sender/receiver | ✅ Identity module  |
+| **CI/CD Workflows**     | Multi-RG support              | Multi-RG support              | ✅ Updated          |
 
 ### Files Updated
 
@@ -450,33 +465,33 @@ All required files have been updated to implement this ADR:
 
 #### Terraform Environments (Completed)
 
-| File | Changes Made |
-|------|-------------|
-| `infra/terraform/environments/dev/main.tf` | ✅ 5 service RGs, shared ACR/comms RGs, Service Bus, RBAC flags |
-| `infra/terraform/environments/staging/main.tf` | ✅ 5 service RGs, Service Bus, RBAC flags, ACR reference fixed |
-| `infra/terraform/environments/prod/main.tf` | ✅ 5 service RGs, Premium Service Bus, RBAC flags, ACR reference fixed |
+| File                                           | Changes Made                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------- |
+| `infra/terraform/environments/dev/main.tf`     | ✅ 5 service RGs, shared ACR/comms RGs, Service Bus, RBAC flags        |
+| `infra/terraform/environments/staging/main.tf` | ✅ 5 service RGs, Service Bus, RBAC flags, ACR reference fixed         |
+| `infra/terraform/environments/prod/main.tf`    | ✅ 5 service RGs, Premium Service Bus, RBAC flags, ACR reference fixed |
 
 #### Terraform Modules (Completed)
 
-| Module | Purpose | Status |
-|--------|---------|--------|
-| `modules/shared/container-registry/` | Shared ACR for all environments | ✅ Created |
-| `modules/shared/communications/` | ACS/Email services | ✅ Created |
-| `modules/shared/servicebus/` | Shared Service Bus messaging | ✅ Created |
-| `modules/shared/identity/` | Cross-RG RBAC, federated credentials per service RG | ✅ Updated |
-| `modules/story-generator/` | Key Vault with Terraform SP access policy | ✅ Fixed |
-| `modules/chain/` | Key Vault with Terraform SP access policy | ✅ Fixed |
-| `modules/publisher/` | Key Vault with Terraform SP access policy | ✅ Has policy |
-| `modules/admin-api/` | Key Vault with Terraform SP access policy | ✅ Has policy |
+| Module                               | Purpose                                             | Status        |
+| ------------------------------------ | --------------------------------------------------- | ------------- |
+| `modules/shared/container-registry/` | Shared ACR for all environments                     | ✅ Created    |
+| `modules/shared/communications/`     | ACS/Email services                                  | ✅ Created    |
+| `modules/shared/servicebus/`         | Shared Service Bus messaging                        | ✅ Created    |
+| `modules/shared/identity/`           | Cross-RG RBAC, federated credentials per service RG | ✅ Updated    |
+| `modules/story-generator/`           | Key Vault with Terraform SP access policy           | ✅ Fixed      |
+| `modules/chain/`                     | Key Vault with Terraform SP access policy           | ✅ Fixed      |
+| `modules/publisher/`                 | Key Vault with Terraform SP access policy           | ✅ Has policy |
+| `modules/admin-api/`                 | Key Vault with Terraform SP access policy           | ✅ Has policy |
 
 #### CI/CD Workflows (Completed)
 
-| File | Changes Made |
-|------|-------------|
-| `.github/workflows/infra-deploy.yml` | ✅ Service RG env variables, ACR import logic |
-| `.github/workflows/staging-release.yml` | ✅ Service RG env variables |
-| `.github/workflows/production-release.yml` | ✅ Service RG env variables |
-| `.github/workflows/keyvault-secrets.yml` | ✅ Multi-service Key Vault support |
+| File                                       | Changes Made                                  |
+| ------------------------------------------ | --------------------------------------------- |
+| `.github/workflows/infra-deploy.yml`       | ✅ Service RG env variables, ACR import logic |
+| `.github/workflows/staging-release.yml`    | ✅ Service RG env variables                   |
+| `.github/workflows/production-release.yml` | ✅ Service RG env variables                   |
+| `.github/workflows/keyvault-secrets.yml`   | ✅ Multi-service Key Vault support            |
 
 ### What's Working
 
@@ -490,13 +505,13 @@ All required files have been updated to implement this ADR:
 
 ### Risk Assessment
 
-| Risk | Impact | Mitigation |
-|------|--------|-----------|
-| Key Vault secret loss during migration | HIGH | Backup secrets before any changes |
-| Service interruption during transition | HIGH | Blue-green deployment, dev first |
-| Cross-RG RBAC failures | MEDIUM | Pre-test identity assignments |
-| CI/CD pipeline breaks | MEDIUM | Update workflows before prod migration |
-| Terraform state drift | MEDIUM | Use `terraform import` carefully |
+| Risk                                   | Impact | Mitigation                             |
+| -------------------------------------- | ------ | -------------------------------------- |
+| Key Vault secret loss during migration | HIGH   | Backup secrets before any changes      |
+| Service interruption during transition | HIGH   | Blue-green deployment, dev first       |
+| Cross-RG RBAC failures                 | MEDIUM | Pre-test identity assignments          |
+| CI/CD pipeline breaks                  | MEDIUM | Update workflows before prod migration |
+| Terraform state drift                  | MEDIUM | Use `terraform import` carefully       |
 
 ## Implementation
 
@@ -580,6 +595,7 @@ Deploy new service resources (Key Vaults, Storage, App Insights) directly to ser
 For existing resources, choose:
 
 **Option A: Recreate** (Recommended for Key Vaults with rotation)
+
 ```hcl
 # Create new Key Vault in service RG
 # Migrate secrets
@@ -588,12 +604,14 @@ For existing resources, choose:
 ```
 
 **Option B: Azure Resource Mover** (For supported resources)
+
 ```bash
 az resource move --destination-group mys-dev-chain-rg-san \
   --ids /subscriptions/.../mys-dev-chain-kv-san
 ```
 
 **Option C: Leave in core-rg** (For stable resources)
+
 - Keep stable resources in core-rg with proper tagging
 - Only move new resources to service RGs
 
@@ -632,6 +650,7 @@ tags = {
 ## Migration Checklist
 
 ### Phase 1: Preparation
+
 - [x] Backup all Key Vault secrets (all environments)
 - [x] Document current RBAC assignments
 - [x] Create new Terraform modules:
@@ -640,6 +659,7 @@ tags = {
   - [x] `modules/shared/servicebus/` - Created for cross-service messaging
 
 ### Phase 2: Development Environment
+
 - [x] Add 5 new resource group definitions to `dev/main.tf`
 - [x] Create `mys-shared-acr-rg-san` and `mys-shared-comms-rg-glob`
 - [x] Move ACR resource to shared ACR module (`modules/shared/container-registry/`)
@@ -653,6 +673,7 @@ tags = {
 - [ ] Test all services connect to correct Key Vaults
 
 ### Phase 3: Staging Environment
+
 - [x] Update `staging/main.tf` with service RGs
 - [x] Add shared Service Bus module
 - [x] Update ACR data source to reference `mys-shared-acr-rg-san`
@@ -662,6 +683,7 @@ tags = {
 - [ ] Validate all services
 
 ### Phase 4: Production Environment
+
 - [x] Update `prod/main.tf` with service RGs
 - [x] Add Premium Service Bus module (zone redundant)
 - [x] Update ACR data source
@@ -674,6 +696,7 @@ tags = {
 - [ ] Monitor for 24-48 hours
 
 ### Phase 5: Cleanup & Documentation
+
 - [ ] Remove old Key Vaults from core-rg (after validation)
 - [ ] Update `infra/terraform/README.md`
 - [ ] Update `docs/infrastructure/azure-setup.md`

@@ -1,0 +1,208 @@
+@page "/login"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<Login> Logger
+
+<PageTitle>Login - Story Generator</PageTitle>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1>Story Generator</h1>
+            <p>Sign in to access story generation tools</p>
+        </div>
+
+        @if (isLoading)
+        {
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Signing in...</p>
+            </div>
+        }
+        else
+        {
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="token">Authentication Token</label>
+                    <textarea id="token" class="form-control" rows="4" placeholder="Paste your JWT token here" @bind="token"></textarea>
+                    <small class="form-text">
+                        Get your token from the <a href="/signin" target="_blank">Mystira Identity Service</a>
+                    </small>
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @errorMessage
+                    </div>
+                }
+
+                <button class="btn btn-primary" @onclick="LoginAsync" disabled="@string.IsNullOrWhiteSpace(token)">
+                    Sign In
+                </button>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-family: Arial, sans-serif;
+    }
+
+    .login-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .login-header h1 {
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .login-header p {
+        color: #666;
+        margin: 0;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 1rem;
+        resize: vertical;
+    }
+
+    .form-text {
+        display: block;
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #666;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        width: 100%;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background: #0056b3;
+    }
+
+    .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .alert {
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border-radius: 5px;
+    }
+
+    .alert-danger {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        color: #721c24;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #007bff;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spinner-spin 1s linear infinite;
+        margin: 0 auto 1rem;
+    }
+
+    @@keyframes spinner-spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+@code {
+    private bool isLoading = false;
+    private string token = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error checking authentication status");
+        }
+    }
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            await AuthService.LoginAsync(token.Trim());
+            Navigation.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Login failed");
+            errorMessage = "Login failed. Please check your credentials and try again.";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

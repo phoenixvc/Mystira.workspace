@@ -23,20 +23,20 @@ Chain is a Python-based blockchain/ledger service using gRPC. Migration focuses 
 
 ### Technology Stack
 
-| Component | Current | Target |
-|-----------|---------|--------|
-| Python | 3.11 | 3.12+ |
-| gRPC | grpcio | grpcio (latest) |
-| Redis | redis-py | redis-py (latest) |
-| Container Registry | Workspace builds | Submodule CI/CD |
+| Component          | Current          | Target            |
+| ------------------ | ---------------- | ----------------- |
+| Python             | 3.11             | 3.12+             |
+| gRPC               | grpcio           | grpcio (latest)   |
+| Redis              | redis-py         | redis-py (latest) |
+| Container Registry | Workspace builds | Submodule CI/CD   |
 
 ### Infrastructure
 
-| Resource | Location | Notes |
-|----------|----------|-------|
-| Key Vault | `mys-{env}-chain-rg-san` | Service-specific per ADR-0017 |
-| Managed Identity | `mys-{env}-chain-rg-san` | Workload identity |
-| App Insights | `mys-{env}-chain-rg-san` | Service telemetry |
+| Resource         | Location                 | Notes                         |
+| ---------------- | ------------------------ | ----------------------------- |
+| Key Vault        | `mys-{env}-chain-rg-san` | Service-specific per ADR-0017 |
+| Managed Identity | `mys-{env}-chain-rg-san` | Workload identity             |
+| App Insights     | `mys-{env}-chain-rg-san` | Service telemetry             |
 
 ---
 
@@ -120,7 +120,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install poetry
         run: pip install poetry
       - name: Install dependencies
@@ -250,31 +250,37 @@ logger = structlog.get_logger()
 ## Migration Checklist
 
 ### Pre-Migration
+
 - [ ] Backup environment variables
 - [ ] Document current gRPC endpoints
 
 ### Phase 1: Python Upgrade
+
 - [ ] Update pyproject.toml to Python 3.12
 - [ ] Update dependencies
 - [ ] Run tests and type checks
 
 ### Phase 2: Dockerfile Migration
+
 - [ ] Create Dockerfile in submodule repo
 - [ ] Add CI/CD workflow
 - [ ] Test Docker build locally
 - [ ] Remove Dockerfile from workspace
 
 ### Phase 3: Kubernetes
+
 - [ ] Update kustomization.yaml with `labels`
 - [ ] Update deployment.yaml
 - [ ] Verify service account configuration
 
 ### Phase 4: Observability
+
 - [ ] Add OpenTelemetry
 - [ ] Add structured logging
 - [ ] Verify traces in App Insights
 
 ### Post-Migration
+
 - [ ] Test gRPC endpoints
 - [ ] Verify Kubernetes deployment
 - [ ] Monitor logs and traces
@@ -284,11 +290,11 @@ logger = structlog.get_logger()
 
 ## Breaking Changes
 
-| Change | Impact | Mitigation |
-|--------|--------|------------|
-| Python 3.11 → 3.12 | Runtime upgrade | Test thoroughly |
-| Dockerfile location | CI/CD changes | Update workflows |
-| Kustomize labels | K8s manifest syntax | Update all overlays |
+| Change              | Impact              | Mitigation          |
+| ------------------- | ------------------- | ------------------- |
+| Python 3.11 → 3.12  | Runtime upgrade     | Test thoroughly     |
+| Dockerfile location | CI/CD changes       | Update workflows    |
+| Kustomize labels    | K8s manifest syntax | Update all overlays |
 
 ---
 
@@ -296,5 +302,5 @@ logger = structlog.get_logger()
 
 - [ADR-0017: Resource Group Organization](../architecture/adr/0017-resource-group-organization-strategy.md)
 - [ADR-0019: Dockerfile Location Standardization](../adr/ADR-0019-dockerfile-location-standardization.md)
-- [Azure Resources Migration Summary](../../MIGRATION_SUMMARY.md)
+- [Azure Resources Migration Summary](../infrastructure/azure-naming-migration-summary.md)
 - [Kubernetes Manifests](../../infra/k8s/chain/)

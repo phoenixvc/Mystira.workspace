@@ -1,29 +1,16 @@
 namespace Mystira.Shared.Messaging;
 
-/// <summary>
-/// Marker interface for commands (actions that change state).
-/// Wolverine uses convention-based handler discovery, so this is optional
-/// but useful for documentation and filtering.
-/// </summary>
-public interface ICommand
-{
-}
-
-/// <summary>
-/// Marker interface for commands that return a result.
-/// </summary>
-/// <typeparam name="TResult">The result type.</typeparam>
-public interface ICommand<TResult> : ICommand
-{
-}
-
-/// <summary>
-/// Marker interface for queries (read-only operations).
-/// </summary>
-/// <typeparam name="TResult">The result type.</typeparam>
-public interface IQuery<TResult>
-{
-}
+// =============================================================================
+// CQRS INTERFACES MOVED
+// =============================================================================
+// ICommand, ICommand<TResponse>, and IQuery<TResponse> have moved to:
+//   Mystira.Shared.CQRS
+//
+// Update your imports:
+//   using Mystira.Shared.CQRS;
+//
+// This file now only contains event-related interfaces.
+// =============================================================================
 
 /// <summary>
 /// Marker interface for domain events.

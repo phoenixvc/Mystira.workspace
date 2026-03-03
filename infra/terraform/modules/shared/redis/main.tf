@@ -6,7 +6,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
   }
 }
@@ -14,6 +14,11 @@ terraform {
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "location" {
@@ -34,21 +39,36 @@ variable "subnet_id" {
 }
 
 variable "capacity" {
-  description = "Redis cache capacity (1, 2, 3, 4, 5, 6 for Standard/Premium)"
+  description = "Redis cache capacity (0-6 for Basic/Standard C family, 1-5 for Premium P family)"
   type        = number
   default     = 1
+
+  validation {
+    condition     = var.capacity >= 0 && var.capacity <= 6
+    error_message = "Capacity must be between 0 and 6 for Basic/Standard (C family) or 1-5 for Premium (P family)."
+  }
 }
 
 variable "family" {
-  description = "Redis cache family (C or P for Premium)"
+  description = "Redis cache family (C for Basic/Standard, P for Premium)"
   type        = string
   default     = "C"
+
+  validation {
+    condition     = contains(["C", "P"], var.family)
+    error_message = "Family must be one of: C (for Basic/Standard), P (for Premium)."
+  }
 }
 
 variable "sku_name" {
   description = "Redis cache SKU name (Basic, Standard, Premium)"
   type        = string
   default     = "Standard"
+
+  validation {
+    condition     = contains(["Basic", "Standard", "Premium"], var.sku_name)
+    error_message = "SKU name must be one of: Basic, Standard, Premium."
+  }
 }
 
 variable "non_ssl_port_enabled" {
@@ -105,6 +125,10 @@ resource "azurerm_redis_cache" "shared" {
   }
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Redis Firewall Rules (allow Azure services)

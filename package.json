@@ -1,51 +1,72 @@
 {
   "name": "mystira-workspace",
-  "version": "0.1.0",
+  "version": "0.5.2-alpha",
   "private": true,
   "description": "Unified workspace for Mystira platform",
+  "author": "Mystira <jurie@phoenixvc.tech>",
+  "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/phoenixvc/Mystira.workspace.git"
   },
-  "workspaces": [
-    "packages/*",
-    "infra"
-  ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run dev",
-    "test": "turbo run test",
-    "lint": "turbo run lint",
+    "build": "npx turbo run build",
+    "dev": "npx turbo run dev",
+    "dev:ts": "npx turbo run dev --filter='./packages/publisher' --filter='./packages/admin-ui' --filter='./packages/devhub/Mystira.DevHub'",
+    "dev:admin": "npx turbo run dev --filter='./packages/admin-ui'",
+    "dev:publisher": "npx turbo run dev --filter='./packages/publisher'",
+    "test": "npx turbo run test",
+    "test:coverage": "npx turbo run test:coverage",
+    "test:affected": "npx turbo run test --filter='...[HEAD~1]'",
+    "lint": "npx turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
+    "docker:up": "docker compose up -d postgres redis hardhat",
+    "docker:down": "docker compose down",
+    "setup": "pnpm install && bash scripts/setup-env.sh && pnpm docker:up",
     "prepare": "husky"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.0",
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
-    "@eslint/js": "^9.15.0",
-    "@typescript-eslint/eslint-plugin": "^8.15.0",
-    "@typescript-eslint/parser": "^8.15.0",
-    "eslint": "^9.15.0",
-    "eslint-plugin-react-hooks": "^7.0.0",
-    "eslint-plugin-react-refresh": "^0.4.14",
-    "globals": "^16.0.0",
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.1.0",
-    "turbo": "^2.6.3",
-    "typescript": "^5.3.0",
-    "typescript-eslint": "^8.15.0"
+    "lint-staged": "^16.3.1",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.12",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^4.0.18"
   },
-  "packageManager": "pnpm@10.26.2",
+  "pnpm": {
+    "overrides": {
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0",
+      "fast-xml-parser": ">=5.3.6",
+      "minimatch": ">=10.2.1",
+      "ajv@<6.12.3": "^8.0.0"
+    }
+  },
+  "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
   "lint-staged": {
+    "package.json": [
+      "prettier --write"
+    ],
     "*.{ts,tsx}": [
-      "eslint --fix",
       "prettier --write"
     ],
     "*.{json,md}": [

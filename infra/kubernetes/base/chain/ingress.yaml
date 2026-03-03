@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: mys-chain-ingress
   labels:
-    app: mystira-chain
+    app: mys-chain
   annotations:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
@@ -23,6 +23,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mystira-chain
+                name: mys-chain
                 port:
                   number: 8545

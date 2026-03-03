@@ -29,6 +29,18 @@ terraform {
   }
 }
 
+# =============================================================================
+# Validation: Ensure at least one access path is configured
+# =============================================================================
+# This prevents provisioning an unreachable Azure AI account by requiring
+# either public network access OR private endpoint to be enabled.
+check "network_access_validation" {
+  assert {
+    condition     = var.public_network_access_enabled || var.enable_private_endpoint
+    error_message = "Azure AI account must have at least one access path: enable public_network_access_enabled OR enable_private_endpoint."
+  }
+}
+
 # Local variables
 locals {
   # Naming: mys-shared-ai-{region_code} (shared resource pattern)
@@ -133,6 +145,7 @@ resource "azurerm_cognitive_account" "ai_foundry" {
   tags = local.common_tags
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       # Ignore changes to tags that might be added by Azure
       tags["hidden-link:*"],
@@ -323,6 +336,7 @@ resource "azurerm_cognitive_account" "ai_foundry_uksouth" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -385,6 +399,55 @@ resource "azapi_resource" "catalog_models_uksouth" {
 }
 
 # =============================================================================
+# Enable Project Management for UK South
+# =============================================================================
+
+resource "azapi_update_resource" "enable_project_management_uksouth" {
+  count = local.needs_uksouth && var.enable_project ? 1 : 0
+
+  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
+  resource_id = azurerm_cognitive_account.ai_foundry_uksouth[0].id
+
+  depends_on = [azapi_resource.catalog_models_uksouth]
+
+  body = {
+    properties = {
+      allowProjectManagement = true
+    }
+  }
+}
+
+# =============================================================================
+# AI Foundry Project (UK South)
+# =============================================================================
+
+resource "azapi_resource" "ai_project_uksouth" {
+  count = local.needs_uksouth && var.enable_project ? 1 : 0
+
+  type      = "Microsoft.CognitiveServices/accounts/projects@2025-06-01"
+  name      = "mys-shared-ai-uks-project"
+  parent_id = azurerm_cognitive_account.ai_foundry_uksouth[0].id
+  location  = "uksouth"
+
+  depends_on = [azapi_update_resource.enable_project_management_uksouth]
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  body = {
+    properties = {
+      displayName = "${var.environment} AI Project (UK South)"
+      description = "Mystira ${var.environment} AI workloads - UK South region for catalog models"
+    }
+  }
+
+  tags = merge(local.common_tags, {
+    Region = "uksouth"
+  })
+}
+
+# =============================================================================
 # Secondary Region AI Foundry Account (East US)
 # =============================================================================
 # Required for OpenAI models that need Standard SKU (DALL-E, Whisper, TTS)
@@ -423,6 +486,7 @@ resource "azurerm_cognitive_account" "ai_foundry_eastus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -507,6 +571,7 @@ resource "azurerm_cognitive_account" "ai_foundry_swedencentral" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]
@@ -555,6 +620,55 @@ resource "azurerm_cognitive_deployment" "openai_models_swedencentral" {
 }
 
 # =============================================================================
+# Enable Project Management for Sweden Central
+# =============================================================================
+
+resource "azapi_update_resource" "enable_project_management_swedencentral" {
+  count = local.needs_swedencentral && var.enable_project ? 1 : 0
+
+  type        = "Microsoft.CognitiveServices/accounts@2025-06-01"
+  resource_id = azurerm_cognitive_account.ai_foundry_swedencentral[0].id
+
+  depends_on = [azurerm_cognitive_deployment.openai_models_swedencentral]
+
+  body = {
+    properties = {
+      allowProjectManagement = true
+    }
+  }
+}
+
+# =============================================================================
+# AI Foundry Project (Sweden Central)
+# =============================================================================
+
+resource "azapi_resource" "ai_project_swedencentral" {
+  count = local.needs_swedencentral && var.enable_project ? 1 : 0
+
+  type      = "Microsoft.CognitiveServices/accounts/projects@2025-06-01"
+  name      = "mys-shared-ai-swc-project"
+  parent_id = azurerm_cognitive_account.ai_foundry_swedencentral[0].id
+  location  = "swedencentral"
+
+  depends_on = [azapi_update_resource.enable_project_management_swedencentral]
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  body = {
+    properties = {
+      displayName = "${var.environment} AI Project (Sweden Central)"
+      description = "Mystira ${var.environment} AI workloads - Sweden Central region for GPT-5.x models"
+    }
+  }
+
+  tags = merge(local.common_tags, {
+    Region = "swedencentral"
+  })
+}
+
+# =============================================================================
 # Secondary Region AI Foundry Account (North Central US)
 # =============================================================================
 # Required for Whisper and TTS models
@@ -591,6 +705,7 @@ resource "azurerm_cognitive_account" "ai_foundry_northcentralus" {
   })
 
   lifecycle {
+    prevent_destroy = true
     ignore_changes = [
       tags["hidden-link:*"],
     ]

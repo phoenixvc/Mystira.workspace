@@ -1,0 +1,206 @@
+@page "/signup"
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@inject ILogger<SignUp> Logger
+
+<PageTitle>Get Started - Mystira</PageTitle>
+
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card @(isLoading ? "loading" : "")">
+            <!-- Logo and Branding -->
+            <div class="auth-header">
+                <a href="/" class="auth-logo-link">
+                    <img src="images/mystira-logo.webp" alt="Mystira" class="auth-logo" />
+                </a>
+                <h1 class="auth-title">Join Mystira</h1>
+                <p class="auth-subtitle">Start your magical adventure today</p>
+            </div>
+
+            <!-- Error Message -->
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="auth-error" role="alert">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>@errorMessage</span>
+                </div>
+            }
+
+            <!-- Sign Up Content -->
+            <div class="auth-content">
+                @if (isLoading)
+                {
+                    <div class="auth-loading">
+                        <div class="auth-spinner">
+                            <div class="spinner-ring"></div>
+                            <i class="fab fa-google spinner-icon"></i>
+                        </div>
+                        <p class="loading-text">Connecting to Google...</p>
+                        <p class="loading-subtext">Creating your account</p>
+                    </div>
+                }
+                else
+                {
+                    <!-- Benefits List -->
+                    <div class="signup-benefits">
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Free to get started</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Interactive story adventures</span>
+                        </div>
+                        <div class="benefit-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Safe for the whole family</span>
+                        </div>
+                    </div>
+
+                    <!-- Entra Sign Up Button -->
+                    <button type="button"
+                            class="entra-signin-btn"
+                            @onclick="SignUpWithEntra"
+                            disabled="@isLoading">
+                        <svg class="entra-icon" viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="#0078D4" d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
+                        </svg>
+                        <span>Continue with Entra</span>
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="auth-divider">
+                        <span>Secure sign-up powered by Microsoft</span>
+                    </div>
+
+                    <div class="mt-3">
+                        <label for="magic-email" class="form-label">Or get a magic sign-in link</label>
+                        <div class="input-group">
+                            <input id="magic-email"
+                                   type="email"
+                                   class="form-control"
+                                   placeholder="you@example.com"
+                                   @bind="magicEmail"
+                                   @bind:event="oninput"
+                                   disabled="@isSendingMagicLink" />
+                            <button class="btn btn-outline-primary"
+                                    type="button"
+                                    @onclick="SendMagicLinkAsync"
+                                    disabled="@isSendingMagicLink">
+                                @(isSendingMagicLink ? "Sending..." : "Send Link")
+                            </button>
+                        </div>
+                        <small class="form-text text-muted">
+                            We'll email you a magic link for instant sign-in
+                        </small>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="security-info">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Your data is protected with enterprise-grade security</span>
+                    </div>
+                }
+            </div>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>
+                    Already have an account?
+                    <a href="/signin" class="auth-link">Sign In</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home Link -->
+        <a href="/" class="back-home-link">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Home</span>
+        </a>
+    </div>
+</div>
+
+@code {
+    private bool isLoading = false;
+    private bool isSendingMagicLink = false;
+    private string errorMessage = string.Empty;
+    private string magicEmail = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (isAuthenticated)
+            {
+                Navigation.NavigateTo("/");
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error checking authentication status on SignUp page");
+        }
+    }
+
+    private async Task SignUpWithEntra()
+    {
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            Logger.LogInformation("Initiating Entra sign-up");
+
+            var result = await AuthService.SignInWithEntraAsync();
+            if (!result.IsSuccess)
+            {
+                errorMessage = result.ErrorMessage ?? "Unable to connect to sign-up service. Please try again later.";
+                isLoading = false;
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error initiating Entra sign-up");
+            errorMessage = "Unable to connect to sign-up service. Please check your connection and try again.";
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task SendMagicLinkAsync()
+    {
+        if (string.IsNullOrWhiteSpace(magicEmail) || !magicEmail.Contains('@'))
+        {
+            errorMessage = "Please enter a valid email address.";
+            return;
+        }
+
+        try
+        {
+            isSendingMagicLink = true;
+            errorMessage = string.Empty;
+
+            var result = await AuthService.RequestMagicLinkAsync(magicEmail.Trim(), null);
+            if (result == null)
+            {
+                errorMessage = "Unable to send magic link right now. Please try again.";
+                return;
+            }
+
+            var encodedEmail = Uri.EscapeDataString(magicEmail.Trim());
+            Navigation.NavigateTo($"/authentication/magic-link-sent?email={encodedEmail}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error requesting magic signup link");
+            errorMessage = "Unable to send magic link right now. Please try again.";
+        }
+        finally
+        {
+            isSendingMagicLink = false;
+            StateHasChanged();
+        }
+    }
+}

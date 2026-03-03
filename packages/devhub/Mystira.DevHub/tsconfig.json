@@ -1,0 +1,12 @@
+{
+  "extends": "../../../configs/typescript/tsconfig.react-vite.json",
+  "compilerOptions": {
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "exclude": ["src/test", "**/*.test.ts", "**/*.test.tsx"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

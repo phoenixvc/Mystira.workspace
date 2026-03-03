@@ -1,0 +1,62 @@
+@using Markdig
+@inject ILogger<MarkdownRenderer> Logger
+@inject IGameSessionService GameSessionService
+
+@if (!string.IsNullOrEmpty(Content))
+{
+    <div class="markdown-content">
+        @((MarkupString)RenderedContent)
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Content { get; set; } = string.Empty;
+
+    private string RenderedContent => ParseMarkdown(ProcessCharacterPlaceholders(Content));
+
+    private string ProcessCharacterPlaceholders(string content)
+    {
+        try
+        {
+            // Use GameSessionService to replace character placeholders
+            return GameSessionService.ReplaceCharacterPlaceholders(content);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error processing character placeholders");
+            return content;
+        }
+    }
+
+    private string ParseMarkdown(string markdown)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(markdown))
+                return string.Empty;
+
+            // Configure the pipeline with common extensions
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .Build();
+
+            // Convert markdown to HTML
+            var html = Markdown.ToHtml(markdown, pipeline);
+            
+            return html;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error parsing markdown content");
+            // Return original content if parsing fails
+            return markdown;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        // Re-render when content changes
+        StateHasChanged();
+    }
+}

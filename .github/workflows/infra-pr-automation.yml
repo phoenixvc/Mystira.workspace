@@ -1,0 +1,1023 @@
+name: "[CI] Infra PR Plan"
+
+# =============================================================================
+# Infrastructure PR Automation Workflow
+# =============================================================================
+# Provides Atlantis-like functionality using native GitHub Actions.
+#
+# Features:
+#   - Automatic terraform plan on PR
+#   - Plan output as PR comments
+#   - Apply via PR comment commands
+#   - Support for Terragrunt and Terragrunt Stacks
+#
+# Commands (via PR comments):
+#   /plan              - Run plan for all changed projects
+#   /plan -d <dir>     - Run plan for specific directory
+#   /apply -d <dir>    - Apply specific directory (requires approval)
+#   /plan-stack -e <env>  - Run stack plan for environment (dev/staging/prod)
+#   /apply-stack -e <env> - Apply stack for environment (requires approval)
+#   /unlock            - Release any held locks
+# =============================================================================
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - "infra/terraform/**"
+      - "atlantis.yaml"
+
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: infra-pr-${{ github.event.pull_request.number || github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+
+env:
+  TF_VERSION: "1.10.3"
+  TG_VERSION: "0.69.1"
+  ARM_USE_OIDC: true
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  TF_IN_AUTOMATION: "true"
+
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  # ===========================================================================
+  # Detect Changed Infrastructure
+  # ===========================================================================
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    outputs:
+      projects: ${{ steps.changes.outputs.projects }}
+      has_changes: ${{ steps.changes.outputs.has_changes }}
+      stacks: ${{ steps.changes.outputs.stacks }}
+      has_stacks: ${{ steps.changes.outputs.has_stacks }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@24d32ffd492484c1d75e0c0b894501ddb9d30d62  # v47 - pinned SHA for security
+        with:
+          files: |
+            infra/terraform/**
+
+      - name: Detect affected projects
+        id: changes
+        run: |
+          CHANGED="${{ steps.changed-files.outputs.all_changed_files }}"
+          BASE_REF="${{ github.base_ref }}"
+          PROJECTS=()
+          STACKS=()
+
+          echo "PR target branch: $BASE_REF"
+
+          # Determine which environments to plan based on target branch
+          # PR into dev → only dev environment
+          # PR into main/master → staging and prod environments
+          if [[ "$BASE_REF" == "dev" ]]; then
+            TARGET_ENVS="dev"
+          elif [[ "$BASE_REF" == "main" || "$BASE_REF" == "master" ]]; then
+            TARGET_ENVS="staging prod"
+          else
+            # Default: all environments for other branches
+            TARGET_ENVS="dev staging prod"
+          fi
+          echo "Target environments: $TARGET_ENVS"
+
+          # Check for shared-infra changes
+          if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
+            for env in $TARGET_ENVS; do
+              if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
+                PROJECTS+=("{\"name\":\"shared-infra-$env\",\"dir\":\"infra/terraform/shared-infra/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
+              fi
+            done
+          fi
+
+          # Check for product changes
+          for product in admin chain mystira-app publisher story-generator; do
+            if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
+              for env in $TARGET_ENVS; do
+                if [ -d "infra/terraform/products/$product/environments/$env" ]; then
+                  PROJECTS+=("{\"name\":\"$product-$env\",\"dir\":\"infra/terraform/products/$product/environments/$env\",\"env\":\"$env\",\"type\":\"terragrunt\"}")
+                fi
+              done
+            fi
+          done
+
+          # Check for stack changes - filter by target branch
+          if echo "$CHANGED" | grep -q "infra/terraform/stacks/"; then
+            for env in $TARGET_ENVS; do
+              if [ -f "infra/terraform/stacks/$env.stack.hcl" ]; then
+                STACKS+=("{\"name\":\"stack-$env\",\"env\":\"$env\",\"config\":\"stacks/$env.stack.hcl\"}")
+              fi
+            done
+          fi
+
+          # Output projects
+          if [ ${#PROJECTS[@]} -eq 0 ]; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "projects=[]" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            PROJECTS_JSON=$(printf '%s,' "${PROJECTS[@]}")
+            PROJECTS_JSON="[${PROJECTS_JSON%,}]"
+            echo "projects=$PROJECTS_JSON" >> "$GITHUB_OUTPUT"
+          fi
+
+          # Output stacks
+          if [ ${#STACKS[@]} -eq 0 ]; then
+            echo "has_stacks=false" >> "$GITHUB_OUTPUT"
+            echo "stacks=[]" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_stacks=true" >> "$GITHUB_OUTPUT"
+            STACKS_JSON=$(printf '%s,' "${STACKS[@]}")
+            STACKS_JSON="[${STACKS_JSON%,}]"
+            echo "stacks=$STACKS_JSON" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Summary
+        run: |
+          BASE_REF="${{ github.base_ref }}"
+          echo "## Infrastructure Changes Detected" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "**Target branch:** \`$BASE_REF\`" >> "$GITHUB_STEP_SUMMARY"
+          if [[ "$BASE_REF" == "dev" ]]; then
+            echo "**Environments:** dev only" >> "$GITHUB_STEP_SUMMARY"
+          elif [[ "$BASE_REF" == "main" || "$BASE_REF" == "master" ]]; then
+            echo "**Environments:** staging, prod" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "**Environments:** all (dev, staging, prod)" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ steps.changes.outputs.has_changes }}" == "true" ]; then
+            echo "### Projects affected:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            echo '${{ steps.changes.outputs.projects }}' | jq '.' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No infrastructure projects affected." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ "${{ steps.changes.outputs.has_stacks }}" == "true" ]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "### 🥞 Terragrunt Stacks:" >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            echo '${{ steps.changes.outputs.stacks }}' | jq '.' >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  # ===========================================================================
+  # Plan Infrastructure Changes
+  # ===========================================================================
+  plan:
+    name: Plan - ${{ matrix.project.name }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.detect-changes.outputs.projects || '[]') }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          TG_VERSION="${{ env.TG_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          TG_SHA_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/SHA256SUMS"
+
+          # Download binary and checksums
+          wget -q -O terragrunt "$TG_URL"
+          wget -q -O SHA256SUMS "$TG_SHA_URL"
+
+          # Verify checksum
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "ERROR: Terragrunt checksum verification failed!"
+            echo "Expected: $EXPECTED_CHECKSUM"
+            echo "Actual:   $ACTUAL_CHECKSUM"
+            exit 1
+          fi
+
+          echo "Terragrunt checksum verified successfully"
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm SHA256SUMS
+
+      - name: Azure Login (OIDC)
+        id: azure-login
+        uses: azure/login@v2
+        continue-on-error: true
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Init
+        id: tg-init
+        if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
+        working-directory: ${{ matrix.project.dir }}
+        run: terragrunt init --terragrunt-non-interactive
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
+
+      - name: Terragrunt Plan
+        id: plan
+        if: steps.azure-login.outcome == 'success' && steps.tg-init.outcome == 'success'
+        working-directory: ${{ matrix.project.dir }}
+        env:
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
+        run: |
+          set +e
+          set -o pipefail
+          terragrunt plan -detailed-exitcode -out=tfplan --terragrunt-non-interactive 2>&1 | tee plan_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
+          set -e
+
+          # Exit codes: 0 = no changes, 1 = error, 2 = changes
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          elif [ $EXIT_CODE -eq 2 ]; then
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Generate Plan Summary
+        if: always() && steps.tg-init.outcome == 'success'
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          if [ -f tfplan ]; then
+            terragrunt show -no-color tfplan > plan_readable.txt 2>&1 || true
+          fi
+
+      - name: Upload Plan Artifact
+        if: steps.plan.outputs.status == 'success' && steps.tg-init.outcome == 'success'
+        uses: actions/upload-artifact@v6
+        with:
+          name: tfplan-${{ matrix.project.name }}
+          path: |
+            ${{ matrix.project.dir }}/tfplan
+            ${{ matrix.project.dir }}/plan_output.txt
+            ${{ matrix.project.dir }}/plan_readable.txt
+          retention-days: 7
+
+      - name: Comment PR with Plan
+        uses: actions/github-script@v8
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const project = '${{ matrix.project.name }}';
+            const dir = '${{ matrix.project.dir }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
+            const tgInit = '${{ steps.tg-init.outcome }}';
+            const status = '${{ steps.plan.outputs.status }}';
+            const changes = '${{ steps.plan.outputs.changes }}';
+
+            let planOutput = '';
+            const planFile = path.join(dir, 'plan_output.txt');
+            if (fs.existsSync(planFile)) {
+              planOutput = fs.readFileSync(planFile, 'utf8');
+              // Truncate if too long
+              if (planOutput.length > 60000) {
+                planOutput = planOutput.substring(0, 60000) + '\n\n... (truncated)';
+              }
+            }
+
+            // Show clear status: no creds, no backend, failed, changes detected, or no changes
+            let statusEmoji, statusText;
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (tgInit !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Terraform backend not provisioned yet (state storage account does not exist)';
+            } else if (status !== 'success') {
+              statusEmoji = '❌';
+              statusText = '❌ **Plan failed** - see output below';
+            } else if (changes === 'true') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Changes detected**';
+            } else {
+              statusEmoji = '✅';
+              statusText = '✅ No changes';
+            }
+
+            const bodyLines = [
+              `## ${statusEmoji} Terraform Plan: \`${project}\``,
+              '',
+              `**Directory:** \`${dir}\``,
+              `**Status:** ${statusText}`,
+              '',
+              '<details>',
+              '<summary>Show Plan Output</summary>',
+              '',
+              '```hcl',
+              planOutput,
+              '```',
+              '',
+              '</details>',
+              '',
+              '---',
+              '**Commands:**',
+              `- \`/apply -d ${dir}\` - Apply this plan`,
+              `- \`/plan -d ${dir}\` - Re-run plan`
+            ];
+            const body = bodyLines.join('\n');
+
+            // Find existing comment or create new
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`Terraform Plan: \`${project}\``)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # ===========================================================================
+  # Plan Terragrunt Stacks
+  # ===========================================================================
+  plan-stacks:
+    name: Plan Stack - ${{ matrix.stack.name }}
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    strategy:
+      fail-fast: false
+      matrix:
+        stack: ${{ fromJson(needs.detect-changes.outputs.stacks || '[]') }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Setup Terragrunt
+        run: |
+          TG_VERSION="${{ env.TG_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          TG_SHA_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/SHA256SUMS"
+
+          wget -q -O terragrunt "$TG_URL"
+          wget -q -O SHA256SUMS "$TG_SHA_URL"
+
+          EXPECTED_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+            echo "ERROR: Terragrunt checksum verification failed!"
+            exit 1
+          fi
+
+          echo "Terragrunt checksum verified successfully"
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm SHA256SUMS
+
+      - name: Azure Login (OIDC)
+        id: azure-login
+        uses: azure/login@v2
+        continue-on-error: true
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terragrunt Stack Plan
+        id: plan
+        if: steps.azure-login.outcome == 'success'
+        continue-on-error: true
+        working-directory: infra/terraform
+        env:
+          # Enable experimental Terragrunt Stacks feature
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
+        run: |
+          set +e
+          STACK_CONFIG="${{ matrix.stack.config }}"
+
+          # Check if terragrunt stack command is available
+          # The stacks feature is experimental and may not be available in all versions
+          # We test by running the command and checking for "no command named" error
+          echo "Checking Terragrunt stacks support..."
+          STACK_CHECK=$(terragrunt stack --help 2>&1 || true)
+          if echo "$STACK_CHECK" | grep -q "no command named"; then
+            echo "::warning::Terragrunt Stacks feature not available in this version (v${{ env.TG_VERSION }})"
+            echo "::warning::Stack planning requires Terragrunt with experimental stacks support"
+            echo "status=unsupported" >> "$GITHUB_OUTPUT"
+            echo "changes=unknown" >> "$GITHUB_OUTPUT"
+            echo "Terragrunt Stacks feature not available. Please deploy stacks manually using:" > stack_plan_output.txt
+            echo "  cd infra/terraform && terragrunt run-all plan" >> stack_plan_output.txt
+            exit 0
+          fi
+
+          set -o pipefail
+          echo "Running: terragrunt stacks run plan --config $STACK_CONFIG"
+
+          # Run stack plan and capture output
+          if terragrunt stacks run plan --config "$STACK_CONFIG" --terragrunt-non-interactive 2>&1 | tee stack_plan_output.txt; then
+            EXIT_CODE=0
+          else
+            EXIT_CODE=$?
+          fi
+          set -e
+
+          # Determine status and changes
+          if [ $EXIT_CODE -eq 0 ]; then
+            # Check if plan output indicates changes
+            if grep -q "Plan:" stack_plan_output.txt && ! grep -q "Plan: 0 to add, 0 to change, 0 to destroy" stack_plan_output.txt; then
+              echo "changes=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "changes=false" >> "$GITHUB_OUTPUT"
+            fi
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=unknown" >> "$GITHUB_OUTPUT"
+            echo "status=failure" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+      - name: Comment PR with Stack Plan
+        uses: actions/github-script@v8
+        if: always()
+        with:
+          script: |
+            const fs = require('fs');
+
+            const stack = '${{ matrix.stack.name }}';
+            const env = '${{ matrix.stack.env }}';
+            const config = '${{ matrix.stack.config }}';
+            const azureLogin = '${{ steps.azure-login.outcome }}';
+            const status = '${{ steps.plan.outputs.status }}';
+            const changes = '${{ steps.plan.outputs.changes }}';
+
+            let planOutput = '';
+            const planFile = 'infra/terraform/stack_plan_output.txt';
+            if (fs.existsSync(planFile)) {
+              planOutput = fs.readFileSync(planFile, 'utf8');
+              if (planOutput.length > 60000) {
+                planOutput = planOutput.substring(0, 60000) + '\n\n... (truncated)';
+              }
+            }
+
+            // Determine status emoji and text
+            let statusEmoji, statusText;
+            if (azureLogin !== 'success') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Skipped** - Azure credentials not configured';
+            } else if (status === 'unsupported') {
+              statusEmoji = '⚠️';
+              statusText = '⚠️ **Stacks feature not available** - see manual instructions below';
+            } else if (status !== 'success') {
+              statusEmoji = '❌';
+              statusText = '❌ **Plan failed** - see output below';
+            } else if (changes === 'true') {
+              statusEmoji = '✅';
+              statusText = '⚠️ **Changes detected**';
+            } else {
+              statusEmoji = '✅';
+              statusText = '✅ No changes';
+            }
+
+            const bodyLines = [
+              `## ${statusEmoji} Terragrunt Stack Plan: \`${stack}\``,
+              '',
+              `**Environment:** \`${env}\``,
+              `**Stack Config:** \`${config}\``,
+              `**Status:** ${statusText}`,
+              '',
+              '<details>',
+              '<summary>Show Plan Output</summary>',
+              '',
+              '```hcl',
+              planOutput,
+              '```',
+              '',
+              '</details>',
+              '',
+              '---',
+              '**Commands:**',
+              `- \`/plan-stack -e ${env}\` - Re-run this stack plan`,
+              `- \`/apply-stack -e ${env}\` - Apply this stack (requires approval)`
+            ];
+            const body = bodyLines.join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existingComment = comments.find(c =>
+              c.user.login === 'github-actions[bot]' &&
+              c.body.includes(`Terragrunt Stack Plan: \`${stack}\``)
+            );
+
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # ===========================================================================
+  # Handle PR Comments (Commands)
+  # ===========================================================================
+  handle-command:
+    name: Handle Command
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'issue_comment' &&
+      github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/')
+    steps:
+      - name: Parse Command
+        id: parse
+        env:
+          COMMENT: ${{ github.event.comment.body }}
+        run: |
+          # Safely parse command without shell injection
+          # Quote all variable expansions to handle spaces properly
+          COMMAND=$(printf '%s' "$COMMENT" | awk '{print $1}')
+          DIR_FLAG=$(printf '%s' "$COMMENT" | grep -oP '(?<=-d\s)\S+' || echo "")
+          ENV_FLAG=$(printf '%s' "$COMMENT" | grep -oP '(?<=-e\s)\S+' || echo "")
+
+          # Use heredoc syntax for safe multi-line/special character handling
+          {
+            echo "command=${COMMAND}"
+            echo "directory=${DIR_FLAG}"
+            echo "environment=${ENV_FLAG}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check Permissions
+        id: check
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { data: permission } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              username: context.actor,
+            });
+
+            const allowed = ['admin', 'write'].includes(permission.permission);
+            core.setOutput('allowed', allowed.toString());
+
+            if (!allowed) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `❌ @${context.actor} does not have permission to run infrastructure commands.`,
+              });
+            }
+
+      - name: Get PR Refs
+        id: pr-ref
+        if: steps.check.outputs.allowed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            core.setOutput('head_ref', pr.head.ref);
+            core.setOutput('base_ref', pr.base.ref);
+
+      - uses: actions/checkout@v6
+        if: steps.check.outputs.allowed == 'true'
+        with:
+          ref: ${{ steps.pr-ref.outputs.head_ref }}
+          fetch-depth: 0  # Full history needed for git diff in /plan command
+
+      - name: Setup Tools
+        if: steps.check.outputs.allowed == 'true'
+        run: |
+          TF_VERSION="${{ env.TF_VERSION }}"
+          TG_VERSION="${{ env.TG_VERSION }}"
+
+          # Terraform with checksum verification
+          TF_ZIP="terraform_${TF_VERSION}_linux_amd64.zip"
+          TF_SHA_URL="https://releases.hashicorp.com/terraform/${TF_VERSION}/terraform_${TF_VERSION}_SHA256SUMS"
+
+          wget -q "https://releases.hashicorp.com/terraform/${TF_VERSION}/${TF_ZIP}"
+          wget -q -O terraform_SHA256SUMS "$TF_SHA_URL"
+
+          EXPECTED_TF_CHECKSUM=$(grep "${TF_ZIP}" terraform_SHA256SUMS | awk '{print $1}')
+          ACTUAL_TF_CHECKSUM=$(sha256sum "${TF_ZIP}" | awk '{print $1}')
+
+          if [ "$EXPECTED_TF_CHECKSUM" != "$ACTUAL_TF_CHECKSUM" ]; then
+            echo "ERROR: Terraform checksum verification failed!"
+            exit 1
+          fi
+          echo "Terraform checksum verified successfully"
+
+          unzip -q "${TF_ZIP}"
+          sudo mv terraform /usr/local/bin/
+          rm "${TF_ZIP}" terraform_SHA256SUMS
+
+          # Terragrunt with checksum verification
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/terragrunt_linux_amd64"
+          TG_SHA_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}/SHA256SUMS"
+
+          wget -q -O terragrunt "$TG_URL"
+          wget -q -O SHA256SUMS "$TG_SHA_URL"
+
+          EXPECTED_TG_CHECKSUM=$(grep "terragrunt_linux_amd64" SHA256SUMS | awk '{print $1}')
+          ACTUAL_TG_CHECKSUM=$(sha256sum terragrunt | awk '{print $1}')
+
+          if [ "$EXPECTED_TG_CHECKSUM" != "$ACTUAL_TG_CHECKSUM" ]; then
+            echo "ERROR: Terragrunt checksum verification failed!"
+            exit 1
+          fi
+          echo "Terragrunt checksum verified successfully"
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm SHA256SUMS
+
+      - name: Azure Login
+        if: steps.check.outputs.allowed == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Execute Plan Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TERRAGRUNT_SKIP_OUTPUTS: "true"
+        run: |
+          DIR="${{ steps.parse.outputs.directory }}"
+
+          if [ -n "$DIR" ]; then
+            # Plan for specific directory
+            echo "Running plan for $DIR..."
+            cd "$DIR"
+            terragrunt init --terragrunt-non-interactive
+            terragrunt plan --terragrunt-non-interactive
+          else
+            # Plan for all changed projects - detect changes inline
+            echo "Detecting changed infrastructure projects..."
+
+            # Get changed files in this PR compared to base branch
+            BASE_REF="${{ steps.pr-ref.outputs.base_ref }}"
+            git fetch origin "$BASE_REF" --depth=1 2>/dev/null || true
+            CHANGED=$(git diff --name-only "origin/$BASE_REF"...HEAD -- infra/terraform/ 2>/dev/null || echo "")
+
+            if [ -z "$CHANGED" ]; then
+              echo "No infrastructure changes detected."
+              exit 0
+            fi
+
+            echo "Changed files:"
+            echo "$CHANGED"
+
+            PROJECTS=()
+
+            # Check for shared-infra changes
+            if echo "$CHANGED" | grep -q "infra/terraform/shared-infra/\|infra/terraform/modules/shared/\|infra/terraform/terragrunt.hcl"; then
+              for env in dev staging prod; do
+                if [ -d "infra/terraform/shared-infra/environments/$env" ]; then
+                  PROJECTS+=("infra/terraform/shared-infra/environments/$env")
+                fi
+              done
+            fi
+
+            # Check for product changes
+            for product in admin chain mystira-app publisher story-generator; do
+              if echo "$CHANGED" | grep -q "infra/terraform/products/$product/\|infra/terraform/modules/$product"; then
+                for env in dev staging prod; do
+                  if [ -d "infra/terraform/products/$product/environments/$env" ]; then
+                    PROJECTS+=("infra/terraform/products/$product/environments/$env")
+                  fi
+                done
+              fi
+            done
+
+            if [ ${#PROJECTS[@]} -eq 0 ]; then
+              echo "No infrastructure projects affected by changes."
+              exit 0
+            fi
+
+            echo ""
+            echo "Projects to plan: ${PROJECTS[*]}"
+            echo ""
+
+            # Run plan for each project
+            FAILED=0
+            for PROJECT_DIR in "${PROJECTS[@]}"; do
+              echo "=========================================="
+              echo "Planning: $PROJECT_DIR"
+              echo "=========================================="
+              cd "$GITHUB_WORKSPACE/$PROJECT_DIR"
+              if ! terragrunt init --terragrunt-non-interactive; then
+                echo "::error::Init failed for $PROJECT_DIR"
+                FAILED=1
+                continue
+              fi
+              if ! terragrunt plan --terragrunt-non-interactive; then
+                echo "::error::Plan failed for $PROJECT_DIR"
+                FAILED=1
+              fi
+            done
+
+            if [ $FAILED -ne 0 ]; then
+              echo "::error::One or more plans failed"
+              exit 1
+            fi
+          fi
+
+      - name: Download Plan Artifact
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
+        uses: actions/download-artifact@v7
+        with:
+          pattern: tfplan-*
+          path: ./plans
+        continue-on-error: true
+
+      - name: Execute Apply Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply'
+        env:
+          # Set ALLOW_PROD_APPLY=true to bypass staging requirement for prod
+          ALLOW_PROD_APPLY: ${{ vars.ALLOW_PROD_APPLY || 'false' }}
+        run: |
+          DIR="${{ steps.parse.outputs.directory }}"
+          if [ -z "$DIR" ]; then
+            echo "::error::Apply requires a directory. Use: /apply -d <directory>"
+            exit 1
+          fi
+
+          echo "Applying changes in $DIR..."
+          cd "$DIR"
+          terragrunt init --terragrunt-non-interactive
+
+          # Compute project name matching detect-changes output format
+          # e.g., infra/terraform/shared-infra/environments/dev -> shared-infra-dev
+          # e.g., infra/terraform/products/mystira-app/environments/dev -> mystira-app-dev
+          PROJECT_NAME="$(basename "$(dirname "$(dirname "$DIR")")")-$(basename "$DIR")"
+          PLAN_FILE="${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/tfplan"
+
+          # Safety check: Require staging apply before prod apply
+          if [[ "$PROJECT_NAME" == *-prod ]]; then
+            STAGING_NAME="${PROJECT_NAME%-prod}-staging"
+            STAGING_SUCCESS_FILE="${GITHUB_WORKSPACE}/plans/tfplan-${STAGING_NAME}/staging-success"
+
+            if [[ "${ALLOW_PROD_APPLY}" == "true" ]]; then
+              echo "::warning::⚠️ ALLOW_PROD_APPLY is set - bypassing staging requirement for prod apply"
+              echo "::warning::Proceeding with direct prod apply for $PROJECT_NAME"
+            elif [[ -f "$STAGING_SUCCESS_FILE" ]]; then
+              echo "✅ Staging apply verified: $STAGING_NAME"
+            else
+              echo "::error::🚫 Production apply blocked: staging must be applied first"
+              echo "::error::Project: $PROJECT_NAME requires $STAGING_NAME to be applied"
+              echo "::error::Expected proof file: $STAGING_SUCCESS_FILE"
+              echo ""
+              echo "To apply to production:"
+              echo "  1. First run: /apply -d ${DIR/\/prod/\/staging}"
+              echo "  2. Then retry: /apply -d $DIR"
+              echo ""
+              echo "To bypass this check (emergency only):"
+              echo "  Set repository variable ALLOW_PROD_APPLY=true"
+              exit 1
+            fi
+          fi
+
+          # Create success marker for staging applies (used by prod safety check)
+          if [[ "$PROJECT_NAME" == *-staging ]]; then
+            mkdir -p "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}"
+            touch "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/staging-success"
+            echo "📝 Created staging success marker for future prod applies"
+          fi
+
+          echo "Looking for plan artifact: $PLAN_FILE"
+          if [ -f "$PLAN_FILE" ]; then
+            echo "Using saved plan artifact..."
+            terragrunt apply "$PLAN_FILE" --terragrunt-non-interactive
+          else
+            echo "::warning::No saved plan found at $PLAN_FILE, running fresh apply..."
+            terragrunt apply -auto-approve --terragrunt-non-interactive
+          fi
+
+          # Update success marker after successful apply
+          if [[ "$PROJECT_NAME" == *-staging ]]; then
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${GITHUB_WORKSPACE}/plans/tfplan-${PROJECT_NAME}/staging-success"
+          fi
+
+      - name: Execute Stack Plan Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/plan-stack'
+        env:
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+        run: |
+          ENV="${{ steps.parse.outputs.environment }}"
+          if [ -z "$ENV" ]; then
+            echo "::error::Stack plan requires environment. Use: /plan-stack -e <dev|staging|prod>"
+            exit 1
+          fi
+
+          STACK_CONFIG="stacks/$ENV.stack.hcl"
+          if [ ! -f "infra/terraform/$STACK_CONFIG" ]; then
+            echo "::error::Stack config not found: $STACK_CONFIG"
+            exit 1
+          fi
+
+          echo "Running stack plan for $ENV..."
+          cd infra/terraform
+          terragrunt stacks run plan \
+            --config "$STACK_CONFIG" \
+            --terragrunt-non-interactive
+
+      - name: Execute Stack Apply Command
+        if: steps.check.outputs.allowed == 'true' && steps.parse.outputs.command == '/apply-stack'
+        env:
+          TERRAGRUNT_EXPERIMENTAL_STACKS: "true"
+          # Set ALLOW_PROD_APPLY=true to bypass staging requirement for prod
+          ALLOW_PROD_APPLY: ${{ vars.ALLOW_PROD_APPLY || 'false' }}
+        run: |
+          ENV="${{ steps.parse.outputs.environment }}"
+          if [ -z "$ENV" ]; then
+            echo "::error::Stack apply requires environment. Use: /apply-stack -e <dev|staging|prod>"
+            exit 1
+          fi
+
+          STACK_CONFIG="stacks/$ENV.stack.hcl"
+          if [ ! -f "infra/terraform/$STACK_CONFIG" ]; then
+            echo "::error::Stack config not found: $STACK_CONFIG"
+            exit 1
+          fi
+
+          # Safety check: Require staging apply before prod apply
+          if [[ "$ENV" == "prod" ]]; then
+            STAGING_SUCCESS_FILE="${GITHUB_WORKSPACE}/plans/stack-staging-success"
+
+            if [[ "${ALLOW_PROD_APPLY}" == "true" ]]; then
+              echo "::warning::⚠️ ALLOW_PROD_APPLY is set - bypassing staging requirement for prod stack apply"
+            elif [[ -f "$STAGING_SUCCESS_FILE" ]]; then
+              echo "✅ Staging stack apply verified"
+            else
+              echo "::error::🚫 Production stack apply blocked: staging must be applied first"
+              echo "::error::Run '/apply-stack -e staging' before '/apply-stack -e prod'"
+              echo ""
+              echo "To bypass this check (emergency only):"
+              echo "  Set repository variable ALLOW_PROD_APPLY=true"
+              exit 1
+            fi
+          fi
+
+          # Create success marker for staging applies
+          if [[ "$ENV" == "staging" ]]; then
+            mkdir -p "${GITHUB_WORKSPACE}/plans"
+            touch "${GITHUB_WORKSPACE}/plans/stack-staging-success"
+            echo "📝 Created staging stack success marker for future prod applies"
+          fi
+
+          echo "Applying stack for $ENV..."
+          cd infra/terraform
+          terragrunt stacks run apply \
+            --config "$STACK_CONFIG" \
+            --terragrunt-non-interactive \
+            --auto-approve
+
+          # Update success marker after successful apply
+          if [[ "$ENV" == "staging" ]]; then
+            echo "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "${GITHUB_WORKSPACE}/plans/stack-staging-success"
+          fi
+
+      - name: Post Result
+        if: always() && steps.check.outputs.allowed == 'true'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const command = '${{ steps.parse.outputs.command }}';
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `${emoji} Command \`${command}\` completed with status: **${status}**`,
+            });
+
+  # ===========================================================================
+  # Summary
+  # ===========================================================================
+  summary:
+    name: Plan Summary
+    runs-on: ubuntu-latest
+    needs: [detect-changes, plan, plan-stacks]
+    if: always() && (needs.detect-changes.outputs.has_changes == 'true' || needs.detect-changes.outputs.has_stacks == 'true')
+    steps:
+      - name: Generate Summary
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const hasProjects = '${{ needs.detect-changes.outputs.has_changes }}' === 'true';
+            const hasStacks = '${{ needs.detect-changes.outputs.has_stacks }}' === 'true';
+
+            let summary = `## 📋 Infrastructure Plan Summary\n\n`;
+
+            // Projects section
+            if (hasProjects) {
+              const projects = JSON.parse('${{ needs.detect-changes.outputs.projects }}');
+              summary += `### Projects\n\n`;
+              summary += `| Project | Environment | Status |\n`;
+              summary += `|---------|-------------|--------|\n`;
+              for (const project of projects) {
+                summary += `| ${project.name} | ${project.env} | See individual comments |\n`;
+              }
+              summary += `\n`;
+            }
+
+            // Stacks section
+            if (hasStacks) {
+              const stacks = JSON.parse('${{ needs.detect-changes.outputs.stacks }}');
+              summary += `### 🥞 Terragrunt Stacks\n\n`;
+              summary += `| Stack | Environment | Status |\n`;
+              summary += `|-------|-------------|--------|\n`;
+              for (const stack of stacks) {
+                summary += `| ${stack.name} | ${stack.env} | See individual comments |\n`;
+              }
+              summary += `\n`;
+            }
+
+            summary += `### Commands\n\n`;
+            summary += `**Projects:**\n`;
+            summary += `- \`/plan\` - Re-run all project plans\n`;
+            summary += `- \`/plan -d <dir>\` - Plan specific directory\n`;
+            summary += `- \`/apply -d <dir>\` - Apply specific directory (requires approval)\n\n`;
+            summary += `**Stacks:**\n`;
+            summary += `- \`/plan-stack -e <env>\` - Plan stack for environment (dev/staging/prod)\n`;
+            summary += `- \`/apply-stack -e <env>\` - Apply stack for environment (requires approval)\n`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: summary,
+            });

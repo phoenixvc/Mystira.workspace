@@ -26,21 +26,21 @@ export function isDefined<T>(value: T | null | undefined): value is T {
  * Check if a value is a non-empty string
  */
 export function isNonEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.trim().length > 0;
+  return typeof value === "string" && value.trim().length > 0;
 }
 
 /**
  * Check if a value is a positive number
  */
 export function isPositiveNumber(value: unknown): value is number {
-  return typeof value === 'number' && !isNaN(value) && value > 0;
+  return typeof value === "number" && !isNaN(value) && value > 0;
 }
 
 /**
  * Check if a value is a valid email format
  */
 export function isValidEmail(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== "string") return false;
   // Simple email regex - not comprehensive but catches most cases
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(value);
@@ -50,7 +50,7 @@ export function isValidEmail(value: unknown): value is string {
  * Check if a value is a valid URL
  */
 export function isValidUrl(value: unknown): value is string {
-  if (typeof value !== 'string') return false;
+  if (typeof value !== "string") return false;
   try {
     new URL(value);
     return true;
@@ -62,7 +62,9 @@ export function isValidUrl(value: unknown): value is string {
 /**
  * Create a validation result
  */
-export function createValidationResult(errors: ValidationError[] = []): ValidationResult {
+export function createValidationResult(
+  errors: ValidationError[] = []
+): ValidationResult {
   return {
     valid: errors.length === 0,
     errors,
@@ -72,7 +74,9 @@ export function createValidationResult(errors: ValidationError[] = []): Validati
 /**
  * Combine multiple validation results
  */
-export function combineValidationResults(...results: ValidationResult[]): ValidationResult {
+export function combineValidationResults(
+  ...results: ValidationResult[]
+): ValidationResult {
   const errors = results.flatMap((r) => r.errors);
   return createValidationResult(errors);
 }
@@ -83,7 +87,7 @@ export function combineValidationResults(...results: ValidationResult[]): Valida
 export function createValidationError(
   path: string,
   message: string,
-  code: string = 'VALIDATION_ERROR'
+  code: string = "VALIDATION_ERROR"
 ): ValidationError {
   return { path, message, code };
 }
@@ -107,7 +111,9 @@ export function validateRequired(
 
   for (const field of fields) {
     if (!isDefined(obj[field])) {
-      errors.push(createValidationError(field, `${field} is required`, 'REQUIRED'));
+      errors.push(
+        createValidationError(field, `${field} is required`, "REQUIRED")
+      );
     }
   }
 

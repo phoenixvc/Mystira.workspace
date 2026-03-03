@@ -2,7 +2,7 @@
  * Simple structured logger utilities
  */
 
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogContext {
   [key: string]: unknown;
@@ -52,11 +52,15 @@ export interface LoggerOptions {
  * ```
  */
 export function createLogger(options: LoggerOptions = {}): Logger {
-  const { level = 'info', context = {}, output = defaultOutput } = options;
+  const { level = "info", context = {}, output = defaultOutput } = options;
 
   const minLevel = LOG_LEVELS[level];
 
-  function log(logLevel: LogLevel, message: string, logContext?: LogContext): void {
+  function log(
+    logLevel: LogLevel,
+    message: string,
+    logContext?: LogContext
+  ): void {
     if (LOG_LEVELS[logLevel] < minLevel) return;
 
     const entry: LogEntry = {
@@ -70,10 +74,10 @@ export function createLogger(options: LoggerOptions = {}): Logger {
   }
 
   return {
-    debug: (message, ctx) => log('debug', message, ctx),
-    info: (message, ctx) => log('info', message, ctx),
-    warn: (message, ctx) => log('warn', message, ctx),
-    error: (message, ctx) => log('error', message, ctx),
+    debug: (message, ctx) => log("debug", message, ctx),
+    info: (message, ctx) => log("info", message, ctx),
+    warn: (message, ctx) => log("warn", message, ctx),
+    error: (message, ctx) => log("error", message, ctx),
     child: (childContext) =>
       createLogger({
         level,
@@ -88,21 +92,24 @@ function safeStringify(value: unknown): string {
     return JSON.stringify(value);
   } catch {
     // Handle circular references or non-serializable values
-    return '[unserializable context]';
+    return "[unserializable context]";
   }
 }
 
 function defaultOutput(entry: LogEntry): void {
   const { level, message, timestamp, context } = entry;
-  const contextStr = context && Object.keys(context).length > 0 ? ` ${safeStringify(context)}` : '';
+  const contextStr =
+    context && Object.keys(context).length > 0
+      ? ` ${safeStringify(context)}`
+      : "";
 
   // Use appropriate console method based on level
   const consoleFn =
-    level === 'error'
+    level === "error"
       ? console.error
-      : level === 'warn'
+      : level === "warn"
         ? console.warn
-        : level === 'debug'
+        : level === "debug"
           ? console.debug
           : console.log;
 

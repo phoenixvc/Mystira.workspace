@@ -2,7 +2,7 @@
 # Terraform configuration for staging environment
 
 terraform {
-  required_version = ">= 1.5.0"
+  required_version = ">= 1.6.0"
 
   backend "azurerm" {
     resource_group_name  = "mys-shared-terraform-rg-san"
@@ -15,15 +15,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.47"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+      version = "~> 2.0" # Required for AI Foundry projects and catalog models
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
     }
   }
 }
@@ -53,7 +57,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["devops@mystira.app"]
+  default     = ["jurie@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {
@@ -64,6 +68,12 @@ variable "oidc_issuer_enabled" {
 
 variable "workload_identity_enabled" {
   description = "Enable workload identity for AKS"
+  type        = bool
+  default     = true
+}
+
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
   default     = true
 }
@@ -160,7 +170,7 @@ resource "azurerm_subnet" "aks" {
   name                 = "aks-subnet"
   resource_group_name  = azurerm_resource_group.main.name
   virtual_network_name = azurerm_virtual_network.main.name
-  address_prefixes     = ["10.1.10.0/22"]
+  address_prefixes     = ["10.1.8.0/22"] # /22 requires 4-byte aligned address
 }
 
 resource "azurerm_subnet" "postgresql" {
@@ -212,10 +222,7 @@ module "chain" {
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 2
-  chain_vm_size                     = "Standard_D2s_v3"
   chain_storage_size_gb             = 100
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.chain.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
@@ -231,16 +238,12 @@ module "publisher" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.publisher.name
-  publisher_replica_count           = 2
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-staging.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   # Use shared Service Bus (in core-rg per ADR-0017)
-  use_shared_servicebus          = true
-  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
-  shared_servicebus_queue_name   = "publisher-events"
+  use_shared_servicebus        = true
+  shared_servicebus_queue_name = "publisher-events"
 
   tags = {
     CostCenter = "staging"
@@ -264,23 +267,52 @@ module "shared_postgresql" {
     "adminapi"
   ]
 
-  # Enable Azure AD authentication for passwordless access
-  aad_auth_enabled = true
-  aad_admin_identities = {
-    "admin-api" = {
-      principal_name = "mys-staging-admin-api-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-    "story-generator" = {
-      principal_name = "mys-staging-story-identity-san"
-      principal_type = "ServicePrincipal"
-    }
-  }
+  # AAD authentication is configured separately below to avoid circular dependencies
+  # (app modules need server_id, AAD admins need app identity principal_ids)
+  aad_auth_enabled = false
 
   tags = {
     CostCenter = "staging"
   }
 }
+
+# =============================================================================
+# PostgreSQL Azure AD Administrators
+# Configured separately from the module to avoid circular dependencies:
+# - PostgreSQL server is created first (module.shared_postgresql)
+# - App modules are created next (they need server_id)
+# - AAD admins are added last (they need app identity principal_ids)
+#
+# NOTE: These are DISABLED until AAD authentication is enabled on the PostgreSQL server.
+# To enable: set aad_auth_enabled = true in the shared_postgresql module above.
+# =============================================================================
+
+data "azurerm_client_config" "current" {}
+
+# DISABLED: Azure AD authentication must be enabled on the PostgreSQL server first.
+# Uncomment these resources after setting aad_auth_enabled = true in shared_postgresql module.
+#
+# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "admin_api" {
+#   server_name         = module.shared_postgresql.server_name
+#   resource_group_name = azurerm_resource_group.main.name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = module.admin_api.identity_principal_id
+#   principal_name      = "mys-staging-admin-api-identity-san"
+#   principal_type      = "ServicePrincipal"
+#
+#   depends_on = [module.admin_api]
+# }
+#
+# resource "azurerm_postgresql_flexible_server_active_directory_administrator" "story_generator" {
+#   server_name         = module.shared_postgresql.server_name
+#   resource_group_name = azurerm_resource_group.main.name
+#   tenant_id           = data.azurerm_client_config.current.tenant_id
+#   object_id           = module.story_generator.identity_principal_id
+#   principal_name      = "mys-staging-story-identity-san"
+#   principal_type      = "ServicePrincipal"
+#
+#   depends_on = [module.story_generator]
+# }
 
 # Shared Redis Infrastructure
 # Note: Standard SKU does not support VNet integration (subnet_id)
@@ -352,13 +384,17 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "staging"
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account
@@ -408,6 +444,8 @@ module "shared_azure_search" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Use standard tier for staging (semantic search available)
   sku                 = "standard"
@@ -443,10 +481,8 @@ module "story_generator" {
   # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
-  fallback_location        = "eastus2"  # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
-  github_branch            = "main"  # staging uses main branch
-  enable_swa_custom_domain = false   # Enable after DNS is configured
+  fallback_location        = "eastus2" # SWA not available in South Africa North
+  enable_swa_custom_domain = false     # Disabled until CNAME DNS records are created
   swa_custom_domain        = "staging.story.mystira.app"
 
   tags = {
@@ -462,10 +498,7 @@ module "admin_api" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.admin.name
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
-  shared_postgresql_server_id       = module.shared_postgresql.server_id
 
   tags = {
     CostCenter = "staging"
@@ -493,12 +526,14 @@ module "entra_external_id" {
   source = "../../modules/entra-external-id"
   count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment   = "staging"
-  tenant_id     = var.external_id_tenant_id
-  tenant_name   = "mystirastaging"
+  environment = "staging"
+  tenant_id   = var.external_id_tenant_id
+  tenant_name = "mystirastaging"
 
   pwa_redirect_uris = [
-    "https://app.staging.mystira.app/auth/callback"
+    # Staging environment
+    "https://staging.mystira.app/authentication/login-callback",
+    "https://staging.app.mystira.app/authentication/login-callback",
   ]
 }
 
@@ -633,17 +668,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
@@ -931,4 +969,43 @@ output "servicebus_connection_string" {
   description = "Shared Service Bus primary connection string"
   value       = module.shared_servicebus.default_primary_connection_string
   sensitive   = true
+}
+
+# =============================================================================
+# ACR Outputs (using shared ACR)
+# =============================================================================
+
+output "acr_login_server" {
+  description = "Shared ACR login server"
+  value       = data.azurerm_container_registry.shared.login_server
+}
+
+output "acr_name" {
+  description = "Shared ACR name"
+  value       = data.azurerm_container_registry.shared.name
+}
+
+# =============================================================================
+# DNS Outputs
+# =============================================================================
+
+# DNS Zone data source - shared DNS zone created by CI/CD bootstrap
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = data.azurerm_dns_zone.mystira.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = "staging.publisher.mystira.app"
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = "staging.chain.mystira.app"
 }

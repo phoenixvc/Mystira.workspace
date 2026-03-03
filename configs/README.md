@@ -1,38 +1,30 @@
-# Configuration Files for Submodules
+# Shared Configuration Presets
 
-This directory contains configuration files that should be copied to submodules when they're missing.
+This directory contains shared config presets used by thin package-level
+wrappers across the monorepo.
 
-## admin-ui.vite.config.ts
+## ESLint presets
 
-Vite/Vitest configuration for the `packages/admin-ui` submodule. This file is automatically copied to `packages/admin-ui/vite.config.ts` by the CI workflow before running tests.
+- `eslint/create-node-eslint-config.mjs`
+  - Shared Node + TypeScript flat-config factory.
+  - Used by non-React packages (for example `contracts`, `shared-utils`).
+- `eslint/create-react-eslint-config.mjs`
+  - Shared React + TypeScript flat-config factory.
+  - Used by frontend packages (for example `admin-ui`, `publisher`).
 
-### Why is this needed?
+Package `eslint.config.mjs` files should stay as thin wrappers that only define
+package-specific ignores and rule tweaks.
 
-The admin-ui submodule currently has no test files. Vitest exits with code 1 when no test files are found, causing CI to fail. This configuration adds `passWithNoTests: true` to allow the test job to pass gracefully.
+## TypeScript presets
 
-## admin-ui.eslintrc.cjs
+- `typescript/tsconfig.base.json`
+  - Common strictness and compiler safety defaults.
+- `typescript/tsconfig.lib.json`
+  - Baseline for TypeScript library packages.
+- `typescript/tsconfig.react-vite.json`
+  - Baseline for React/Vite app packages.
+- `typescript/tsconfig.vite-node.json`
+  - Baseline for Vite node-side config files (`tsconfig.node.json`).
 
-ESLint configuration for the `packages/admin-ui` submodule. This file is automatically copied to `packages/admin-ui/.eslintrc.cjs` by:
-
-1. The `scripts/setup-submodules.sh` script
-2. The CI workflow before running lint
-
-### Why is this needed?
-
-The admin-ui submodule is a React/Vite application that requires specific ESLint configuration:
-
-- Browser environment for DOM APIs
-- ES2020 environment features
-- React Hooks linting rules
-- TypeScript support
-- Node.js environment for config files (vite.config.ts)
-
-### Permanent Solution
-
-This is a temporary workaround. The permanent solution is to add this `.eslintrc.cjs` file directly to the [Mystira.Admin.UI repository](https://github.com/phoenixvc/Mystira.Admin.UI).
-
-A patch file is available at `admin-ui-eslint-config.patch` that can be applied to the admin-ui repository.
-
-## Future
-
-When the ESLint configuration is added to the admin-ui repository itself, this workaround can be removed.
+Package `tsconfig*.json` files should prefer `extends` and only keep
+package-specific options (aliases, output paths, stricter linting toggles).

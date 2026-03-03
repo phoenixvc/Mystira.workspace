@@ -15,15 +15,19 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
     azuread = {
       source  = "hashicorp/azuread"
-      version = "~> 2.47"
+      version = "~> 3.0"
     }
     azapi = {
       source  = "Azure/azapi"
-      version = "~> 2.0"  # Required for AI Foundry projects and catalog models
+      version = "~> 2.0" # Required for AI Foundry projects and catalog models
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
     }
   }
 }
@@ -53,7 +57,7 @@ variable "external_id_tenant_id" {
 variable "alert_email_addresses" {
   description = "Email addresses for monitoring alerts"
   type        = list(string)
-  default     = ["devops@mystira.app"]
+  default     = ["jurie@phoenixvc.tech"]
 }
 
 variable "oidc_issuer_enabled" {
@@ -66,6 +70,35 @@ variable "workload_identity_enabled" {
   description = "Enable workload identity for AKS"
   type        = bool
   default     = true
+}
+
+variable "enable_azure_ai" {
+  description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
+  type        = bool
+  default     = true
+}
+
+# =============================================================================
+# Staging Environment Backend Overrides
+# Used by Front Door to route staging traffic. Leave empty to use defaults.
+# =============================================================================
+
+variable "staging_story_generator_swa_backend" {
+  description = "Staging Story Generator SWA backend address (leave empty for default)"
+  type        = string
+  default     = ""
+}
+
+variable "staging_mystira_app_api_backend" {
+  description = "Staging Mystira.App API backend address (leave empty for default)"
+  type        = string
+  default     = ""
+}
+
+variable "staging_mystira_app_swa_backend" {
+  description = "Staging Mystira.App SWA backend address (leave empty for default)"
+  type        = string
+  default     = ""
 }
 
 # Common tags for all resources
@@ -261,10 +294,7 @@ module "chain" {
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
   chain_node_count                  = 1
-  chain_vm_size                     = "Standard_B2s"
   chain_storage_size_gb             = 100 # Premium file shares require minimum 100 GB
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.chain.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   tags = {
@@ -280,16 +310,12 @@ module "publisher" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.publisher.name
-  publisher_replica_count           = 1
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.publisher.id
   chain_rpc_endpoint                = "http://mys-chain.mys-dev.svc.cluster.local:8545"
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
   # Use shared Service Bus (in core-rg per ADR-0017)
-  use_shared_servicebus          = true
-  shared_servicebus_namespace_id = module.shared_servicebus.namespace_id
-  shared_servicebus_queue_name   = "publisher-events"
+  use_shared_servicebus        = true
+  shared_servicebus_queue_name = "publisher-events"
 
   tags = {
     CostCenter = "development"
@@ -395,8 +421,8 @@ module "shared_monitoring" {
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
 
-  retention_in_days       = 30
-  alert_email_addresses   = var.alert_email_addresses
+  retention_in_days     = 30
+  alert_email_addresses = var.alert_email_addresses
 
   tags = {
     CostCenter = "development"
@@ -405,13 +431,18 @@ module "shared_monitoring" {
 
 # Shared Azure AI Foundry Infrastructure (in core-rg)
 # Updated to use AIServices (Azure AI Foundry) instead of legacy OpenAI
+# Can be disabled with enable_azure_ai=false to speed up initial deployment
 module "shared_azure_ai" {
   source = "../../modules/shared/azure-ai"
+  count  = var.enable_azure_ai ? 1 : 0
 
   environment         = "dev"
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Enable AI Foundry project for workload isolation
   enable_project = true # Uses AzAPI to enable allowProjectManagement on account
@@ -440,6 +471,9 @@ module "shared_azure_search" {
   location            = var.location
   region_code         = local.region_code
   resource_group_name = azurerm_resource_group.main.name
+
+  # TODO: Disable public access and configure private endpoints
+  public_network_access_enabled = true
 
   # Use basic tier for dev (cost-effective, 2GB storage, 15 indexes)
   # Note: semantic search requires standard tier
@@ -475,10 +509,8 @@ module "story_generator" {
   # Static Web App (Blazor WASM frontend) - same pattern as Mystira.App
   enable_static_web_app    = true
   static_web_app_sku       = "Free"
-  fallback_location        = "eastus2"  # SWA not available in South Africa North
-  github_repository_url    = "https://github.com/phoenixvc/Mystira.StoryGenerator"
-  github_branch            = "dev"
-  enable_swa_custom_domain = false  # Enable after DNS is configured
+  fallback_location        = "eastus2" # SWA not available in South Africa North
+  enable_swa_custom_domain = false     # Enable after DNS is configured
   swa_custom_domain        = "dev.story.mystira.app"
 
   tags = {
@@ -494,10 +526,25 @@ module "admin_api" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.admin.name
-  vnet_id                           = azurerm_virtual_network.main.id
-  subnet_id                         = azurerm_subnet.admin_api.id
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
-  shared_postgresql_server_id       = module.shared_postgresql.server_id
+
+  tags = {
+    CostCenter = "development"
+  }
+}
+
+# Admin UI Infrastructure (Static Web App)
+# React/Vite frontend served via Azure Static Web Apps + Front Door
+module "admin_ui" {
+  source = "../../modules/admin-ui"
+
+  environment         = "dev"
+  location            = var.location
+  fallback_location   = "eastus2" # SWA not available in South Africa North
+  resource_group_name = azurerm_resource_group.admin.name
+
+  static_web_app_sku   = "Free"
+  enable_custom_domain = false # Custom domain managed via Front Door
 
   tags = {
     CostCenter = "development"
@@ -513,7 +560,7 @@ module "entra_id" {
   admin_ui_redirect_uris = [
     "http://localhost:7001/auth/callback",
     "http://localhost:3000/auth/callback",
-    "https://admin.dev.mystira.app/auth/callback"
+    "https://dev.admin.mystira.app/auth/callback"
   ]
 
   tags = {
@@ -522,7 +569,7 @@ module "entra_id" {
 }
 
 # GitHub Actions OIDC Authentication
-# Creates federated credentials for all submodule repositories
+# Creates federated credentials for the monorepo (all services consolidated)
 module "github_oidc" {
   source = "../../modules/github-oidc"
 
@@ -533,45 +580,13 @@ module "github_oidc" {
   acr_id = module.shared_acr.acr_id
   aks_id = azurerm_kubernetes_cluster.main.id
 
-  # All Mystira submodule repositories
+  # Monorepo - all services deploy from Mystira.workspace
   repositories = {
-    # Kubernetes-deployed services
-    "admin-api" = {
-      name     = "Mystira.Admin.Api"
-      branches = ["dev", "main"]
-    }
-    "admin-ui" = {
-      name     = "Mystira.Admin.UI"
-      branches = ["dev", "main"]
-    }
-    "chain" = {
-      name     = "Mystira.Chain"
-      branches = ["dev", "main"]
-    }
-    "publisher" = {
-      name     = "Mystira.Publisher"
-      branches = ["dev", "main"]
-    }
-    "story-generator" = {
-      name     = "Mystira.StoryGenerator"
-      branches = ["dev", "main"]
-    }
-
-    # App Service / Static Web App services
-    "app" = {
-      name     = "Mystira.App"
-      branches = ["dev", "main"]
-    }
-    "devhub" = {
-      name     = "Mystira.DevHub"
-      branches = ["dev", "main"]
-    }
-
-    # Workspace (for infra and orchestration)
     "workspace" = {
-      name        = "Mystira.workspace"
-      branches    = ["dev", "main"]
-      enable_tags = true # For release deployments
+      name                 = "Mystira.workspace"
+      branches             = ["dev", "main"]
+      enable_tags          = true # For release deployments
+      enable_pull_requests = true # For PR automation workflows
     }
   }
 
@@ -716,17 +731,20 @@ resource "azurerm_key_vault_secret" "story_appinsights" {
 }
 
 # Story-Generator Azure AI Foundry Secrets (auto-populated from shared_azure_ai module)
+# Only created when enable_azure_ai=true
 resource "azurerm_key_vault_secret" "story_azure_ai_endpoint" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-endpoint"
-  value        = module.shared_azure_ai.endpoint
+  value        = module.shared_azure_ai[0].endpoint
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
 }
 
 resource "azurerm_key_vault_secret" "story_azure_ai_key" {
+  count        = var.enable_azure_ai ? 1 : 0
   name         = "azure-ai-api-key"
-  value        = module.shared_azure_ai.primary_access_key
+  value        = module.shared_azure_ai[0].primary_access_key
   key_vault_id = module.story_generator.key_vault_id
   content_type = "azure-ai"
   tags         = { AutoPopulated = "true", Source = "shared-azure-ai" }
@@ -814,14 +832,18 @@ module "entra_external_id" {
   source = "../../modules/entra-external-id"
   count  = var.external_id_tenant_id != "" ? 1 : 0
 
-  environment   = "dev"
-  tenant_id     = var.external_id_tenant_id
-  tenant_name   = "mystiradev"
+  environment = "dev"
+  tenant_id   = var.external_id_tenant_id
+  tenant_name = "mystiradev"
 
   pwa_redirect_uris = [
-    "http://localhost:5173/auth/callback",
-    "http://localhost:3000/auth/callback",
-    "https://app.dev.mystira.app/auth/callback"
+    # Localhost development
+    "http://localhost:5173/authentication/login-callback",
+    "http://localhost:7000/authentication/login-callback",
+    "http://localhost:3000/authentication/login-callback",
+    # Dev environment
+    "https://dev.mystira.app/authentication/login-callback",
+    "https://dev.app.mystira.app/authentication/login-callback",
   ]
 }
 
@@ -935,6 +957,28 @@ output "story_generator_swa_api_key" {
 output "story_generator_swa_default_hostname" {
   description = "Story-Generator Static Web App default hostname"
   value       = module.story_generator.static_web_app_default_hostname
+}
+
+# Admin-UI Static Web App Outputs
+output "admin_ui_swa_url" {
+  description = "Admin-UI Static Web App URL"
+  value       = module.admin_ui.static_web_app_url
+}
+
+output "admin_ui_swa_api_key" {
+  description = "Admin-UI Static Web App API key (for GitHub Actions deployments)"
+  value       = module.admin_ui.static_web_app_api_key
+  sensitive   = true
+}
+
+output "admin_ui_swa_default_hostname" {
+  description = "Admin-UI Static Web App default hostname"
+  value       = module.admin_ui.static_web_app_default_hostname
+}
+
+output "admin_ui_swa_name" {
+  description = "Admin-UI Static Web App name"
+  value       = module.admin_ui.static_web_app_name
 }
 
 # Connection string for Story-Generator (from shared PostgreSQL)
@@ -1113,22 +1157,27 @@ output "servicebus_queue_ids" {
 }
 
 # =============================================================================
-# Shared Azure AI Foundry Outputs
+# Shared Azure AI Foundry Outputs (only populated when enable_azure_ai=true)
 # =============================================================================
 
 output "azure_ai_account_id" {
   description = "Azure AI Foundry cognitive account ID"
-  value       = module.shared_azure_ai.cognitive_account_id
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].cognitive_account_id : null
 }
 
 output "azure_ai_endpoint" {
   description = "Azure AI Foundry endpoint URL"
-  value       = module.shared_azure_ai.endpoint
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].endpoint : null
 }
 
 output "azure_ai_model_deployments" {
   description = "Map of deployed AI models"
-  value       = module.shared_azure_ai.model_deployments
+  value       = var.enable_azure_ai ? module.shared_azure_ai[0].model_deployments : {}
+}
+
+output "azure_ai_enabled" {
+  description = "Whether Azure AI Foundry is enabled"
+  value       = var.enable_azure_ai
 }
 
 # =============================================================================
@@ -1158,4 +1207,29 @@ output "github_oidc_secrets" {
 output "github_oidc_credential_count" {
   description = "Number of federated credentials created"
   value       = module.github_oidc.credential_count
+}
+
+# =============================================================================
+# DNS Outputs
+# =============================================================================
+
+# DNS Zone data source - shared DNS zone created by CI/CD bootstrap
+data "azurerm_dns_zone" "mystira" {
+  name                = "mystira.app"
+  resource_group_name = "mys-shared-terraform-rg-san"
+}
+
+output "dns_name_servers" {
+  description = "Name servers for DNS zone - configure these in your domain registrar"
+  value       = data.azurerm_dns_zone.mystira.name_servers
+}
+
+output "publisher_domain" {
+  description = "Publisher service domain"
+  value       = "dev.publisher.mystira.app"
+}
+
+output "chain_domain" {
+  description = "Chain service domain"
+  value       = "dev.chain.mystira.app"
 }

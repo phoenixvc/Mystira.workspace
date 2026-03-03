@@ -1,0 +1,131 @@
+name: "[CI] Mystira.Authoring"
+
+on:
+  push:
+    paths:
+      - "packages/authoring/**"
+      - "packages/shared/**"
+      - "packages/ai/**"
+      - "packages/contracts/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-authoring.yml"
+    branches:
+      - main
+      - "release/**"
+  pull_request:
+    paths:
+      - "packages/authoring/**"
+      - "packages/shared/**"
+      - "packages/ai/**"
+      - "packages/contracts/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-authoring.yml"
+
+concurrency:
+  group: packages-authoring-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build Mystira.Authoring.Abstractions
+        run: dotnet build packages/authoring/Mystira.Authoring.Abstractions --configuration Release
+
+      - name: Build Mystira.Authoring
+        run: dotnet build packages/authoring/Mystira.Authoring --configuration Release
+
+      - name: Test Mystira.Authoring
+        run: dotnet test packages/authoring/Mystira.Authoring.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: authoring
+          name: mystira-authoring
+          fail_ci_if_error: false
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore packages
+        run: |
+          dotnet restore packages/authoring/Mystira.Authoring.Abstractions
+          dotnet restore packages/authoring/Mystira.Authoring
+
+      - name: Check for vulnerable packages
+        run: |
+          echo "## Vulnerability Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          VULNERABLE=false
+          COMMAND_FAILED=false
+
+          for PKG in "packages/authoring/Mystira.Authoring.Abstractions" "packages/authoring/Mystira.Authoring"; do
+            RESULT=$(dotnet list "$PKG" package --vulnerable --include-transitive 2>&1)
+            EXIT_CODE=$?
+
+            if [ $EXIT_CODE -ne 0 ]; then
+              echo "::error::Failed to check vulnerabilities in $PKG"
+              echo "### ❌ Command Failed for $(basename $PKG)" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              COMMAND_FAILED=true
+              continue
+            fi
+
+            if echo "$RESULT" | grep -q "has the following vulnerable packages"; then
+              echo "::error::Vulnerable packages detected in $PKG"
+              echo "### ⚠️ Vulnerable Packages Found in $(basename $PKG)" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              VULNERABLE=true
+            fi
+          done
+
+          if [ "$COMMAND_FAILED" = "true" ]; then
+            echo "::error::One or more vulnerability checks failed"
+            exit 1
+          elif [ "$VULNERABLE" = "true" ]; then
+            exit 1
+          else
+            echo "### ✅ No Vulnerabilities Found" >> $GITHUB_STEP_SUMMARY
+            echo "No known vulnerabilities detected in dependencies." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Dependency Review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          config-file: ".github/dependency-review-config.yml"

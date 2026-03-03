@@ -28,10 +28,32 @@ spec:
         runAsNonRoot: true
       nodeSelector:
         workload: publisher
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-publisher
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: mys-publisher
       containers:
         - name: publisher
-          image: mystiraacr.azurecr.io/publisher:v0.0.0
+          image: myssharedacr.azurecr.io/publisher:v0.0.0
           imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           ports:
             - name: http
               containerPort: 3000
@@ -90,6 +112,13 @@ spec:
               port: 3001
             initialDelaySeconds: 10
             periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3001
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            failureThreshold: 20
 ---
 apiVersion: v1
 kind: Service
@@ -142,3 +171,15 @@ spec:
         target:
           type: Utilization
           averageUtilization: 80
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-publisher-pdb
+  labels:
+    app: mys-publisher
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-publisher

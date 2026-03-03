@@ -66,6 +66,11 @@ output "app_service_plan_id" {
   value       = azurerm_service_plan.main.id
 }
 
+output "app_service_custom_domain_verification_id" {
+  description = "App Service custom domain verification ID for DNS TXT record"
+  value       = azurerm_linux_web_app.api.custom_domain_verification_id
+}
+
 # -----------------------------------------------------------------------------
 # Static Web App Outputs
 # -----------------------------------------------------------------------------

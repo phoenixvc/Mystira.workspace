@@ -6,6 +6,11 @@
   "tabWidth": 2,
   "useTabs": false,
   "arrowParens": "always",
-  "endOfLine": "lf"
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": "docs/history/.index.json",
+      "options": { "printWidth": 40 }
+    }
+  ]
 }
-

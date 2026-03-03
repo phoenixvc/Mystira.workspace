@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 .pnpm-store/
+.pnp
+.pnp.js
 
 # Build outputs
 dist/
@@ -8,6 +10,23 @@ build/
 out/
 .next/
 .turbo/
+nupkg/
+nupkg-test/
+test-nupkg/
+publish/
+
+# .NET build outputs
+bin/
+obj/
+*.nupkg
+*.snupkg
+.nuget/
+project.lock.json
+
+# Rust / WASM
+target/
+pkg/
+wasm-pack.log
 
 # Cache
 .cache/
@@ -16,17 +35,85 @@ out/
 
 # Environment variables
 .env
-.env.local
-.env.*.local
-.env.development
-.env.production
+.env.*
+!.env.example
+!.env.*.example
 
-# IDE
+# Allow template .env files for debug configurations at workspace root
+!.env.admin-api
+!.env.publisher
+!.env.story-generator
+
+# IDE - JetBrains
 .idea/
+*.DotSettings.user
+
+# IDE - Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# IDE - VS Code / Windsurf / Cursor
 .vscode/
+.windsurf/
+.cascade/
+
+# IDE - Vim
 *.swp
 *.swo
+
+# OS
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# VS Code / Cursor / Windsurf - Keep shared settings, ignore user-specific
+.vscode/*
+**/.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Cursor - Keep rules
+.cursor/*
+!.cursor/rules
+
+# Windsurf - Keep rules
+.windsurf/*
+!.windsurf/rules
+
+# Claude - User-specific
+.claude/
+
+# PyCharm / Rider / JetBrains - Keep shared settings, ignore user-specific
+.idea/*
+**/.idea/*
+!.idea/modules.xml
+!.idea/misc.xml
+!.idea/*.iml
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/prettier.xml
+!.idea/jsLinters/
+!.idea/vcs.xml
+!.idea/runConfigurations/
+!.idea/.idea.Mystira/
+# User-specific JetBrains files (always ignore)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/*.iws
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+.idea/.idea.Mystira/.idea/workspace.xml
 
 # Logs
 logs/
@@ -35,17 +122,30 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
 # Testing
 coverage/
 .nyc_output/
+*.trx
+cypress/videos/
+cypress/screenshots/
+TestResults/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
 
-# Blockchain specific
+# Blockchain - Hardhat
 artifacts/
 cache/
+cache_hardhat/
 typechain/
 typechain-types/
 deployments/localhost/
+gasReporterOutput.json
+
+# Blockchain - Foundry
+forge-cache/
 
 # Terraform
 *.tfstate
@@ -54,22 +154,23 @@ deployments/localhost/
 .terraform.lock.hcl
 *.tfvars
 !*.tfvars.example
-*.zip
 
 # Docker
-*.pem
 docker-compose.override.yml
 
-# Secrets
+# Secrets & certificates
+*.pem
 *.key
 *.p12
-*.pem
+*.pfx
 secrets/
 .secrets/
+# Allow public CA certs committed intentionally
+!letsencrypt-*.pem
 
-# OS
-Thumbs.db
-ehthumbs.db
+# Archives
+*.zip
+*.tar.gz
 
 # Mobile
 *.apk
@@ -80,6 +181,7 @@ ehthumbs.db
 
 # Python (for AI/ML components)
 __pycache__/
+.ruff_cache/
 *.py[cod]
 *$py.class
 .Python
@@ -88,16 +190,86 @@ __pycache__/
 venv/
 ENV/
 
+# .NET
+bin/
+obj/
+.vs/
+**/.vs/
+_ReSharper.Caches/
+riderModule.iml
+*.rsuser
+*.userprefs
+mono_crash.*
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+artifacts/
+secrets.json
+appsettings.local.json
+appsettings.Local.json
+find_dotnet.txt
+*.dll
+*.pdb
+*.exe
+*.cache
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+*.pubxml
+*.publishproj
+*.azurePubxml
+BenchmarkDotNet.Artifacts/
+Generated Files/
+MigrationBackup/
+FakesAssemblies/
+*.binlog
+healthchecksdb
+.tye/
+csx/
+ecf/
+rcf/
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+# Frontend transient outputs
+dist-ssr/
+
 # Misc
 *.bak
 *.tmp
 *.temp
+tmp/
+temp/
+.aider*
+*.tgz
+*.tar.gz
+yarn.lock
 
-gasReporterOutput.json
+# Package-scoped migration/legacy artifacts
+packages/app/packages/
+packages/app/tools/
+packages/app/**/tools/
+packages/devhub/Mystira.DevHub/Mystira.App.*/
+packages/devhub/Mystira.DevHub/src/Mystira.App.*/
+packages/devhub/Mystira.DevHub/.github/
+packages/devhub/Mystira.DevHub/tools/
+packages/devhub/Mystira.DevHub/MEDIA_*.md
+packages/devhub/Mystira.DevHub/PWA_*.md
+packages/devhub/Mystira.DevHub/SRI_*.md
 
 # Temporary documentation files
-SUBMODULE_SETUP_SUMMARY.md
 CHAIN_COMPARISON.md
 REPO_SETUP_COMPLETE.md
-.submodule-update
 package-lock.json
+
+# Generated parity evidence payloads (large, reproducible)
+docs/analysis/evidence/github-manifests/workflow-files/

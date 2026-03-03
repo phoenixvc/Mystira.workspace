@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Azure.AI.Projects" Version="1.1.0" />
+    <PackageReference Include="Azure.AI.Agents.Persistent" Version="1.2.0-beta.9" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+    <PackageReference Include="Azure.Identity" Version="1.18.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.57.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+    <ProjectReference Include="..\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

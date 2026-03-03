@@ -1,8 +1,10 @@
 packages:
   - "packages/*"
+  - "packages/devhub/*"
   - "packages/app/*"
-  - "packages/chain"
-  - "packages/publisher"
-  - "infra"
-  - "tools/*"
-
+  - "packages/authoring/*"
+  - "packages/story-generator/*"
+  - "packages/infrastructure/*"
+  - "packages/shared/*"
+  - "packages/application/*"
+  - "packages/admin-api/*"

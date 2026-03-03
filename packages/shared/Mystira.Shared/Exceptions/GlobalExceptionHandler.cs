@@ -111,6 +111,19 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Extensions = { ["errorCode"] = conflictEx.ErrorCode }
             },
 
+            BusinessRuleException businessEx => new ProblemDetails
+            {
+                Status = StatusCodes.Status422UnprocessableEntity,
+                Title = "Business Rule Violation",
+                Detail = businessEx.Message,
+                Instance = traceId,
+                Extensions =
+                {
+                    ["errorCode"] = businessEx.ErrorCode,
+                    ["rule"] = businessEx.Rule
+                }
+            },
+
             ServiceUnavailableException serviceEx => new ProblemDetails
             {
                 Status = StatusCodes.Status503ServiceUnavailable,

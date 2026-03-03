@@ -2,6 +2,37 @@
 
 Utility scripts for managing the Mystira workspace and repositories.
 
+## Migration Parity Manifest Capture
+
+### `Get-MonorepoMigrationManifests.ps1`
+
+Captures GitHub API manifests for legacy PhoenixVC repositories and the mapped
+`Mystira.workspace` targets to support migration parity audits.
+
+**Reads token from:**
+
+- `.env.local` key `PHOENIXVC_GITHUB_PAT` (preferred)
+- `.env.local` key `GITHUB_TOKEN` (fallback)
+
+**Output:**
+
+- `docs/analysis/evidence/github-manifests/*.json`
+
+**Usage (PowerShell):**
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\Get-MonorepoMigrationManifests.ps1
+```
+
+**Optional parameters:**
+
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\scripts\Get-MonorepoMigrationManifests.ps1 `
+  -Organization "phoenixvc" `
+  -Monorepo "Mystira.workspace" `
+  -MonorepoRef "dev"
+```
+
 ## Repository Metadata Sync
 
 ### `sync-repo-metadata.sh`
@@ -9,6 +40,7 @@ Utility scripts for managing the Mystira workspace and repositories.
 Synchronizes repository metadata (descriptions, topics, homepage) across all Mystira repositories using the GitHub API.
 
 **Features:**
+
 - Updates repository descriptions
 - Manages repository topics/labels
 - Sets homepage URLs
@@ -16,6 +48,7 @@ Synchronizes repository metadata (descriptions, topics, homepage) across all Mys
 - Handles archived repositories
 
 **Prerequisites:**
+
 ```bash
 # Install GitHub CLI
 # macOS
@@ -38,11 +71,13 @@ sudo apt install jq
 **Usage:**
 
 Dry run (preview changes without applying):
+
 ```bash
 ./scripts/sync-repo-metadata.sh --dry-run
 ```
 
 Apply changes:
+
 ```bash
 ./scripts/sync-repo-metadata.sh
 ```
@@ -65,6 +100,7 @@ Edit `scripts/repo-metadata.json` to update repository metadata:
 ```
 
 **Supported Fields:**
+
 - `description` - Repository description (required)
 - `topics` - Array of topic labels (optional)
 - `homepage` - Homepage URL (optional)
@@ -73,11 +109,13 @@ Edit `scripts/repo-metadata.json` to update repository metadata:
 **Examples:**
 
 1. Update all repositories:
+
    ```bash
    ./scripts/sync-repo-metadata.sh
    ```
 
 2. Preview changes:
+
    ```bash
    ./scripts/sync-repo-metadata.sh --dry-run
    ```
@@ -100,6 +138,7 @@ Edit `scripts/repo-metadata.json` to update repository metadata:
 - **jq not found**: Install jq using your package manager
 
 **Notes:**
+
 - The script skips repositories that don't exist or aren't accessible
 - Archived repositories can still have their metadata updated
 - Changes are applied immediately (no undo, use dry-run first!)

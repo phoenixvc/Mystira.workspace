@@ -37,12 +37,12 @@ public class Product : Entity<Guid>  // or AuditableEntity<Guid> for timestamps
 
 ### Step 2: Choose Your Repository Approach
 
-| Approach | When to Use | Effort |
-|----------|-------------|--------|
-| **Generic Repository** | Simple CRUD, no custom queries | Lowest |
-| **Inherited Repository** | Custom queries needed | Low |
-| **Source Generated** | Many repositories with similar patterns | Medium |
-| **Full Custom** | Complex domain logic, multiple data sources | Higher |
+| Approach                 | When to Use                                 | Effort |
+| ------------------------ | ------------------------------------------- | ------ |
+| **Generic Repository**   | Simple CRUD, no custom queries              | Lowest |
+| **Inherited Repository** | Custom queries needed                       | Low    |
+| **Source Generated**     | Many repositories with similar patterns     | Medium |
+| **Full Custom**          | Complex domain logic, multiple data sources | Higher |
 
 ### Step 3: Implement (3 Options)
 
@@ -197,13 +197,13 @@ dotnet ef database update -p src/Infrastructure -s src/Api
 
 ### Source Generators vs Alternatives
 
-| Approach | Pros | Cons | Best For |
-|----------|------|------|----------|
-| **Our Source Generators** | Compile-time, type-safe, no runtime reflection | Learning curve, debugging difficult | Teams comfortable with Roslyn |
-| **Generic Repository Only** | Zero boilerplate, simple | No custom queries, limited flexibility | Simple CRUD apps |
-| **Scaffolding CLI** | User-friendly, visual output | Not type-safe, one-time generation | Initial project setup |
-| **Scrutor Convention Registration** | Auto-discovery, flexible | Runtime assembly scanning | Large projects with many repositories |
-| **EF Core Power Tools** | Visual, database-first | Tied to EF Core, regeneration issues | Database-first projects |
+| Approach                            | Pros                                           | Cons                                   | Best For                              |
+| ----------------------------------- | ---------------------------------------------- | -------------------------------------- | ------------------------------------- |
+| **Our Source Generators**           | Compile-time, type-safe, no runtime reflection | Learning curve, debugging difficult    | Teams comfortable with Roslyn         |
+| **Generic Repository Only**         | Zero boilerplate, simple                       | No custom queries, limited flexibility | Simple CRUD apps                      |
+| **Scaffolding CLI**                 | User-friendly, visual output                   | Not type-safe, one-time generation     | Initial project setup                 |
+| **Scrutor Convention Registration** | Auto-discovery, flexible                       | Runtime assembly scanning              | Large projects with many repositories |
+| **EF Core Power Tools**             | Visual, database-first                         | Tied to EF Core, regeneration issues   | Database-first projects               |
 
 ### Modern Alternatives to Consider
 
@@ -266,6 +266,7 @@ var products = await _repo.ListAsync(new ProductsByCategory(categoryId));
 ```
 
 **Use Source Generators when:**
+
 - You have 20+ similar repositories
 - Custom methods can't be expressed as specifications
 - You want compile-time validation of repository contracts
@@ -526,6 +527,6 @@ public class ProductRepositoryTests
 
 ## Related Documentation
 
-- [Repository Architecture](../architecture/migrations/repository-architecture.md) - Dual-database strategy
 - [Ardalis Specification Migration](../architecture/specifications/ardalis-specification-migration.md)
 - [Mystira.Shared Migration Guide](./mystira-shared-migration.md)
+- [Workspace Backlog](../../../BACKLOG.md) - Technical debt and implementation status

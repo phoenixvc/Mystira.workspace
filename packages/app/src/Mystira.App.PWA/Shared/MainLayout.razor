@@ -1,0 +1,445 @@
+@inherits LayoutComponentBase
+@implements IAsyncDisposable
+
+@inject IJSRuntime JSRuntime
+
+<div class="page">
+    <!-- Offline Indicator -->
+    <div id="offline-indicator" class="offline-indicator">
+        <i class="fas fa-wifi me-2"></i>
+        You are currently offline. Some features may be limited.
+    </div>
+
+    <!-- Navigation - Fixed with transparency -->
+    <nav class="navbar navbar-expand-md shadow-sm fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-dragon me-2"></i>
+                Mystira
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item d-flex align-items-center me-2">
+                        <EndpointSwitcher />
+                    </li>
+                    <li class="nav-item d-flex align-items-center">
+                        <ThemeToggle />
+                    </li>
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+                            <i class="fas fa-home me-1"></i>
+                            Home
+                        </NavLink>
+                    </li>
+                    @if (isAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/adventures">
+                                <i class="fas fa-compass me-1"></i>
+                                Adventures
+                            </NavLink>
+                        </li>
+                    }
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/about">
+                            <i class="fas fa-info-circle me-1"></i>
+                            About
+                        </NavLink>
+                    </li>
+                    @if (CurrentGameSession != null)
+                    {
+                        <li class="nav-item d-flex align-items-center">
+                            <a class="nav-link current-adventure-indicator" href="/game">
+                                <i class="fas fa-play-circle"></i>
+                                <span class="current-adventure-name">@CurrentGameSession.ScenarioName</span>
+                            </a>
+                        </li>
+                    }
+                    @if (isAuthenticated)
+                    {
+                        <li class="nav-item dropdown" @ref="profileMenuElement" id="profile-menu">
+                            <button class="btn btn-link nav-link dropdown-toggle"
+                                    type="button"
+                                    @onclick="ToggleSettingsMenu"
+                                    @onclick:stopPropagation="true">
+                                <i class="fas fa-user-circle me-1"></i>
+                                @if (CurrentAccount != null)
+                                {
+                                    <span>@CurrentAccount.DisplayName</span>
+                                }
+                                else
+                                {
+                                    <span>Account</span>
+                                }
+                            </button>
+                            @if (isProfileMenuOpen)
+                            {
+                                <div class="dropdown-menu show dropdown-menu-end profile-menu-dropdown">
+                                    <h6 class="dropdown-header">
+                                        <i class="fas fa-user me-2"></i>
+                                        @(CurrentAccount?.DisplayName ?? "Account")
+                                    </h6>
+                                    <div class="dropdown-divider"></div>
+                                    <a class="dropdown-item" href="/achievements">
+                                        <i class="fas fa-trophy me-2"></i>
+                                        Achievements
+                                    </a>
+                                    <a class="dropdown-item" href="/profiles">
+                                        <i class="fas fa-users me-2"></i>
+                                        Profiles
+                                    </a>
+                                    <AccountInstallOption />
+                                    <button class="dropdown-item" @onclick="OpenSettingsAsync">
+                                        <i class="fas fa-cog me-2"></i>
+                                        Settings
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item" @onclick="SignOutAsync">
+                                        <i class="fas fa-sign-out-alt me-2"></i>
+                                        Sign Out
+                                    </button>
+                                </div>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" href="/signin">
+                                Sign In
+                            </a>
+                        </li>
+                        <li class="nav-item d-none d-md-flex align-items-center ms-md-2">
+                            <a class="btn btn-primary-custom px-4 py-2" href="/signup">
+                                Get Started
+                            </a>
+                        </li>
+                        <li class="nav-item d-md-none mt-2">
+                            <a class="btn btn-primary-custom w-100" href="/signup">
+                                Get Started
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+        @Body
+    </main>
+
+    <!-- PWA Install Button -->
+    <PwaInstallButton IsAuthenticated="isAuthenticated" />
+
+    <!-- Discord Widget -->
+    <DiscordWidget />
+
+    <!-- Footer -->
+    <footer class="py-2 mt-4">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center">
+                <small>
+                    @if (!string.IsNullOrEmpty(_footerEnvironment) && _footerEnvironment != "Production")
+                    {
+                        <span class="environment-badge @_footerEnvClass me-2">
+                            <i class="@_footerEnvIcon me-1"></i>@_footerEnvironment
+                        </span>
+                    }
+                </small>
+                <small class="text-muted">
+                    <span id="connection-status" class="text-success">Online</span>
+                    <span class="version-indicator" id="app-version" title="Click for details"></span>
+                </small>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notifications -->
+    <ToastContainer />
+
+    <!-- Update Notification -->
+    <UpdateNotification />
+
+    <!-- Environment Indicator (shows for non-production environments) -->
+    <EnvironmentIndicator />
+
+    <!-- Account Settings Modal -->
+    <AccountSettingsModal ShowModal="isSettingsModalOpen" OnClose="CloseSettingsAsync" />
+</div>
+
+@code {
+    [Inject] private IGameSessionService GameSessionService { get; set; } = default!;
+    [Inject] private IAuthService AuthService { get; set; } = default!;
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    [Inject] private ISettingsService SettingsService { get; set; } = default!;
+    [Inject] private IApiConfigurationService ApiConfigService { get; set; } = default!;
+    [Inject] private ILogger<MainLayout> Logger { get; set; } = default!;
+
+    private GameSession? CurrentGameSession { get; set; }
+    private Account? CurrentAccount { get; set; }
+    private bool isAuthenticated;
+    private bool isProfileMenuOpen;
+    private bool isSettingsModalOpen;
+    private ElementReference profileMenuElement;
+    private IJSObjectReference? outsideClickHandler;
+
+    // Footer environment display
+    private string _footerEnvironment = string.Empty;
+    private string _footerEnvClass = string.Empty;
+    private string _footerEnvIcon = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        GameSessionService.GameSessionChanged += OnGameSessionChanged;
+        CurrentGameSession = GameSessionService.CurrentGameSession;
+
+        AuthService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+        await LoadAuthenticationStateAsync();
+        await LoadEnvironmentAsync();
+    }
+
+    private async Task LoadEnvironmentAsync()
+    {
+        try
+        {
+            _footerEnvironment = await ApiConfigService.GetCurrentEnvironmentAsync();
+
+            if (string.IsNullOrWhiteSpace(_footerEnvironment))
+            {
+                _footerEnvironment = "Production";
+                _footerEnvClass = string.Empty;
+                _footerEnvIcon = string.Empty;
+                return;
+            }
+
+            switch (_footerEnvironment.ToLowerInvariant())
+            {
+                case "development":
+                case "dev":
+                    _footerEnvClass = "env-dev";
+                    _footerEnvIcon = "fas fa-code";
+                    _footerEnvironment = "Development";
+                    break;
+                case "staging":
+                case "stage":
+                    _footerEnvClass = "env-staging";
+                    _footerEnvIcon = "fas fa-flask";
+                    _footerEnvironment = "Staging";
+                    break;
+                case "local":
+                case "localhost":
+                    _footerEnvClass = "env-local";
+                    _footerEnvIcon = "fas fa-laptop-code";
+                    _footerEnvironment = "Local";
+                    break;
+                default:
+                    _footerEnvironment = "Production";
+                    _footerEnvClass = string.Empty;
+                    _footerEnvIcon = string.Empty;
+                    break;
+            }
+        }
+        catch (Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            Logger.LogWarning(ex, "Failed to load environment configuration. Defaulting to Production.");
+            _footerEnvironment = "Production";
+            _footerEnvClass = string.Empty;
+            _footerEnvIcon = string.Empty;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            outsideClickHandler = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                "outsideClickHandler.initialize",
+                DotNetObjectReference.Create(this),
+                "profile-menu");
+        }
+    }
+
+    private async Task LoadAuthenticationStateAsync()
+    {
+        try
+        {
+            isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            CurrentAccount = isAuthenticated ? await AuthService.GetCurrentAccountAsync() : null;
+        }
+        catch (Exception ex)
+        {
+            if (ex is OperationCanceledException)
+            {
+                throw;
+            }
+
+            Logger.LogWarning(ex, "Failed to load authentication state. Defaulting to unauthenticated.");
+            isAuthenticated = false;
+            CurrentAccount = null;
+        }
+    }
+
+    private void OnGameSessionChanged(object? sender, GameSession? gameSession)
+    {
+        CurrentGameSession = gameSession;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async void OnAuthenticationStateChanged(object? sender, bool authenticated)
+    {
+        isAuthenticated = authenticated;
+
+        if (!authenticated)
+        {
+            CurrentAccount = null;
+            isProfileMenuOpen = false;
+            await InvokeAsync(StateHasChanged);
+            return;
+        }
+
+        CurrentAccount = await AuthService.GetCurrentAccountAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    [JSInvokable]
+    public void HandleOutsideClick()
+    {
+        if (isProfileMenuOpen)
+        {
+            isProfileMenuOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleSettingsMenu()
+    {
+        if (!isAuthenticated)
+        {
+            return;
+        }
+
+        isProfileMenuOpen = !isProfileMenuOpen;
+    }
+
+    private async Task OpenSettingsAsync()
+    {
+        isSettingsModalOpen = true;
+        isProfileMenuOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CloseSettingsAsync()
+    {
+        isSettingsModalOpen = false;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SignOutAsync()
+    {
+        try
+        {
+            await AuthService.LogoutAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Error during sign out. Continuing with local cleanup.");
+        }
+        finally
+        {
+            isProfileMenuOpen = false;
+            await LoadAuthenticationStateAsync();
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        GameSessionService.GameSessionChanged -= OnGameSessionChanged;
+        AuthService.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+
+        if (outsideClickHandler != null)
+        {
+            await outsideClickHandler.InvokeVoidAsync("dispose");
+            await outsideClickHandler.DisposeAsync();
+        }
+    }
+}
+
+<script>
+    // Connection status monitoring
+    function updateConnectionStatus() {
+        const statusElement = document.getElementById('connection-status');
+        const offlineIndicator = document.getElementById('offline-indicator');
+
+        if (navigator.onLine) {
+            if (statusElement) {
+                statusElement.textContent = 'Online';
+                statusElement.className = 'text-success';
+            }
+            if (offlineIndicator) offlineIndicator.style.display = 'none';
+        } else {
+            if (statusElement) {
+                statusElement.textContent = 'Offline';
+                statusElement.className = 'text-warning';
+            }
+            if (offlineIndicator) offlineIndicator.style.display = 'block';
+        }
+    }
+
+    // Monitor connection status
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
+
+    // Version display - subtle, you need to know to look for it
+    async function loadAppVersion() {
+        const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        try {
+            const response = await fetch('./version.json?t=' + Date.now(), { cache: 'no-store' });
+            if (response.ok) {
+                const data = await response.json();
+                const versionEl = document.getElementById('app-version');
+                if (versionEl) {
+                    // For local development, if version is 1.0.0, show it as 1.0.0-dev
+                    let displayVersion = data.version;
+                    if (isLocal && displayVersion === '1.0.0') {
+                        displayVersion = '1.0.0-dev';
+                    }
+
+                    versionEl.textContent = 'v' + displayVersion;
+                    versionEl.title = `Build: ${data.version}\nDate: ${new Date(data.buildDate).toLocaleString()}\nCommit: ${data.commitSha || 'dev'}`;
+                    versionEl.style.cursor = 'help';
+                }
+            }
+        } catch (e) {
+            // Silently fail - version display is non-critical
+            const versionEl = document.getElementById('app-version');
+            if (versionEl) versionEl.textContent = isLocal ? 'v1.0.0-dev' : 'v1.0.0';
+        }
+    }
+
+    // Initial status check - run immediately and also after DOM is ready
+    // This ensures status is updated whether script runs before or after DOM
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+            updateConnectionStatus();
+            loadAppVersion();
+        });
+    } else {
+        // DOM is already ready, update immediately
+        updateConnectionStatus();
+        loadAppVersion();
+    }
+</script>

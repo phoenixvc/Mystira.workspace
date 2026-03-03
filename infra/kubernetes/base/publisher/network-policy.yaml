@@ -1,0 +1,67 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mys-publisher-network-policy
+  labels:
+    app: mys-publisher
+spec:
+  podSelector:
+    matchLabels:
+      app: mys-publisher
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controller
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 3000
+        - protocol: TCP
+          port: 3001
+    # Allow health check probes from kubelet
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 3001
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow traffic to Chain service (RPC and WebSocket)
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mys-chain
+      ports:
+        - protocol: TCP
+          port: 8545
+        - protocol: TCP
+          port: 8546
+    # Allow HTTPS to Azure services (Key Vault, Service Bus, App Insights)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443
+        # Azure Service Bus AMQP
+        - protocol: TCP
+          port: 5671
+        - protocol: TCP
+          port: 5672

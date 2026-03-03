@@ -1,0 +1,144 @@
+name: "[CI] Shared .NET Packages"
+
+# Validates that all shared .NET library packages (Domain, Contracts, Shared,
+# Application, Infrastructure.*) build and test successfully.
+#
+# These packages are consumed via ProjectReference within the monorepo and are
+# no longer published to NuGet. See ADR-0024 for the monorepo migration decision.
+#
+# Previously this workflow published packages to GitHub Packages and NuGet.org.
+# That pipeline was removed because all consumers are now in-tree.
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - 'packages/domain/**'
+      - 'packages/contracts/dotnet/**'
+      - 'packages/ai/**'
+      - 'packages/shared/**'
+      - 'packages/authoring/**'
+      - 'packages/application/**'
+      - 'packages/infrastructure/**'
+      - '.github/workflows/packages-publish.yml'
+
+  pull_request:
+    paths:
+      - 'packages/domain/**'
+      - 'packages/contracts/dotnet/**'
+      - 'packages/ai/**'
+      - 'packages/shared/**'
+      - 'packages/authoring/**'
+      - 'packages/application/**'
+      - 'packages/infrastructure/**'
+
+  workflow_dispatch:
+
+concurrency:
+  group: validate-dotnet-packages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Build & Test Shared Packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore all shared packages
+        run: |
+          PACKAGES=(
+            "packages/domain/Mystira.Domain"
+            "packages/core/Mystira.Core"
+            "packages/contracts/dotnet/Mystira.Contracts"
+            "packages/shared/Mystira.Shared"
+            "packages/ai/Mystira.Ai"
+            "packages/authoring/Mystira.Authoring.Abstractions"
+            "packages/authoring/Mystira.Authoring"
+            "packages/application/Mystira.Application"
+            "packages/infrastructure/Mystira.Infrastructure.Data"
+            "packages/infrastructure/Mystira.Infrastructure.Azure"
+            "packages/infrastructure/Mystira.Infrastructure.Discord"
+            "packages/infrastructure/Mystira.Infrastructure.Teams"
+            "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
+            "packages/infrastructure/Mystira.Infrastructure.Payments"
+            "packages/infrastructure/Mystira.Infrastructure.StoryProtocol"
+          )
+
+          for PKG in "${PACKAGES[@]}"; do
+            if [ -d "$PKG" ]; then
+              echo "::group::Restoring $PKG"
+              dotnet restore "$PKG"
+              echo "::endgroup::"
+            fi
+          done
+
+      - name: Build all shared packages
+        run: |
+          PACKAGES=(
+            "packages/domain/Mystira.Domain"
+            "packages/core/Mystira.Core"
+            "packages/contracts/dotnet/Mystira.Contracts"
+            "packages/shared/Mystira.Shared"
+            "packages/ai/Mystira.Ai"
+            "packages/authoring/Mystira.Authoring.Abstractions"
+            "packages/authoring/Mystira.Authoring"
+            "packages/application/Mystira.Application"
+            "packages/infrastructure/Mystira.Infrastructure.Data"
+            "packages/infrastructure/Mystira.Infrastructure.Azure"
+            "packages/infrastructure/Mystira.Infrastructure.Discord"
+            "packages/infrastructure/Mystira.Infrastructure.Teams"
+            "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
+            "packages/infrastructure/Mystira.Infrastructure.Payments"
+            "packages/infrastructure/Mystira.Infrastructure.StoryProtocol"
+          )
+
+          for PKG in "${PACKAGES[@]}"; do
+            if [ -d "$PKG" ]; then
+              echo "::group::Building $PKG"
+              dotnet build "$PKG" -c Release --no-restore
+              echo "::endgroup::"
+            fi
+          done
+
+      - name: Run tests
+        run: |
+          TEST_PROJECTS=(
+            "packages/ai/Mystira.Ai.Tests"
+            "packages/shared/Mystira.Shared.Tests"
+            "packages/authoring/Mystira.Authoring.Tests"
+          )
+
+          for TEST in "${TEST_PROJECTS[@]}"; do
+            if [ -d "$TEST" ]; then
+              echo "::group::Testing $TEST"
+              dotnet restore "$TEST"
+              dotnet build "$TEST" -c Release --no-restore
+              dotnet test "$TEST" -c Release --no-build --verbosity normal
+              echo "::endgroup::"
+            fi
+          done
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Shared .NET Package Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All shared library packages were built and tested." >> $GITHUB_STEP_SUMMARY
+          echo "These packages are consumed via \`ProjectReference\` (not NuGet)." >> $GITHUB_STEP_SUMMARY
+          echo "See ADR-0024 for monorepo migration details." >> $GITHUB_STEP_SUMMARY

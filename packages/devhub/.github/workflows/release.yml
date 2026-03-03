@@ -1,0 +1,348 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+      - 'leptos-v*'
+      - 'react-v*'
+
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g., v1.0.0)'
+        required: true
+        type: string
+      frontend:
+        description: 'Frontend to release'
+        required: true
+        type: choice
+        options:
+          - leptos
+          - react
+          - both
+        default: leptos
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # ============================================================================
+  # Determine what to build
+  # ============================================================================
+
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      build_leptos: ${{ steps.determine.outputs.build_leptos }}
+      build_react: ${{ steps.determine.outputs.build_react }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Determine what to build
+        id: determine
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          FRONTEND="${{ inputs.frontend }}"
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            if [ "$FRONTEND" = "leptos" ] || [ "$FRONTEND" = "both" ]; then
+              echo "build_leptos=true" >> $GITHUB_OUTPUT
+            else
+              echo "build_leptos=false" >> $GITHUB_OUTPUT
+            fi
+            if [ "$FRONTEND" = "react" ] || [ "$FRONTEND" = "both" ]; then
+              echo "build_react=true" >> $GITHUB_OUTPUT
+            else
+              echo "build_react=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            # Tag-based detection
+            if [[ "$VERSION" == leptos-* ]]; then
+              echo "build_leptos=true" >> $GITHUB_OUTPUT
+              echo "build_react=false" >> $GITHUB_OUTPUT
+            elif [[ "$VERSION" == react-* ]]; then
+              echo "build_leptos=false" >> $GITHUB_OUTPUT
+              echo "build_react=true" >> $GITHUB_OUTPUT
+            else
+              # Default: build both
+              echo "build_leptos=true" >> $GITHUB_OUTPUT
+              echo "build_react=true" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  # ============================================================================
+  # Leptos + Tauri 2.0
+  # ============================================================================
+
+  build-leptos:
+    name: Build Leptos (${{ matrix.platform.name }})
+    needs: prepare
+    if: needs.prepare.outputs.build_leptos == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: mystira-devhub-leptos-linux-x64
+          - name: Windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: mystira-devhub-leptos-windows-x64
+          - name: macOS Intel
+            os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: mystira-devhub-leptos-macos-x64
+          - name: macOS ARM
+            os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: mystira-devhub-leptos-macos-arm64
+    runs-on: ${{ matrix.platform.os }}
+    defaults:
+      run:
+        working-directory: Mystira.Leptos
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown,${{ matrix.platform.target }}
+
+      - name: Install trunk
+        uses: taiki-e/install-action@v2
+        with:
+          tool: trunk
+
+      - name: Install tauri-cli
+        uses: taiki-e/install-action@v2
+        with:
+          tool: tauri-cli@2
+
+      - name: Install system dependencies (Linux)
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: leptos-release-${{ matrix.platform.target }}
+
+      - name: Install npm dependencies
+        run: npm install
+
+      - name: Build CSS
+        run: npm run css
+
+      - name: Build Tauri app
+        run: cargo tauri build --target ${{ matrix.platform.target }}
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.artifact }}
+          path: |
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.AppImage
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.deb
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.msi
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.exe
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.dmg
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.app.tar.gz
+            Mystira.Leptos/src-tauri/target/${{ matrix.platform.target }}/release/bundle/**/*.sig
+          retention-days: 30
+
+  # ============================================================================
+  # React + Tauri 1.x
+  # ============================================================================
+
+  build-react:
+    name: Build React (${{ matrix.platform.name }})
+    needs: prepare
+    if: needs.prepare.outputs.build_react == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: Linux
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: mystira-devhub-react-linux-x64
+          - name: Windows
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: mystira-devhub-react-windows-x64
+          - name: macOS
+            os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: mystira-devhub-react-macos-x64
+    runs-on: ${{ matrix.platform.os }}
+    defaults:
+      run:
+        working-directory: Mystira.DevHub
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+          cache-dependency-path: Mystira.DevHub/pnpm-lock.yaml
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install system dependencies (Linux)
+        if: matrix.platform.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: Mystira.DevHub/src-tauri
+          shared-key: react-release-${{ matrix.platform.target }}
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Build Tauri app
+        run: pnpm tauri build
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform.artifact }}
+          path: |
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.AppImage
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.deb
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.msi
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.exe
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.dmg
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.app.tar.gz
+            Mystira.DevHub/src-tauri/target/release/bundle/**/*.sig
+          retention-days: 30
+
+  # ============================================================================
+  # Create GitHub Release
+  # ============================================================================
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [prepare, build-leptos, build-react]
+    if: always() && (needs.build-leptos.result == 'success' || needs.build-react.result == 'success')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Prepare release files
+        run: |
+          mkdir -p release-files
+          find artifacts -type f \( -name "*.AppImage" -o -name "*.deb" -o -name "*.msi" -o -name "*.exe" -o -name "*.dmg" -o -name "*.app.tar.gz" -o -name "*.sig" \) -exec cp {} release-files/ \;
+          echo "Release files:"
+          ls -la release-files/
+
+      - name: Generate changelog
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            echo "## Changes since $LAST_TAG" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            git log --pretty=format:"- %s (%h)" $LAST_TAG..HEAD >> CHANGELOG.md
+          else
+            echo "## Initial Release" > CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            echo "First release of Mystira DevHub." >> CHANGELOG.md
+          fi
+          echo "" >> CHANGELOG.md
+          echo "---" >> CHANGELOG.md
+          echo "" >> CHANGELOG.md
+          echo "### Included Frontends" >> CHANGELOG.md
+          if [ "${{ needs.build-leptos.result }}" = "success" ]; then
+            echo "- ✅ Leptos + Tauri 2.0" >> CHANGELOG.md
+          fi
+          if [ "${{ needs.build-react.result }}" = "success" ]; then
+            echo "- ✅ React + Tauri 1.x" >> CHANGELOG.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.version }}
+          name: Mystira DevHub ${{ needs.prepare.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ inputs.prerelease || false }}
+          files: release-files/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Property | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | \`${{ needs.prepare.outputs.version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Leptos Build | ${{ needs.build-leptos.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| React Build | ${{ needs.build-react.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Platforms" >> $GITHUB_STEP_SUMMARY
+          echo "- Linux (x64)" >> $GITHUB_STEP_SUMMARY
+          echo "- Windows (x64)" >> $GITHUB_STEP_SUMMARY
+          echo "- macOS (Intel & ARM for Leptos)" >> $GITHUB_STEP_SUMMARY

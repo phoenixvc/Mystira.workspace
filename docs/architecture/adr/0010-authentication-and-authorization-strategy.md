@@ -72,6 +72,7 @@ We adopt a **layered security and authentication strategy** with clear boundarie
 **Method**: HTTP-only secure cookies with session tokens
 
 **Rationale**:
+
 - Protection against XSS attacks (cookies not accessible via JavaScript)
 - Automatic inclusion in requests (no client-side token management)
 - Better fit for same-origin web applications
@@ -96,15 +97,15 @@ services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 
 **Cookie Configuration**:
 
-| Attribute   | Value            | Reason                                      |
-| ----------- | ---------------- | ------------------------------------------- |
-| HttpOnly    | `true`           | Prevents XSS-based token theft              |
-| Secure      | `true`           | HTTPS only in production                    |
-| SameSite    | `Strict`         | CSRF protection                             |
-| Domain      | Service-specific | Isolates cookies per service                |
-| Path        | `/`              | Available to all routes                     |
-| Expiry      | 8 hours          | Balance between security and UX             |
-| Sliding     | `true`           | Extends session on activity                 |
+| Attribute | Value            | Reason                          |
+| --------- | ---------------- | ------------------------------- |
+| HttpOnly  | `true`           | Prevents XSS-based token theft  |
+| Secure    | `true`           | HTTPS only in production        |
+| SameSite  | `Strict`         | CSRF protection                 |
+| Domain    | Service-specific | Isolates cookies per service    |
+| Path      | `/`              | Available to all routes         |
+| Expiry    | 8 hours          | Balance between security and UX |
+| Sliding   | `true`           | Extends session on activity     |
 
 #### API Clients (JWT-Based)
 
@@ -113,6 +114,7 @@ services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 **Method**: JWT Bearer tokens in Authorization header
 
 **Rationale**:
+
 - Stateless authentication (scalable across servers)
 - Self-contained claims (no database lookup required)
 - Standard format for API authentication
@@ -163,11 +165,11 @@ services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 **Token Lifetimes**:
 
-| Token Type    | Lifetime     | Storage                     | Use Case                    |
-| ------------- | ------------ | --------------------------- | --------------------------- |
-| Access Token  | 15 minutes   | Memory (not localStorage)   | API authentication          |
-| Refresh Token | 7 days       | HTTP-only cookie            | Obtain new access tokens    |
-| ID Token      | 1 hour       | Memory                      | User info display           |
+| Token Type    | Lifetime   | Storage                   | Use Case                 |
+| ------------- | ---------- | ------------------------- | ------------------------ |
+| Access Token  | 15 minutes | Memory (not localStorage) | API authentication       |
+| Refresh Token | 7 days     | HTTP-only cookie          | Obtain new access tokens |
+| ID Token      | 1 hour     | Memory                    | User info display        |
 
 #### Service-to-Service (API Keys & Managed Identities)
 
@@ -264,21 +266,21 @@ var cosmosClient = new CosmosClient(endpoint, credential);
 
 **User Roles** (Public API):
 
-| Role      | Description                          | Permissions                              |
-| --------- | ------------------------------------ | ---------------------------------------- |
-| Player    | Standard user                        | Read scenarios, manage own sessions      |
-| Creator   | Content creator                      | Create/edit own scenarios                |
-| Moderator | Content moderation                   | Review/approve/reject content            |
-| Admin     | Full access                          | All operations                           |
+| Role      | Description        | Permissions                         |
+| --------- | ------------------ | ----------------------------------- |
+| Player    | Standard user      | Read scenarios, manage own sessions |
+| Creator   | Content creator    | Create/edit own scenarios           |
+| Moderator | Content moderation | Review/approve/reject content       |
+| Admin     | Full access        | All operations                      |
 
 **Admin Roles** (Admin API):
 
-| Role         | Description                       | Permissions                              |
-| ------------ | --------------------------------- | ---------------------------------------- |
-| Viewer       | Read-only access                  | View dashboards, reports                 |
-| Operator     | Day-to-day operations             | Manage content, users                    |
-| Admin        | Full admin access                 | All admin operations                     |
-| SuperAdmin   | System-level access               | Infrastructure, secrets, dangerous ops   |
+| Role       | Description           | Permissions                            |
+| ---------- | --------------------- | -------------------------------------- |
+| Viewer     | Read-only access      | View dashboards, reports               |
+| Operator   | Day-to-day operations | Manage content, users                  |
+| Admin      | Full admin access     | All admin operations                   |
+| SuperAdmin | System-level access   | Infrastructure, secrets, dangerous ops |
 
 **Claims-Based Authorization**:
 
@@ -306,21 +308,23 @@ public async Task<IActionResult> ApproveScenario()
 
 **Session States**:
 
-| State    | Duration                | Action Required                          |
-| -------- | ----------------------- | ---------------------------------------- |
-| Active   | While using app         | None                                     |
-| Idle     | 15 min inactivity       | Sliding refresh extends session          |
-| Expired  | After max lifetime      | Re-authenticate required                 |
-| Revoked  | Manual logout/revoke    | Re-authenticate required                 |
+| State   | Duration             | Action Required                 |
+| ------- | -------------------- | ------------------------------- |
+| Active  | While using app      | None                            |
+| Idle    | 15 min inactivity    | Sliding refresh extends session |
+| Expired | After max lifetime   | Re-authenticate required        |
+| Revoked | Manual logout/revoke | Re-authenticate required        |
 
 #### Session Storage
 
 **Cookie Sessions** (Admin UI):
+
 - Session stored server-side (distributed cache/Redis)
 - Cookie contains session ID only
 - Server can revoke sessions immediately
 
 **JWT Sessions** (Public API):
+
 - Token is self-contained (stateless)
 - Refresh tokens tracked in database for revocation
 - Access tokens valid until expiry (use short lifetime)
@@ -367,16 +371,17 @@ Application Layer (Auth Endpoints)
 
 **Front Door WAF Rules for Auth Protection**:
 
-| Rule | Type | Action | Purpose |
-|------|------|--------|---------|
-| OWASP 3.2 | Managed | Block | SQL injection, XSS, etc. |
-| Bot Manager | Managed | Block | Bad bots, scanners |
-| Rate Limit | Custom | Block | 500 req/min per IP (prod) |
-| Method Filter | Custom | Block | Allow only GET, POST, PUT, DELETE |
+| Rule          | Type    | Action | Purpose                           |
+| ------------- | ------- | ------ | --------------------------------- |
+| OWASP 3.2     | Managed | Block  | SQL injection, XSS, etc.          |
+| Bot Manager   | Managed | Block  | Bad bots, scanners                |
+| Rate Limit    | Custom  | Block  | 500 req/min per IP (prod)         |
+| Method Filter | Custom  | Block  | Allow only GET, POST, PUT, DELETE |
 
 **Defense in Depth**: Front Door rate limiting + application-level rate limiting provide layered protection.
 
 For Front Door implementation details, see:
+
 - [Front Door Implementation Summary](../../../FRONT_DOOR_IMPLEMENTATION_SUMMARY.md)
 - [Front Door Deployment Guide](../../../infra/FRONT_DOOR_DEPLOYMENT_GUIDE.md)
 
@@ -398,12 +403,12 @@ options.Password = new PasswordOptions
 
 **Note**: Front Door provides edge-level rate limiting (500 req/min per IP). The limits below are application-level rate limits for additional protection on auth endpoints specifically.
 
-| Endpoint           | Limit                 | Window    | Action on Exceed        |
-| ------------------ | --------------------- | --------- | ----------------------- |
-| `/auth/login`      | 5 attempts            | 15 min    | Temporary lockout       |
-| `/auth/register`   | 3 attempts            | 1 hour    | CAPTCHA required        |
-| `/auth/refresh`    | 10 attempts           | 1 hour    | Force re-login          |
-| `/auth/forgot`     | 3 attempts            | 1 hour    | Delay response          |
+| Endpoint         | Limit       | Window | Action on Exceed  |
+| ---------------- | ----------- | ------ | ----------------- |
+| `/auth/login`    | 5 attempts  | 15 min | Temporary lockout |
+| `/auth/register` | 3 attempts  | 1 hour | CAPTCHA required  |
+| `/auth/refresh`  | 10 attempts | 1 hour | Force re-login    |
+| `/auth/forgot`   | 3 attempts  | 1 hour | Delay response    |
 
 #### Security Headers
 
@@ -450,6 +455,7 @@ public class ScenariosController : ControllerBase
 ### 7. Secrets Management
 
 **JWT Keys**:
+
 - Stored in Azure Key Vault
 - Rotated every 90 days
 - Retrieved via Managed Identity
@@ -459,11 +465,12 @@ public class ScenariosController : ControllerBase
 ```yaml
 # appsettings.Production.json
 {
-  "Jwt": {
-    "KeyVaultSecretName": "jwt-signing-key",
-    "Issuer": "mystira.app",
-    "Audience": "mystira-public-api"
-  }
+  "Jwt":
+    {
+      "KeyVaultSecretName": "jwt-signing-key",
+      "Issuer": "mystira.app",
+      "Audience": "mystira-public-api",
+    },
 }
 ```
 
@@ -479,24 +486,24 @@ public class ScenariosController : ControllerBase
 
 ### Cookie vs. JWT Decision Matrix
 
-| Factor              | Cookies                    | JWT                        | Decision                   |
-| ------------------- | -------------------------- | -------------------------- | -------------------------- |
-| XSS Protection      | HttpOnly (excellent)       | Vulnerable if in storage   | Cookies for browsers       |
-| CSRF Protection     | Needs SameSite/tokens      | Not vulnerable             | JWT for APIs               |
-| Cross-Origin        | Complex (CORS)             | Simple (header)            | JWT for cross-origin       |
-| Session Revocation  | Immediate                  | Wait for expiry            | Cookies for admin          |
-| Scalability         | Needs shared session store | Stateless                  | JWT for public API         |
-| Mobile/Third-party  | Not supported              | Works everywhere           | JWT for external clients   |
+| Factor             | Cookies                    | JWT                      | Decision                 |
+| ------------------ | -------------------------- | ------------------------ | ------------------------ |
+| XSS Protection     | HttpOnly (excellent)       | Vulnerable if in storage | Cookies for browsers     |
+| CSRF Protection    | Needs SameSite/tokens      | Not vulnerable           | JWT for APIs             |
+| Cross-Origin       | Complex (CORS)             | Simple (header)          | JWT for cross-origin     |
+| Session Revocation | Immediate                  | Wait for expiry          | Cookies for admin        |
+| Scalability        | Needs shared session store | Stateless                | JWT for public API       |
+| Mobile/Third-party | Not supported              | Works everywhere         | JWT for external clients |
 
 ### OAuth/OIDC and External Identity Providers
 
 OAuth 2.0 / OpenID Connect is now implemented via Microsoft Entra ID and External ID:
 
-| Provider | Use Case | Features |
-|----------|----------|----------|
-| **Microsoft Entra ID** | Admin users, Enterprise SSO | MFA, Conditional Access, App Roles |
+| Provider                        | Use Case                         | Features                                                  |
+| ------------------------------- | -------------------------------- | --------------------------------------------------------- |
+| **Microsoft Entra ID**          | Admin users, Enterprise SSO      | MFA, Conditional Access, App Roles                        |
 | **Microsoft Entra External ID** | Consumer users (Public API, PWA) | Social login (Google, Discord), Self-service registration |
-| **Managed Identity** | Service-to-service | Passwordless Azure resource access |
+| **Managed Identity**            | Service-to-service               | Passwordless Azure resource access                        |
 
 **For complete implementation details**, see [ADR-0011: Microsoft Entra ID Authentication Integration](./0011-entra-id-authentication-integration.md).
 
@@ -509,6 +516,7 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 - **Email/Password**: Local accounts with self-service registration
 
 **External ID Sign-in Experience**:
+
 - Combined sign-up and sign-in with email/password or social providers
 - Self-service password reset via email verification
 - User profile management for display name and avatar
@@ -539,19 +547,20 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 
 ## Authentication Matrix
 
-| Service/Client         | Auth Method         | Token Type      | Storage               | Revocation          |
-| ---------------------- | ------------------- | --------------- | --------------------- | ------------------- |
-| Admin UI               | Cookie              | Session ID      | HTTP-only cookie      | Immediate           |
-| PWA (Blazor)           | Cookie + JWT        | Both            | Cookie + Memory       | Hybrid              |
-| Public API (Browser)   | JWT                 | Access + Refresh| Memory + Cookie       | Refresh revocation  |
-| Public API (Mobile)    | JWT                 | Access + Refresh| Secure storage        | Refresh revocation  |
-| Publisher              | API Key             | API Key         | Environment var       | Key rotation        |
-| Chain Service          | API Key             | API Key         | Environment var       | Key rotation        |
-| Service-to-Azure       | Managed Identity    | AAD Token       | Runtime               | AAD revocation      |
+| Service/Client       | Auth Method      | Token Type       | Storage          | Revocation         |
+| -------------------- | ---------------- | ---------------- | ---------------- | ------------------ |
+| Admin UI             | Cookie           | Session ID       | HTTP-only cookie | Immediate          |
+| PWA (Blazor)         | Cookie + JWT     | Both             | Cookie + Memory  | Hybrid             |
+| Public API (Browser) | JWT              | Access + Refresh | Memory + Cookie  | Refresh revocation |
+| Public API (Mobile)  | JWT              | Access + Refresh | Secure storage   | Refresh revocation |
+| Publisher            | API Key          | API Key          | Environment var  | Key rotation       |
+| Chain Service        | API Key          | API Key          | Environment var  | Key rotation       |
+| Service-to-Azure     | Managed Identity | AAD Token        | Runtime          | AAD revocation     |
 
 ## Implementation Checklist
 
 ### Core Authentication
+
 - [x] JWT services in `Mystira.App.Shared`
 - [x] Cookie-based auth for Admin UI
 - [ ] Refresh token implementation for Public API
@@ -560,6 +569,7 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 - [ ] Audit logging for auth events
 
 ### Microsoft Entra ID Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+
 - [ ] Entra ID App Registration for Admin API
 - [ ] Entra ID App Registration for Admin UI
 - [ ] MSAL configuration in Admin UI (React)
@@ -568,6 +578,7 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 - [ ] App Roles and group mapping
 
 ### Microsoft Entra External ID Integration (see [ADR-0011](./0011-entra-id-authentication-integration.md))
+
 - [ ] External ID tenant creation
 - [ ] User flow configuration (SignUpSignIn, PasswordReset, ProfileEdit)
 - [ ] Google identity provider setup
@@ -577,11 +588,13 @@ Microsoft Entra External ID enables social identity providers for consumer appli
 - [ ] Custom External ID UI branding
 
 ### Service-to-Service Authentication
+
 - [ ] Managed Identity on App Services/AKS
 - [ ] Managed Identity access to Cosmos DB
 - [ ] Managed Identity access to Key Vault
 
 ### Edge Security (Azure Front Door)
+
 - [ ] Deploy Front Door in dev environment
 - [ ] Configure WAF with OWASP 3.2 managed rules
 - [ ] Configure Bot Manager rules

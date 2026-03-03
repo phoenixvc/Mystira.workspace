@@ -1,0 +1,29 @@
+@code {
+  private string Mode = "info";
+
+  private void SetMode(string mode) => Mode = mode;
+
+  private (string title, string message) Content => Mode switch
+  {
+    "success" => ("Success", "Achievement unlocked. Your progress was saved."),
+    "warning" => ("Warning", "This choice may affect your moral compass."),
+    "danger"  => ("Error", "We couldn't load the story. Try again."),
+    _         => ("Info", "Tip: explore different paths to discover new outcomes.")
+  };
+}
+
+<div class="status-controls">
+  <button type="button" class="pill" data-active="@(Mode=="info")" @onclick="@(() => Mode = "info")">Info</button>
+  <button type="button" class="pill" data-active="@(Mode=="success")" @onclick="@(() => Mode = "success")">Success</button>
+  <button type="button" class="pill" data-active="@(Mode=="warning")" @onclick="@(() => Mode = "warning")">Warning</button>
+  <button type="button" class="pill" data-active="@(Mode=="danger")" @onclick="@(() => Mode = "danger")">Error</button>
+</div>
+
+<div class="status-card" data-kind="@Mode">
+  <div class="status-title">@Content.title</div>
+  <div class="status-message">@Content.message</div>
+  <div class="status-actions">
+    <button class="btn btn-ghost" type="button">Dismiss</button>
+    <button class="btn btn-primary" type="button">Continue</button>
+  </div>
+</div>

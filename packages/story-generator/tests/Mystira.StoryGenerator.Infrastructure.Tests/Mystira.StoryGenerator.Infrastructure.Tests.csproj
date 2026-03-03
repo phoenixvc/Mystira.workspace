@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="10.0.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
+    <PackageReference Include="Moq" Version="4.20.72" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj" />
+  </ItemGroup>
+
+</Project>

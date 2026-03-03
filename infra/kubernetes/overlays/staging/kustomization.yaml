@@ -4,12 +4,14 @@ kind: Kustomization
 namespace: mys-staging
 
 resources:
+  - ../../base
   - ../../base/chain
   - ../../base/publisher
   - ../../base/story-generator
   - ../../base/admin-api
   - ../../base/admin-ui
   - ../../base/cert-manager
+  - ../../base/service-mesh  # Istio mTLS configuration
 
 labels:
   - pairs:
@@ -17,6 +19,46 @@ labels:
     includeSelectors: true
 
 patches:
+  # Enable Istio sidecar injection for the namespace
+  - target:
+      kind: Namespace
+      name: mystira
+    patch: |-
+      - op: add
+        path: /metadata/labels/istio-injection
+        value: "enabled"
+  # ServiceAccount patches for workload identity client IDs
+  # These values should be populated from Terraform outputs:
+  #   terraform output -json | jq -r '.admin_api_identity_client_id.value'
+  # TODO(#INFRA-289): Migrate to kustomize vars/ConfigMapGenerator for dynamic injection
+  - target:
+      kind: ServiceAccount
+      name: admin-api-sa
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/azure.workload.identity~1client-id
+        value: "00000000-0000-0000-0000-000000000001"
+  - target:
+      kind: ServiceAccount
+      name: story-generator-sa
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/azure.workload.identity~1client-id
+        value: "00000000-0000-0000-0000-000000000002"
+  - target:
+      kind: ServiceAccount
+      name: publisher-sa
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/azure.workload.identity~1client-id
+        value: "00000000-0000-0000-0000-000000000003"
+  - target:
+      kind: ServiceAccount
+      name: chain-sa
+    patch: |-
+      - op: replace
+        path: /metadata/annotations/azure.workload.identity~1client-id
+        value: "00000000-0000-0000-0000-000000000004"
   - target:
       kind: Ingress
       name: mys-publisher-ingress

@@ -10,6 +10,8 @@
  */
 
 // Re-export all utilities
-export * from './retry';
-export * from './logger';
-export * from './validation';
+export * from "./retry";
+export * from "./logger";
+export * from "./validation";
+export * from "./signalr.types";
+export * from "./signalr.client";

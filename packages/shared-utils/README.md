@@ -27,20 +27,17 @@ yarn add @mystira/shared-utils
 ### Retry with Exponential Backoff
 
 ```typescript
-import { withRetry, createRetryable } from '@mystira/shared-utils';
+import { withRetry, createRetryable } from "@mystira/shared-utils";
 
 // One-time retry
-const result = await withRetry(
-  () => fetchData(),
-  {
-    maxAttempts: 3,
-    initialDelayMs: 1000,
-    isRetryable: (error) => error instanceof NetworkError,
-    onRetry: (attempt, error, delay) => {
-      console.log(`Retry ${attempt} after ${delay}ms`);
-    },
-  }
-);
+const result = await withRetry(() => fetchData(), {
+  maxAttempts: 3,
+  initialDelayMs: 1000,
+  isRetryable: (error) => error instanceof NetworkError,
+  onRetry: (attempt, error, delay) => {
+    console.log(`Retry ${attempt} after ${delay}ms`);
+  },
+});
 
 // Create a retryable function
 const retryableFetch = createRetryable(fetchData, { maxAttempts: 3 });
@@ -50,16 +47,16 @@ const data = await retryableFetch();
 ### Structured Logging
 
 ```typescript
-import { createLogger } from '@mystira/shared-utils';
+import { createLogger } from "@mystira/shared-utils";
 
-const logger = createLogger({ level: 'info' });
+const logger = createLogger({ level: "info" });
 
-logger.info('Request received', { requestId: '123', path: '/api/stories' });
-logger.error('Failed to process', { error: 'timeout', requestId: '123' });
+logger.info("Request received", { requestId: "123", path: "/api/stories" });
+logger.error("Failed to process", { error: "timeout", requestId: "123" });
 
 // Create child logger with base context
-const childLogger = logger.child({ service: 'story-generator' });
-childLogger.info('Processing story'); // Includes service context automatically
+const childLogger = logger.child({ service: "story-generator" });
+childLogger.info("Processing story"); // Includes service context automatically
 ```
 
 ### Validation Helpers
@@ -70,7 +67,7 @@ import {
   isNonEmptyString,
   isValidEmail,
   validateRequired,
-} from '@mystira/shared-utils';
+} from "@mystira/shared-utils";
 
 // Type guards
 if (isDefined(value)) {
@@ -82,7 +79,7 @@ if (isNonEmptyString(name)) {
 }
 
 // Validate required fields
-const result = validateRequired(data, ['name', 'email', 'content']);
+const result = validateRequired(data, ["name", "email", "content"]);
 if (!result.valid) {
   console.log(result.errors);
 }
@@ -92,29 +89,29 @@ if (!result.valid) {
 
 ### Retry Utilities
 
-| Function | Description |
-|----------|-------------|
-| `withRetry(fn, options)` | Execute a function with retry logic |
+| Function                       | Description                         |
+| ------------------------------ | ----------------------------------- |
+| `withRetry(fn, options)`       | Execute a function with retry logic |
 | `createRetryable(fn, options)` | Create a retryable wrapper function |
-| `sleep(ms)` | Promise-based sleep |
-| `calculateBackoffDelay(...)` | Calculate exponential backoff delay |
+| `sleep(ms)`                    | Promise-based sleep                 |
+| `calculateBackoffDelay(...)`   | Calculate exponential backoff delay |
 
 ### Logger Utilities
 
-| Function | Description |
-|----------|-------------|
+| Function                | Description                |
+| ----------------------- | -------------------------- |
 | `createLogger(options)` | Create a structured logger |
 
 ### Validation Utilities
 
-| Function | Description |
-|----------|-------------|
-| `isDefined(value)` | Check if value is not null/undefined |
-| `isNonEmptyString(value)` | Check if value is a non-empty string |
-| `isPositiveNumber(value)` | Check if value is a positive number |
-| `isValidEmail(value)` | Check if value is a valid email format |
-| `isValidUrl(value)` | Check if value is a valid URL |
-| `validateRequired(obj, fields)` | Validate required fields on an object |
+| Function                        | Description                            |
+| ------------------------------- | -------------------------------------- |
+| `isDefined(value)`              | Check if value is not null/undefined   |
+| `isNonEmptyString(value)`       | Check if value is a non-empty string   |
+| `isPositiveNumber(value)`       | Check if value is a positive number    |
+| `isValidEmail(value)`           | Check if value is a valid email format |
+| `isValidUrl(value)`             | Check if value is a valid URL          |
+| `validateRequired(obj, fields)` | Validate required fields on an object  |
 
 ## Related Documentation
 

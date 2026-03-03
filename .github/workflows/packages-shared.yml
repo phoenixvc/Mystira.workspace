@@ -1,0 +1,97 @@
+name: "[CI] Mystira.Shared"
+
+on:
+  push:
+    paths:
+      - "packages/shared/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-shared.yml"
+    branches:
+      - main
+      - "release/**"
+  pull_request:
+    paths:
+      - "packages/shared/**"
+      - "packages/domain/**"
+      - ".github/workflows/packages-shared.yml"
+
+concurrency:
+  group: packages-shared-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Build Mystira.Shared
+        run: dotnet build packages/shared/Mystira.Shared --configuration Release
+
+      - name: Test Mystira.Shared
+        run: dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --collect:"XPlat Code Coverage" --results-directory ./coverage
+
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        if: success()
+        with:
+          files: ./coverage/**/coverage.cobertura.xml
+          flags: shared
+          name: mystira-shared
+          fail_ci_if_error: false
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore packages
+        run: dotnet restore packages/shared/Mystira.Shared
+
+      - name: Check for vulnerable packages
+        run: |
+          echo "## Vulnerability Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          RESULT=$(dotnet list packages/shared/Mystira.Shared package --vulnerable --include-transitive 2>&1) || true
+
+          if echo "$RESULT" | grep -q "has the following vulnerable packages"; then
+            echo "::error::Vulnerable packages detected in Mystira.Shared"
+            echo "### ⚠️ Vulnerable Packages Found" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            echo "$RESULT" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            exit 1
+          else
+            echo "### ✅ No Vulnerabilities Found" >> $GITHUB_STEP_SUMMARY
+            echo "No known vulnerabilities detected in dependencies." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Dependency Review
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          config-file: ".github/dependency-review-config.yml"

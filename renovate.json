@@ -5,15 +5,18 @@
     "local>phoenixvc/Mystira.workspace:renovate-config"
   ],
   "baseBranches": ["dev"],
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/vendor/**",
-    "**/.terraform/**"
-  ],
+  "ignorePaths": ["**/node_modules/**", "**/vendor/**", "**/.terraform/**"],
   "packageRules": [
     {
-      "description": "Disable updates for submodule packages (managed separately)",
-      "matchPaths": ["packages/admin-api/**", "packages/publisher/**"],
+      "description": "Ignore private ACR Docker images (managed via CI/CD)",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "myssharedacr.azurecr.io/admin-api",
+        "myssharedacr.azurecr.io/admin-ui",
+        "myssharedacr.azurecr.io/chain",
+        "myssharedacr.azurecr.io/publisher",
+        "myssharedacr.azurecr.io/story-generator"
+      ],
       "enabled": false
     }
   ]

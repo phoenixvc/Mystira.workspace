@@ -1,0 +1,82 @@
+[
+  {
+    "name": "ci.yml",
+    "path": ".github/workflows/ci.yml",
+    "sha": "ea7337236f1999b5229cc81b9a5c056d4e21f58a",
+    "size": 2127,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/ci.yml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/ci.yml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/ea7337236f1999b5229cc81b9a5c056d4e21f58a",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Admin.UI/dev/.github/workflows/ci.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/ci.yml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/ea7337236f1999b5229cc81b9a5c056d4e21f58a",
+      "html": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/ci.yml"
+    }
+  },
+  {
+    "name": "deploy-dev.yml",
+    "path": ".github/workflows/deploy-dev.yml",
+    "sha": "20b189f032420a1d9aae22e35b66c4ce0ba2e865",
+    "size": 5022,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/deploy-dev.yml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/deploy-dev.yml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/20b189f032420a1d9aae22e35b66c4ce0ba2e865",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Admin.UI/dev/.github/workflows/deploy-dev.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/deploy-dev.yml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/20b189f032420a1d9aae22e35b66c4ce0ba2e865",
+      "html": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/deploy-dev.yml"
+    }
+  },
+  {
+    "name": "security.yml",
+    "path": ".github/workflows/security.yml",
+    "sha": "e059c60b3b28ae99768c505f5e8c471c654723a7",
+    "size": 4907,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/security.yml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/security.yml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/e059c60b3b28ae99768c505f5e8c471c654723a7",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Admin.UI/dev/.github/workflows/security.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/security.yml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/e059c60b3b28ae99768c505f5e8c471c654723a7",
+      "html": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/security.yml"
+    }
+  },
+  {
+    "name": "test-e2e.yml",
+    "path": ".github/workflows/test-e2e.yml",
+    "sha": "e54cd9b9143de2a5daaa6346774a2747e65c0347",
+    "size": 1706,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/test-e2e.yml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/test-e2e.yml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/e54cd9b9143de2a5daaa6346774a2747e65c0347",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Admin.UI/dev/.github/workflows/test-e2e.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/test-e2e.yml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/e54cd9b9143de2a5daaa6346774a2747e65c0347",
+      "html": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/test-e2e.yml"
+    }
+  },
+  {
+    "name": "test-unit.yml",
+    "path": ".github/workflows/test-unit.yml",
+    "sha": "6e8e895aec593048cacf7494d328cd1f890958c4",
+    "size": 2165,
+    "url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/test-unit.yml?ref=dev",
+    "html_url": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/test-unit.yml",
+    "git_url": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/6e8e895aec593048cacf7494d328cd1f890958c4",
+    "download_url": "https://raw.githubusercontent.com/phoenixvc/Mystira.Admin.UI/dev/.github/workflows/test-unit.yml",
+    "type": "file",
+    "_links": {
+      "self": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/contents/.github/workflows/test-unit.yml?ref=dev",
+      "git": "https://api.github.com/repos/phoenixvc/Mystira.Admin.UI/git/blobs/6e8e895aec593048cacf7494d328cd1f890958c4",
+      "html": "https://github.com/phoenixvc/Mystira.Admin.UI/blob/dev/.github/workflows/test-unit.yml"
+    }
+  }
+]

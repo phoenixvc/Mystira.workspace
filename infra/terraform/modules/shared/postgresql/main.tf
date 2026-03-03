@@ -6,7 +6,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
     random = {
       source  = "hashicorp/random"
@@ -18,6 +18,11 @@ terraform {
 variable "environment" {
   description = "Deployment environment (dev, staging, prod)"
   type        = string
+
+  validation {
+    condition     = contains(["dev", "staging", "prod"], var.environment)
+    error_message = "Environment must be one of: dev, staging, prod."
+  }
 }
 
 variable "location" {
@@ -34,6 +39,7 @@ variable "resource_group_name" {
 variable "vnet_id" {
   description = "Virtual Network ID for PostgreSQL deployment"
   type        = string
+  default     = null
 }
 
 variable "subnet_id" {
@@ -68,21 +74,36 @@ variable "postgres_version" {
 }
 
 variable "sku_name" {
-  description = "PostgreSQL SKU name"
+  description = "PostgreSQL SKU name (e.g., B_Standard_B1ms, GP_Standard_D2s_v3, MO_Standard_E2s_v3)"
   type        = string
   default     = null
+
+  validation {
+    condition     = var.sku_name == null || can(regex("^(B_Standard_B[12](ms|s)|GP_Standard_D(2|4|8|16|32|48|64)s_v3|MO_Standard_E(2|4|8|16|20|32|48|64)s_v3)$", var.sku_name))
+    error_message = "SKU name must be a valid PostgreSQL Flexible Server SKU: Burstable (B_Standard_B1ms, B_Standard_B2s), General Purpose (GP_Standard_D*s_v3), or Memory Optimized (MO_Standard_E*s_v3)."
+  }
 }
 
 variable "storage_mb" {
-  description = "Storage size in MB"
+  description = "Storage size in MB (minimum 32768 MB / 32 GB)"
   type        = number
   default     = 32768
+
+  validation {
+    condition     = var.storage_mb >= 32768
+    error_message = "Storage size must be at least 32768 MB (32 GB)."
+  }
 }
 
 variable "backup_retention_days" {
-  description = "Backup retention in days"
+  description = "Backup retention in days (7-35)"
   type        = number
   default     = 7
+
+  validation {
+    condition     = var.backup_retention_days >= 7 && var.backup_retention_days <= 35
+    error_message = "Backup retention days must be between 7 and 35."
+  }
 }
 
 variable "geo_redundant_backup_enabled" {
@@ -104,10 +125,11 @@ variable "aad_auth_enabled" {
 }
 
 variable "aad_admin_identities" {
-  description = "Map of managed identities to add as Azure AD administrators (principal_name is used to look up the identity)"
+  description = "Map of managed identities to add as Azure AD administrators. If principal_id is provided, it's used directly; otherwise principal_name is used to look up the identity."
   type = map(object({
     principal_name = string
-    principal_type = string # ServicePrincipal, User, or Group
+    principal_type = string           # ServicePrincipal, User, or Group
+    principal_id   = optional(string) # If provided, skip data lookup (avoids circular dependencies)
   }))
   default = {}
 }
@@ -139,6 +161,10 @@ resource "azurerm_private_dns_zone" "postgres" {
   resource_group_name = var.resource_group_name
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Private DNS Zone Virtual Network Link
@@ -173,6 +199,10 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   geo_redundant_backup_enabled = var.geo_redundant_backup_enabled
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Random password for PostgreSQL (if not provided)
@@ -207,6 +237,33 @@ resource "azurerm_postgresql_flexible_server_firewall_rule" "allow_azure_service
 # Enables managed identities and Azure AD users to authenticate without passwords
 # =============================================================================
 
+data "azurerm_client_config" "current" {}
+
+# Local to separate identities that need lookup vs those with principal_id provided
+locals {
+  # Identities that need data source lookup (no principal_id provided)
+  aad_identities_needing_lookup = var.aad_auth_enabled ? {
+    for k, v in var.aad_admin_identities : k => v if v.principal_id == null
+  } : {}
+
+  # All identities with resolved principal_id
+  aad_admin_principal_ids = var.aad_auth_enabled ? {
+    for k, v in var.aad_admin_identities : k => coalesce(
+      v.principal_id,
+      try(data.azurerm_user_assigned_identity.aad_admins[k].principal_id, null)
+    )
+  } : {}
+}
+
+# Look up managed identities by name ONLY when principal_id is not provided directly
+# This avoids circular dependencies when the identity is created in the same terraform run
+data "azurerm_user_assigned_identity" "aad_admins" {
+  for_each = local.aad_identities_needing_lookup
+
+  name                = each.value.principal_name
+  resource_group_name = var.resource_group_name
+}
+
 # Configure Azure AD authentication on the PostgreSQL server
 resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aad_admins" {
   for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
@@ -214,24 +271,19 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aa
   server_name         = azurerm_postgresql_flexible_server.shared.name
   resource_group_name = var.resource_group_name
   tenant_id           = data.azurerm_client_config.current.tenant_id
-  object_id           = data.azurerm_user_assigned_identity.aad_admins[each.key].principal_id
+  object_id           = local.aad_admin_principal_ids[each.key]
   principal_name      = each.value.principal_name
   principal_type      = each.value.principal_type
-}
-
-data "azurerm_client_config" "current" {}
-
-# Look up managed identities by name to avoid circular dependencies
-data "azurerm_user_assigned_identity" "aad_admins" {
-  for_each = var.aad_auth_enabled ? var.aad_admin_identities : {}
-
-  name                = each.value.principal_name
-  resource_group_name = var.resource_group_name
 }
 
 output "server_id" {
   description = "PostgreSQL server ID"
   value       = azurerm_postgresql_flexible_server.shared.id
+}
+
+output "server_name" {
+  description = "PostgreSQL server name"
+  value       = azurerm_postgresql_flexible_server.shared.name
 }
 
 output "server_fqdn" {

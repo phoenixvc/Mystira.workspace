@@ -1,0 +1,90 @@
+# GitHub OIDC Configuration for Dev Environment
+# This configures federated identity credentials for all Mystira repositories
+#
+# Usage:
+#   terraform apply -var-file="github-oidc.tfvars.example"
+
+environment = "dev"
+github_org  = "phoenixvc"
+
+# Main workspace repository
+repositories = {
+  # Main monorepo workspace
+  workspace = {
+    name                 = "Mystira.workspace"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging", "prod"]
+    enable_tags          = true
+    enable_pull_requests = true
+  }
+
+  # Service submodule repositories
+  admin-api = {
+    name                 = "Mystira.Admin.Api"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging", "prod"]
+    enable_tags          = true
+    enable_pull_requests = false
+  }
+
+  admin-ui = {
+    name                 = "Mystira.Admin.UI"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging"]
+    enable_tags          = false
+    enable_pull_requests = false
+  }
+
+  chain = {
+    name                 = "Mystira.Chain"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging", "prod"]
+    enable_tags          = true
+    enable_pull_requests = false
+  }
+
+  publisher = {
+    name                 = "Mystira.Publisher"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging"]
+    enable_tags          = false
+    enable_pull_requests = false
+  }
+
+  story-generator = {
+    name                 = "Mystira.StoryGenerator"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging", "prod"]
+    enable_tags          = true
+    enable_pull_requests = false
+  }
+
+  devhub = {
+    name                 = "Mystira.DevHub"
+    branches             = ["dev", "main"]
+    environments         = ["dev"]
+    enable_tags          = true
+    enable_pull_requests = false
+  }
+
+  app = {
+    name                 = "Mystira.App"
+    branches             = ["dev", "main"]
+    environments         = ["dev", "staging", "prod"]
+    enable_tags          = true
+    enable_pull_requests = true
+  }
+}
+
+# Role assignments
+enable_subscription_contributor = true
+
+# These should reference actual resource IDs from other modules
+# acr_id = module.shared.acr_id
+# aks_id = module.shared.aks_id
+
+tags = {
+  Environment = "dev"
+  ManagedBy   = "terraform"
+  Purpose     = "github-actions-oidc"
+}

@@ -67,6 +67,7 @@ Mystira uses multiple deployment strategies based on service requirements:
 ### Overview
 
 AKS hosts the core microservices that require:
+
 - Container orchestration
 - Auto-scaling
 - Service mesh capabilities
@@ -74,12 +75,12 @@ AKS hosts the core microservices that require:
 
 ### Services Deployed to AKS
 
-| Service | Language | Workload Type | Replicas |
-|---------|----------|---------------|----------|
-| Admin API | .NET 9 | Deployment | 1-3 |
-| Story Generator | .NET 9 | Deployment | 1-5 |
-| Publisher | Node.js | Deployment | 1-5 |
-| Chain | Python | StatefulSet | 1-3 |
+| Service         | Language | Workload Type | Replicas |
+| --------------- | -------- | ------------- | -------- |
+| Admin API       | .NET 9   | Deployment    | 1-3      |
+| Story Generator | .NET 9   | Deployment    | 1-5      |
+| Publisher       | Node.js  | Deployment    | 1-5      |
+| Chain           | Python   | StatefulSet   | 1-3      |
 
 ### AKS Configuration
 
@@ -164,6 +165,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "chain" {
 ### Kubernetes Manifests
 
 **Namespace:**
+
 ```yaml
 # infra/kubernetes/base/namespace.yaml
 apiVersion: v1
@@ -173,6 +175,7 @@ metadata:
 ```
 
 **ServiceAccount with Workload Identity:**
+
 ```yaml
 # infra/kubernetes/base/service-accounts.yaml
 apiVersion: v1
@@ -187,6 +190,7 @@ metadata:
 ```
 
 **Deployment Example:**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -232,6 +236,7 @@ spec:
 ```
 
 **Key Files:**
+
 - AKS Config: [`environments/dev/main.tf`](../../infra/terraform/environments/dev/main.tf)
 - K8s Manifests: [`infra/kubernetes/`](../../infra/kubernetes/)
 - ServiceAccounts: [`infra/kubernetes/base/service-accounts.yaml`](../../infra/kubernetes/base/service-accounts.yaml)
@@ -244,12 +249,12 @@ App Service is used for the Mystira.App component, which is a monolithic .NET ap
 
 ### Resources Created
 
-| Resource | Type | Purpose |
-|----------|------|---------|
-| App Service Plan | Linux | Compute hosting |
-| Linux Web App | .NET 9 | API backend |
-| Key Vault | Secrets | Configuration and secrets |
-| Application Insights | Monitoring | Telemetry |
+| Resource             | Type       | Purpose                   |
+| -------------------- | ---------- | ------------------------- |
+| App Service Plan     | Linux      | Compute hosting           |
+| Linux Web App        | .NET 9     | API backend               |
+| Key Vault            | Secrets    | Configuration and secrets |
+| Application Insights | Monitoring | Telemetry                 |
 
 ### Configuration
 
@@ -292,13 +297,13 @@ resource "azurerm_linux_web_app" "api" {
 
 ### App Service SKUs
 
-| SKU | vCPU | Memory | Use Case | Cost |
-|-----|------|--------|----------|------|
-| F1 | Shared | 1 GB | Free tier, testing | Free |
-| B1 | 1 | 1.75 GB | Development | ~$13/month |
-| B2 | 2 | 3.5 GB | Light production | ~$26/month |
-| P1v2 | 1 | 3.5 GB | Production | ~$73/month |
-| P2v2 | 2 | 7 GB | High traffic | ~$146/month |
+| SKU  | vCPU   | Memory  | Use Case           | Cost        |
+| ---- | ------ | ------- | ------------------ | ----------- |
+| F1   | Shared | 1 GB    | Free tier, testing | Free        |
+| B1   | 1      | 1.75 GB | Development        | ~$13/month  |
+| B2   | 2      | 3.5 GB  | Light production   | ~$26/month  |
+| P1v2 | 1      | 3.5 GB  | Production         | ~$73/month  |
+| P2v2 | 2      | 7 GB    | High traffic       | ~$146/month |
 
 ### Key Vault Integration
 
@@ -316,6 +321,7 @@ resource "azurerm_key_vault_access_policy" "app_service" {
 ```
 
 **Key Files:**
+
 - Mystira App Module: [`modules/mystira-app/`](../../infra/terraform/modules/mystira-app/)
 - Dev Config: [`environments/dev/mystira-app.tf`](../../infra/terraform/environments/dev/mystira-app.tf)
 
@@ -355,9 +361,9 @@ resource "azurerm_static_web_app_custom_domain" "main" {
 
 ### Static Web App SKUs
 
-| SKU | Features | Cost |
-|-----|----------|------|
-| Free | 100 GB bandwidth, 2 custom domains | Free |
+| SKU      | Features                                 | Cost      |
+| -------- | ---------------------------------------- | --------- |
+| Free     | 100 GB bandwidth, 2 custom domains       | Free      |
 | Standard | 100 GB bandwidth, 5 custom domains, Auth | ~$9/month |
 
 ### Deployment via GitHub Actions
@@ -370,7 +376,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/admin-ui/**'
+      - "packages/admin-ui/**"
 
 jobs:
   deploy:
@@ -407,15 +413,16 @@ resource "azurerm_container_registry" "shared" {
 
 ### Image Tagging Strategy
 
-| Environment | Tag Pattern | Example |
-|-------------|-------------|---------|
-| Dev | `dev-<sha>` | `admin-api:dev-abc1234` |
-| Staging | `staging-<sha>` | `admin-api:staging-abc1234` |
-| Prod | `v<version>`, `latest` | `admin-api:v1.2.3` |
+| Environment | Tag Pattern            | Example                     |
+| ----------- | ---------------------- | --------------------------- |
+| Dev         | `dev-<sha>`            | `admin-api:dev-abc1234`     |
+| Staging     | `staging-<sha>`        | `admin-api:staging-abc1234` |
+| Prod        | `v<version>`, `latest` | `admin-api:v1.2.3`          |
 
 ### ACR Access
 
 **AKS to ACR (Pull):**
+
 ```hcl
 # modules/shared/identity/main.tf
 resource "azurerm_role_assignment" "aks_acr_pull" {
@@ -426,6 +433,7 @@ resource "azurerm_role_assignment" "aks_acr_pull" {
 ```
 
 **CI/CD to ACR (Push):**
+
 ```hcl
 resource "azurerm_role_assignment" "cicd_acr_push" {
   scope                = var.acr_id
@@ -448,23 +456,24 @@ docker push myssharedacr.azurecr.io/admin-api:dev-$(git rev-parse --short HEAD)
 ```
 
 **Key Files:**
+
 - ACR Config: [`environments/dev/main.tf`](../../infra/terraform/environments/dev/main.tf)
 - Identity Module: [`modules/shared/identity/`](../../infra/terraform/modules/shared/identity/)
 
 ## Comparison Matrix
 
-| Feature | AKS | App Service | Static Web App |
-|---------|-----|-------------|----------------|
-| **Best For** | Microservices | Monolithic apps | SPAs, Static sites |
-| **Scaling** | HPA, Cluster autoscaler | Manual/Auto scale rules | Automatic |
-| **Cost** | Higher (VMs) | Medium | Low/Free |
-| **Complexity** | High | Medium | Low |
-| **Workload Identity** | Yes | Yes (System-assigned) | No |
-| **Custom Domains** | Via Ingress | Yes | Yes |
-| **SSL** | Cert-manager/Front Door | Managed | Managed |
-| **Container Support** | Native | Yes (Web App for Containers) | No |
-| **Stateful Workloads** | StatefulSet | Limited | No |
-| **Multi-language** | Any | Limited to supported stacks | Any (static) |
+| Feature                | AKS                     | App Service                  | Static Web App     |
+| ---------------------- | ----------------------- | ---------------------------- | ------------------ |
+| **Best For**           | Microservices           | Monolithic apps              | SPAs, Static sites |
+| **Scaling**            | HPA, Cluster autoscaler | Manual/Auto scale rules      | Automatic          |
+| **Cost**               | Higher (VMs)            | Medium                       | Low/Free           |
+| **Complexity**         | High                    | Medium                       | Low                |
+| **Workload Identity**  | Yes                     | Yes (System-assigned)        | No                 |
+| **Custom Domains**     | Via Ingress             | Yes                          | Yes                |
+| **SSL**                | Cert-manager/Front Door | Managed                      | Managed            |
+| **Container Support**  | Native                  | Yes (Web App for Containers) | No                 |
+| **Stateful Workloads** | StatefulSet             | Limited                      | No                 |
+| **Multi-language**     | Any                     | Limited to supported stacks  | Any (static)       |
 
 ## Choosing the Right Option
 
@@ -498,6 +507,7 @@ docker push myssharedacr.azurecr.io/admin-api:dev-$(git rev-parse --short HEAD)
 ### Deployment Commands
 
 **AKS:**
+
 ```bash
 # Get credentials
 az aks get-credentials -n mys-dev-core-aks-san -g mys-dev-core-rg-san
@@ -510,6 +520,7 @@ kubectl get pods -n mystira
 ```
 
 **App Service:**
+
 ```bash
 # Deploy via Azure CLI
 az webapp deployment source config-zip \
@@ -522,6 +533,7 @@ az webapp log tail -n mys-dev-app-api-san -g mys-dev-core-rg-san
 ```
 
 **Container Registry:**
+
 ```bash
 # List repositories
 az acr repository list -n myssharedacr -o table
@@ -555,12 +567,14 @@ kubectl get pods -n mystira -l app=mys-admin-api
 ```
 
 **Best Practices:**
+
 - Always verify deployment health before and after rollback
 - Check pod logs: `kubectl logs -n mystira -l app=mys-admin-api`
 - Monitor application metrics during rollback
 - Document the reason for rollback in incident reports
 
 **References:**
+
 - [Azure AKS Rollback Guide](https://learn.microsoft.com/en-us/azure/aks/operator-best-practices-run-workloads#rollback-deployments)
 - [Kubernetes Rollout Management](https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#rolling-back-a-deployment)
 
@@ -595,12 +609,14 @@ az webapp log tail \
 ```
 
 **Best Practices:**
+
 - Always test in staging slot before swapping to production
 - Use slot settings to maintain environment-specific configurations
 - Monitor application health endpoints after slot swap
 - Keep previous deployment available in staging for quick rollback
 
 **References:**
+
 - [App Service Deployment Slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots)
 - [Best Practices for Deployment Slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-best-practices)
 
@@ -621,6 +637,7 @@ az staticwebapp show \
 ```
 
 **Best Practices:**
+
 - Static Web Apps deployments are tied to Git commits
 - To rollback, redeploy from a previous successful commit
 - Use Git tags to mark stable releases
@@ -628,6 +645,7 @@ az staticwebapp show \
 - Monitor CDN cache invalidation after redeployment
 
 **Alternative Method - Manual Deployment:**
+
 ```bash
 # Build from specific commit
 git checkout <commit-sha>
@@ -642,6 +660,7 @@ az staticwebapp deploy \
 ```
 
 **References:**
+
 - [Static Web Apps Deployment](https://learn.microsoft.com/en-us/azure/static-web-apps/deployment-token-management)
 - [GitHub Actions for Static Web Apps](https://learn.microsoft.com/en-us/azure/static-web-apps/github-actions-workflow)
 

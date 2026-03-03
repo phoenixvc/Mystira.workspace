@@ -1,0 +1,33 @@
+/* Theme toggle button - scoped styles */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--primary-color);
+    background-color: rgba(147, 51, 234, 0.25);
+    transform: scale(1.1);
+}
+
+.theme-toggle:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.theme-toggle i {
+    font-size: 1.25rem;
+    color: inherit;
+}
+

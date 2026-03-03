@@ -1,0 +1,61 @@
+# =============================================================================
+# Terraform / Terragrunt .gitignore
+# =============================================================================
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files (state is stored remotely in Azure Blob Storage)
+*.tfstate
+*.tfstate.*
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude all .tfvars files, which are likely to contain sensitive data
+# Use *.auto.tfvars for non-sensitive values
+*.tfvars
+!*.auto.tfvars
+
+# Ignore override files as they are usually used to override resources locally
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration files
+.terraformrc
+terraform.rc
+
+# Terragrunt cache
+**/.terragrunt-cache/
+
+# Terragrunt generated files (backend and provider configs)
+**/backend.tf
+**/provider.tf
+
+# Plan files
+*.tfplan
+tfplan
+tfplan.*
+
+# Lock files should be committed for reproducibility
+# Uncomment to ignore:
+# .terraform.lock.hcl
+
+# Migration script generated files
+.state_resources.txt
+.*_resources.txt
+.last_backup_dir
+backups/
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

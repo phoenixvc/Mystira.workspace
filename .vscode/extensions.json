@@ -1,0 +1,39 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
+
+    "ms-vscode.vscode-typescript-next",
+
+    "dsznajder.es7-react-js-snippets",
+    "bradlc.vscode-tailwindcss",
+    "styled-components.vscode-styled-components",
+
+    "eamodio.gitlens",
+    "mhutchie.git-graph",
+
+    "vitest.explorer",
+
+    "vercel.turbo-vsc",
+
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "ms-python.black-formatter",
+
+    "NomicFoundation.hardhat-solidity",
+
+    "christian-kohler.path-intellisense",
+    "usernamehw.errorlens",
+    "streetsidesoftware.code-spell-checker",
+    "pkief.material-icon-theme",
+    "mikestead.dotenv",
+
+    "ms-azuretools.vscode-docker",
+
+    "humao.rest-client",
+
+    "yzhang.markdown-all-in-one"
+  ],
+  "unwantedRecommendations": []
+}

@@ -1,6 +1,6 @@
 {
   "name": "@mystira/infra",
-  "version": "0.1.0",
+  "version": "0.5.2-alpha",
   "private": true,
   "description": "Infrastructure, DevOps, and deployment configurations for Mystira",
   "scripts": {
@@ -12,4 +12,3 @@
     "docker:push": "./scripts/push-images.sh"
   }
 }
-

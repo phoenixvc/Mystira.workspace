@@ -22,14 +22,15 @@ The ServiceAccounts in this directory are configured for Azure Workload Identity
 
 ### Service Accounts
 
-| ServiceAccount | Service | Terraform Module | Notes |
-|----------------|---------|------------------|-------|
-| `admin-api-sa` | Admin API | `modules/admin-api` | ✅ Ready |
+| ServiceAccount       | Service             | Terraform Module          | Notes    |
+| -------------------- | ------------------- | ------------------------- | -------- |
+| `admin-api-sa`       | Admin API           | `modules/admin-api`       | ✅ Ready |
 | `story-generator-sa` | Story Generator API | `modules/story-generator` | ✅ Ready |
-| `publisher-sa` | Publisher | `modules/publisher` | ✅ Ready |
-| `chain-sa` | Chain | `modules/chain` | ✅ Ready |
+| `publisher-sa`       | Publisher           | `modules/publisher`       | ✅ Ready |
+| `chain-sa`           | Chain               | `modules/chain`           | ✅ Ready |
 
 **Notes:**
+
 - Admin UI is a browser-based SPA and doesn't need a ServiceAccount (it uses MSAL authentication in the browser).
 - Story Generator deploys the **API** component to Kubernetes. The Blazor WASM frontend (if needed) would use Static Web App (no ServiceAccount required).
 
@@ -136,11 +137,13 @@ kubectl get serviceaccount story-generator-sa -n mystira -o yaml
 If the Azure AD token is not being injected:
 
 1. Verify OIDC issuer is enabled on AKS:
+
    ```bash
    az aks show -n <cluster-name> -g <resource-group> --query "oidcIssuerProfile"
    ```
 
 2. Verify federated credential exists:
+
    ```bash
    az identity federated-credential list --identity-name <identity-name> -g <resource-group>
    ```

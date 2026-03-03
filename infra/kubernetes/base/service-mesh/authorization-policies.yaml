@@ -1,0 +1,191 @@
+# Istio AuthorizationPolicies for Service-to-Service Access Control
+# These policies define which services can communicate with each other
+
+---
+# Deny all by default in mystira namespace (zero-trust baseline)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: deny-all
+  namespace: mystira
+spec:
+  {}  # Empty spec denies all traffic
+
+---
+# Allow ingress gateway to reach all services
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: allow-ingress-gateway
+  namespace: mystira
+spec:
+  action: ALLOW
+  rules:
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+
+---
+# Chain service - Allow specific services to access RPC
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-chain-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-chain
+  action: ALLOW
+  rules:
+    # Allow admin-api to access chain RPC
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/admin-api-sa
+      to:
+        - operation:
+            ports: ["8545", "8546"]
+    # Allow publisher to access chain RPC
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/publisher-sa
+      to:
+        - operation:
+            ports: ["8545", "8546"]
+    # Allow health checks from kubelet (no mTLS)
+    - to:
+        - operation:
+            paths: ["/health", "/ready"]
+
+---
+# Admin API - Allow access from admin-ui and ingress
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-admin-api-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-admin-api
+  action: ALLOW
+  rules:
+    # Allow from ingress (external requests)
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+    # Allow health checks
+    - to:
+        - operation:
+            paths: ["/health", "/ready", "/healthz"]
+
+---
+# Publisher service - Allow admin-api and ingress access
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-publisher-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-publisher
+  action: ALLOW
+  rules:
+    # Allow from admin-api
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/admin-api-sa
+    # Allow from ingress
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+    # Allow health checks
+    - to:
+        - operation:
+            paths: ["/health", "/ready"]
+
+---
+# Story Generator - Allow admin-api and publisher access
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-story-generator-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-story-generator
+  action: ALLOW
+  rules:
+    # Allow from admin-api
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/admin-api-sa
+    # Allow from publisher
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/publisher-sa
+    # Allow health checks
+    - to:
+        - operation:
+            paths: ["/health", "/ready"]
+
+---
+# DevHub - Allow admin-api and ingress access
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-devhub-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-devhub
+  action: ALLOW
+  rules:
+    # Allow from admin-api
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/mystira/sa/admin-api-sa
+    # Allow from ingress
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+    # Allow health checks
+    - to:
+        - operation:
+            paths: ["/health", "/ready"]
+
+---
+# Admin UI - Allow ingress only (static files)
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: mys-admin-ui-access
+  namespace: mystira
+spec:
+  selector:
+    matchLabels:
+      app: mys-admin-ui
+  action: ALLOW
+  rules:
+    # Allow from ingress
+    - from:
+        - source:
+            principals:
+              - cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account
+    # Allow health checks
+    - to:
+        - operation:
+            paths: ["/health", "/ready"]

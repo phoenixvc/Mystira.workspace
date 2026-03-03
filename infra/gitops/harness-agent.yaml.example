@@ -1,0 +1,23 @@
+# Example Harness GitOps Agent YAML
+#
+# IMPORTANT: This is a template. Replace with actual agent YAML from Harness platform.
+#
+# Security: Use environment variable substitution for secrets:
+#   HARNESS_AGENT_TOKEN="${HARNESS_AGENT_TOKEN}"
+#
+# Apply with: envsubst < harness-agent.yaml | kubectl apply -f - -n harness-gitops
+#
+# DO NOT commit actual secrets to Git!
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: harness-gitops
+---
+# Add your agent YAML here
+# This typically includes:
+# - ServiceAccount
+# - Secret (with HARNESS_AGENT_TOKEN)
+# - Deployment
+# - Service
+# - NetworkPolicy (optional)

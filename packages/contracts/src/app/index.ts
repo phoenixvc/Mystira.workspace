@@ -19,4 +19,4 @@
 
 // Re-export all App contract types
 // TODO: Migrate types from @mystira/app-contracts
-export * from './types';
+export * from "./types";

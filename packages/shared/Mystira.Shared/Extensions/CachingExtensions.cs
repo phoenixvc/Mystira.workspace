@@ -51,6 +51,29 @@ public static class CachingExtensions
         // Use Scoped to match IDistributedCache lifetime and support options reloading
         services.AddScoped<ICacheService, DistributedCacheService>();
 
+        // Add query caching services for Wolverine middleware
+        services.AddQueryCaching();
+
+        return services;
+    }
+
+    /// <summary>
+    /// Adds query caching services for Wolverine middleware.
+    /// Includes IQueryCacheInvalidationService and QueryCachingMiddleware.
+    /// </summary>
+    /// <param name="services">The service collection.</param>
+    /// <returns>The service collection for chaining.</returns>
+    public static IServiceCollection AddQueryCaching(this IServiceCollection services)
+    {
+        // Add memory cache if not already registered
+        services.AddMemoryCache();
+
+        // Register cache invalidation service as singleton (tracks keys across requests)
+        services.AddSingleton<IQueryCacheInvalidationService, QueryCacheInvalidationService>();
+
+        // Register middleware as scoped (one per request)
+        services.AddScoped<QueryCachingMiddleware>();
+
         return services;
     }
 

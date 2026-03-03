@@ -1,0 +1,67 @@
+using System.Net.Http.Json;
+using Mystira.Contracts.App.Responses.Badges;
+
+namespace Mystira.App.PWA.Services;
+
+public class BadgesApiClient : BaseApiClient, IBadgesApiClient
+{
+    public BadgesApiClient(HttpClient httpClient, ILogger<BadgesApiClient> logger, ITokenProvider tokenProvider)
+        : base(httpClient, logger, tokenProvider)
+    {
+    }
+
+    public Task<List<BadgeResponse>?> GetBadgesByAgeGroupAsync(string ageGroup)
+    {
+        if (string.IsNullOrWhiteSpace(ageGroup))
+        {
+            return Task.FromResult<List<BadgeResponse>?>(new List<BadgeResponse>());
+        }
+
+        var encoded = Uri.EscapeDataString(ageGroup);
+        return SendGetAsync<List<BadgeResponse>>($"api/badges?ageGroup={encoded}", "badges");
+    }
+
+    public Task<BadgeResponse?> GetBadgeByIdAsync(string badgeId)
+    {
+        if (string.IsNullOrWhiteSpace(badgeId))
+        {
+            return Task.FromResult<BadgeResponse?>(null);
+        }
+
+        var encoded = Uri.EscapeDataString(badgeId);
+        return SendGetAsync<BadgeResponse>($"api/badges/{encoded}", "badge");
+    }
+
+    public Task<BadgeProgressResponse?> GetProfileBadgeProgressAsync(string profileId)
+    {
+        if (string.IsNullOrWhiteSpace(profileId))
+        {
+            return Task.FromResult<BadgeProgressResponse?>(null);
+        }
+
+        var encoded = Uri.EscapeDataString(profileId);
+        return SendGetAsync<BadgeProgressResponse>($"api/badges/profile/{encoded}", "badge progress");
+    }
+
+    public async Task<List<AxisAchievementResponse>?> GetAxisAchievementsAsync(string ageGroupId)
+    {
+        if (string.IsNullOrWhiteSpace(ageGroupId))
+        {
+            return new List<AxisAchievementResponse>();
+        }
+
+        var encoded = Uri.EscapeDataString(ageGroupId);
+        return await SendGetAsync<List<AxisAchievementResponse>>($"api/badges/axis-achievements?ageGroupId={encoded}", "axis achievements");
+    }
+
+    public string GetBadgeImageResourceEndpointUrl(string imageId)
+    {
+        if (string.IsNullOrWhiteSpace(imageId))
+        {
+            return string.Empty;
+        }
+
+        var encoded = Uri.EscapeDataString(imageId);
+        return $"{GetApiBaseAddressPublic()}api/badges/images/{encoded}";
+    }
+}

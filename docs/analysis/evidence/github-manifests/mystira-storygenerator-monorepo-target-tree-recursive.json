@@ -1,0 +1,3929 @@
+{
+  "repo": "Mystira.workspace",
+  "tree": [
+    {
+      "path": "packages/story-generator",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f23fec19c9ec7a6a73b5af9f3ed27f8b0da1a9e4",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f23fec19c9ec7a6a73b5af9f3ed27f8b0da1a9e4"
+    },
+    {
+      "path": "packages/story-generator/.claude",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4d201783ea6d4e7f6f952c96039acadbe988f6a5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4d201783ea6d4e7f6f952c96039acadbe988f6a5"
+    },
+    {
+      "path": "packages/story-generator/.claude/settings.local.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "00fc07d753c54b9f78e34ed2a9a9211ea3d679b1",
+      "size": 77,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/00fc07d753c54b9f78e34ed2a9a9211ea3d679b1"
+    },
+    {
+      "path": "packages/story-generator/.editorconfig",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "032c8faa1d910696f3209e03efe1bbaea32225e0",
+      "size": 261,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/032c8faa1d910696f3209e03efe1bbaea32225e0"
+    },
+    {
+      "path": "packages/story-generator/.gitignore",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca7ac2b57483c5ef3c24704516bb93fc78847f9e",
+      "size": 7276,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca7ac2b57483c5ef3c24704516bb93fc78847f9e"
+    },
+    {
+      "path": "packages/story-generator/Directory.Build.props",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "128842597bc48524246a8cba52b8ead246438180",
+      "size": 172,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/128842597bc48524246a8cba52b8ead246438180"
+    },
+    {
+      "path": "packages/story-generator/Mystira.StoryGenerator.sln",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9003e522920d02b79b22683cf2a111d263a887df",
+      "size": 23662,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9003e522920d02b79b22683cf2a111d263a887df"
+    },
+    {
+      "path": "packages/story-generator/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e1810b12f62fd0d630509383fd64c9170870c100",
+      "size": 3880,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e1810b12f62fd0d630509383fd64c9170870c100"
+    },
+    {
+      "path": "packages/story-generator/build.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5eee2c1da1d95ab2a557e85a786978d6dbc8c1a3",
+      "size": 191,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5eee2c1da1d95ab2a557e85a786978d6dbc8c1a3"
+    },
+    {
+      "path": "packages/story-generator/build.sh",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ef79778748b74ca70dcfca6a2f376a779fc2af8d",
+      "size": 198,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ef79778748b74ca70dcfca6a2f376a779fc2af8d"
+    },
+    {
+      "path": "packages/story-generator/docs",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4bc4a61198e2a821dfb05c02957d605a29f964e8",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4bc4a61198e2a821dfb05c02957d605a29f964e8"
+    },
+    {
+      "path": "packages/story-generator/docs/AGENTIC_STORY_GENERATION_ARCHITECTURE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1beb16fe02bd1274c14d0e59ebc1d802b3bc1ea3",
+      "size": 33478,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1beb16fe02bd1274c14d0e59ebc1d802b3bc1ea3"
+    },
+    {
+      "path": "packages/story-generator/docs/AGENT_MODE_SETUP.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84472f14d580d724e64a93684cbd6dd24ad8bcb4",
+      "size": 23169,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/84472f14d580d724e64a93684cbd6dd24ad8bcb4"
+    },
+    {
+      "path": "packages/story-generator/docs/AGENT_SETUP_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10850e4648e5dffedbb78b20dde2c7f2cefc8269",
+      "size": 14479,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/10850e4648e5dffedbb78b20dde2c7f2cefc8269"
+    },
+    {
+      "path": "packages/story-generator/docs/AGE_SPECIFIC_VECTOR_STORES_FLOW.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7904a1c9144ddde29a210bc4e9a749f827ba9703",
+      "size": 11574,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7904a1c9144ddde29a210bc4e9a749f827ba9703"
+    },
+    {
+      "path": "packages/story-generator/docs/AI_PROVIDER_INTEGRATION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bd4d8e3ca4b8719e7906c563881db744fc915bb8",
+      "size": 10266,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bd4d8e3ca4b8719e7906c563881db744fc915bb8"
+    },
+    {
+      "path": "packages/story-generator/docs/CONFIGURATION_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9591146562971b143dab51b198ff91faf9f8e4cb",
+      "size": 13994,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9591146562971b143dab51b198ff91faf9f8e4cb"
+    },
+    {
+      "path": "packages/story-generator/docs/DYNAMIC_CHAT_MODELS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c249558fddfff4e904d2f96bf6d1158d392066c",
+      "size": 3458,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5c249558fddfff4e904d2f96bf6d1158d392066c"
+    },
+    {
+      "path": "packages/story-generator/docs/E2E_TEST_RESULTS.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75fe500dda5e0f200d604e2bccac8f4cc61fde53",
+      "size": 19490,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/75fe500dda5e0f200d604e2bccac8f4cc61fde53"
+    },
+    {
+      "path": "packages/story-generator/docs/IMPLEMENTATION_SUMMARY.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13b6dd8b6eceafd748a2b00fa0753a4549b91874",
+      "size": 4810,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/13b6dd8b6eceafd748a2b00fa0753a4549b91874"
+    },
+    {
+      "path": "packages/story-generator/docs/INTEGRATION_CHECKLIST.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "19e45c8bdd5a3bd4b6511a3aef380ae5f29c4eed",
+      "size": 14591,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/19e45c8bdd5a3bd4b6511a3aef380ae5f29c4eed"
+    },
+    {
+      "path": "packages/story-generator/docs/NO_DEFAULT_VECTOR_STORE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "296526db62db6c0becc049c4768d52c56211282b",
+      "size": 6445,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/296526db62db6c0becc049c4768d52c56211282b"
+    },
+    {
+      "path": "packages/story-generator/docs/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02afd2cf1f5a2fdafb54efbe159b75036b7fe41a",
+      "size": 1831,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/02afd2cf1f5a2fdafb54efbe159b75036b7fe41a"
+    },
+    {
+      "path": "packages/story-generator/docs/SCHEMA_VALIDATION_IMPLEMENTATION.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8435f91cfb979cc9ba128ba8b3b5cdb196739294",
+      "size": 5010,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8435f91cfb979cc9ba128ba8b3b5cdb196739294"
+    },
+    {
+      "path": "packages/story-generator/docs/VECTOR_STORE_SETUP_GUIDE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48d0a1eba87c7ee40ac684fd7c80bd24020a600d",
+      "size": 11639,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48d0a1eba87c7ee40ac684fd7c80bd24020a600d"
+    },
+    {
+      "path": "packages/story-generator/docs/YAML_IMPORT_FEATURE.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54f58f41ba43107790135f41ec0281900dc26fa7",
+      "size": 4580,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54f58f41ba43107790135f41ec0281900dc26fa7"
+    },
+    {
+      "path": "packages/story-generator/docs/test-yaml-import.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f998968a2b3b6bd95d271bc2c14b376b039e9ee",
+      "size": 4027,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2f998968a2b3b6bd95d271bc2c14b376b039e9ee"
+    },
+    {
+      "path": "packages/story-generator/scripts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2f4f786517b9d6f9daa681004b6c5183e922fe65",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/2f4f786517b9d6f9daa681004b6c5183e922fe65"
+    },
+    {
+      "path": "packages/story-generator/scripts/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "95ace1a26e41cc5c21fa3018aef2c71bafaf06de",
+      "size": 4954,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/95ace1a26e41cc5c21fa3018aef2c71bafaf06de"
+    },
+    {
+      "path": "packages/story-generator/scripts/list-agents.py",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd2553802517d302b49571e7f6dc8b384fe09036",
+      "size": 3509,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dd2553802517d302b49571e7f6dc8b384fe09036"
+    },
+    {
+      "path": "packages/story-generator/scripts/list-agents.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "6e92995604a40abc39f35d6e7f1641d4001f28d3",
+      "size": 3932,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6e92995604a40abc39f35d6e7f1641d4001f28d3"
+    },
+    {
+      "path": "packages/story-generator/scripts/setup-agents.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c362e99323db8977d8796ed5a5d6b72788eecac",
+      "size": 2842,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1c362e99323db8977d8796ed5a5d6b72788eecac"
+    },
+    {
+      "path": "packages/story-generator/src",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1bf7afa8a6d52d8d47fc7111e2ed85ac6a26b5e0",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1bf7afa8a6d52d8d47fc7111e2ed85ac6a26b5e0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.AgentSetup",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6f98064133650247d08ab6e4f749fe74264c64a2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6f98064133650247d08ab6e4f749fe74264c64a2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.AgentSetup/Mystira.StoryGenerator.AgentSetup.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d84e0858c36b21cd62d9ff6f02d2eaa75e7ad59f",
+      "size": 576,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d84e0858c36b21cd62d9ff6f02d2eaa75e7ad59f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.AgentSetup/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7dc35b2393cbe887220606ac0017b5e76d2dbe4b",
+      "size": 12812,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7dc35b2393cbe887220606ac0017b5e76d2dbe4b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be2b0ae5323703ac314c5248e460de8011a9ac57",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/be2b0ae5323703ac314c5248e460de8011a9ac57"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d45e4577661279dd553d52c4f546b5c98b7b118d",
+      "size": 107,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d45e4577661279dd553d52c4f546b5c98b7b118d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d08877771e9425b333f8f94aad0032128e3dca99",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d08877771e9425b333f8f94aad0032128e3dca99"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/ChatController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c6c6d6992b76e04cfcb83b53641e0096ede24a2",
+      "size": 5310,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1c6c6d6992b76e04cfcb83b53641e0096ede24a2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/ScenarioDominatorPathAnalysisController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e34f7ecf605cdce1054fb19dd3099fa5fd185ea1",
+      "size": 5238,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e34f7ecf605cdce1054fb19dd3099fa5fd185ea1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/SchemaController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb20c48090ff292cc5208c79690aef1290589062",
+      "size": 3198,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eb20c48090ff292cc5208c79690aef1290589062"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/StoriesController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09f0ea1827353c97184bc2b4fa751f3304ac4949",
+      "size": 18105,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/09f0ea1827353c97184bc2b4fa751f3304ac4949"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/StoryAgentController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a989c8c045a95b22d6464083578fe3ccdfab2ab",
+      "size": 28372,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9a989c8c045a95b22d6464083578fe3ccdfab2ab"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Controllers/StoryContinuityController.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "34c1b5b60f0a26ee66e3fd4bb8378f0df7e0d150",
+      "size": 6119,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/34c1b5b60f0a26ee66e3fd4bb8378f0df7e0d150"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Dockerfile",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "193a43679e995f9627eff6e48b87f6d5c09b2767",
+      "size": 3235,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/193a43679e995f9627eff6e48b87f6d5c09b2767"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Extensions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3ff457092ba175f8190d15b7b55601d0e7a21e4e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/3ff457092ba175f8190d15b7b55601d0e7a21e4e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Extensions/ChatMessageExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26162fbba45083068e7f5939a79a781d7cb2aeba",
+      "size": 1194,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/26162fbba45083068e7f5939a79a781d7cb2aeba"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Infrastructure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "da79e25f1e55d72395a84c41c2d1da6e15598b11",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/da79e25f1e55d72395a84c41c2d1da6e15598b11"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Infrastructure/Agents",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9212cc25626166dfcd2cb78a0e20a40a963c767b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9212cc25626166dfcd2cb78a0e20a40a963c767b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Infrastructure/Agents/SignalRStreamPublisher.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4e23266177c9d804214f416311aff76967c48ba",
+      "size": 2765,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c4e23266177c9d804214f416311aff76967c48ba"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62986b53051782f50078f32c608e5fb585fbe723",
+      "size": 1414,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/62986b53051782f50078f32c608e5fb585fbe723"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.http",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fbb8892f9401aea27dcf11bb2eb068ada37ecd0",
+      "size": 170,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1fbb8892f9401aea27dcf11bb2eb068ada37ecd0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f5298ffc24f03b5ee3bc5f3b60b05d61c5dbb4ec",
+      "size": 8924,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f5298ffc24f03b5ee3bc5f3b60b05d61c5dbb4ec"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "63ac822ff4b571e0e4e28de73382fb11eebc8d85",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/63ac822ff4b571e0e4e28de73382fb11eebc8d85"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Properties/AssemblyInfo.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ae8517762d47c2df9add0e17005609105409ae2f",
+      "size": 110,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ae8517762d47c2df9add0e17005609105409ae2f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Properties/launchSettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8669e3aa6340319ba026c0cf48a2a9be93a53ca4",
+      "size": 1084,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8669e3aa6340319ba026c0cf48a2a9be93a53ca4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4970f496b731931ebc6a334468cf0bdfbcd61de6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4970f496b731931ebc6a334468cf0bdfbcd61de6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services/ContinuityAsync",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "45c2a11ed5ef0217e80900f06c58f90b6b6d4505",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/45c2a11ed5ef0217e80900f06c58f90b6b6d4505"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services/ContinuityAsync/ContinuityAsyncModels.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b91364ccecc6794758be9d3f3f452ee3fc4b7a69",
+      "size": 2834,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b91364ccecc6794758be9d3f3f452ee3fc4b7a69"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services/ContinuityAsync/ContinuityWorker.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8a3a9572223f8137f0ea2412367fc6cf66a27e5c",
+      "size": 3981,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8a3a9572223f8137f0ea2412367fc6cf66a27e5c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services/FileStorySchemaProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fe14829aadd7a84e710e267fac7b6a796cad1884",
+      "size": 1859,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fe14829aadd7a84e710e267fac7b6a796cad1884"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/Services/StoryValidationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4624a9bc68ac532596da3b13c871d09ee00a28f3",
+      "size": 14867,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4624a9bc68ac532596da3b13c871d09ee00a28f3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb1cbcc71ce98988a97427b10d37239d3862efc5",
+      "size": 8379,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb1cbcc71ce98988a97427b10d37239d3862efc5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/config",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "0681d75fb2455f0d401a83e6b4df14a74256b554",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/0681d75fb2455f0d401a83e6b4df14a74256b554"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Api/config/story-schema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb49c2462a103d07b8680af46ca2010a27522f21",
+      "size": 8416,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb49c2462a103d07b8680af46ca2010a27522f21"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e6cf4582f184b9896eaa14f15ffce504c2fc4269",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e6cf4582f184b9896eaa14f15ffce504c2fc4269"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/FoundryServiceCollectionExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a3f709db17a16b71e3ced302c9eb7f9a4b2ffa2e",
+      "size": 7643,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a3f709db17a16b71e3ced302c9eb7f9a4b2ffa2e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bbf2b8bffbba157738564f44abe1ecd95453845b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bbf2b8bffbba157738564f44abe1ecd95453845b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8551d19b5b9dab9be467cf3b86d45a03abc18cde",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/8551d19b5b9dab9be467cf3b86d45a03abc18cde"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/ChatContextSummaryBuilder.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2deec906830fda7bbb7b6bd4b4dd6ce00dd654ab",
+      "size": 1526,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2deec906830fda7bbb7b6bd4b4dd6ce00dd654ab"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/FreeTextCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7791f30b68cc0bbdd3b8ecffb7a198df56957098",
+      "size": 7216,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7791f30b68cc0bbdd3b8ecffb7a198df56957098"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/GuidelinesCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ace160c4850edbeea45e574f9955495e78fe9e61",
+      "size": 6539,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ace160c4850edbeea45e574f9955495e78fe9e61"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/HelpCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2442728ad224951af8b1aea820e4f71957eafe0a",
+      "size": 2798,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2442728ad224951af8b1aea820e4f71957eafe0a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/RequirementsCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ecf57329d6e2f5115d2ade6c321cdbefb297c062",
+      "size": 6643,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ecf57329d6e2f5115d2ade6c321cdbefb297c062"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/SafetyPolicyCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "47cebee8daa5e0e8a5f1a0f7a6d7c24cf0ed83a8",
+      "size": 7095,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/47cebee8daa5e0e8a5f1a0f7a6d7c24cf0ed83a8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Chat/SchemaDocsCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9969a70eb32d66da222b24d558498464e9b86797",
+      "size": 7348,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9969a70eb32d66da222b24d558498464e9b86797"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c461cd229ff07dbf819d6108917ebaa4ed8a7f0a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c461cd229ff07dbf819d6108917ebaa4ed8a7f0a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories/AutoFixStoryJsonCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54de8d8fbcbae95e60fd30e1f657df8cf409ddfb",
+      "size": 5637,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54de8d8fbcbae95e60fd30e1f657df8cf409ddfb"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories/GenerateStoryCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ba86173863bc065fe2e5b0b5b2a44cb2223dc9ef",
+      "size": 21368,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ba86173863bc065fe2e5b0b5b2a44cb2223dc9ef"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories/RefineStoryCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a6d9dae150b62fff40c4b8abc6c13a16ae8a580",
+      "size": 14262,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a6d9dae150b62fff40c4b8abc6c13a16ae8a580"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories/SummarizeStoryCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bebdbee1425087ee884a66e00842f163698bfaca",
+      "size": 3451,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bebdbee1425087ee884a66e00842f163698bfaca"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Handlers/Stories/ValidateStoryCommandHandler.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ec01467d4159c80fdc1ee35aeaa93384035ed4cd",
+      "size": 1180,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ec01467d4159c80fdc1ee35aeaa93384035ed4cd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7e883a331f8246d9eb662923fb5c751ee43b7ae7",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7e883a331f8246d9eb662923fb5c751ee43b7ae7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "43e60a8769e50433fdd2c3c5cab5e0753f8c0d33",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/43e60a8769e50433fdd2c3c5cab5e0753f8c0d33"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AISearchKnowledgeProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1b2cc65e2210e09f512662e9eecbbace9fc6613d",
+      "size": 7938,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1b2cc65e2210e09f512662e9eecbbace9fc6613d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AgentOrchestrator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "baf6be608a4e1524294ef84004e7246ba829d007",
+      "size": 34818,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/baf6be608a4e1524294ef84004e7246ba829d007"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AgentOrchestrator_SchemaHelper.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "484935794c61007d9697a0b43ee2ecd4d6912dc5",
+      "size": 1788,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/484935794c61007d9697a0b43ee2ecd4d6912dc5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AgentOrchestrator_Streaming.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b716acc89e12e63ff871a4d95c43d33e0f2c78b8",
+      "size": 24505,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b716acc89e12e63ff871a4d95c43d33e0f2c78b8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AgentResponseParser.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93aa13447d1c74dfe71cc31d6413f197c7feee27",
+      "size": 2200,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/93aa13447d1c74dfe71cc31d6413f197c7feee27"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/AgentStreamEvent.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9471b530af2320ecdbddaf1b3f485fd876bef69c",
+      "size": 1434,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9471b530af2320ecdbddaf1b3f485fd876bef69c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/CosmosStorySessionRepository.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37e5f16433fa4658fe7b3deeeccd883ce8c289f1",
+      "size": 5923,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/37e5f16433fa4658fe7b3deeeccd883ce8c289f1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/FileSearchKnowledgeProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "da39ba7a616e797a88be4746702c9505c849f870",
+      "size": 9149,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/da39ba7a616e797a88be4746702c9505c849f870"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/IAgentOrchestrator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9559e84ae4d0565152dc3c62cc5cdebe69638384",
+      "size": 4584,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9559e84ae4d0565152dc3c62cc5cdebe69638384"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/IAgentStreamPublisher.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "741bc8a0131846b8d6ed3e1ee540fa59ef4cb021",
+      "size": 893,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/741bc8a0131846b8d6ed3e1ee540fa59ef4cb021"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/IAsyncObserver.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10f3dd14baf7fd5ce565cbaffefdba42489308fb",
+      "size": 647,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/10f3dd14baf7fd5ce565cbaffefdba42489308fb"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/IKnowledgeProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d049845e2633c5437100422ee0dd50fe401d84be",
+      "size": 1949,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d049845e2633c5437100422ee0dd50fe401d84be"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/IStorySessionRepository.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbd8582754311c30589d57436a1ad419b8867b31",
+      "size": 2114,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fbd8582754311c30589d57436a1ad419b8867b31"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/InMemoryStreamPublisher.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a76161e1819fb17314f488f90913c695ff145379",
+      "size": 4967,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a76161e1819fb17314f488f90913c695ff145379"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/JsonToYamlConverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4578d6fe848365a2861ac8b4ee0de8e15830b087",
+      "size": 2665,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4578d6fe848365a2861ac8b4ee0de8e15830b087"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/Agents/StorySchemaValidator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c0e03414e330320055dcf46eaf1c1cdb8d36c55",
+      "size": 2230,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8c0e03414e330320055dcf46eaf1c1cdb8d36c55"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/RateLimiting",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d770a459e2c5e9c6ce43397112c767c067b4740c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d770a459e2c5e9c6ce43397112c767c067b4740c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Infrastructure/RateLimiting/PerMinuteRateLimiter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca909c2c03d3378de21ea854b22b25d679589acd",
+      "size": 1690,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca909c2c03d3378de21ea854b22b25d679589acd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Mystira.StoryGenerator.Application.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e4d3e36a8f4aa56c90ea9743fcacfea9ce58140e",
+      "size": 1446,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e4d3e36a8f4aa56c90ea9743fcacfea9ce58140e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/PromptTemplates",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "48e2ef2a2097ddc7fb8f0c91016067eee937729c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/48e2ef2a2097ddc7fb8f0c91016067eee937729c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/PromptTemplates/JudgeAgentPrompt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "734f425b81f39cf4942e01e6614b1e313dfa13e3",
+      "size": 2735,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/734f425b81f39cf4942e01e6614b1e313dfa13e3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/PromptTemplates/RefinerAgentPrompt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d42e0a0705b43810050f47e0060cc41eefd8c887",
+      "size": 8938,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d42e0a0705b43810050f47e0060cc41eefd8c887"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/PromptTemplates/RubricSummaryAgentPrompt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d0e40f3c66f734af36d753a358ddfa1b49d22e8",
+      "size": 1515,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3d0e40f3c66f734af36d753a358ddfa1b49d22e8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/PromptTemplates/WriterAgentPrompt.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fd66c7a6f784671c4997dfc60108fcce85d752bd",
+      "size": 8237,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fd66c7a6f784671c4997dfc60108fcce85d752bd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Resources",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f7ce01508aadc81005ca88f6218045341fdc8568",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f7ce01508aadc81005ca88f6218045341fdc8568"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Resources/FoundryDevelopmentPrinciples.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "28fb3caad1b85beb9c1a30c3134a8cf00fe2eba0",
+      "size": 427,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/28fb3caad1b85beb9c1a30c3134a8cf00fe2eba0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Resources/FoundryProjectGuidelines.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d2b2b85742b4a074997147c5990235dabac5b626",
+      "size": 402,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d2b2b85742b4a074997147c5990235dabac5b626"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Resources/FoundrySafetyGuidelines.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c937e8efb8c62a46ee173e2d1d5eaa7cc2a834e",
+      "size": 339,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1c937e8efb8c62a46ee173e2d1d5eaa7cc2a834e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Resources/FoundryStorySchema.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb49c2462a103d07b8680af46ca2010a27522f21",
+      "size": 8416,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb49c2462a103d07b8680af46ca2010a27522f21"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Scenarios",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "6c104937c6f23de88749ee70938f101fe27732c1",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/6c104937c6f23de88749ee70938f101fe27732c1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Scenarios/ScenarioExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "216dad3e047877afe8eebe725457b779b4ea8d69",
+      "size": 2385,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/216dad3e047877afe8eebe725457b779b4ea8d69"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Scenarios/ScenarioFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "31248e35fec3189e2fae2e674e25cf9840957d85",
+      "size": 12280,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/31248e35fec3189e2fae2e674e25cf9840957d85"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Scenarios/ScenarioGraph.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edf599dfed3fe0a12c3a0c5624502166b43d316c",
+      "size": 9775,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/edf599dfed3fe0a12c3a0c5624502166b43d316c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "59115520b1a457c9f324afa8a5b4d5393e5843da",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/59115520b1a457c9f324afa8a5b4d5393e5843da"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ChatOrchestrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bdbe2d169a557b87545668d9053eb24afe00bdc4",
+      "size": 28587,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bdbe2d169a557b87545668d9053eb24afe00bdc4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/IStoryMediaProcessor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "42c137fdca7f1a15434c4169cb10bb1136162d84",
+      "size": 147,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/42c137fdca7f1a15434c4169cb10bb1136162d84"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/Prompting",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7c16f7c7d3f9453d9025e88348a3237a90aa04c5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7c16f7c7d3f9453d9025e88348a3237a90aa04c5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/Prompting/IProjectGuidelinesService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "306395134df0e805977d0b44c28b5ef8451a8791",
+      "size": 260,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/306395134df0e805977d0b44c28b5ef8451a8791"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/Prompting/IPromptGenerator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "16cf70106c212ccfbfcad9114d26051db70f1eb6",
+      "size": 566,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/16cf70106c212ccfbfcad9114d26051db70f1eb6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/Prompting/ProjectGuidelinesService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7436dda02e025460874a0c9defc66650a35997ee",
+      "size": 1696,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7436dda02e025460874a0c9defc66650a35997ee"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/Prompting/PromptGenerator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3de4f7f1e91009338a97ce8a556438dfe774360a",
+      "size": 2565,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3de4f7f1e91009338a97ce8a556438dfe774360a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ScenarioContinuityService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3a8082feb8b4161f8d1b306a9db96a751ab625f5",
+      "size": 5587,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3a8082feb8b4161f8d1b306a9db96a751ab625f5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ScenarioDominatorPathConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "75a21318e926a6cb2521be88f3a154867083a117",
+      "size": 4451,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/75a21318e926a6cb2521be88f3a154867083a117"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ScenarioEntityConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "59fdd7d11b4eb30e8740e08825150a673723e02c",
+      "size": 10395,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/59fdd7d11b4eb30e8740e08825150a673723e02c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ScenarioPrefixSummaryService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a651a449f5c2a5d73b914e1df1d19ce9ab1ee00",
+      "size": 3445,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7a651a449f5c2a5d73b914e1df1d19ce9ab1ee00"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/ScenarioSrlAnalysisService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9ea94c8ac315198a4f022755f8d5105deaf4dd33",
+      "size": 5543,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9ea94c8ac315198a4f022755f8d5105deaf4dd33"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Services/StoryMediaProcessor.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "07e4c5abade9b607ba563b8181b90e4831dd0d72",
+      "size": 5367,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/07e4c5abade9b607ba563b8181b90e4831dd0d72"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "5fcf32e397c3a06c85c79894f74c0f16d9658a0d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/5fcf32e397c3a06c85c79894f74c0f16d9658a0d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ContinuityAnalyzer",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c4acac41c0049583632386477cdd61f4cbd597ba",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c4acac41c0049583632386477cdd61f4cbd597ba"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ContinuityAnalyzer/EntityContinuityAnalyzer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5a701e4a626df2590d0c91ece7ac138b97eb92ce",
+      "size": 7767,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5a701e4a626df2590d0c91ece7ac138b97eb92ce"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ContinuityAnalyzer/EntityContinuityIssueFiltering.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bc5fb43c3585bead60b50ce67c84b151e34fa69b",
+      "size": 2160,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bc5fb43c3585bead60b50ce67c84b151e34fa69b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/ContinuityAnalyzer/SrlEntityClassificationComparer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a89749f98000a63509d569d59ea34c992067fda6",
+      "size": 1161,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a89749f98000a63509d569d59ea34c992067fda6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/EntityConsistency",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "ab4f04618e0d5f8548919dab284696444d8aa256",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/ab4f04618e0d5f8548919dab284696444d8aa256"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/EntityConsistency/EntityIntroductionViolation.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "98285cdfd5665844ad8dad758d85f7e687f2112f",
+      "size": 381,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/98285cdfd5665844ad8dad758d85f7e687f2112f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/EntityConsistency/ScenarioEntityIntroductionValidator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d0e0dec7fe9c5b295ac521bd8676f4e6a2831938",
+      "size": 9250,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d0e0dec7fe9c5b295ac521bd8676f4e6a2831938"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/Legacy",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bfdce9b5c00146edf2e7c9a037bab350ee6634f0",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bfdce9b5c00146edf2e7c9a037bab350ee6634f0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/Legacy/ScenarioConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "37f1ca868d3b9c206d1074816980d8c6410626fa",
+      "size": 3052,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/37f1ca868d3b9c206d1074816980d8c6410626fa"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/PrefixSummary",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "00fda294c253fd1e94ab9b08b9b69ebafe2403e6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/00fda294c253fd1e94ab9b08b9b69ebafe2403e6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/PrefixSummary/PrefixSummaryMerger.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f72a33a7f468abf9a05d396b96800ab59a7be7a",
+      "size": 6304,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4f72a33a7f468abf9a05d396b96800ab59a7be7a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/StoryConsistencyAnalysis/SceneNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d4dd5115174fa88536b76717adf0e0696491a6d",
+      "size": 2019,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9d4dd5115174fa88536b76717adf0e0696491a6d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Utilities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b48b52ee78cf7776163e985101d07ed246a76b6d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b48b52ee78cf7776163e985101d07ed246a76b6d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/Utilities/StoryTextSanitizer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c22769bb4a737e203e9d5a528468aad02d33d2fa",
+      "size": 4883,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c22769bb4a737e203e9d5a528468aad02d33d2fa"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Application/readme.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b92663c68a42880d289ca22935956e5c84e6a968",
+      "size": 8033,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b92663c68a42880d289ca22935956e5c84e6a968"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Console",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d023fcf35b5ef42cb610f896d2b243aff678d49b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d023fcf35b5ef42cb610f896d2b243aff678d49b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Console/Mystira.StoryGenerator.Console.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d4165431db4fbacf981d73e53ef6524972ce4645",
+      "size": 601,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d4165431db4fbacf981d73e53ef6524972ce4645"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Console/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff7029d17ebf9628a7221267196e18b847233b6a",
+      "size": 2225,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ff7029d17ebf9628a7221267196e18b847233b6a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8b2c1ac5ace46657cc31e0ce31675024bb954b0a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/8b2c1ac5ace46657cc31e0ce31675024bb954b0a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b074a1d3d3c323c553877f3cdbf14e14983f1da5",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b074a1d3d3c323c553877f3cdbf14e14983f1da5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents/EvaluationReport.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f51bf6d236892706dac7d23278cbfad099949ca6",
+      "size": 2552,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f51bf6d236892706dac7d23278cbfad099949ca6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents/RubricSummary.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f88a892f2e6b7d38396fde596ab053356f037be0",
+      "size": 941,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f88a892f2e6b7d38396fde596ab053356f037be0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents/StorySessionEnums.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f418a9f78beaf244b71da11ea81b40710009b669",
+      "size": 2384,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f418a9f78beaf244b71da11ea81b40710009b669"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents/StoryVersionSnapshot.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9a71d09b25fa0c90645802818b51d12b0fa9b2de",
+      "size": 1042,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9a71d09b25fa0c90645802818b51d12b0fa9b2de"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Agents/UserRefinementFocus.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a9921346452a63588cdd12d478ff578c1620060",
+      "size": 828,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6a9921346452a63588cdd12d478ff578c1620060"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a20b91eaa5b1287443e698d0d445253163dda07c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a20b91eaa5b1287443e698d0d445253163dda07c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/ChatCompletionRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b1ec7fbc0145fc4041ee69b5bce2bfce6439fea3",
+      "size": 3315,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b1ec7fbc0145fc4041ee69b5bce2bfce6439fea3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/ChatCompletionResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1fc15a3022529a8179d65df75974f0ea258f1bfd",
+      "size": 2550,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1fc15a3022529a8179d65df75974f0ea258f1bfd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/ChatModelsResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d30ac5082bda493db97f97832d1dbcdbb0919b4",
+      "size": 2987,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4d30ac5082bda493db97f97832d1dbcdbb0919b4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/ChatOrchestrationResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b70c62e93c7f4a91adc13714bfe6096530bdf11",
+      "size": 840,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6b70c62e93c7f4a91adc13714bfe6096530bdf11"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/ChatSession.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21635669baa83d44c4bf9537c99bb8a712781d60",
+      "size": 1995,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/21635669baa83d44c4bf9537c99bb8a712781d60"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/MystiraChatMessage.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3ca38100dca8e78cd0339962a4638fd090137023",
+      "size": 713,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3ca38100dca8e78cd0339962a4638fd090137023"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Chat/StorySnapshot.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "62404ab5a0c47b9cb11aa2610e452d8621e5d146",
+      "size": 2936,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/62404ab5a0c47b9cb11aa2610e452d8621e5d146"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "364d85cc27c0c7aa377daa37a03c5c613783348b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/364d85cc27c0c7aa377daa37a03c5c613783348b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/AiSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "baef10282b1ef2e7f1658fe206c76b3fa79712cd",
+      "size": 8108,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/baef10282b1ef2e7f1658fe206c76b3fa79712cd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/FoundryAgentConfig.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "38b82ce7d742eb0efd170b3c8a2622a24981ec4d",
+      "size": 5198,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/38b82ce7d742eb0efd170b3c8a2622a24981ec4d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/FoundryAgentConfigValidator.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "764f6a0d541eda91b05cf37f915b5c7c2b6192df",
+      "size": 3565,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/764f6a0d541eda91b05cf37f915b5c7c2b6192df"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/InstructionSearchSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a6584c813351e4d8c9aa731040a96079e82d9151",
+      "size": 2265,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a6584c813351e4d8c9aa731040a96079e82d9151"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/IntentRouterSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb80fc40804aecee1f2444e9ef19d182315e903f",
+      "size": 662,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb80fc40804aecee1f2444e9ef19d182315e903f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Configuration/LlmRateLimitOptions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71f4fa26410b1875867a54b87a03a85968a57c26",
+      "size": 383,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/71f4fa26410b1875867a54b87a03a85968a57c26"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "56b082eb8f2e2554cf5347d26e233757b4960343",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/56b082eb8f2e2554cf5347d26e233757b4960343"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities/Confidence.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23a0a3f14d77ccdb6cf4fa0916c3c2fc71a1ad9a",
+      "size": 297,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/23a0a3f14d77ccdb6cf4fa0916c3c2fc71a1ad9a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities/EntityClassification.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4f13b0cf0691d99a6bfe4ed2557524b9ac481dfe",
+      "size": 468,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4f13b0cf0691d99a6bfe4ed2557524b9ac481dfe"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities/SceneEntity.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "520ef806ea4afa2f8257a9cd93c6f6452d737fcd",
+      "size": 463,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/520ef806ea4afa2f8257a9cd93c6f6452d737fcd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities/SceneEntityComparer.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a1d521351619634a4c54eee1b230dc7f7f71a37",
+      "size": 659,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7a1d521351619634a4c54eee1b230dc7f7f71a37"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Entities/SceneEntityType.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a3c94d631b3288dfca2bbad7033a985e067a1a6",
+      "size": 1157,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1a3c94d631b3288dfca2bbad7033a985e067a1a6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Extensions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2e17972d887fe28910f0a74b80b9dc0b026d59fa",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/2e17972d887fe28910f0a74b80b9dc0b026d59fa"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Extensions/ChatMessageExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de5e0b1cf564c887c93fed2232670bef067458d1",
+      "size": 1196,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/de5e0b1cf564c887c93fed2232670bef067458d1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Intent",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "66fc3ef140f97e3c611f82938e4b25260bc2d36c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/66fc3ef140f97e3c611f82938e4b25260bc2d36c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Intent/IntentClassification.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8f55a5c5155a8682c0b4791d60883a8c71613f3b",
+      "size": 1404,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8f55a5c5155a8682c0b4791d60883a8c71613f3b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7fdb860e4ff872b538ae7328c9cc57ae345c8022",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7fdb860e4ff872b538ae7328c9cc57ae345c8022"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/EvaluateRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ccc66cee4e6bde1fe5584a8891c4dda509303633",
+      "size": 351,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ccc66cee4e6bde1fe5584a8891c4dda509303633"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/EvaluateResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5470fa8e5bc4671d7e20580767a18e9f925e6a07",
+      "size": 765,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5470fa8e5bc4671d7e20580767a18e9f925e6a07"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/RefineRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ca7bb98b21124a7f1b854fdbb51cfc67d00129ad",
+      "size": 741,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ca7bb98b21124a7f1b854fdbb51cfc67d00129ad"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/RefineResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8707cea11299e657e78dc9199411c9c8b9a0ab0",
+      "size": 706,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f8707cea11299e657e78dc9199411c9c8b9a0ab0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/SessionStartResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "15a182b5eec3f6bebfd88dafc0d2e417ca3894dd",
+      "size": 834,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/15a182b5eec3f6bebfd88dafc0d2e417ca3894dd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/SessionStateResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4d444d5f4e35e3953c621501d990148c381857c5",
+      "size": 1718,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4d444d5f4e35e3953c621501d990148c381857c5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Models/StartSessionRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3e9e6fd791016864b73af388be8f79a2bdb07d25",
+      "size": 1566,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3e9e6fd791016864b73af388be8f79a2bdb07d25"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "49c03e840fc87cd22a1b6b879154155cf3d270c3",
+      "size": 372,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/49c03e840fc87cd22a1b6b879154155cf3d270c3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bab526e94ad4a1eb19067c5e34fede2ed42fc4ad",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bab526e94ad4a1eb19067c5e34fede2ed42fc4ad"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/GenerateJsonStoryRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "402b463b559514e0a8f8960513d9fe0badc36e9b",
+      "size": 959,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/402b463b559514e0a8f8960513d9fe0badc36e9b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/GenerateJsonStoryResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc13eaaeecf48adfbce631daec1f3c4631a9ddf9",
+      "size": 519,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc13eaaeecf48adfbce631daec1f3c4631a9ddf9"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/GenerateStoryRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e3cebc797368e6ff0dceada05580a7a05ba7d84",
+      "size": 250,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2e3cebc797368e6ff0dceada05580a7a05ba7d84"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/GenerateStoryResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e9c2a465defdbbbc9ae8cb30e4ab3a897feda0f",
+      "size": 201,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9e9c2a465defdbbbc9ae8cb30e4ab3a897feda0f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/RandomStoryParametersRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d9a9282c85bebd18ad137b52b0b777d7e69afd1b",
+      "size": 725,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d9a9282c85bebd18ad137b52b0b777d7e69afd1b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/RandomStoryParametersResponse.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48c226843b4ac1ea5f9972adfee4b34478ef153b",
+      "size": 1110,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48c226843b4ac1ea5f9972adfee4b34478ef153b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/Stories/ValidationModels.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa24d5967493c02d3350b72e6ecf3cec3c511e37",
+      "size": 872,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fa24d5967493c02d3350b72e6ecf3cec3c511e37"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "37b899df27a21586355f96f861fae6c724ad0c18",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/37b899df27a21586355f96f861fae6c724ad0c18"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/ConsistencyEvaluationResult.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "623c9b69e833c84f05ab084fe1ddfe008bded6f0",
+      "size": 1200,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/623c9b69e833c84f05ab084fe1ddfe008bded6f0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/EntityContinuityIssue.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8434775bd92c6a6d33aa03b155c1639c2f2c2b50",
+      "size": 917,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8434775bd92c6a6d33aa03b155c1639c2f2c2b50"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/ScenarioConsistencyEvaluationResult.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d258546d9c7217b918a20ae5f43dc135165a9cd",
+      "size": 3675,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3d258546d9c7217b918a20ae5f43dc135165a9cd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/ScenarioPath.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8d2051bc917d5f70352cef9f3cf48991e8a48df",
+      "size": 641,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f8d2051bc917d5f70352cef9f3cf48991e8a48df"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/ScenarioPathPrefixSummary.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8e02930842ff11d59ff5107642f1de6dd1d61ac4",
+      "size": 4079,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8e02930842ff11d59ff5107642f1de6dd1d61ac4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Contracts/StoryConsistency/SemanticRoleLabellingClassification.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2d985ae71c063470eed8ccf0bf783f5fd64ca7f",
+      "size": 2381,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c2d985ae71c063470eed8ccf0bf783f5fd64ca7f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1e6e8ddf63d90b2550b87bf3f1d5bfc6f160884e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1e6e8ddf63d90b2550b87bf3f1d5bfc6f160884e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Agents",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e327b9b30794a6ceeeba00c03350604724b261f0",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e327b9b30794a6ceeeba00c03350604724b261f0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Agents/IterationRecord.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4dcc5dd7dab11749e7c18c08ebd16df0fc47bda0",
+      "size": 1865,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4dcc5dd7dab11749e7c18c08ebd16df0fc47bda0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Agents/StorySchema.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3340df18f0a88271b72369b6b65e967ac7c74b58",
+      "size": 3357,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3340df18f0a88271b72369b6b65e967ac7c74b58"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Agents/StorySession.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6923502e2871c9e513441173524b3def09d7b708",
+      "size": 3050,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6923502e2871c9e513441173524b3def09d7b708"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4eaa335a4ab4363491b6ac7159dc63ab00f88eff",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4eaa335a4ab4363491b6ac7159dc63ab00f88eff"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a92d039af8a22ae20dcc074b54654480d1383a7d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a92d039af8a22ae20dcc074b54654480d1383a7d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/FreeTextCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "feff2e4645b8c87049d3e8a3c6eca92e1b94f129",
+      "size": 650,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/feff2e4645b8c87049d3e8a3c6eca92e1b94f129"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/GuidelinesCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "17d488e7eb42a80930e74d3656e4326944fe246d",
+      "size": 666,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/17d488e7eb42a80930e74d3656e4326944fe246d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/HelpCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e2dbdc02d95639eb7e5e41db57b80ace59c39333",
+      "size": 468,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e2dbdc02d95639eb7e5e41db57b80ace59c39333"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/RequirementsCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "26ff8797f83495f4c8d566d9cacb6aa750e709b0",
+      "size": 670,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/26ff8797f83495f4c8d566d9cacb6aa750e709b0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/SafetyPolicyCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ea9400b017c0fc1791450bcc1823a48cd7b9c116",
+      "size": 670,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ea9400b017c0fc1791450bcc1823a48cd7b9c116"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Chat/SchemaDocsCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5048dc405b7d406ef13e13805a7d38c609a912c6",
+      "size": 666,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5048dc405b7d406ef13e13805a7d38c609a912c6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/ICommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a943d674d9dfc3dc0b085bb6850094b541411a4",
+      "size": 361,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a943d674d9dfc3dc0b085bb6850094b541411a4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "457a238747e454f8d549c792c5a658586a15c4db",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/457a238747e454f8d549c792c5a658586a15c4db"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories/AutoFixStoryJsonCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7ad7b8d44798be471d7ccb61c11a58b2afc22536",
+      "size": 930,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7ad7b8d44798be471d7ccb61c11a58b2afc22536"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories/GenerateStoryCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c6d3137557113b9ea867a9c0e73ec22580adc9b3",
+      "size": 661,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c6d3137557113b9ea867a9c0e73ec22580adc9b3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories/RefineStoryCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aef91d323977973ae1e6a4f65974aecaaa1020d2",
+      "size": 892,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aef91d323977973ae1e6a4f65974aecaaa1020d2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories/SummarizeStoryCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1c2a52704bdb53791962a2d35a77e9244a512a5e",
+      "size": 766,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1c2a52704bdb53791962a2d35a77e9244a512a5e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Commands/Stories/ValidateStoryCommand.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "52c03eb6b2392e5e77dce02ddd9168a31d06444e",
+      "size": 767,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/52c03eb6b2392e5e77dce02ddd9168a31d06444e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9d3f5f9c5ddcc96109341dbcc3ae6070677d468d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9d3f5f9c5ddcc96109341dbcc3ae6070677d468d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph/IDirectedGraph.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "272c4e11dc48d4947d66080a3e8cbf6f737b20a9",
+      "size": 513,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/272c4e11dc48d4947d66080a3e8cbf6f737b20a9"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph/IEdge.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dcac87461b4110aa6a4f6db4a57a1bc99e3e99bc",
+      "size": 266,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dcac87461b4110aa6a4f6db4a57a1bc99e3e99bc"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph/IGraph.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d0fd41263951354c761ece3768b824e4a1d698b",
+      "size": 206,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5d0fd41263951354c761ece3768b824e4a1d698b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph/IScenarioGraph.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f079994b423d5778bcb213cc8e87030c6ecaaf4",
+      "size": 817,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7f079994b423d5778bcb213cc8e87030c6ecaaf4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Graph/SceneEdge.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eda7f34aab2da40f2d14d915f133838cfeeb4885",
+      "size": 271,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eda7f34aab2da40f2d14d915f133838cfeeb4885"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Mystira.StoryGenerator.Domain.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "80b87b9531ec05b3703138a23a48ec4aa0c9ff78",
+      "size": 527,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/80b87b9531ec05b3703138a23a48ec4aa0c9ff78"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fd31aeaea40526296c9071cea716769257fcb267",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fd31aeaea40526296c9071cea716769257fcb267"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ChatContext.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ee563b48097a802a756525750c7dc80c76fc03cf",
+      "size": 1735,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ee563b48097a802a756525750c7dc80c76fc03cf"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IChatOrchestrationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "083fb53e73b074a0397ceddc1fb8e82fd2093c61",
+      "size": 796,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/083fb53e73b074a0397ceddc1fb8e82fd2093c61"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ICommandRouter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db16ce68173637a09bdb59efdf59fdb11c63ac05",
+      "size": 208,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/db16ce68173637a09bdb59efdf59fdb11c63ac05"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IDominatorPathConsistencyLlmService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "754d31a5356cae45556ad4cd5ae39442a9076478",
+      "size": 309,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/754d31a5356cae45556ad4cd5ae39442a9076478"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IEntityLlmClassificationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "975c25845b787aabbea29c6592e2f3ffe0e323e6",
+      "size": 209,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/975c25845b787aabbea29c6592e2f3ffe0e323e6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IInstructionBlockService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "102d077278f7399a43e0fd9338bf25e2f8094632",
+      "size": 548,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/102d077278f7399a43e0fd9338bf25e2f8094632"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ILlmClassificationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e81d59ce263441fa0ae66322a7441a23c67787c7",
+      "size": 200,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e81d59ce263441fa0ae66322a7441a23c67787c7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ILlmIntentLlmClassificationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a23cc10bd00d2e0af2fc054895335bd52ae47be3",
+      "size": 207,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a23cc10bd00d2e0af2fc054895335bd52ae47be3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ILlmServiceFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dfa57e5d8419fe8e1d8f2f7007d6b8c0181a88c4",
+      "size": 2018,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dfa57e5d8419fe8e1d8f2f7007d6b8c0181a88c4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IPrefixSummaryLlmService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf0f387319dc2832d154b130b54df2cc1ac65702",
+      "size": 338,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cf0f387319dc2832d154b130b54df2cc1ac65702"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IPrefixSummaryService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c90fc2fa30d63798b61e5dadcd0faa75f8c63e1",
+      "size": 361,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2c90fc2fa30d63798b61e5dadcd0faa75f8c63e1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IScenarioConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d1504222256c9cdb6683dc74faadc701b860a659",
+      "size": 1273,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d1504222256c9cdb6683dc74faadc701b860a659"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IScenarioDominatorPathConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a5c633aca22f9a90d718f35f987386314323f72c",
+      "size": 1455,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a5c633aca22f9a90d718f35f987386314323f72c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IScenarioEntityConsistencyEvaluationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "70007e6f15cc09304c800aed324e1ac5bfa1f3f8",
+      "size": 1460,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/70007e6f15cc09304c800aed324e1ac5bfa1f3f8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IScenarioFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3435e0878ceb0ae961e8c8d3dee401f58bdb5808",
+      "size": 948,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3435e0878ceb0ae961e8c8d3dee401f58bdb5808"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IScenarioSrlAnalysisService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cff89f095a64169295e2da2ed50cb2a8c916e737",
+      "size": 450,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cff89f095a64169295e2da2ed50cb2a8c916e737"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/ISemanticRoleLabellingLlmService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9f974b81085124b297dfc4b298b2ed035bf9abfa",
+      "size": 564,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9f974b81085124b297dfc4b298b2ed035bf9abfa"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IStoryContinuityService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "910de2c44c1894f6e714e433a9ee2ac57b9d9e3b",
+      "size": 343,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/910de2c44c1894f6e714e433a9ee2ac57b9d9e3b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IStorySchemaProvider.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4116875859fa5661a6aca15aee6536066f4675cb",
+      "size": 205,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4116875859fa5661a6aca15aee6536066f4675cb"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/IStoryValidationService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "718c0407de2dda1dd6443976e6de0a549c378d42",
+      "size": 224,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/718c0407de2dda1dd6443976e6de0a549c378d42"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Services/StoryConsistencyEvaluation.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "328e7951e5d980c2763d647de3ba8f658f3b43ca",
+      "size": 947,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/328e7951e5d980c2763d647de3ba8f658f3b43ca"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "23266245404165263eaf172677326ca4a593c6cf",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/23266245404165263eaf172677326ca4a593c6cf"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/Scenario.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ff3458d48bf885bdb0a5c32abb61aed24e8e7021",
+      "size": 4226,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ff3458d48bf885bdb0a5c32abb61aed24e8e7021"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/ScenarioDominatorPathAnalysis.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "83f064d723f7266dd8833c5ec05b27bcd8152799",
+      "size": 3256,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/83f064d723f7266dd8833c5ec05b27bcd8152799"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/ScenarioExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b3fcefd24c2603444d848b074ed092c33d83ec6",
+      "size": 398,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5b3fcefd24c2603444d848b074ed092c33d83ec6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/SceneExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5fcd2a7bf05d43722895ab31e4ed7313b845fbb1",
+      "size": 326,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5fcd2a7bf05d43722895ab31e4ed7313b845fbb1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/StoryContinuityAsyncContracts.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1df04d61179e69cb984b7f142cdb566890dd9c56",
+      "size": 950,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1df04d61179e69cb984b7f142cdb566890dd9c56"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Domain/Stories/StoryContinuityIssue.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b27882ad66672b45e5d2119170008cafcb828800",
+      "size": 3838,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b27882ad66672b45e5d2119170008cafcb828800"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3c95aba98c589d8ef227f9c3a409b16cb7657e1c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/3c95aba98c589d8ef227f9c3a409b16cb7657e1c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Algorithms",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "aa5bdd20f9e5636a77a159f40592408a9264dd2c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/aa5bdd20f9e5636a77a159f40592408a9264dd2c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Algorithms/DominatorAlgorithms.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d214258dd48b41db013e3a1293995930c4b7bca4",
+      "size": 3502,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d214258dd48b41db013e3a1293995930c4b7bca4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Algorithms/PathAlgorithms.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fbed4adfb916e3aacecba1d54484d6f477820fd6",
+      "size": 17213,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fbed4adfb916e3aacecba1d54484d6f477820fd6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Algorithms/SearchAlgorithms.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cb5e3694ba43b8137103801f2acb17026141852b",
+      "size": 3668,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cb5e3694ba43b8137103801f2acb17026141852b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Algorithms/SortAlgorithms.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f8a6ceb835c38912c0fb93654f447f812c5667bc",
+      "size": 2564,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f8a6ceb835c38912c0fb93654f447f812c5667bc"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/DataFlowAnalysis",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a9e9b105812faead01bd4e77aba60706bbf8d480",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a9e9b105812faead01bd4e77aba60706bbf8d480"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/DataFlowAnalysis/DataFlowAnalysis.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3832bd1f1b748a87fe2eb8be7f37009eb697a0b9",
+      "size": 7411,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3832bd1f1b748a87fe2eb8be7f37009eb697a0b9"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/DataFlowAnalysis/DataFlowNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d8a8e83d249f90e4e25dffd19b178313ba399d1",
+      "size": 1945,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5d8a8e83d249f90e4e25dffd19b178313ba399d1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/FrontierMergedGraph",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a58b18d329540eadb70b621a4c993fb5edf5270b",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a58b18d329540eadb70b621a4c993fb5edf5270b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/FrontierMergedGraph/FrontierMergedGraphBuilder.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b77950af1c7e5c1fc9d06bbcf8c75405070bdab0",
+      "size": 9357,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b77950af1c7e5c1fc9d06bbcf8c75405070bdab0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/FrontierMergedGraph/FrontierMergedGraphResult.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a8890432bd8de871d076c8c2be797edcca69737a",
+      "size": 3636,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a8890432bd8de871d076c8c2be797edcca69737a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/FrontierMergedGraph/SceneStateNode.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c7070199918272c07e02ecf2b4d929f58d268cea",
+      "size": 1587,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c7070199918272c07e02ecf2b4d929f58d268cea"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/FrontierMergedGraph/SceneTransition.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "60d44c6eaa53789a769a66bfc5af7b4e3008f943",
+      "size": 1443,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/60d44c6eaa53789a769a66bfc5af7b4e3008f943"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Graph",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "2be453eaaee82b831e9b6c2395db160ebd419a31",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/2be453eaaee82b831e9b6c2395db160ebd419a31"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Graph/DirectedGraph.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eac592c0388e11e96a3372def25b5baf7f5e893c",
+      "size": 9247,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eac592c0388e11e96a3372def25b5baf7f5e893c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Graph/Edge.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "344260322cfade605836ed93152f83fece7b318b",
+      "size": 902,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/344260322cfade605836ed93152f83fece7b318b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Mystira.StoryGenerator.GraphTheory.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ac1528c4375ad184b2377d26cccf3f24caa37473",
+      "size": 367,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ac1528c4375ad184b2377d26cccf3f24caa37473"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/readme.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6ba69033cce1bb3491e496f0f463c9f70b0c02a3",
+      "size": 9809,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6ba69033cce1bb3491e496f0f463c9f70b0c02a3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Infrastructure",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "01e3fbea515c77fe7643ac0291febc28ce2aeeb9",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/01e3fbea515c77fe7643ac0291febc28ce2aeeb9"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/Agents",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8852c14049f1078f6f812671c6e73987cffd8030",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/8852c14049f1078f6f812671c6e73987cffd8030"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/Agents/FoundryAgentClient.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "55a15ddef8ceb5c70393912bbf777d6fa2f45c1b",
+      "size": 21769,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/55a15ddef8ceb5c70393912bbf777d6fa2f45c1b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/Mystira.StoryGenerator.Infrastructure.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d40249d38c6f8aaace5fa9ec4e3c80168180f1c3",
+      "size": 962,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d40249d38c6f8aaace5fa9ec4e3c80168180f1c3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "8602e39484da7bdf08e8eb110296e31ccacefa96",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/8602e39484da7bdf08e8eb110296e31ccacefa96"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Mystira.StoryGenerator.Llm.Console.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4eb3b5bd3d576f4831c55979a9bb864c87549a28",
+      "size": 1899,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4eb3b5bd3d576f4831c55979a9bb864c87549a28"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c2d4f549820a156a7999ac5e773193adf47424d5",
+      "size": 9144,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c2d4f549820a156a7999ac5e773193adf47424d5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be0d016f8e3f3fc96d5a500f6a7656dd9448ce8f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/be0d016f8e3f3fc96d5a500f6a7656dd9448ce8f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests/DominatorPathConsistencyFileRunner.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d31ad0ab9b4a0b07826201c23a6672925a1b91d7",
+      "size": 6466,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d31ad0ab9b4a0b07826201c23a6672925a1b91d7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests/DominatorPathConsistencyTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "93dc7a4fcc81d6c38ff11516df4611b1408890d8",
+      "size": 9545,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/93dc7a4fcc81d6c38ff11516df4611b1408890d8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests/EntityClassificationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8c53a5787d3a8e51f09ee1e55b59fb88e799ed35",
+      "size": 10272,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8c53a5787d3a8e51f09ee1e55b59fb88e799ed35"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests/EntityConsistencyFileRunner.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bb668124d8d20fa7bafc6d4e21f111ebaf160b74",
+      "size": 3512,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bb668124d8d20fa7bafc6d4e21f111ebaf160b74"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/Tests/StoryContinuityFileRunner.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3253f308cadfb3f7e03cfe82a0e9a22ca079c825",
+      "size": 5086,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3253f308cadfb3f7e03cfe82a0e9a22ca079c825"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/appsettings.Development.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "be4ddbaeeccd1e6c904b660588ddff577c406323",
+      "size": 393,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/be4ddbaeeccd1e6c904b660588ddff577c406323"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1030b49886fac594cf175a5a1020d644a5348319",
+      "size": 3730,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1030b49886fac594cf175a5a1020d644a5348319"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/http.http",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3cd308002151a7277f23ae5d63cf4b921b29c16",
+      "size": 529,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b3cd308002151a7277f23ae5d63cf4b921b29c16"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/test_data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bc2523faaf0b2fe2dc9bd2ad0cb9e4072a7bb3a2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bc2523faaf0b2fe2dc9bd2ad0cb9e4072a7bb3a2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/test_data/Test-Story-UnintroducedEntities-Extensive.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "13e25b9181b7ec08f9a9434840b3307577988d2b",
+      "size": 56336,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/13e25b9181b7ec08f9a9434840b3307577988d2b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/test_data/Test-Story-UnintroducedEntities-Minimal.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "070aa4000cdbe40c795ee5a868a24b53c9a4ad1e",
+      "size": 723,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/070aa4000cdbe40c795ee5a868a24b53c9a4ad1e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm.Console/test_data/Test-Story-UnintroducedEntities-Small.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c83b32a91df10f373e980b19abfcd640db71c91f",
+      "size": 1461,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c83b32a91df10f373e980b19abfcd640db71c91f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c5725a7e2258a5256584ac9c0e0fcb6eec40e5ab",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c5725a7e2258a5256584ac9c0e0fcb6eec40e5ab"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Extensions",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4553a71b7a9d01a1652f130c3077c462d1402de4",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4553a71b7a9d01a1652f130c3077c462d1402de4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Extensions/ChatMessageExtensions.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fed8a3de72e7e3e5eb315ffd168b7ed7f501e4ce",
+      "size": 1097,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fed8a3de72e7e3e5eb315ffd168b7ed7f501e4ce"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.Llm.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "977ed2acc4022fce3564f79aa12e1a7cd03598c7",
+      "size": 1108,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/977ed2acc4022fce3564f79aa12e1a7cd03598c7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "3b523c3dbe2f8551cac2c867f386836d480fb9b8",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/3b523c3dbe2f8551cac2c867f386836d480fb9b8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/ConsistencyEvaluators",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bd3d1429dc6a44821ea124425ae19c5981392d38",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bd3d1429dc6a44821ea124425ae19c5981392d38"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/ConsistencyEvaluators/DominatorPathConsistencyLlmService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2205f48466b70d074d8e5c5220048471d033d351",
+      "size": 18707,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2205f48466b70d074d8e5c5220048471d033d351"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/ConsistencyEvaluators/PrefixSummaryLlmService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "056273282feda02e1de9d767d5a76f2fc532ca62",
+      "size": 19426,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/056273282feda02e1de9d767d5a76f2fc532ca62"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/ConsistencyEvaluators/SceneEntityLlmClassifierService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b3fcc5ee324123d2cd9734414b8b2e84b77d8c66",
+      "size": 28261,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b3fcc5ee324123d2cd9734414b8b2e84b77d8c66"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/ConsistencyEvaluators/SemanticRoleLabellingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "db4f49b309b3c875a3f3dadab3d56a3d48046ad6",
+      "size": 23648,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/db4f49b309b3c875a3f3dadab3d56a3d48046ad6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/LLM",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "f877ecdcbd76648da05239d5df449bf6a332eee6",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/f877ecdcbd76648da05239d5df449bf6a332eee6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/LLM/AnthropicAIService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "294d3409118cab90261c5187350f5c5028026618",
+      "size": 10553,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/294d3409118cab90261c5187350f5c5028026618"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/LLM/AzureOpenAIService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c5d78c793629591d0f5b3daa6a5200cdd82d0128",
+      "size": 16338,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c5d78c793629591d0f5b3daa6a5200cdd82d0128"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/LLM/LLMServiceFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "abf54a407ba776d3c3b823758dff344793e84cb2",
+      "size": 6231,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/abf54a407ba776d3c3b823758dff344793e84cb2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryInstructionsRag",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4685b7c3ccc2b280524a5d54e25017d6172b95a4",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4685b7c3ccc2b280524a5d54e25017d6172b95a4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryInstructionsRag/InstructionBlockAdapter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c97c6cb564f01bbdfe97868fa2c14e2b52a91e17",
+      "size": 1040,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c97c6cb564f01bbdfe97868fa2c14e2b52a91e17"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryInstructionsRag/InstructionBlockService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "797bb5a8ba5a03baa5ea7887806dbe191fc7ea00",
+      "size": 18167,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/797bb5a8ba5a03baa5ea7887806dbe191fc7ea00"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryInstructionsRag/InstructionChunk.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48e2b482c4513bdd4cfd622137bea7b1ba969261",
+      "size": 1155,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48e2b482c4513bdd4cfd622137bea7b1ba969261"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryIntentClassification",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "910479dff3a35198bd4932e1b3f1cde284705572",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/910479dff3a35198bd4932e1b3f1cde284705572"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryIntentClassification/CommandIntentRouter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "758889c4f8b70e7d634b991593fc29031682fb1f",
+      "size": 2721,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/758889c4f8b70e7d634b991593fc29031682fb1f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Llm/Services/StoryIntentClassification/StoryLlmIntentLlmClassifier.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c08748eb3434e12f878a2a0de72d8a149f78b6c8",
+      "size": 11633,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c08748eb3434e12f878a2a0de72d8a149f78b6c8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "c5b01b79a9b5aab55e4a361f6fcda09c2383afde",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/c5b01b79a9b5aab55e4a361f6fcda09c2383afde"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Configuration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a0225bdfcdb1ba7cfa01398509813d099f981125",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a0225bdfcdb1ba7cfa01398509813d099f981125"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Configuration/RagIndexerSettings.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3908b86462d096cae7db99c69e459ae08e33bea7",
+      "size": 1010,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3908b86462d096cae7db99c69e459ae08e33bea7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "624261f247b1fad68ecae00c14e3eae5c45979cf",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/624261f247b1fad68ecae00c14e3eae5c45979cf"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/IAzureAISearchService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fc9f2c3b3983a7410dcf76cb60ea14815631cc62",
+      "size": 431,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fc9f2c3b3983a7410dcf76cb60ea14815631cc62"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/IAzureOpenAIEmbeddingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3749024c79bbbca2c8eec286cb0a5d894234a793",
+      "size": 174,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3749024c79bbbca2c8eec286cb0a5d894234a793"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/ILoggerService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "226f14f0fdddc74479c686155d2d44d289cd862e",
+      "size": 227,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/226f14f0fdddc74479c686155d2d44d289cd862e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/IRagIndexingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5cb24fecd4da0ce588398a44963fcdc04467f043",
+      "size": 199,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5cb24fecd4da0ce588398a44963fcdc04467f043"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/IRetryPolicyService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c4927c4ccaa57fa13bd0ad8879f2cef91428929c",
+      "size": 222,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c4927c4ccaa57fa13bd0ad8879f2cef91428929c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Interfaces/IServiceFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0f24ddeaf319fc4743eb3853c1ec54190fa44bf0",
+      "size": 476,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0f24ddeaf319fc4743eb3853c1ec54190fa44bf0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Models",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "20f00e6b2c7da17a4f63e114974654ddd07c5a76",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/20f00e6b2c7da17a4f63e114974654ddd07c5a76"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Models/RagIndexRequest.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7a1b563c6b8d65f873ff7385f6e4bc44b60b3c22",
+      "size": 2007,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7a1b563c6b8d65f873ff7385f6e4bc44b60b3c22"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Mystira.StoryGenerator.RagIndexer.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "790b50108e105173912cd43f8b3e0c198df8dad8",
+      "size": 1501,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/790b50108e105173912cd43f8b3e0c198df8dad8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f20bd9dec54eec7745c228100b9443de773de351",
+      "size": 6343,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f20bd9dec54eec7745c228100b9443de773de351"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "081e271751b369beb298d1e0591278e17e4b53fc",
+      "size": 4703,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/081e271751b369beb298d1e0591278e17e4b53fc"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "715e960c3007fa8926c19c1b4e297581d5959098",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/715e960c3007fa8926c19c1b4e297581d5959098"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/AzureAISearchService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2c3ab44d69798a244b00ebabc219423d9b677193",
+      "size": 11794,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2c3ab44d69798a244b00ebabc219423d9b677193"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/AzureOpenAIEmbeddingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f64d8b58661af5a0dc9879a2c076280e4ac7615f",
+      "size": 1571,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f64d8b58661af5a0dc9879a2c076280e4ac7615f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/ConsoleLoggerService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ae07a985626e7bbd6e4fd8b012ea2b4aade3ef6a",
+      "size": 612,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ae07a985626e7bbd6e4fd8b012ea2b4aade3ef6a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/RagIndexingService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "153bead77ca31f5b79f0fa1f46a047040ef16339",
+      "size": 3427,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/153bead77ca31f5b79f0fa1f46a047040ef16339"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/RetryPolicyService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3df0a40a15749bbaf667c51abe1bbb8e403a10c7",
+      "size": 934,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3df0a40a15749bbaf667c51abe1bbb8e403a10c7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/Services/ServiceFactory.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "33ab4f99cdf4df3625c3ca8c011a1b86a4f7c845",
+      "size": 1089,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/33ab4f99cdf4df3625c3ca8c011a1b86a4f7c845"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "366e7c3af556068b205953ecd2749f0eee9f6486",
+      "size": 688,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/366e7c3af556068b205953ecd2749f0eee9f6486"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1d8fca905dc96225e9ccfe0dcecaac1f8f960019",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1d8fca905dc96225e9ccfe0dcecaac1f8f960019"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data/sample_instructions_1-2.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "23b2bdfd1fc3ff4ecc5ce2eb583a6f2cfd37eb7f",
+      "size": 1874,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/23b2bdfd1fc3ff4ecc5ce2eb583a6f2cfd37eb7f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data/sample_instructions_10-12.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ce84771c58977dd403f493d999255423c56b1aa1",
+      "size": 3213,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ce84771c58977dd403f493d999255423c56b1aa1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data/sample_instructions_13-18.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2f690c72e5c05e1b4720df62bde1e606463d45c1",
+      "size": 3284,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2f690c72e5c05e1b4720df62bde1e606463d45c1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data/sample_instructions_3-5.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "66ca8361e89a45f2cb9dea0c023ace0d770030d5",
+      "size": 2885,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/66ca8361e89a45f2cb9dea0c023ace0d770030d5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/data/sample_instructions_6-9.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa6f9bf20324ceb32bb9d5158a8fe90a55829ff8",
+      "size": 25887,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fa6f9bf20324ceb32bb9d5158a8fe90a55829ff8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/run-example.ps1",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "aca80a51ee88698eed60455121cf9a1829572d92",
+      "size": 1210,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/aca80a51ee88698eed60455121cf9a1829572d92"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.RagIndexer/run-example.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "7a6831ef74a66822c4e5bc3577345cffec01e14f",
+      "size": 929,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7a6831ef74a66822c4e5bc3577345cffec01e14f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b88dbe70fa4d0f843220a088e8e276e89bc76ac2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b88dbe70fa4d0f843220a088e8e276e89bc76ac2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/App.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "48e7aeb63e00688098c2fc6c2151ab27023964ae",
+      "size": 410,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/48e7aeb63e00688098c2fc6c2151ab27023964ae"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "be6499a672e69e2be3516b1533a23b00274b4d9d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/be6499a672e69e2be3516b1533a23b00274b4d9d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "65e5a3a57bb7ca356eabbae58996881c9c47db9e",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/65e5a3a57bb7ca356eabbae58996881c9c47db9e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/AgentModeProgressPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10145a28a72648dbf0053492147f53e8ae77ac29",
+      "size": 14488,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/10145a28a72648dbf0053492147f53e8ae77ac29"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/AgentModeProgressPanel.razor.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ad5f17e9dc415598096eb8d9756d17a6ffdae8de",
+      "size": 1865,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ad5f17e9dc415598096eb8d9756d17a6ffdae8de"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/AgentModePromptForm.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9e6d089233949b68c32efb5fa82b79bc53c1b835",
+      "size": 2746,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9e6d089233949b68c32efb5fa82b79bc53c1b835"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/AgentModeRefinementPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dc4c4bd172813a7984cffdacefba42cbe0a58166",
+      "size": 7825,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dc4c4bd172813a7984cffdacefba42cbe0a58166"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/ProgressBar.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4a4032de43850009cc92b95af340dfe5f13db1c6",
+      "size": 464,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4a4032de43850009cc92b95af340dfe5f13db1c6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/StoryDisplayPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "25ed148b88989c491951cb5a30933d895b25bb8b",
+      "size": 3381,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/25ed148b88989c491951cb5a30933d895b25bb8b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/AgentMode/StoryVersionDiffViewer.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3aeec452d55e8f34de1221ac095b75f79bf70049",
+      "size": 7703,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3aeec452d55e8f34de1221ac095b75f79bf70049"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9895e31ba4428308f05fbc2daa5b1318abd80cf8",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9895e31ba4428308f05fbc2daa5b1318abd80cf8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat/AIMessage.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d3bc8215c3e1efe50d73f3bcac6baed98b5c4f7d",
+      "size": 2100,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d3bc8215c3e1efe50d73f3bcac6baed98b5c4f7d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat/ProviderSettings.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "84cb1e002b0e89adb7da125d70771f4c983186e6",
+      "size": 13902,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/84cb1e002b0e89adb7da125d70771f4c983186e6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat/SystemMessage.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8668c6702c2e45b662487bfb13b90fd7925edac1",
+      "size": 1037,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8668c6702c2e45b662487bfb13b90fd7925edac1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat/UserMessage.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "54ff45fad9b36eb808ed08822fd6a0619aaae737",
+      "size": 1886,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/54ff45fad9b36eb808ed08822fd6a0619aaae737"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Chat/YamlGeneratorModal.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "708fa18c9e9feecb81e93df6bd2b0162ee43bcad",
+      "size": 16689,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/708fa18c9e9feecb81e93df6bd2b0162ee43bcad"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/MarkdownRenderer.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c3f6137180e2f5d155377c3159ca2aa2298ff51b",
+      "size": 3479,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c3f6137180e2f5d155377c3159ca2aa2298ff51b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Panels",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7f9143501bb0fb58f13364651ead9add9300e4e1",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7f9143501bb0fb58f13364651ead9add9300e4e1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Panels/ActiveChatPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "744beae8623504be21a8f18ea5003fb77388c0bd",
+      "size": 9290,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/744beae8623504be21a8f18ea5003fb77388c0bd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Panels/ChatHistoryPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "de7bc39b288ef400c1b735936cc79f6de128a6fa",
+      "size": 3644,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/de7bc39b288ef400c1b735936cc79f6de128a6fa"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/Panels/YamlPreviewPanel.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "36c214701edd6ca9984f5f4db3452498dc0e5c82",
+      "size": 55672,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/36c214701edd6ca9984f5f4db3452498dc0e5c82"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/ValidationResults.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ff542aca116c533ee691f0cbd6cc8e6f1dcd1f0",
+      "size": 11207,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0ff542aca116c533ee691f0cbd6cc8e6f1dcd1f0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Components/YamlDiffView.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "35603715c0471f0069593698bbc882b2fa1af22e",
+      "size": 4488,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/35603715c0471f0069593698bbc882b2fa1af22e"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bc16055bb160f279e194a4569d28f66663231678",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bc16055bb160f279e194a4569d28f66663231678"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout/MainLayout.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "76eb72528390cf4c8dcc2044cab588ece0835d39",
+      "size": 356,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/76eb72528390cf4c8dcc2044cab588ece0835d39"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout/MainLayout.razor.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ecf25e5b2e4fe21d61aabba74ae233cde6e4a4a6",
+      "size": 1401,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ecf25e5b2e4fe21d61aabba74ae233cde6e4a4a6"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout/NavMenu.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "edaba48fa39cece1cc59274224c724f93281d563",
+      "size": 1836,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/edaba48fa39cece1cc59274224c724f93281d563"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout/NavMenu.razor.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "881d128a5fb1ff3e76ba3f897fe649bbb69798e3",
+      "size": 2599,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/881d128a5fb1ff3e76ba3f897fe649bbb69798e3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Layout/ThreePanelLayout.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06579f5108d3cfb07efea217eff9322523b7d4ca",
+      "size": 120894,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/06579f5108d3cfb07efea217eff9322523b7d4ca"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Models",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "373dfc0e15f3c148564b113c4488b0d9dc585762",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/373dfc0e15f3c148564b113c4488b0d9dc585762"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Models/AiModelConfiguration.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dd81f3db5af27f0118c6ca6236d0d54e131a5e6d",
+      "size": 4060,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dd81f3db5af27f0118c6ca6236d0d54e131a5e6d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Models/ChatModels.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "393f3738f5fe96fb47448d919bd7d93f5843d880",
+      "size": 973,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/393f3738f5fe96fb47448d919bd7d93f5843d880"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Models/YamlCopyResult.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b7a4c34c627e581c3716784f658691f67c466752",
+      "size": 122,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b7a4c34c627e581c3716784f658691f67c466752"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Models/YamlSyntaxColorScheme.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2f1cffbc5aa3e10332896fda0f56d052f024419",
+      "size": 1414,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a2f1cffbc5aa3e10332896fda0f56d052f024419"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Mystira.StoryGenerator.Web.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9133f4f1254b9425b8d524d6828c12f3a18b8490",
+      "size": 2737,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9133f4f1254b9425b8d524d6828c12f3a18b8490"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "fe625dd9458e55f9623df69e4a18d04223a310e2",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/fe625dd9458e55f9623df69e4a18d04223a310e2"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/AgentModeStoryPage.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "ffce0ec9eebcd5a023c2dd89316089964bf14e8a",
+      "size": 26058,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/ffce0ec9eebcd5a023c2dd89316089964bf14e8a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/AgentModeStoryPage.razor.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "06916b1dc8dfce09ade6028b69851cda4354e8dc",
+      "size": 9685,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/06916b1dc8dfce09ade6028b69851cda4354e8dc"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/Home.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2870652904e4030f6ae2121b6f0045638a798b05",
+      "size": 4103,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2870652904e4030f6ae2121b6f0045638a798b05"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/ScenarioDominatorPathAnalysis.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "88f21f43d0663abe90e2b8a469484d1938cb9306",
+      "size": 24174,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/88f21f43d0663abe90e2b8a469484d1938cb9306"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/StoryContinuity.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "771081db245c016374be4e1d5316d24cf27ec934",
+      "size": 32965,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/771081db245c016374be4e1d5316d24cf27ec934"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/StoryGenerator.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4495165e863da5588b0ac65eb702aea85b0e87b8",
+      "size": 263,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4495165e863da5588b0ac65eb702aea85b0e87b8"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Pages/StoryLibrary.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8dd5b1f5701ad438ada2c507e58fbe7a1f8272c7",
+      "size": 15096,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8dd5b1f5701ad438ada2c507e58fbe7a1f8272c7"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Program.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "fa77381d5ec25053e50346547ee9b3c73c9e5de1",
+      "size": 3120,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/fa77381d5ec25053e50346547ee9b3c73c9e5de1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Properties",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e2657f1e17c5e0595a806f66657a0d246fb9f883",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e2657f1e17c5e0595a806f66657a0d246fb9f883"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Properties/launchSettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "41c78793d2056ec789014d0303a7f7cdf40b59de",
+      "size": 1403,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/41c78793d2056ec789014d0303a7f7cdf40b59de"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1a2067dc06a7d2d92217f3e12949e6630de460ad",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1a2067dc06a7d2d92217f3e12949e6630de460ad"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/AgentSessionService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "736679a413224e7b2157d721a1fe524ca9fd714a",
+      "size": 8975,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/736679a413224e7b2157d721a1fe524ca9fd714a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/AiModelSettingsService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f6b6a8859e14de61c5174688bd8436c62d44433a",
+      "size": 15396,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f6b6a8859e14de61c5174688bd8436c62d44433a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/ChatService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "140ae7524715450c5932eaf8ccc0d966263817b4",
+      "size": 5652,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/140ae7524715450c5932eaf8ccc0d966263817b4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/ChatSessionService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5c27fc4616e5df2cf2f9041cc253e493b1ad2a47",
+      "size": 18298,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5c27fc4616e5df2cf2f9041cc253e493b1ad2a47"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/IAgentSessionService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1de0bf4669e00b1170e1c8b89cadab083d6725d0",
+      "size": 1522,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1de0bf4669e00b1170e1c8b89cadab083d6725d0"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/IStoryApiService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6b216a03cf3353b101b4ee8667c7b00192291496",
+      "size": 708,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6b216a03cf3353b101b4ee8667c7b00192291496"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/JsonYamlConverter.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "eb748a7b29577566eeff1529026f0203b3772a24",
+      "size": 11395,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/eb748a7b29577566eeff1529026f0203b3772a24"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/SseJsInteropService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bf47af41273191eb0926fe81c5e2db3166927fbb",
+      "size": 5339,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bf47af41273191eb0926fe81c5e2db3166927fbb"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/StoryApiService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1280dcb87dfb05f8e5f4b874fcc294fd2baa1efe",
+      "size": 14276,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1280dcb87dfb05f8e5f4b874fcc294fd2baa1efe"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/StoryContinuityService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0ee03c7ca4e9ac1d285f7358afee73802f5fede9",
+      "size": 9138,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0ee03c7ca4e9ac1d285f7358afee73802f5fede9"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/WebScenarioDominatorPathAnalysisService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3af30ef669fd2bb62f7999cd32de67f058cb6b7a",
+      "size": 2617,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3af30ef669fd2bb62f7999cd32de67f058cb6b7a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Services/YamlImportService.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "21690f31e3b71236252098f2ee2fc726a7d6fefd",
+      "size": 5648,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/21690f31e3b71236252098f2ee2fc726a7d6fefd"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Styles",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "4031a1814aaa9623b3ac39e0f6e0a243bcbdb296",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/4031a1814aaa9623b3ac39e0f6e0a243bcbdb296"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/Styles/input.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6fd3fce86136028c8b989851bad7bd21167bb739",
+      "size": 1511,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6fd3fce86136028c8b989851bad7bd21167bb739"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/_Imports.razor",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d262746d119ba825a2ef840ebc70ec62710b0d96",
+      "size": 887,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d262746d119ba825a2ef840ebc70ec62710b0d96"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/package.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dae6ce6ee4ea3abab778591e692f6e36dad22330",
+      "size": 550,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dae6ce6ee4ea3abab778591e692f6e36dad22330"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/postcss.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "96bb01e7dd1fcd9b131ec736a3be2570721d4c8c",
+      "size": 81,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/96bb01e7dd1fcd9b131ec736a3be2570721d4c8c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/tailwind.config.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2effdccb798b68127473d393393d87cf8f4e1a69",
+      "size": 487,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2effdccb798b68127473d393393d87cf8f4e1a69"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "917a829a48800cafd294ca105411d435e50cecd1",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/917a829a48800cafd294ca105411d435e50cecd1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/appsettings.Development.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b57cfa35405ff7a40bc72ced6f9fc31f04b7b37",
+      "size": 178,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5b57cfa35405ff7a40bc72ced6f9fc31f04b7b37"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/appsettings.Production.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "99bba6a897bbc95c8645761140fecf18adc7282b",
+      "size": 125,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/99bba6a897bbc95c8645761140fecf18adc7282b"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/appsettings.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "921dbcbb1b334b585de67bd41d5522b1a7249d6d",
+      "size": 285,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/921dbcbb1b334b585de67bd41d5522b1a7249d6d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/config",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "7d252d7427669af5b13f38f536b939b55b642f5c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/7d252d7427669af5b13f38f536b939b55b642f5c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/config/ai-models.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1a70e26b475ad46ec3f7051c68f870f14c370a50",
+      "size": 632,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1a70e26b475ad46ec3f7051c68f870f14c370a50"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/css",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b1788f0add4e7da2aba00fad325810f52a01f22c",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b1788f0add4e7da2aba00fad325810f52a01f22c"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/css/app.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5aa833b6da65c172e8138fef5a80954850c26ae4",
+      "size": 28034,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5aa833b6da65c172e8138fef5a80954850c26ae4"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/css/bootstrap",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d9a7a0804801ad058ed736eda188633801d99c8f",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d9a7a0804801ad058ed736eda188633801d99c8f"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/css/bootstrap/bootstrap.min.css",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "02ae65b5fe5d12c881eb054006f68b52a2818615",
+      "size": 162720,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/02ae65b5fe5d12c881eb054006f68b52a2818615"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/css/bootstrap/bootstrap.min.css.map",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "afcd9e33e9eae3876cdc0dfaafa5a80e012b1631",
+      "size": 449111,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/afcd9e33e9eae3876cdc0dfaafa5a80e012b1631"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/favicon.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8422b59695935d180d11d5dbe99653e711097819",
+      "size": 1148,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8422b59695935d180d11d5dbe99653e711097819"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/icon-192.png",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "166f56da7612ea74df6a297154c8d281a4f28a14",
+      "size": 2626,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/166f56da7612ea74df6a297154c8d281a4f28a14"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/index.html",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5bc14de6688569f3261d32afadfd8aa5f4598166",
+      "size": 1867,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5bc14de6688569f3261d32afadfd8aa5f4598166"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "90c11fe6ae704a9d29e8347f5a6c657c870510e1",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/90c11fe6ae704a9d29e8347f5a6c657c870510e1"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js/clipboard.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8140b2af9feceb0472230006adaabc7083b3ff3d",
+      "size": 2000,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8140b2af9feceb0472230006adaabc7083b3ff3d"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js/download.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "870ff966e0146f756fb75fdc4436833d61cd36d5",
+      "size": 1939,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/870ff966e0146f756fb75fdc4436833d61cd36d5"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js/panels.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "58b6f98f77b91ce4643b045b0b01c44f0740e035",
+      "size": 4600,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/58b6f98f77b91ce4643b045b0b01c44f0740e035"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js/sseClient.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2143a646e905abcb66259233fb8f10fffc1f8a5a",
+      "size": 3296,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2143a646e905abcb66259233fb8f10fffc1f8a5a"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/js/yamlPreview.js",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9fedac78b7438d6c6d471e9b740cd6b38d932fb3",
+      "size": 2952,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9fedac78b7438d6c6d471e9b740cd6b38d932fb3"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/staticwebapp.config.json",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c9a7ffb4c02a4322ce680b596ea2cafb0570c137",
+      "size": 509,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c9a7ffb4c02a4322ce680b596ea2cafb0570c137"
+    },
+    {
+      "path": "packages/story-generator/src/Mystira.StoryGenerator.Web/wwwroot/web.config",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7d739416a4d2ccf2729fff14f670cd6f4f66edcb",
+      "size": 1740,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7d739416a4d2ccf2729fff14f670cd6f4f66edcb"
+    },
+    {
+      "path": "packages/story-generator/test-data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "e34719fa811b54daed155d990fcda05c2f1e6851",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/e34719fa811b54daed155d990fcda05c2f1e6851"
+    },
+    {
+      "path": "packages/story-generator/test-data/README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "518ff9876c34e73edf388d8a2221008b225894aa",
+      "size": 2246,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/518ff9876c34e73edf388d8a2221008b225894aa"
+    },
+    {
+      "path": "packages/story-generator/test-data/test-import-feature.sh",
+      "mode": "100755",
+      "type": "blob",
+      "sha": "c1ea6cac665aa33790b71371111bc91af5e8f3b2",
+      "size": 2835,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c1ea6cac665aa33790b71371111bc91af5e8f3b2"
+    },
+    {
+      "path": "packages/story-generator/test-data/test-story-invalid.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a2809253b930f4c369c80c64086f8bf98fc3efa1",
+      "size": 279,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a2809253b930f4c369c80c64086f8bf98fc3efa1"
+    },
+    {
+      "path": "packages/story-generator/test-data/test-story.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "0b1d1f555bbec44a9604274638d1a84258c8db82",
+      "size": 5253,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/0b1d1f555bbec44a9604274638d1a84258c8db82"
+    },
+    {
+      "path": "packages/story-generator/tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "1d8f259f1f153b039275cfc40be79210a3923ca8",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/1d8f259f1f153b039275cfc40be79210a3923ca8"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "a2ecd20bc0a0ee56fb1eaae4b16dff8e3d593c45",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/a2ecd20bc0a0ee56fb1eaae4b16dff8e3d593c45"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/AzureOpenAIServiceOptionsTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7478662fa8a67fbf6db791c82f6b3b3695fdd557",
+      "size": 1550,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7478662fa8a67fbf6db791c82f6b3b3695fdd557"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/AzureOpenAIServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "71b6e320e868e7343afbd9f1097269e73237615b",
+      "size": 3630,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/71b6e320e868e7343afbd9f1097269e73237615b"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/ChatControllerTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "7f87ea17bd677188b08479704ef38a7bcf1de7d2",
+      "size": 3186,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/7f87ea17bd677188b08479704ef38a7bcf1de7d2"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "dcf3d34baecc145dd27a874580a5aacf32012870",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/dcf3d34baecc145dd27a874580a5aacf32012870"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration/AgentPipelineE2ETests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f11c83aee94691404e51471dd1f03c908ab74540",
+      "size": 27926,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f11c83aee94691404e51471dd1f03c908ab74540"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration/AgentPipelinePerformanceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3800f775ec2ccf9305986874282ff0757bf5e449",
+      "size": 19036,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3800f775ec2ccf9305986874282ff0757bf5e449"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration/ChatModelsEndpointTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "81d31d45fcb4eb65668b609358d14ee73e15de79",
+      "size": 5276,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/81d31d45fcb4eb65668b609358d14ee73e15de79"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration/StoryAgentControllerTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b9c0e5c7478ceda416f83fcaf7c5072626cfdb5e",
+      "size": 15193,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/b9c0e5c7478ceda416f83fcaf7c5072626cfdb5e"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Integration/StreamingIntegrationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c97d0fe24cac47c7f71e56bce83d855d6bd5fc2d",
+      "size": 17462,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c97d0fe24cac47c7f71e56bce83d855d6bd5fc2d"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/JsonYamlConverterTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cc112bfeacbcabeea837ec88b8658129268d712c",
+      "size": 2697,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cc112bfeacbcabeea837ec88b8658129268d712c"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/LLMServiceFactoryTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "043a84bd196c250358d6cf1ecec5598030d55ebc",
+      "size": 7346,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/043a84bd196c250358d6cf1ecec5598030d55ebc"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Api.Tests/Mystira.StoryGenerator.Api.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "8ef69e450a93096888aa717607f20f2b59b69202",
+      "size": 995,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/8ef69e450a93096888aa717607f20f2b59b69202"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "82c524f1ec42264fcb31e210152dd15d29818bc0",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/82c524f1ec42264fcb31e210152dd15d29818bc0"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "061a477964d8afb2a0b4261dce16208e45b1772d",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/061a477964d8afb2a0b4261dce16208e45b1772d"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ChatOrchestrationServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "a732c6efa1ae79cb84dad5573b26addc1919346d",
+      "size": 9660,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/a732c6efa1ae79cb84dad5573b26addc1919346d"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e234be8a42c5506cbc227a073738c45b64a8079e",
+      "size": 1242,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e234be8a42c5506cbc227a073738c45b64a8079e"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/PromptGeneratorTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2e06eb314a4c9f9f38498d5c08973aa429aaaa7c",
+      "size": 6062,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2e06eb314a4c9f9f38498d5c08973aa429aaaa7c"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioConsistencyEvaluationServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "930771c9fc16cb36e30fb0959a8d0231ef0871a5",
+      "size": 10092,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/930771c9fc16cb36e30fb0959a8d0231ef0871a5"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioDominatorPathConsistencyEvaluationServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3d8c6d2af07608476428e590423034dd5ee9bc59",
+      "size": 8421,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3d8c6d2af07608476428e590423034dd5ee9bc59"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioEntityConsistencyEvaluationServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "c006ad3a1acb92f4aeb6e04c581264cb39eea781",
+      "size": 7651,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/c006ad3a1acb92f4aeb6e04c581264cb39eea781"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioEntityIntroductionValidatorTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "feb74f361e03b8d6974e5b42cb292d36414ee32a",
+      "size": 5343,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/feb74f361e03b8d6974e5b42cb292d36414ee32a"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioFactoryTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1e590e4117bb6edf2d59089d85265a29b52f940a",
+      "size": 3492,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/1e590e4117bb6edf2d59089d85265a29b52f940a"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/ScenarioGraphTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4ad0b624cabda3bb85f1ce00eaaa08d449cf5195",
+      "size": 1592,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4ad0b624cabda3bb85f1ce00eaaa08d449cf5195"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/StoryMediaProcessorTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4187537682235debbe436e5dc43e188bf94703b6",
+      "size": 2880,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/4187537682235debbe436e5dc43e188bf94703b6"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/StoryTextSanitizerTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "cf1621104d91243b2e3df5ebb5972f616279eab2",
+      "size": 2051,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/cf1621104d91243b2e3df5ebb5972f616279eab2"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/test_data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "167a7ea7536c8b99301fa32b442a97204b8f02aa",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/167a7ea7536c8b99301fa32b442a97204b8f02aa"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Application.Tests/Mystira.StoryGenerator.Application.Tests/test_data/Test-Story-6-9.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "624be58e0e3b529ebc0a94bd88dbd75178b10aa9",
+      "size": 56333,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/624be58e0e3b529ebc0a94bd88dbd75178b10aa9"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Domain.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "9ab9d7441571ee943b7f9fe35252b64ed183f3f3",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/9ab9d7441571ee943b7f9fe35252b64ed183f3f3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Domain.Tests/Mystira.StoryGenerator.Domain.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "300244f9eb244af3d8a749dc40d61c03c5ad68c4",
+      "size": 1396,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/300244f9eb244af3d8a749dc40d61c03c5ad68c4"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "d159dc0481857285a71e511c43841e9fb2ae70af",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/d159dc0481857285a71e511c43841e9fb2ae70af"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/CycleHandlingTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6a59839811103d9fcc829086453bcc682f708b46",
+      "size": 2245,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6a59839811103d9fcc829086453bcc682f708b46"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/CycleTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "924b2fde2d8634a2ebf55f05ef9c0f472fcc96b9",
+      "size": 3583,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/924b2fde2d8634a2ebf55f05ef9c0f472fcc96b9"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/DominatorPathAlgorithmTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5415472d20f72f78bb5918d294d4957a9826d6ca",
+      "size": 5362,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5415472d20f72f78bb5918d294d4957a9826d6ca"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/Mystira.StoryGenerator.GraphTheory.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "bfdb67f0f9c73bcfb52376905772a8461cee62f7",
+      "size": 1477,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/bfdb67f0f9c73bcfb52376905772a8461cee62f7"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/PathAlgorithmTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e3ddf638d1f63197b5b720ad627eee7e8e05fd75",
+      "size": 5970,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e3ddf638d1f63197b5b720ad627eee7e8e05fd75"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/test_data",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "974edecde6d08787056b730475c478d5f2b908c3",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/974edecde6d08787056b730475c478d5f2b908c3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/test_data/Test-Minimal.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d6cba3eb8cd1893dedc0de542476db8d9075786e",
+      "size": 1253,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/d6cba3eb8cd1893dedc0de542476db8d9075786e"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.GraphTheory.Tests/test_data/Test-Story-6-9.yaml",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "865d2f0239a70a049d3ecc30f5e753b6a4377a57",
+      "size": 56341,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/865d2f0239a70a049d3ecc30f5e753b6a4377a57"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "bd5bccb10adc7be2d3fefe87e2cb57994c776096",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/bd5bccb10adc7be2d3fefe87e2cb57994c776096"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/AgentOrchestratorIntegrationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "2b4ac7a93c4e16fe63d0ae03c4c9f87f4cce1ef3",
+      "size": 30603,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/2b4ac7a93c4e16fe63d0ae03c4c9f87f4cce1ef3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/DomainModelSerializationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5b35c964706316768f7fb8cd1ab0b7c670ddb922",
+      "size": 9706,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5b35c964706316768f7fb8cd1ab0b7c670ddb922"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/ErrorHandlingTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "9d36ebe3e7a5f4eeb7eb392b5c96c05f71ed4d7a",
+      "size": 21019,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/9d36ebe3e7a5f4eeb7eb392b5c96c05f71ed4d7a"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/FoundryAgentClientTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "e9955b32b13f51e6eaccfe2142c0ea4a1655bbe3",
+      "size": 3197,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/e9955b32b13f51e6eaccfe2142c0ea4a1655bbe3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/KnowledgeProviderIntegrationTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "86613ca1d3906e5d3f4c45193c5d47297ffe1b7f",
+      "size": 8786,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/86613ca1d3906e5d3f4c45193c5d47297ffe1b7f"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/KnowledgeProviderTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "dfde77811952ce0c7227490188977ed3f90be891",
+      "size": 5530,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/dfde77811952ce0c7227490188977ed3f90be891"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/Mystira.StoryGenerator.Infrastructure.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "5d7baca96836a180225efa82e6fbd193069558f3",
+      "size": 1283,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/5d7baca96836a180225efa82e6fbd193069558f3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/StorySchemaComplianceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f575a3e07cdf852e83dc7b28c648629e2fc4b40e",
+      "size": 16857,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/f575a3e07cdf852e83dc7b28c648629e2fc4b40e"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/StorySessionStateTransitionTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "134a97e9fc278f87326f725088aec0a2c1e39d89",
+      "size": 9786,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/134a97e9fc278f87326f725088aec0a2c1e39d89"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Infrastructure.Tests/StorySessionTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "72196768e8218a8b12654000c9ae4469fc2de1f7",
+      "size": 9228,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/72196768e8218a8b12654000c9ae4469fc2de1f7"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Llm.Tests",
+      "mode": "040000",
+      "type": "tree",
+      "sha": "b9b2227c16d753dff338db5a30a6183690afc95a",
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/trees/b9b2227c16d753dff338db5a30a6183690afc95a"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Llm.Tests/AnthropicAIServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "3816a485117d6496eb3c9f221b4c1971deb0e7c3",
+      "size": 7023,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/3816a485117d6496eb3c9f221b4c1971deb0e7c3"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Llm.Tests/AzureOpenAIServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "53efbe9bb19d385f67c4c627cbd758d2d2a8b3ad",
+      "size": 10978,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/53efbe9bb19d385f67c4c627cbd758d2d2a8b3ad"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Llm.Tests/Mystira.StoryGenerator.Llm.Tests.csproj",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "6dd66cc8ec4fb32c9703d221335e035f52bcf128",
+      "size": 1096,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/6dd66cc8ec4fb32c9703d221335e035f52bcf128"
+    },
+    {
+      "path": "packages/story-generator/tests/Mystira.StoryGenerator.Llm.Tests/SceneEntityLlmClassifierServiceTests.cs",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "09d8a4cccf286b4a4899ab23039b71fd0efb5a16",
+      "size": 7060,
+      "url": "https://api.github.com/repos/phoenixvc/Mystira.workspace/git/blobs/09d8a4cccf286b4a4899ab23039b71fd0efb5a16"
+    }
+  ],
+  "targetPath": "packages/story-generator",
+  "sha": "ac8859da6ac3a510253fbace6294a6ba56ac7a8f",
+  "ref": "dev"
+}

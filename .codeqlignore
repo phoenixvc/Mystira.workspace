@@ -1,0 +1,24 @@
+# CodeQL ignore file for monorepo-wide analysis
+
+# Build output directories
+**/bin/**
+**/obj/**
+
+# NuGet and dependency caches
+**/.nuget/**
+**/node_modules/**
+
+# Razor generated files
+**/*.razor.g.cs
+**/*.razor.g.css
+
+# Test and coverage artifacts
+**/TestResults/**
+**/coverage/**
+
+# Temporary and IDE artifacts
+**/*.tmp
+**/.vs/**
+
+# Generated web assets
+**/service-worker-assets.js

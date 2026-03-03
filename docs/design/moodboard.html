@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystira Design System Moodboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* CSS Variables from @mystira/design-tokens */
+        :root {
+            /* Primary Purple (Brand) */
+            --color-primary-50: #faf5ff;
+            --color-primary-100: #f3e8ff;
+            --color-primary-200: #e9d5ff;
+            --color-primary-300: #d8b4fe;
+            --color-primary-400: #c084fc;
+            --color-primary-500: #a855f7;
+            --color-primary-600: #9333ea;
+            --color-primary-700: #7c3aed;
+            --color-primary-800: #6b21a8;
+            --color-primary-900: #581c87;
+            --color-primary-950: #3b0764;
+
+            /* Neutral Gray */
+            --color-neutral-50: #fafafa;
+            --color-neutral-100: #f4f4f5;
+            --color-neutral-200: #e4e4e7;
+            --color-neutral-300: #d4d4d8;
+            --color-neutral-400: #a1a1aa;
+            --color-neutral-500: #71717a;
+            --color-neutral-600: #52525b;
+            --color-neutral-700: #3f3f46;
+            --color-neutral-800: #27272a;
+            --color-neutral-900: #18181b;
+            --color-neutral-950: #09090b;
+
+            /* Success */
+            --color-success-50: #f0fdf4;
+            --color-success-500: #22c55e;
+            --color-success-700: #15803d;
+
+            /* Warning */
+            --color-warning-50: #fffbeb;
+            --color-warning-500: #f59e0b;
+            --color-warning-700: #b45309;
+
+            /* Danger */
+            --color-danger-50: #fef2f2;
+            --color-danger-500: #ef4444;
+            --color-danger-700: #b91c1c;
+
+            /* Info */
+            --color-info-50: #eff6ff;
+            --color-info-500: #3b82f6;
+            --color-info-700: #1d4ed8;
+
+            /* Typography */
+            --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --font-family-mono: 'Fira Code', 'JetBrains Mono', Menlo, Monaco, Consolas, monospace;
+            --font-family-display: 'Inter', system-ui, sans-serif;
+
+            /* Font Sizes */
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+
+            /* Font Weights */
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-semibold: 600;
+            --font-weight-bold: 700;
+
+            /* Border Radius */
+            --radius-none: 0px;
+            --radius-sm: 0.125rem;
+            --radius-default: 0.25rem;
+            --radius-md: 0.375rem;
+            --radius-lg: 0.5rem;
+            --radius-xl: 0.75rem;
+            --radius-2xl: 1rem;
+            --radius-3xl: 1.5rem;
+            --radius-full: 9999px;
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-default: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+            /* Transitions */
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Spacing */
+            --spacing-1: 0.25rem;
+            --spacing-2: 0.5rem;
+            --spacing-3: 0.75rem;
+            --spacing-4: 1rem;
+            --spacing-5: 1.25rem;
+            --spacing-6: 1.5rem;
+            --spacing-8: 2rem;
+            --spacing-10: 2.5rem;
+            --spacing-12: 3rem;
+
+            /* Semantic Light Mode */
+            --bg-primary: var(--color-neutral-50);
+            --bg-secondary: var(--color-neutral-100);
+            --bg-tertiary: var(--color-neutral-200);
+            --bg-elevated: #ffffff;
+            --fg-primary: var(--color-neutral-900);
+            --fg-secondary: var(--color-neutral-600);
+            --fg-tertiary: var(--color-neutral-500);
+            --fg-muted: var(--color-neutral-400);
+            --border-default: var(--color-neutral-200);
+            --border-strong: var(--color-neutral-300);
+            --interactive-default: var(--color-primary-700);
+            --interactive-hover: var(--color-primary-800);
+            --interactive-active: var(--color-primary-900);
+        }
+
+        .dark {
+            --bg-primary: var(--color-neutral-900);
+            --bg-secondary: var(--color-neutral-800);
+            --bg-tertiary: var(--color-neutral-700);
+            --bg-elevated: var(--color-neutral-800);
+            --fg-primary: var(--color-neutral-50);
+            --fg-secondary: var(--color-neutral-300);
+            --fg-tertiary: var(--color-neutral-400);
+            --fg-muted: var(--color-neutral-500);
+            --border-default: var(--color-neutral-700);
+            --border-strong: var(--color-neutral-600);
+            --interactive-default: var(--color-primary-500);
+            --interactive-hover: var(--color-primary-400);
+            --interactive-active: var(--color-primary-600);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-sans);
+            background-color: var(--bg-primary);
+            color: var(--fg-primary);
+            line-height: 1.5;
+            padding: var(--spacing-8);
+            transition: background-color var(--transition-base), color var(--transition-base);
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: var(--spacing-12);
+        }
+
+        .header h1 {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            color: var(--interactive-default);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .header p {
+            font-size: var(--font-size-lg);
+            color: var(--fg-secondary);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: var(--spacing-4);
+            right: var(--spacing-4);
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-2) var(--spacing-4);
+            cursor: pointer;
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-sm);
+            color: var(--fg-primary);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-fast);
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Grid Container */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--spacing-6);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Card */
+        .card {
+            background-color: var(--bg-elevated);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            padding: var(--spacing-6);
+            border: 1px solid var(--border-default);
+            transition: all var(--transition-base);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-xl);
+            transform: translateY(-2px);
+        }
+
+        .card h2 {
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-4);
+            color: var(--fg-primary);
+        }
+
+        .card h3 {
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-medium);
+            color: var(--fg-secondary);
+            margin-bottom: var(--spacing-2);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Color Swatches */
+        .color-section {
+            margin-bottom: var(--spacing-4);
+        }
+
+        .color-row {
+            display: flex;
+            gap: var(--spacing-1);
+            margin-bottom: var(--spacing-3);
+        }
+
+        .color-swatch {
+            flex: 1;
+            height: 48px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: var(--spacing-1);
+            font-size: 10px;
+            font-weight: var(--font-weight-medium);
+            transition: transform var(--transition-fast);
+            cursor: pointer;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.05);
+        }
+
+        .color-swatch.light-text {
+            color: white;
+        }
+
+        .color-swatch.dark-text {
+            color: var(--color-neutral-900);
+        }
+
+        /* Primary Scale */
+        .primary-50 { background-color: var(--color-primary-50); }
+        .primary-100 { background-color: var(--color-primary-100); }
+        .primary-200 { background-color: var(--color-primary-200); }
+        .primary-300 { background-color: var(--color-primary-300); }
+        .primary-400 { background-color: var(--color-primary-400); }
+        .primary-500 { background-color: var(--color-primary-500); }
+        .primary-600 { background-color: var(--color-primary-600); }
+        .primary-700 { background-color: var(--color-primary-700); }
+        .primary-800 { background-color: var(--color-primary-800); }
+        .primary-900 { background-color: var(--color-primary-900); }
+        .primary-950 { background-color: var(--color-primary-950); }
+
+        /* Neutral Scale */
+        .neutral-50 { background-color: var(--color-neutral-50); }
+        .neutral-100 { background-color: var(--color-neutral-100); }
+        .neutral-200 { background-color: var(--color-neutral-200); }
+        .neutral-300 { background-color: var(--color-neutral-300); }
+        .neutral-400 { background-color: var(--color-neutral-400); }
+        .neutral-500 { background-color: var(--color-neutral-500); }
+        .neutral-600 { background-color: var(--color-neutral-600); }
+        .neutral-700 { background-color: var(--color-neutral-700); }
+        .neutral-800 { background-color: var(--color-neutral-800); }
+        .neutral-900 { background-color: var(--color-neutral-900); }
+        .neutral-950 { background-color: var(--color-neutral-950); }
+
+        /* Semantic Colors */
+        .semantic-colors {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-3);
+        }
+
+        .semantic-color {
+            text-align: center;
+        }
+
+        .semantic-swatch {
+            height: 60px;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-semibold);
+            color: white;
+        }
+
+        .semantic-label {
+            font-size: var(--font-size-xs);
+            color: var(--fg-secondary);
+        }
+
+        /* Typography Samples */
+        .typography-sample {
+            margin-bottom: var(--spacing-4);
+        }
+
+        .type-display {
+            font-family: var(--font-family-display);
+            font-size: var(--font-size-4xl);
+            font-weight: var(--font-weight-bold);
+            letter-spacing: -0.025em;
+            margin-bottom: var(--spacing-2);
+        }
+
+        .type-heading {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .type-body {
+            font-size: var(--font-size-base);
+            color: var(--fg-secondary);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .type-small {
+            font-size: var(--font-size-sm);
+            color: var(--fg-tertiary);
+        }
+
+        .type-mono {
+            font-family: var(--font-family-mono);
+            font-size: var(--font-size-sm);
+            background: var(--bg-secondary);
+            padding: var(--spacing-3);
+            border-radius: var(--radius-md);
+            color: var(--color-primary-700);
+            margin-top: var(--spacing-4);
+        }
+
+        .dark .type-mono {
+            color: var(--color-primary-400);
+        }
+
+        /* Font Weights Demo */
+        .weight-demo {
+            display: grid;
+            gap: var(--spacing-2);
+        }
+
+        .weight-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-2) 0;
+            border-bottom: 1px solid var(--border-default);
+        }
+
+        .weight-item:last-child {
+            border-bottom: none;
+        }
+
+        .weight-label {
+            font-size: var(--font-size-xs);
+            color: var(--fg-tertiary);
+            text-transform: uppercase;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-3);
+            margin-bottom: var(--spacing-4);
+        }
+
+        .btn {
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--radius-lg);
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-sm);
+            font-weight: var(--font-weight-semibold);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--interactive-default);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--interactive-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--bg-secondary);
+            color: var(--fg-primary);
+            border: 1px solid var(--border-strong);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--bg-tertiary);
+        }
+
+        .btn-success {
+            background-color: var(--color-success-500);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: var(--color-success-700);
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger-500);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: var(--color-danger-700);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--interactive-default);
+            border: 2px solid var(--interactive-default);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--interactive-default);
+            color: white;
+        }
+
+        /* Input */
+        .input-demo {
+            margin-bottom: var(--spacing-4);
+        }
+
+        .input {
+            width: 100%;
+            padding: var(--spacing-3);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-lg);
+            font-family: var(--font-family-sans);
+            font-size: var(--font-size-base);
+            background: var(--bg-elevated);
+            color: var(--fg-primary);
+            transition: all var(--transition-fast);
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: var(--interactive-default);
+            box-shadow: 0 0 0 3px var(--color-primary-200);
+        }
+
+        .dark .input:focus {
+            box-shadow: 0 0 0 3px var(--color-primary-900);
+        }
+
+        .input::placeholder {
+            color: var(--fg-muted);
+        }
+
+        /* Sample Card */
+        .sample-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-default);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-4);
+            margin-top: var(--spacing-4);
+        }
+
+        .sample-card-title {
+            font-weight: var(--font-weight-semibold);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .sample-card-text {
+            font-size: var(--font-size-sm);
+            color: var(--fg-secondary);
+        }
+
+        /* Spacing Demo */
+        .spacing-demo {
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-2);
+        }
+
+        .spacing-item {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-3);
+        }
+
+        .spacing-bar {
+            background: linear-gradient(90deg, var(--color-primary-500), var(--color-primary-700));
+            height: 24px;
+            border-radius: var(--radius-sm);
+        }
+
+        .spacing-label {
+            font-size: var(--font-size-xs);
+            color: var(--fg-tertiary);
+            font-family: var(--font-family-mono);
+            min-width: 80px;
+        }
+
+        /* Radius Demo */
+        .radius-demo {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--spacing-3);
+        }
+
+        .radius-item {
+            text-align: center;
+        }
+
+        .radius-box {
+            background: var(--interactive-default);
+            height: 48px;
+            margin-bottom: var(--spacing-2);
+        }
+
+        .radius-label {
+            font-size: var(--font-size-xs);
+            color: var(--fg-tertiary);
+        }
+
+        /* Shadow Demo */
+        .shadow-demo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--spacing-4);
+        }
+
+        .shadow-item {
+            text-align: center;
+        }
+
+        .shadow-box {
+            background: var(--bg-elevated);
+            height: 64px;
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--spacing-2);
+        }
+
+        .shadow-label {
+            font-size: var(--font-size-xs);
+            color: var(--fg-tertiary);
+        }
+
+        /* Status Badges */
+        .badge-demo {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--spacing-2);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: var(--spacing-1) var(--spacing-3);
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: var(--font-weight-medium);
+        }
+
+        .badge-primary {
+            background: var(--color-primary-100);
+            color: var(--color-primary-700);
+        }
+
+        .dark .badge-primary {
+            background: var(--color-primary-900);
+            color: var(--color-primary-300);
+        }
+
+        .badge-success {
+            background: var(--color-success-50);
+            color: var(--color-success-700);
+        }
+
+        .badge-warning {
+            background: var(--color-warning-50);
+            color: var(--color-warning-700);
+        }
+
+        .badge-danger {
+            background: var(--color-danger-50);
+            color: var(--color-danger-700);
+        }
+
+        .badge-info {
+            background: var(--color-info-50);
+            color: var(--color-info-700);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: var(--spacing-12);
+            padding-top: var(--spacing-6);
+            border-top: 1px solid var(--border-default);
+            color: var(--fg-tertiary);
+            font-size: var(--font-size-sm);
+        }
+
+        .footer code {
+            font-family: var(--font-family-mono);
+            background: var(--bg-secondary);
+            padding: var(--spacing-1) var(--spacing-2);
+            border-radius: var(--radius-sm);
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" onclick="toggleTheme()">Toggle Dark Mode</button>
+
+    <header class="header">
+        <h1>Mystira Design System</h1>
+        <p>Unified design tokens for the Mystira platform</p>
+    </header>
+
+    <div class="container">
+        <!-- Color Palette -->
+        <div class="card">
+            <h2>Primary Brand Color</h2>
+            <h3>Purple Scale</h3>
+            <div class="color-row">
+                <div class="color-swatch primary-50 dark-text">50</div>
+                <div class="color-swatch primary-100 dark-text">100</div>
+                <div class="color-swatch primary-200 dark-text">200</div>
+                <div class="color-swatch primary-300 dark-text">300</div>
+                <div class="color-swatch primary-400 light-text">400</div>
+                <div class="color-swatch primary-500 light-text">500</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch primary-600 light-text">600</div>
+                <div class="color-swatch primary-700 light-text">700*</div>
+                <div class="color-swatch primary-800 light-text">800</div>
+                <div class="color-swatch primary-900 light-text">900</div>
+                <div class="color-swatch primary-950 light-text">950</div>
+            </div>
+            <p class="type-small" style="margin-top: var(--spacing-2);">* Primary brand color: #7c3aed</p>
+        </div>
+
+        <!-- Neutral Colors -->
+        <div class="card">
+            <h2>Neutral Gray Scale</h2>
+            <h3>For backgrounds, text, and borders</h3>
+            <div class="color-row">
+                <div class="color-swatch neutral-50 dark-text">50</div>
+                <div class="color-swatch neutral-100 dark-text">100</div>
+                <div class="color-swatch neutral-200 dark-text">200</div>
+                <div class="color-swatch neutral-300 dark-text">300</div>
+                <div class="color-swatch neutral-400 dark-text">400</div>
+                <div class="color-swatch neutral-500 light-text">500</div>
+            </div>
+            <div class="color-row">
+                <div class="color-swatch neutral-600 light-text">600</div>
+                <div class="color-swatch neutral-700 light-text">700</div>
+                <div class="color-swatch neutral-800 light-text">800</div>
+                <div class="color-swatch neutral-900 light-text">900</div>
+                <div class="color-swatch neutral-950 light-text">950</div>
+            </div>
+        </div>
+
+        <!-- Semantic Colors -->
+        <div class="card">
+            <h2>Semantic Colors</h2>
+            <h3>Status and feedback colors</h3>
+            <div class="semantic-colors">
+                <div class="semantic-color">
+                    <div class="semantic-swatch" style="background: var(--color-success-500);">Success</div>
+                    <div class="semantic-label">#22c55e</div>
+                </div>
+                <div class="semantic-color">
+                    <div class="semantic-swatch" style="background: var(--color-warning-500);">Warning</div>
+                    <div class="semantic-label">#f59e0b</div>
+                </div>
+                <div class="semantic-color">
+                    <div class="semantic-swatch" style="background: var(--color-danger-500);">Danger</div>
+                    <div class="semantic-label">#ef4444</div>
+                </div>
+                <div class="semantic-color">
+                    <div class="semantic-swatch" style="background: var(--color-info-500);">Info</div>
+                    <div class="semantic-label">#3b82f6</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typography -->
+        <div class="card">
+            <h2>Typography</h2>
+            <div class="typography-sample">
+                <div class="type-display">Display Heading</div>
+                <div class="type-heading">Section Heading</div>
+                <div class="type-body">Body text for regular content. The quick brown fox jumps over the lazy dog.</div>
+                <div class="type-small">Small text for captions and helper text</div>
+                <div class="type-mono">const code = "Monospace for code";</div>
+            </div>
+        </div>
+
+        <!-- Font Weights -->
+        <div class="card">
+            <h2>Font Weights</h2>
+            <h3>Inter Font Family</h3>
+            <div class="weight-demo">
+                <div class="weight-item">
+                    <span style="font-weight: 400;">Regular 400</span>
+                    <span class="weight-label">Normal</span>
+                </div>
+                <div class="weight-item">
+                    <span style="font-weight: 500;">Medium 500</span>
+                    <span class="weight-label">Medium</span>
+                </div>
+                <div class="weight-item">
+                    <span style="font-weight: 600;">Semibold 600</span>
+                    <span class="weight-label">Semibold</span>
+                </div>
+                <div class="weight-item">
+                    <span style="font-weight: 700;">Bold 700</span>
+                    <span class="weight-label">Bold</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="card">
+            <h2>Buttons</h2>
+            <h3>Interactive Elements</h3>
+            <div class="button-group">
+                <button class="btn btn-primary">Primary</button>
+                <button class="btn btn-secondary">Secondary</button>
+                <button class="btn btn-outline">Outline</button>
+            </div>
+            <div class="button-group">
+                <button class="btn btn-success">Success</button>
+                <button class="btn btn-danger">Danger</button>
+            </div>
+        </div>
+
+        <!-- Form Elements -->
+        <div class="card">
+            <h2>Form Elements</h2>
+            <div class="input-demo">
+                <input type="text" class="input" placeholder="Enter text here...">
+            </div>
+            <h3>Status Badges</h3>
+            <div class="badge-demo">
+                <span class="badge badge-primary">Default</span>
+                <span class="badge badge-success">Active</span>
+                <span class="badge badge-warning">Pending</span>
+                <span class="badge badge-danger">Error</span>
+                <span class="badge badge-info">Info</span>
+            </div>
+        </div>
+
+        <!-- Card Component -->
+        <div class="card">
+            <h2>Card Component</h2>
+            <div class="sample-card">
+                <div class="sample-card-title">Nested Card Title</div>
+                <div class="sample-card-text">Cards use elevated backgrounds with subtle borders and shadows to create depth and hierarchy.</div>
+            </div>
+        </div>
+
+        <!-- Spacing -->
+        <div class="card">
+            <h2>Spacing Scale</h2>
+            <div class="spacing-demo">
+                <div class="spacing-item">
+                    <span class="spacing-label">--spacing-1</span>
+                    <div class="spacing-bar" style="width: 4px;"></div>
+                    <span class="spacing-label">0.25rem</span>
+                </div>
+                <div class="spacing-item">
+                    <span class="spacing-label">--spacing-2</span>
+                    <div class="spacing-bar" style="width: 8px;"></div>
+                    <span class="spacing-label">0.5rem</span>
+                </div>
+                <div class="spacing-item">
+                    <span class="spacing-label">--spacing-4</span>
+                    <div class="spacing-bar" style="width: 16px;"></div>
+                    <span class="spacing-label">1rem</span>
+                </div>
+                <div class="spacing-item">
+                    <span class="spacing-label">--spacing-6</span>
+                    <div class="spacing-bar" style="width: 24px;"></div>
+                    <span class="spacing-label">1.5rem</span>
+                </div>
+                <div class="spacing-item">
+                    <span class="spacing-label">--spacing-8</span>
+                    <div class="spacing-bar" style="width: 32px;"></div>
+                    <span class="spacing-label">2rem</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Border Radius -->
+        <div class="card">
+            <h2>Border Radius</h2>
+            <div class="radius-demo">
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-sm);"></div>
+                    <div class="radius-label">sm (2px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-md);"></div>
+                    <div class="radius-label">md (6px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-lg);"></div>
+                    <div class="radius-label">lg (8px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-xl);"></div>
+                    <div class="radius-label">xl (12px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-2xl);"></div>
+                    <div class="radius-label">2xl (16px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-3xl);"></div>
+                    <div class="radius-label">3xl (24px)</div>
+                </div>
+                <div class="radius-item">
+                    <div class="radius-box" style="border-radius: var(--radius-full);"></div>
+                    <div class="radius-label">full</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shadows -->
+        <div class="card">
+            <h2>Box Shadows</h2>
+            <div class="shadow-demo">
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-sm);"></div>
+                    <div class="shadow-label">shadow-sm</div>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-default);"></div>
+                    <div class="shadow-label">shadow</div>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-md);"></div>
+                    <div class="shadow-label">shadow-md</div>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-lg);"></div>
+                    <div class="shadow-label">shadow-lg</div>
+                </div>
+                <div class="shadow-item">
+                    <div class="shadow-box" style="box-shadow: var(--shadow-xl);"></div>
+                    <div class="shadow-label">shadow-xl</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Design tokens from <code>@mystira/design-tokens</code></p>
+        <p style="margin-top: var(--spacing-2);">Toggle theme to preview light/dark mode semantic colors</p>
+    </footer>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+        }
+    </script>
+</body>
+</html>

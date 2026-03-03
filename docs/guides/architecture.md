@@ -147,20 +147,22 @@ The platform uses a tiered authentication strategy based on user type:
 
 **Authentication Flows by Component**:
 
-| Component | Auth Method | Provider | Token Type |
-|-----------|-------------|----------|------------|
-| Admin UI | Cookie + OIDC | Microsoft Entra ID | Session cookie |
-| Admin API | JWT Bearer | Microsoft Entra ID | Access token |
-| Public API | JWT Bearer | Entra External ID | Access token |
-| PWA | MSAL + External ID | Entra External ID | Access + Refresh |
-| Services | Managed Identity | Azure | AAD token |
+| Component  | Auth Method        | Provider           | Token Type       |
+| ---------- | ------------------ | ------------------ | ---------------- |
+| Admin UI   | Cookie + OIDC      | Microsoft Entra ID | Session cookie   |
+| Admin API  | JWT Bearer         | Microsoft Entra ID | Access token     |
+| Public API | JWT Bearer         | Entra External ID  | Access token     |
+| PWA        | MSAL + External ID | Entra External ID  | Access + Refresh |
+| Services   | Managed Identity   | Azure              | AAD token        |
 
 **Social Login** (via Microsoft Entra External ID):
+
 - Google OAuth 2.0 for Google accounts
 - Discord OpenID Connect for gaming community
 - Email/password for local accounts
 
 For detailed implementation, see:
+
 - [ADR-0010: Authentication Strategy](./architecture/adr/0010-authentication-and-authorization-strategy.md)
 - [ADR-0011: Entra ID Integration](./architecture/adr/0011-entra-id-authentication-integration.md)
 
@@ -226,4 +228,4 @@ For detailed implementation, see:
 - **Visualization**: Grafana
 - **Logging**: Centralized logging system
 - **Tracing**: Distributed tracing (OpenTelemetry)
-- **Alerting**: PagerDuty / Slack integration
+- **Alerting**: Email notifications

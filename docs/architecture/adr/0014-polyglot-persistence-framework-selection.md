@@ -5,6 +5,7 @@
 **Accepted** - 2025-12-24
 
 Decision accepted to implement permanent polyglot persistence architecture. Key clarifications:
+
 - **No full PostgreSQL migration** - Cosmos DB remains the primary document store
 - Each database serves its optimal use case permanently
 - PolyglotRepository provides unified access with database-appropriate routing
@@ -451,13 +452,13 @@ Implement a hybrid solution combining:
 
 ### Database Routing Strategy
 
-| Entity Type | Primary Store | Rationale |
-|-------------|---------------|-----------|
-| Scenarios, Content Bundles | Cosmos DB | Complex nested documents, flexible schema |
-| User Profiles, Sessions | Cosmos DB | Document-oriented, low-latency reads |
-| Analytics, Metrics | PostgreSQL | Relational queries, aggregations |
-| Story Generator data | PostgreSQL | Structured LLM responses, embeddings |
-| Saga/Outbox state | PostgreSQL | Transactional consistency for Wolverine |
+| Entity Type                | Primary Store | Rationale                                 |
+| -------------------------- | ------------- | ----------------------------------------- |
+| Scenarios, Content Bundles | Cosmos DB     | Complex nested documents, flexible schema |
+| User Profiles, Sessions    | Cosmos DB     | Document-oriented, low-latency reads      |
+| Analytics, Metrics         | PostgreSQL    | Relational queries, aggregations          |
+| Story Generator data       | PostgreSQL    | Structured LLM responses, embeddings      |
+| Saga/Outbox state          | PostgreSQL    | Transactional consistency for Wolverine   |
 
 ### Implementation in Mystira.Shared
 
@@ -477,16 +478,16 @@ Mystira.Shared/
 
 ### Implementation Status
 
-| Component | Package | Status |
-|-----------|---------|--------|
+| Component             | Package                              | Status      |
+| --------------------- | ------------------------------------ | ----------- |
 | Specification Pattern | `Mystira.Shared.Data.Specifications` | ✅ Complete |
-| Repository Base | `Mystira.Shared.Data.Repositories` | ✅ Complete |
-| Redis Caching | `Mystira.Shared.Caching` | ✅ Complete |
-| Polly Resilience | `Mystira.Shared.Resilience` | ✅ Complete |
-| Wolverine Messaging | `Mystira.Shared.Messaging` | ✅ Complete |
-| Ardalis.Specification | NuGet integration | ✅ Complete |
-| PolyglotRepository | `Mystira.Shared.Data.Polyglot` | ✅ Complete |
-| Wolverine EF Core | NuGet integration | ✅ Complete |
+| Repository Base       | `Mystira.Shared.Data.Repositories`   | ✅ Complete |
+| Redis Caching         | `Mystira.Shared.Caching`             | ✅ Complete |
+| Polly Resilience      | `Mystira.Shared.Resilience`          | ✅ Complete |
+| Wolverine Messaging   | `Mystira.Shared.Messaging`           | ✅ Complete |
+| Ardalis.Specification | NuGet integration                    | ✅ Complete |
+| PolyglotRepository    | `Mystira.Shared.Data.Polyglot`       | ✅ Complete |
+| Wolverine EF Core     | NuGet integration                    | ✅ Complete |
 
 ---
 
@@ -508,13 +509,13 @@ Mystira.Shared/
 
 ### Risks & Mitigations
 
-| Risk                               | Mitigation                                   |
-| ---------------------------------- | -------------------------------------------- |
-| Ardalis.Spec version conflicts     | Pin versions, test upgrades                  |
-| Redis cache stampede               | Use cache locks for expensive queries        |
-| Cross-database consistency         | Use Wolverine saga/outbox for coordination   |
-| Testing complexity                 | Use in-memory providers for unit tests       |
-| Wrong database choice for entity   | Document routing rationale, review in PRs    |
+| Risk                             | Mitigation                                 |
+| -------------------------------- | ------------------------------------------ |
+| Ardalis.Spec version conflicts   | Pin versions, test upgrades                |
+| Redis cache stampede             | Use cache locks for expensive queries      |
+| Cross-database consistency       | Use Wolverine saga/outbox for coordination |
+| Testing complexity               | Use in-memory providers for unit tests     |
+| Wrong database choice for entity | Document routing rationale, review in PRs  |
 
 ---
 

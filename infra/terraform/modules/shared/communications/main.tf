@@ -49,8 +49,8 @@ variable "enable_email_service" {
 variable "email_domains" {
   description = "Custom email domains to configure"
   type = list(object({
-    name                = string
-    domain_management   = string # AzureManaged or CustomerManaged
+    name                             = string
+    domain_management                = string # AzureManaged or CustomerManaged
     user_engagement_tracking_enabled = bool
   }))
   default = []
@@ -97,9 +97,9 @@ resource "azurerm_email_communication_service" "shared" {
 resource "azurerm_email_communication_service_domain" "azure_managed" {
   count = var.enable_email_service ? 1 : 0
 
-  name                         = "AzureManagedDomain"
-  email_service_id             = azurerm_email_communication_service.shared[0].id
-  domain_management            = "AzureManaged"
+  name                             = "AzureManagedDomain"
+  email_service_id                 = azurerm_email_communication_service.shared[0].id
+  domain_management                = "AzureManaged"
   user_engagement_tracking_enabled = false
 
   tags = local.common_tags
@@ -109,9 +109,9 @@ resource "azurerm_email_communication_service_domain" "azure_managed" {
 resource "azurerm_email_communication_service_domain" "custom" {
   for_each = { for d in var.email_domains : d.name => d }
 
-  name                         = each.value.name
-  email_service_id             = azurerm_email_communication_service.shared[0].id
-  domain_management            = each.value.domain_management
+  name                             = each.value.name
+  email_service_id                 = azurerm_email_communication_service.shared[0].id
+  domain_management                = each.value.domain_management
   user_engagement_tracking_enabled = each.value.user_engagement_tracking_enabled
 
   tags = local.common_tags

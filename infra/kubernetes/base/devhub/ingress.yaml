@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: mys-devhub-ingress
+  labels:
+    app: mys-devhub
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    # Enable gzip compression for WASM files
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      gzip on;
+      gzip_types application/wasm application/javascript text/css text/html;
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - devhub.mystira.app
+      secretName: mys-devhub-tls
+  rules:
+    - host: devhub.mystira.app
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mys-devhub
+                port:
+                  number: 3000

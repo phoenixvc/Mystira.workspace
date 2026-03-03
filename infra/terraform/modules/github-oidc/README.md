@@ -78,24 +78,24 @@ terraform output github_oidc_secrets
 
 ## Inputs
 
-| Name | Description | Type | Default |
-|------|-------------|------|---------|
-| environment | Deployment environment (dev, staging, prod) | string | - |
-| github_org | GitHub organization name | string | "phoenixvc" |
-| repositories | Map of repositories to configure | map(object) | {} |
-| enable_subscription_contributor | Grant Contributor role | bool | true |
-| acr_id | ACR resource ID for AcrPush role | string | "" |
-| aks_id | AKS resource ID for Cluster Admin role | string | "" |
+| Name                            | Description                                 | Type        | Default     |
+| ------------------------------- | ------------------------------------------- | ----------- | ----------- |
+| environment                     | Deployment environment (dev, staging, prod) | string      | -           |
+| github_org                      | GitHub organization name                    | string      | "phoenixvc" |
+| repositories                    | Map of repositories to configure            | map(object) | {}          |
+| enable_subscription_contributor | Grant Contributor role                      | bool        | true        |
+| acr_id                          | ACR resource ID for AcrPush role            | string      | ""          |
+| aks_id                          | AKS resource ID for Cluster Admin role      | string      | ""          |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| cicd_client_id | CI/CD app client ID (for AZURE_CLIENT_ID) |
-| tenant_id | Azure AD tenant ID (for AZURE_TENANT_ID) |
-| subscription_id | Azure subscription ID (for AZURE_SUBSCRIPTION_ID) |
-| github_secrets | All values needed for GitHub secrets |
-| federated_credentials | Map of created federated credentials |
+| Name                  | Description                                       |
+| --------------------- | ------------------------------------------------- |
+| cicd_client_id        | CI/CD app client ID (for AZURE_CLIENT_ID)         |
+| tenant_id             | Azure AD tenant ID (for AZURE_TENANT_ID)          |
+| subscription_id       | Azure subscription ID (for AZURE_SUBSCRIPTION_ID) |
+| github_secrets        | All values needed for GitHub secrets              |
+| federated_credentials | Map of created federated credentials              |
 
 ## How OIDC Works
 

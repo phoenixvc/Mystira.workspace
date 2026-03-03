@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  title: Mystira Common Types - Pagination
+  version: 1.0.0
+  description: Shared pagination types for all Mystira APIs
+
+components:
+  schemas:
+    PaginationRequest:
+      type: object
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Page number (1-indexed)
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+          description: Number of items per page
+        sortBy:
+          type: string
+          nullable: true
+          description: Field to sort by
+        sortOrder:
+          type: string
+          enum: [asc, desc]
+          default: asc
+          description: Sort order
+
+    PaginationMetadata:
+      type: object
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+      properties:
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        pageSize:
+          type: integer
+          description: Items per page
+          example: 20
+        totalItems:
+          type: integer
+          description: Total number of items
+          example: 150
+        totalPages:
+          type: integer
+          description: Total number of pages
+          example: 8
+        hasNextPage:
+          type: boolean
+          description: Whether there is a next page
+        hasPreviousPage:
+          type: boolean
+          description: Whether there is a previous page
+
+    PagedResponse:
+      type: object
+      required:
+        - items
+        - pagination
+      properties:
+        items:
+          type: array
+          items: {}
+          description: The paginated items
+        pagination:
+          $ref: '#/components/schemas/PaginationMetadata'

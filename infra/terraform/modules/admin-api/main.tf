@@ -1,64 +1,18 @@
 # Mystira Admin-API Infrastructure Module - Azure
 # Terraform module for deploying Mystira.AdminAPI service infrastructure on Azure
 # This is a .NET Web API that uses Microsoft Entra ID for authentication
+#
+# Variables defined in: variables.tf
+# Outputs defined in: outputs.tf
 
 terraform {
   required_version = ">= 1.5.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"  # 4.x required for .NET 9.0 support
+      version = "~> 4.0" # 4.x required for .NET 10.0 support
     }
   }
-}
-
-variable "environment" {
-  description = "Deployment environment (dev, staging, prod)"
-  type        = string
-}
-
-variable "location" {
-  description = "Azure region for deployment"
-  type        = string
-  default     = "eastus"
-}
-
-variable "region_code" {
-  description = "Short region code (eus, euw, etc.) - defaults to 'eus' for eastus"
-  type        = string
-  default     = "eus"
-}
-
-variable "resource_group_name" {
-  description = "Name of the resource group"
-  type        = string
-}
-
-variable "vnet_id" {
-  description = "Virtual Network ID for admin-api deployment"
-  type        = string
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for admin-api service"
-  type        = string
-}
-
-variable "shared_log_analytics_workspace_id" {
-  description = "ID of shared Log Analytics workspace (from shared monitoring module)"
-  type        = string
-}
-
-variable "shared_postgresql_server_id" {
-  description = "ID of shared PostgreSQL server (from shared/postgresql module)"
-  type        = string
-  default     = null
-}
-
-variable "tags" {
-  description = "Tags to apply to all resources"
-  type        = map(string)
-  default     = {}
 }
 
 locals {
@@ -132,6 +86,10 @@ resource "azurerm_application_insights" "admin_api" {
   application_type    = "web"
 
   tags = local.common_tags
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 # Key Vault for Admin-API Secrets
@@ -172,46 +130,8 @@ resource "azurerm_key_vault" "admin_api" {
   }
 
   tags = local.common_tags
-}
 
-# Outputs
-output "nsg_id" {
-  description = "Network Security Group ID for admin-api service"
-  value       = azurerm_network_security_group.admin_api.id
-}
-
-output "identity_id" {
-  description = "Managed Identity ID for admin-api service"
-  value       = azurerm_user_assigned_identity.admin_api.id
-}
-
-output "identity_principal_id" {
-  description = "Managed Identity Principal ID"
-  value       = azurerm_user_assigned_identity.admin_api.principal_id
-}
-
-output "identity_client_id" {
-  description = "Managed Identity Client ID (for workload identity)"
-  value       = azurerm_user_assigned_identity.admin_api.client_id
-}
-
-output "application_insights_id" {
-  description = "Application Insights ID for admin-api monitoring"
-  value       = azurerm_application_insights.admin_api.id
-}
-
-output "app_insights_connection_string" {
-  description = "Application Insights connection string"
-  value       = azurerm_application_insights.admin_api.connection_string
-  sensitive   = true
-}
-
-output "key_vault_id" {
-  description = "Key Vault ID for admin-api secrets"
-  value       = azurerm_key_vault.admin_api.id
-}
-
-output "key_vault_uri" {
-  description = "Key Vault URI for admin-api"
-  value       = azurerm_key_vault.admin_api.vault_uri
+  lifecycle {
+    prevent_destroy = true
+  }
 }

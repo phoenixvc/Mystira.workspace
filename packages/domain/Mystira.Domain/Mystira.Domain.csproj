@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Suppress XML doc comment warnings for specification classes -->
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <RootNamespace>Mystira.Domain</RootNamespace>
+
+    <!-- Package metadata -->
+    <PackageId>Mystira.Domain</PackageId>
+    <Version>0.6.0-alpha</Version>
+    <Authors>Mystira Team</Authors>
+    <Company>PhoenixVC</Company>
+    <Description>Core domain types for Mystira platform - enums, value objects, entity base classes, and shared domain primitives used across Contracts, Shared, and application layers</Description>
+    <PackageTags>mystira;domain;ddd;enums;valueobjects;entities</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/phoenixvc/Mystira.workspace</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/phoenixvc/Mystira.workspace.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+
+    <!-- Build configuration -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <!-- Source Link for debugging -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,91 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mys-chain-network-policy
+  labels:
+    app: mys-chain
+spec:
+  podSelector:
+    matchLabels:
+      app: mys-chain
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    # Allow traffic from ingress controller (for RPC API exposure)
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8545
+        - protocol: TCP
+          port: 8546
+    # Allow traffic from publisher service (RPC and WebSocket)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mys-publisher
+      ports:
+        - protocol: TCP
+          port: 8545
+        - protocol: TCP
+          port: 8546
+    # Allow P2P traffic between chain nodes (StatefulSet replicas)
+    - from:
+        - podSelector:
+            matchLabels:
+              app: mys-chain
+      ports:
+        - protocol: TCP
+          port: 30303
+        - protocol: UDP
+          port: 30303
+    # Allow health check probes from kubelet
+    - from: []
+      ports:
+        - protocol: TCP
+          port: 8545
+  egress:
+    # Allow DNS resolution
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # Allow P2P traffic between chain nodes
+    - to:
+        - podSelector:
+            matchLabels:
+              app: mys-chain
+      ports:
+        - protocol: TCP
+          port: 30303
+        - protocol: UDP
+          port: 30303
+    # Allow P2P traffic to external nodes (internal load balancer)
+    - to:
+        - ipBlock:
+            cidr: 10.0.0.0/8
+      ports:
+        - protocol: TCP
+          port: 30303
+        - protocol: UDP
+          port: 30303
+    # Allow HTTPS to Azure services (Key Vault)
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except:
+              - 10.0.0.0/8
+              - 172.16.0.0/12
+              - 192.168.0.0/16
+      ports:
+        - protocol: TCP
+          port: 443

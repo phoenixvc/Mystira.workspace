@@ -1,6 +1,6 @@
 # Mystira Workspace
 
-A unified workspace containing all Mystira platform components as integrated git submodules.
+A unified monorepo workspace containing all Mystira platform components.
 
 ## Overview
 
@@ -9,8 +9,8 @@ Mystira is an AI-powered interactive storytelling platform that combines blockch
 ## Quick Start
 
 ```bash
-# Clone with submodules
-git clone --recurse-submodules https://github.com/phoenixvc/Mystira.workspace.git
+# Clone the repository
+git clone https://github.com/phoenixvc/Mystira.workspace.git
 cd Mystira.workspace
 
 # Install dependencies
@@ -27,24 +27,24 @@ For detailed setup instructions, see [Quick Start Guide](./docs/guides/quick-sta
 
 ## Components
 
-Each component is maintained as a separate repository and integrated into this workspace:
+All components live in the `packages/` directory:
 
-| Component                  | Description                             | Tech Stack        | Repository                         |
-| -------------------------- | --------------------------------------- | ----------------- | ---------------------------------- |
-| **Mystira.Chain**          | Blockchain integration & Story Protocol | Python, gRPC      | `phoenixvc/Mystira.Chain`          |
-| **Mystira.App**            | Main storytelling application           | C#, .NET          | `phoenixvc/Mystira.App`            |
-| **Mystira.StoryGenerator** | AI-powered story generation engine      | C#, .NET          | `phoenixvc/Mystira.StoryGenerator` |
-| **Mystira.Publisher**      | Content publishing service              | TypeScript, Node  | `phoenixvc/Mystira.Publisher`      |
-| **Mystira.DevHub**         | Developer portal and tools              | TypeScript        | `phoenixvc/Mystira.DevHub`         |
-| **Mystira.Admin.Api**      | Admin backend API                       | C#, ASP.NET Core  | `phoenixvc/Mystira.Admin.Api`      |
-| **Mystira.Admin.UI**       | Admin dashboard frontend                | TypeScript, React | `phoenixvc/Mystira.Admin.UI`       |
-| **Infrastructure**         | Terraform, Kubernetes, CI/CD            | HCL, YAML         | _(workspace-native)_               |
+| Component                  | Path                        | Description                             | Tech Stack        |
+| -------------------------- | --------------------------- | --------------------------------------- | ----------------- |
+| **Mystira.Chain**          | `packages/chain/`           | Blockchain integration & Story Protocol | Python, gRPC      |
+| **Mystira.App**            | `packages/app/`             | Main storytelling application           | C#, .NET          |
+| **Mystira.StoryGenerator** | `packages/story-generator/` | AI-powered story generation engine      | C#, .NET          |
+| **Mystira.Publisher**      | `packages/publisher/`       | Content publishing service              | TypeScript, Node  |
+| **Mystira.DevHub**         | `packages/devhub/`          | Developer portal and tools              | TypeScript        |
+| **Mystira.Admin.Api**      | `packages/admin-api/`       | Admin backend API                       | C#, ASP.NET Core  |
+| **Mystira.Admin.UI**       | `packages/admin-ui/`        | Admin dashboard frontend                | TypeScript, React |
+| **Infrastructure**         | `infra/`                    | Terraform, Kubernetes, CI/CD            | HCL, YAML         |
 
 ## Repository Structure
 
 ```
 Mystira.workspace/
-├── packages/               # Component submodules
+├── packages/               # Application packages
 │   ├── admin-api/         # Admin backend (C# API)
 │   ├── admin-ui/          # Admin frontend (React)
 │   ├── app/               # Main application (C#)
@@ -80,25 +80,26 @@ Mystira.workspace/
 ### Prerequisites
 
 - **Node.js** >= 18.x with **pnpm** >= 8.x (TypeScript components)
-- **.NET SDK** 8.0+ (C# components)
+- **.NET SDK** 10.0+ (C# components)
 - **Python** 3.11+ (Chain component)
 - **Docker** (local development)
-- **Git** with submodule support
+- **Azure AD Tenant** (for Entra authentication)
+- **Email Service** (SendGrid/SMTP for Magic Link authentication)
 
-### Working with Submodules
+> **Note**: For .NET development, you'll need to configure GitHub Packages authentication. See [Setup Guide](./docs/guides/setup.md#nuget-packages-github-packages) for NuGet configuration including Package Source Mapping.
 
-```bash
-# Initialize submodules after cloning
-git submodule update --init --recursive
+### Authentication Setup
 
-# Update all submodules to latest
-git submodule update --remote
+The Mystira platform uses unified dual-path authentication (Entra + Magic Link). For complete setup instructions:
 
-# Update specific submodule
-git submodule update --remote packages/chain
-```
+📖 **[Entra-Magic Auth Setup Guide](./docs/ENTRA_MAGIC_AUTH_SETUP.md)**
+🔖 **[Quick Reference](./docs/ENTRA_MAGIC_AUTH_QUICK_REFERENCE.md)**
 
-For detailed submodule workflows, see [Submodules Guide](./docs/guides/submodules.md).
+Key requirements:
+
+- Azure AD app registration for Entra SSO
+- Email service configuration for Magic Link
+- JWT token configuration across all applications
 
 ### Common Tasks
 
@@ -125,25 +126,35 @@ pnpm dev
 pnpm --filter mystira-publisher dev
 ```
 
+### Debugging
+
+The workspace includes VS Code debug configurations for TypeScript/Node.js services. Template environment files are provided:
+
+- `.env.admin-api` - Admin API environment variables
+- `.env.publisher` - Publisher service environment variables
+- `.env.story-generator` - Story Generator service environment variables
+
+Before debugging, update these files with your local configuration values. The debug configurations will automatically load these environment files.
+
 ## CI/CD Pipeline
 
 The workspace uses a distributed CI/CD model:
 
-### Component Dev CI (in component repos)
+### Component CI
 
-Each component runs its own dev CI workflow in its repository for fast feedback during development:
+Each component has a CI workflow triggered by path-based filters:
 
-| Component       | Repository                                                                              | Runtime     |
-| --------------- | --------------------------------------------------------------------------------------- | ----------- |
-| Admin API       | [phoenixvc/Mystira.Admin.Api](https://github.com/phoenixvc/Mystira.Admin.Api)           | .NET 9.0    |
-| Admin UI        | [phoenixvc/Mystira.Admin.UI](https://github.com/phoenixvc/Mystira.Admin.UI)             | Node.js 20  |
-| App             | [phoenixvc/Mystira.App](https://github.com/phoenixvc/Mystira.App)                       | .NET 9.0    |
-| Chain           | [phoenixvc/Mystira.Chain](https://github.com/phoenixvc/Mystira.Chain)                   | Python 3.11 |
-| DevHub          | [phoenixvc/Mystira.DevHub](https://github.com/phoenixvc/Mystira.DevHub)                 | Node.js 20  |
-| Publisher       | [phoenixvc/Mystira.Publisher](https://github.com/phoenixvc/Mystira.Publisher)           | Node.js 20  |
-| Story Generator | [phoenixvc/Mystira.StoryGenerator](https://github.com/phoenixvc/Mystira.StoryGenerator) | .NET 9.0    |
+| Component       | Workflow                 | Runtime     |
+| --------------- | ------------------------ | ----------- |
+| Admin API       | `admin-api-ci.yml`       | .NET 10.0   |
+| Admin UI        | `admin-ui-ci.yml`        | Node.js 24  |
+| App             | `app-ci.yml`             | .NET 10.0   |
+| Chain           | `chain-ci.yml`           | Python 3.11 |
+| DevHub          | `devhub-ci.yml`          | Node.js 24  |
+| Publisher       | `publisher-ci.yml`       | Node.js 24  |
+| Story Generator | `story-generator-ci.yml` | .NET 10.0   |
 
-### Workspace Workflows (staging/production)
+### Integration, Staging & Production
 
 This workspace handles integration, staging, and production deployments:
 
@@ -164,7 +175,6 @@ This workspace handles integration, staging, and production deployments:
 
 ### Utilities
 
-- **Utilities: Check Submodules** - Validate submodule commits
 - **Utilities: Link Checker** - Check markdown links in documentation
 
 All workflows run on push to `dev`/`main` and on pull requests.
@@ -210,7 +220,6 @@ See [Infrastructure Documentation](./infra/README.md) for detailed guides.
 
 - [Quick Start Guide](./docs/guides/quick-start.md) - Get running in 5 minutes
 - [Setup Guide](./docs/guides/setup.md) - Detailed setup instructions
-- [Submodules Guide](./docs/guides/submodules.md) - Working with git submodules
 
 ### Development
 
@@ -280,7 +289,7 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  │                         Kubernetes (AKS)                                  │  │
 │  │  ┌────────────┐  ┌────────────┐  ┌─────────────┐  ┌───────────┐          │  │
 │  │  │ Publisher  │  │ Admin API  │  │   Story     │  │   Chain   │          │  │
-│  │  │(TypeScript)│  │(C# .NET 9) │  │  Generator  │  │  (Python) │          │  │
+│  │  │(TypeScript)│  │(C# .NET 10) │  │  Generator  │  │  (Python) │          │  │
 │  │  │            │  │            │  │ (C# + AI)   │  │           │          │  │
 │  │  │ • Content  │  │ • Entra ID │  │ • Claude    │  │ • Story   │          │  │
 │  │  │ • Publish  │  │ • CRUD     │  │ • GPT-4     │  │   Protocol│          │  │
@@ -304,7 +313,27 @@ Configuration: [`scripts/repo-metadata.json`](./scripts/repo-metadata.json)
 │  │  ┌─────────────────┐  ┌───────────────────┐  ┌─────────────────────────┐ │  │
 │  │  │ Microsoft Entra │  │ Entra External ID │  │   Managed Identity      │ │  │
 │  │  │  ID (Admins)    │  │ (Consumer Users)  │  │  (Service-to-Service)   │ │  │
-│  │  └─────────────────┘  └───────────────────┘  └─────────────────────────┘ │  │
+│  │  │                 │  │  + Magic Link    │  │                         │ │  │
+│  │  │  • OAuth 2.0    │  │  • OAuth 2.0      │  │  • Azure AD Auth       │ │  │
+│  │  │  • JWT Tokens   │  │  • Magic Links    │  │  • Service Principals  │ │  │
+│  │  │  • SSO          │  │  • JWT Tokens     │  │                         │ │  │
+│  │  │                 │  │  • Email Service  │  │                         │ │  │
+│  │  └─────────┬───────┘  └─────────┬─────────┘  └─────────────────────────┘ │  │
+│  │            │                    │                                            │  │
+│  │            └──────────┬─────────┘                                            │  │
+│  │                       │ JWT Token Flow                                       │  │
+│  │                       ▼                                                      │  │
+│  │              ┌─────────────────┐                                            │  │
+│  │              │  Identity API   │                                            │  │
+│  │              │  (Token Issuer  │                                            │  │
+│  │              │   & Validator)   │                                            │  │
+│  │              │                 │                                            │  │
+│  │              │ • JWT issuance  │                                            │  │
+│  │              │ • Token validation│                                           │  │
+│  │              │ • Magic link auth│                                           │  │
+│  │              │ • Entra ID integration│                                      │  │
+│  │              │ • Centralized auth authority│                               │  │
+│  │              └─────────────────┘                                            │  │
 │  └──────────────────────────────────────────────────────────────────────────┘  │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -343,7 +372,7 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 - **IndexedDB** - Client-side data persistence and sync
 - **Haptics & Audio** - Native device feature integration via JS interop
 
-**Backend**: ASP.NET Core on .NET 9 with Cosmos DB and hexagonal architecture (CQRS + MediatR)
+**Backend**: ASP.NET Core on .NET 10 with Cosmos DB and hexagonal architecture (CQRS + MediatR)
 
 ### Package Ecosystem
 
@@ -355,29 +384,32 @@ The main client application ([Mystira.App](https://github.com/phoenixvc/Mystira.
 
 ### Service Endpoints
 
-| Environment | Service         | URL                             |
-| ----------- | --------------- | ------------------------------- |
-| Development | Web App         | dev.mystira.app                 |
-|             | Admin UI        | dev.admin.mystira.app           |
-|             | Admin API       | dev.admin-api.mystira.app       |
-|             | Publisher       | dev.publisher.mystira.app       |
-|             | Story Generator | dev.story-api.mystira.app       |
-|             | Story Web       | dev.story.mystira.app           |
-|             | Chain           | dev.chain.mystira.app           |
-| Staging     | Web App         | staging.mystira.app             |
-|             | Admin UI        | staging.admin.mystira.app       |
-|             | Admin API       | staging.admin-api.mystira.app   |
-|             | Publisher       | staging.publisher.mystira.app   |
-|             | Story Generator | staging.story-api.mystira.app   |
-|             | Story Web       | staging.story.mystira.app       |
-|             | Chain           | staging.chain.mystira.app       |
-| Production  | Web App         | mystira.app                     |
-|             | Admin UI        | admin.mystira.app               |
-|             | Admin API       | admin-api.mystira.app           |
-|             | Publisher       | publisher.mystira.app           |
-|             | Story Generator | story-api.mystira.app           |
-|             | Story Web       | story.mystira.app               |
-|             | Chain           | chain.mystira.app               |
+| Environment | Service         | URL                           |
+| ----------- | --------------- | ----------------------------- |
+| Development | Web App         | dev.mystira.app               |
+|             | Admin UI        | dev.admin.mystira.app         |
+|             | Admin API       | dev.admin-api.mystira.app     |
+|             | Identity API    | dev.identity.mystira.app      |
+|             | Publisher       | dev.publisher.mystira.app     |
+|             | Story Generator | dev.story-api.mystira.app     |
+|             | Story Web       | dev.story.mystira.app         |
+|             | Chain           | dev.chain.mystira.app         |
+| Staging     | Web App         | staging.mystira.app           |
+|             | Admin UI        | staging.admin.mystira.app     |
+|             | Admin API       | staging.admin-api.mystira.app |
+|             | Identity API    | staging.identity.mystira.app  |
+|             | Publisher       | staging.publisher.mystira.app |
+|             | Story Generator | staging.story-api.mystira.app |
+|             | Story Web       | staging.story.mystira.app     |
+|             | Chain           | staging.chain.mystira.app     |
+| Production  | Web App         | mystira.app                   |
+|             | Admin UI        | admin.mystira.app             |
+|             | Admin API       | admin-api.mystira.app         |
+|             | Identity API    | identity.mystira.app          |
+|             | Publisher       | publisher.mystira.app         |
+|             | Story Generator | story-api.mystira.app         |
+|             | Story Web       | story.mystira.app             |
+|             | Chain           | chain.mystira.app             |
 
 ## Security
 
@@ -392,7 +424,6 @@ We welcome contributions! Please read:
 
 1. [Contributing Guide](./CONTRIBUTING.md) - Development process
 2. [Commit Conventions](./docs/guides/commit-conventions.md) - Commit message format
-3. [Submodules Guide](./docs/guides/submodules.md) - Working with submodules
 
 ## License
 

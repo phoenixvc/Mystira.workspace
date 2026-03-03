@@ -1,6 +1,6 @@
 # ADR-0019: Dockerfile Location Standardization
 
-**Status**: Proposed
+**Status**: Accepted
 **Date**: 2024-12-24
 **Decision Makers**: DevOps, Platform Team
 
@@ -8,24 +8,27 @@
 
 Currently, Dockerfiles are inconsistently located across the Mystira ecosystem:
 
-| Service | Code Location | Dockerfile Location | Built By |
-|---------|---------------|---------------------|----------|
-| Admin.Api | `packages/admin-api` (submodule) | Submodule repo | Submodule CI |
-| Admin.UI | `packages/admin-ui` (submodule) | Submodule repo | Submodule CI |
-| Chain | `packages/chain` (submodule) | `infra/docker/chain/` (workspace) | Workspace CI |
-| Publisher | `packages/publisher` (submodule) | `infra/docker/publisher/` (workspace) | Workspace CI |
+| Service             | Code Location                          | Dockerfile Location                         | Built By     |
+| ------------------- | -------------------------------------- | ------------------------------------------- | ------------ |
+| Admin.Api           | `packages/admin-api` (submodule)       | Submodule repo                              | Submodule CI |
+| Admin.UI            | `packages/admin-ui` (submodule)        | Submodule repo                              | Submodule CI |
+| Chain               | `packages/chain` (submodule)           | `infra/docker/chain/` (workspace)           | Workspace CI |
+| Publisher           | `packages/publisher` (submodule)       | `infra/docker/publisher/` (workspace)       | Workspace CI |
 | Story-Generator.Api | `packages/story-generator` (submodule) | `infra/docker/story-generator/` (workspace) | Workspace CI |
 
 > **Note**: Story-Generator follows the same pattern as Mystira.App:
+>
 > - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
 > - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
 >
 > **SWA Infrastructure (Implemented)**:
+>
 > - Terraform module: `infra/terraform/modules/story-generator/` (includes SWA resources)
 > - Front Door: `infra/terraform/modules/front-door/` (story-generator endpoints)
 > - Workflow: `submodule-deploy-dev-appservice.yml` (handles `story-generator-swa-deploy`)
 
 This inconsistency causes:
+
 - Confusion about where to find/update Dockerfiles
 - Inconsistent CI/CD patterns across services
 - Slower feedback loops for Chain/Publisher/Story-Generator (changes require workspace build)
@@ -35,6 +38,7 @@ This inconsistency causes:
 **Standardize on Dockerfiles living in their respective submodule repositories.**
 
 All services will:
+
 1. Have their Dockerfile in the submodule repo root
 2. Build and push Docker images via submodule CI/CD
 3. Trigger workspace deployment via `repository_dispatch`
@@ -47,6 +51,7 @@ All services will:
 
 1. Copy `infra/docker/chain/Dockerfile` to `Mystira.Chain` repo
 2. Update paths:
+
    ```dockerfile
    # Before (workspace context)
    COPY packages/chain/ ./
@@ -54,12 +59,14 @@ All services will:
    # After (submodule context)
    COPY . ./
    ```
+
 3. Add CI/CD workflow to `Mystira.Chain` repo (use `submodule-cicd-setup.md` template)
 
 #### Publisher (Node.js)
 
 1. Copy `infra/docker/publisher/Dockerfile` to `Mystira.Publisher` repo
 2. Update paths and remove pnpm workspace references:
+
    ```dockerfile
    # Before (workspace context)
    COPY package.json ./
@@ -71,6 +78,7 @@ All services will:
    COPY package.json ./
    COPY pnpm-lock.yaml ./
    ```
+
 3. Ensure Publisher has its own `pnpm-lock.yaml`
 4. Add CI/CD workflow
 
@@ -99,6 +107,7 @@ All services will:
 ### Phase 3: Verify Submodule CI/CD
 
 Each submodule should have a workflow that:
+
 1. Builds Docker image on push to `dev`
 2. Pushes to ACR (`myssharedacr.azurecr.io`)
 3. Triggers workspace via `repository_dispatch`
@@ -106,16 +115,19 @@ Each submodule should have a workflow that:
 ## Consequences
 
 ### Positive
+
 - Consistent CI/CD pattern across all services
 - Faster feedback (Docker build runs on submodule PR)
 - Teams own their Dockerfiles
 - Clearer separation of concerns
 
 ### Negative
+
 - Migration effort required
 - Dockerfiles spread across repos (harder to see all at once)
 
 ### Neutral
+
 - No change to deployment flow (still uses `repository_dispatch`)
 
 ## Action Items

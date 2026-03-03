@@ -2,7 +2,7 @@
 # Multi-stage build for Mystira Publisher service
 
 # Build stage
-FROM node:24-alpine@sha256:c921b97d4b74f51744057454b306b418cf693865e73b8100559189605f6955b8 AS builder
+FROM node:24-alpine@sha256:7fddd9ddeae8196abf4a3ef2de34e11f7b1a722119f91f28ddf1e99dcafdf114 AS builder
 
 WORKDIR /app
 
@@ -37,7 +37,7 @@ RUN mkdir -p /app/packages/publisher/dist
 RUN pnpm prune --prod
 
 # Production stage
-FROM node:24-alpine@sha256:c921b97d4b74f51744057454b306b418cf693865e73b8100559189605f6955b8 AS production
+FROM node:24-alpine@sha256:7fddd9ddeae8196abf4a3ef2de34e11f7b1a722119f91f28ddf1e99dcafdf114 AS production
 
 WORKDIR /app
 

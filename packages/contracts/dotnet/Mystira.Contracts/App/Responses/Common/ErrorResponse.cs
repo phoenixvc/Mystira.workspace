@@ -81,6 +81,11 @@ public record ValidationErrorResponse : ErrorResponse
     public required IDictionary<string, IReadOnlyList<string>> Errors { get; init; }
 
     /// <summary>
+    /// Alias for Errors property for backward compatibility.
+    /// </summary>
+    public IDictionary<string, IReadOnlyList<string>> ValidationErrors => Errors;
+
+    /// <summary>
     /// Creates a validation error response from field errors.
     /// </summary>
     public static ValidationErrorResponse FromErrors(IDictionary<string, IReadOnlyList<string>> errors) => new()
@@ -176,4 +181,92 @@ public record UnauthorizedErrorResponse : ErrorResponse
         IsRecoverable = true,
         StatusCode = 401
     };
+}
+
+/// <summary>
+/// Simple validation result for field-level validation.
+/// </summary>
+public class ValidationResult
+{
+    /// <summary>
+    /// Whether the validation passed.
+    /// </summary>
+    public bool IsValid { get; set; }
+
+    /// <summary>
+    /// Optional message describing the validation result.
+    /// </summary>
+    public string? Message { get; set; }
+
+    /// <summary>
+    /// Creates a successful validation result.
+    /// </summary>
+    public static ValidationResult Success() => new() { IsValid = true };
+
+    /// <summary>
+    /// Creates a failed validation result with a message.
+    /// </summary>
+    public static ValidationResult Failure(string message) => new() { IsValid = false, Message = message };
+}
+
+/// <summary>
+/// Response for health check endpoints.
+/// </summary>
+public record HealthCheckResponse
+{
+    /// <summary>
+    /// Overall health status of the service.
+    /// </summary>
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Total duration of the health check in milliseconds.
+    /// </summary>
+    public long TotalDurationMs { get; set; }
+
+    /// <summary>
+    /// Individual component health check results.
+    /// </summary>
+    public Dictionary<string, ComponentHealthStatus> Components { get; set; } = new();
+
+    /// <summary>
+    /// Timestamp when the health check was performed.
+    /// </summary>
+    public DateTime Timestamp { get; set; }
+
+    /// <summary>
+    /// Version of the service.
+    /// </summary>
+    public string? Version { get; set; }
+}
+
+/// <summary>
+/// Health status of an individual component.
+/// </summary>
+public record ComponentHealthStatus
+{
+    /// <summary>
+    /// Status of the component (e.g., "Healthy", "Degraded", "Unhealthy").
+    /// </summary>
+    public string Status { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Description or additional information about the component's health.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Duration of the component health check in milliseconds.
+    /// </summary>
+    public long DurationMs { get; set; }
+
+    /// <summary>
+    /// Additional data about the component.
+    /// </summary>
+    public Dictionary<string, object>? Data { get; set; }
+
+    /// <summary>
+    /// Error message if the component is unhealthy.
+    /// </summary>
+    public string? Error { get; set; }
 }

@@ -25,6 +25,7 @@ Microsoft Entra External ID is Microsoft's customer identity and access manageme
 #### Option 1: Azure Portal (Recommended)
 
 1. **Create External Tenant**:
+
    ```
    Azure Portal → Microsoft Entra ID → Manage tenants → Create
    - Select "External" configuration
@@ -34,6 +35,7 @@ Microsoft Entra External ID is Microsoft's customer identity and access manageme
    ```
 
 2. **Configure Sign-in Experience**:
+
    ```
    Microsoft Entra admin center → External Identities → Overview → Get started guide
    - Choose authentication methods: Email + password, Email + OTP, or Social
@@ -126,34 +128,34 @@ module "entra_external_id" {
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| environment | Deployment environment | `string` | n/a | yes |
-| tenant_name | External tenant subdomain | `string` | `"mystira"` | no |
-| tenant_id | External tenant ID (GUID) | `string` | n/a | yes |
-| pwa_redirect_uris | PWA redirect URIs | `list(string)` | `[]` | no |
-| mobile_redirect_uris | Mobile app redirect URIs | `list(string)` | `[]` | no |
+| Name                 | Description               | Type           | Default     | Required |
+| -------------------- | ------------------------- | -------------- | ----------- | :------: |
+| environment          | Deployment environment    | `string`       | n/a         |   yes    |
+| tenant_name          | External tenant subdomain | `string`       | `"mystira"` |    no    |
+| tenant_id            | External tenant ID (GUID) | `string`       | n/a         |   yes    |
+| pwa_redirect_uris    | PWA redirect URIs         | `list(string)` | `[]`        |    no    |
+| mobile_redirect_uris | Mobile app redirect URIs  | `list(string)` | `[]`        |    no    |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
+| Name                 | Description                        |
+| -------------------- | ---------------------------------- |
 | public_api_client_id | Public API application (client) ID |
-| pwa_client_id | PWA application (client) ID |
-| api_scopes | Map of API scopes |
-| public_api_config | Configuration for Public API |
-| pwa_config | Configuration for PWA |
-| mobile_config | Configuration for Mobile App |
-| auth_endpoints | Authentication endpoints |
+| pwa_client_id        | PWA application (client) ID        |
+| api_scopes           | Map of API scopes                  |
+| public_api_config    | Configuration for Public API       |
+| pwa_config           | Configuration for PWA              |
+| mobile_config        | Configuration for Mobile App       |
+| auth_endpoints       | Authentication endpoints           |
 
 ## API Scopes
 
-| Scope | Description |
-|-------|-------------|
-| `API.Access` | General API access |
-| `Stories.Read` | Read user stories |
+| Scope           | Description             |
+| --------------- | ----------------------- |
+| `API.Access`    | General API access      |
+| `Stories.Read`  | Read user stories       |
 | `Stories.Write` | Create and edit stories |
-| `Profile.Read` | Read user profile |
+| `Profile.Read`  | Read user profile       |
 
 ## Configuration Examples
 
@@ -218,7 +220,7 @@ yarn add @azure/msal-react-native
 Configure authentication:
 
 ```typescript
-import { PublicClientApplication } from '@azure/msal-react-native';
+import { PublicClientApplication } from "@azure/msal-react-native";
 
 const config = {
   auth: {
@@ -313,11 +315,11 @@ const result = await pca.acquireTokenInteractive({
 
 For complete isolation, create separate External ID tenants:
 
-| Environment | Tenant Domain | Purpose |
-|-------------|--------------|---------|
-| Dev | `mystiradev.ciamlogin.com` | Development testing |
-| Staging | `mystirastaging.ciamlogin.com` | Pre-production validation |
-| Prod | `mystira.ciamlogin.com` | Production |
+| Environment | Tenant Domain                  | Purpose                   |
+| ----------- | ------------------------------ | ------------------------- |
+| Dev         | `mystiradev.ciamlogin.com`     | Development testing       |
+| Staging     | `mystirastaging.ciamlogin.com` | Pre-production validation |
+| Prod        | `mystira.ciamlogin.com`        | Production                |
 
 ### Single Tenant with Separate App Registrations
 
@@ -334,7 +336,7 @@ module "entra_external_id" {
 
   pwa_redirect_uris = [
     "http://localhost:5173/auth/callback",
-    "https://app.dev.mystira.app/auth/callback"  # Environment-specific URLs
+    "https://dev.mystira.app/auth/callback"  # Environment-specific URLs
   ]
 }
 ```
@@ -428,6 +430,7 @@ This module focuses on app registration management and assumes the external tena
 ### Issue 1: "No subscriptions found" when running `az login`
 
 **Symptom**:
+
 ```
 az login --tenant <external-tenant-id>
 No subscriptions found for <user@domain.com>.
@@ -436,11 +439,13 @@ No subscriptions found for <user@domain.com>.
 **Cause**: External ID tenants are standalone identity tenants and don't have Azure subscriptions. This is expected and normal.
 
 **Solution**: Use the `--allow-no-subscriptions` flag:
+
 ```bash
 az login --tenant <external-tenant-id> --allow-no-subscriptions
 ```
 
 Verify authentication:
+
 ```bash
 az account show
 ```
@@ -448,6 +453,7 @@ az account show
 ### Issue 2: "Please run 'az login' to setup account" during Terraform plan
 
 **Symptom**:
+
 ```
 Error: unable to build authorizer: could not configure AzureCli Authorizer
 ```
@@ -455,6 +461,7 @@ Error: unable to build authorizer: could not configure AzureCli Authorizer
 **Cause**: Azure CLI session expired or not authenticated to the External ID tenant.
 
 **Solution**:
+
 ```bash
 # Clear cached credentials
 az account clear
@@ -472,6 +479,7 @@ terraform plan
 ### Issue 3: "requested_access_token_version must be 2" error
 
 **Symptom**:
+
 ```
 Error: `requested_access_token_version` must be 2 when `sign_in_audience` is "AzureADandPersonalMicrosoftAccount"
 ```
@@ -479,6 +487,7 @@ Error: `requested_access_token_version` must be 2 when `sign_in_audience` is "Az
 **Cause**: PWA and Mobile app registrations require explicit token version configuration when using personal Microsoft accounts.
 
 **Solution**: This has been fixed in the module. Ensure you're using the latest version with the `api` block:
+
 ```hcl
 resource "azuread_application" "pwa" {
   # ...
@@ -495,6 +504,7 @@ resource "azuread_application" "pwa" {
 **Solution**: Create a standalone test configuration:
 
 1. **Create test directory**:
+
    ```bash
    cd infra/terraform/modules/azure-ad-b2c
    mkdir test
@@ -502,6 +512,7 @@ resource "azuread_application" "pwa" {
    ```
 
 2. **Create `main.tf`**:
+
    ```hcl
    terraform {
      required_version = ">= 1.5.0"
@@ -552,6 +563,7 @@ resource "azuread_application" "pwa" {
    ```
 
 3. **Create `variables.tf`**:
+
    ```hcl
    variable "tenant_id" {
      description = "External ID tenant ID"
@@ -560,6 +572,7 @@ resource "azuread_application" "pwa" {
    ```
 
 4. **Create `terraform.tfvars`**:
+
    ```hcl
    tenant_id = "<your-external-tenant-id>"
    ```
@@ -575,6 +588,7 @@ resource "azuread_application" "pwa" {
 ### Issue 5: Finding your External Tenant ID
 
 **Solution**:
+
 1. Go to [Microsoft Entra admin center](https://entra.microsoft.com/)
 2. Switch to your External ID tenant (look for tenant name in tenant switcher)
 3. Navigate to **Overview**
@@ -587,11 +601,13 @@ resource "azuread_application" "pwa" {
 **Cause**: The authority endpoint must include the `/v2.0` suffix for proper OAuth2 endpoint discovery.
 
 **Solution**: This has been fixed in the module outputs. The correct format is:
+
 ```
 https://mystira.ciamlogin.com/<tenant-id>/v2.0
 ```
 
 Not:
+
 ```
 https://mystira.ciamlogin.com/<tenant-id>
 ```
@@ -599,6 +615,7 @@ https://mystira.ciamlogin.com/<tenant-id>
 ### Issue 7: Backend storage authentication errors
 
 **Symptom**:
+
 ```
 Error: Failed to get existing workspaces: unexpected status 403
 ```

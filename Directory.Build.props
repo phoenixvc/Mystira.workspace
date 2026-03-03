@@ -1,0 +1,24 @@
+<Project>
+  <!--
+    Centralized MSBuild properties for CodeQL compatibility.
+    Applies across all .NET projects in the monorepo.
+  -->
+  <PropertyGroup>
+    <IsCodeQLAnalysis Condition="'$(LGTM_INDEX_IMPORT)' != '' OR '$(CODEQL_DIST)' != ''">true</IsCodeQLAnalysis>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Nullable Condition="'$(Nullable)' == ''">enable</Nullable>
+    <ImplicitUsings Condition="'$(ImplicitUsings)' == ''">enable</ImplicitUsings>
+    <LangVersion Condition="'$(LangVersion)' == ''">latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsCodeQLAnalysis)' == 'true'">
+    <RunAOTCompilation>false</RunAOTCompilation>
+    <BlazorWebAssemblyEnableLinking>false</BlazorWebAssemblyEnableLinking>
+    <BlazorEnableCompression>false</BlazorEnableCompression>
+    <BlazorCacheBootResources>false</BlazorCacheBootResources>
+    <DebugType>portable</DebugType>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

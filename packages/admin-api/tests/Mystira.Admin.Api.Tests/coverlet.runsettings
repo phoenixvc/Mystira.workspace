@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <Format>opencover,cobertura</Format>
+          <Exclude>[*]*.Migrations.*,[*]*.Designer.*</Exclude>
+          <ExcludeByFile>**/Migrations/**/*.cs,**/*.Designer.cs</ExcludeByFile>
+          <Include>[Mystira.Admin.Api]*</Include>
+          <IncludeDirectory>../src/Mystira.Admin.Api/</IncludeDirectory>
+          <SingleHit>false</SingleHit>
+          <UseSourceLink>true</UseSourceLink>
+          <IncludeTestAssembly>false</IncludeTestAssembly>
+          <SkipAutoProps>true</SkipAutoProps>
+          <DeterministicReport>false</DeterministicReport>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

@@ -9,6 +9,7 @@ metadata:
 resources:
   - deployment.yaml
   - ingress.yaml
+  - network-policy.yaml
 
 labels:
   - pairs:

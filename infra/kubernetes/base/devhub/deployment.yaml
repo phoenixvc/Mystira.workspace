@@ -1,0 +1,154 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mys-devhub
+  labels:
+    app: mys-devhub
+    component: devhub
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mys-devhub
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: mys-devhub
+        component: devhub
+    spec:
+      securityContext:
+        runAsUser: 1000
+        runAsNonRoot: true
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app: mys-devhub
+                topologyKey: kubernetes.io/hostname
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app: mys-devhub
+      containers:
+        - name: devhub
+          image: myssharedacr.azurecr.io/devhub:v0.0.0
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          # Leptos/Rust apps may need writable temp storage
+          volumeMounts:
+            - name: tmp-volume
+              mountPath: /tmp
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: RUST_LOG
+              value: info
+            - name: LEPTOS_SITE_ADDR
+              value: "0.0.0.0:3000"
+            - name: LEPTOS_ENV
+              value: production
+            - name: API_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: mys-devhub-config
+                  key: api_url
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "25m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            failureThreshold: 20
+      volumes:
+        - name: tmp-volume
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mys-devhub
+  labels:
+    app: mys-devhub
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  selector:
+    app: mys-devhub
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mys-devhub-config
+data:
+  api_url: "https://dev.admin-api.mystira.app"
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mys-devhub-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: mys-devhub
+  minReplicas: 2
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mys-devhub-pdb
+  labels:
+    app: mys-devhub
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mys-devhub
