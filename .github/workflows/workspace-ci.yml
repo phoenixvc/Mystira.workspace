@@ -58,8 +58,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linting
-        run: pnpm lint
+      - name: Lint TypeScript packages
+        run: pnpm exec turbo run lint --filter='!@mystira/chain'
+
+      - name: Lint Python (chain)
+        run: ruff check packages/chain/
 
   yaml-lint:
     name: YAML Lint
