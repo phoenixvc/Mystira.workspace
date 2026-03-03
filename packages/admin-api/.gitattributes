@@ -1,0 +1,32 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# C# files must have CRLF line endings (per .editorconfig)
+*.cs text eol=crlf
+
+# Project and config files
+*.csproj text eol=crlf
+*.sln text eol=crlf
+*.config text eol=crlf
+*.props text eol=crlf
+*.targets text eol=crlf
+
+# Shell scripts must have LF line endings
+*.sh text eol=lf
+
+# Batch scripts must have CRLF line endings
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# JSON, YAML, and other config files
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Documentation
+*.md text eol=lf
+
+# Docker files
+Dockerfile text eol=lf
+*.dockerfile text eol=lf
+.dockerignore text eol=lf
