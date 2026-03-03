@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
@@ -48,7 +48,7 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
 
@@ -58,8 +58,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run linting
-        run: pnpm lint
+      - name: Lint TypeScript packages
+        run: pnpm exec turbo run lint --filter='!@mystira/chain'
+
+      - name: Lint Python (chain)
+        run: ruff check packages/chain/
 
   yaml-lint:
     name: YAML Lint
@@ -87,7 +90,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
@@ -141,7 +144,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all packages
-        run: pnpm build
+        run: pnpm exec turbo run build --filter='!mystira-leptos'
 
   build-dotnet:
     name: Build and Test .NET

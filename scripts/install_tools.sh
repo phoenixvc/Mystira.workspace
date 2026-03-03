@@ -34,6 +34,43 @@ else
 fi
 echo "  Using BIN_DIR: $BIN_DIR (SUDO: ${SUDO:-none})"
 
+# Resolve project directory (fallback to script location if not set by Claude)
+PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+
+# -----------------------------------------------------------------------------
+# GitHub CLI (gh)
+# -----------------------------------------------------------------------------
+GH_VERSION="2.67.0"
+echo "Installing GitHub CLI ${GH_VERSION}..."
+if ! command -v gh &> /dev/null; then
+    GH_ARCHIVE="gh_${GH_VERSION}_linux_amd64.tar.gz"
+    GH_URL="https://github.com/cli/cli/releases/download/v${GH_VERSION}/${GH_ARCHIVE}"
+
+    echo "  Downloading gh ${GH_VERSION}..."
+    wget -q "${GH_URL}" -O "/tmp/${GH_ARCHIVE}"
+
+    # Extract and install
+    tar -xzf "/tmp/${GH_ARCHIVE}" -C /tmp
+    $SUDO mv "/tmp/gh_${GH_VERSION}_linux_amd64/bin/gh" "$BIN_DIR/gh"
+    rm -rf "/tmp/${GH_ARCHIVE}" "/tmp/gh_${GH_VERSION}_linux_amd64"
+
+    echo "  gh installed: $(gh --version | head -1)"
+else
+    echo "  gh already installed: $(gh --version | head -1)"
+fi
+
+# Authenticate gh if GH_TOKEN is available
+if command -v gh &> /dev/null; then
+    if [ -n "${GH_TOKEN:-}" ] || [ -n "${GITHUB_TOKEN:-}" ]; then
+        echo "  Configuring gh authentication..."
+        echo "${GH_TOKEN:-$GITHUB_TOKEN}" | gh auth login --with-token 2>/dev/null && \
+            echo "  gh authenticated" || \
+            echo "  WARNING: gh auth failed (token may be invalid)"
+    else
+        echo "  WARNING: No GH_TOKEN or GITHUB_TOKEN set — gh will be unauthenticated"
+    fi
+fi
+
 # -----------------------------------------------------------------------------
 # Helper function: verify SHA256 checksum
 # -----------------------------------------------------------------------------
@@ -75,8 +112,8 @@ fi
 # .NET Restore (restore NuGet packages for the solution)
 # -----------------------------------------------------------------------------
 echo "Restoring .NET NuGet packages..."
-if command -v dotnet &> /dev/null && [ -f "$CLAUDE_PROJECT_DIR/Mystira.sln" ]; then
-    cd "$CLAUDE_PROJECT_DIR"
+if command -v dotnet &> /dev/null && [ -f "$PROJECT_DIR/Mystira.sln" ]; then
+    cd "$PROJECT_DIR"
     dotnet restore Mystira.sln --verbosity minimal 2>/dev/null && echo "  .NET packages restored" || echo "  WARNING: dotnet restore failed (may need authentication for private feeds)"
 fi
 
@@ -153,6 +190,39 @@ if ! command -v pnpm &> /dev/null; then
     echo "  pnpm installed: $(pnpm --version)"
 else
     echo "  pnpm already installed: $(pnpm --version)"
+fi
+
+# -----------------------------------------------------------------------------
+# Rust toolchain (packages/devhub)
+# -----------------------------------------------------------------------------
+DEVHUB_DIR="$PROJECT_DIR/packages/devhub"
+echo "Setting up Rust toolchain..."
+if [ -f "$DEVHUB_DIR/rust-toolchain.toml" ]; then
+    if command -v rustup &> /dev/null; then
+        # Ensure the toolchain file is respected (stable + required components)
+        echo "  Syncing toolchain from $DEVHUB_DIR/rust-toolchain.toml..."
+        cd "$DEVHUB_DIR"
+        rustup show active-toolchain > /dev/null 2>&1  # triggers auto-install from rust-toolchain.toml
+        rustup component add rustfmt clippy 2>/dev/null || true
+        rustup target add wasm32-unknown-unknown 2>/dev/null || true
+        echo "  Rust: $(rustc --version)"
+        echo "  Targets: $(rustup target list --installed | tr '\n' ' ')"
+        cd "$PROJECT_DIR"
+    elif command -v rustc &> /dev/null; then
+        echo "  rustc found but no rustup — cannot manage toolchain components"
+        echo "  Rust: $(rustc --version)"
+    else
+        echo "  Installing Rust via rustup..."
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable 2>/dev/null
+        . "$HOME/.cargo/env"
+        cd "$DEVHUB_DIR"
+        rustup component add rustfmt clippy 2>/dev/null || true
+        rustup target add wasm32-unknown-unknown 2>/dev/null || true
+        echo "  Rust installed: $(rustc --version)"
+        cd "$PROJECT_DIR"
+    fi
+else
+    echo "  No rust-toolchain.toml found in devhub, skipping"
 fi
 
 # -----------------------------------------------------------------------------
@@ -301,20 +371,72 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Python 3.12 + pip-audit
+# Python 3.11+ virtual environment (packages/chain)
 # -----------------------------------------------------------------------------
-echo "Installing Python tools..."
-if command -v python3 &> /dev/null; then
-    pip3 install --user pip-audit 2>/dev/null || pip install --user pip-audit 2>/dev/null || true
-    echo "  Python: $(python3 --version)"
+echo "Setting up Python environment..."
+PYTHON_BIN=""
+# Prefer python3.11+ — check common binary names
+for candidate in python3.14 python3.13 python3.12 python3.11 python3; do
+    if command -v "$candidate" &> /dev/null; then
+        PY_VER=$("$candidate" -c 'import sys; print(sys.version_info[:2])' 2>/dev/null)
+        if "$candidate" -c 'import sys; exit(0 if sys.version_info >= (3,11) else 1)' 2>/dev/null; then
+            PYTHON_BIN="$candidate"
+            break
+        fi
+    fi
+done
+
+if [ -n "$PYTHON_BIN" ]; then
+    echo "  Python: $($PYTHON_BIN --version)"
+
+    # Ensure venv module is available
+    if ! "$PYTHON_BIN" -c 'import venv' 2>/dev/null; then
+        echo "  Installing python3-venv..."
+        $SUDO apt-get update -qq && $SUDO apt-get install -y -qq python3-venv 2>/dev/null || true
+    fi
+
+    # Create venv for packages/chain
+    CHAIN_DIR="$PROJECT_DIR/packages/chain"
+    CHAIN_VENV="$CHAIN_DIR/.venv"
+    if [ -d "$CHAIN_DIR" ]; then
+        if [ ! -d "$CHAIN_VENV" ] || [ ! -f "$CHAIN_VENV/bin/python" ]; then
+            echo "  Creating venv at $CHAIN_VENV..."
+            "$PYTHON_BIN" -m venv "$CHAIN_VENV"
+        else
+            echo "  Venv already exists at $CHAIN_VENV"
+        fi
+
+        # Install chain dependencies into the venv
+        echo "  Installing packages/chain dependencies..."
+        "$CHAIN_VENV/bin/pip" install --upgrade pip -q 2>/dev/null
+        if [ -f "$CHAIN_DIR/requirements.txt" ]; then
+            "$CHAIN_VENV/bin/pip" install -r "$CHAIN_DIR/requirements.txt" -q 2>/dev/null && \
+                echo "  requirements.txt installed" || \
+                echo "  WARNING: Some requirements.txt packages failed to install"
+        fi
+        if [ -f "$CHAIN_DIR/requirements-dev.txt" ]; then
+            "$CHAIN_VENV/bin/pip" install -r "$CHAIN_DIR/requirements-dev.txt" -q 2>/dev/null && \
+                echo "  requirements-dev.txt installed" || \
+                echo "  WARNING: Some requirements-dev.txt packages failed to install"
+        fi
+
+        # Install pip-audit into the venv as well
+        "$CHAIN_VENV/bin/pip" install pip-audit -q 2>/dev/null || true
+
+        echo "  Chain venv ready: $($CHAIN_VENV/bin/python --version)"
+    else
+        echo "  WARNING: packages/chain/ not found, skipping Python venv"
+    fi
+else
+    echo "  WARNING: Python 3.11+ not found, skipping Python environment setup"
 fi
 
 # -----------------------------------------------------------------------------
 # ESLint & Prettier (via pnpm - project dependencies)
 # -----------------------------------------------------------------------------
 echo "Installing Node.js project dependencies (includes ESLint & Prettier)..."
-if [ -f "$CLAUDE_PROJECT_DIR/package.json" ]; then
-    cd "$CLAUDE_PROJECT_DIR"
+if [ -f "$PROJECT_DIR/package.json" ]; then
+    cd "$PROJECT_DIR"
     pnpm install --frozen-lockfile 2>/dev/null || pnpm install 2>/dev/null || true
     echo "  Node.js dependencies installed"
 fi
@@ -361,8 +483,38 @@ else
     echo "  yq already installed: $(yq --version)"
 fi
 
+# =============================================================================
+# Environment Summary
+# =============================================================================
 echo ""
-echo "=== Tool Installation Complete ==="
+echo "=== Environment Summary ==="
+echo ""
+echo "  Languages:"
+command -v node     &>/dev/null && echo "    Node.js:  $(node --version)"
+command -v dotnet   &>/dev/null && echo "    .NET SDK: $(dotnet --version 2>/dev/null)"
+command -v rustc    &>/dev/null && echo "    Rust:     $(rustc --version 2>/dev/null | awk '{print $2}')"
+[ -n "$PYTHON_BIN" ]           && echo "    Python:   $($PYTHON_BIN --version 2>/dev/null)"
+echo ""
+echo "  Package Managers:"
+command -v pnpm     &>/dev/null && echo "    pnpm:     $(pnpm --version)"
+command -v cargo    &>/dev/null && echo "    cargo:    $(cargo --version 2>/dev/null | awk '{print $2}')"
+command -v pip3     &>/dev/null && echo "    pip:      $(pip3 --version 2>/dev/null | awk '{print $2}')"
+echo ""
+echo "  CLI Tools:"
+command -v gh       &>/dev/null && echo "    gh:       $(gh --version 2>/dev/null | head -1 | awk '{print $3}')"
+command -v az       &>/dev/null && echo "    az:       $(az version --query '"azure-cli"' -o tsv 2>/dev/null || echo 'installed')"
+command -v terraform &>/dev/null && echo "    terraform:$(terraform version 2>/dev/null | head -1 | awk '{print $2}')"
+command -v kubectl  &>/dev/null && echo "    kubectl:  $(kubectl version --client 2>/dev/null | grep -oP 'v[0-9.]+' | head -1 || echo 'installed')"
+echo ""
+echo "  Virtual Environments:"
+CHAIN_VENV="${PROJECT_DIR}/packages/chain/.venv"
+if [ -f "$CHAIN_VENV/bin/python" ]; then
+    echo "    packages/chain/.venv: $($CHAIN_VENV/bin/python --version)"
+else
+    echo "    packages/chain/.venv: NOT CONFIGURED"
+fi
+echo ""
+echo "=== Setup Complete ==="
 echo ""
 
 exit 0

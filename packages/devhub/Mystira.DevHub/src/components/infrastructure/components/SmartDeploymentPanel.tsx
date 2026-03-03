@@ -535,7 +535,7 @@ function RegionRow({
   };
 
   const getRowClass = () => {
-    let base =
+    const base =
       "flex items-center justify-between p-3 rounded-lg border transition-colors";
 
     if (isCurrentTarget) {

@@ -186,7 +186,7 @@ public class ChatOrchestrationServiceTests
             Json = @"{""title"": ""Generated Story"", ""scenes"": []}"
         };
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.InvokeAsync<GenerateJsonStoryResponse>(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(mockStoryResponse);
 
         // Act
@@ -218,7 +218,7 @@ public class ChatOrchestrationServiceTests
         var helpResponse = new ChatCompletionResponse { Success = true, Content = "Help details" };
 
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(helpResponse);
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);
@@ -247,7 +247,7 @@ public class ChatOrchestrationServiceTests
         var fallbackResponse = new ChatCompletionResponse { Success = true, Content = "fallback" };
 
         _mockMessageBus
-            .Setup(x => x.Send(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
+            .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(fallbackResponse);
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);

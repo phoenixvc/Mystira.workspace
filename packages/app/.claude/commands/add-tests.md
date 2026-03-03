@@ -33,6 +33,7 @@ Map source to test project:
 | `Mystira.App.PWA` | `tests/Mystira.App.PWA.Tests` |
 
 If the test project doesn't exist yet, create it with:
+
 ```bash
 dotnet new xunit -n {TestProjectName} -o tests/{TestProjectName}
 dotnet sln add tests/{TestProjectName}
@@ -45,6 +46,7 @@ dotnet sln add tests/{TestProjectName}
 ```
 
 Examples:
+
 - `Handle_ValidInput_ReturnsCreatedGameSession`
 - `Handle_NullRequest_ThrowsArgumentNullException`
 - `Handle_NonExistentEntity_ReturnsNull`
@@ -104,6 +106,7 @@ public class {ClassUnderTest}Tests
 ### 5. What to Test
 
 **For Command/Query Handlers:**
+
 - Happy path (valid input -> expected output)
 - Null/missing required fields
 - Entity not found scenarios
@@ -112,12 +115,14 @@ public class {ClassUnderTest}Tests
 - Verify repository methods called with correct arguments
 
 **For Domain Entities:**
+
 - Factory methods / constructors with valid input
 - Business rule violations (invariant enforcement)
 - State transitions
 - Value object equality
 
 **For Controllers (Integration):**
+
 - HTTP status codes (200, 201, 204, 400, 401, 404)
 - Request validation (DataAnnotations)
 - Response shape matches DTO

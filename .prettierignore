@@ -1,4 +1,7 @@
 node_modules
 dist
 coverage
-*.min.js
+*.min.js**/obj
+**/bin
+pnpm-lock.yaml
+*.yaml

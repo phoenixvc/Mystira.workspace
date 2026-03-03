@@ -8,10 +8,10 @@ interface GroupedLog {
 
 export function useLogGrouping(
   filteredLogs: ServiceLog[],
-  collapseSimilar: boolean,
+  collapseSimilar: boolean
 ) {
   const [collapsedGroups, setCollapsedGroups] = useState<Set<number>>(
-    new Set(),
+    new Set()
   );
 
   const groupedLogs = useMemo(() => {

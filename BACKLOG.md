@@ -1,4 +1,66 @@
-# BACKLOG
+# Mystira Workspace Backlog
+
+Single source of truth for open work items in the Mystira monorepo.
+
+## Active Work Items
+
+### Documentation & Organization
+
+- [ ] Update `.github/workflows/README.md` to reflect current 13 workflows
+- [ ] Flatten workflow trigger table and add reusable workflow tracking
+- [ ] Remove stale migration/review docs (consolidated into backlog)
+
+### Features In Progress
+
+- [ ] App test gaps refactor
+- [ ] Devhub Leptos Tauri integration
+
+### Dependencies (Renovate)
+
+- [ ] rust:1.93-slim-bookworm
+- [ ] python:3.14-slim
+- [ ] python:3.11-slim
+- [ ] github-actions updates
+- [ ] node.js updates
+- [ ] debian:bookworm-slim
+- [ ] @testing-library/react to v16
+- [ ] microsoft packages v3 (major)
+- [ ] linting packages
+- [ ] all non-major dependencies
+
+### Build Performance (NEW P0 Priority)
+
+- [ ] BUILD-1: Fix TypeScript localStorage DOM types in publisher package
+- [ ] BUILD-2: Fix IAuthService.EnsureTokenValidAsync interface implementations
+- [ ] BUILD-3: Fix turbo.json missing output paths for chain package
+- [ ] BUILD-4: Enable MSBuild parallelism and CPU optimization
+- [ ] BUILD-5: Optimize NuGet package caching and incremental builds
+- [ ] BUILD-6: Audit and optimize .NET inter-project references
+- [ ] BUILD-7: Enable deterministic builds and optimize Roslyn analyzers
+- [ ] BUILD-8: Refine turbo.json caching strategy and output patterns
+- [ ] BUILD-9: Implement selective build strategies for affected packages
+- [ ] BUILD-10: Optimize task dependency graph for maximum parallelism
+- [ ] BUILD-11: Standardize and optimize output directory structures
+- [ ] BUILD-12: Optimize pnpm-workspace.yaml dependency resolution
+- [ ] BUILD-13: Centralize common devDependencies and remove duplication
+- [ ] BUILD-14: Create targeted build commands (full vs incremental)
+- [ ] BUILD-15: Ensure optimal HMR configuration for dev cycles
+- [ ] BUILD-16: Implement affected-only testing strategies
+- [ ] BUILD-17: Configure CI/CD build caching and parallel execution
+
+## Completed
+
+- [x] Submodules converted to true monorepo structure
+- [x] .NET 10.0 upgrade across all packages
+- [x] ESLint converted to modular configuration format
+- [x] Build time optimization plan integrated into backlog
+
+## Notes
+
+- All migration docs consolidated in `docs/migrations/`
+- Package-specific CI runs via turbo in workspace root
+- Release workflows run centrally from workspace
+- Build performance prioritized as P0 due to blocking all development
 
 This file consolidates:
 
@@ -24,6 +86,28 @@ Completed items are intentionally omitted.
 3. Keep workflow docs aligned with actual workflow files
    - `.github/workflows/README.md`
    - `docs/cicd/README.md`
+
+## P0: Build Performance & Developer Experience
+
+_Build performance currently blocks all development work with failing builds and 146+ second build times._
+
+- BUILD-1: Fix TypeScript localStorage DOM types in publisher package
+- BUILD-2: Fix IAuthService.EnsureTokenValidAsync interface implementations across test projects
+- BUILD-3: Fix turbo.json missing output paths for chain package build task
+- BUILD-4: Enable MSBuild parallelism (/m switch) and optimize max CPU count
+- BUILD-5: Optimize NuGet package caching and ensure proper --no-restore flag usage
+- BUILD-6: Audit and optimize .NET inter-project references to reduce unnecessary rebuilds
+- BUILD-7: Enable deterministic builds and optimize Roslyn analyzer usage
+- BUILD-8: Refine turbo.json caching strategy and output patterns for better caching
+- BUILD-9: Implement selective build strategies for affected packages only
+- BUILD-10: Optimize task dependency graph for maximum parallelism
+- BUILD-11: Standardize and optimize output directory structures across packages
+- BUILD-12: Optimize pnpm-workspace.yaml for efficient dependency resolution
+- BUILD-13: Centralize common devDependencies and remove duplication across packages
+- BUILD-14: Create targeted build commands for different scenarios (full vs incremental)
+- BUILD-15: Ensure optimal HMR configuration for faster development cycles
+- BUILD-16: Implement affected-only testing strategies to reduce test execution time
+- BUILD-17: Configure CI/CD build caching and parallel execution in pipelines
 
 ## P0: Critical correctness and migration safety
 
@@ -125,6 +209,7 @@ Completed items are intentionally omitted.
 - Feature flags infrastructure and usage procedures
 - Canary deployment infrastructure/workflows
 - Chaos engineering experiments/runbooks
+- _Build time optimization and performance improvements (see P0: Build Performance)_
 
 ## P3: C# modernization (consolidated from code-review-improvements.md)
 

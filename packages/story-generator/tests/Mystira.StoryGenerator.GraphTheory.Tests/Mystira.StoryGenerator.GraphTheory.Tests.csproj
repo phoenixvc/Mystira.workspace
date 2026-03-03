@@ -7,6 +7,7 @@
 
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <!-- Avoid assembly name collision with the product library 'Mystira.StoryGenerator.GraphTheory' -->
         <AssemblyName>Mystira.StoryGenerator.GraphTheory.Tests</AssemblyName>
         <RootNamespace>Mystira.StoryGenerator.GraphTheory.Tests</RootNamespace>

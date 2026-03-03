@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
+using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Contracts.Configuration;
 using Mystira.StoryGenerator.Contracts.Agents;
@@ -215,7 +216,7 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         Assert.Equal("Generating", updatedSession.StoryVersions[0].StageWhenCreated);
 
         _mockFoundryClient.Verify(
-            x => x.CreateRunAsync(session.ThreadId, _testConfig.WriterAgentId, It.IsAny<string>(), It.IsAny<CancellationToken>()),
+            x => x.CreateRunAsync(session.ThreadId, _testConfig.WriterAgentId, It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -462,10 +463,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
 
         // Verify refiner was called with targeted instructions
         _mockFoundryClient.Verify(
-            x => x.CreateRunAsync(session.ThreadId, _testConfig.RefinerAgentId, It.Is<string>(prompt => 
-                prompt.Contains("ONLY edit scenes: scene_2") && 
+            x => x.CreateRunAsync(session.ThreadId, _testConfig.RefinerAgentId, It.Is<string>(prompt =>
+                prompt.Contains("ONLY edit scenes: scene_2") &&
                 prompt.Contains("ONLY modify aspects: description, dialogue")),
-                It.IsAny<CancellationToken>()),
+                It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()),
             Times.Once);
     }
 

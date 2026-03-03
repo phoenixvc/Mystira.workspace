@@ -152,7 +152,6 @@ function InfrastructureStatus({
       if (timeoutId) clearTimeout(timeoutId);
       clearInterval(interval);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [environment, resourceGroup]);
 
   const getHealthColor = (health?: string) => {

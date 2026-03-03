@@ -57,7 +57,11 @@ All resources follow the pattern: `[org]-[env]-[project]-[type]-[region]`
 | `type`    | Resource type     | `api`, `app`, `log`, `cosmos`, `storage`, `kv`, `acs`, `bot`, `swa`, etc.                          |
 | `region`  | Region code       | `san` (South Africa North - **primary**), `eus2` (East US 2 - fallback), `euw` (West Europe), etc. |
 
-### Resource Group Pattern
+| Tier                 | Resource Groups              | Purpose                                                           |
+| -------------------- | ---------------------------- | ----------------------------------------------------------------- |
+| **Tier 1: Core**     | `mys-{env}-core-rg-san`      | Shared infrastructure (VNet, AKS, PostgreSQL, Redis, Service Bus) |
+| **Tier 2: Services** | `mys-{env}-{service}-rg-san` | Service-specific resources (chain, publisher, story, admin, app)  |
+| **Tier 3: Shared**   | `mys-shared-{purpose}-rg-*`  | Cross-environment (ACR, Communications, Terraform state)          |
 
 ```
 [org]-[env]-[project]-rg-[region]

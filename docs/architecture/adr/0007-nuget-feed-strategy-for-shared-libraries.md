@@ -68,7 +68,7 @@ We ~~will use~~ **used** **NuGet packages** hosted on an **internal NuGet feed**
 All internal .NET packages are now consumed via `ProjectReference` within the monorepo. The GitHub Packages NuGet feed configuration has been removed from:
 
 - `.github/workflows/packages-*.yml` - Removed `source-url` and `NUGET_AUTH_TOKEN`
-- `packages/*/nuget.config` - Removed GitHub Packages feed and credentials
+- `packages/*/NuGet configuration` - Removed GitHub Packages feed and credentials
 - `release.yml` - Removed NuGet publishing triggers
 
 External dependencies (NuGet.org packages) are still restored via standard `dotnet restore`.
@@ -76,7 +76,7 @@ External dependencies (NuGet.org packages) are still restored via standard `dotn
 ## Migration Path
 
 1. **Completed**: Removed GitHub Packages authentication from CI workflows
-2. **Completed**: Simplified `nuget.config` files to only include nuget.org
+2. **Completed**: Simplified `NuGet configuration` files to only include nuget.org
 3. **Completed**: Removed NuGet publishing jobs from `release.yml`
 4. **Completed**: All .NET projects use `ProjectReference` for internal dependencies
 
@@ -276,7 +276,7 @@ Each shared library `.csproj` should include:
 
 ### Consumer Configuration
 
-#### NuGet.config
+#### NuGet configuration
 
 **Location**: Repository root or solution root
 
@@ -362,7 +362,7 @@ Each shared library `.csproj` should include:
 **For Local Development**:
 
 - Azure DevOps Personal Access Token (PAT)
-- Store in `NuGet.config` (excluded from git) or user-level config
+- Store in `NuGet configuration` (excluded from git) or user-level config
 
 **For CI/CD**:
 

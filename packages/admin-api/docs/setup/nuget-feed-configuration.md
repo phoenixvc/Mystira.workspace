@@ -14,9 +14,9 @@ The project now uses **GitHub Packages** as the primary source for internal Myst
 
 ## Implementation Details
 
-### NuGet.config
+### NuGet configuration
 
-The `NuGet.config` file at the repository root is configured with two package sources and package source mapping:
+The `NuGet configuration` file at the repository root is configured with two package sources and package source mapping:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -37,7 +37,7 @@ The `NuGet.config` file at the repository root is configured with two package so
 </configuration>
 ```
 
-**Note:** The `NuGet.config` file does not include `packageSourceCredentials` to avoid committing sensitive tokens. Authentication is handled differently for CI/CD and local development (see sections below).
+**Note:** The `NuGet configuration` file does not include `packageSourceCredentials` to avoid committing sensitive tokens. Authentication is handled differently for CI/CD and local development (see sections below).
 
 ### CI Workflow Changes
 
@@ -53,7 +53,7 @@ The `.github/workflows/ci.yml` file configures GitHub Packages authentication in
       --username phoenixvc \
       --password "$GITHUB_TOKEN" \
       --store-password-in-clear-text \
-      --configfile NuGet.config
+      --configfile NuGet configuration
 ```
 
 ### Workflow Permissions
@@ -90,7 +90,7 @@ For local development, you need to create a Personal Access Token (PAT) with `re
 
 #### Step 2: Configure Local NuGet Authentication
 
-Since `NuGet.config` uses package source mapping without embedded credentials, you need to configure authentication separately. You have two options:
+Since `NuGet configuration` uses package source mapping without embedded credentials, you need to configure authentication separately. You have two options:
 
 **Option A: Environment Variable (Recommended)**
 
@@ -112,9 +112,9 @@ export NUGET_AUTH_TOKEN="your-github-pat-here"
 export GITHUB_TOKEN="your-github-pat-here"
 ```
 
-**Option B: User-Level NuGet.config**
+**Option B: User-Level NuGet configuration**
 
-Add credentials to your user-level `NuGet.config` (see "Alternative: User-Level Configuration" section below).
+Add credentials to your user-level `NuGet configuration` (see "Alternative: User-Level Configuration" section below).
 
 #### Step 3: Restore Packages
 
@@ -126,10 +126,10 @@ NuGet will use the environment variable or user-level config to authenticate wit
 
 #### Alternative: User-Level Configuration
 
-You can also configure credentials in your user-level `NuGet.config`:
+You can also configure credentials in your user-level `NuGet configuration`:
 
-**Windows:** `%APPDATA%\NuGet\NuGet.config`  
-**macOS/Linux:** `~/.nuget/NuGet/NuGet.config`
+**Windows:** `%APPDATA%\NuGet\NuGet configuration`  
+**macOS/Linux:** `~/.nuget/NuGet/NuGet configuration`
 
 ```xml
 <configuration>
@@ -204,7 +204,7 @@ This repository has been migrated from Azure DevOps to GitHub Packages. The foll
 
 ### Added
 
-- ✅ GitHub Packages feed configuration in `NuGet.config`
+- ✅ GitHub Packages feed configuration in `NuGet configuration`
 - ✅ Automatic `GITHUB_TOKEN` authentication in CI workflow
 - ✅ Workflow permissions for package access
 - ✅ Documentation for local development setup
@@ -226,6 +226,6 @@ This repository has been migrated from Azure DevOps to GitHub Packages. The foll
 ## Related Files
 
 - `.github/workflows/ci.yml` - CI workflow with GitHub Packages configuration
-- `NuGet.config` - Package source configuration
+- `NuGet configuration` - Package source configuration
 - `README.md` - Setup instructions
 - `docs/cicd/README.md` - CI/CD documentation

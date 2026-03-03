@@ -5,6 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Data.Repositories;
+using Mystira.Shared.Locking;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -13,6 +14,7 @@ public class CheckAchievementsUseCaseTests
     private readonly Mock<IGameSessionRepository> _sessionRepository;
     private readonly Mock<IBadgeConfigurationRepository> _badgeRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<IDistributedLockService> _lockService;
     private readonly Mock<ILogger<CheckAchievementsUseCase>> _logger;
     private readonly CheckAchievementsUseCase _useCase;
 
@@ -21,12 +23,14 @@ public class CheckAchievementsUseCaseTests
         _sessionRepository = new Mock<IGameSessionRepository>();
         _badgeRepository = new Mock<IBadgeConfigurationRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
+        _lockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<CheckAchievementsUseCase>>();
 
         _useCase = new CheckAchievementsUseCase(
             _sessionRepository.Object,
             _badgeRepository.Object,
             _unitOfWork.Object,
+            _lockService.Object,
             _logger.Object);
     }
 

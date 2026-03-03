@@ -6,6 +6,7 @@ using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
+using Mystira.Shared.Locking;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -14,6 +15,7 @@ public class ProgressSceneUseCaseTests
     private readonly Mock<IGameSessionRepository> _repository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<IDistributedLockService> _lockService;
     private readonly Mock<ILogger<ProgressSceneUseCase>> _logger;
     private readonly ProgressSceneUseCase _useCase;
 
@@ -22,10 +24,11 @@ public class ProgressSceneUseCaseTests
         _repository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
+        _lockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<ProgressSceneUseCase>>();
         _useCase = new ProgressSceneUseCase(
             _repository.Object, _scenarioRepository.Object,
-            _unitOfWork.Object, _logger.Object);
+            _unitOfWork.Object, _lockService.Object, _logger.Object);
     }
 
     [Fact]

@@ -4,10 +4,10 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 
 ## Contents
 
-- [Publishing & Deployment Flow](./publishing-flow.md) - Complete guide to deployment pipelines
-- [CI/CD Setup](./cicd-setup.md) - CI/CD pipeline configuration
+- [Publishing & Deployment Flow](./publishing-flow.md) - **Complete guide to package publishing and deployment**
+- [CI/CD Setup](./cicd-setup.md) - CI/CD pipelines and branch protection configuration
 - [Branch Protection](./branch-protection.md) - Branch protection rules for `dev` and `main`
-- [Workflow Permissions](./workflow-permissions.md) - GitHub workflow permissions and token management
+- [Workflow Permissions](./workflow-permissions.md) - Explanation of GitHub workflow permissions and token management
 
 ## Quick Reference
 
@@ -15,11 +15,11 @@ This directory contains documentation for CI/CD pipelines, GitHub Actions workfl
 
 | Environment | URL Pattern             | Trigger                  |
 | ----------- | ----------------------- | ------------------------ |
-| Dev         | `dev.*.mystira.app`     | Push to `dev`            |
+| Dev         | `dev.*.mystira.app`     | `infra-deploy` workflow  |
 | Staging     | `staging.*.mystira.app` | Auto on merge to `main`  |
 | Production  | `*.mystira.app`         | Manual with confirmation |
 
-### Build Pipeline
+> **Note**: Dev deployments can be triggered via `infra-deploy` workflow dispatch.
 
 All packages are built from the monorepo root:
 

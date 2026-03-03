@@ -412,10 +412,10 @@ error NU1301: Unable to load the service index for source
    dotnet restore Mystira.sln
    ```
 
-3. **Check NuGet.config:**
+3. **Check NuGet configuration:**
 
    ```bash
-   cat NuGet.config
+   cat NuGet configuration
    # Should have nuget.org as a source
    ```
 

@@ -42,16 +42,16 @@ Replace:
 - `YOUR_GITHUB_USERNAME`: Your GitHub username
 - `YOUR_GITHUB_PAT`: Personal Access Token created above
 
-**Option B: Edit NuGet.config**
+**Option B: Edit NuGet configuration**
 
-Copy `NuGet.config.template` to `NuGet.config` in the repository root and add your credentials.
+Copy `NuGet template` to `NuGet configuration` in the repository root and add your credentials.
 
-**⚠️ Security Note**: Do NOT commit `NuGet.config` with credentials to git. Use user-level NuGet config instead:
+**⚠️ Security Note**: Do NOT commit `NuGet configuration` with credentials to git. Use user-level NuGet config instead:
 
 ```bash
 # User-level config location:
-# Windows: %APPDATA%\NuGet\NuGet.Config
-# Linux/Mac: ~/.nuget/NuGet/NuGet.Config
+# Windows: %APPDATA%\NuGet\NuGet configuration
+# Linux/Mac: ~/.nuget/NuGet/NuGet configuration
 ```
 
 ### 4. Verify Configuration
