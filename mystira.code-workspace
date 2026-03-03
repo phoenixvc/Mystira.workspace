@@ -54,6 +54,8 @@
     }
   ],
   "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder:Root}/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
     "files.exclude": {
       "**/node_modules": true,
       "**/.turbo": true
