@@ -2,7 +2,7 @@
 
 This document explains the CI/CD workflow organization for the Mystira monorepo.
 
-## Current workflows (13)
+## Current workflows
 
 All code lives in a single monorepo. CI, linting, testing, building, and deployments are managed centrally via GitHub Actions workflows in this repository.
 
@@ -36,7 +36,6 @@ Per-package CI workflows trigger on path-based changes:
 ### 📋 Workspace-Level Workflows
 
 - **`ci.yml`** - Workspace-wide CI (lint, test, build across all packages)
-- **`release.yml`** - NPM package releases via Changesets
 
 ### 🔧 Utility Workflows
 
@@ -60,7 +59,6 @@ Per-package CI workflows trigger on path-based changes:
 | Infrastructure Validate | Path-based      | Path-based    | Yes    | -        |
 | Infrastructure Deploy   | Main only       | -             | Yes    | -        |
 | Workspace CI            | Yes             | Yes           | Yes    | -        |
-| Workspace Release       | Main only       | -             | Yes    | -        |
 | Link Checker            | Markdown only   | Markdown only | Yes    | Weekly   |
 
 ## Adding New Component Workflows
