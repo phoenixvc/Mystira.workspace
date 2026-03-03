@@ -77,7 +77,7 @@ dotnet nuget add source https://pkgs.dev.azure.com/{org}/{project}/_packaging/{f
   --password {your-pat}
 ```
 
-Or update `NuGet.config` with your credentials.
+Or update `NuGet configuration` with your credentials.
 
 **Note**: This is only needed if you're using packages from a private Azure DevOps feed. Public packages from nuget.org don't require any additional configuration.
 

@@ -28,7 +28,7 @@ This guide covers migrating from the `Mystira.App.Infrastructure.*` packages (pr
 
 ### Step 1: Update NuGet Sources
 
-Ensure your `nuget.config` includes the GitHub Packages feed with Package Source Mapping:
+Ensure your `NuGet configuration` includes the GitHub Packages feed with Package Source Mapping:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -335,7 +335,7 @@ The polyglot interfaces in `Mystira.Shared.Data.Polyglot` are now **deprecated**
 
 **Error**: `Unable to find package 'Mystira.Infrastructure.Data'`
 
-**Solution**: Ensure GitHub Packages is configured in your `nuget.config` with valid credentials.
+**Solution**: Ensure GitHub Packages is configured in your `NuGet configuration` with valid credentials.
 
 ### Namespace Conflicts
 
