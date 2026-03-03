@@ -34,8 +34,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Mystira.App.Application\Mystira.App.Application.csproj" />
-    <ProjectReference Include="../../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
-    <ProjectReference Include="../../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
+    <ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
+    <ProjectReference Include="../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
     <ProjectReference Include="..\..\src\Mystira.App.Domain\Mystira.App.Domain.csproj" />
     <ProjectReference Include="..\..\src\Mystira.App.Infrastructure.Data\Mystira.App.Infrastructure.Data.csproj" />
   </ItemGroup>

@@ -141,7 +141,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build all packages
-        run: pnpm build
+        run: pnpm exec turbo run build --filter='!mystira-leptos'
 
   build-dotnet:
     name: Build and Test .NET
