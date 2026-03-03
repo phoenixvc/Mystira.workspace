@@ -134,5 +134,5 @@ Infra capability is represented in monorepo by `infra-validate.yml`,
 ## Evidence note
 
 This mapping is based on captured manifests in
-`docs/analysis/evidence/github-manifests/` and the workspace workflow set at
-capture time.
+archived snapshots (available from git history) and the workspace workflow set
+at capture time.

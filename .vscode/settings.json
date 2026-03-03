@@ -94,6 +94,8 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.tabSize": 4
   },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.terminal.activateEnvironment": true,
   "python.analysis.typeCheckingMode": "basic",
 
   "tailwindCSS.experimental.classRegex": [

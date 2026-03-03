@@ -1,8 +1,9 @@
 # Monorepo Deep Parity Report
 
 This report evaluates deep parity (recursive file trees), behavioral parity, and
-nested config parity using GitHub manifest snapshots in
-`docs/analysis/evidence/github-manifests`.
+nested config parity using previously captured GitHub manifest snapshots.
+Those archived snapshots were removed from the working tree and can be recovered
+from git history when needed.
 
 ## Coverage set
 

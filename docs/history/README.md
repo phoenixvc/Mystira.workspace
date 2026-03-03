@@ -2,6 +2,9 @@
 
 This directory contains historical documentation for significant work completed in the Mystira workspace.
 
+Archived snapshot artifacts are intentionally not kept in the working tree.
+If needed for investigation, retrieve them from git history.
+
 ## Structure
 
 ```

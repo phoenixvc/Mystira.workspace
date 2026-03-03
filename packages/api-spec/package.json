@@ -16,7 +16,7 @@
     "bundle": "pnpm exec redocly bundle openapi/app-api.yaml -o dist/app-api.yaml && pnpm exec redocly bundle openapi/story-generator-api.yaml -o dist/story-generator-api.yaml"
   },
   "devDependencies": {
-    "@redocly/cli": "^2.20.0",
+    "@redocly/cli": "^2.20.1",
     "nswag": "^14.6.3",
     "openapi-typescript": "^7.13.0"
   },

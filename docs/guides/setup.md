@@ -447,8 +447,8 @@ dotnet run --project src/Mystira.App.PWA
 ```bash
 cd packages/admin-api
 
-# Configure NuGet.config with Azure DevOps feed
-# Edit NuGet.config and update feed URL/token placeholders
+# Configure NuGet configuration with Azure DevOps feed
+# Edit NuGet configuration and update feed URL/token placeholders
 
 # Restore packages
 dotnet restore
@@ -460,7 +460,7 @@ dotnet build
 dotnet run --project src/Mystira.App.Admin.Api
 ```
 
-**NuGet.config Setup**:
+**NuGet configuration Setup**:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -531,7 +531,7 @@ NuGet packages are published to GitHub Packages at `https://nuget.pkg.github.com
 
 #### CI/CD Configuration
 
-Package `nuget.config` files use environment variables for authentication and **Package Source Mapping** to ensure Mystira packages are resolved from GitHub Packages (not nuget.org):
+Package `NuGet configuration` files use environment variables for authentication and **Package Source Mapping** to ensure Mystira packages are resolved from GitHub Packages (not nuget.org):
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -593,7 +593,7 @@ dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
   --username phoenixvc \
   --password ghp_your_token_here \
   --store-password-in-clear-text \
-  --configfile ~/.nuget/NuGet/NuGet.Config
+  --configfile ~/.nuget/NuGet/NuGet configuration
 ```
 
 This way:
@@ -604,7 +604,7 @@ This way:
 
 **Option 3: dotnet user-secrets (For App Configuration Only)**
 
-Note: User secrets work for reading tokens in app code but **not** for NuGet package restore (NuGet uses environment variables or NuGet.Config).
+Note: User secrets work for reading tokens in app code but **not** for NuGet package restore (NuGet uses environment variables or NuGet configuration).
 
 ```bash
 # Initialize user secrets for a project
@@ -684,7 +684,7 @@ dotnet restore
 
 This usually means NuGet is trying to find Mystira packages on nuget.org instead of GitHub Packages.
 
-**Solution**: Add Package Source Mapping to your `nuget.config`:
+**Solution**: Add Package Source Mapping to your `NuGet configuration`:
 
 ```xml
 <packageSourceMapping>

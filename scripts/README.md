@@ -16,7 +16,7 @@ Captures GitHub API manifests for legacy PhoenixVC repositories and the mapped
 
 **Output:**
 
-- `docs/analysis/evidence/github-manifests/*.json`
+- Archived parity manifests should be retrieved from git history when needed.
 
 **Usage (PowerShell):**
 
