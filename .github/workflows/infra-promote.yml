@@ -151,7 +151,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -206,7 +206,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: promote-plan-shared-infra-${{ inputs.target_environment }}
           path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}/promote.tfplan
@@ -228,7 +228,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -283,7 +283,7 @@ jobs:
           TF_VAR_environment: ${{ inputs.target_environment }}
 
       - name: Upload Plan
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
           path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}/promote.tfplan
@@ -302,7 +302,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -335,7 +335,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Download Plan
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: promote-plan-shared-infra-${{ inputs.target_environment }}
           path: infra/terraform/shared-infra/environments/${{ inputs.target_environment }}
@@ -383,7 +383,7 @@ jobs:
 
       - name: Setup Terraform
         if: inputs.product == 'all' || inputs.product != 'shared-infra'
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -404,7 +404,7 @@ jobs:
 
       - name: Download Plan
         if: inputs.product == 'all' || inputs.product != 'shared-infra'
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: promote-plan-${{ matrix.product }}-${{ inputs.target_environment }}
           path: infra/terraform/products/${{ matrix.product }}/environments/${{ inputs.target_environment }}

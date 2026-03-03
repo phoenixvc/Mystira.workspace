@@ -272,4 +272,4 @@ REPO_SETUP_COMPLETE.md
 package-lock.json
 
 # Generated parity evidence payloads (large, reproducible)
-docs/analysis/evidence/github-manifests/workflow-files/
+docs/analysis/evidence/manifest-captures/workflow-files/

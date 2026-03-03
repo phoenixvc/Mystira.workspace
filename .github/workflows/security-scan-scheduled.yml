@@ -37,7 +37,7 @@ jobs:
   admin-api:
     name: Admin API Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'admin-api' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: csharp
       working_directory: packages/admin-api
@@ -51,7 +51,7 @@ jobs:
   admin-ui:
     name: Admin UI Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'admin-ui' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
       working_directory: packages/admin-ui
@@ -65,7 +65,7 @@ jobs:
   chain:
     name: Chain Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'chain' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: python
       working_directory: packages/chain
@@ -79,7 +79,7 @@ jobs:
   devhub:
     name: DevHub Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'devhub' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
       working_directory: packages/devhub
@@ -93,7 +93,7 @@ jobs:
   publisher:
     name: Publisher Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'publisher' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
       working_directory: packages/publisher
@@ -107,7 +107,7 @@ jobs:
   story-generator:
     name: Story Generator Security Scan
     if: github.event.inputs.component == 'all' || github.event.inputs.component == 'story-generator' || github.event_name == 'schedule'
-    uses: ./.github/workflows/_security-scan.yml
+    uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: csharp
       working_directory: packages/story-generator

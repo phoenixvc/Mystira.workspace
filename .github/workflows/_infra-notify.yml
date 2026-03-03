@@ -1,4 +1,4 @@
-name: "[Reusable] Infrastructure - Notifications"
+name: "[Reusable] Infra Notifications"
 
 # Reusable workflow for sending notifications to Slack and Teams
 # Called by other infrastructure workflows

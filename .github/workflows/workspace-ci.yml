@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
@@ -48,7 +48,7 @@ jobs:
           node-version: "24"
           cache: "pnpm"
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.14"
 
@@ -61,6 +61,21 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
+  yaml-lint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Lint YAML files
+        run: yamllint -f github .
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -72,7 +87,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.14'
 
@@ -356,7 +371,7 @@ jobs:
     name: CI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint, test, build, build-dotnet, integration-tests]
+    needs: [lint, yaml-lint, test, build, build-dotnet, integration-tests]
     # Always run summary job to report status regardless of previous job outcomes
     if: always()
     permissions:
@@ -369,6 +384,7 @@ jobs:
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint (TypeScript) | ${{ needs.lint.result == 'success' && '✅' || needs.lint.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint (YAML) | ${{ needs['yaml-lint'].result == 'success' && '✅' || needs['yaml-lint'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Test (TypeScript) | ${{ needs.test.result == 'success' && '✅' || needs.test.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build (TypeScript) | ${{ needs.build.result == 'success' && '✅' || needs.build.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build (.NET) | ${{ needs['build-dotnet'].result == 'success' && '✅' || needs['build-dotnet'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
@@ -377,6 +393,7 @@ jobs:
 
           # Overall status
           if [ "${{ needs.lint.result }}" == "success" ] && \
+             [ "${{ needs['yaml-lint'].result }}" == "success" ] && \
              [ "${{ needs.test.result }}" == "success" ] && \
              [ "${{ needs.build.result }}" == "success" ] && \
              [ "${{ needs['build-dotnet'].result }}" == "success" ] && \

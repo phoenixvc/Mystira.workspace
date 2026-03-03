@@ -196,10 +196,10 @@ dotnet nuget add source https://nuget.pkg.github.com/phoenixvc/index.json \
   --username phoenixvc \
   --password ghp_your_github_pat_here \
   --store-password-in-clear-text \
-  --configfile ~/.nuget/NuGet/NuGet.Config
+  --configfile ~/.nuget/NuGet/NuGet configuration
 ```
 
-**Package Source Mapping (Required in nuget.config):**
+**Package Source Mapping (Required in NuGet configuration):**
 
 To ensure NuGet resolves Mystira packages from GitHub (not nuget.org), add package source mapping:
 

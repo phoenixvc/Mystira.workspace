@@ -5,7 +5,7 @@
 # scanning, consider using Trivy's misconfig mode instead of tfsec-action.
 # See: https://aquasecurity.github.io/trivy/latest/docs/scanner/misconfiguration/
 
-name: "[Build] Security Scan"
+name: "[Reusable] Security Scan"
 
 on:
   workflow_call:
@@ -261,7 +261,7 @@ jobs:
           fetch-depth: 0
 
       - name: TruffleHog Secret Scan
-        uses: trufflesecurity/trufflehog@v3.93.4
+        uses: trufflesecurity/trufflehog@v3.93.6
         with:
           path: ./
           base: ${{ github.event.repository.default_branch }}

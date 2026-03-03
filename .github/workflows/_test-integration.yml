@@ -1,4 +1,4 @@
-name: "[Test] Integration"
+name: "[Reusable] Integration Tests"
 
 # Reusable workflow for running integration tests
 # Tests service interactions with real dependencies (databases, caches, queues)
@@ -58,7 +58,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:18@sha256:9b5bd946f3a507db72c55959700e517463e8d5dbb6f7eb30d920d5bcf6951431
+        image: postgres:18@sha256:69e8582b781cb44fa4557b98ed586fe68361e320d9b12f9707494335634f4f3d
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
@@ -196,7 +196,7 @@ jobs:
       # Upload test results
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: integration-test-results-${{ inputs.service }}
           path: |

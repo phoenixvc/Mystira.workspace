@@ -127,7 +127,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
@@ -207,7 +207,7 @@ jobs:
       # --- Trivy ---
       - name: Run Trivy IaC Scanner
         if: ${{ vars.ENABLE_TRIVY != 'false' }}
-        uses: aquasecurity/trivy-action@1bd062560b422f5944df1de50abd05162bea079e
+        uses: aquasecurity/trivy-action@97e0b3872f55f89b95b2f65b3dbab56962816478
         with:
           scan-type: 'config'
           scan-ref: 'infra/terraform'
@@ -221,6 +221,15 @@ jobs:
         if: always() && hashFiles('trivy-iac-results.sarif') != ''
         with:
           sarif_file: trivy-iac-results.sarif
+
+      - name: Trivy Summary
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" << 'EOF'
+          ## Trivy IaC Security Scan
+
+          Security scan completed. Check the Security tab for detailed findings.
+          EOF
 
       # --- Checkov ---
       - name: Run Checkov
@@ -256,7 +265,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: ${{ env.TF_VERSION }}
 

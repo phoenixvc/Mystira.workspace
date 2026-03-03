@@ -1,4 +1,4 @@
-name: "[CI] Gate"
+name: "[Reusable] CI Gate"
 
 # CI Gate - Validates that CI passed before allowing deployments
 # Used by deployment workflows to ensure code quality

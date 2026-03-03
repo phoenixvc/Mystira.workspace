@@ -93,7 +93,7 @@ packages:
 
 - .NET projects are managed independently but coordinated through workspace scripts
 - Use `Directory.Build.props` for shared configuration
-- Central package management via `NuGet.config`
+- Central package management via `NuGet configuration`
 
 **Key Files**:
 
