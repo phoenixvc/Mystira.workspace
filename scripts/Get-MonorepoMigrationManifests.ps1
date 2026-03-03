@@ -3,7 +3,7 @@ param(
     [string]$Organization = "phoenixvc",
     [string]$Monorepo = "Mystira.workspace",
     [string]$MonorepoRef = "dev",
-    [string]$OutputDirectory = "docs/analysis/evidence/github-manifests"
+    [string]$OutputDirectory = "docs/analysis/evidence/manifest-captures"
 )
 
 Set-StrictMode -Version Latest

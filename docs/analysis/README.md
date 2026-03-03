@@ -16,3 +16,8 @@ This directory contains analysis documents for repository structure, extraction 
 
 - [Migration Plans](../migration/) - Detailed migration plans based on analysis
 - [ADR-0006: Admin API Repository Extraction](../architecture/adr/0006-admin-api-repository-extraction.md) - Architecture decision record
+
+## Archived Snapshot Note
+
+Archived analysis snapshots were removed from the working tree to reduce repository bloat.
+If historical snapshot artifacts are needed, retrieve them from git history.
