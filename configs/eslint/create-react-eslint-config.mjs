@@ -15,6 +15,7 @@ export function createReactEslintConfig({
   includeNoExplicitAny = false,
   testFiles = ["**/*.test.{ts,tsx}", "**/tests/**/*.{ts,tsx}"],
   additionalRules = {},
+  tsconfigRootDir = undefined,
 } = {}) {
   const rules = {
     ...reactHooks.configs.recommended.rules,
@@ -41,6 +42,9 @@ export function createReactEslintConfig({
       languageOptions: {
         ecmaVersion,
         globals: globals.browser,
+        ...(tsconfigRootDir && {
+          parserOptions: { tsconfigRootDir },
+        }),
       },
       plugins: {
         "react-hooks": reactHooks,

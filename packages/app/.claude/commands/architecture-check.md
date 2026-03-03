@@ -33,10 +33,12 @@ FORBIDDEN:
 #### Rule 1: No Business Logic in Controllers
 
 Scan controllers in:
+
 - `src/Mystira.App.Api/Controllers/`
 - `src/Mystira.App.Admin.Api/Controllers/`
 
 **Violations to detect:**
+
 - Repository interfaces injected directly into controllers
 - DbContext usage in controllers
 - Complex conditional logic (business decisions) in controller methods
@@ -46,6 +48,7 @@ Scan controllers in:
 #### Rule 2: No Services in API Layer
 
 **Violations to detect:**
+
 - Any files in `src/Mystira.App.Api/Services/` (known violation -- PERF-4)
 - Any files in `src/Mystira.App.Admin.Api/Services/`
 - Classes that contain business logic outside of the Application layer
@@ -55,6 +58,7 @@ Scan controllers in:
 Scan `src/Mystira.App.Application/`:
 
 **Violations to detect:**
+
 - `using Mystira.App.Infrastructure.*` statements
 - `using Microsoft.EntityFrameworkCore` statements
 - Direct references to Azure SDK, Discord.Net, or other infrastructure packages
@@ -65,6 +69,7 @@ Scan `src/Mystira.App.Application/`:
 Scan `src/Mystira.App.Domain/`:
 
 **Violations to detect:**
+
 - Any `using` statements referencing Application, Infrastructure, or API namespaces
 - Any NuGet package references in `.csproj` (except basic .NET BCL)
 - Any framework-specific attributes (EF Core, ASP.NET)
@@ -72,12 +77,14 @@ Scan `src/Mystira.App.Domain/`:
 #### Rule 5: DTOs in Contracts Only
 
 **Violations to detect:**
+
 - Request/Response DTO classes defined outside `src/Mystira.Contracts.App/`
 - DTOs mixed into Domain or Application layers
 
 #### Rule 6: Correct API Routing
 
 **Violations to detect:**
+
 - Public API controllers with `/adminapi` routes
 - Admin API controllers with `/api` routes
 - Missing `[Authorize]` on sensitive endpoints

@@ -17,6 +17,7 @@ Scaffold a new API endpoint following Mystira's Hexagonal Architecture. Generate
 - Otherwise: generate in `src/Mystira.App.Api/Controllers/` with route prefix `/api/`
 
 **Routing Rule:**
+
 - `/api/*` = User acting on their OWN resources (requires auth, scoped to user)
 - `/adminapi/*` = System-level or other users' data (requires admin role)
 
@@ -36,12 +37,14 @@ src/Mystira.Contracts.App/Responses/{Entity}Response.cs  (if not already exists)
 #### b) CQRS Command/Query in `src/Mystira.App.Application/`
 
 For write operations (Create, Update, Delete):
+
 ```
 src/Mystira.App.Application/CQRS/{Entity}s/Commands/{Action}{Entity}Command.cs
 src/Mystira.App.Application/CQRS/{Entity}s/Commands/{Action}{Entity}CommandHandler.cs
 ```
 
 For read operations (Get, GetAll, Search):
+
 ```
 src/Mystira.App.Application/CQRS/{Entity}s/Queries/{Action}{Entity}Query.cs
 src/Mystira.App.Application/CQRS/{Entity}s/Queries/{Action}{Entity}QueryHandler.cs
@@ -50,6 +53,7 @@ src/Mystira.App.Application/CQRS/{Entity}s/Queries/{Action}{Entity}QueryHandler.
 **Wolverine handler pattern (NOT MediatR):**
 
 Command/Query is a plain DTO class:
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Commands;
 
@@ -57,6 +61,7 @@ public record {Action}{Entity}Command(/* input properties */);
 ```
 
 Handler uses Wolverine's static method convention with DI via parameters:
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Commands;
 

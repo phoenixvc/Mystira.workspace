@@ -14,12 +14,14 @@ Generate a CQRS Command or Query with Handler following Mystira's Application la
 ### 1. Determine Type
 
 Auto-detect from name prefix if `--type` not specified:
-- **Command** (write): Create*, Update*, Delete*, Add*, Remove*, Link*, Unlink*
+
+- **Command** (write): Create*, Update*, Delete*, Add*, Remove*, Link*, Unlink\*
 - **Query** (read): Get*, Find*, Search*, List*, Validate*, Count*
 
 ### 2. Identify the Entity
 
 Extract the entity name from the use case name:
+
 - `CreateGameSession` -> Entity: `GameSession`
 - `GetUserBadges` -> Entity: `UserBadge`
 - `LinkProfilesToAccount` -> Entity: `Account`
@@ -34,6 +36,7 @@ src/Mystira.App.Application/CQRS/{Entity}s/Commands/{Name}CommandHandler.cs
 ```
 
 **Command pattern (Wolverine — plain DTO, no MediatR interfaces):**
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Commands;
 
@@ -41,6 +44,7 @@ public record {Name}Command(/* input properties */);
 ```
 
 **Handler pattern (Wolverine — static method with DI via parameters):**
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Commands;
 
@@ -64,6 +68,7 @@ src/Mystira.App.Application/CQRS/{Entity}s/Queries/{Name}QueryHandler.cs
 ```
 
 **Query pattern (Wolverine — plain DTO):**
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Queries;
 
@@ -71,6 +76,7 @@ public record {Name}Query(/* input properties */);
 ```
 
 **Handler pattern (Wolverine — static method with DI via parameters):**
+
 ```csharp
 namespace Mystira.App.Application.CQRS.{Entity}s.Queries;
 
@@ -87,6 +93,7 @@ public static class {Name}QueryHandler
 ```
 
 **Cacheable Query (for reference/lookup data):**
+
 ```csharp
 public record {Name}Query(/* input */) : ICacheableQuery
 {

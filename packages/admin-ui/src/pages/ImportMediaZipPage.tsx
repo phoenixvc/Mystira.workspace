@@ -18,17 +18,9 @@ function ImportMediaZipPage() {
   const queryClient = useQueryClient();
 
   const uploadMutation = useMutation({
-    mutationFn: (data: {
-      file: File;
-      overwriteMetadata: boolean;
-      overwriteMedia: boolean;
-    }) =>
-      mediaApi.uploadMediaZip(
-        data.file,
-        data.overwriteMetadata,
-        data.overwriteMedia
-      ),
-    onSuccess: (result) => {
+    mutationFn: (data: { file: File; overwriteMetadata: boolean; overwriteMedia: boolean }) =>
+      mediaApi.uploadMediaZip(data.file, data.overwriteMetadata, data.overwriteMedia),
+    onSuccess: result => {
       queryClient.invalidateQueries({ queryKey: ["media"] });
       setUploadResult(result);
       setUploading(false);
@@ -38,12 +30,8 @@ function ImportMediaZipPage() {
         showToast.error("Media ZIP upload completed with errors");
       }
     },
-    onError: (error) => {
-      showToast.error(
-        error instanceof Error
-          ? error.message
-          : "Failed to upload media ZIP file"
-      );
+    onError: error => {
+      showToast.error(error instanceof Error ? error.message : "Failed to upload media ZIP file");
       setUploading(false);
     },
   });
@@ -94,16 +82,14 @@ function ImportMediaZipPage() {
           <p className="card-text">The ZIP file must contain:</p>
           <ul>
             <li>
-              <code>media-metadata.json</code> - A JSON file containing media
-              metadata with image IDs and their corresponding filenames
+              <code>media-metadata.json</code> - A JSON file containing media metadata with image
+              IDs and their corresponding filenames
             </li>
-            <li>
-              Media files (images, audio, video) referenced in the metadata file
-            </li>
+            <li>Media files (images, audio, video) referenced in the metadata file</li>
           </ul>
           <p className="card-text text-muted mb-0">
-            The system will process the metadata file and upload the
-            corresponding media files to the database.
+            The system will process the metadata file and upload the corresponding media files to
+            the database.
           </p>
         </div>
       </div>
@@ -124,9 +110,7 @@ function ImportMediaZipPage() {
                 disabled={uploading}
                 required
               />
-              <div className="form-text">
-                Select a ZIP file containing media and metadata
-              </div>
+              <div className="form-text">Select a ZIP file containing media and metadata</div>
             </div>
 
             {file && (
@@ -145,7 +129,7 @@ function ImportMediaZipPage() {
                   type="checkbox"
                   id="overwriteMetadata"
                   checked={overwriteMetadata}
-                  onChange={(e) => setOverwriteMetadata(e.target.checked)}
+                  onChange={e => setOverwriteMetadata(e.target.checked)}
                   disabled={uploading}
                 />
                 <label className="form-check-label" htmlFor="overwriteMetadata">
@@ -153,8 +137,7 @@ function ImportMediaZipPage() {
                 </label>
               </div>
               <div className="form-text">
-                If checked, existing metadata entries will be updated with new
-                values
+                If checked, existing metadata entries will be updated with new values
               </div>
             </div>
 
@@ -165,7 +148,7 @@ function ImportMediaZipPage() {
                   type="checkbox"
                   id="overwriteMedia"
                   checked={overwriteMedia}
-                  onChange={(e) => setOverwriteMedia(e.target.checked)}
+                  onChange={e => setOverwriteMedia(e.target.checked)}
                   disabled={uploading}
                 />
                 <label className="form-check-label" htmlFor="overwriteMedia">
@@ -178,11 +161,7 @@ function ImportMediaZipPage() {
             </div>
 
             <div className="d-flex gap-2">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={!file || uploading}
-              >
+              <button type="submit" className="btn btn-primary" disabled={!file || uploading}>
                 {uploading ? (
                   <>
                     <span
@@ -210,13 +189,9 @@ function ImportMediaZipPage() {
         <div className="card">
           <div className="card-body">
             <h5 className="card-title">Upload Results</h5>
-            <div
-              className={`alert ${uploadResult.success ? "alert-success" : "alert-warning"}`}
-            >
+            <div className={`alert ${uploadResult.success ? "alert-success" : "alert-warning"}`}>
               <strong>{uploadResult.message}</strong>
-              <p className="mb-0">
-                Processed files: {uploadResult.processedFiles}
-              </p>
+              <p className="mb-0">Processed files: {uploadResult.processedFiles}</p>
             </div>
 
             {uploadResult.errors.length > 0 && (
@@ -224,10 +199,7 @@ function ImportMediaZipPage() {
                 <h6>Errors:</h6>
                 <ul className="list-group">
                   {uploadResult.errors.map((error, index) => (
-                    <li
-                      key={index}
-                      className="list-group-item list-group-item-danger"
-                    >
+                    <li key={index} className="list-group-item list-group-item-danger">
                       {error}
                     </li>
                   ))}

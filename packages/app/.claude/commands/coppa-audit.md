@@ -17,6 +17,7 @@ Review code for COPPA (Children's Online Privacy Protection Act) compliance. Thi
 Reference: `docs/prd/features/coppa-compliance.md`
 
 **Core COPPA Rules (16 CFR Part 312):**
+
 1. **Parental Consent** - Must obtain verifiable parental consent before collecting PII from children under 13
 2. **Privacy Notice** - Must provide clear, prominent privacy notice
 3. **Data Minimization** - Only collect PII reasonably necessary for the activity
@@ -30,6 +31,7 @@ Reference: `docs/prd/features/coppa-compliance.md`
 #### PII Collection Points
 
 Search for any code that collects, stores, or transmits:
+
 - Full name, email address, physical address
 - Phone numbers, Social Security numbers
 - Geolocation data (GPS, IP-based location)
@@ -38,6 +40,7 @@ Search for any code that collects, stores, or transmits:
 - Screen names that could reveal real identity
 
 **Search patterns:**
+
 - Form inputs collecting personal data
 - API endpoints accepting PII in request bodies
 - Database fields storing PII
@@ -46,6 +49,7 @@ Search for any code that collects, stores, or transmits:
 #### Missing Consent Checks
 
 Look for:
+
 - User creation/registration flows WITHOUT age verification
 - Profile updates that collect additional PII without consent check
 - Features that enable direct communication between users (chat, messaging)
@@ -54,6 +58,7 @@ Look for:
 #### Data Retention Issues
 
 Look for:
+
 - PII stored without TTL or expiration policy
 - Logs containing PII without redaction (known issue: BUG-4)
 - Backup/export features that include children's PII
@@ -62,6 +67,7 @@ Look for:
 #### Security Gaps
 
 Look for:
+
 - PII transmitted without encryption
 - PII stored in plain text (not encrypted at rest)
 - Missing access controls on PII endpoints

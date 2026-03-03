@@ -101,7 +101,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [x] Configure Story-Generator to use shared PostgreSQL and Redis
 - [x] Deploy Story-Generator infrastructure to dev
 - [x] Create Kubernetes manifests for Story-Generator service
-- [x] Standardize K8s naming to mys-* prefix (December 2025)
+- [x] Standardize K8s naming to mys-\* prefix (December 2025)
 
 **Deliverables**:
 
@@ -347,6 +347,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 **Tasks**:
 
 #### Phase 5.0.1: Microsoft Entra ID (Admin)
+
 - [x] Create Entra ID Terraform module (`infra/terraform/modules/entra-id/` - December 2025)
 - [x] Define App Roles (Admin, SuperAdmin, Moderator, Viewer) - in Terraform module
 - [x] Define API Scopes (Admin.Read, Admin.Write, Users.Manage, Content.Moderate) - in Terraform module
@@ -360,6 +361,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Test admin authentication flow end-to-end
 
 #### Phase 5.0.2: Microsoft Entra External ID (Consumer)
+
 - [x] Create Entra External ID Terraform module (`infra/terraform/modules/entra-external-id/` - December 2025)
   - [x] Public API app registration with exposed scopes
   - [x] PWA/SPA app registration for Blazor WASM and React clients
@@ -373,6 +375,7 @@ This roadmap outlines the strategic implementation plan for the Mystira workspac
 - [ ] Test consumer sign-up/sign-in flow
 
 #### Phase 5.0.3: Service-to-Service Authentication (Managed Identity)
+
 - [x] Create shared identity RBAC module (`infra/terraform/modules/shared/identity/` - December 2025)
   - [x] AKS to ACR role assignments (AcrPull)
   - [x] Key Vault Secrets User role assignments

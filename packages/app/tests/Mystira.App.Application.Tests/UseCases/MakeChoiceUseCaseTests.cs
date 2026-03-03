@@ -5,6 +5,7 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.App.Domain.Models;
+using Mystira.Shared.Locking;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -13,6 +14,7 @@ public class MakeChoiceUseCaseTests
     private readonly Mock<IGameSessionRepository> _repository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+    private readonly Mock<IDistributedLockService> _lockService;
     private readonly Mock<ILogger<MakeChoiceUseCase>> _logger;
     private readonly MakeChoiceUseCase _useCase;
 
@@ -21,10 +23,11 @@ public class MakeChoiceUseCaseTests
         _repository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
+        _lockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<MakeChoiceUseCase>>();
         _useCase = new MakeChoiceUseCase(
             _repository.Object, _scenarioRepository.Object,
-            _unitOfWork.Object, _logger.Object);
+            _unitOfWork.Object, _lockService.Object, _logger.Object);
     }
 
     [Fact]

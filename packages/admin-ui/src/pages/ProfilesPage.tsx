@@ -36,9 +36,7 @@ function ProfilesPage() {
       <ErrorAlert
         error={error}
         title="Error loading profiles"
-        onRetry={() =>
-          queryClient.invalidateQueries({ queryKey: ["profiles"] })
-        }
+        onRetry={() => queryClient.invalidateQueries({ queryKey: ["profiles"] })}
       />
     );
   }
@@ -57,7 +55,7 @@ function ProfilesPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={(value) => {
+        onChange={value => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -82,20 +80,16 @@ function ProfilesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.profiles.map((profile) => (
+                    {data.profiles.map(profile => (
                       <tr key={profile.id}>
                         <td>
-                          <code className="small">
-                            {profile.id.slice(0, 8)}...
-                          </code>
+                          <code className="small">{profile.id.slice(0, 8)}...</code>
                         </td>
                         <td>{profile.displayName || "-"}</td>
                         <td>{profile.ageGroup || "-"}</td>
                         <td>
                           {profile.avatarId ? (
-                            <code className="small">
-                              {profile.avatarId.slice(0, 8)}...
-                            </code>
+                            <code className="small">{profile.avatarId.slice(0, 8)}...</code>
                           ) : (
                             "-"
                           )}
@@ -116,18 +110,11 @@ function ProfilesPage() {
                 </table>
               </div>
 
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           ) : (
             <div className="text-center py-5">
-              <i
-                className="bi bi-person-badge text-muted"
-                style={{ fontSize: "3rem" }}
-              ></i>
+              <i className="bi bi-person-badge text-muted" style={{ fontSize: "3rem" }}></i>
               <p className="text-muted mt-3">No profiles found.</p>
             </div>
           )}

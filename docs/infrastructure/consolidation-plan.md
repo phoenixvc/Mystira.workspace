@@ -11,6 +11,7 @@ This plan consolidates the `Mystira.Infra` repository (currently a submodule) di
 ## Current State
 
 ### Repository Structure
+
 ```
 Mystira.workspace/
 ├── infra/                    ← Submodule → Mystira.Infra (private repo)
@@ -26,6 +27,7 @@ Mystira.workspace/
 ```
 
 ### What's in Mystira.Infra
+
 ```
 infra/
 ├── terraform/
@@ -174,25 +176,25 @@ Update workflows that reference submodules to remove infra-specific token requir
 
 ## Benefits of Consolidation
 
-| Benefit | Description |
-|---------|-------------|
-| **Atomic commits** | Infra + workflow changes in single commit |
-| **Simpler CI/CD** | No submodule sync issues for infra |
-| **Better discoverability** | All infra code visible in main repo |
-| **Easier onboarding** | New developers see everything in one place |
-| **Reduced auth complexity** | One less private repo to manage access for |
-| **Unified history** | Git log shows infra changes with related code |
+| Benefit                     | Description                                   |
+| --------------------------- | --------------------------------------------- |
+| **Atomic commits**          | Infra + workflow changes in single commit     |
+| **Simpler CI/CD**           | No submodule sync issues for infra            |
+| **Better discoverability**  | All infra code visible in main repo           |
+| **Easier onboarding**       | New developers see everything in one place    |
+| **Reduced auth complexity** | One less private repo to manage access for    |
+| **Unified history**         | Git log shows infra changes with related code |
 
 ## What Stays as Submodules
 
-| Submodule | Reason |
-|-----------|--------|
-| `packages/publisher` | Service code, separate release cycle |
-| `packages/chain` | Service code, separate release cycle |
-| `packages/story-generator` | Service code, separate release cycle |
-| `packages/app` | Different tooling (Bicep), separate team |
-| `packages/devhub` | Desktop app, completely different build |
-| `packages/admin-ui` | UI component library |
+| Submodule                  | Reason                                   |
+| -------------------------- | ---------------------------------------- |
+| `packages/publisher`       | Service code, separate release cycle     |
+| `packages/chain`           | Service code, separate release cycle     |
+| `packages/story-generator` | Service code, separate release cycle     |
+| `packages/app`             | Different tooling (Bicep), separate team |
+| `packages/devhub`          | Desktop app, completely different build  |
+| `packages/admin-ui`        | UI component library                     |
 
 ---
 
@@ -218,20 +220,21 @@ git push
 
 ## Timeline
 
-| Phase | Duration | Dependencies |
-|-------|----------|--------------|
-| Phase 1: Preparation | 1 hour | Team notification |
-| Phase 2: Migration | 30 minutes | No active deployments |
-| Phase 3: CI/CD Updates | 1 hour | Phase 2 complete |
-| Phase 4: Archive | 15 minutes | Phase 3 verified |
-| Phase 5: Verification | 2 hours | Deploy to dev |
-| **Total** | **~5 hours** | |
+| Phase                  | Duration     | Dependencies          |
+| ---------------------- | ------------ | --------------------- |
+| Phase 1: Preparation   | 1 hour       | Team notification     |
+| Phase 2: Migration     | 30 minutes   | No active deployments |
+| Phase 3: CI/CD Updates | 1 hour       | Phase 2 complete      |
+| Phase 4: Archive       | 15 minutes   | Phase 3 verified      |
+| Phase 5: Verification  | 2 hours      | Deploy to dev         |
+| **Total**              | **~5 hours** |                       |
 
 ---
 
 ## Checklist
 
 ### Pre-Migration
+
 - [x] All infra changes committed and pushed
 - [x] Backup of infra repo created
 - [x] Current commit SHA documented: `ee1c91b`
@@ -239,12 +242,14 @@ git push
 - [x] No active deployments
 
 ### Migration
+
 - [x] Submodule removed
 - [x] Content copied (55 files)
 - [x] .gitmodules updated
 - [x] Changes committed and pushed
 
 ### Post-Migration
+
 - [ ] CI workflows passing
 - [ ] Dev deployment successful
 - [ ] Terraform state accessible
@@ -277,5 +282,5 @@ git subtree add --prefix infra https://github.com/phoenixvc/Mystira.Infra.git ma
 
 ---
 
-*Created: 2025-12-19*
-*Author: Claude*
+_Created: 2025-12-19_
+_Author: Claude_

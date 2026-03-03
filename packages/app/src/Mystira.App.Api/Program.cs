@@ -21,6 +21,7 @@ using Mystira.Shared.Locking;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 using OpenTelemetry.Resources;
+using Microsoft.ApplicationInsights.Extensibility;
 using Serilog;
 using Serilog.Events;
 using Wolverine;

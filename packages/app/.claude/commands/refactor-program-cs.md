@@ -16,6 +16,7 @@ Extract service registrations from Program.cs into well-organized extension meth
 Read `src/Mystira.App.Api/Program.cs` and the existing extension methods in `src/Mystira.App.Api/Configuration/`:
 
 Already extracted (do not duplicate):
+
 - `AuthenticationExtensions.cs` - JWT/auth configuration
 - `CorsExtensions.cs` - CORS policy setup
 - `DatabaseExtensions.cs` - Cosmos DB / EF Core setup
@@ -27,6 +28,7 @@ Already extracted (do not duplicate):
 ### 2. Identify Remaining Inline Registrations
 
 Look for any service registrations still directly in Program.cs that should be extracted:
+
 - Logging configuration
 - Health check registration
 - Middleware pipeline configuration

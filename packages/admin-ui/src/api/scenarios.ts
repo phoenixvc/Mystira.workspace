@@ -40,41 +40,25 @@ export interface ScenarioReferenceValidation {
 }
 
 export const scenariosApi = {
-  getScenarios: async (
-    request?: ScenarioQueryRequest
-  ): Promise<ScenarioQueryResponse> => {
-    const response = await apiClient.get<ScenarioQueryResponse>(
-      "/api/admin/scenarios",
-      {
-        params: request,
-      }
-    );
+  getScenarios: async (request?: ScenarioQueryRequest): Promise<ScenarioQueryResponse> => {
+    const response = await apiClient.get<ScenarioQueryResponse>("/api/admin/scenarios", {
+      params: request,
+    });
     return response.data;
   },
 
   getScenario: async (id: string): Promise<Scenario> => {
-    const response = await apiClient.get<Scenario>(
-      `/api/admin/scenarios/${id}`
-    );
+    const response = await apiClient.get<Scenario>(`/api/admin/scenarios/${id}`);
     return response.data;
   },
 
   createScenario: async (request: CreateScenarioRequest): Promise<Scenario> => {
-    const response = await apiClient.post<Scenario>(
-      "/api/admin/scenarios",
-      request
-    );
+    const response = await apiClient.post<Scenario>("/api/admin/scenarios", request);
     return response.data;
   },
 
-  updateScenario: async (
-    id: string,
-    request: CreateScenarioRequest
-  ): Promise<Scenario> => {
-    const response = await apiClient.put<Scenario>(
-      `/api/admin/scenarios/${id}`,
-      request
-    );
+  updateScenario: async (id: string, request: CreateScenarioRequest): Promise<Scenario> => {
+    const response = await apiClient.put<Scenario>(`/api/admin/scenarios/${id}`, request);
     return response.data;
   },
 

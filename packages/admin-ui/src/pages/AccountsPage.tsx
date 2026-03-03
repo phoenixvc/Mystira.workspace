@@ -36,9 +36,7 @@ function AccountsPage() {
       <ErrorAlert
         error={error}
         title="Error loading accounts"
-        onRetry={() =>
-          queryClient.invalidateQueries({ queryKey: ["accounts"] })
-        }
+        onRetry={() => queryClient.invalidateQueries({ queryKey: ["accounts"] })}
       />
     );
   }
@@ -57,7 +55,7 @@ function AccountsPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={(value) => {
+        onChange={value => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -82,12 +80,10 @@ function AccountsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.accounts.map((account) => (
+                    {data.accounts.map(account => (
                       <tr key={account.id}>
                         <td>
-                          <code className="small">
-                            {account.id.slice(0, 8)}...
-                          </code>
+                          <code className="small">{account.id.slice(0, 8)}...</code>
                         </td>
                         <td>{account.email || "-"}</td>
                         <td>{account.displayName || "-"}</td>
@@ -118,18 +114,11 @@ function AccountsPage() {
                 </table>
               </div>
 
-              <Pagination
-                currentPage={page}
-                totalPages={totalPages}
-                onPageChange={setPage}
-              />
+              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
             </>
           ) : (
             <div className="text-center py-5">
-              <i
-                className="bi bi-people text-muted"
-                style={{ fontSize: "3rem" }}
-              ></i>
+              <i className="bi bi-people text-muted" style={{ fontSize: "3rem" }}></i>
               <p className="text-muted mt-3">No accounts found.</p>
             </div>
           )}

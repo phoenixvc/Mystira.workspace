@@ -2,6 +2,10 @@ import js from "@eslint/js";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import eslintConfigPrettier from "eslint-config-prettier";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config(
   {
@@ -24,6 +28,9 @@ export default tseslint.config(
         ...globals.node,
         ...globals.es2022,
       },
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+      },
     },
     rules: {
       "@typescript-eslint/no-unused-vars": [
@@ -31,7 +38,28 @@ export default tseslint.config(
         { argsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-empty-object-type": "warn",
     },
   },
-  eslintConfigPrettier
+  {
+    files: ["**/packages/devhub/**/*.{ts,tsx}"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          caughtErrorsIgnorePattern: ".*",
+        },
+      ],
+      "no-case-declarations": "warn",
+      "no-useless-escape": "warn",
+      "no-useless-catch": "warn",
+      "prefer-const": "warn",
+    },
+  },
+  eslintConfigPrettier,
 );

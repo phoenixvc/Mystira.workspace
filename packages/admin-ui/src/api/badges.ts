@@ -22,15 +22,10 @@ export interface BadgeQueryResponse {
 }
 
 export const badgesApi = {
-  getBadges: async (
-    request?: BadgeQueryRequest
-  ): Promise<BadgeQueryResponse> => {
-    const response = await apiClient.get<BadgeQueryResponse>(
-      "/api/admin/badges",
-      {
-        params: request,
-      }
-    );
+  getBadges: async (request?: BadgeQueryRequest): Promise<BadgeQueryResponse> => {
+    const response = await apiClient.get<BadgeQueryResponse>("/api/admin/badges", {
+      params: request,
+    });
     return response.data;
   },
 
@@ -45,10 +40,7 @@ export const badgesApi = {
   },
 
   updateBadge: async (id: string, badge: Partial<Badge>): Promise<Badge> => {
-    const response = await apiClient.put<Badge>(
-      `/api/admin/badges/${id}`,
-      badge
-    );
+    const response = await apiClient.put<Badge>(`/api/admin/badges/${id}`, badge);
     return response.data;
   },
 
