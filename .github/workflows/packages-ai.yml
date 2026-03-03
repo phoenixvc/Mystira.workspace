@@ -106,4 +106,4 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v4
         with:
-          config-file: ".github/dependency-review-config.yml"
+          config-file: '.github/dependency-review-config.yml'

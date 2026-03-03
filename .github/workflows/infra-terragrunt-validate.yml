@@ -231,7 +231,143 @@ jobs:
           Security scan completed. Check the Security tab for detailed findings.
           EOF
 
-      # --- Checkov ---
+  # ============================================
+  # Validate Shared Infrastructure
+  # ============================================
+  validate-shared-infra:
+    name: Validate shared-infra
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [detect-changes, format-check]
+    if: needs['detect-changes'].outputs['shared-infra'] == 'true' || github.event_name == 'workflow_dispatch'
+    strategy:
+      fail-fast: false
+      matrix:
+        environment: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        run: |
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
+
+      - name: Terragrunt Init
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ matrix.environment }}
+          terragrunt init --terragrunt-non-interactive -backend=false
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+      - name: Terragrunt Validate
+        run: |
+          cd infra/terraform/shared-infra/environments/${{ matrix.environment }}
+          terragrunt validate --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+  # ============================================
+  # Validate Products
+  # ============================================
+  validate-products:
+    name: Validate ${{ matrix.product }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: [detect-changes, format-check, validate-shared-infra]
+    if: always() && needs.format-check.result == 'success'
+    strategy:
+      fail-fast: false
+      matrix:
+        product: [mystira-app, story-generator, admin, publisher, chain]
+        environment: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Check if product changed
+        id: check
+        run: |
+          PRODUCT="${{ matrix.product }}"
+          CHANGED="${{ needs['detect-changes'].outputs[matrix.product] }}"
+          if [[ "$CHANGED" == "true" ]] || [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "run=true" >> $GITHUB_OUTPUT
+          else
+            echo "run=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Terraform
+        if: steps.check.outputs.run == 'true'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Setup Terragrunt
+        if: steps.check.outputs.run == 'true'
+        run: |
+          TG_VERSION="${{ env.TERRAGRUNT_VERSION }}"
+          TG_URL="https://github.com/gruntwork-io/terragrunt/releases/download/v${TG_VERSION}"
+
+          wget -q -O terragrunt "${TG_URL}/terragrunt_linux_amd64"
+          wget -q -O terragrunt_SHA256SUMS "${TG_URL}/SHA256SUMS"
+
+          # Verify checksum
+          EXPECTED=$(grep "terragrunt_linux_amd64" terragrunt_SHA256SUMS | awk '{print $1}')
+          ACTUAL=$(sha256sum terragrunt | awk '{print $1}')
+          if [[ "$EXPECTED" != "$ACTUAL" ]]; then
+            echo "::error::Terragrunt checksum verification failed"
+            exit 1
+          fi
+
+          chmod +x terragrunt
+          sudo mv terragrunt /usr/local/bin/
+          rm -f terragrunt_SHA256SUMS
+
+      - name: Terragrunt Init
+        if: steps.check.outputs.run == 'true'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}
+          terragrunt init --terragrunt-non-interactive -backend=false
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+      - name: Terragrunt Validate
+        if: steps.check.outputs.run == 'true'
+        run: |
+          cd infra/terraform/products/${{ matrix.product }}/environments/${{ matrix.environment }}
+          terragrunt validate --terragrunt-non-interactive
+        env:
+          TF_VAR_environment: ${{ matrix.environment }}
+
+  # ============================================
+  # Security Scan (Checkov)
+  # ============================================
+  security-scan:
+    name: Security Scan (Checkov)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: format-check
+    if: ${{ vars.ENABLE_CHECKOV != 'false' }}
+    steps:
+      - uses: actions/checkout@v6
       - name: Run Checkov
         if: ${{ vars.ENABLE_CHECKOV != 'false' }}
         uses: bridgecrewio/checkov-action@v12
