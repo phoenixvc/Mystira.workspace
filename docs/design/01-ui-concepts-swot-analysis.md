@@ -13,13 +13,13 @@ This document evaluates three UI design directions for Mystira against key produ
 | Dimension               | Description                                      |
 |-------------------------|--------------------------------------------------|
 | Narrative immersion     | Feels like a story world                         |
-| Brand distinctiveness   | Distinct from SaaS / crypto UI                   |
-| Child-appropriate tone  | Clear and inviting for younger audiences          |
-| Product clarity / usability | Navigation and interaction clarity             |
+| Brand uniqueness        | Distinct from SaaS / crypto UI                   |
+| Child-friendly tone     | Clear and inviting for younger audiences          |
+| Product usability       | Navigation and interaction clarity                |
 | System scalability      | Token + component design system potential         |
 | Visual hierarchy        | Scanability and content organization              |
 | Emotional resonance     | Delight, magic, and wonder                        |
-| Engineering feasibility | Ease of implementation                            |
+| Engineering simplicity  | Ease of implementation                            |
 
 Weights reflect Mystira priorities — a story-driven platform, not a SaaS dashboard.
 
@@ -55,7 +55,7 @@ Weights reflect Mystira priorities — a story-driven platform, not a SaaS dashb
 
 ---
 
-## Concept B — Gold Cosmic Artifact Interface
+## Concept B — Gold Cosmic Vault
 
 ### Strengths
 
@@ -83,7 +83,7 @@ Weights reflect Mystira priorities — a story-driven platform, not a SaaS dashb
 
 ---
 
-## Concept C — Mystira Artifact Experience
+## Concept C — Mystira Cosmic Artifact
 
 ### Strengths
 
@@ -134,3 +134,11 @@ The product should feel like:
 - An enchanted discovery interface
 
 **Concept C achieves this.**
+
+---
+
+## Related Documents
+
+- [Weighted Evaluation Matrix](02-weighted-evaluation-matrix.md) — quantitative scoring of these concepts
+- [Design Direction Decision Matrix](03-design-direction-decision-matrix.md) — final decision framework
+- [Unified Design Language](04-unified-design-language.md) — combined design language from all three concepts

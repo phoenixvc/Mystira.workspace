@@ -178,7 +178,9 @@ Default: `cubic-bezier(0.4, 0, 0.2, 1)` — smooth, natural deceleration.
 
 ---
 
-## Rarity System
+## Rarity System _(Future Scope)_
+
+> **Note:** The rarity visual treatments described below do not yet have corresponding design tokens in the token system (docs 06/07). Rarity-specific tokens will be defined in a future phase when these treatments are implemented.
 
 Artifacts in Mystira have rarity tiers that affect visual treatment:
 
@@ -205,3 +207,11 @@ Internal tools adopt the structural patterns (grids, navigation, filters) with a
 ### Premium Moments (Concept B)
 
 Achievement reveals, vault screens, and rare artifact displays use the gold cosmic accent layer for heightened premium feeling.
+
+---
+
+## Related Documents
+
+- [Unified Design Language](04-unified-design-language.md) — combined design language from all three concepts
+- [Canonical UI Architecture](05-canonical-ui-architecture.md) — layout, tokens, and component hierarchy
+- [Phase 1A Design Tokens](06-phase-1a-design-tokens.md) — token values and Tailwind mapping

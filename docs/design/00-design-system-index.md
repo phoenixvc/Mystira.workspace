@@ -58,6 +58,8 @@ This directory contains the complete design system documentation for Mystira, co
 ```
 Wave 1A: tokens → figma variables
 Wave 1B: core component library
-Wave 2A: /brand page → storybook
-Wave 2B: full UI kit expansion
+Wave 2A: full UI kit spec
+Wave 2B: production Tailwind hardening
+Wave 2C: /brand page
+Wave 2D: storybook
 ```

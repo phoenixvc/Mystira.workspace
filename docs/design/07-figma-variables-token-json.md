@@ -24,10 +24,11 @@ This document defines the Figma variable collections, modes, styles, and the can
 | `surface/hover`               | `#F1EDFF`   | `#23204A`   |
 | `surface/selected`            | `#DDD6FF`   | `#2F2866`   |
 | `surface/border`              | `#DED9FF`   | `#2B2750`   |
-| `surface/selected-border`     | `#B8A9FF`   | _(TBD)_     |
+| `surface/selected-border`     | `#B8A9FF`   | `#3D3580`   |
 | `text/primary`                | `#2E1F66`   | `#F8F7FF`   |
 | `text/secondary`              | `#5C4FA3`   | `#B9B4E6`   |
 | `text/disabled`               | `#A8A3D6`   | `#6F6A9A`   |
+| `text/gold`                   | `#F6C453`   | `#F6C453`   |
 | `text/selected`               | `#2E1F66`   | `#F8F7FF`   |
 | `focus/ring`                  | `#5B3CC4`   | `#C7B8FF`   |
 | `status/success/bg`           | `#E9F8EF`   | `#0F2A1C`   |
@@ -163,6 +164,7 @@ This document defines the Figma variable collections, modes, styles, and the can
         "text/primary": { "Light": "#2E1F66", "Dark": "#F8F7FF" },
         "text/secondary": { "Light": "#5C4FA3", "Dark": "#B9B4E6" },
         "text/disabled": { "Light": "#A8A3D6", "Dark": "#6F6A9A" },
+        "text/gold": { "Light": "#F6C453", "Dark": "#F6C453" },
         "text/selected": { "Light": "#2E1F66", "Dark": "#F8F7FF" },
         "focus/ring": { "Light": "#5B3CC4", "Dark": "#C7B8FF" },
         "status/success/bg": { "Light": "#E9F8EF", "Dark": "#0F2A1C" },
@@ -248,3 +250,11 @@ Examples:
 - `status/success/base`
 - `type/h1/size`
 - `motion/fast`
+
+---
+
+## Related Documents
+
+- [Canonical UI Architecture](05-canonical-ui-architecture.md) — token architecture and component hierarchy
+- [Phase 1A Design Tokens](06-phase-1a-design-tokens.md) — token values and Tailwind mapping
+- [Phase Execution Plan](08-phase-execution-plan.md) — delivery plan and work breakdown

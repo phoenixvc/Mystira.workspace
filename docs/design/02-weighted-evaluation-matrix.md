@@ -6,7 +6,7 @@
 |-------------------------|--------|--------------------------------------|
 | Narrative immersion     | 0.20   | Feels like a story world             |
 | Brand uniqueness        | 0.15   | Distinct from SaaS / crypto UI       |
-| Child readability       | 0.15   | Clear for younger audiences          |
+| Child-friendly tone     | 0.15   | Clear for younger audiences          |
 | Product usability       | 0.15   | Navigation clarity                   |
 | System scalability      | 0.10   | Token + component system             |
 | Visual hierarchy        | 0.10   | Scanability                          |
@@ -34,8 +34,8 @@
 
 | Concept     | Weighted Score |
 |-------------|---------------|
-| Concept A   | **3.35**      |
-| Concept B   | **3.55**      |
+| Concept A   | **3.25**      |
+| Concept B   | **3.40**      |
 | Concept C   | **4.55**      |
 
 ---
@@ -73,7 +73,7 @@ Tone is slightly crypto-adjacent.
 
 ## Result
 
-Mystira Archive direction (Concept C) wins decisively.
+Mystira Cosmic Artifact direction (Concept C) wins decisively.
 
 However:
 

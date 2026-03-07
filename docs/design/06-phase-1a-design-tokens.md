@@ -38,6 +38,7 @@ This document defines the canonical design token model, semantic naming conventi
 | `text.primary`     | `#2E1F66` |
 | `text.secondary`   | `#5C4FA3` |
 | `text.disabled`    | `#A8A3D6` |
+| `text.gold`        | `#F6C453` |
 | `text.selected`    | `#2E1F66` |
 
 #### Focus
@@ -90,6 +91,7 @@ This document defines the canonical design token model, semantic naming conventi
 | `surface.hover`            | `#23204A` |
 | `surface.selected`         | `#2F2866` |
 | `surface.border`           | `#2B2750` |
+| `surface.selectedBorder`   | `#3D3580` |
 
 #### Text
 
@@ -98,6 +100,7 @@ This document defines the canonical design token model, semantic naming conventi
 | `text.primary`     | `#F8F7FF` |
 | `text.secondary`   | `#B9B4E6` |
 | `text.disabled`    | `#6F6A9A` |
+| `text.gold`        | `#F6C453` |
 | `text.selected`    | `#F8F7FF` |
 
 #### Focus
@@ -148,7 +151,7 @@ All Mystira components must consume semantic tokens, never raw color values.
 
 - **Brand:** `brand.primary`, `brand.secondary`, `brand.accent`, `brand.support`
 - **Surface:** `surface.background`, `surface.card`, `surface.elevated`, `surface.hover`, `surface.selected`, `surface.border`, `surface.selectedBorder`
-- **Text:** `text.primary`, `text.secondary`, `text.disabled`, `text.selected`
+- **Text:** `text.primary`, `text.secondary`, `text.disabled`, `text.gold`, `text.selected`
 - **Focus:** `focus.ring`
 - **Status:** `status.{success|info|warning|error}.{background|base|border}`
 
@@ -173,11 +176,11 @@ All Mystira components must consume semantic tokens, never raw color values.
 
 ### Shadow
 
-| Token        | Purpose          |
-|--------------|------------------|
-| `shadow.sm`  | Subtle elevation |
-| `shadow.md`  | Card elevation   |
-| `shadow.lg`  | Modal elevation  |
+| Token        | Purpose          | Value                                          |
+|--------------|------------------|-------------------------------------------------|
+| `shadow.sm`  | Subtle elevation | `0 1px 3px rgba(0,0,0,0.08)`                  |
+| `shadow.md`  | Card elevation   | `0 4px 12px rgba(0,0,0,0.12)`                 |
+| `shadow.lg`  | Modal elevation  | `0 8px 24px rgba(0,0,0,0.16)`                 |
 
 ### Typography
 
@@ -186,15 +189,15 @@ All Mystira components must consume semantic tokens, never raw color values.
 | `font.heading` | Baloo 2   |
 | `font.body`    | Nunito    |
 
-| Token          | Description         |
-|----------------|---------------------|
-| `type.h1`      | Hero headings       |
-| `type.h2`      | Section headings    |
-| `type.h3`      | Subsection headings |
-| `type.h4`      | Card headings       |
-| `type.body`    | Body text           |
-| `type.small`   | Small text          |
-| `type.caption` | Captions            |
+| Token          | Size  | Weight | Description         |
+|----------------|-------|--------|---------------------|
+| `type.h1`      | 36px  | 700    | Hero headings       |
+| `type.h2`      | 28px  | 700    | Section headings    |
+| `type.h3`      | 22px  | 600    | Subsection headings |
+| `type.h4`      | 18px  | 600    | Card headings       |
+| `type.body`    | 16px  | 400    | Body text           |
+| `type.small`   | 14px  | 400    | Small text          |
+| `type.caption` | 12px  | 400    | Captions            |
 
 ---
 
@@ -222,6 +225,7 @@ All semantic tokens are expressed as CSS custom properties with RGB channel valu
   --text-primary: 46 31 102;
   --text-secondary: 92 79 163;
   --text-disabled: 168 163 214;
+  --text-gold: 246 196 83;
   --text-selected: 46 31 102;
 
   --focus-ring: 91 60 196;
@@ -270,6 +274,7 @@ colors: {
     primary: 'rgb(var(--text-primary) / <alpha-value>)',
     secondary: 'rgb(var(--text-secondary) / <alpha-value>)',
     disabled: 'rgb(var(--text-disabled) / <alpha-value>)',
+    gold: 'rgb(var(--text-gold) / <alpha-value>)',
     selected: 'rgb(var(--text-selected) / <alpha-value>)',
   },
   focus: {
@@ -332,3 +337,11 @@ Wave 1A is complete when:
 - [ ] Light and dark mode values are finalized
 - [ ] Figma variable collections mirror code naming
 - [ ] No raw color usage is required in components
+
+---
+
+## Related Documents
+
+- [Canonical UI Architecture](05-canonical-ui-architecture.md) — token architecture and component hierarchy
+- [Figma Variables & Token JSON](07-figma-variables-token-json.md) — Figma variable collections and export JSON
+- [Phase Execution Plan](08-phase-execution-plan.md) — delivery plan and work breakdown

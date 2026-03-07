@@ -18,7 +18,7 @@ This matrix provides a structured framework for evaluating UI design directions 
 |-------------------------|--------|--------------------------------------|
 | Narrative immersion     | 0.20   | Feels like a story world             |
 | Brand uniqueness        | 0.15   | Distinct from SaaS / crypto UI       |
-| Child readability       | 0.15   | Clear for younger audiences          |
+| Child-friendly tone     | 0.15   | Clear for younger audiences          |
 | Product usability       | 0.15   | Navigation clarity                   |
 | System scalability      | 0.10   | Token + component system             |
 | Visual hierarchy        | 0.10   | Scanability                          |
@@ -31,15 +31,15 @@ This matrix provides a structured framework for evaluating UI design directions 
 
 | Design Direction        | Narrative | Brand | Child | Usability | System | Hierarchy | Emotion | Eng | **Weighted** |
 |-------------------------|-----------|-------|-------|-----------|--------|-----------|---------|-----|-------------|
-| SaaS Purple (A)         | 2         | 2     | 3     | 5         | 5      | 4         | 2       | 5   | **3.35**    |
-| Cosmic Vault (B)        | 4         | 4     | 2     | 3         | 3      | 4         | 4       | 3   | **3.55**    |
-| Mystira Archive (C)     | 5         | 5     | 4     | 4         | 4      | 5         | 5       | 4   | **4.55**    |
+| SaaS Purple (A)         | 2         | 2     | 3     | 5         | 5      | 4         | 2       | 5   | **3.25**    |
+| Gold Cosmic Vault (B)   | 4         | 4     | 2     | 3         | 3      | 4         | 4       | 3   | **3.40**    |
+| Mystira Cosmic Artifact (C) | 5     | 5     | 4     | 4         | 4      | 5         | 5       | 4   | **4.55**    |
 
 ---
 
 ## Decision
 
-**Mystira Archive direction wins decisively.**
+**Mystira Cosmic Artifact direction wins decisively.**
 
 ### Role Assignment
 

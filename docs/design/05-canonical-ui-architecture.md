@@ -104,7 +104,7 @@ AppShell
 |------------------|----------------------|
 | `text.primary`   | Main content         |
 | `text.secondary` | Supporting text      |
-| `text.muted`     | De-emphasized        |
+| `text.disabled`  | De-emphasized        |
 | `text.gold`      | Special highlights   |
 
 #### Status
@@ -134,21 +134,21 @@ AppShell
 | `radius.xl`  | 24px   |
 | `radius.pill`| 999px  |
 
-### Elevation Tokens
+### Shadow Tokens
 
 | Token            | Purpose              |
 |------------------|----------------------|
-| `elevation.card` | Card shadow          |
-| `elevation.panel`| Panel shadow         |
-| `elevation.modal`| Modal shadow         |
+| `shadow.sm`      | Card shadow          |
+| `shadow.md`      | Panel shadow         |
+| `shadow.lg`      | Modal shadow         |
 
 ### Motion Tokens
 
 | Token             | Value  |
 |-------------------|--------|
 | `motion.fast`     | 150ms  |
-| `motion.base`     | 250ms  |
-| `motion.emphasis` | 400ms  |
+| `motion.standard` | 250ms  |
+| `motion.slow`     | 400ms  |
 
 ---
 
@@ -226,3 +226,12 @@ ArtifactCard
 
 - Particle shimmer
 - Subtle pulse
+
+---
+
+## Related Documents
+
+- [Unified Design Language](04-unified-design-language.md) — visual characteristics and interaction model
+- [Phase 1A Design Tokens](06-phase-1a-design-tokens.md) — token values and Tailwind mapping
+- [Figma Variables & Token JSON](07-figma-variables-token-json.md) — Figma variable collections and export JSON
+- [Brand Guide Canvas](09-brand-guide-canvas.md) — brand identity and visual guidelines

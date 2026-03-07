@@ -75,7 +75,7 @@ Structure (A) + Atmosphere (B) + Story Identity (C) = Mystira System
 | Surfaces    | Dark magical gradients                     |
 | Accents     | Gold + teal energy                         |
 | Artifacts   | Glowing focal objects                      |
-| Typography  | Elegant serif headings + readable body     |
+| Typography  | Rounded sans-serif headings + readable body |
 
 ---
 
@@ -113,3 +113,11 @@ Mystira interfaces should feel like:
 - A fintech dashboard
 - An NFT marketplace
 - A developer console
+
+---
+
+## Related Documents
+
+- [UI Concepts SWOT Analysis](01-ui-concepts-swot-analysis.md) — detailed SWOT for each concept
+- [Canonical UI Architecture](05-canonical-ui-architecture.md) — layout, tokens, and component hierarchy
+- [Brand Guide Canvas](09-brand-guide-canvas.md) — brand identity and visual guidelines

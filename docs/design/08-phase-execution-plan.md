@@ -26,7 +26,7 @@ The Mystira design system is delivered in two phases. Phase 1 locks system primi
 - Light/dark parity established
 - Semantic classes available in Tailwind
 
-### Wave 1A: Figma Variables
+### Wave 1A (continued): Figma Variables
 
 **Deliverables:**
 
@@ -78,7 +78,7 @@ The Mystira design system is delivered in two phases. Phase 1 locks system primi
 
 ## Phase 2 — Productization & System Expansion
 
-### 4. Full Mystira UI Kit Spec (30+ Components)
+### Wave 2A: Full Mystira UI Kit Spec (30+ Components)
 
 **Deliverables:**
 
@@ -95,7 +95,7 @@ The Mystira design system is delivered in two phases. Phase 1 locks system primi
 - Overlays
 - System feedback
 
-### 5. Production Tailwind Config
+### Wave 2B: Production Tailwind Config
 
 **Deliverables:**
 
@@ -107,7 +107,7 @@ The Mystira design system is delivered in two phases. Phase 1 locks system primi
 
 Separate from Phase 1 because Phase 1 defines tokens; this step hardens production ergonomics.
 
-### 6. Live `/brand` Design System Page
+### Wave 2C: Live `/brand` Design System Page
 
 **Deliverables:**
 
@@ -127,7 +127,7 @@ Separate from Phase 1 because Phase 1 defines tokens; this step hardens producti
 - Engineering reference
 - Investor / partner showcase
 
-### 7. Storybook Architecture for Mystira PWA
+### Wave 2D: Storybook Architecture for Mystira PWA
 
 **Deliverables:**
 
@@ -156,10 +156,10 @@ Separate from Phase 1 because Phase 1 defines tokens; this step hardens producti
 
 ### Wave 2 (Productization)
 
-4. Production Tailwind hardening
-5. `/brand` live page
-6. Storybook architecture
-7. Full UI kit expansion
+1. Full UI kit spec
+2. Production Tailwind hardening
+3. `/brand` live page
+4. Storybook architecture
 
 ---
 
@@ -223,5 +223,5 @@ If you start with `/brand` or Storybook before tokens and core components are st
 ## Recommended Execution Sequence
 
 ```
-tokens → figma variables → core component library → /brand → storybook → full UI kit
+tokens → figma variables → core component library → full UI kit → production Tailwind hardening → /brand → storybook
 ```
