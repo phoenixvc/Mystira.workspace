@@ -16,6 +16,19 @@ Before diving into section-specific metrics, note what's currently available:
 
 **Implication:** Most metrics below require instrumenting the existing `ITelemetryService` with new custom events. The infrastructure exists; the event catalog does not.
 
+### Telemetry Constraints
+
+Any additions to the `ITelemetryService` event catalog **must** follow these guardrails:
+
+1. **Pseudonymous IDs only.** Events must reference users by opaque, non-reversible identifiers (e.g., hashed account IDs). Never emit emails, clear profile names, display names, or any other directly identifying information.
+2. **No PII or child-content payloads.** Event properties must never contain personally identifiable information or child-generated content (story responses, free-text inputs, avatar descriptions). This is a COPPA hard requirement.
+3. **Sanitize free-text before emitting.** If an event must reference user-supplied text (e.g., error context from a form field), strip or hash the value before passing it to `ITelemetryService`. No raw free-text should reach the telemetry backend.
+4. **Aggregate or sample sensitive metrics.** Metrics that could reveal individual behavior patterns (e.g., per-child choice sequences, exact session timestamps for minors) should be aggregated server-side or sampled at a rate that prevents individual reconstruction.
+5. **Server-side payload validation.** Telemetry producers must validate event payloads on the server before forwarding to Application Insights or any downstream sink. Reject events that contain disallowed fields.
+6. **CI enforcement.** Include automated tests or CI gating that scan new telemetry event definitions for PII patterns (email regex, name-length heuristics, known PII field names). Regressions that introduce PII into the event catalog must block the build.
+
+**Enforcement points:** `ITelemetryService` (the JSInterop bridge) and the server-side event catalog are the two control surfaces. All new event types should be reviewed against these constraints during code review, and the CI gate provides a safety net for regressions.
+
 ---
 
 ## APPLICATION 1: MYSTIRA APP (PWA)
@@ -45,7 +58,7 @@ The footer is purely informational (environment badge, version, connection statu
 | Metric | Why It Matters | Acceptable Range | How to Measure |
 |--------|---------------|-----------------|----------------|
 | **Visibility scroll-reach rate** | Whether users ever see the footer. If it's never scrolled to, the environment/version info is invisible. | N/A — this is a diagnostic data point, not a target | Intersection Observer event |
-| **Offline status display accuracy** | The footer shows Online/Offline. If this disagrees with actual connectivity, it erodes trust. | 100% accuracy (tested via service worker) | Compare `navigator.onLine` events with displayed state |
+| **Offline status display accuracy** | The footer shows Online/Offline. If this disagrees with actual connectivity, it erodes trust. | 100% accuracy (tested via service worker) | Run a lightweight backend reachability probe (periodic HEAD/OPTIONS request to a known endpoint) and/or observe service worker fetch failure events and failed API fetches. Record each probe result (success/failure) alongside the footer's displayed state at that moment. Compute accuracy as the percentage of samples where the displayed state matches the probe/fetch-error telemetry. Do NOT rely on `navigator.onLine` as the source of truth — it only reflects the OS network-adapter state and is unreliable for detecting actual server reachability. |
 
 **What to skip:** Engagement metrics, click rates, time-on-footer — none apply. The footer's success criterion is "doesn't confuse anyone."
 
@@ -59,7 +72,7 @@ These components share a critical constraint: they must communicate without bloc
 
 | Metric | Why It Matters | Acceptable Range | How to Measure |
 |--------|---------------|-----------------|----------------|
-| **Display latency after connectivity loss** | If the banner appears 10+ seconds after going offline, users have already encountered errors. | < 2 seconds after `navigator.onLine` fires `false` | Timestamp comparison |
+| **Display latency after connectivity loss** | If the banner appears 10+ seconds after going offline, users have already encountered errors. | < 2 seconds after a reachability probe failure or service worker fetch error is detected | Timestamp comparison between probe/fetch failure event and banner display |
 | **False positive rate** | Banner showing when connectivity exists → trust erosion. | 0% | QA testing + user reports |
 
 #### PWA Install Button
