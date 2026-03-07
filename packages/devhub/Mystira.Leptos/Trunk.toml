@@ -13,5 +13,5 @@ open = false
 
 [[hooks]]
 stage = "pre_build"
-command = "sh"
-command_arguments = ["-c", "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --minify"]
+command = "node"
+command_arguments = ["../../../node_modules/tailwindcss/lib/cli.js", "-i", "./styles/input.css", "-o", "./styles/output.css", "--minify"]

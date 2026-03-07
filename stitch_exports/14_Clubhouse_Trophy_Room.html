@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7c3bed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#171121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(49, 36, 71, 0.4);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(124, 59, 237, 0.2);
+        }
+        .magical-glow {
+            box-shadow: 0 0 20px rgba(124, 59, 237, 0.3);
+        }
+        .nebula-bg {
+            background: radial-gradient(circle at 50% 50%, #2e1a4d 0%, #171121 100%);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 overflow-hidden h-screen">
+<!-- Main Container -->
+<div class="relative flex h-full w-full flex-col nebula-bg overflow-hidden">
+<!-- Top Navigation Bar -->
+<header class="relative z-20 flex items-center justify-between px-6 py-4 glass-panel border-b-0 m-4 rounded-xl">
+<div class="flex items-center gap-4">
+<button class="flex items-center justify-center p-2 rounded-lg bg-primary/20 hover:bg-primary/30 transition-colors text-primary">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div class="flex flex-col">
+<h2 class="text-slate-100 text-lg font-bold leading-tight tracking-tight">Trophy Room</h2>
+<p class="text-primary/70 text-xs font-medium uppercase tracking-widest">Mystira Clubhouse</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 bg-primary px-4 py-2 rounded-full magical-glow">
+<span class="material-symbols-outlined text-yellow-300 text-sm fill-1">star</span>
+<span class="text-white text-sm font-bold">1,250 Sparkles</span>
+</div>
+<div class="size-10 rounded-full border-2 border-primary/50 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="User profile avatar with magical theme" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdC_xXTmTTESu7iwDSyWUjHN_5lL2rZMopqub9e1gD5_aUlR-F4z2EVup_XpfAF3NR3US4m1JoF6l3DgwNrsNhm1MMQvH9qrDuGR8hKbb6B0aK7L9q3FeCSNUphV2WhDH0s0CEBpVJtcfCeZ0dn0zVjB6NdOzRfkg9voCr5o503WKXvrbiLZV5bPcefloZF-uk1DliQbCug8yNLRywRRnhRo0mwcltOEfVpzyYLB3XT9IP27HTrtxs99OY81Srn5y9-S_iB6RzYJo"/>
+</div>
+</div>
+</header>
+<!-- Main 3D Viewport Simulation -->
+<main class="relative flex-1 flex flex-col items-center justify-center p-4">
+<!-- Magic Dust/Nebula Visual Element (Absolute Background) -->
+<div class="absolute inset-0 z-0 opacity-40 pointer-events-none">
+<div class="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[120px]"></div>
+<div class="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px]"></div>
+</div>
+<!-- Floating Trophies (Display Slots) -->
+<div class="absolute inset-0 z-10 pointer-events-none">
+<!-- Top Left Slot -->
+<div class="absolute top-[20%] left-[15%] pointer-events-auto">
+<div class="group flex flex-col items-center gap-2">
+<div class="size-16 glass-panel rounded-full flex items-center justify-center border-primary/40 magical-glow transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl">emoji_events</span>
+</div>
+<span class="text-[10px] text-primary/60 font-bold uppercase">Star Explorer</span>
+</div>
+</div>
+<!-- Mid Left Slot -->
+<div class="absolute top-[45%] left-[10%] pointer-events-auto">
+<div class="group flex flex-col items-center gap-2">
+<div class="size-20 glass-panel rounded-full flex items-center justify-center border-primary/60 magical-glow transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-primary text-4xl">military_tech</span>
+</div>
+<span class="text-[10px] text-primary/60 font-bold uppercase">Dragon Slayer</span>
+</div>
+</div>
+<!-- Top Right Slot -->
+<div class="absolute top-[20%] right-[15%] pointer-events-auto">
+<div class="group flex flex-col items-center gap-2">
+<div class="size-16 glass-panel rounded-full flex items-center justify-center border-primary/40 magical-glow transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-primary text-3xl">workspace_premium</span>
+</div>
+<span class="text-[10px] text-primary/60 font-bold uppercase">First Rank</span>
+</div>
+</div>
+<!-- Mid Right Slot -->
+<div class="absolute top-[45%] right-[10%] pointer-events-auto">
+<div class="group flex flex-col items-center gap-2">
+<div class="size-16 glass-panel rounded-full flex items-center justify-center border-primary/40 magical-glow transition-transform hover:scale-110">
+<span class="material-symbols-outlined text-primary text-2xl">add</span>
+</div>
+<span class="text-[10px] text-primary/60 font-bold uppercase">Empty Slot</span>
+</div>
+</div>
+</div>
+<!-- Central Pedestal & Character -->
+<div class="relative z-10 flex flex-col items-center">
+<!-- Character Placeholder -->
+<div class="relative w-64 h-96 mb-[-60px]">
+<div class="w-full h-full bg-contain bg-no-repeat bg-bottom" data-alt="Stylized low-poly fantasy character model" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA_MiwR1tjy9zLnfzRqSgupVXqsTXdD9YGsCqDzw01azpghsHg8eH8WIzTSVU8Pw541bCwbcu2taGTn-KJDIgrcqsocAkY3nPuyaa2YzXH5MQuzCwGfGVtcblcfQ6wMpkBuSuXnZSTOeMK-smGiRGCg2O0dJ53C_96yQnypGUAxq8acjamqDhdzO2tYu2c7I2TKLixEuLWNY50_LllMMTB_9sYqp3EIWyKf_BuMw2CERG2mjJBMxquI7LjdTTXImgZtuSKBIWAiyt8')"></div>
+</div>
+<!-- Floating Stone Pedestal (Turntable) -->
+<div class="relative w-72 h-32 bg-slate-800/80 rounded-[100%] border-t-4 border-primary/30 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-start justify-center pt-2 overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent"></div>
+<div class="w-full h-1 bg-primary/20 blur-sm"></div>
+</div>
+<!-- Rotation Indicators -->
+<div class="flex gap-12 mt-4">
+<button class="size-12 rounded-full glass-panel flex items-center justify-center text-primary hover:bg-primary/20 transition-all border-primary/30">
+<span class="material-symbols-outlined">rotate_left</span>
+</button>
+<button class="size-12 rounded-full glass-panel flex items-center justify-center text-primary hover:bg-primary/20 transition-all border-primary/30">
+<span class="material-symbols-outlined">rotate_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- Bottom Shop Carousel -->
+<footer class="relative z-20 px-6 pb-8 pt-4">
+<div class="max-w-5xl mx-auto glass-panel rounded-2xl p-4">
+<div class="flex items-center justify-between mb-4 px-2">
+<h3 class="text-sm font-bold uppercase tracking-widest text-primary/80 flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">shopping_bag</span>
+                        Equip Store
+                    </h3>
+<div class="flex gap-2">
+<button class="p-1 rounded-full hover:bg-white/5"><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="p-1 rounded-full hover:bg-white/5"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+<!-- Item Card 1 -->
+<div class="min-w-[180px] bg-background-dark/60 rounded-xl border border-primary/20 p-3 group">
+<div class="relative w-full aspect-square bg-primary/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform">local_florist</span>
+<div class="absolute top-1 right-1 opacity-40">
+<span class="material-symbols-outlined text-xs">explore</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-1">Sunflower Crown</h4>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-yellow-400 fill-1">star</span>
+<span class="text-xs font-bold">50</span>
+</div>
+<button class="px-3 py-1 bg-primary text-[10px] font-bold rounded-lg uppercase tracking-tight">Preview</button>
+</div>
+</div>
+<!-- Item Card 2 -->
+<div class="min-w-[180px] bg-background-dark/60 rounded-xl border border-primary/20 p-3 group">
+<div class="relative w-full aspect-square bg-primary/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform">layers</span>
+<div class="absolute top-1 right-1 opacity-40">
+<span class="material-symbols-outlined text-xs">explore</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-1">Dragon Cape</h4>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-yellow-400 fill-1">star</span>
+<span class="text-xs font-bold">120</span>
+</div>
+<button class="px-3 py-1 bg-primary text-[10px] font-bold rounded-lg uppercase tracking-tight">Preview</button>
+</div>
+</div>
+<!-- Item Card 3 -->
+<div class="min-w-[180px] bg-background-dark/60 rounded-xl border border-primary/20 p-3 group border-primary/60 ring-1 ring-primary/40">
+<div class="relative w-full aspect-square bg-primary/20 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">visibility</span>
+<div class="absolute top-1 right-1 opacity-40">
+<span class="material-symbols-outlined text-xs">explore</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-1">Star Telescope</h4>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-yellow-400 fill-1">star</span>
+<span class="text-xs font-bold">200</span>
+</div>
+<button class="px-3 py-1 bg-primary text-[10px] font-bold rounded-lg uppercase tracking-tight opacity-50">Equipped</button>
+</div>
+</div>
+<!-- Item Card 4 -->
+<div class="min-w-[180px] bg-background-dark/60 rounded-xl border border-primary/20 p-3 group">
+<div class="relative w-full aspect-square bg-primary/5 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-4xl text-primary/40 group-hover:scale-110 transition-transform">auto_awesome</span>
+<div class="absolute top-1 right-1 opacity-40">
+<span class="material-symbols-outlined text-xs">explore</span>
+</div>
+</div>
+<h4 class="text-sm font-semibold mb-1">Magic Wand</h4>
+<div class="flex items-center justify-between mt-2">
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-yellow-400 fill-1">star</span>
+<span class="text-xs font-bold">350</span>
+</div>
+<button class="px-3 py-1 bg-primary text-[10px] font-bold rounded-lg uppercase tracking-tight">Preview</button>
+</div>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

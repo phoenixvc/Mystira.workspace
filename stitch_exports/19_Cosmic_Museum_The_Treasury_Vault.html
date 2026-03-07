@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;family=Space+Mono&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5b3cc3",
+                        "accent-amber": "#f6c453",
+                        "accent-teal": "#4ed7c8",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#0a090f",
+                        "surface-dark": "#16141e",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "serif": ["Playfair Display", "serif"],
+                        "mono": ["Space Mono", "monospace"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.75rem",
+                        "lg": "1.5rem",
+                        "xl": "2.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+        }
+        .shimmer-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-effect::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 45%, rgba(78, 215, 200, 0.1) 50%, transparent 55%);
+            pointer-events: none;
+        }
+        .spotlight {
+            background: radial-gradient(circle at 50% 50%, rgba(246, 196, 83, 0.15) 0%, transparent 70%);
+        }
+        .nebula-bg {
+            background: radial-gradient(circle at 20% 30%, rgba(91, 60, 195, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at 80% 70%, rgba(78, 215, 200, 0.1) 0%, transparent 40%);
+        }
+    </style>
+</head>
+<body class="bg-background-dark font-display text-slate-100 selection:bg-accent-teal/30 overflow-hidden">
+<div class="flex h-screen w-full nebula-bg">
+<!-- Sidebar Navigation -->
+<aside class="w-72 flex flex-col border-r border-white/5 bg-background-dark/80 backdrop-blur-xl p-6">
+<div class="mb-12">
+<div class="flex items-center gap-3 mb-8">
+<div class="size-10 rounded-full bg-gradient-to-tr from-accent-amber to-primary flex items-center justify-center text-background-dark">
+<span class="material-symbols-outlined font-bold">account_balance</span>
+</div>
+<div>
+<h1 class="font-serif italic text-2xl tracking-tight text-white">Mystira</h1>
+<p class="font-mono text-[10px] uppercase tracking-widest text-accent-amber/70">Vault Sector 2247</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/5 text-accent-teal border border-accent-teal/20" href="#">
+<span class="material-symbols-outlined text-[20px]">diamond</span>
+<span class="text-sm font-medium tracking-wide">Treasury Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+<span class="text-sm font-medium tracking-wide">Elite Auctions</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">explore</span>
+<span class="text-sm font-medium tracking-wide">Cartography</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all" href="#">
+<span class="material-symbols-outlined text-[20px]">history_edu</span>
+<span class="text-sm font-medium tracking-wide">Provenance</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto space-y-4">
+<div class="p-4 rounded-xl bg-gradient-to-br from-primary/20 to-transparent border border-white/10">
+<p class="text-[11px] font-mono text-accent-amber uppercase mb-2">Vault Capacity</p>
+<div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+<div class="h-full bg-accent-amber w-2/3 shadow-[0_0_8px_rgba(246,196,83,0.5)]"></div>
+</div>
+<p class="text-[10px] text-slate-500 mt-2 tracking-tighter">842.2 TB / 1.2 PB Encrypted</p>
+</div>
+<button class="w-full py-4 rounded-full bg-accent-teal text-background-dark font-bold text-xs uppercase tracking-[0.2em] shadow-lg shadow-accent-teal/20 hover:scale-[1.02] transition-transform">
+                    Authorize Access
+                </button>
+</div>
+</aside>
+<!-- Main Content Area (Artifact Grid) -->
+<main class="flex-1 flex flex-col overflow-hidden">
+<header class="h-20 flex items-center justify-between px-8 border-b border-white/5 bg-background-dark/40">
+<div class="flex items-center gap-6">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-accent-teal transition-colors">search</span>
+<input class="bg-white/5 border-none rounded-full pl-10 pr-6 py-2 text-sm w-80 focus:ring-1 focus:ring-accent-teal/50 transition-all placeholder:text-slate-600" placeholder="Search Archives..." type="text"/>
+</div>
+<div class="flex gap-2">
+<button class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono hover:border-accent-amber/50 transition-colors uppercase tracking-wider text-slate-300">Stellar Shards</button>
+<button class="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-[11px] font-mono hover:border-accent-amber/50 transition-colors uppercase tracking-wider text-slate-300">Void Relics</button>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="size-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<div class="h-10 w-[1px] bg-white/10 mx-2"></div>
+<div class="flex items-center gap-3">
+<div class="text-right">
+<p class="text-xs font-bold text-white leading-none">Archivist Solis</p>
+<p class="text-[10px] text-accent-teal font-mono">Premium Tier</p>
+</div>
+<div class="size-10 rounded-full border-2 border-accent-amber p-0.5">
+<div class="w-full h-full rounded-full bg-cover bg-center" data-alt="Portrait of an elegant futuristic space archivist" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB73uaWDM_kWeDn98HMSZsRt0-bPSsXwT6LlCPrws-lfEvK83gob9uunluN6YOmIYemPi2hLr6wIEf7G0-5dv0B-PO-5zz0tEko82lOK2CFk9D-5JwS_TiHXcOvuqWYHQFMyeVrrwDmcXEI4Mh2S18LhRwiEgxmx5GmySPhHMXJp2xCUdFRlQKQFAF-dfUBDytrCGY6RLdPjNJlzuIgGt51blC1FOa_u9jVA71T_5KZJP0htwZb9ZAVBABdzfLHo_6RECN2tbeyp7g')"></div>
+</div>
+</div>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto p-8 custom-scrollbar">
+<div class="mb-10">
+<h2 class="font-serif text-4xl text-white italic mb-2">Curated Specimens</h2>
+<p class="text-slate-400 font-mono text-xs uppercase tracking-[0.3em]">Sector Alpha-9 Catalog</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Artifact Card 1 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:scale-[1.02] transition-all duration-500 shimmer-effect">
+<div class="aspect-[4/5] relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent z-10"></div>
+<div class="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" data-alt="A glowing blue nebula core suspended in a glass sphere" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDm23yReZyiaS63mKiiJsfSNm2P0NJWCUyGDV1YcfyWK7S2xowWXi9VLnWwsmVIFTggXJmCgHcXHdMBUmWim6jfOcEt4QaUmLtUY9BT8a_lLOwVYoOWbfhzXHZ8tTJMrvVoGdOqGeWUyZ9_4h5on38wTH6vB_rdn1P7c7FmkNxOl0sjPaoUmQHqLBi_mpDy1tNy7z9l6pZPpPoXFsOFDXRohtnDppAs0A7eeBfSJzudJbVs4WWTzEQligNq6FEeZv8WcY9j6Xp_E50')"></div>
+<div class="absolute top-4 left-4 z-20">
+<span class="bg-accent-amber/10 text-accent-amber border border-accent-amber/30 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest">Rare</span>
+</div>
+</div>
+<div class="p-6 relative z-20 -mt-20">
+<p class="font-mono text-[10px] text-accent-teal mb-1">ID-88 // NEBULA_CORE</p>
+<h3 class="font-serif text-2xl text-white group-hover:text-accent-teal transition-colors">The Azure Pulsar</h3>
+<div class="mt-4 flex justify-between items-center border-t border-white/10 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase">Current Bid</p>
+<p class="text-lg font-mono text-white">42.50 <span class="text-accent-amber">ETH</span></p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-amber">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+<!-- Artifact Card 2 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:scale-[1.02] transition-all duration-500 shimmer-effect">
+<div class="aspect-[4/5] relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent z-10"></div>
+<div class="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" data-alt="Intricate golden astronomical clockwork with floating shards" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB7rftk4yLmi_0vpPL6sNafnzNI56xAqZYg6NRlufLlpU6ZiI-Cu_wEy1W7bGOML6AUIDNuWBR4YhHGE2qS8QOnlUw-fpiunAREUWaTDWYt3kfcmD4wbFpEq56IG6QkKmV7HzsCCZzgzSOMe9MKiNL7WU0P977CxCvnE35x_5_jwdszhie5qhMKk2OB9GcKDGYphlHoI_g4iENgLooexlRVYvw4GdA4cl5E5MEKDKtxFnMs0xccHtenIbD3QcfuRnJCsWIMMqr6R2o')"></div>
+<div class="absolute top-4 left-4 z-20">
+<span class="bg-accent-teal/10 text-accent-teal border border-accent-teal/30 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest">Unique</span>
+</div>
+</div>
+<div class="p-6 relative z-20 -mt-20">
+<p class="font-mono text-[10px] text-accent-teal mb-1">ID-12 // VOID_PRISM</p>
+<h3 class="font-serif text-2xl text-white group-hover:text-accent-teal transition-colors">Chronos Fragment</h3>
+<div class="mt-4 flex justify-between items-center border-t border-white/10 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase">Current Bid</p>
+<p class="text-lg font-mono text-white">128.00 <span class="text-accent-amber">ETH</span></p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-amber">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+<!-- Artifact Card 3 -->
+<div class="glass-card rounded-xl overflow-hidden group hover:scale-[1.02] transition-all duration-500 shimmer-effect">
+<div class="aspect-[4/5] relative">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-transparent to-transparent z-10"></div>
+<div class="w-full h-full bg-cover bg-center group-hover:scale-110 transition-transform duration-700" data-alt="Dark obsidian shards vibrating with teal energy veins" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtiErEQw2-xt_xbFfaK2ihCdODCQGDQyx8B_RvhUXplFeh7jvCKGdCeI-UNckMtYO0Y2G3GWP_Df8HrXiGVoGCwmcyzjG4RnZcLSKS3FHmh3u6qGDgSU6KyZ6ElBwfrfkayHHbZZDPaDK78u89qyGi2CaN_iqRZf4chzWg3xdToBnVBpv5f139jpybY2r6WbUmpCDSmBeG-eq0fyRwxQ9zlx3UqFXQ4i4yzH9jrSo-DFwVrGBIK5ruscJ2tq8oze5MXS97TidLEUc')"></div>
+<div class="absolute top-4 left-4 z-20">
+<span class="bg-white/10 text-white border border-white/30 px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest">Common</span>
+</div>
+</div>
+<div class="p-6 relative z-20 -mt-20">
+<p class="font-mono text-[10px] text-accent-teal mb-1">ID-24 // STAR_MAP</p>
+<h3 class="font-serif text-2xl text-white group-hover:text-accent-teal transition-colors">Andromeda Echo</h3>
+<div class="mt-4 flex justify-between items-center border-t border-white/10 pt-4">
+<div>
+<p class="text-[10px] text-slate-500 uppercase">Current Bid</p>
+<p class="text-lg font-mono text-white">12.20 <span class="text-accent-amber">ETH</span></p>
+</div>
+<span class="material-symbols-outlined text-slate-600 group-hover:text-accent-amber">arrow_forward_ios</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Lore Inspector (Right Sidebar) -->
+<aside class="w-96 flex flex-col border-l border-white/5 bg-background-dark/80 backdrop-blur-2xl">
+<div class="flex-1 overflow-y-auto p-8 spotlight">
+<div class="mb-8">
+<div class="flex justify-between items-center mb-6">
+<span class="material-symbols-outlined text-slate-500 cursor-pointer">close</span>
+<div class="px-3 py-1 rounded border border-accent-amber/30 bg-accent-amber/5">
+<p class="text-[10px] font-mono text-accent-amber tracking-[0.2em] uppercase">Verified Specimen</p>
+</div>
+</div>
+<div class="aspect-square w-full rounded-2xl bg-gradient-to-b from-white/5 to-white/0 border border-white/10 flex items-center justify-center p-8 relative overflow-hidden mb-8">
+<div class="absolute inset-0 opacity-30 bg-[radial-gradient(circle_at_50%_50%,_var(--tw-gradient-from)_0%,_transparent_50%)] from-accent-teal"></div>
+<div class="relative z-10 w-full h-full bg-contain bg-no-repeat bg-center drop-shadow-[0_0_30px_rgba(78,215,200,0.4)]" data-alt="High detailed 3D render of the Azure Pulsar Nebula Core" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1Bznt6ubOKIQ5505aUQTmKqjzt4z9ZSlD_uGlgFDxJCeHEXJvEGTNcDBziy3bbCZW6eILTvsktHX2mEQwD-nibp1fW52LkpO4CzxRi4vwRwxv8tV2TSgFNARigVKn-vGVYEQ1fyGlKIwyTHlHUY5IvcbcUFWuKGsqfT-HERmpc_tWoVI96XeoRNO9rXxmvq6Xbnyh4zsREPUNpXwIwbLTv2kZ272CIi8C_iBtmTuDILrWFvZgijf4AsvFDdz7iwyuP0qxwfeiZRI')"></div>
+</div>
+<div class="space-y-6">
+<div>
+<p class="font-mono text-[10px] text-accent-amber uppercase mb-1">Provenance Registry</p>
+<h2 class="font-serif text-3xl text-white italic">The Azure Pulsar</h2>
+<p class="text-slate-400 text-sm mt-4 leading-relaxed italic">
+                                Extracted from the heart of the Orion-V system in 2231. This core retains the original vibrational frequency of a collapsing star. It is rumored to have been the power source for the first Mystira Star-Gates.
+                            </p>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 rounded-xl bg-white/5 border border-white/10">
+<p class="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">Energy Output</p>
+<p class="text-xl font-mono text-accent-teal">9.2 PW</p>
+</div>
+<div class="p-4 rounded-xl bg-white/5 border border-white/10">
+<p class="text-[9px] font-mono text-slate-500 uppercase tracking-widest mb-1">Radiation</p>
+<p class="text-xl font-mono text-accent-amber">0.02 mSv</p>
+</div>
+</div>
+<div class="space-y-4 pt-4 border-t border-white/10">
+<div class="flex items-center gap-4">
+<div class="size-8 rounded-full bg-primary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-primary">location_on</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 uppercase leading-none">Discovery Point</p>
+<p class="text-xs text-white font-mono" data-location="Orion Nebula">Sector-42, Orion Belt</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="size-8 rounded-full bg-accent-teal/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] text-accent-teal">verified</span>
+</div>
+<div>
+<p class="text-[10px] text-slate-500 uppercase leading-none">Authentication</p>
+<p class="text-xs text-white font-mono">Quantum Signed #819224</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-8 bg-background-dark border-t border-white/5">
+<button class="w-full py-4 rounded-full bg-gradient-to-r from-primary to-accent-teal text-white font-bold text-xs uppercase tracking-[0.2em] shadow-xl hover:opacity-90 transition-opacity">
+                    Place Acquisition Bid
+                </button>
+<button class="w-full mt-3 py-4 rounded-full border border-white/10 text-white font-bold text-xs uppercase tracking-[0.2em] hover:bg-white/5 transition-colors">
+                    Historical Archives
+                </button>
+</div>
+</aside>
+</div>
+</body></html>

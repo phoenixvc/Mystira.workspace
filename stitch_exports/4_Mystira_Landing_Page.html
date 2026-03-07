@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mystira | Where Stories Come to Life</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7c3bed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#171121",
+                        "accent-purple": "#a692c8",
+                        "success-green": "#0bda6f",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 selection:bg-primary/30">
+<div class="relative flex min-h-screen flex-col overflow-x-hidden">
+<!-- Navigation -->
+<header class="sticky top-0 z-50 w-full border-b border-primary/10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md">
+<div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
+<span class="material-symbols-outlined text-2xl">auto_stories</span>
+</div>
+<h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white uppercase">Mystira</h2>
+</div>
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Narratives</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Moral Compass</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Character Growth</a>
+<a class="text-sm font-semibold hover:text-primary transition-colors" href="#">Pricing</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="hidden sm:flex items-center justify-center rounded-full bg-primary px-6 py-2.5 text-sm font-bold text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                        Begin Your Adventure
+                    </button>
+<div class="h-10 w-10 rounded-full border-2 border-primary/20 bg-primary/10 p-0.5">
+<img alt="User Profile" class="h-full w-full rounded-full" data-alt="User avatar profile picture circular icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvrYPe-K0nFW_uTn13sEXhSVMki3SoHySm4eW1poqi5EMaqRZ44b0H9YNnaNCfvtMsidtKG4CPnTNPLUXMdYhbWo-2uVetv0RSYo33QJ3--5vQsB7QIVVnQzLCLtdaAF6UMHDpUj2NfRLi5TiSg5j7iIwgAdqJStNIvmb0oouAArE7tjoudNXp7aGljE5_aJUbs18BYzk3KTpcaLVXdKjWbDSkMHzJjk9uh5PUmFjwY2CnfrMXP-8btD-NbjiXk4D2GbXulW7uL7A"/>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-grow">
+<!-- Hero Section -->
+<section class="relative px-6 py-20 lg:py-32">
+<div class="mx-auto max-w-7xl">
+<div class="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:items-center">
+<div class="flex flex-col gap-8 text-left">
+<div class="inline-flex w-fit items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-primary">
+<span class="material-symbols-outlined text-sm">magic_button</span>
+                                New Adventure Awaits
+                            </div>
+<h1 class="text-5xl font-black leading-tight tracking-tight text-slate-900 dark:text-white sm:text-7xl">
+                                Where stories <span class="text-primary">come to life</span>
+</h1>
+<p class="max-w-lg text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                                An immersive world of branching narratives where every choice shapes your child's journey, fostering empathy, wisdom, and courage through play.
+                            </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-lg font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-xl shadow-primary/25">
+                                    Begin Your Adventure
+                                    <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+<button class="flex items-center justify-center gap-2 rounded-xl border-2 border-primary/20 bg-transparent px-8 py-4 text-lg font-bold hover:bg-primary/5 transition-all">
+                                    Explore World
+                                </button>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-1 rounded-3xl bg-gradient-to-r from-primary to-purple-400 opacity-20 blur-2xl group-hover:opacity-30 transition duration-1000"></div>
+<div class="relative aspect-square w-full overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+<img alt="Mystical World Glimpse" class="h-full w-full object-cover transition duration-700 group-hover:scale-105" data-alt="A mystical purple landscape with floating islands and magical lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPBvh2L8-_jUMemOn4AumRwZ_sLFHPLktMSZ8MCwAw5Do-5Mn8BSAL7HYo-gj49uS-XQsc3wiZUBrf9EQBZ1BYf7TeRO6mb8TKZ9oF0ASKZQc6590smZR7rJc-UaSnQaE-DErMxb8Y8EwupRpkcOotp5Dolz631_umivLbdEROPf5q_GFLpaJyPdbS3URY7TWFeiGFck4DEpSKI-ogXVL4egTY4rDhx_wG3s_ii3ls-eter6zbKfIjBvxHVQLEi9_nMDA89LEYeVw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 via-transparent to-transparent"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Features Grid -->
+<section class="bg-primary/5 py-24 dark:bg-slate-900/40">
+<div class="mx-auto max-w-7xl px-6">
+<div class="mb-16 text-center">
+<h2 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white sm:text-4xl">Forge Your Own Path</h2>
+<p class="mx-auto mt-4 max-w-2xl text-slate-600 dark:text-slate-400">Experience stories that adapt to your decisions and foster real-world values in an interactive ecosystem.</p>
+</div>
+<div class="grid grid-cols-1 gap-8 md:grid-cols-3">
+<!-- Card 1 -->
+<div class="group flex flex-col rounded-2xl bg-white p-2 shadow-xl dark:bg-background-dark">
+<div class="aspect-video w-full overflow-hidden rounded-xl">
+<img alt="Branching Paths" class="h-full w-full object-cover transition group-hover:scale-110" data-alt="Abstract colorful light paths intertwining in the dark" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPSh_uTPrDW5DJTA1ayYnqDbyzJI1qFN3sDofxEDbTzU32v44IDvF8NAiak4Yl6CU96C0gyCnmfCZsYSl_SkvAZgIt2mFKE8wrcXUIDxWLi1o_NEYa-NbMyv-Eax18pvREvb2isNcYmMQoDWhS5ze_SyJvZtRdm3ZEtBhL4i6WjKgXb-18ODLOVQQ_CNbukUhxmB6RULxH1sB88Wt5HuuWc8V4Y7LvHvzDUMfrQk6GH0eXVxOtYuuu23iJ8HrRylZIoCPdcO2sYTk"/>
+</div>
+<div class="p-6">
+<div class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">account_tree</span>
+</div>
+<h3 class="text-xl font-bold dark:text-white">Branching Narratives</h3>
+<p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Every choice leads to a new destiny with thousands of unique story paths designed by master storytellers.</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group flex flex-col rounded-2xl bg-white p-2 shadow-xl dark:bg-background-dark">
+<div class="aspect-video w-full overflow-hidden rounded-xl">
+<img alt="Compass Visualization" class="h-full w-full object-cover transition group-hover:scale-110" data-alt="Magical compass glowing with purple energy on an old map" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfSIuRrGmwavjZ5CzoEiR7I0bbGouRWcvLwxdiRPjG7-NcSv0yzDJecn2Lj27RjjgdsoX_VknRoika2NhvKx4YgX28dvd_rte5_EuErsopFwC_I8K3Ro4IB2clANGc_zkAeniNIemRAGN51bsRIDdPL_9Ew_NeB1KX-lQb2Av7fV2cu7iWHBkvgWFzM-H_467rxsU0NIY7x5iNsZzAMoVAuTCHNQmOkh40pADJYdceA-TjydyIvWvwOGHq3n7ongo-y3UwtbmlxVk"/>
+</div>
+<div class="p-6">
+<div class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">explore</span>
+</div>
+<h3 class="text-xl font-bold dark:text-white">Moral Compass Tracking</h3>
+<p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Visualize development through our unique axes. Every action influences the narrative world's reaction.</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group flex flex-col rounded-2xl bg-white p-2 shadow-xl dark:bg-background-dark">
+<div class="aspect-video w-full overflow-hidden rounded-xl">
+<img alt="Character Growth" class="h-full w-full object-cover transition group-hover:scale-110" data-alt="Silhouette of a hero standing on a hill during sunset" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMAaTc3-DWTYc8KYwTbsOGWuw_jjhxiXK65bg_ysviDnrKN8ACXxTkNzfly5c1RlSQf1ut4NWDkXgJb00D2Zlda1y_FUAO923f-aVsAmELhUw3YY8A9z8gBstzQIA4EYXwxmb4ROyKrNYj-L7ZtfAAZk7n6AhTr8_OAPteEAf0o_XokYBDBL5ebWKppKrmJp8F6KRWyNUn1YllNxybr2E5bWL-dUU2puQWuKRVujDgzyB7RVG-8kyYd1IBeh36wIzZdh9SYHLwssY"/>
+</div>
+<div class="p-6">
+<div class="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+<h3 class="text-xl font-bold dark:text-white">Character Growth</h3>
+<p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">Watch your hero evolve visually and mechanically based on the virtues you practice throughout the adventure.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Moral Compass Visualization Section -->
+<section class="py-24">
+<div class="mx-auto max-w-7xl px-6">
+<div class="grid grid-cols-1 gap-16 lg:grid-cols-5">
+<div class="lg:col-span-2 flex flex-col justify-center gap-6">
+<h2 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">Your Moral Compass</h2>
+<p class="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Our proprietary algorithms track subtle decisions across stories to map emotional intelligence and ethical development.
+                            </p>
+<div class="space-y-4">
+<div class="flex flex-col gap-2 rounded-xl bg-primary/5 p-4 border border-primary/10">
+<div class="flex justify-between items-center">
+<p class="text-sm font-semibold text-accent-purple">Current Growth</p>
+<p class="text-success-green text-sm font-bold">+12% this week</p>
+</div>
+<p class="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">Kindness vs Wisdom</p>
+<p class="text-primary font-medium">State: Highly Balanced</p>
+</div>
+</div>
+</div>
+<div class="lg:col-span-3">
+<div class="relative rounded-3xl bg-slate-900 p-8 shadow-2xl border border-white/5">
+<div class="flex flex-col gap-8">
+<!-- Chart Visual -->
+<div class="relative h-64 w-full">
+<svg class="h-full w-full overflow-visible" fill="none" preserveaspectratio="none" viewbox="0 0 500 150">
+<defs>
+<lineargradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#7c3bed" stop-opacity="0.4"></stop>
+<stop offset="100%" stop-color="#7c3bed" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0 100 Q 50 20 100 80 T 200 60 T 300 120 T 400 30 T 500 90 V 150 H 0 Z" fill="url(#chartGradient)"></path>
+<path d="M0 100 Q 50 20 100 80 T 200 60 T 300 120 T 400 30 T 500 90" stroke="#7c3bed" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"></path>
+<!-- Dots -->
+<circle cx="100" cy="80" fill="#7c3bed" r="6"></circle>
+<circle cx="300" cy="120" fill="#7c3bed" r="6"></circle>
+<circle cx="400" cy="30" fill="#7c3bed" r="6"></circle>
+</svg>
+</div>
+<!-- Axes Legend -->
+<div class="grid grid-cols-5 gap-2 text-center">
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary">volunteer_activism</span>
+<p class="text-[10px] font-bold uppercase text-slate-400">Kindness</p>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary">psychology</span>
+<p class="text-[10px] font-bold uppercase text-slate-400">Wisdom</p>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary">shield</span>
+<p class="text-[10px] font-bold uppercase text-slate-400">Courage</p>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary">handshake</span>
+<p class="text-[10px] font-bold uppercase text-slate-400">Empathy</p>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<p class="text-[10px] font-bold uppercase text-slate-400">Honesty</p>
+</div>
+</div>
+</div>
+<!-- Background Decoration -->
+<div class="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary/20 blur-3xl"></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Call to Action Section -->
+<section class="relative overflow-hidden py-24 bg-primary text-white">
+<div class="absolute inset-0 opacity-10">
+<svg class="h-full w-full" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0 100 C 20 0 50 0 100 100 Z" fill="white"></path>
+</svg>
+</div>
+<div class="relative mx-auto max-w-4xl px-6 text-center">
+<h2 class="text-4xl font-black sm:text-6xl">Ready to write your own legend?</h2>
+<p class="mt-6 text-xl text-white/80">Join thousands of families in the ever-expanding universe of Mystira.</p>
+<div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
+<button class="w-full sm:w-auto rounded-full bg-white px-10 py-5 text-lg font-black text-primary hover:bg-slate-50 hover:scale-105 transition-all shadow-2xl">
+                            Begin Your Adventure
+                        </button>
+<a class="text-lg font-bold border-b-2 border-white/40 hover:border-white transition-all py-1" href="#">View Pricing Plans</a>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="border-t border-primary/10 py-12 dark:bg-background-dark">
+<div class="mx-auto max-w-7xl px-6">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="flex items-center gap-3">
+<div class="flex h-8 w-8 items-center justify-center rounded bg-primary text-white">
+<span class="material-symbols-outlined text-sm">auto_stories</span>
+</div>
+<h2 class="text-lg font-bold uppercase tracking-tight text-slate-900 dark:text-white">Mystira</h2>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400">© 2024 Mystira Narratives Inc. All rights reserved.</p>
+<div class="flex gap-6">
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">public</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">mail</span></a>
+<a class="text-slate-400 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined">forum</span></a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

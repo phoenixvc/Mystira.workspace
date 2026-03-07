@@ -6,7 +6,7 @@
     "css": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css",
     "css:watch": "npx tailwindcss -i ./styles/input.css -o ./styles/output.css --watch",
     "dev": "trunk serve",
-    "build": "trunk build --release || echo 'trunk not installed, skipping Leptos build'",
+    "build": "trunk build --release || (echo 'trunk not installed, skipping Leptos build')",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"
   },
