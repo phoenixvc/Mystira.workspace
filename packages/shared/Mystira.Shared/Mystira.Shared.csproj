@@ -45,7 +45,7 @@
          This avoids circular dependency issues during package publishing. -->
     <PackageReference Include="Microsoft.ApplicationInsights" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="4.5.0" />
     <!-- Microsoft.Extensions.Logging.Abstractions and Microsoft.Extensions.Options are now part of .NET 10.0 shared framework -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="10.0.103" PrivateAssets="All" />
     <PackageReference Include="OpenTelemetry.Api" Version="1.15.0" />
