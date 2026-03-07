@@ -1,21 +1,21 @@
 /**
  * Mystira Design Tokens - CSS Custom Properties
- * Primary color: #7c3aed (from Mystira App)
+ * Primary color: #5b3cc4 — Twilight Amethyst (brand guide canonical)
  */
 
 :root {
-  /* Primary Purple (brand color) - from Mystira App */
-  --color-primary-50: #faf5ff;
-  --color-primary-100: #f3e8ff;
-  --color-primary-200: #e9d5ff;
-  --color-primary-300: #d8b4fe;
-  --color-primary-400: #c084fc;
-  --color-primary-500: #a855f7;
-  --color-primary-600: #9333ea;
-  --color-primary-700: #7c3aed; /* Main brand color */
-  --color-primary-800: #6b21a8;
-  --color-primary-900: #581c87;
-  --color-primary-950: #3b0764;
+  /* Primary Purple — Twilight Amethyst (brand color) */
+  --color-primary-50: #f5f0ff;
+  --color-primary-100: #ede5ff;
+  --color-primary-200: #ddd0ff;
+  --color-primary-300: #c7b8ff;
+  --color-primary-400: #a68eff;
+  --color-primary-500: #8668e5;
+  --color-primary-600: #6d4fd4;
+  --color-primary-700: #5b3cc4; /* Main brand color — Twilight Amethyst */
+  --color-primary-800: #4a2fa3;
+  --color-primary-900: #3a2482;
+  --color-primary-950: #231560;
 
   /* Neutral Gray */
   --color-neutral-50: #fafafa;
