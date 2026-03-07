@@ -23,7 +23,7 @@
 | Brand uniqueness       | 0.15   | 2        | 4                 | 5           |
 | Child-friendly tone    | 0.15   | 3        | 2                 | 4           |
 | Product usability      | 0.15   | 5        | 3                 | 4           |
-| Design system scalability | 0.10 | 5        | 3                 | 4           |
+| System scalability       | 0.10 | 5        | 3                 | 4           |
 | Visual hierarchy       | 0.10   | 4        | 4                 | 5           |
 | Emotional resonance    | 0.10   | 2        | 4                 | 5           |
 | Engineering simplicity | 0.05   | 5        | 3                 | 4           |
