@@ -1,0 +1,226 @@
+@page "/vault/treasury"
+@layout Mystira.App.PWA.Shared.EmptyLayout
+
+<HeadContent>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&family=Space+Mono&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+</HeadContent>
+
+<div class="vault-layout dark">
+    <div class="vault-container nebula-bg">
+        <!-- Sidebar Navigation -->
+        <aside class="vault-sidebar">
+            <div class="sidebar-top">
+                <div class="brand-header">
+                    <div class="brand-logo">
+                        <span class="material-symbols-outlined">account_balance</span>
+                    </div>
+                    <div class="brand-text">
+                        <h1>Mystira</h1>
+                        <p>Vault Sector 2247</p>
+                    </div>
+                </div>
+                <nav class="sidebar-nav">
+                    <a class="nav-item active" href="#">
+                        <span class="material-symbols-outlined nav-icon">diamond</span>
+                        <span class="nav-label">Treasury Vault</span>
+                    </a>
+                    <a class="nav-item" href="#">
+                        <span class="material-symbols-outlined nav-icon">gavel</span>
+                        <span class="nav-label">Elite Auctions</span>
+                    </a>
+                    <a class="nav-item" href="#">
+                        <span class="material-symbols-outlined nav-icon">explore</span>
+                        <span class="nav-label">Cartography</span>
+                    </a>
+                    <a class="nav-item" href="#">
+                        <span class="material-symbols-outlined nav-icon">history_edu</span>
+                        <span class="nav-label">Provenance</span>
+                    </a>
+                </nav>
+            </div>
+            <div class="sidebar-bottom">
+                <div class="capacity-widget">
+                    <p class="capacity-label">Vault Capacity</p>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill"></div>
+                    </div>
+                    <p class="capacity-text">842.2 TB / 1.2 PB Encrypted</p>
+                </div>
+                <button class="btn-authorize">Authorize Access</button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="vault-main">
+            <header class="main-header">
+                <div class="header-left">
+                    <div class="search-bar">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" placeholder="Search Archives..." />
+                    </div>
+                    <div class="header-tags">
+                        <button class="tag-btn">Stellar Shards</button>
+                        <button class="tag-btn">Void Relics</button>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="notification-btn">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <div class="divider"></div>
+                    <div class="user-profile">
+                        <div class="user-info">
+                            <p class="user-name">Archivist Solis</p>
+                            <p class="user-tier">Premium Tier</p>
+                        </div>
+                        <div class="user-avatar-ring">
+                            <div class="user-avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB73uaWDM_kWeDn98HMSZsRt0-bPSsXwT6LlCPrws-lfEvK83gob9uunluN6YOmIYemPi2hLr6wIEf7G0-5dv0B-PO-5zz0tEko82lOK2CFk9D-5JwS_TiHXcOvuqWYHQFMyeVrrwDmcXEI4Mh2S18LhRwiEgxmx5GmySPhHMXJp2xCUdFRlQKQFAF-dfUBDytrCGY6RLdPjNJlzuIgGt51blC1FOa_u9jVA71T_5KZJP0htwZb9ZAVBABdzfLHo_6RECN2tbeyp7g')"></div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="main-content custom-scrollbar">
+                <div class="content-header">
+                    <h2>Curated Specimens</h2>
+                    <p>Sector Alpha-9 Catalog</p>
+                </div>
+                
+                <div class="artifact-grid">
+                    <!-- Card 1 -->
+                    <div class="artifact-card shimmer-effect active" @onclick="() => SelectView(1)">
+                        <div class="card-image-container">
+                            <div class="card-gradient-overlay"></div>
+                            <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDm23yReZyiaS63mKiiJsfSNm2P0NJWCUyGDV1YcfyWK7S2xowWXi9VLnWwsmVIFTggXJmCgHcXHdMBUmWim6jfOcEt4QaUmLtUY9BT8a_lLOwVYoOWbfhzXHZ8tTJMrvVoGdOqGeWUyZ9_4h5on38wTH6vB_rdn1P7c7FmkNxOl0sjPaoUmQHqLBi_mpDy1tNy7z9l6pZPpPoXFsOFDXRohtnDppAs0A7eeBfSJzudJbVs4WWTzEQligNq6FEeZv8WcY9j6Xp_E50')"></div>
+                            <div class="card-badge rare">Rare</div>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-id">ID-88 // NEBULA_CORE</p>
+                            <h3 class="card-title">The Azure Pulsar</h3>
+                            <div class="card-footer">
+                                <div class="bid-info">
+                                    <p class="bid-label">Current Bid</p>
+                                    <p class="bid-amount">42.50 <span>ETH</span></p>
+                                </div>
+                                <span class="material-symbols-outlined arrow-icon">arrow_forward_ios</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="artifact-card shimmer-effect" @onclick="() => SelectView(2)">
+                        <div class="card-image-container">
+                            <div class="card-gradient-overlay"></div>
+                            <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuB7rftk4yLmi_0vpPL6sNafnzNI56xAqZYg6NRlufLlpU6ZiI-Cu_wEy1W7bGOML6AUIDNuWBR4YhHGE2qS8QOnlUw-fpiunAREUWaTDWYt3kfcmD4wbFpEq56IG6QkKmV7HzsCCZzgzSOMe9MKiNL7WU0P977CxCvnE35x_5_jwdszhie5qhMKk2OB9GcKDGYphlHoI_g4iENgLooexlRVYvw4GdA4cl5E5MEKDKtxFnMs0xccHtenIbD3QcfuRnJCsWIMMqr6R2o')"></div>
+                            <div class="card-badge unique">Unique</div>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-id">ID-12 // VOID_PRISM</p>
+                            <h3 class="card-title">Chronos Fragment</h3>
+                            <div class="card-footer">
+                                <div class="bid-info">
+                                    <p class="bid-label">Current Bid</p>
+                                    <p class="bid-amount">128.00 <span>ETH</span></p>
+                                </div>
+                                <span class="material-symbols-outlined arrow-icon">arrow_forward_ios</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="artifact-card shimmer-effect" @onclick="() => SelectView(3)">
+                        <div class="card-image-container">
+                            <div class="card-gradient-overlay"></div>
+                            <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAtiErEQw2-xt_xbFfaK2ihCdODCQGDQyx8B_RvhUXplFeh7jvCKGdCeI-UNckMtYO0Y2G3GWP_Df8HrXiGVoGCwmcyzjG4RnZcLSKS3FHmh3u6qGDgSU6KyZ6ElBwfrfkayHHbZZDPaDK78u89qyGi2CaN_iqRZf4chzWg3xdToBnVBpv5f139jpybY2r6WbUmpCDSmBeG-eq0fyRwxQ9zlx3UqFXQ4i4yzH9jrSo-DFwVrGBIK5ruscJ2tq8oze5MXS97TidLEUc')"></div>
+                            <div class="card-badge common">Common</div>
+                        </div>
+                        <div class="card-content">
+                            <p class="card-id">ID-24 // STAR_MAP</p>
+                            <h3 class="card-title">Andromeda Echo</h3>
+                            <div class="card-footer">
+                                <div class="bid-info">
+                                    <p class="bid-label">Current Bid</p>
+                                    <p class="bid-amount">12.20 <span>ETH</span></p>
+                                </div>
+                                <span class="material-symbols-outlined arrow-icon">arrow_forward_ios</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Lore Inspector (Right Sidebar) -->
+        <aside class="vault-inspector">
+            <div class="inspector-content spotlight">
+                <div class="inspector-header">
+                    <span class="material-symbols-outlined close-icon" @onclick="() => SelectView(0)">close</span>
+                    <div class="verified-badge">
+                        <p>Verified Specimen</p>
+                    </div>
+                </div>
+                
+                <div class="inspector-hero-image">
+                    <div class="inspector-gradient-bg"></div>
+                    <div class="inspector-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1Bznt6ubOKIQ5505aUQTmKqjzt4z9ZSlD_uGlgFDxJCeHEXJvEGTNcDBziy3bbCZW6eILTvsktHX2mEQwD-nibp1fW52LkpO4CzxRi4vwRwxv8tV2TSgFNARigVKn-vGVYEQ1fyGlKIwyTHlHUY5IvcbcUFWuKGsqfT-HERmpc_tWoVI96XeoRNO9rXxmvq6Xbnyh4zsREPUNpXwIwbLTv2kZ272CIi8C_iBtmTuDILrWFvZgijf4AsvFDdz7iwyuP0qxwfeiZRI')"></div>
+                </div>
+
+                <div class="inspector-details">
+                    <div class="details-title-section">
+                        <p class="registry-label">Provenance Registry</p>
+                        <h2 class="item-name">The Azure Pulsar</h2>
+                        <p class="item-lore">
+                            Extracted from the heart of the Orion-V system in 2231. This core retains the original vibrational frequency of a collapsing star. It is rumored to have been the power source for the first Mystira Star-Gates.
+                        </p>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <p class="stat-label">Energy Output</p>
+                            <p class="stat-value teal">9.2 PW</p>
+                        </div>
+                        <div class="stat-box">
+                            <p class="stat-label">Radiation</p>
+                            <p class="stat-value amber">0.02 mSv</p>
+                        </div>
+                    </div>
+
+                    <div class="meta-list">
+                        <div class="meta-item">
+                            <div class="meta-icon-container purple">
+                                <span class="material-symbols-outlined meta-icon">location_on</span>
+                            </div>
+                            <div class="meta-text">
+                                <p class="meta-label">Discovery Point</p>
+                                <p class="meta-value">Sector-42, Orion Belt</p>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon-container teal">
+                                <span class="material-symbols-outlined meta-icon">verified</span>
+                            </div>
+                            <div class="meta-text">
+                                <p class="meta-label">Authentication</p>
+                                <p class="meta-value">Quantum Signed #819224</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="inspector-actions">
+                <button class="btn-bid">Place Acquisition Bid</button>
+                <button class="btn-archives">Historical Archives</button>
+            </div>
+        </aside>
+    </div>
+</div>
+
+@code {
+    private int selectedView = 1;
+
+    private void SelectView(int view)
+    {
+        selectedView = view;
+    }
+}

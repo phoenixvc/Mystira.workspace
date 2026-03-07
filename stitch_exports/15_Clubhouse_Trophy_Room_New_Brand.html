@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Clubhouse Trophy Room</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5b3cc4",
+                        "teal-accent": "#4ed7c8",
+                        "sparkle-yellow": "#f6c453",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#141127",
+                        "surface-dark": "#1e1a38",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased overflow-x-hidden">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation -->
+<header class="flex items-center justify-between border-b border-primary/10 px-6 py-4 lg:px-20 bg-background-light/50 dark:bg-background-dark/50 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<div class="bg-primary p-2 rounded-lg">
+<span class="material-symbols-outlined text-white">trophy</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-extrabold tracking-tight">Trophy Room</h2>
+</div>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-1">
+<a class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-primary transition-colors" href="#">Home</a>
+<a class="px-4 py-2 text-sm font-semibold text-primary bg-primary/10 rounded-full" href="#">Gallery</a>
+<a class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-primary transition-colors" href="#">Social</a>
+<a class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-primary transition-colors" href="#">Shop</a>
+</nav>
+<div class="flex items-center gap-3">
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-surface-dark hover:bg-primary/20 transition-all border border-white/5">
+<span class="material-symbols-outlined text-slate-100 text-[20px]">settings</span>
+</button>
+<button class="flex items-center justify-center rounded-full h-10 w-10 bg-surface-dark hover:bg-primary/20 transition-all border border-white/5">
+<span class="material-symbols-outlined text-slate-100 text-[20px]">share</span>
+</button>
+<div class="h-10 w-10 rounded-full border-2 border-primary bg-cover bg-center" data-alt="User avatar profile picture circular thumbnail" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBjX5LMfVZ58Et4n3VxJaDt0Je3xeKXiPH9MyARWaWqXSsK8uriicNO2po4flaQ8kAlkYqReAkHu6IFSLzv1bsu28_I0VreNdy4wxacIM9WyO5Y5sEoiNIB6B5ODWPRWlZpTbR4Q8icxul7Xmx6LW0DIPMymrQlfZiLwHw6hXwMXcLs_vvcXe_U7LtWEvVUZoOUqfItTjqvRB8tArPls-T0MXYhjPXlwWc8gUTJ5sRsudU4zpAp57ibolQvVpIe7zMDuqQZLLBSPIE');"></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-start relative px-4 lg:px-20 py-8">
+<!-- Atmospheric Radial Gradient Backgrounds -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden">
+<div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[120px]"></div>
+<div class="absolute top-[40%] -right-[10%] w-[50%] h-[50%] rounded-full bg-teal-accent/5 blur-[120px]"></div>
+</div>
+<!-- Stats and Sparkles -->
+<div class="z-10 text-center space-y-2 mb-8">
+<div class="inline-flex items-center gap-2 bg-sparkle-yellow/10 border border-sparkle-yellow/20 px-4 py-1.5 rounded-full">
+<span class="material-symbols-outlined text-sparkle-yellow text-[18px] fill-current">auto_awesome</span>
+<span class="text-sparkle-yellow font-bold text-sm">1,250 Sparkle Points</span>
+</div>
+<h1 class="text-4xl md:text-5xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Level 45 Champion</h1>
+<p class="text-slate-500 dark:text-slate-400 font-medium">Your Legendary Collection</p>
+</div>
+<!-- 3D Pedestal and Character Rotation Container -->
+<div class="relative w-full max-w-4xl aspect-[16/9] flex items-end justify-center perspective-1000">
+<!-- Character Placeholder -->
+<div class="relative z-20 mb-12 h-4/5 w-64 group">
+<div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent blur-3xl rounded-full scale-75 opacity-50"></div>
+<img class="w-full h-full object-contain drop-shadow-[0_20px_50px_rgba(91,60,196,0.3)]" data-alt="3D stylized game character in hero pose on pedestal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCdkjyE7AY85XO9xPecbPS7eHav_551cUCptKawdKWRweghzp5ZmPpbMIdwpj03orA6vEiojbwxfx2mwNLwjwy8aVFOYVvDgudGpHaVLT4uKKbctdI5L7lF_a-6ZqmDUS69r23kxACcjp-PR-gt-zrFSLeZymepkA8NZlqTQHZcrNgPIDHq7locncaArxzlYXrVN-FVacXnMY_aVQgK_WRyTjvirylmkZVfojr6dGSFjxRVj80SjDi9NNQ6Q1KyQNbN1EoEvGhOGu0"/>
+</div>
+<!-- 3D Pedestal Base -->
+<div class="absolute bottom-0 w-[400px] h-[120px] z-10">
+<div class="w-full h-12 bg-surface-dark rounded-[100%] border-b-8 border-primary/30 shadow-[0_20px_40px_rgba(0,0,0,0.5)] flex items-center justify-center overflow-hidden">
+<div class="w-[95%] h-[90%] rounded-[100%] border-2 border-teal-accent/30 bg-gradient-to-b from-primary/20 to-surface-dark flex items-center justify-center">
+<div class="w-[80%] h-[80%] rounded-[100%] border border-teal-accent/10 bg-surface-dark/50"></div>
+</div>
+</div>
+<!-- Glow effect -->
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-primary/20 blur-[60px] rounded-full -z-10"></div>
+</div>
+</div>
+<!-- Shop Carousel Section -->
+<div class="w-full max-w-6xl mt-12 z-10">
+<div class="flex items-center justify-between mb-6">
+<h3 class="text-xl font-bold dark:text-slate-100">Featured Gear</h3>
+<div class="flex gap-2">
+<button class="p-2 rounded-full border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="p-2 rounded-full border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-primary hover:border-primary transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+<!-- Item Card 1 -->
+<div class="bg-surface-dark border border-white/5 rounded-2xl p-4 group hover:border-primary/50 transition-all">
+<div class="aspect-square bg-background-dark/50 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-white/5">
+<div class="absolute top-2 right-2 bg-sparkle-yellow text-background-dark text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Rare</div>
+<img class="w-3/4 h-3/4 object-contain" data-alt="Neon blue laser sword weapon skin icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBuheAsA-AInUq8JzeOu6iGUuKC0mHULlw5QQfBYJ8TnZ7ro5Rcjnx-aR5tNO_uBOnRDHFYFEOShuiSYocSbD5xtz05l8kXdu3ngCl8FjYPhklDb8ZFtDjqBV0VqSBOcnl7ZE9udZhm6UexAsLxO7zv40NTw8840r2xZ95DLlmNRhx5OH2I_jmlQS3RPVSgCwHeNL4djKqwCK41bszNvWQLHzfmtWo0sYLApzh_cK8jFUGEi2wQ-IjIEtK2WS_Wj0GN-x_0szwSE7Q"/>
+</div>
+<h4 class="font-bold text-slate-100 mb-1">Cyber Blade</h4>
+<p class="text-xs text-slate-400 mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sparkle-yellow text-[12px] fill-current">auto_awesome</span> 450
+                            </p>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-full hover:bg-primary/80 transition-all">Equip</button>
+<button class="flex-1 bg-white/5 text-slate-300 text-xs font-bold py-2.5 rounded-full border border-white/10 hover:bg-white/10 transition-all">Preview</button>
+</div>
+</div>
+<!-- Item Card 2 -->
+<div class="bg-surface-dark border border-primary/30 ring-2 ring-primary/20 rounded-2xl p-4 group relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+<div class="aspect-square bg-background-dark/50 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-white/5">
+<div class="absolute top-2 right-2 bg-teal-accent text-background-dark text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Equipped</div>
+<img class="w-3/4 h-3/4 object-contain" data-alt="Advanced tactical exoskeleton armor set preview" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5wdMSYeOavw4ARQjM4E4R3p5EGCJroe77BeIzpa1AcGHl_X1h-v0Ld9C6yic9Ja9QfzCE62MGJE_H2bpJ4nE8RkAcC0wPi7VmTLptImimsZnSmomoILJPu7Q3Es3TH29iR5Jr23OZkWo4H0M6JxqANe2aWoQWNRMRmRZjPfZI0iJ95yzv-13MIpJHeQPi5t7ATpcT7HKfOPb5_fMo7Lwc6cF6ZqnQPkgLxIICpu59REkPTYGYnEKd7Veom7i2laUdwWcq1osynpo"/>
+</div>
+<h4 class="font-bold text-slate-100 mb-1">Vanguard Suit</h4>
+<p class="text-xs text-slate-400 mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-teal-accent text-[12px]">check_circle</span> In Use
+                            </p>
+<div class="flex gap-2">
+<button class="flex-1 bg-teal-accent text-background-dark text-xs font-bold py-2.5 rounded-full hover:bg-teal-accent/80 transition-all">Unequip</button>
+<button class="flex-1 bg-white/5 text-slate-300 text-xs font-bold py-2.5 rounded-full border border-white/10 hover:bg-white/10 transition-all">Details</button>
+</div>
+</div>
+<!-- Item Card 3 -->
+<div class="bg-surface-dark border border-white/5 rounded-2xl p-4 group hover:border-primary/50 transition-all">
+<div class="aspect-square bg-background-dark/50 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-white/5">
+<div class="absolute top-2 right-2 bg-slate-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Locked</div>
+<img class="w-3/4 h-3/4 object-contain opacity-50 grayscale" data-alt="Floating helper drone pet icon shaded out" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5I0evyu6tEuZAa-BM4S-LsAe_1yt0yVGLBgeDoNAneRarLPvXjc2ivr1ZeXoVFcZqVK3hW9MDzMETUBeSTWNbyx5gQ7CcCfQGlaYaPM-oGIq0f9nUGGkJrtZ3uiRDIJxDd3yJPTrWysgZft-DOBG3e4_v9GjQgL7Etf-qJDqmtfLd1tzYaOcZiMDdYeMk3_guGx9IBLPGf-whmAqkuVz5EPaw6q0-97pKdP3D5cZflyH3VVHQ91-f--gQXCbrykSsIxKES40Tpsc"/>
+</div>
+<h4 class="font-bold text-slate-100 mb-1">Neon Drone</h4>
+<p class="text-xs text-slate-400 mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sparkle-yellow text-[12px] fill-current">auto_awesome</span> 1,200
+                            </p>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-full hover:bg-primary/80 transition-all">Purchase</button>
+<button class="flex-1 bg-white/5 text-slate-300 text-xs font-bold py-2.5 rounded-full border border-white/10 hover:bg-white/10 transition-all">Preview</button>
+</div>
+</div>
+<!-- Item Card 4 -->
+<div class="bg-surface-dark border border-white/5 rounded-2xl p-4 group hover:border-primary/50 transition-all">
+<div class="aspect-square bg-background-dark/50 rounded-xl mb-4 relative overflow-hidden flex items-center justify-center border border-white/5">
+<div class="absolute top-2 right-2 bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Epic</div>
+<img class="w-3/4 h-3/4 object-contain" data-alt="Glowing energy wings accessory icon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB1Z8KWSarciXeJebRkAqCdENw1Q5hCj6tTtdhY-jW-IHwK9ASDDSZQWj1O6WhmyQoVHvzAGTS5Ia2TpBXKT1n-ji7iXl2Ex4X17nP8S9vgLs1OVvUolpc9blXp38qBtmbELr_uy8mqDQLN-S320JP0eY3RVIjbRZVOosvD0m_UVyx6drsIMU83GxJxyqjjqxORUSAWpAvKMTdEzazycaipr035xo-LNvdfmTzYKQq8T2OGmVf-dQG8iNNQegjMYV-e0HJkdNg8REU"/>
+</div>
+<h4 class="font-bold text-slate-100 mb-1">Energy Wings</h4>
+<p class="text-xs text-slate-400 mb-4 flex items-center gap-1">
+<span class="material-symbols-outlined text-sparkle-yellow text-[12px] fill-current">auto_awesome</span> 850
+                            </p>
+<div class="flex gap-2">
+<button class="flex-1 bg-primary text-white text-xs font-bold py-2.5 rounded-full hover:bg-primary/80 transition-all">Equip</button>
+<button class="flex-1 bg-white/5 text-slate-300 text-xs font-bold py-2.5 rounded-full border border-white/10 hover:bg-white/10 transition-all">Preview</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Dashboard Quick Links -->
+<footer class="w-full bg-surface-dark/80 backdrop-blur-xl border-t border-white/5 py-4 px-6 lg:px-20">
+<div class="max-w-6xl mx-auto flex items-center justify-between">
+<div class="flex gap-6 overflow-x-auto no-scrollbar">
+<div class="flex items-center gap-2 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all">
+<span class="material-symbols-outlined">collections</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Inventory</span>
+</div>
+<div class="flex items-center gap-2 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-teal-accent/20 flex items-center justify-center text-teal-accent group-hover:bg-teal-accent group-hover:text-background-dark transition-all">
+<span class="material-symbols-outlined">leaderboard</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Ranks</span>
+</div>
+<div class="flex items-center gap-2 group cursor-pointer">
+<div class="w-10 h-10 rounded-full bg-sparkle-yellow/20 flex items-center justify-center text-sparkle-yellow group-hover:bg-sparkle-yellow group-hover:text-background-dark transition-all">
+<span class="material-symbols-outlined">stars</span>
+</div>
+<span class="text-xs font-bold uppercase tracking-wider text-slate-400">Challenges</span>
+</div>
+</div>
+<div class="hidden sm:block">
+<p class="text-slate-500 text-xs font-medium">Player ID: #8821-XP-CHARLIE</p>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

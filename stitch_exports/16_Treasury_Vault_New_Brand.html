@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Celestial Treasury - Vault</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#5b3cc4",
+                        "accent-teal": "#4ed7c8",
+                        "accent-yellow": "#f6c453",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#141127",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            background-color: #141127;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(91, 60, 196, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(78, 215, 200, 0.1) 0%, transparent 40%);
+        }
+    </style>
+</head>
+<body class="font-display text-slate-100 min-h-screen">
+<div class="relative flex h-full w-full flex-col overflow-x-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-white/10 px-6 py-4 lg:px-10 bg-background-dark/80 backdrop-blur-md sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary">
+<span class="material-symbols-outlined text-3xl font-bold">auto_awesome</span>
+<h2 class="text-slate-100 text-xl font-black leading-tight tracking-tight">Celestial Vault</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-primary text-sm font-bold uppercase tracking-wider" href="#">Vault</a>
+<a class="text-slate-400 hover:text-accent-teal transition-colors text-sm font-bold uppercase tracking-wider" href="#">Lore</a>
+<a class="text-slate-400 hover:text-accent-teal transition-colors text-sm font-bold uppercase tracking-wider" href="#">Market</a>
+<a class="text-slate-400 hover:text-accent-teal transition-colors text-sm font-bold uppercase tracking-wider" href="#">History</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-4 lg:gap-8">
+<label class="hidden sm:flex flex-col min-w-40 h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-full bg-white/5 border border-white/10 focus-within:border-primary/50 overflow-hidden">
+<div class="text-slate-400 flex items-center justify-center pl-4">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="w-full min-w-0 flex-1 border-none bg-transparent text-slate-100 focus:ring-0 placeholder:text-slate-500 text-sm font-medium px-3" placeholder="Search artifacts..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-full size-10 bg-white/5 text-slate-100 hover:bg-white/10 transition-all border border-white/5">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="flex items-center justify-center rounded-full size-10 bg-white/5 text-slate-100 hover:bg-white/10 transition-all border border-white/5">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+</div>
+<div class="bg-primary/20 p-0.5 rounded-full border border-primary/30">
+<img class="aspect-square rounded-full size-9 object-cover" data-alt="User profile avatar with subtle glow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuComaxqJO-UKCLW6tSWTp9K11QMqhTaAEA59Hg5KSXE-5excj84vcjqYWzC5CDc4IzFiepbHb3IGXnF6-FWqI-8tXZ8TdtOKwoicEei1TMISONRDqr4b__hgARJF5myvVmH60SE4NIRfjziVBWaBuzAjos0L5WmesIaqu-dFz9H1lfRXi2zp-dEl1-rBMhp1K5DdlVJQ_5aUPLLj_I31BeiqVLkEhtZFXd5yoi4_pdBlvx5H_0xtosczUpGTdQHFMcrJg_PxxMv_JY"/>
+</div>
+</div>
+</header>
+<main class="flex flex-1 flex-col lg:flex-row max-w-[1600px] mx-auto w-full p-4 lg:p-8 gap-8">
+<aside class="w-full lg:w-72 flex flex-col gap-6">
+<div class="bg-white/5 border border-white/10 p-6 rounded-xl">
+<div class="flex items-center gap-4 mb-6">
+<div class="bg-accent-teal/20 p-2 rounded-lg">
+<span class="material-symbols-outlined text-accent-teal">verified_user</span>
+</div>
+<div>
+<h3 class="text-slate-100 font-bold leading-tight">Celestial Traveler</h3>
+<p class="text-slate-400 text-xs font-medium">Level 88 Hunter</p>
+</div>
+</div>
+<nav class="flex flex-col gap-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white font-bold shadow-lg shadow-primary/20" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span>Main Vault</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">auto_stories</span>
+<span>Legendary Lore</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">group</span>
+<span>Social Guild</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-white/5 transition-colors font-medium" href="#">
+<span class="material-symbols-outlined">account_circle</span>
+<span>User Profile</span>
+</a>
+</nav>
+</div>
+<div class="bg-white/5 border border-white/10 p-6 rounded-xl flex flex-col gap-4">
+<h4 class="text-xs font-black uppercase tracking-widest text-slate-500">Wealth Status</h4>
+<div class="space-y-4">
+<div class="flex justify-between items-end">
+<p class="text-slate-400 text-sm">Celestial Essence</p>
+<p class="text-accent-yellow font-bold text-lg leading-none">12,450</p>
+</div>
+<div class="flex justify-between items-end">
+<p class="text-slate-400 text-sm">Artifacts Logged</p>
+<p class="text-accent-teal font-bold text-lg leading-none">84/150</p>
+</div>
+<div class="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-accent-teal rounded-full" style="width: 56%;"></div>
+</div>
+</div>
+</div>
+</aside>
+<section class="flex-1 flex flex-col gap-6">
+<div class="flex flex-wrap items-center justify-between gap-4">
+<div>
+<h1 class="text-slate-100 text-4xl font-black tracking-tight leading-tight">Treasury Vault</h1>
+<p class="text-slate-400 font-medium">Manage and inspect your rare cosmic artifacts</p>
+</div>
+<div class="flex gap-2">
+<button class="bg-white/5 border border-white/10 hover:bg-white/10 px-5 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">filter_list</span>
+                            Filter
+                        </button>
+<button class="bg-primary hover:bg-primary/90 px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-primary/20 transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-xl">add</span>
+                            Add Item
+                        </button>
+</div>
+</div>
+<div class="flex border-b border-white/5 gap-8 overflow-x-auto pb-px">
+<a class="border-b-2 border-primary text-slate-100 py-3 font-bold text-sm whitespace-nowrap" href="#">All Items</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-300 py-3 font-bold text-sm transition-colors whitespace-nowrap" href="#">Legendary</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-300 py-3 font-bold text-sm transition-colors whitespace-nowrap" href="#">Epic</a>
+<a class="border-b-2 border-transparent text-slate-500 hover:text-slate-300 py-3 font-bold text-sm transition-colors whitespace-nowrap" href="#">Common</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<div class="group bg-white/5 border border-white/10 hover:border-accent-teal/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="aspect-video relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent"></div>
+<img class="w-full h-full object-cover transition-transform group-hover:scale-105" data-alt="Glowing nebula artifact crystal" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLhK4NOiOfYU7ZqJD2CjOjDP1L0y5jh8zRQLIZ03Z6la0qShqdsqpS4MnZGQCAHDOIrw7zG0JFNGrzV2CvLB1sRppdp78GEVkAEg90KBwBYwtADR9jx9_WByTiYvwGZj5SRzSrwefgwQxBd4UUoHRNahzVUkyoKgHJlFE8qX7pV93eXF3U8GXTxIK57Dg3BOYlQOywOlPZQ34dcH3zOEv9ajP5V0y0UDXVfa7_7BVmtDTkBbWx7iHGm1eDN6KsdPHOCF1J0M8UbOM"/>
+<span class="absolute top-3 right-3 bg-accent-yellow text-background-dark text-[10px] font-black uppercase px-2 py-1 rounded-full shadow-lg">Legendary</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-black text-lg text-slate-100">Nebula Core</h3>
+<p class="text-accent-teal font-bold">1,200 <span class="text-[10px] text-slate-500">ESS</span></p>
+</div>
+<p class="text-slate-400 text-sm leading-relaxed mb-4">A pulsating heart of a dead star, still radiating faint cosmic energy.</p>
+<button class="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest group-hover:bg-primary transition-all">Inspect Artifact</button>
+</div>
+</div>
+<div class="group bg-white/5 border border-white/10 hover:border-accent-teal/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="aspect-video relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent"></div>
+<img class="w-full h-full object-cover transition-transform group-hover:scale-105" data-alt="Sleek silver futuristic satellite component" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1EPi2BsYlMQdbwntGDD-RCaS1JwVWqkpLKO4kRmBeTItQ6mIwzOVBStFcqgTx8Na0xRNiESWLBskVHuazdU0vCUn-fQxGmiF6h7dYgmjuDiMMMtm3UuYVoovgdXbAcj1ASobvPHjvwTFYMwWDpYUZFKdeOpI4PSuqKLo_B59nTvCfW1m0-cDohpggVQZUn9iJxdE_jr-BdKSdQfl-FJllTWVWgMu9Jza7ko1M--KFqja9FFAfebIfzVX1O21UKaVeIt8JnPkclHc"/>
+<span class="absolute top-3 right-3 bg-primary text-white text-[10px] font-black uppercase px-2 py-1 rounded-full shadow-lg">Epic</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-black text-lg text-slate-100">Solar Spire</h3>
+<p class="text-accent-teal font-bold">850 <span class="text-[10px] text-slate-500">ESS</span></p>
+</div>
+<p class="text-slate-400 text-sm leading-relaxed mb-4">A high-conductivity antenna forged from planetary crust fragments.</p>
+<button class="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest group-hover:bg-primary transition-all">Inspect Artifact</button>
+</div>
+</div>
+<div class="group bg-white/5 border border-white/10 hover:border-accent-teal/50 rounded-xl overflow-hidden transition-all duration-300">
+<div class="aspect-video relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark/80 to-transparent"></div>
+<img class="w-full h-full object-cover transition-transform group-hover:scale-105" data-alt="Deep space purple galaxy swirls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDdXem44sRIM6uzKsN2viBlIP6qxTixcfyKbMXvsh4LVZt-eZ3tmWINDzFYreBFpTMYjTzYF0qZJROXbh80i_tCJsrk8pFR7XYUnxDKFS7iK1kQMElW7VFHos01UkrkvzJrsiHEE5H9LwZaspPy1O694HJG5BIHDshhJz1ldDPVIxeNBXc93IaVZU1ce1VrJRT6GqS9UsZ5Efk2HT_eKQ8TDEdYOQq10Ljz-lrSZoCv3ODlDJe6rsGgq-1mjMv1M_oWJ-df0mrox1Y"/>
+<span class="absolute top-3 right-3 bg-accent-yellow text-background-dark text-[10px] font-black uppercase px-2 py-1 rounded-full shadow-lg">Legendary</span>
+</div>
+<div class="p-5">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-black text-lg text-slate-100">Void Shard</h3>
+<p class="text-accent-teal font-bold">3,500 <span class="text-[10px] text-slate-500">ESS</span></p>
+</div>
+<p class="text-slate-400 text-sm leading-relaxed mb-4">A fragment from the edge of the universe, light seems to disappear near it.</p>
+<button class="w-full py-2.5 rounded-lg bg-white/5 border border-white/10 text-xs font-bold uppercase tracking-widest group-hover:bg-primary transition-all">Inspect Artifact</button>
+</div>
+</div>
+</div>
+</section>
+<aside class="hidden xl:flex w-80 flex-col gap-6">
+<div class="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+<div class="bg-primary/20 p-6 border-b border-white/10">
+<h2 class="text-slate-100 font-black text-xl mb-1">Lore Inspector</h2>
+<p class="text-slate-400 text-xs font-medium uppercase tracking-tighter">Current Selection</p>
+</div>
+<div class="p-6">
+<div class="aspect-square rounded-xl overflow-hidden mb-6 border border-white/10 shadow-2xl">
+<img class="w-full h-full object-cover" data-alt="Close up detail of crystalline nebula core" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDRC9xfGqOHwIoemiYNhLsCFnFzo6SN5cBEwN1VG0X7-5YLiOAtHqe3O6hZcHNEILMe7RAHY0fPl7mPBvkHB1H9cnPuyFjWVJLDqmk1Sr-oenonvpUQSn3M8-tsxj4H3AXBoRL0oq661Fk1AK0ahZcF2g9AUQ5b3SqcRCVknNdKpbPrTsYfJz-NRi9Jjpm72KoheSjocUrrnA16nS3dajC5qIeAOXyYMmVWAc_OG9NqDoIrjTaTbT4k_qd2qndcNKvKABU9PbVtqfU"/>
+</div>
+<div class="flex items-center gap-2 mb-4">
+<span class="px-2 py-0.5 rounded-full bg-accent-yellow text-background-dark text-[10px] font-black">LEGENDARY</span>
+<span class="text-slate-500 text-[10px] font-bold">OBJECT ID: NC-082</span>
+</div>
+<h3 class="text-slate-100 text-2xl font-black mb-4">Nebula Core</h3>
+<p class="text-slate-400 text-sm leading-relaxed mb-6">
+                            Discovered in the Andromeda segment, this core contains the compressed history of a sun. Ancient scripts suggest it can power a fleet of cruisers for a millennium, or destroy a small moon if destabilized.
+                        </p>
+<div class="space-y-3">
+<div class="flex justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<span class="text-slate-400 text-xs">Origin</span>
+<span class="text-slate-100 text-xs font-bold">Andromeda-IV</span>
+</div>
+<div class="flex justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<span class="text-slate-400 text-xs">Era</span>
+<span class="text-slate-100 text-xs font-bold">Golden Age</span>
+</div>
+<div class="flex justify-between p-3 bg-white/5 rounded-lg border border-white/5">
+<span class="text-slate-400 text-xs">Stability</span>
+<span class="text-accent-teal text-xs font-bold">94.2%</span>
+</div>
+</div>
+<button class="w-full mt-8 bg-white text-background-dark py-3 rounded-full font-black text-sm hover:bg-slate-200 transition-colors">EQUIP TO SHIP</button>
+</div>
+</div>
+</aside>
+</main>
+<footer class="mt-auto border-t border-white/5 p-8 bg-background-dark/50 backdrop-blur-sm">
+<div class="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex items-center gap-3 text-primary/50">
+<span class="material-symbols-outlined text-2xl">auto_awesome</span>
+<p class="text-slate-500 text-xs font-bold uppercase tracking-widest">© 2142 Celestial Treasury Syndicate</p>
+</div>
+<div class="flex gap-8">
+<a class="text-slate-500 hover:text-accent-teal text-xs font-bold uppercase tracking-widest transition-colors" href="#">Privacy Protocols</a>
+<a class="text-slate-500 hover:text-accent-teal text-xs font-bold uppercase tracking-widest transition-colors" href="#">Term of Service</a>
+<a class="text-slate-500 hover:text-accent-teal text-xs font-bold uppercase tracking-widest transition-colors" href="#">Support Node</a>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

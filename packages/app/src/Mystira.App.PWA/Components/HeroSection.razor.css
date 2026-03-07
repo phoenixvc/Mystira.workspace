@@ -24,8 +24,9 @@
 }
 
 /* Dark mode background - slightly darker for less brightness */
-html[data-theme="dark"] .hero-section {
-    background: linear-gradient(135deg, #14122b 0%, #1e1b4b 100%);
+html[data-theme="dark"] .hero-section,
+.hero-section {
+    background: linear-gradient(135deg, #14122b 0%, #171038 100%); /* Force dark theme aesthetics for hero */
 }
 
 /* Particle Canvas Background */
@@ -39,40 +40,19 @@ html[data-theme="dark"] .hero-section {
     z-index: 0;
 }
 
-/* Golden Light Tubes Container - centered around logo */
+/* Golden Light Tubes Container - centered but set back from text */
 .golden-lights {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 600px;
-    height: 500px;
-    transform: translate(-50%, -50%);
-    z-index: 1;
-    pointer-events: none;
-    overflow: visible;
-    /* Contain the SVG within the hero section bounds */
-    max-width: 100%;
-    max-height: 100%;
-    transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
-}
-
-/* Video mode - tubes expand and animate more actively */
-.golden-lights.video-mode {
-    transform: translate(-50%, -50%) scale(1.15);
-}
-
-/* Logo mode - tubes contract and animate more gently */
-.golden-lights.logo-mode {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.golden-light-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.5);
+    z-index: 0; /* Push behind text */
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.6; /* Soften the intensity */
+    transition: transform 0.8s ease-in-out, opacity 0.8s ease-in-out;
 }
 
 /* Light tube base styles */
@@ -352,230 +332,75 @@ html[data-theme="dark"] .hero-section {
     margin: 0 auto;
     position: relative;
     z-index: 2;
+    padding: 60px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-.mystira-title {
-    font-size: 5rem;
-    font-weight: 300;
-    letter-spacing: 0.02em;
-    color: #7C3AED; /* Fallback color for browsers that don't support background-clip */
-    background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 50%, #5B21B6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 12px;
-    -webkit-animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    animation: fadeInScale 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Dark mode title */
-html[data-theme="dark"] .mystira-title {
-    color: #A78BFA; /* Fallback color */
-    background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #7C3AED 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.mystira-title .title-text {
-    color: #7C3AED; /* Fallback color */
-    background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 50%, #5B21B6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-/* Alpha badge - elegant glass-morphism style */
-/* Dark mode title text */
-html[data-theme="dark"] .mystira-title .title-text {
-    color: #C4B5FD; /* Fallback color */
-    background: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 50%, #8B5CF6 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.mystira-title .alpha-badge {
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 12px;
-    padding: 4px 12px;
-    line-height: 1.2;
-    font-size: 0.65rem;
-    font-weight: 600;
-    letter-spacing: 0.1em;
+/* Ancient Secrets Pill */
+.hero-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 16px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #C4B5FD;
+    background: rgba(81, 35, 161, 0.2);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 100px;
     text-transform: uppercase;
-    color: #7c3aed;
-    -webkit-text-fill-color: #7c3aed;
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.12) 0%, rgba(109, 40, 217, 0.08) 100%);
-    border: 1px solid rgba(124, 58, 237, 0.35);
-    border-radius: 6px;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.3);
-    -webkit-animation: alphaPulse 3s ease-in-out infinite;
-    animation: alphaPulse 3s ease-in-out infinite;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+    animation: pillFloat 4s ease-in-out infinite;
+    -webkit-animation: pillFloat 4s ease-in-out infinite;
 }
 
-/* Dark mode alpha badge */
-html[data-theme="dark"] .mystira-title .alpha-badge {
-    color: #a78bfa;
-    -webkit-text-fill-color: #a78bfa;
-    background: linear-gradient(135deg, rgba(167, 139, 250, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
-    border-color: rgba(167, 139, 250, 0.4);
-    box-shadow: 0 2px 12px rgba(139, 92, 246, 0.25),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
+.hero-pill i {
+    color: #A78BFA;
+    font-size: 0.8rem;
 }
 
-@media (prefers-color-scheme: dark) {
-    .mystira-title .alpha-badge {
-        color: #a78bfa;
-        -webkit-text-fill-color: #a78bfa;
-        background: linear-gradient(135deg, rgba(167, 139, 250, 0.2) 0%, rgba(139, 92, 246, 0.15) 100%);
-        border-color: rgba(167, 139, 250, 0.4);
-        box-shadow: 0 2px 12px rgba(139, 92, 246, 0.25),
-                    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-    }
+@keyframes pillFloat {
+    0%, 100% { transform: translateY(0); box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
+    50% { transform: translateY(-5px); box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4); }
+}
+@-webkit-keyframes pillFloat {
+    0%, 100% { -webkit-transform: translateY(0); box-shadow: 0 0 15px rgba(124, 58, 237, 0.2); }
+    50% { -webkit-transform: translateY(-5px); box-shadow: 0 5px 20px rgba(124, 58, 237, 0.4); }
 }
 
-@-webkit-keyframes alphaPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
+/* Massive Headline */
+.hero-headline {
+    font-size: clamp(3rem, 8vw, 6rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+    text-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    margin: 0;
+    animation: fadeInScaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    -webkit-animation: fadeInScaleUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-@keyframes alphaPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.85; }
+.hero-headline .highlight {
+    background: linear-gradient(135deg, #A78BFA 0%, #8B5CF6 50%, #6D28D9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: inline-block; /* Ensure gradient works well over wraps if needed */
 }
 
-.mystira-tagline {
-    font-size: 1.25rem;
-    color: var(--muted, #6b7280);
-    font-weight: 500;
-    -webkit-animation: fadeIn 0.8s ease-in-out;
-    animation: fadeIn 0.8s ease-in-out;
+@keyframes fadeInScaleUp {
+    0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
 }
-
-/* Dark mode tagline */
-html[data-theme="dark"] .mystira-tagline {
-    color: #cbd5e1;
-}
-
-/* Hero logo container - fixed size with visible overflow for button */
-.hero-logo-container {
-    position: relative;
-    width: var(--hero-logo-size);
-    height: var(--hero-logo-size);
-    margin: 0 auto 8px; /* tighter gap below logo */
-    -webkit-animation: fadeIn 1s ease-in-out;
-    animation: fadeIn 1s ease-in-out;
-    overflow: visible;
-}
-
-/* Video and logo positioning */
-.hero-logo-video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%) scale(0.8);
-    transform: translate(-50%, -50%) scale(0.8);
-    width: 100%;
-    height: 100%;
-    max-width: var(--hero-logo-size);
-    max-height: var(--hero-logo-size);
-    object-fit: contain;
-    -webkit-filter: drop-shadow(0 4px 20px rgba(139, 92, 246, 0.2));
-    filter: drop-shadow(0 4px 20px rgba(139, 92, 246, 0.2));
-    /* Visible elegant border and soft shadow around the video element */
-    border: 2px solid rgba(124, 58, 237, 0.35);
-    outline: none;
-    border-radius: 12px;
-    box-shadow: 0 10px 28px rgba(124, 58, 237, 0.22), 0 2px 8px rgba(0, 0, 0, 0.08);
-    z-index: 2;
-    /* START HIDDEN - prevents flash on load */
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    -webkit-transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                -webkit-transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                -webkit-filter 0.5s ease;
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                filter 0.5s ease;
-}
-
-/* Also remove any focus outlines some browsers add on media elements */
-.hero-logo-video:focus,
-.hero-logo-video:focus-visible,
-.hero-logo-video:active {
-    outline: none;
-    /* Keep border; add a slightly stronger glow when focused/active */
-    box-shadow: 0 12px 32px rgba(124, 58, 237, 0.28), 0 3px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Ensure the container doesn't contribute a border either */
-.hero-logo-container {
-    border: none;
-}
-
-/* Dark theme adjustments: slightly stronger contrast for border and shadow */
-html[data-theme="dark"] .hero-logo-video {
-    border-color: rgba(167, 139, 250, 0.45);
-    box-shadow: 0 12px 32px rgba(139, 92, 246, 0.35), 0 3px 10px rgba(0, 0, 0, 0.45);
-}
-
-.hero-logo-video.visible {
-    opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    transform: translate(-50%, -50%) scale(1);
-    visibility: visible;
-    pointer-events: auto;
-}
-
-.hero-logo-video.hidden {
-    opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scale(0.8);
-    transform: translate(-50%, -50%) scale(0.8);
-    pointer-events: none;
-    visibility: hidden;
-}
-
-.hero-logo {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    max-width: var(--hero-logo-size);
-    max-height: var(--hero-logo-size);
-    object-fit: contain;
-    -webkit-filter: drop-shadow(0 4px 20px rgba(139, 92, 246, 0.2));
-    filter: drop-shadow(0 4px 20px rgba(139, 92, 246, 0.2));
-    z-index: 1;
-    -webkit-transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                -webkit-transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-    transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.hero-logo.visible {
-    opacity: 1;
-    -webkit-transform: translate(-50%, -50%) scale(1);
-    transform: translate(-50%, -50%) scale(1);
-}
-
-.hero-logo.hidden {
-    opacity: 0;
-    -webkit-transform: translate(-50%, -50%) scale(0.9);
-    transform: translate(-50%, -50%) scale(0.9);
-}
-
-.hero-logo:hover {
-    -webkit-filter: drop-shadow(0 6px 25px rgba(139, 92, 246, 0.3));
-    filter: drop-shadow(0 6px 25px rgba(139, 92, 246, 0.3));
+@-webkit-keyframes fadeInScaleUp {
+    0% { opacity: 0; -webkit-transform: scale(0.95) translateY(20px); }
+    100% { opacity: 1; -webkit-transform: scale(1) translateY(0); }
 }
 
 /* Replay button - positioned to the left of logo, outside the container */
@@ -734,66 +559,120 @@ html[data-theme="dark"] .skip-btn:hover {
     font-size: 0.7rem;
 }
 
-.hero-description {
+.hero-subtext {
     font-size: 1.125rem;
-    line-height: 1.7;
-    color: #374151;
-    max-width: 720px;
-    margin: 0 auto 32px;
-    -webkit-animation: fadeIn 1.2s ease-in-out;
-    animation: fadeIn 1.2s ease-in-out;
+    line-height: 1.6;
+    color: #9CA3AF;
+    max-width: 600px;
+    margin: 0 auto;
+    font-weight: 400;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    animation: fadeIn 1.5s ease-in-out forwards;
+    -webkit-animation: fadeIn 1.5s ease-in-out forwards;
+    opacity: 0; /* Starts hidden, animated in */
+    animation-delay: 0.3s;
+    -webkit-animation-delay: 0.3s;
 }
 
-html[data-theme="dark"] .hero-description {
-    color: #d1d5db;
+html[data-theme="dark"] .hero-subtext,
+.hero-subtext { /* Force dark mode styling */
+    color: #9CA3AF; 
 }
 
 .hero-cta-buttons {
-    -webkit-animation: fadeIn 1.4s ease-in-out;
-    animation: fadeIn 1.4s ease-in-out;
-    gap: 24px !important;
+    animation: fadeIn 1.5s ease-in-out forwards;
+    -webkit-animation: fadeIn 1.5s ease-in-out forwards;
+    opacity: 0;
+    animation-delay: 0.6s;
+    -webkit-animation-delay: 0.6s;
+    gap: 16px !important;
 }
 
 .hero-cta-buttons .btn {
     position: relative;
     overflow: hidden;
-    -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 100px; /* Fully rounded pill buttons */
+    font-weight: 600;
+    letter-spacing: 0.02em;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    -webkit-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Primary Button (Begin Your Journey) */
 .hero-cta-buttons .btn-primary-custom {
-    box-shadow: 0 8px 20px rgba(109, 40, 217, 0.25);
+    background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);
+    border: none;
+    color: white;
+    box-shadow: 0 8px 20px rgba(109, 40, 217, 0.3);
 }
 
 .hero-cta-buttons .btn-primary-custom:hover {
-    -webkit-transform: translateY(-2px);
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(109, 40, 217, 0.35);
-    background: linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%);
-}
-
-.hero-cta-buttons .btn-outline-primary {
-    border: 2px solid #7C3AED;
-    color: #7C3AED;
-    background: white;
-}
-
-.hero-cta-buttons .btn-outline-primary:hover {
-    background: #7C3AED;
-    color: white;
     -webkit-transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(109, 40, 217, 0.5);
+    background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
+}
+
+/* Secondary Button (Explore The Lore) */
+.hero-cta-buttons .btn-secondary-custom {
+    background: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #E5E7EB;
+}
+
+.hero-cta-buttons .btn-secondary-custom:hover {
+    background: rgba(31, 41, 55, 0.8);
+    border-color: rgba(167, 139, 250, 0.5);
+    color: #FFFFFF;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(109, 40, 217, 0.25);
+    -webkit-transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
-.hero-cta-buttons .btn i {
-    -webkit-transition: -webkit-transform 0.3s ease;
-    transition: transform 0.3s ease;
+/* Scroll Indicator */
+.scroll-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #6B7280;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    -webkit-transition: color 0.3s ease;
+    animation: fadeIn 2s ease-in-out forwards;
+    -webkit-animation: fadeIn 2s ease-in-out forwards;
+    opacity: 0;
+    animation-delay: 1s;
+    -webkit-animation-delay: 1s;
 }
 
-.hero-cta-buttons .btn:hover i {
-    -webkit-transform: scale(1.1);
-    transform: scale(1.1);
+.scroll-indicator:hover {
+    color: #A78BFA;
+}
+
+.scroll-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.scroll-arrow {
+    font-size: 1rem;
+    animation: bounceDown 2s infinite;
+    -webkit-animation: bounceDown 2s infinite;
+}
+
+@keyframes bounceDown {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(8px); }
+    60% { transform: translateY(4px); }
+}
+@-webkit-keyframes bounceDown {
+    0%, 20%, 50%, 80%, 100% { -webkit-transform: translateY(0); }
+    40% { -webkit-transform: translateY(8px); }
+    60% { -webkit-transform: translateY(4px); }
 }
 
 /* Trust badges */
