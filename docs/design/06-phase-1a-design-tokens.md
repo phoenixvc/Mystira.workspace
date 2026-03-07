@@ -248,7 +248,51 @@ All semantic tokens are expressed as CSS custom properties with RGB channel valu
 }
 ```
 
-Dark theme overrides the same semantic variables via `.dark` class or `@media (prefers-color-scheme: dark)`.
+Dark theme overrides the same semantic variables via `.dark` class or `@media (prefers-color-scheme: dark)`. The `.dark` class is the canonical integration path; `@media` provides automatic OS-level switching.
+
+```css
+.dark,
+@media (prefers-color-scheme: dark) {
+  :root {
+    --brand-primary: 91 60 196;
+    --brand-secondary: 199 184 255;
+    --brand-accent: 246 196 83;
+    --brand-support: 78 215 200;
+
+    --surface-bg: 20 17 39;
+    --surface-card: 30 26 56;
+    --surface-elevated: 38 34 90;
+    --surface-hover: 35 32 74;
+    --surface-selected: 47 40 102;
+    --surface-border: 43 39 80;
+    --surface-selected-border: 61 53 128;
+
+    --text-primary: 248 247 255;
+    --text-secondary: 185 180 230;
+    --text-disabled: 111 106 154;
+    --text-gold: 246 196 83;
+    --text-selected: 248 247 255;
+
+    --focus-ring: 199 184 255;
+
+    --status-success-bg: 15 42 28;
+    --status-success-base: 94 220 145;
+    --status-success-border: 30 92 60;
+
+    --status-info-bg: 16 33 43;
+    --status-info-base: 89 199 230;
+    --status-info-border: 30 76 102;
+
+    --status-warning-bg: 43 33 8;
+    --status-warning-base: 255 184 77;
+    --status-warning-border: 122 93 28;
+
+    --status-error-bg: 42 21 21;
+    --status-error-base: 255 107 107;
+    --status-error-border: 122 46 46;
+  }
+}
+```
 
 ### 3.2 Tailwind Theme Extension
 
@@ -305,7 +349,7 @@ colors: {
 }
 ```
 
-### 3.3 Tailwind Radius / Motion / Shadow
+### 3.3 Tailwind Radius / Motion / Shadow / Typography
 
 ```js
 // tailwind.config.ts — theme.extend
@@ -323,6 +367,24 @@ transitionDuration: {
 },
 transitionTimingFunction: {
   DEFAULT: 'cubic-bezier(0.4, 0, 0.2, 1)',
+},
+boxShadow: {
+  sm: '0 1px 3px rgba(0,0,0,0.08)',
+  md: '0 4px 12px rgba(0,0,0,0.12)',
+  lg: '0 8px 24px rgba(0,0,0,0.16)',
+},
+fontFamily: {
+  heading: ['Baloo 2', 'system-ui', 'sans-serif'],
+  body: ['Nunito', 'system-ui', 'sans-serif'],
+},
+fontSize: {
+  h1: ['36px', { lineHeight: '1.2', fontWeight: '700' }],
+  h2: ['28px', { lineHeight: '1.3', fontWeight: '700' }],
+  h3: ['22px', { lineHeight: '1.4', fontWeight: '600' }],
+  h4: ['18px', { lineHeight: '1.4', fontWeight: '600' }],
+  body: ['16px', { lineHeight: '1.5', fontWeight: '400' }],
+  small: ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+  caption: ['12px', { lineHeight: '1.5', fontWeight: '400' }],
 },
 ```
 

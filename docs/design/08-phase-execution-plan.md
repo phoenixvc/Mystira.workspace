@@ -222,6 +222,6 @@ If you start with `/brand` or Storybook before tokens and core components are st
 
 ## Recommended Execution Sequence
 
-```
+```text
 tokens → figma variables → core component library → full UI kit → production Tailwind hardening → /brand → storybook
 ```

@@ -183,6 +183,7 @@
 - **Current layout/structure:**
   - "Create a Story with AI" section title
   - Story Prompt textarea (placeholder: "Describe the story you want to create...")
+    - Example: "Write a whimsical 800-word bedtime tale about a brave squirrel who learns to share, aimed at ages 6-9, using gentle humor and simple language."
   - Age Group dropdown (Ages 1-2, 3-5, 6-9, 10-12, 13-18)
   - Knowledge Mode radio buttons:
     - File Search (Vector Store)

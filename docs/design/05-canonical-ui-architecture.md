@@ -10,7 +10,7 @@ This document defines the recommended production UI architecture for Mystira, in
 
 ### Primary App Layout
 
-```
+```text
 AppShell
 ├── Sidebar Navigation
 ├── Top Command Bar
@@ -196,7 +196,7 @@ AppShell
 
 Standard artifact card layout:
 
-```
+```text
 ArtifactCard
 ├── RarityBadge
 ├── ArtifactVisual

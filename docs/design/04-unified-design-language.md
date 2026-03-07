@@ -61,7 +61,7 @@ The optimal Mystira design direction combines three UI systems into a unified de
 
 ## Unified Visual Formula
 
-```
+```text
 Structure (A) + Atmosphere (B) + Story Identity (C) = Mystira System
 ```
 

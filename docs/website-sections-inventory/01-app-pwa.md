@@ -465,7 +465,7 @@ These components appear on all pages via the MainLayout:
 - **Purpose:** Handle magic link verification when user clicks the email link
 - **Target audience:** Users clicking the magic link from their email
 
-### Login Callback (`/authentication/logincallback`)
+### Login Callback (`/authentication/login-callback`)
 
 - **Purpose:** Handle OAuth redirect callback after Entra authentication
 - **Target audience:** Users returning from Microsoft Entra sign-in flow

@@ -241,7 +241,7 @@ This document defines the Figma variable collections, modes, styles, and the can
 
 ### Naming Pattern
 
-```
+```text
 {category}/{subcategory}/{property}
 ```
 

@@ -55,7 +55,7 @@ This directory contains the complete design system documentation for Mystira, co
 
 ### Execution Sequence
 
-```
+```text
 Wave 1A: tokens → figma variables
 Wave 1B: core component library
 Wave 2A: full UI kit spec
