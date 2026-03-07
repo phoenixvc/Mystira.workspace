@@ -40,7 +40,7 @@
   "private": true,
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.5",
     "eslint": "^10.0.2",
     "globals": "^17.4.0",
     "rimraf": "^6.1.3",
