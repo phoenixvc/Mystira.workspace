@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7c3bed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#171121",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Mystira Quest Dashboard</title>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-72 flex-shrink-0 border-r border-primary/10 bg-background-light dark:bg-background-dark/50 overflow-y-auto flex flex-col justify-between p-6">
+<div class="flex flex-col gap-8">
+<!-- User Profile -->
+<div class="flex items-center gap-4">
+<div class="h-12 w-12 rounded-full border-2 border-primary bg-primary/20 flex items-center justify-center overflow-hidden">
+<img class="h-full w-full object-cover" data-alt="Portrait of a mystical mage character" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-0poPHI3jc0_11hrKrEf_vtkSGF7i6Gv4P6PC0mBJnmChlsmW3gS0NMbGqcxsQbkhAAaLOY6ChsBvMRF7i1sKFCmOAnNcAWrt2Kwoy_sYoRuIodmE3aptuPeOaEY8oR8NiZ1nhImF0bJi5o3Ai2-kAUWzVDu1WMvKa5tXLZJpyVJ9VqM-c-mhpxEKh-UzCw2Y2MHyO-1At_B3e0fLF3F0UTcEp84cWj6S-p8WN3G7l9PqjsBrm_g1c5fMwDNumdpkcMv2vX59FLE"/>
+</div>
+<div class="flex flex-col">
+<h2 class="text-base font-bold leading-tight">Mystira Traveler</h2>
+<p class="text-xs text-primary font-medium">Level 14 Mage</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/20 transition-all" href="#">
+<span class="material-symbols-outlined fill-1">map</span>
+<span class="text-sm font-semibold leading-none">My Adventures</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 text-slate-600 dark:text-slate-400 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="text-sm font-semibold leading-none">Moral Compass</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 text-slate-600 dark:text-slate-400 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">trophy</span>
+<span class="text-sm font-semibold leading-none">Achievements</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 text-slate-600 dark:text-slate-400 hover:text-primary transition-all mt-4" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-sm font-semibold leading-none">Settings</span>
+</a>
+</nav>
+<!-- Quick Stats -->
+<div class="p-4 rounded-xl bg-primary/5 border border-primary/10">
+<p class="text-xs font-bold text-primary uppercase tracking-wider mb-3">Mana Reserves</p>
+<div class="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-3/4"></div>
+</div>
+<p class="text-[10px] mt-2 text-slate-500 dark:text-slate-400">750 / 1000 MP</p>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-primary/10 text-primary border border-primary/20 font-bold text-sm hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-[20px]">person</span>
+            View Profile
+        </button>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 overflow-y-auto bg-background-light dark:bg-background-dark">
+<header class="sticky top-0 z-10 px-8 py-6 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md flex justify-between items-center">
+<div>
+<h1 class="text-3xl font-black tracking-tight">Quest Dashboard</h1>
+<p class="text-slate-500 dark:text-slate-400 text-sm">Your journey through the mystical realms of Mystira.</p>
+</div>
+<div class="flex gap-4">
+<div class="flex flex-col items-end">
+<span class="text-xs font-bold text-slate-400">CURRENT REGION</span>
+<span class="text-sm font-bold text-primary">The Silverwoods</span>
+</div>
+<div class="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-location="The Silverwoods">location_on</span>
+</div>
+</div>
+</header>
+<div class="p-8 space-y-8 max-w-6xl mx-auto">
+<!-- Hero Quest Card -->
+<section class="relative group overflow-hidden rounded-xl bg-slate-900 aspect-[21/9]">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="A glowing mystical forest at twilight" style='background-image: linear-gradient(to top, rgba(23, 17, 33, 0.95) 0%, rgba(23, 17, 33, 0.4) 50%, rgba(23, 17, 33, 0) 100%), url("https://lh3.googleusercontent.com/aida-public/AB6AXuAjQWBuw8akDl8vttNz0mGwnAJveRtdOChM8lSazt45WhFgmYDq36gDuQoE5cf-b_x9CZps6MzbeAnq-MaUByipUBzs8CvVRYRUz_1LgQjjJxMHThma3ny7lE6O0AusQXJhGvPGC91wlvkL9Y94fvvuBJ8xxURO5eLZQgibMhBtJmuo4l_4EETzPKn4_xZ8Hy55H8rMP234VtfnEC0dAukZqkcrtmtxx-C2X3L9R9LJwJLWVDk-CElVLQpXgXHJwNcT1C_-oAE75H8");'></div>
+<div class="absolute bottom-0 left-0 p-8 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
+<div class="max-w-2xl">
+<span class="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold rounded-full uppercase tracking-widest mb-3">Active Quest</span>
+<h2 class="text-3xl font-bold text-white mb-2 leading-tight">Current Quest: The Whispering Woods</h2>
+<p class="text-slate-300 text-base leading-relaxed">
+                            The air grows thick with silver mist as you approach the heart of the grove. A faint shimmer reveals a Forest Spirit, its eyes pleading for aid against the encroaching shadow. Yet, the path to the Ancient Ruins, said to hold the key to your past, lies just beyond the ridge.
+                        </p>
+</div>
+<div class="flex flex-col sm:flex-row gap-3">
+<button class="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-xl shadow-primary/40 hover:scale-105 transition-all">
+                            Help the Spirit
+                        </button>
+<button class="px-6 py-3 bg-background-dark/60 text-white border border-white/20 backdrop-blur-md rounded-xl font-bold text-sm hover:bg-background-dark transition-all">
+                            Seek the Ruins
+                        </button>
+</div>
+</div>
+</section>
+<!-- Grid Layout for Stats -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Achievement Progress Bar -->
+<div class="lg:col-span-1 p-6 rounded-xl bg-white dark:bg-background-dark/30 border border-primary/10 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h3 class="font-bold text-lg">Achievement Rank</h3>
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+<div class="relative pt-1">
+<div class="flex mb-2 items-center justify-between">
+<div>
+<span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary bg-primary/10">
+                                    Grand Arcanist
+                                </span>
+</div>
+<div class="text-right">
+<span class="text-xs font-semibold inline-block text-primary">
+                                    68%
+                                </span>
+</div>
+</div>
+<div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-primary/10">
+<div class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary" style="width:68%"></div>
+</div>
+</div>
+<div class="space-y-3 mt-4">
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors">
+<div class="h-8 w-8 rounded bg-yellow-500/20 text-yellow-500 flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] fill-1">star</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold leading-none">Shadow Banisher</p>
+<p class="text-[10px] text-slate-500">Defeated 10 Corrupted Ents</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 rounded-lg hover:bg-primary/5 transition-colors">
+<div class="h-8 w-8 rounded bg-primary/20 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">auto_stories</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold leading-none">Lore Seeker</p>
+<p class="text-[10px] text-slate-500">Unlocked 4 Chapters</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Moral Compass Visual -->
+<div class="lg:col-span-2 p-6 rounded-xl bg-white dark:bg-background-dark/30 border border-primary/10 shadow-sm overflow-hidden relative">
+<div class="flex items-center justify-between mb-2">
+<div>
+<h3 class="font-bold text-lg leading-none">Moral Compass</h3>
+<p class="text-xs text-slate-500 mt-1">Reflecting your soul's alignment</p>
+</div>
+<div class="flex gap-1">
+<div class="h-2 w-2 rounded-full bg-primary"></div>
+<div class="h-2 w-2 rounded-full bg-primary/30"></div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row items-center justify-center gap-8 py-4">
+<!-- Radar Chart Placeholder -->
+<div class="relative h-48 w-48 flex items-center justify-center">
+<!-- Background Circles -->
+<div class="absolute h-48 w-48 rounded-full border border-primary/5"></div>
+<div class="absolute h-36 w-36 rounded-full border border-primary/10"></div>
+<div class="absolute h-24 w-24 rounded-full border border-primary/20"></div>
+<!-- Radar Shape Simulation -->
+<svg class="absolute inset-0 h-full w-full drop-shadow-lg" viewbox="0 0 100 100">
+<polygon fill="rgba(124, 63, 237, 0.4)" points="50,15 85,35 75,75 35,85 15,50" stroke="#7c3bed" stroke-width="2"></polygon>
+</svg>
+<!-- Labels -->
+<span class="absolute -top-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Purity</span>
+<span class="absolute -right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Courage</span>
+<span class="absolute -bottom-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justice</span>
+<span class="absolute -left-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wit</span>
+</div>
+<!-- Stats Legend -->
+<div class="grid grid-cols-2 gap-x-8 gap-y-4 flex-1 max-w-xs">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-primary uppercase mb-1">Purity</span>
+<span class="text-xl font-black">74%</span>
+<div class="w-full h-1 bg-primary/10 rounded-full mt-1"><div class="h-full bg-primary rounded-full" style="width:74%"></div></div>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-primary uppercase mb-1">Courage</span>
+<span class="text-xl font-black">82%</span>
+<div class="w-full h-1 bg-primary/10 rounded-full mt-1"><div class="h-full bg-primary rounded-full" style="width:82%"></div></div>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-primary uppercase mb-1">Justice</span>
+<span class="text-xl font-black">45%</span>
+<div class="w-full h-1 bg-primary/10 rounded-full mt-1"><div class="h-full bg-primary rounded-full" style="width:45%"></div></div>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-primary uppercase mb-1">Wit</span>
+<span class="text-xl font-black">91%</span>
+<div class="w-full h-1 bg-primary/10 rounded-full mt-1"><div class="h-full bg-primary rounded-full" style="width:91%"></div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Activity / Timeline -->
+<section class="p-6 rounded-xl bg-white dark:bg-background-dark/30 border border-primary/10 shadow-sm">
+<h3 class="font-bold text-lg mb-6">Recent Deeds</h3>
+<div class="space-y-6 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-primary/10">
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[14px]">done</span>
+</div>
+<p class="text-sm font-bold">Solved the Riddle of the Weeping Willow</p>
+<p class="text-xs text-slate-500">2 hours ago • +50 Experience</p>
+</div>
+<div class="relative pl-10">
+<div class="absolute left-0 top-1 h-6 w-6 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[14px]">history_edu</span>
+</div>
+<p class="text-sm font-bold">Entered The Whispering Woods</p>
+<p class="text-xs text-slate-500">5 hours ago • New Region Discovered</p>
+</div>
+</div>
+</section>
+</div>
+</main>
+</div>
+</body></html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mystira - The Treasury</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7c3bed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0a0712",
+                        "surface-dark": "#171121",
+                        "accent-purple": "#312447",
+                        "muted-purple": "#a692c8",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .mist-overlay {
+            background: radial-gradient(circle at 50% 50%, rgba(124, 59, 237, 0.1) 0%, transparent 70%);
+        }
+        .artifact-glow {
+            filter: drop-shadow(0 0 15px rgba(124, 59, 237, 0.4));
+        }
+        .rarity-legendary { color: #facc15; }
+        .rarity-epic { color: #c084fc; }
+        .rarity-rare { color: #60a5fa; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen overflow-x-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- Side Navigation -->
+<aside class="w-72 bg-surface-dark border-r border-primary/20 flex flex-col justify-between p-6 shrink-0">
+<div class="flex flex-col gap-8">
+<!-- Brand -->
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-gradient-to-br from-primary to-purple-900 flex items-center justify-center border border-primary/40 shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-white">auto_awesome</span>
+</div>
+<div class="flex flex-col">
+<h1 class="text-slate-100 text-lg font-bold leading-none">Mystira</h1>
+<p class="text-muted-purple text-xs font-medium uppercase tracking-widest">Chronicles</p>
+</div>
+</div>
+<!-- Nav Links -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors group" href="#">
+<span class="material-symbols-outlined text-muted-purple group-hover:text-primary">dashboard</span>
+<span class="text-sm font-medium text-muted-purple group-hover:text-slate-100">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors group" href="#">
+<span class="material-symbols-outlined text-muted-purple group-hover:text-primary">person</span>
+<span class="text-sm font-medium text-muted-purple group-hover:text-slate-100">Character</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="text-sm font-medium">The Treasury</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors group" href="#">
+<span class="material-symbols-outlined text-muted-purple group-hover:text-primary">swords</span>
+<span class="text-sm font-medium text-muted-purple group-hover:text-slate-100">Quests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-primary/10 transition-colors group" href="#">
+<span class="material-symbols-outlined text-muted-purple group-hover:text-primary">settings</span>
+<span class="text-sm font-medium text-muted-purple group-hover:text-slate-100">Settings</span>
+</a>
+</nav>
+</div>
+<!-- Bottom Action -->
+<button class="w-full bg-accent-purple border border-primary/20 text-slate-100 py-3 rounded-xl flex items-center justify-center gap-2 hover:bg-primary/20 transition-all">
+<span class="material-symbols-outlined text-sm">search</span>
+<span class="text-sm font-bold">Locate Artifact</span>
+</button>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col overflow-hidden relative">
+<!-- Decorative Mist -->
+<div class="absolute inset-0 pointer-events-none mist-overlay opacity-30"></div>
+<!-- Top Header & Currency -->
+<header class="h-20 border-b border-primary/10 flex items-center justify-between px-8 bg-background-dark/80 backdrop-blur-md z-10">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary text-3xl">account_balance_wallet</span>
+<h2 class="text-2xl font-black tracking-tight uppercase">The Treasury</h2>
+</div>
+<!-- Currency Bar -->
+<div class="flex gap-4">
+<div class="bg-accent-purple/40 border border-primary/20 px-4 py-2 rounded-xl flex items-center gap-3">
+<div class="size-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-400 text-sm">energy_savings_leaf</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-muted-purple leading-none uppercase font-bold">Spirit Essence</span>
+<span class="text-sm font-bold text-slate-100">12,450</span>
+</div>
+</div>
+<div class="bg-accent-purple/40 border border-primary/20 px-4 py-2 rounded-xl flex items-center gap-3">
+<div class="size-6 rounded-full bg-indigo-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-indigo-400 text-sm">diamond</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-muted-purple leading-none uppercase font-bold">Void Shards</span>
+<span class="text-sm font-bold text-slate-100">82</span>
+</div>
+</div>
+<div class="bg-accent-purple/40 border border-primary/20 px-4 py-2 rounded-xl flex items-center gap-3">
+<div class="size-6 rounded-full bg-amber-500/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-400 text-sm">payments</span>
+</div>
+<div class="flex flex-col">
+<span class="text-[10px] text-muted-purple leading-none uppercase font-bold">Ancient Gold</span>
+<span class="text-sm font-bold text-slate-100">1,200</span>
+</div>
+</div>
+</div>
+</header>
+<!-- Layout: Grid + Inspector -->
+<div class="flex-1 flex overflow-hidden">
+<!-- Artifact Grid -->
+<div class="flex-1 flex flex-col overflow-y-auto p-8 custom-scrollbar">
+<!-- Categories -->
+<div class="flex gap-6 border-b border-primary/10 mb-8 overflow-x-auto pb-1">
+<button class="pb-4 border-b-2 border-primary text-slate-100 font-bold text-sm whitespace-nowrap">Relics (24)</button>
+<button class="pb-4 border-b-2 border-transparent text-muted-purple font-medium text-sm hover:text-slate-100 transition-colors whitespace-nowrap">Consumables (12)</button>
+<button class="pb-4 border-b-2 border-transparent text-muted-purple font-medium text-sm hover:text-slate-100 transition-colors whitespace-nowrap">Lore Fragments (5)</button>
+<button class="pb-4 border-b-2 border-transparent text-muted-purple font-medium text-sm hover:text-slate-100 transition-colors whitespace-nowrap">Key Items (2)</button>
+</div>
+<!-- Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
+<!-- Artifact Slot 1 -->
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/30 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary/80 transition-all hover:bg-primary/5">
+<div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary">info</span>
+</div>
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/10 to-transparent rounded-full flex items-center justify-center overflow-hidden">
+<img class="w-20 h-20 object-contain artifact-glow" data-alt="Glowing spherical orange energy orb artifact" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA59ejMteeA9SlUQEa8GznHqmN7ee4sr_sUBLkls2MrRjpkVL0UoK-4NmZOXaAA5SqaLypG3lgI8Hrz0OBrheomupQOYXjPu7PxOMO8q6p4-55pF_C6P25x7sLuudl5_KqvkEObnCiHNuowhveFi8IYLA2YnoywMpplXbpzgcbbi0lEE0WlBj6oMH_e9Yvb4cymUoo--XsAAx5X2Nf3yXXdLKZJZZl8PuM1WCcKwzvphPv7MZx9gf8oe8AU3jTpuN9Q-QRsCVmBOrM"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Dragon's Breath</h3>
+<span class="text-[10px] text-amber-400 uppercase font-black tracking-widest mt-1">Legendary</span>
+</div>
+<!-- Artifact Slot 2 -->
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary/80 transition-all hover:bg-primary/5 border-primary/60 bg-primary/10">
+<div class="absolute inset-0 border-2 border-primary rounded-2xl animate-pulse opacity-50"></div>
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/20 to-transparent rounded-full flex items-center justify-center">
+<img class="w-20 h-20 object-contain artifact-glow" data-alt="Intricate iridescent spiral shell artifact" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx3vTpmwrkYgaPK12sZCjIlBcRDWq-LtpK8n9sez-Aua8bveqnjZrTkcQZPGwZmegU1xhdXTu1BnDV3WrDPhT0pZ_ZtbPi4hYbOfwpafn9STZgJvytChLT677QC5MxY51gHF5fLhVDPNykv1R53hd3XhjviqgF-MONNBRJHHU9527vAwmyvx8wMKatnfyHbIYIKK0Y_WhrJJL0B6yNbVOZciRuPY5pehrgCa3Fd6cgFn-tB_2K7X1GMrY3XV9M4N1wC1ifYFPqE5k"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Echoing Shell</h3>
+<span class="text-[10px] text-purple-400 uppercase font-black tracking-widest mt-1">Epic</span>
+</div>
+<!-- Artifact Slot 3 -->
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary/80 transition-all hover:bg-primary/5">
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/10 to-transparent rounded-full flex items-center justify-center">
+<img class="w-20 h-20 object-contain artifact-glow" data-alt="Luminescent glowing green plant seed artifact" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGw77Jd5iRnn1iwWIsLPrwyVUuR1iIokdzLUCBCEwKymXY2J51hAjIGbMitj8tTBkhrHDJ3T75bgrz-G0QgZZhjxHz4TzLy10sz2aCI84A0EZij7Bt1b2Q_pJGgt7o9AVtR9vMbn6x8l_hl0b1LXUFlxhQsN8-cesCuiQfbxq0PexWTZWSzTy6JDx0oWCmuAvlZt1oe5ijE11vS6m1I8JjGfFps8JD8UuYO9FH5C1tv96FNAufKNhyP7bVXC8VL15rNGS-9OpqWJE"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Spirit Seed</h3>
+<span class="text-[10px] text-emerald-400 uppercase font-black tracking-widest mt-1">Rare</span>
+</div>
+<!-- Repeat Slots -->
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer hover:border-primary/80 transition-all">
+<div class="size-16 border-2 border-dashed border-primary/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/30">lock</span>
+</div>
+<span class="text-[10px] text-muted-purple uppercase font-bold mt-4">Locked Slot</span>
+</div>
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer">
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/10 to-transparent rounded-full flex items-center justify-center">
+<img class="w-20 h-20 object-contain" data-alt="Frosty blue crystal shard artifact" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAHjIvFUyBwIY46325IrlzlSOkb0i_0Cuyi5fCd2YvAl0PVoV-8bkH5Vz4mZO4JbsITpCobkcLFFUwozfbDVTLJvgmPKR5EYO-DX4tWwGRsZjNkpnRZPVgpfIvH5P8Zossbpid54DHidipR2G6puqvRvQObvIxe_CZ0-_ng4BjBm6AMo7yVHwSQJS1BRLQFrnD-KFDkHObGF6lFXK86IdtHIup22zpnngqOPiqSK9cu6CBfa-kuAux48j3mgBhCGTziETcDAEczUeE"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Glacial Shard</h3>
+<span class="text-[10px] text-blue-400 uppercase font-black tracking-widest mt-1">Common</span>
+</div>
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer">
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/10 to-transparent rounded-full flex items-center justify-center">
+<img class="w-20 h-20 object-contain" data-alt="Deep red burning ember relic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAj51vR75wKeXsiuFGPm1lQjks1gSPdTNBHfvTOldOBtcmReR4CBpJFqfD_AkUoAE4lfKmqUywC0mtFEmbvfUfn1PASSuwGVmGYGvdKPd8Ud0s19rREjI1--Njp8vyOwTjJU9E-nZiTx1kVeQmtVS1QwHr2Ro6zUTgGWRjOtDdOq1zaSWjyf-WiZejoMMddZn9GF-c0RN9HS2fD4I1tP7B4OiI6D8pzjKUcBK8BOQ6Ayt6mJ6xZ4wae3JdpAqxk2aSjr8UcEpYbHRc"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Core Ember</h3>
+<span class="text-[10px] text-rose-400 uppercase font-black tracking-widest mt-1">Rare</span>
+</div>
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer">
+<div class="w-full h-32 mb-4 bg-gradient-to-t from-primary/10 to-transparent rounded-full flex items-center justify-center">
+<img class="w-20 h-20 object-contain" data-alt="Ancient golden feather relic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBbdW6RRo8xbdWNMN0577-h1kc7GQE9TN-Y-AxJmnhEcZIQUigpZEoR3G65NKWVhPCHqSsYEbI4pvkC9l0DvoLhjD6thZ5Kp0inokE4u5TOTYZj4t9wLJcwAqFQUgMLKvxagUa9SLlnL9rmi60GNCauU8mVoA14p-zAXaTMo2yxq51hKv40SYKp8QUe09KMVt9TED9W3cUN7d_8qgo0W0XR34MOXEq_ER2RsAQziCM4iw43foUVs8njEe3bQ9mpTyyYyYlgQ48nQc"/>
+</div>
+<h3 class="text-slate-100 font-bold text-sm">Sunfeather</h3>
+<span class="text-[10px] text-amber-400 uppercase font-black tracking-widest mt-1">Epic</span>
+</div>
+<div class="group relative aspect-square bg-accent-purple/20 border-2 border-primary/10 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer">
+<div class="size-16 border-2 border-dashed border-primary/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary/30">lock</span>
+</div>
+<span class="text-[10px] text-muted-purple uppercase font-bold mt-4">Locked Slot</span>
+</div>
+</div>
+</div>
+<!-- Inspection Panel -->
+<aside class="w-[450px] bg-surface-dark border-l border-primary/20 flex flex-col overflow-y-auto">
+<!-- Artifact Showcase -->
+<div class="relative w-full aspect-square flex items-center justify-center p-12 bg-gradient-to-b from-primary/20 to-transparent">
+<div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+<!-- Large Artifact 3D View -->
+<div class="relative z-10 w-full h-full flex items-center justify-center">
+<div class="absolute size-64 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+<img class="w-64 h-64 object-contain artifact-glow relative z-10" data-alt="Large detailed iridescent spiral shell glowing purple" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtweuT28lxmbXI5XAHHUR8iyP8xuUR1VFQaan4hCyJc47LbyBialUXv0KHbZiShAJuHajzAvhS1MY-cz4EiQLElUE2LQJoXzPShcErrsFJbNCsh_Rtg3lRX-dEzcQxsvjsEIHn0yPutkE11Ni67uX3VO-s2-iehWqyWJg7BbKT_1dOt2Xke5YWOd2r-x6E31JmLsNu0BnS-uM-qtRqYRJCWAZWbO7rHoITXa4BS43-NSfuUBPlvFv0jABLTS_qGyjvIeQMGdZQh-4"/>
+</div>
+<div class="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+<div class="flex flex-col">
+<span class="text-xs font-black text-purple-400 uppercase tracking-tighter">Artifact ID: #772-ECO</span>
+<h3 class="text-3xl font-black text-slate-100">Echoing Shell</h3>
+</div>
+<div class="bg-primary/20 backdrop-blur-md px-3 py-1 rounded-lg border border-primary/40 text-xs font-bold text-primary">
+                                EPIC RELIC
+                            </div>
+</div>
+</div>
+<!-- Details -->
+<div class="p-8 flex flex-col gap-8">
+<!-- Stats Row -->
+<div class="grid grid-cols-3 gap-4">
+<div class="bg-accent-purple/40 p-4 rounded-xl border border-primary/10 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">waves</span>
+<span class="text-[10px] text-muted-purple uppercase font-bold">Resonance</span>
+<span class="text-lg font-black">94%</span>
+</div>
+<div class="bg-accent-purple/40 p-4 rounded-xl border border-primary/10 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">auto_graph</span>
+<span class="text-[10px] text-muted-purple uppercase font-bold">Frequency</span>
+<span class="text-lg font-black">42Hz</span>
+</div>
+<div class="bg-accent-purple/40 p-4 rounded-xl border border-primary/10 flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">shield</span>
+<span class="text-[10px] text-muted-purple uppercase font-bold">Integrity</span>
+<span class="text-lg font-black">100</span>
+</div>
+</div>
+<!-- Lore -->
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">menu_book</span>
+<h4 class="text-xs font-bold uppercase tracking-widest text-muted-purple">The Lore</h4>
+</div>
+<p class="text-slate-300 text-sm leading-relaxed italic">
+                                "A remnants of the Sunken Isles, this calcified shell still vibrates with the phantom sounds of an ocean that dried up eons ago. Legend says those who listen closely can hear the whispers of the Old Gods."
+                            </p>
+</div>
+<!-- Properties -->
+<div class="flex flex-col gap-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">bolt</span>
+<h4 class="text-xs font-bold uppercase tracking-widest text-muted-purple">Intrinsic Traits</h4>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+<span class="text-sm font-medium">Whisperer's Boon</span>
+<span class="text-xs text-primary">+15 Mental Clarity</span>
+</div>
+<div class="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+<span class="text-sm font-medium">Oceanic Resilience</span>
+<span class="text-xs text-primary">+5% Water Resistance</span>
+</div>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex gap-4 mt-4">
+<button class="flex-1 bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">
+                                EQUIP ARTIFACT
+                            </button>
+<button class="size-14 bg-accent-purple border border-primary/20 text-slate-100 flex items-center justify-center rounded-xl hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+</div>
+</body></html>
