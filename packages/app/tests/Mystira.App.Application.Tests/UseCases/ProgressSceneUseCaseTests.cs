@@ -15,11 +15,7 @@ public class ProgressSceneUseCaseTests
     private readonly Mock<IGameSessionRepository> _repository;
     private readonly Mock<IScenarioRepository> _scenarioRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
-<<<<<<< HEAD
-    private readonly Mock<IDistributedLockService> _distributedLockService;
-=======
     private readonly Mock<IDistributedLockService> _lockService;
->>>>>>> origin/dev
     private readonly Mock<ILogger<ProgressSceneUseCase>> _logger;
     private readonly ProgressSceneUseCase _useCase;
 
@@ -28,19 +24,11 @@ public class ProgressSceneUseCaseTests
         _repository = new Mock<IGameSessionRepository>();
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
-<<<<<<< HEAD
-        _distributedLockService = new Mock<IDistributedLockService>();
-        _logger = new Mock<ILogger<ProgressSceneUseCase>>();
-        _useCase = new ProgressSceneUseCase(
-            _repository.Object, _scenarioRepository.Object,
-            _unitOfWork.Object, _distributedLockService.Object, _logger.Object);
-=======
         _lockService = new Mock<IDistributedLockService>();
         _logger = new Mock<ILogger<ProgressSceneUseCase>>();
         _useCase = new ProgressSceneUseCase(
             _repository.Object, _scenarioRepository.Object,
             _unitOfWork.Object, _lockService.Object, _logger.Object);
->>>>>>> origin/dev
     }
 
     [Fact]

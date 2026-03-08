@@ -10,7 +10,7 @@ using Mystira.StoryGenerator.Contracts.Agents;
 using Mystira.StoryGenerator.Domain.Agents;
 using Mystira.StoryGenerator.Domain.Services;
 using Mystira.StoryGenerator.Infrastructure.Agents;
-using Mystira.StoryGenerator.Application.Services;
+
 using Xunit;
 
 namespace Mystira.StoryGenerator.Infrastructure.Tests;

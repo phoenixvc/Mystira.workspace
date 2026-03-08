@@ -9,7 +9,7 @@ using Mystira.StoryGenerator.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Domain.Services;
-using Mystira.StoryGenerator.Application.Services;
+
 using Xunit;
 using Azure;
 using Azure.Core;
