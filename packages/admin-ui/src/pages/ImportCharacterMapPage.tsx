@@ -12,14 +12,16 @@ function ImportCharacterMapPage() {
 
   const uploadMutation = useMutation({
     mutationFn: (file: File) => characterMapsApi.uploadCharacterMap(file),
-    onSuccess: data => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["characterMaps"] });
       showToast.success(data.message || "Character map uploaded successfully!");
       navigate("/admin/character-maps");
     },
-    onError: error => {
+    onError: (error) => {
       showToast.error(
-        error instanceof Error ? error.message : "Failed to upload character map file"
+        error instanceof Error
+          ? error.message
+          : "Failed to upload character map file"
       );
       setUploading(false);
     },
@@ -51,7 +53,10 @@ function ImportCharacterMapPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">📥 Import Character Map</h1>
-        <Link to="/admin/character-maps" className="btn btn-sm btn-outline-secondary">
+        <Link
+          to="/admin/character-maps"
+          className="btn btn-sm btn-outline-secondary"
+        >
           <i className="bi bi-arrow-left"></i> Back to Character Maps
         </Link>
       </div>
@@ -71,19 +76,26 @@ function ImportCharacterMapPage() {
                 disabled={uploading}
                 required
               />
-              <div className="form-text">Select a character map file to upload</div>
+              <div className="form-text">
+                Select a character map file to upload
+              </div>
             </div>
 
             {file && (
               <div className="mb-3">
                 <div className="alert alert-info">
-                  <strong>Selected file:</strong> {file.name} ({(file.size / 1024).toFixed(2)} KB)
+                  <strong>Selected file:</strong> {file.name} (
+                  {(file.size / 1024).toFixed(2)} KB)
                 </div>
               </div>
             )}
 
             <div className="d-flex gap-2">
-              <button type="submit" className="btn btn-primary" disabled={!file || uploading}>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={!file || uploading}
+              >
                 {uploading ? (
                   <>
                     <span

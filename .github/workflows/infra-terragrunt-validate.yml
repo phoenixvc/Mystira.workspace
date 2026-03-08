@@ -231,6 +231,7 @@ jobs:
           Security scan completed. Check the Security tab for detailed findings.
           EOF
 
+
   # ============================================
   # Validate Shared Infrastructure
   # ============================================
@@ -368,6 +369,7 @@ jobs:
     if: ${{ vars.ENABLE_CHECKOV != 'false' }}
     steps:
       - uses: actions/checkout@v6
+
       - name: Run Checkov
         if: ${{ vars.ENABLE_CHECKOV != 'false' }}
         uses: bridgecrewio/checkov-action@v12

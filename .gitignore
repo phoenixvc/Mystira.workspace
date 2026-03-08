@@ -28,18 +28,6 @@ target/
 pkg/
 wasm-pack.log
 
-# .NET build outputs
-bin/
-obj/
-*.nupkg
-*.snupkg
-.nuget/
-project.lock.json
-
-# Rust / WASM
-target/
-pkg/
-wasm-pack.log
 
 # Cache
 .cache/
@@ -55,6 +43,7 @@ wasm-pack.log
 # IDE - JetBrains
 .idea/
 *.DotSettings.user
+
 
 # IDE - Visual Studio
 .vs/
@@ -78,6 +67,51 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
+# VS Code / Cursor / Windsurf - Keep shared settings, ignore user-specific
+.vscode/*
+**/.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+
+# Cursor - Keep rules
+.cursor/*
+!.cursor/rules
+
+# Windsurf - Keep rules
+.windsurf/*
+!.windsurf/rules
+
+# Claude - User-specific
+.claude/
+
+# PyCharm / Rider / JetBrains - Keep shared settings, ignore user-specific
+.idea/*
+**/.idea/*
+!.idea/modules.xml
+!.idea/misc.xml
+!.idea/*.iml
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+!.idea/prettier.xml
+!.idea/jsLinters/
+!.idea/vcs.xml
+!.idea/runConfigurations/
+!.idea/.idea.Mystira/
+# User-specific JetBrains files (always ignore)
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/shelf/
+.idea/*.iws
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
+.idea/.idea.Mystira/.idea/workspace.xml
+
 # Logs
 logs/
 *.log
@@ -90,7 +124,13 @@ lerna-debug.log*
 # Testing
 coverage/
 .nyc_output/
+*.trx
+cypress/videos/
+cypress/screenshots/
 TestResults/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
 
 # Blockchain - Hardhat
 artifacts/
@@ -211,6 +251,17 @@ temp/
 *.tar.gz
 yarn.lock
 
+# Package-scoped migration/legacy artifacts
+packages/app/packages/
+packages/app/tools/
+packages/app/**/tools/
+packages/devhub/Mystira.DevHub/Mystira.App.*/
+packages/devhub/Mystira.DevHub/src/Mystira.App.*/
+packages/devhub/Mystira.DevHub/.github/
+packages/devhub/Mystira.DevHub/tools/
+packages/devhub/Mystira.DevHub/MEDIA_*.md
+packages/devhub/Mystira.DevHub/PWA_*.md
+packages/devhub/Mystira.DevHub/SRI_*.md
 # Temporary documentation files
 CHAIN_COMPARISON.md
 REPO_SETUP_COMPLETE.md

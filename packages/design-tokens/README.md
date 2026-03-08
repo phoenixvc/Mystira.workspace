@@ -2,6 +2,8 @@
 
 Unified design tokens for the Mystira platform. Provides consistent colors, typography, spacing, and component styles across all frontend packages.
 
+> **Note:** For the comprehensive philosophical and structural design guide, please refer to the [Mystira Unified Design Language](./Mystira-Design-System.md) documentation.
+
 ## Installation
 
 ```bash

@@ -59,24 +59,6 @@ public class AvatarsControllerTests
         returnedAvatars.AgeGroupAvatars.Should().ContainKey("6-9");
     }
 
-    [Fact]
-    public async Task GetAvatars_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<AvatarResponse>(
-                It.IsAny<GetAvatarsQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetAvatars();
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -152,24 +134,6 @@ public class AvatarsControllerTests
         errorResponse.Message.Should().Contain("No avatars found");
     }
 
-    [Fact]
-    public async Task GetAvatarsByAgeGroup_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<AvatarConfigurationResponse?>(
-                It.IsAny<GetAvatarsByAgeGroupQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetAvatarsByAgeGroup("6-9");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     [Theory]
     [InlineData("1-2")]

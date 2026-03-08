@@ -30,21 +30,9 @@ public class AvatarsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<AvatarResponse>> GetAvatars()
     {
-        try
-        {
-            var query = new GetAvatarsQuery();
-            var avatars = await _bus.InvokeAsync<AvatarResponse>(query);
-            return Ok(avatars);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting avatars");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while getting avatars",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetAvatarsQuery();
+        var avatars = await _bus.InvokeAsync<AvatarResponse>(query);
+        return Ok(avatars);
     }
 
     /// <summary>
@@ -53,39 +41,27 @@ public class AvatarsController : ControllerBase
     [HttpGet("{ageGroup}")]
     public async Task<ActionResult<AvatarConfigurationResponse>> GetAvatarsByAgeGroup(string ageGroup)
     {
-        try
+        if (string.IsNullOrWhiteSpace(ageGroup))
         {
-            if (string.IsNullOrWhiteSpace(ageGroup))
+            return BadRequest(new ErrorResponse
             {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Age group is required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var query = new GetAvatarsByAgeGroupQuery(ageGroup);
-            var avatars = await _bus.InvokeAsync<AvatarConfigurationResponse?>(query);
-
-            if (avatars == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"No avatars found for age group: {ageGroup}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(avatars);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting avatars for age group: {AgeGroup}", ageGroup);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while getting avatars",
+                Message = "Age group is required",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var query = new GetAvatarsByAgeGroupQuery(ageGroup);
+        var avatars = await _bus.InvokeAsync<AvatarConfigurationResponse?>(query);
+
+        if (avatars == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"No avatars found for age group: {ageGroup}",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return Ok(avatars);
     }
 }

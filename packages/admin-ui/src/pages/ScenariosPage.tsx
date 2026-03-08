@@ -76,7 +76,9 @@ function ScenariosPage() {
       <ErrorAlert
         error={error}
         title="Error loading scenarios"
-        onRetry={() => queryClient.invalidateQueries({ queryKey: ["scenarios"] })}
+        onRetry={() =>
+          queryClient.invalidateQueries({ queryKey: ["scenarios"] })
+        }
       />
     );
   }
@@ -99,13 +101,22 @@ function ScenariosPage() {
         <h1 className="h2">📚 Scenarios</h1>
         <div className="btn-toolbar mb-2 mb-md-0">
           <div className="btn-group me-2">
-            <Link to="/admin/scenarios/create" className="btn btn-sm btn-primary">
+            <Link
+              to="/admin/scenarios/create"
+              className="btn btn-sm btn-primary"
+            >
               <i className="bi bi-plus-circle"></i> Create
             </Link>
-            <Link to="/admin/scenarios/import" className="btn btn-sm btn-outline-primary">
+            <Link
+              to="/admin/scenarios/import"
+              className="btn btn-sm btn-outline-primary"
+            >
               <i className="bi bi-upload"></i> Import
             </Link>
-            <Link to="/admin/scenarios/validate" className="btn btn-sm btn-outline-success">
+            <Link
+              to="/admin/scenarios/validate"
+              className="btn btn-sm btn-outline-success"
+            >
               <i className="bi bi-check-circle"></i> Validate
             </Link>
           </div>
@@ -114,7 +125,7 @@ function ScenariosPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={value => {
+        onChange={(value) => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -137,10 +148,12 @@ function ScenariosPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.scenarios.map(scenario => (
+                    {data.scenarios.map((scenario) => (
                       <tr key={scenario.id}>
                         <td>
-                          <Link to={`/admin/scenarios/edit/${scenario.id}`}>{scenario.title}</Link>
+                          <Link to={`/admin/scenarios/edit/${scenario.id}`}>
+                            {scenario.title}
+                          </Link>
                         </td>
                         <td>{scenario.ageRating}</td>
                         <td>
@@ -171,7 +184,11 @@ function ScenariosPage() {
                 </table>
               </div>
 
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </>
           ) : (
             <div className="text-center py-5">
@@ -180,7 +197,10 @@ function ScenariosPage() {
                 <Link to="/admin/scenarios/create" className="btn btn-primary">
                   Create Your First Scenario
                 </Link>
-                <Link to="/admin/scenarios/import" className="btn btn-outline-primary">
+                <Link
+                  to="/admin/scenarios/import"
+                  className="btn btn-outline-primary"
+                >
                   Import Scenario
                 </Link>
               </div>

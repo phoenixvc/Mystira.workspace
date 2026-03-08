@@ -1,5 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
 export type Theme = "light" | "dark" | "system";
 
@@ -38,7 +44,8 @@ export function ThemeProvider({
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
     const applyTheme = () => {
-      const isDark = theme === "dark" || (theme === "system" && mediaQuery.matches);
+      const isDark =
+        theme === "dark" || (theme === "system" && mediaQuery.matches);
 
       root.classList.toggle("dark", isDark);
       root.setAttribute("data-bs-theme", isDark ? "dark" : "light");

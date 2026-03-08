@@ -51,11 +51,11 @@ module "entra_id" {
 
 ### Environment-Specific Redirect URIs
 
-| Environment | Redirect URIs                                           |
-| ----------- | ------------------------------------------------------- |
+| Environment | Redirect URIs |
+| ----------- | ------------- |
 | Dev         | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
-| Staging     | `https://admin.staging.mystira.app/*`                   |
-| Prod        | `https://admin.mystira.app/*`                           |
+| Staging     | `https://admin.staging.mystira.app/*` |
+| Prod        | `https://admin.mystira.app/*` |
 
 ## External Entities
 

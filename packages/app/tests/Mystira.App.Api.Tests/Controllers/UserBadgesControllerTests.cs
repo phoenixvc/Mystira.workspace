@@ -94,30 +94,7 @@ public class UserBadgesControllerTests
         errorResponse.Message.Should().Contain("Badge not found");
     }
 
-    [Fact]
-    public async Task AwardBadge_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        var request = new AwardBadgeRequest
-        {
-            UserProfileId = "profile-123",
-            BadgeConfigurationId = "badge-config-456"
-        };
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<UserBadge>(
-                It.IsAny<AwardBadgeCommand>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.AwardBadge(request);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -150,24 +127,7 @@ public class UserBadgesControllerTests
         returnedBadges.Should().HaveCount(2);
     }
 
-    [Fact]
-    public async Task GetUserBadges_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<UserBadge>>(
-                It.IsAny<GetUserBadgesQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetUserBadges("profile-123");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -201,24 +161,7 @@ public class UserBadgesControllerTests
         returnedBadges[0].Axis.Should().Be(axis);
     }
 
-    [Fact]
-    public async Task GetUserBadgesForAxis_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<UserBadge>>(
-                It.IsAny<GetUserBadgesForAxisQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetUserBadgesForAxis("profile-123", "honesty");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -262,24 +205,7 @@ public class UserBadgesControllerTests
         result.Result.Should().BeOfType<OkObjectResult>();
     }
 
-    [Fact]
-    public async Task HasUserEarnedBadge_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<bool>(
-                It.IsAny<HasUserEarnedBadgeQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.HasUserEarnedBadge("profile-123", "badge-config-456");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -313,24 +239,7 @@ public class UserBadgesControllerTests
         returnedStats["honesty"].Should().Be(5);
     }
 
-    [Fact]
-    public async Task GetBadgeStatistics_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<Dictionary<string, int>>(
-                It.IsAny<GetBadgeStatisticsQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetBadgeStatistics("profile-123");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -383,24 +292,7 @@ public class UserBadgesControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetBadgesForAccount_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<UserBadge>>(
-                It.IsAny<GetBadgesForAccountByEmailQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetBadgesForAccount("test@example.com");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -433,24 +325,7 @@ public class UserBadgesControllerTests
         returnedStats["total"].Should().Be(15);
     }
 
-    [Fact]
-    public async Task GetBadgeStatisticsForAccount_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<Dictionary<string, int>>(
-                It.IsAny<GetBadgeStatisticsForAccountByEmailQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetBadgeStatisticsForAccount("test@example.com");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 }

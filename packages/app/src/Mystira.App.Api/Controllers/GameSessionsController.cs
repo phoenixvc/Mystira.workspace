@@ -44,49 +44,37 @@ public class GameSessionsController : ControllerBase
     [Authorize] // Requires authentication
     public async Task<ActionResult<GameSession>> StartSession([FromBody] StartGameSessionRequest request)
     {
-        try
+        if (!ModelState.IsValid)
         {
-            if (!ModelState.IsValid)
+            return BadRequest(new ErrorResponse
             {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Validation failed",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var accountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(accountId))
-            {
-                return Unauthorized(new ErrorResponse
-                {
-                    Message = "Account ID not found in authentication claims",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var command = new StartGameSessionCommand(request);
-            var session = await _bus.InvokeAsync<GameSession?>(command);
-            if (session == null)
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Failed to start game session. Check request parameters.",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return CreatedAtAction(nameof(GetSession), new { id = session.Id }, session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error starting session");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while starting session",
+                Message = "Validation failed",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var accountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(accountId))
+        {
+            return Unauthorized(new ErrorResponse
+            {
+                Message = "Account ID not found in authentication claims",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        var command = new StartGameSessionCommand(request);
+        var session = await _bus.InvokeAsync<GameSession?>(command);
+        if (session == null)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "Failed to start game session. Check request parameters.",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return CreatedAtAction(nameof(GetSession), new { id = session.Id }, session);
     }
 
     /// <summary>
@@ -96,40 +84,28 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<GameSession>> PauseSession(string id)
     {
-        try
+        var accountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(accountId))
         {
-            var accountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(accountId))
+            return Unauthorized(new ErrorResponse
             {
-                return Unauthorized(new ErrorResponse
-                {
-                    Message = "Account ID not found in authentication claims",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var command = new PauseGameSessionCommand(id);
-            var session = await _bus.InvokeAsync<GameSession?>(command);
-            if (session == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found or cannot be paused: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error pausing session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while pausing session",
+                Message = "Account ID not found in authentication claims",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var command = new PauseGameSessionCommand(id);
+        var session = await _bus.InvokeAsync<GameSession?>(command);
+        if (session == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Session not found or cannot be paused: {id}",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return Ok(session);
     }
 
     /// <summary>
@@ -139,40 +115,28 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<GameSession>> ResumeSession(string id)
     {
-        try
+        var accountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(accountId))
         {
-            var accountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(accountId))
+            return Unauthorized(new ErrorResponse
             {
-                return Unauthorized(new ErrorResponse
-                {
-                    Message = "Account ID not found in authentication claims",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var command = new ResumeGameSessionCommand(id);
-            var session = await _bus.InvokeAsync<GameSession?>(command);
-            if (session == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found or cannot be resumed: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error resuming session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while resuming session",
+                Message = "Account ID not found in authentication claims",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var command = new ResumeGameSessionCommand(id);
+        var session = await _bus.InvokeAsync<GameSession?>(command);
+        if (session == null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Session not found or cannot be resumed: {id}",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return Ok(session);
     }
 
     /// <summary>
@@ -182,30 +146,18 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<GameSession>> EndSession(string id)
     {
-        try
+        var command = new EndGameSessionCommand(id);
+        var session = await _bus.InvokeAsync<GameSession?>(command);
+        if (session == null)
         {
-            var command = new EndGameSessionCommand(id);
-            var session = await _bus.InvokeAsync<GameSession?>(command);
-            if (session == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error ending session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while ending session",
+                Message = $"Session not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(session);
     }
 
     /// <summary>
@@ -215,23 +167,11 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<object>> FinalizeSession(string id)
     {
-        try
-        {
-            var command = new FinalizeGameSessionCommand(id);
-            var result = await _bus.InvokeAsync<object>(command);
+        var command = new FinalizeGameSessionCommand(id);
+        var result = await _bus.InvokeAsync<object>(command);
 
-            // Always return 200 with the aggregation result; if session not found, Awards will be empty
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error finalizing session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while finalizing session",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        // Always return 200 with the aggregation result; if session not found, Awards will be empty
+        return Ok(result);
     }
 
     /// <summary>
@@ -241,36 +181,24 @@ public class GameSessionsController : ControllerBase
     [Authorize] // Requires authentication
     public async Task<ActionResult<List<GameSessionResponse>>> GetSessionsByAccount(string accountId)
     {
-        try
+        var requestingAccountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(requestingAccountId))
         {
-            var requestingAccountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(requestingAccountId))
+            return Unauthorized(new ErrorResponse
             {
-                return Unauthorized(new ErrorResponse
-                {
-                    Message = "Account ID not found in authentication claims",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            if (requestingAccountId != accountId && !User.IsInRole("Admin"))
-            {
-                return Forbid();
-            }
-
-            var query = new GetSessionsByAccountQuery(accountId);
-            var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
-            return Ok(sessions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting sessions for account {AccountId}", LogAnonymizer.HashId(accountId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching account sessions",
+                Message = "Account ID not found in authentication claims",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        if (requestingAccountId != accountId && !User.IsInRole("Admin"))
+        {
+            return Forbid();
+        }
+
+        var query = new GetSessionsByAccountQuery(accountId);
+        var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
+        return Ok(sessions);
     }
 
     /// <summary>
@@ -326,15 +254,6 @@ public class GameSessionsController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error making choice in session {SessionId}", request.SessionId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while making choice",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
     }
 
     /// <summary>
@@ -343,30 +262,18 @@ public class GameSessionsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<GameSession>> GetSession(string id)
     {
-        try
+        var query = new GetGameSessionQuery(id);
+        var session = await _bus.InvokeAsync<GameSession?>(query);
+        if (session == null)
         {
-            var query = new GetGameSessionQuery(id);
-            var session = await _bus.InvokeAsync<GameSession?>(query);
-            if (session == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching session",
+                Message = $"Session not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(session);
     }
 
     /// <summary>
@@ -375,21 +282,9 @@ public class GameSessionsController : ControllerBase
     [HttpGet("profile/{profileId}")]
     public async Task<ActionResult<List<GameSessionResponse>>> GetSessionsByProfile(string profileId)
     {
-        try
-        {
-            var query = new GetSessionsByProfileQuery(profileId);
-            var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
-            return Ok(sessions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting sessions for profile {ProfileId}", LogAnonymizer.HashId(profileId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching profile sessions",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetSessionsByProfileQuery(profileId);
+        var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
+        return Ok(sessions);
     }
 
     /// <summary>
@@ -399,21 +294,9 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<List<GameSessionResponse>>> GetInProgressSessions(string accountId)
     {
-        try
-        {
-            var query = new GetInProgressSessionsQuery(accountId);
-            var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
-            return Ok(sessions);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting in-progress sessions for account {AccountId}", LogAnonymizer.HashId(accountId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching in-progress sessions",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetInProgressSessionsQuery(accountId);
+        var sessions = await _bus.InvokeAsync<List<GameSessionResponse>>(query);
+        return Ok(sessions);
     }
 
     /// <summary>
@@ -423,30 +306,18 @@ public class GameSessionsController : ControllerBase
     [Authorize] // Requires authentication
     public async Task<ActionResult<SessionStatsResponse>> GetSessionStats(string id)
     {
-        try
+        var query = new GetSessionStatsQuery(id);
+        var stats = await _bus.InvokeAsync<SessionStatsResponse?>(query);
+        if (stats == null)
         {
-            var query = new GetSessionStatsQuery(id);
-            var stats = await _bus.InvokeAsync<SessionStatsResponse?>(query);
-            if (stats == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(stats);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting session stats {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching session stats",
+                Message = $"Session not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(stats);
     }
 
     /// <summary>
@@ -455,21 +326,9 @@ public class GameSessionsController : ControllerBase
     [HttpGet("{id}/achievements")]
     public async Task<ActionResult<List<SessionAchievement>>> GetAchievements(string id)
     {
-        try
-        {
-            var query = new GetAchievementsQuery(id);
-            var achievements = await _bus.InvokeAsync<List<SessionAchievement>>(query);
-            return Ok(achievements);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting achievements for session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while checking achievements",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetAchievementsQuery(id);
+        var achievements = await _bus.InvokeAsync<List<SessionAchievement>>(query);
+        return Ok(achievements);
     }
 
     /// <summary>
@@ -521,15 +380,6 @@ public class GameSessionsController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error progressing scene in session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while progressing scene",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
     }
 
     /// <summary>
@@ -538,39 +388,26 @@ public class GameSessionsController : ControllerBase
     [HttpPost("complete-scenario")]
     public async Task<ActionResult> CompleteScenarioForAccount([FromBody] CompleteScenarioRequest request)
     {
-        try
+        if (string.IsNullOrEmpty(request.AccountId) || string.IsNullOrEmpty(request.ScenarioId))
         {
-            if (string.IsNullOrEmpty(request.AccountId) || string.IsNullOrEmpty(request.ScenarioId))
+            return BadRequest(new ErrorResponse
             {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "AccountId and ScenarioId are required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var command = new AddCompletedScenarioCommand(request.AccountId, request.ScenarioId);
-            var success = await _bus.InvokeAsync<bool>(command);
-            if (!success)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Account not found: {request.AccountId}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error completing scenario {ScenarioId} for account {AccountId}",
-                request.ScenarioId, LogAnonymizer.HashId(request.AccountId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while completing scenario",
+                Message = "AccountId and ScenarioId are required",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var command = new AddCompletedScenarioCommand(request.AccountId, request.ScenarioId);
+        var success = await _bus.InvokeAsync<bool>(command);
+        if (!success)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Account not found: {request.AccountId}",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        return Ok();
     }
 }

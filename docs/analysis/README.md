@@ -1,6 +1,7 @@
 # Analysis Documentation
 
 This directory contains analysis documents for repository structure, extraction decisions, architectural evaluations, and UI/UX quality assessments.
+- [Repository Extraction Analysis](./repository-extraction-analysis.md) - Analysis of all repositories and extraction recommendations
 
 ## UI/UX Analysis Suite
 
@@ -27,6 +28,7 @@ Comprehensive evaluation of Mystira's user interface across both applications (P
 ---
 
 ## Architecture & Migration Analysis
+
 
 - [App Components Extraction](./app-components-extraction.md) - Analysis of Admin API/Public API extraction decision
 - [Monorepo Migration Parity Matrix](./monorepo-migration-parity-matrix.md) - Legacy repo to monorepo artifact parity snapshot and recovery gaps

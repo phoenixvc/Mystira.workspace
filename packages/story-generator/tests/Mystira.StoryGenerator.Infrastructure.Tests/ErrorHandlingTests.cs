@@ -9,6 +9,7 @@ using Mystira.StoryGenerator.Infrastructure.Agents;
 using Mystira.StoryGenerator.Application.Services;
 using Mystira.StoryGenerator.Application.Services.Prompting;
 using Mystira.StoryGenerator.Domain.Services;
+
 using Xunit;
 using Azure;
 using Azure.Core;
@@ -95,13 +96,13 @@ public class ErrorHandlingTests : IDisposable
 
         // Act & Assert - Should eventually succeed with retry
         var result = await _orchestrator.InitializeSessionAsync(sessionId, knowledgeMode, ageGroup);
-        
+
         Assert.Equal(sessionId, result.SessionId);
         Assert.NotNull(result.ThreadId);
-        
+
         // Verify retry occurred
         _mockFoundryClient.Verify(
-            x => x.CreateThreadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()), 
+            x => x.CreateThreadAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()),
             Times.AtLeast(2));
     }
 
@@ -163,7 +164,7 @@ public class ErrorHandlingTests : IDisposable
         // Assert
         Assert.True(success);
         Assert.Equal("Story generated successfully", message);
-        
+
         // Verify session was updated properly
         Assert.NotNull(updatedSession);
         Assert.Equal(StorySessionStage.Validating, updatedSession.Stage);
@@ -174,7 +175,7 @@ public class ErrorHandlingTests : IDisposable
     {
         // Arrange
         var sessionId = "test-session-rate-limit";
-        
+
         var session = new StorySession
         {
             SessionId = sessionId,
@@ -191,7 +192,7 @@ public class ErrorHandlingTests : IDisposable
 
         // Simulate rate limiting error
         var rateLimitException = new RequestFailedException(429, "Rate limit exceeded", "TooManyRequests", null);
-        
+
         _mockFoundryClient
             .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ThrowsAsync(rateLimitException);
@@ -202,7 +203,7 @@ public class ErrorHandlingTests : IDisposable
 
         // Verify error event was published
         _mockEventPublisher.Verify(
-            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt => 
+            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt =>
                 evt.Type == AgentStreamEvent.EventType.Error &&
                 evt.Phase == "Evaluating")),
             Times.Once);
@@ -213,7 +214,7 @@ public class ErrorHandlingTests : IDisposable
     {
         // Arrange
         var sessionId = "test-session-malformed";
-        
+
         var session = new StorySession
         {
             SessionId = sessionId,
@@ -232,7 +233,7 @@ public class ErrorHandlingTests : IDisposable
 
         // Simulate malformed response from refiner
         var malformedResponse = "This is not valid JSON {{{ invalid json response";
-        
+
         _mockFoundryClient
             .Setup(x => x.CreateRunAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<BinaryData?>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new RunSubmissionResult { RunId = "run-malformed", Status = "running" });
@@ -262,14 +263,14 @@ public class ErrorHandlingTests : IDisposable
         // Assert
         Assert.False(success);
         Assert.Contains("Refinement failed", message);
-        
+
         // Verify session was marked as failed
         Assert.NotNull(failedSession);
         Assert.Equal(StorySessionStage.Failed, failedSession.Stage);
-        
+
         // Verify detailed error was logged
         _mockEventPublisher.Verify(
-            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt => 
+            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt =>
                 evt.Type == AgentStreamEvent.EventType.Error &&
                 evt.Phase == "Refining")),
             Times.Once);
@@ -362,7 +363,7 @@ public class ErrorHandlingTests : IDisposable
     {
         // Arrange
         var sessionId = "test-session-not-found";
-        
+
         _mockSessionRepository
             .Setup(x => x.GetAsync(sessionId, It.IsAny<CancellationToken>()))
             .ReturnsAsync((StorySession?)null);
@@ -372,7 +373,7 @@ public class ErrorHandlingTests : IDisposable
         Assert.False(genSuccess);
         Assert.Contains("Session not found", genMessage);
 
-        // Act & Assert for EvaluateStoryAsync  
+        // Act & Assert for EvaluateStoryAsync
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             await _orchestrator.EvaluateStoryAsync(sessionId, CancellationToken.None));
 
@@ -430,14 +431,14 @@ public class ErrorHandlingTests : IDisposable
         Assert.False(success);
         Assert.Contains("Generation failed", message);
         Assert.Contains(runErrorMessage, message);
-        
+
         // Verify session was marked as failed
         Assert.NotNull(failedSession);
         Assert.Equal(StorySessionStage.Failed, failedSession.Stage);
-        
+
         // Verify error event includes context
         _mockEventPublisher.Verify(
-            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt => 
+            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt =>
                 evt.Type == AgentStreamEvent.EventType.Error &&
                 evt.Phase == "Writing")),
             Times.Once);
@@ -503,7 +504,7 @@ public class ErrorHandlingTests : IDisposable
 
         // Verify token usage event was published
         _mockEventPublisher.Verify(
-            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt => 
+            x => x.PublishEventAsync(sessionId, It.Is<AgentStreamEvent>(evt =>
                 evt.Type == AgentStreamEvent.EventType.GenerationComplete)),
             Times.Once);
     }

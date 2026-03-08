@@ -1,0 +1,262 @@
+@page "/vault/trophy-room"
+@layout Mystira.App.PWA.Shared.EmptyLayout
+
+<HeadContent>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet" />
+</HeadContent>
+
+<div class="trophy-layout dark">
+    <div class="trophy-container cosmic-gradient">
+        
+        <!-- Header -->
+        <header class="trophy-header glass-panel">
+            <div class="header-brand">
+                <div class="brand-icon text-gold">
+                    <span class="material-symbols-outlined">auto_awesome</span>
+                </div>
+                <h2>Mystira Cosmic Museum</h2>
+            </div>
+            
+            <div class="header-actions">
+                <nav class="header-nav">
+                    <a href="#">The Archive</a>
+                    <a href="#">Starlight Market</a>
+                    <a href="#">Relics</a>
+                </nav>
+                <div class="user-profile">
+                    <div class="user-info">
+                        <span class="user-role">Navigator</span>
+                        <span class="user-name">Vesper Starfall</span>
+                    </div>
+                    <div class="user-avatar-ring">
+                        <div class="user-avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCq_b1gEZgYunZ-XnaBRxVEYHAT9e_cKmwhr9u9BcMwg5OX3oqWsVe-JeuC9of7lLzpJeB0VwCjgE_lmdCdhetakEEP_S3GG48n8gSp9nJJOMLVKv9OlpygqpA-e2icGo961UrFJdQHZDnsLtpbv4GyRk1gHvutEN6EIk0p-ZvrO9v9e76UJwzypVFscMXhTCBma708fmYQP9vACyjagegH4FBtJ1YOIlEK-HFOPQdw2seawzqo6XyzYbXg76jGZvRyH1RConDOi5Y')"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="trophy-main">
+            <!-- Left Sidebar -->
+            <aside class="trophy-sidebar-left">
+                <div class="sidebar-panel">
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <p class="metric-label">Sparkles</p>
+                            <div class="metric-value-row">
+                                <span class="material-symbols-outlined text-gold">flare</span>
+                                <p class="metric-value">12,450</p>
+                            </div>
+                            <p class="metric-subtext success">+15% from last quest</p>
+                        </div>
+                        
+                        <div class="metric-card">
+                            <p class="metric-label">Current Level</p>
+                            <div class="metric-value-row">
+                                <span class="material-symbols-outlined text-gold">military_tech</span>
+                                <p class="metric-value">Lvl 42</p>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 65%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <nav class="sidebar-nav">
+                        <a href="#" class="nav-btn primary">
+                            <span class="material-symbols-outlined">dashboard</span>
+                            <span>Dashboard</span>
+                        </a>
+                        <a href="#" class="nav-btn">
+                            <span class="material-symbols-outlined">database</span>
+                            <span>Specimens</span>
+                        </a>
+                        <a href="#" class="nav-btn">
+                            <span class="material-symbols-outlined">shopping_cart</span>
+                            <span>Marketplace</span>
+                        </a>
+                        <a href="/vault/treasury" class="nav-btn">
+                            <span class="material-symbols-outlined">diamond</span>
+                            <span>Treasury Vault</span>
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Center Stage -->
+            <section class="trophy-center-stage">
+                <div class="stage-header">
+                    <h2>The Specimen Archive</h2>
+                    <div class="stage-controls">
+                        <button class="icon-btn"><span class="material-symbols-outlined">chevron_left</span></button>
+                        <button class="icon-btn"><span class="material-symbols-outlined">chevron_right</span></button>
+                    </div>
+                </div>
+
+                <div class="stage-presentation">
+                    <!-- Floating Orbs -->
+                    <div class="floating-orb orb-1"><span class="material-symbols-outlined">auto_awesome_motion</span></div>
+                    <div class="floating-orb orb-2"><span class="material-symbols-outlined">magic_button</span></div>
+                    <div class="floating-orb orb-3"><span class="material-symbols-outlined">star</span></div>
+
+                    <!-- Main Artifact Character -->
+                    <div class="stage-artifact-container">
+                        <div class="stage-artifact" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD7xLaVRGIWCnrTdZY1LZecg-acE6tv6cgIbGk0T00PsvSPIX33WJ-bsPB05IcyieixfXWFr-NrDBj4E07e-9VIofYlIViooZqSGew3V4glj1b8cDUZcCgPNrTVQZQBsHTKK_PkyIxeIFwJm8igd7UIF8jpGGNkOTvVn3ExTWIVCmmkz-TR87uKnlOs2hA5OPQmsSFEnHX5I19OntcH1JQHBKgsAhuaSQ59l-gCRJR8mtl4DaLJ1r2YxZ8gAjiCEExJU0ttXcw2at0');"></div>
+                        
+                        <!-- 360 Plinth Base -->
+                        <div class="plinth-container">
+                            <div class="plinth-top-surface">
+                                <div class="plinth-glow"></div>
+                            </div>
+                            <div class="plinth-base">
+                                <div class="plinth-trim"></div>
+                                <div class="plinth-controls">
+                                    <span class="material-symbols-outlined blink">keyboard_double_arrow_left</span>
+                                    <div class="plinth-labels">
+                                        <span class="primary-label">360° Inspection</span>
+                                        <span class="secondary-label">Sensors Active</span>
+                                    </div>
+                                    <span class="material-symbols-outlined blink">keyboard_double_arrow_right</span>
+                                </div>
+                            </div>
+                            <div class="plinth-floor-shadow"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Sidebar -->
+            <aside class="trophy-sidebar-right">
+                <div class="sidebar-panel">
+                    <div class="panel-header">
+                        <h3>Astral Voyager</h3>
+                        <p>Legendary Specimen #0842</p>
+                    </div>
+
+                    <div class="stats-container">
+                        <div class="stat-group">
+                            <div class="stat-header">
+                                <span>Celestial Power</span>
+                                <span class="stat-value text-gold">92%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill gold" style="width: 92%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-group">
+                            <div class="stat-header">
+                                <span>Void Resistance</span>
+                                <span class="stat-value text-primary">78%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill primary" style="width: 78%"></div>
+                            </div>
+                        </div>
+
+                        <div class="gear-section">
+                            <h4>Equipped Gear</h4>
+                            <div class="gear-grid">
+                                <div class="gear-slot"><span class="material-symbols-outlined">shield</span></div>
+                                <div class="gear-slot"><span class="material-symbols-outlined">swords</span></div>
+                                <div class="gear-slot"><span class="material-symbols-outlined">auto_stories</span></div>
+                                <div class="gear-slot"><span class="material-symbols-outlined">visibility</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn-equip">Equip Specimen</button>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Scrolling Footer (Starlight Market) -->
+        <footer class="trophy-footer">
+            <div class="footer-header">
+                <div class="header-title-group">
+                    <h3>Starlight Market</h3>
+                    <span class="badge">New Drops</span>
+                </div>
+                <button class="view-all-btn">
+                    View All Treasures <span class="material-symbols-outlined">arrow_forward</span>
+                </button>
+            </div>
+            
+            <div class="market-scroll-container">
+                <!-- Market Card 1 -->
+                <div class="market-card hover-gold">
+                    <div class="card-pin text-gold"><span class="material-symbols-outlined">workspace_premium</span></div>
+                    <div class="card-content-top">
+                        <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC7GMzb3Z1kBtAXb6l2CRenqDQb8Is-wAQDIUjTNx9p5cSbZUGGq9tiBfGM2cndpnDyLK7ryIIUbFTWdSZK3VsKmkNSSp7KGGMZHe0y_DVm0HUaY_taKvorh3PstV8H9iabJtk5VboNX8X-Js9Yll0L3ZrAuTq6I-h1-an8BsyQs5YxAjerc7lxIQHSFs3PHOeecV4RAlFfoEvsngve_0akN8wkSGqJYXrN7UgA61IpmCeS3QiEcXMi1q9hN3Na_F6QiO-29Qw-iy0')"></div>
+                        <div class="card-info">
+                            <span class="location-tag primary">Found in: Echoes of Void</span>
+                            <p class="item-name">Nebula Blade</p>
+                            <div class="item-cost">
+                                <span class="material-symbols-outlined">flare</span>
+                                <span>1,200</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="item-lore">Forged in the heart of a dying star, this blade hums with the resonance of a thousand lost souls.</p>
+                    <button class="btn-preview">Preview</button>
+                </div>
+
+                <!-- Market Card 2 -->
+                <div class="market-card hover-teal">
+                    <div class="card-pin text-teal"><span class="material-symbols-outlined">stars</span></div>
+                    <div class="card-content-top">
+                        <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-ppu8_HotTxkWax9WhJ7u0_UmWbl2Hbt-WezZMa_lLGDGfJS3WnUj6LGRw1qOczHuH2RZUIGVJwMBnqW1F4ARt-g8QcEiJs8ccSRjufD7qIG6VEKrVk0To5sbkJUjbQ48OAsEKb1gthOr2A_iEHzol0GhmhoUP-LzVkZUacyRik_3XisMl11g-OfylIg7YBjxisBFGQITKG-jaDZt1YuhWenaqIC2WQEL_XEtR8VFmaFaxFvQF6lKQjTWJ6YTPkZa_uXkksB_uKc')"></div>
+                        <div class="card-info">
+                            <span class="location-tag teal">Found in: Astral Odyssey</span>
+                            <p class="item-name">Cosmic Cloak</p>
+                            <div class="item-cost">
+                                <span class="material-symbols-outlined">flare</span>
+                                <span>850</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="item-lore">Woven from strands of dark matter, it renders the wearer invisible to the eyes of celestial guardians.</p>
+                    <button class="btn-preview">Preview</button>
+                </div>
+
+                <!-- Market Card 3 -->
+                <div class="market-card hover-gold">
+                    <div class="card-content-top">
+                        <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAOAYpD8qpCLAK2Sp15WrsrsqBkPpZe6e9oe9CficwS13uGOC1pd5sbhiSj2G7Gbb8fjDGtA4uc0k14Hzp7cWqip_Bz60Rjy_jVQDDPDSJf49G1HaRSJYbtSMnuvGazChf8xMPMnSPxbvuK9u1CybkYzEPT8Bq1F5mfwy4RM7xdWiK-8W1oIuiMQJMTn3RoSl7Bjt0mevFLN41z-ZWj7unzu6GqWXtSFTvJLiSlH-tNebd2Tv-Tu8wrDkidsyHM5MMycuZ0XiA2uS4')"></div>
+                        <div class="card-info">
+                            <span class="location-tag muted">Found in: Silent Abyss</span>
+                            <p class="item-name">Void Orb</p>
+                            <div class="item-cost">
+                                <span class="material-symbols-outlined">flare</span>
+                                <span>2,100</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="item-lore">A perfect sphere of pure gravity. Holding it feels like clutching the weight of a entire galaxy.</p>
+                    <button class="btn-preview">Preview</button>
+                </div>
+
+                <!-- Market Card 4 -->
+                <div class="market-card hover-gold">
+                    <div class="card-content-top">
+                        <div class="card-image" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuD-wSJImejLCdIAserwpPrkiszQthqKOU9VEW5mcgFyI8fjnUHzgUM53nmBKhXyePO3bJGH3IPVMRk75UJmpQ0xCubaQo7kmDgJkPdv990Fj_gqWV7ASzuGkNymq-xR3cbYG4LAgoypfW3xMF5sqUmVkX1223sr_u7zim_3NbGgHqCyJkp8PMC5syRHO9HH4ijFNFUQOZVRumYM574b26sJlSzP1Uf4jKZ40tYigJiMSdYLqmpPe_YM4rb9J-b7xyJFVjZGdEU0gCg')"></div>
+                        <div class="card-info">
+                            <span class="location-tag gold">Found in: Helios Spire</span>
+                            <p class="item-name">Solar Crest</p>
+                            <div class="item-cost">
+                                <span class="material-symbols-outlined">flare</span>
+                                <span>5,000</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="item-lore">The emblem of the Solar Kings, it grants the power of the morning sun to any who prove worthy.</p>
+                    <button class="btn-preview">Preview</button>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+</div>
+
+@code {
+    // Component logic
+}

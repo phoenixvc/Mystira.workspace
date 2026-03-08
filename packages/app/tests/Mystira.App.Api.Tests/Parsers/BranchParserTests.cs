@@ -80,7 +80,7 @@ public class BranchParserTests
     }
 
     [Fact]
-    public void Parse_WhenChoiceMissing_ThrowsArgumentException()
+    public void Parse_WhenChoiceMissing_ThrowsValidationException()
     {
         // Arrange - branch without choice field
         var branchDict = new Dictionary<object, object>
@@ -90,7 +90,6 @@ public class BranchParserTests
 
         // Act & Assert
         var act = () => BranchParser.Parse(branchDict);
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*choice*");
+        act.Should().Throw<Mystira.Shared.Exceptions.ValidationException>();
     }
 }

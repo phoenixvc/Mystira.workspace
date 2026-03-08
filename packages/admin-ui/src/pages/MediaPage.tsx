@@ -102,7 +102,10 @@ function MediaPage() {
             <Link to="/admin/media/import" className="btn btn-sm btn-primary">
               <i className="bi bi-upload"></i> Upload Media
             </Link>
-            <Link to="/admin/media/import-zip" className="btn btn-sm btn-outline-primary">
+            <Link
+              to="/admin/media/import-zip"
+              className="btn btn-sm btn-outline-primary"
+            >
               <i className="bi bi-file-zip"></i> Import ZIP
             </Link>
           </div>
@@ -111,7 +114,7 @@ function MediaPage() {
 
       <SearchBar
         value={searchTerm}
-        onChange={value => {
+        onChange={(value) => {
           setSearchTerm(value);
           setPage(1);
         }}
@@ -134,11 +137,15 @@ function MediaPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.media.map(media => (
+                    {data.media.map((media) => (
                       <tr key={media.id}>
                         <td>{media.fileName}</td>
                         <td>{media.contentType}</td>
-                        <td>{media.size ? `${(media.size / 1024).toFixed(2)} KB` : "-"}</td>
+                        <td>
+                          {media.size
+                            ? `${(media.size / 1024).toFixed(2)} KB`
+                            : "-"}
+                        </td>
                         <td>
                           <div className="btn-group btn-group-sm">
                             <a
@@ -164,7 +171,11 @@ function MediaPage() {
                 </table>
               </div>
 
-              <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+              <Pagination
+                currentPage={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
+              />
             </>
           ) : (
             <div className="text-center py-5">

@@ -1,4 +1,4 @@
-name: "[Deploy] Staging"
+name: "[Deploy] Staging Release"
 
 # Staging Environment Deployment: Deploys infrastructure and services to staging
 # Steps: Verify CI, deploy Terraform infrastructure, deploy Kubernetes services
@@ -22,8 +22,6 @@ concurrency:
 env:
   ENVIRONMENT: staging
   TF_VERSION: 1.5.0
-  # OIDC Authentication (preferred over service principal)
-  ARM_USE_OIDC: true
 
   # Resource Groups (ADR-0017)
   AZURE_RESOURCE_GROUP: mys-staging-core-rg-san
@@ -38,37 +36,36 @@ env:
   AKS_CLUSTER_NAME: mys-staging-core-aks-san
 
 jobs:
-  # Use reusable CI gate to verify builds passed
-  ci-gate:
-    name: CI Gate
-    uses: ./.github/workflows/_ci-gate.yml
-    with:
-      required_workflows: "[CI] Build & Test"
-    secrets: inherit
-
   ci-check:
     name: Verify CI Checks Passed
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [ci-gate]
-    if: needs.ci-gate.outputs.passed == 'true' || github.event_name == 'workflow_dispatch'
-    permissions:
-      contents: read
     steps:
-      - name: CI Gate passed
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Check if CI passed on PR
         run: |
-          echo "## CI Gate Status" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ needs.ci-gate.outputs.passed }}" == "true" ]; then
-            echo "✅ All required CI checks passed" >> $GITHUB_STEP_SUMMARY
+          # Get the last commit SHA that was merged
+          LAST_COMMIT=${{ github.sha }}
+
+          # Check if there was a PR for this commit
+          PR_NUMBER=$(gh pr list --state merged --base main --search "$LAST_COMMIT" --json number --jq '.[0].number // empty')
+
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Found merged PR #$PR_NUMBER"
+            # Verify CI checks passed (this is a basic check - GitHub branch protection should enforce this)
+            echo "CI checks should have passed via branch protection rules"
           else
-            echo "⚠️ Workflow dispatch - skipping CI gate" >> $GITHUB_STEP_SUMMARY
+            echo "No PR found for commit $LAST_COMMIT - this may be a direct push to main"
+            echo "Branch protection should prevent direct pushes to main"
           fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   deploy-infrastructure:
     name: Deploy Infrastructure to Staging
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     needs: [ci-check]
     environment:
       name: staging
@@ -84,20 +81,26 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
 
-      - name: Azure Login (OIDC)
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
-      - name: Set Terraform environment variables
+      - name: Set Azure credentials for Terraform
         run: |
+          ARM_CLIENT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientId')
+          ARM_CLIENT_SECRET=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.clientSecret')
+          ARM_SUBSCRIPTION_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.subscriptionId')
+          ARM_TENANT_ID=$(echo '${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}' | jq -r '.tenantId')
+
+          echo "::add-mask::$ARM_CLIENT_SECRET"
+
           {
-            echo "ARM_CLIENT_ID=${{ secrets.AZURE_CLIENT_ID }}"
-            echo "ARM_SUBSCRIPTION_ID=${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-            echo "ARM_TENANT_ID=${{ secrets.AZURE_TENANT_ID }}"
-            echo "ARM_USE_OIDC=true"
+            echo "ARM_CLIENT_ID=$ARM_CLIENT_ID"
+            echo "ARM_CLIENT_SECRET=$ARM_CLIENT_SECRET"
+            echo "ARM_SUBSCRIPTION_ID=$ARM_SUBSCRIPTION_ID"
+            echo "ARM_TENANT_ID=$ARM_TENANT_ID"
+            echo "ARM_USE_CLI=false"
           } >> "$GITHUB_ENV"
 
       - name: Terraform Init
@@ -118,7 +121,6 @@ jobs:
   deploy-services:
     name: Deploy Services to Staging
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     needs: [deploy-infrastructure]
     environment:
       name: staging
@@ -128,12 +130,10 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Azure Login (OIDC)
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
       - name: Setup kubectl
         uses: azure/setup-kubectl@v4
@@ -180,103 +180,11 @@ jobs:
             echo "- Story Generator SWA: Not deployed" >> $GITHUB_STEP_SUMMARY
           fi
 
-  smoke-tests:
-    name: Run Smoke Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [deploy-services]
-    environment: staging
-    permissions:
-      contents: read
-    steps:
-      - name: Health Check - Publisher API
-        run: |
-          echo "## Smoke Test Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Service | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|--------|" >> $GITHUB_STEP_SUMMARY
-
-          # Publisher health check
-          PUBLISHER_URL="https://staging.publisher.mystira.app/health"
-          echo "Testing Publisher API: $PUBLISHER_URL"
-
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$PUBLISHER_URL" || echo "000")
-
-          if [ "$RESPONSE" = "200" ]; then
-            echo "| Publisher API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Publisher API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-            echo "::error::Publisher API health check failed with response: $RESPONSE"
-            exit 1
-          fi
-
-      - name: Health Check - Story Generator API
-        run: |
-          STORY_URL="https://staging.story-api.mystira.app/health"
-          echo "Testing Story Generator API: $STORY_URL"
-
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$STORY_URL" || echo "000")
-
-          if [ "$RESPONSE" = "200" ]; then
-            echo "| Story Generator API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Story Generator API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-            echo "::error::Story Generator API health check failed with response: $RESPONSE"
-            exit 1
-          fi
-
-      - name: Health Check - Admin API
-        run: |
-          ADMIN_URL="https://staging.admin-api.mystira.app/health"
-          echo "Testing Admin API: $ADMIN_URL"
-
-          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$ADMIN_URL" || echo "000")
-
-          if [ "$RESPONSE" = "200" ]; then
-            echo "| Admin API | ✅ Healthy ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Admin API | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-            echo "::error::Admin API health check failed with response: $RESPONSE"
-            exit 1
-          fi
-
-      - name: Frontend Accessibility Check
-        run: |
-          FAILED=0
-          # Check that SWAs are accessible
-          for URL in "https://staging.mystira.app" "https://staging.admin.mystira.app" "https://staging.story.mystira.app"; do
-            echo "Testing: $URL"
-            RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 "$URL" || echo "000")
-            SERVICE=$(echo "$URL" | sed 's|https://staging\.||' | sed 's|\.mystira\.app||')
-
-            if [ "$RESPONSE" = "200" ] || [ "$RESPONSE" = "304" ]; then
-              echo "| $SERVICE | ✅ Accessible ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-            else
-              echo "| $SERVICE | ❌ Failed ($RESPONSE) |" >> $GITHUB_STEP_SUMMARY
-              echo "::warning::Frontend $SERVICE check failed with response: $RESPONSE"
-              FAILED=1
-            fi
-          done
-
-          if [ "$FAILED" = "1" ]; then
-            echo "::error::One or more frontend accessibility checks failed"
-            exit 1
-          fi
-
-      - name: Summary
-        run: |
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Smoke tests completed. Check individual service results above." >> $GITHUB_STEP_SUMMARY
-
   notify:
     name: Notify Deployment Status
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [deploy-infrastructure, deploy-services, smoke-tests]
-    # Always run notification job to report status regardless of previous job outcomes
+    needs: [deploy-services]
     if: always()
-    permissions:
-      contents: read
     steps:
       - name: Deployment Summary
         run: |

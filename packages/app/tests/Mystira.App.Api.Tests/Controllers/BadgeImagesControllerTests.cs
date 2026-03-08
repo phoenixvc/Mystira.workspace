@@ -73,20 +73,7 @@ public class BadgeImagesControllerTests
         result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task GetBadgeImage_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        _mockBus.Setup(x => x.InvokeAsync<BadgeImageResult?>(
-                It.IsAny<GetBadgeImageQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Storage error"));
 
-        var result = await _controller.GetBadgeImage("badge-img-1");
-
-        var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     [Fact]
     public async Task GetBadgeImage_SetsCacheControlHeader()

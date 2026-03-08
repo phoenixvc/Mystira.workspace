@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mystira - Character Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7c3bed",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0a0712",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .mystic-glow {
+            box-shadow: 0 0 20px rgba(124, 59, 237, 0.3);
+        }
+        .rune-border {
+            border: 1px solid rgba(124, 59, 237, 0.2);
+            background: linear-gradient(135deg, rgba(23, 17, 34, 0.8) 0%, rgba(49, 36, 71, 0.4) 100%);
+        }
+        .crystal-meter {
+            background: linear-gradient(90deg, #7c3bed 0%, #a855f7 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .crystal-meter::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, transparent 25%, rgba(255,255,255,0.1) 50%, transparent 75%);
+            background-size: 200% 200%;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="flex h-screen overflow-hidden">
+<!-- Sidebar Navigation -->
+<aside class="w-72 bg-background-light dark:bg-[#120c1d] border-r border-primary/10 flex flex-col shrink-0">
+<div class="p-6 flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-white mystic-glow">
+<span class="material-symbols-outlined">auto_awesome</span>
+</div>
+<span class="text-xl font-bold tracking-tight text-primary">MYSTIRA</span>
+</div>
+<nav class="flex-1 px-4 py-4 space-y-2">
+<div class="group flex items-center gap-3 px-4 py-3 rounded-xl bg-primary/10 text-primary border border-primary/20 cursor-pointer">
+<span class="material-symbols-outlined">swords</span>
+<span class="font-medium">My Adventures</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/5 hover:text-slate-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">backpack</span>
+<span class="font-medium">Inventory</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/5 hover:text-slate-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">auto_stories</span>
+<span class="font-medium">The Chronicle</span>
+</div>
+<div class="group flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-primary/5 hover:text-slate-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined">groups</span>
+<span class="font-medium">Fellowship</span>
+</div>
+</nav>
+<div class="p-4 border-t border-primary/10">
+<div class="flex items-center gap-3 p-3 rounded-xl hover:bg-primary/5 cursor-pointer">
+<span class="material-symbols-outlined text-slate-400">settings</span>
+<span class="text-sm font-medium text-slate-400">Settings</span>
+</div>
+<button class="mt-4 w-full bg-primary text-white py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all">
+                    LOG OUT
+                </button>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto relative bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-primary/10 via-background-dark to-background-dark">
+<!-- Hero Header -->
+<div class="relative h-[400px] w-full flex items-end p-12">
+<div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/40 to-transparent z-10"></div>
+<div class="absolute inset-0 opacity-40 bg-center bg-cover" data-alt="Atmospheric purple nebula and stars background" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBcUMAPjEwE6S37z6QYeTB3JFXTk6YW8WO3r9whigzg1uQW220Y7gO7LYDbtE7CtuH3NKJACUlTdA5T9oweoKZBYo0eRQU4PFLX0HPHYYiYLfJYIDEjThCoyLUOjrXPNIj0X7nOfuO0-nLouiVoiGzL8xjTLWL3wPKmbg_dC_EQn0GP3t3kmpy7drIV3oe--PXqY4V2wJmoZk2AM_BO2sA9UPrO5TQRbk_yT4N6hhV1gF3kRrInTDGRP2fa1aeV1r1oyb9OJQ5UoXg')"></div>
+<div class="relative z-20 flex items-center gap-8 w-full max-w-6xl mx-auto">
+<div class="relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-primary to-purple-400 rounded-full blur opacity-75 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative w-40 h-40 rounded-full border-4 border-background-dark overflow-hidden bg-background-dark">
+<img class="w-full h-full object-cover" data-alt="Mystical portrait of a character with glowing eyes" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcqN_xc8UmLmJXxKDcblIPmpoPU6PLQ7_49nfThokiCD8ZaaD63CKWV7iwNu-uIQnPOzh8SumGWtqgoE6-O84MRfpIa9pcaD91jY-De3EgE4BLkqZQ2Z1wfhp9JziDQ_G0TWNqTM-sm00CY5UsSU1XSV5YcyTk42LRVsnxGZ0qoBFFC5Uzf4qJkuwMBk4bnB76YN-0ci8w4G4ffHT4oFN9Teb0fi4kXmnj_qh1P88pT89IaaWsSK-s5tbJPpgb-US3vCqAKflO8IA"/>
+</div>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-4 mb-2">
+<span class="px-3 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary text-xs font-bold uppercase tracking-widest">Seeker Level 24</span>
+<span class="text-slate-400 text-sm italic">The Forsaken Lands</span>
+</div>
+<h1 class="text-6xl font-extrabold tracking-tighter text-white mb-2">Eldrin Thorne</h1>
+<p class="text-slate-300 max-w-lg">Wanderer of the Void, Chosen of the Silver Flame, and Arch-Keeper of the Echoing Shell.</p>
+</div>
+<div class="flex gap-4">
+<div class="rune-border p-4 rounded-xl text-center min-w-[100px]">
+<p class="text-xs uppercase text-slate-500 font-bold mb-1">Mana</p>
+<p class="text-2xl font-bold text-primary">2,450</p>
+</div>
+<div class="rune-border p-4 rounded-xl text-center min-w-[100px]">
+<p class="text-xs uppercase text-slate-500 font-bold mb-1">XP</p>
+<p class="text-2xl font-bold text-purple-400">88%</p>
+</div>
+</div>
+</div>
+</div>
+<div class="max-w-6xl mx-auto px-12 pb-24 grid grid-cols-12 gap-8">
+<!-- Left Column: Moral Compass -->
+<div class="col-span-12 lg:col-span-5 flex flex-col gap-8">
+<div class="rune-border rounded-xl p-8 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-8xl">explore</span>
+</div>
+<h2 class="text-xl font-bold text-white mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">architecture</span>
+                            Moral Compass Alignment
+                        </h2>
+<!-- Visual Pentagon/Star Representation -->
+<div class="relative aspect-square w-full max-w-[300px] mx-auto mb-8 flex items-center justify-center">
+<div class="absolute inset-0 border-[1px] border-primary/20 rounded-full animate-pulse"></div>
+<!-- Simple SVG Visualization for the Pentagon axes -->
+<svg class="w-full h-full drop-shadow-[0_0_10px_rgba(124,59,237,0.5)]" viewbox="0 0 100 100">
+<polygon class="text-primary/30" fill="none" points="50,5 95,38 78,92 22,92 5,38" stroke="currentColor" stroke-width="0.5"></polygon>
+<line class="text-primary/30" stroke="currentColor" stroke-width="0.5" x1="50" x2="50" y1="50" y2="5"></line>
+<line class="text-primary/30" stroke="currentColor" stroke-width="0.5" x1="50" x2="95" y1="50" y2="38"></line>
+<line class="text-primary/30" stroke="currentColor" stroke-width="0.5" x1="50" x2="78" y1="50" y2="92"></line>
+<line class="text-primary/30" stroke="currentColor" stroke-width="0.5" x1="50" x2="22" y1="50" y2="92"></line>
+<line class="text-primary/30" stroke="currentColor" stroke-width="0.5" x1="50" x2="5" y1="50" y2="38"></line>
+<!-- Current Alignment Shape -->
+<polygon fill="rgba(124, 59, 237, 0.2)" points="50,15 85,45 70,80 35,85 15,40" stroke="#7c3bed" stroke-width="2"></polygon>
+</svg>
+<!-- Labels -->
+<span class="absolute top-0 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Purity</span>
+<span class="absolute top-1/4 -right-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Wit</span>
+<span class="absolute bottom-2 right-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Justice</span>
+<span class="absolute bottom-2 left-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Courage</span>
+<span class="absolute top-1/4 -left-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Empathy</span>
+</div>
+<div class="space-y-4">
+<div class="flex justify-between items-center p-3 rounded-lg bg-background-dark/50 border border-primary/10">
+<span class="text-sm text-slate-400">Primary Resonance</span>
+<span class="text-sm font-bold text-primary">Chaotic Benevolent</span>
+</div>
+</div>
+</div>
+<!-- Essence & Aura -->
+<div class="rune-border rounded-xl p-8">
+<h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">storm</span>
+                            Essence &amp; Aura
+                        </h2>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-sm font-medium text-slate-300">Essence Rank: Paragon</span>
+<span class="text-sm font-bold text-primary">Level 8</span>
+</div>
+<div class="w-full h-3 bg-background-dark rounded-full border border-primary/20 overflow-hidden p-0.5">
+<div class="crystal-meter h-full rounded-full" style="width: 75%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between mb-2">
+<span class="text-sm font-medium text-slate-300">Mana Aura: Ethereal Blue</span>
+<span class="text-sm font-bold text-blue-400">92% Stability</span>
+</div>
+<div class="w-full h-3 bg-background-dark rounded-full border border-blue-900/40 overflow-hidden p-0.5">
+<div class="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" style="width: 92%"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Achievements & History -->
+<div class="col-span-12 lg:col-span-7 flex flex-col gap-8">
+<!-- Hall of Deeds -->
+<div class="rune-border rounded-xl p-8">
+<div class="flex justify-between items-center mb-6">
+<h2 class="text-xl font-bold text-white flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">workspace_premium</span>
+                                The Hall of Deeds
+                            </h2>
+<button class="text-primary text-xs font-bold hover:underline">VIEW ALL</button>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="group cursor-pointer bg-background-dark/60 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-center">
+<div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-yellow-500 bg-yellow-500/10 rounded-full border border-yellow-500/30 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl">lightbulb</span>
+</div>
+<h3 class="text-sm font-bold text-white mb-1">Dragon's Breath</h3>
+<p class="text-[10px] text-slate-500 uppercase">Relic Class</p>
+</div>
+<div class="group cursor-pointer bg-background-dark/60 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-center">
+<div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-blue-400 bg-blue-400/10 rounded-full border border-blue-400/30 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl">shield</span>
+</div>
+<h3 class="text-sm font-bold text-white mb-1">Echoing Shell</h3>
+<p class="text-[10px] text-slate-500 uppercase">Mythic Artifact</p>
+</div>
+<div class="group cursor-pointer bg-background-dark/60 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-center">
+<div class="w-16 h-16 mx-auto mb-3 flex items-center justify-center text-purple-400 bg-purple-400/10 rounded-full border border-purple-400/30 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl">owl</span>
+</div>
+<h3 class="text-sm font-bold text-white mb-1">Spirit Seed</h3>
+<p class="text-[10px] text-slate-500 uppercase">Ancient Key</p>
+</div>
+</div>
+</div>
+<!-- Chronicle of Choices -->
+<div class="rune-border rounded-xl p-8 flex-1">
+<h2 class="text-xl font-bold text-white mb-8 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history_edu</span>
+                            Chronicle of Choices
+                        </h2>
+<div class="relative space-y-8 before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-primary/30 before:to-transparent">
+<!-- Choice 1 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+<div class="flex items-center justify-center w-10 h-10 rounded-full border border-primary/50 bg-background-dark text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+<span class="material-symbols-outlined text-sm">priority_high</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-primary/10 bg-background-dark/40">
+<div class="flex items-center justify-between space-x-2 mb-1">
+<div class="font-bold text-white">The Silver Spire</div>
+<time class="text-xs font-medium text-primary">Chapter 3</time>
+</div>
+<div class="text-slate-400 text-sm">You chose to <span class="text-primary italic">spare the Fallen Guardian</span>, gaining the 'Mark of Mercy' and altering the future of the Elder Woods.</div>
+</div>
+</div>
+<!-- Choice 2 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+<div class="flex items-center justify-center w-10 h-10 rounded-full border border-primary/50 bg-background-dark text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+<span class="material-symbols-outlined text-sm">balance</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-primary/10 bg-background-dark/40">
+<div class="flex items-center justify-between space-x-2 mb-1">
+<div class="font-bold text-white">Tides of Fate</div>
+<time class="text-xs font-medium text-primary">Chapter 5</time>
+</div>
+<div class="text-slate-400 text-sm">You <span class="text-primary italic">sacrificed the Mana Crystal</span> to save the village of Oakhaven, permanently reducing your maximum aura capacity.</div>
+</div>
+</div>
+<!-- Choice 3 -->
+<div class="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group">
+<div class="flex items-center justify-center w-10 h-10 rounded-full border border-primary/50 bg-background-dark text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
+<span class="material-symbols-outlined text-sm">auto_fix_high</span>
+</div>
+<div class="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-primary/10 bg-background-dark/40">
+<div class="flex items-center justify-between space-x-2 mb-1">
+<div class="font-bold text-white">Void Breach</div>
+<time class="text-xs font-medium text-primary">Chapter 12</time>
+</div>
+<div class="text-slate-400 text-sm">Aligned with the <span class="text-primary italic">Shadow Weaver Alliance</span>, unlocking forbidden dark magic paths.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Atmospheric Fog Layer (Bottom) -->
+<div class="fixed bottom-0 left-0 right-0 h-32 pointer-events-none bg-gradient-to-t from-background-dark to-transparent opacity-80 z-30"></div>
+</main>
+</div>
+</body></html>

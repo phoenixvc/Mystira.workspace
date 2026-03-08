@@ -56,20 +56,7 @@ public class BundlesControllerTests
         returnedBundles.Should().HaveCount(2);
     }
 
-    [Fact]
-    public async Task GetBundles_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        _mockBus.Setup(x => x.InvokeAsync<IEnumerable<ContentBundle>>(
-                It.IsAny<GetAllContentBundlesQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        var result = await _controller.GetBundles();
-
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -110,20 +97,7 @@ public class BundlesControllerTests
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task GetBundlesByAgeGroup_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        _mockBus.Setup(x => x.InvokeAsync<IEnumerable<ContentBundle>>(
-                It.IsAny<GetContentBundlesByAgeGroupQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        var result = await _controller.GetBundlesByAgeGroup("Ages7to9");
-
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 

@@ -32,38 +32,18 @@ public class BadgeImagesController : ControllerBase
             });
         }
 
-        try
-        {
-            var result = await _bus.InvokeAsync<BadgeImageResult?>(new GetBadgeImageQuery(imageId));
+        var result = await _bus.InvokeAsync<BadgeImageResult?>(new GetBadgeImageQuery(imageId));
 
-            if (result is null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = "Badge image not found",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            Response.Headers.CacheControl = "public, max-age=604800";
-            return File(result.ImageData, result.ContentType);
-        }
-        catch (Exception ex) when (
-            ex is not StackOverflowException &&
-            ex is not OutOfMemoryException &&
-            ex is not ThreadAbortException &&
-            ex is not AccessViolationException &&
-            ex is not AppDomainUnloadedException &&
-            ex is not BadImageFormatException &&
-            ex is not CannotUnloadAppDomainException
-        )
+        if (result is null)
         {
-            _logger.LogError(ex, "Error getting badge image {ImageId}", imageId);
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while fetching badge image",
+                Message = "Badge image not found",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        Response.Headers.CacheControl = "public, max-age=604800";
+        return File(result.ImageData, result.ContentType);
     }
 }

@@ -47,7 +47,7 @@ ${errorInfo?.componentStack || "No component stack available"}
       .then(() => {
         alert("Error details copied to clipboard");
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Failed to copy to clipboard:", err);
         // Fallback for non-secure contexts or clipboard access denied
         try {
@@ -62,11 +62,15 @@ ${errorInfo?.componentStack || "No component stack available"}
           if (success) {
             alert("Error details copied to clipboard");
           } else {
-            alert("Failed to copy error details. Please copy manually from the console.");
+            alert(
+              "Failed to copy error details. Please copy manually from the console."
+            );
             console.log("Error details:", errorText);
           }
         } catch (fallbackErr) {
-          alert("Failed to copy error details. Please copy manually from the console.");
+          alert(
+            "Failed to copy error details. Please copy manually from the console."
+          );
           console.log("Error details:", errorText);
           console.error("Fallback copy failed:", fallbackErr);
         }
@@ -85,13 +89,14 @@ ${errorInfo?.componentStack || "No component stack available"}
               ></i>
               <h1 className="h2 mt-3">Something went wrong</h1>
               <p className="text-muted">
-                We encountered an unexpected error. Please try again or contact support if the
-                problem persists.
+                We encountered an unexpected error. Please try again or contact
+                support if the problem persists.
               </p>
             </div>
 
             <Alert variant="danger" title="Error Details">
-              <strong>Message:</strong> {error?.message || "Unknown error occurred"}
+              <strong>Message:</strong>{" "}
+              {error?.message || "Unknown error occurred"}
             </Alert>
 
             {showStackTrace && error && (
@@ -100,7 +105,9 @@ ${errorInfo?.componentStack || "No component stack available"}
                   className="btn btn-sm btn-outline-secondary mb-2"
                   onClick={() => setExpanded(!expanded)}
                 >
-                  <i className={`bi bi-chevron-${expanded ? "up" : "down"} me-2`}></i>
+                  <i
+                    className={`bi bi-chevron-${expanded ? "up" : "down"} me-2`}
+                  ></i>
                   {expanded ? "Hide" : "Show"} Technical Details
                 </button>
 
@@ -153,7 +160,10 @@ ${errorInfo?.componentStack || "No component stack available"}
                 <i className="bi bi-house me-2"></i>
                 Go to Dashboard
               </button>
-              <button className="btn btn-outline-secondary" onClick={handleReload}>
+              <button
+                className="btn btn-outline-secondary"
+                onClick={handleReload}
+              >
                 <i className="bi bi-arrow-clockwise me-2"></i>
                 Reload Page
               </button>
@@ -167,7 +177,8 @@ ${errorInfo?.componentStack || "No component stack available"}
 
             <div className="mt-4 text-center">
               <small className="text-muted">
-                If this problem persists, please contact support with the error details above.
+                If this problem persists, please contact support with the error
+                details above.
               </small>
             </div>
           </Card>

@@ -134,26 +134,7 @@ public class GameSessionsControllerTests
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task StartSession_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var request = new StartGameSessionRequest { ScenarioId = "scenario-1" };
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<GameSession?>(
-                It.IsAny<StartGameSessionCommand>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.StartSession(request);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -202,26 +183,7 @@ public class GameSessionsControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetSession_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var sessionId = "session-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<GameSession?>(
-                It.IsAny<GetGameSessionQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetSession(sessionId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -403,26 +365,7 @@ public class GameSessionsControllerTests
         actionResult.Result.Should().BeOfType<OkObjectResult>();
     }
 
-    [Fact]
-    public async Task FinalizeSession_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var sessionId = "session-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<object>(
-                It.IsAny<FinalizeGameSessionCommand>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.FinalizeSession(sessionId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 

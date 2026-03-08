@@ -27,32 +27,62 @@ type MasterDataType =
   | "fantasy-themes";
 
 const ageGroupSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
   minAge: z.number().min(0).max(100).optional(),
   maxAge: z.number().min(0).max(100).optional(),
 });
 
 const archetypeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 const compassAxisSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
   positiveLabel: z.string().max(100).optional(),
   negativeLabel: z.string().max(100).optional(),
 });
 
 const echoTypeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 const fantasyThemeSchema = z.object({
-  name: z.string().min(1, "Name is required").max(200, "Name must be less than 200 characters"),
-  description: z.string().max(1000, "Description must be less than 1000 characters").optional(),
+  name: z
+    .string()
+    .min(1, "Name is required")
+    .max(200, "Name must be less than 200 characters"),
+  description: z
+    .string()
+    .max(1000, "Description must be less than 1000 characters")
+    .optional(),
 });
 
 type AgeGroupFormData = z.infer<typeof ageGroupSchema>;
@@ -206,7 +236,13 @@ function EditMasterDataPage() {
       !!id &&
       !!api &&
       !!type &&
-      ["age-groups", "archetypes", "compass-axes", "echo-types", "fantasy-themes"].includes(type),
+      [
+        "age-groups",
+        "archetypes",
+        "compass-axes",
+        "echo-types",
+        "fantasy-themes",
+      ].includes(type),
   });
 
   const updateMutation = useMutation({
@@ -221,9 +257,11 @@ function EditMasterDataPage() {
       showToast.success(`${title} updated successfully!`);
       navigate(`/admin/master-data/${type}`);
     },
-    onError: error => {
+    onError: (error) => {
       showToast.error(
-        error instanceof Error ? error.message : `Failed to update ${title.toLowerCase()}`
+        error instanceof Error
+          ? error.message
+          : `Failed to update ${title.toLowerCase()}`
       );
     },
   });
@@ -236,7 +274,13 @@ function EditMasterDataPage() {
 
   if (
     !type ||
-    !["age-groups", "archetypes", "compass-axes", "echo-types", "fantasy-themes"].includes(type)
+    ![
+      "age-groups",
+      "archetypes",
+      "compass-axes",
+      "echo-types",
+      "fantasy-themes",
+    ].includes(type)
   ) {
     return (
       <div className="alert alert-danger" role="alert">
@@ -283,7 +327,10 @@ function EditMasterDataPage() {
     <div>
       <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
         <h1 className="h2">✏️ Edit {title}</h1>
-        <Link to={`/admin/master-data/${type}`} className="btn btn-sm btn-outline-secondary">
+        <Link
+          to={`/admin/master-data/${type}`}
+          className="btn btn-sm btn-outline-secondary"
+        >
           <i className="bi bi-arrow-left"></i> Back to {title}s
         </Link>
       </div>
@@ -296,14 +343,21 @@ function EditMasterDataPage() {
             </FormField>
 
             <FormField label="Description" error={errors.description?.message}>
-              <Textarea id="description" rows={5} {...register("description")} />
+              <Textarea
+                id="description"
+                rows={5}
+                {...register("description")}
+              />
             </FormField>
 
             {type === "age-groups" && (
               <>
                 <FormField
                   label="Minimum Age"
-                  error={(errors as Record<string, { message?: string }>).minAge?.message}
+                  error={
+                    (errors as Record<string, { message?: string }>).minAge
+                      ?.message
+                  }
                   helpText="Minimum age for this group (0-100)"
                 >
                   <NumberInput
@@ -316,7 +370,10 @@ function EditMasterDataPage() {
 
                 <FormField
                   label="Maximum Age"
-                  error={(errors as Record<string, { message?: string }>).maxAge?.message}
+                  error={
+                    (errors as Record<string, { message?: string }>).maxAge
+                      ?.message
+                  }
                   helpText="Maximum age for this group (0-100)"
                 >
                   <NumberInput
@@ -333,18 +390,30 @@ function EditMasterDataPage() {
               <>
                 <FormField
                   label="Positive Label"
-                  error={(errors as Record<string, { message?: string }>).positiveLabel?.message}
+                  error={
+                    (errors as Record<string, { message?: string }>)
+                      .positiveLabel?.message
+                  }
                   helpText="Label for the positive end of the axis"
                 >
-                  <TextInput id="positiveLabel" {...register("positiveLabel")} />
+                  <TextInput
+                    id="positiveLabel"
+                    {...register("positiveLabel")}
+                  />
                 </FormField>
 
                 <FormField
                   label="Negative Label"
-                  error={(errors as Record<string, { message?: string }>).negativeLabel?.message}
+                  error={
+                    (errors as Record<string, { message?: string }>)
+                      .negativeLabel?.message
+                  }
                   helpText="Label for the negative end of the axis"
                 >
-                  <TextInput id="negativeLabel" {...register("negativeLabel")} />
+                  <TextInput
+                    id="negativeLabel"
+                    {...register("negativeLabel")}
+                  />
                 </FormField>
               </>
             )}
@@ -370,7 +439,10 @@ function EditMasterDataPage() {
                   </>
                 )}
               </button>
-              <Link to={`/admin/master-data/${type}`} className="btn btn-secondary">
+              <Link
+                to={`/admin/master-data/${type}`}
+                className="btn btn-secondary"
+              >
                 Cancel
               </Link>
             </div>

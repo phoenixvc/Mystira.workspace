@@ -35,21 +35,21 @@ public class UserBadgesController : ControllerBase
     [HttpPost("award")]
     public async Task<ActionResult<UserBadge>> AwardBadge([FromBody] AwardBadgeRequest request)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(new ValidationErrorResponse
+            {
+                Message = "Validation failed",
+                ValidationErrors = ModelState.ToDictionary(
+                    kvp => kvp.Key,
+                    kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
+                ),
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
         try
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new ValidationErrorResponse
-                {
-                    Message = "Validation failed",
-                    ValidationErrors = ModelState.ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value?.Errors.Select(e => e.ErrorMessage).ToList() ?? new List<string>()
-                    ),
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
             var command = new AwardBadgeCommand(request);
             var badge = await _bus.InvokeAsync<UserBadge>(command);
             return CreatedAtAction(nameof(GetUserBadges),
@@ -64,15 +64,6 @@ public class UserBadgesController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error awarding badge");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while awarding badge",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
     }
 
     /// <summary>
@@ -81,21 +72,9 @@ public class UserBadgesController : ControllerBase
     [HttpGet("user/{userProfileId}")]
     public async Task<ActionResult<List<UserBadge>>> GetUserBadges(string userProfileId)
     {
-        try
-        {
-            var query = new GetUserBadgesQuery(userProfileId);
-            var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
-            return Ok(badges);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badges for user {UserProfileId}", LogAnonymizer.HashId(userProfileId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badges",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetUserBadgesQuery(userProfileId);
+        var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
+        return Ok(badges);
     }
 
     /// <summary>
@@ -104,22 +83,9 @@ public class UserBadgesController : ControllerBase
     [HttpGet("user/{userProfileId}/axis/{axis}")]
     public async Task<ActionResult<List<UserBadge>>> GetUserBadgesForAxis(string userProfileId, string axis)
     {
-        try
-        {
-            var query = new GetUserBadgesForAxisQuery(userProfileId, axis);
-            var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
-            return Ok(badges);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badges for user {UserProfileId} and axis {Axis}",
-                LogAnonymizer.HashId(userProfileId), LogAnonymizer.SanitizeForLog(axis));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badges for axis",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetUserBadgesForAxisQuery(userProfileId, axis);
+        var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
+        return Ok(badges);
     }
 
     /// <summary>
@@ -128,22 +94,9 @@ public class UserBadgesController : ControllerBase
     [HttpGet("user/{userProfileId}/badge/{badgeConfigurationId}/earned")]
     public async Task<ActionResult<bool>> HasUserEarnedBadge(string userProfileId, string badgeConfigurationId)
     {
-        try
-        {
-            var query = new HasUserEarnedBadgeQuery(userProfileId, badgeConfigurationId);
-            var hasEarned = await _bus.InvokeAsync<bool>(query);
-            return Ok(new { hasEarned });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error checking if user {UserProfileId} has badge {BadgeId}",
-                LogAnonymizer.HashId(userProfileId), LogAnonymizer.SanitizeForLog(badgeConfigurationId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while checking badge status",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new HasUserEarnedBadgeQuery(userProfileId, badgeConfigurationId);
+        var hasEarned = await _bus.InvokeAsync<bool>(query);
+        return Ok(new { hasEarned });
     }
 
     /// <summary>
@@ -152,21 +105,9 @@ public class UserBadgesController : ControllerBase
     [HttpGet("user/{userProfileId}/statistics")]
     public async Task<ActionResult<Dictionary<string, int>>> GetBadgeStatistics(string userProfileId)
     {
-        try
-        {
-            var query = new GetBadgeStatisticsQuery(userProfileId);
-            var statistics = await _bus.InvokeAsync<Dictionary<string, int>>(query);
-            return Ok(statistics);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badge statistics for user {UserProfileId}", LogAnonymizer.HashId(userProfileId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badge statistics",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetBadgeStatisticsQuery(userProfileId);
+        var statistics = await _bus.InvokeAsync<Dictionary<string, int>>(query);
+        return Ok(statistics);
     }
 
     /// <summary>
@@ -175,31 +116,19 @@ public class UserBadgesController : ControllerBase
     [HttpGet("account/{email}")]
     public async Task<ActionResult<List<UserBadge>>> GetBadgesForAccount(string email)
     {
-        try
-        {
-            var query = new GetBadgesForAccountByEmailQuery(email);
-            var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
+        var query = new GetBadgesForAccountByEmailQuery(email);
+        var badges = await _bus.InvokeAsync<List<UserBadge>>(query);
 
-            if (!badges.Any())
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = "Account not found or has no badges",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(badges);
-        }
-        catch (Exception ex)
+        if (!badges.Any())
         {
-            _logger.LogError(ex, "Error getting badges for account");
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while getting account badges",
+                Message = "Account not found or has no badges",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(badges);
     }
 
     /// <summary>
@@ -208,21 +137,9 @@ public class UserBadgesController : ControllerBase
     [HttpGet("account/{email}/statistics")]
     public async Task<ActionResult<Dictionary<string, int>>> GetBadgeStatisticsForAccount(string email)
     {
-        try
-        {
-            var query = new GetBadgeStatisticsForAccountByEmailQuery(email);
-            var statistics = await _bus.InvokeAsync<Dictionary<string, int>>(query);
+        var query = new GetBadgeStatisticsForAccountByEmailQuery(email);
+        var statistics = await _bus.InvokeAsync<Dictionary<string, int>>(query);
 
-            return Ok(statistics);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badge statistics for account");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while getting account badge statistics",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        return Ok(statistics);
     }
 }

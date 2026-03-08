@@ -144,6 +144,16 @@ _Build performance currently blocks all development work with failing builds and
 - Remove MediatR usage and pipeline behaviors where still present
 - Ensure controller/message bus integration is complete
 
+## P1: Library and pattern migrations
+
+- **Ardalis.Specification 8.0.0 migration**: Implement specification pattern across all services
+  - Status: Implementation Ready, detailed guide available
+  - Reference: `docs/architecture/specifications/ardalis-specification-migration.md`
+- **Contracts package consolidation**: Complete migration to unified @mystira/contracts packages
+  - Status: Phase 1 Complete, migration period active
+  - Reference: `docs/guides/contracts-migration.md`
+  - Actions: Update imports, remove old packages, validate TypeScript/NuGet flows
+
 ## P1: Security and identity completion
 
 - Deploy Entra ID app registrations
