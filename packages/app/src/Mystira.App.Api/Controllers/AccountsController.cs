@@ -227,10 +227,10 @@ public class AccountsController : ControllerBase
             var isValid = await _bus.InvokeAsync<bool>(query);
             return Ok(isValid);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            _logger.LogError(ex, "Error validating account");
-            return StatusCode(500, "Internal server error");
+            _logger.LogWarning(ex, "Error validating account");
+            return BadRequest(ex.Message);
         }
     }
 }
