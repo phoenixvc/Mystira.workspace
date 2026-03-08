@@ -3,7 +3,7 @@ import { ServiceLog } from "../types";
 
 export function formatTimestamp(
   timestamp: number,
-  format: "time" | "full" | "relative",
+  format: "time" | "full" | "relative"
 ): string {
   const date = new Date(timestamp);
   switch (format) {
@@ -28,7 +28,7 @@ export function highlightSearch(text: string, search: string): JSX.Element {
   }
 
   const parts = text.split(
-    new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"),
+    new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi")
   );
   return (
     <>
@@ -42,7 +42,7 @@ export function highlightSearch(text: string, search: string): JSX.Element {
           </mark>
         ) : (
           <span key={i}>{part}</span>
-        ),
+        )
       )}
     </>
   );
@@ -99,7 +99,7 @@ export function findErrorIndices(logs: ServiceLog[]): number[] {
 
 export function formatLogsForCopy(
   logs: ServiceLog[],
-  formatTimestamp: (timestamp: number) => string,
+  formatTimestamp: (timestamp: number) => string
 ): string {
   return logs
     .map((log) => {
@@ -113,7 +113,7 @@ export function formatLogsForCopy(
 
 export async function copyLogsToClipboard(
   logs: ServiceLog[],
-  formatTimestamp: (timestamp: number) => string,
+  formatTimestamp: (timestamp: number) => string
 ): Promise<void> {
   const logContent = formatLogsForCopy(logs, formatTimestamp);
   await navigator.clipboard.writeText(logContent);
@@ -122,7 +122,7 @@ export async function copyLogsToClipboard(
 export async function exportLogs(
   serviceName: string,
   logs: ServiceLog[],
-  formatTimestamp: (timestamp: number) => string,
+  formatTimestamp: (timestamp: number) => string
 ): Promise<void> {
   const { save } = await import("@tauri-apps/plugin-dialog");
   const { writeTextFile } = await import("@tauri-apps/plugin-fs");

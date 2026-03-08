@@ -10,6 +10,7 @@ export function createNodeEslintConfig({
   noUnusedVarsSeverity = "warn",
   includeNoExplicitAny = true,
   noUnusedVarsOptions = { argsIgnorePattern: "^_" },
+  tsconfigRootDir = undefined,
 } = {}) {
   const rules = {
     "@typescript-eslint/no-unused-vars": [
@@ -33,6 +34,9 @@ export function createNodeEslintConfig({
           ...globals.node,
           ...globals.es2022,
         },
+        ...(tsconfigRootDir && {
+          parserOptions: { tsconfigRootDir },
+        }),
       },
       rules,
     },

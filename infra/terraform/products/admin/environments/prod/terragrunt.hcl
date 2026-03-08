@@ -27,8 +27,4 @@ inputs = {
 
   # Custom domains
   enable_custom_domain = true
-
-  # Admin API scaling
-  admin_api_min_replicas = 2
-  admin_api_max_replicas = 5
 }

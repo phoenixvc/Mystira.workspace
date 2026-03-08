@@ -24,7 +24,6 @@ export function useWorkflowStatus(workflowFile: string, repository: string) {
 
   useEffect(() => {
     fetchStatus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return { status, fetchStatus };

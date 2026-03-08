@@ -1,0 +1,560 @@
+# Publishing & Deployment Flow
+
+**Last Updated**: February 2026
+**Status**: ✅ Complete (updated for monorepo)
+
+This document describes how packages are built, published, and deployed across all Mystira services in the monorepo.
+
+---
+
+## Overview
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        PUBLISHING DESTINATIONS                          │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Docker Images  →  Azure Container Registry (myssharedacr.azurecr.io)  │
+│  NPM Packages   →  npmjs.org (via Changesets, external only)           │
+│  NuGet Packages →  GitHub Packages / NuGet.org (external only)         │
+│  Deployments    →  Azure Kubernetes Service (AKS)                      │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+> **Monorepo note**: Internal `@mystira/*` TypeScript packages and internal Mystira .NET libraries are consumed via workspace protocol (`workspace:*`) and `<ProjectReference>` respectively — they are **not** published to any registry.
+
+---
+
+## Version Strategy
+
+### Internal Packages (Not Published)
+
+Internal packages are consumed directly within the monorepo:
+
+| Package Type   | Version Source            | Synchronization              |
+| -------------- | ------------------------- | ---------------------------- |
+| NPM Packages   | Changesets                | Primary source of truth      |
+| NuGet Packages | Triggered by NPM release  | Follows NPM package versions |
+| Docker Images  | Git SHA + environment tag | Tagged with release version  |
+
+### External Packages (Published)
+
+Related packages are versioned together using Changesets' `linked` feature:
+
+- `@mystira/app` ↔ `Mystira.App.Contracts`
+- `@mystira/story-generator` ↔ `Mystira.StoryGenerator.Contracts`
+
+When an NPM package is released via Changesets, the corresponding NuGet package is automatically triggered for release.
+
+### Version Flow
+
+The unified publishing system supports bidirectional synchronization:
+
+**Forward Flow (Changesets → NuGet):**
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Changeset     │ ──▶ │  NPM Release    │ ──▶ │  NuGet Release  │
+│   Created       │     │  (Changesets)   │     │  (Triggered)    │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+```
+
+**Reverse Flow (Submodule → Changeset):**
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Submodule     │ ──▶ │  NuGet Release  │ ──▶ │  Auto-Changeset │
+│   Push to Main  │     │  (Dispatch)     │     │  Created        │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+                                                ┌─────────────────┐
+                                                │  NPM Version PR │
+                                                │  (Changesets)   │
+                                                └─────────────────┘
+```
+
+This ensures NPM packages stay in sync when their NuGet dependencies are updated directly from submodules.
+
+### Pre-release Strategy
+
+| Environment | NPM Version   | NuGet Version | Docker Tag             |
+| ----------- | ------------- | ------------- | ---------------------- |
+| Development | `1.0.0-dev.N` | `1.0.0-dev.N` | `dev-{sha}`            |
+| Staging     | `1.0.0-rc.N`  | `1.0.0-rc.N`  | `staging-{sha}`        |
+| Production  | `1.0.0`       | `1.0.0`       | `prod-{sha}`, `latest` |
+
+---
+
+## Docker Image Publishing
+
+### Registry
+
+**Azure Container Registry**: `myssharedacr.azurecr.io`
+
+### Images Published
+
+| Image             | Source                     | Dockerfile                                | Notes                      |
+| ----------------- | -------------------------- | ----------------------------------------- | -------------------------- |
+| `publisher`       | `packages/publisher`       | `infra/docker/publisher/Dockerfile`       | Node.js                    |
+| `chain`           | `packages/chain`           | `infra/docker/chain/Dockerfile`           | Python                     |
+| `story-generator` | `packages/story-generator` | `infra/docker/story-generator/Dockerfile` | .NET API (not Blazor WASM) |
+
+> **Note**: The `story-generator` image builds `Mystira.StoryGenerator.Api`, following the same pattern as `Mystira.App` where API goes to Kubernetes and Web (Blazor WASM) would go to Static Web App.
+
+### Tagging Strategy
+
+| Branch        | Tags Applied                 |
+| ------------- | ---------------------------- |
+| `dev`         | `dev`, `latest`, `{sha}`     |
+| `main`        | `staging`, `latest`, `{sha}` |
+| Manual deploy | `prod`, `{sha}`              |
+
+### Workflow Triggers
+
+```yaml
+# Triggered on push to dev or main with path-based filtering
+on:
+  push:
+    branches: [dev, main]
+    paths:
+      - "packages/{service}/**"
+```
+
+### Build Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│    Lint      │ ──▶ │    Test      │ ──▶ │    Build     │ ──▶ │ Docker Push  │
+│              │     │              │     │              │     │   to ACR     │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+```
+
+---
+
+## NPM Package Publishing
+
+### Registry
+
+**npmjs.org** (public registry)
+
+### Configuration
+
+Uses **Changesets** for versioning and publishing.
+
+### Workflow
+
+```yaml
+# .github/workflows/release.yml
+- Triggers on push to main
+- Creates version PRs via Changesets
+- Publishes to npm on merge
+```
+
+### Required Secrets
+
+| Secret      | Description                     |
+| ----------- | ------------------------------- |
+| `NPM_TOKEN` | npm access token for publishing |
+
+### Publishing Flow
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│ Push to main │ ──▶ │  Changesets  │ ──▶ │  Version PR  │ ──▶ │  Publish to  │
+│              │     │   Action     │     │   Created    │     │    npmjs     │
+└──────────────┘     └──────────────┘     └──────────────┘     └──────────────┘
+```
+
+---
+
+## NuGet Package Publishing
+
+### Workflows
+
+NuGet packages are published through dedicated workflows:
+
+| Workflow                              | File                    | Package             | Status        |
+| ------------------------------------- | ----------------------- | ------------------- | ------------- |
+| `Packages - Contracts: Publish NuGet` | `contracts-publish.yml` | `Mystira.Contracts` | ✅ Active     |
+| `Packages - Shared: Publish NuGet`    | `shared-publish.yml`    | `Mystira.Shared`    | ✅ Active     |
+| `Packages - Legacy: Submodule NuGet`  | `nuget-publish.yml`     | Legacy packages     | ⚠️ Deprecated |
+
+### Automatic Branch Publishing
+
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                        NuGet Publishing Triggers                        │
+├──────────────────────────────────────────────────────────────────────────┤
+│  Push to dev   →  Pre-release to GitHub Packages (e.g., 0.1.0-dev.123) │
+│  Push to main  →  Stable to GitHub Packages + NuGet.org (e.g., 0.1.0)  │
+│  Changesets    →  Triggered after @mystira/contracts NPM publish        │
+│  Manual        →  workflow_dispatch with version suffix + NuGet toggle  │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Registry Options
+
+- **GitHub Packages**: `https://nuget.pkg.github.com/phoenixvc/index.json` (all builds)
+- **NuGet.org**: `https://api.nuget.org/v3/index.json` (stable releases only)
+
+### Packages Published
+
+| Package                            | NPM Counterpart            | Description           | Workflow                |
+| ---------------------------------- | -------------------------- | --------------------- | ----------------------- |
+| `Mystira.Contracts`                | `@mystira/contracts`       | Unified API contracts | `contracts-publish.yml` |
+| `Mystira.Shared`                   | N/A                        | .NET shared utilities | `shared-publish.yml`    |
+| `Mystira.App.Contracts`            | `@mystira/app`             | ⚠️ Deprecated         | `nuget-publish.yml`     |
+| `Mystira.StoryGenerator.Contracts` | `@mystira/story-generator` | ⚠️ Deprecated         | `nuget-publish.yml`     |
+
+### Version Synchronization
+
+| Package             | Version Source                    | Strategy                       |
+| ------------------- | --------------------------------- | ------------------------------ |
+| `Mystira.Contracts` | `packages/contracts/package.json` | Synced with NPM via Changesets |
+| `Mystira.Shared`    | `.csproj` Version property        | Independent versioning         |
+
+### Required Secrets
+
+| Secret          | Description                             |
+| --------------- | --------------------------------------- |
+| `NUGET_API_KEY` | NuGet.org API key (for public packages) |
+| `GITHUB_TOKEN`  | Auto-provided (for GitHub Packages)     |
+
+### Version Strategy
+
+| Branch/Trigger     | Version Format            | Destination                 |
+| ------------------ | ------------------------- | --------------------------- |
+| Push to `dev`      | `{base}-dev.{run_number}` | GitHub Packages only        |
+| Push to `main`     | `{base}` (stable)         | GitHub Packages + NuGet.org |
+| Changesets release | Matches NPM version       | GitHub Packages + NuGet.org |
+| Manual dispatch    | User-specified suffix     | Configurable via checkbox   |
+
+### Manual Trigger Options
+
+Both contracts and shared workflows support manual dispatch with:
+
+- **Version suffix** (optional): e.g., `beta.1`, `rc.1`
+- **Publish to NuGet.org** checkbox: Controls public registry publishing
+
+---
+
+## Deployment Flow
+
+### Environment URLs
+
+| Environment | Publisher                       | Chain                       | API                       |
+| ----------- | ------------------------------- | --------------------------- | ------------------------- |
+| Dev         | `dev.publisher.mystira.app`     | `dev.chain.mystira.app`     | `dev.api.mystira.app`     |
+| Staging     | `staging.publisher.mystira.app` | `staging.chain.mystira.app` | `staging.api.mystira.app` |
+| Production  | `publisher.mystira.app`         | `chain.mystira.app`         | `api.mystira.app`         |
+
+### Complete Flow Diagram
+
+```
+                              CODE CHANGES
+                                   │
+                    ┌──────────────┴──────────────┐
+                    │                             │
+                    ▼                             ▼
+             ┌─────────────┐               ┌─────────────┐
+             │ Feature     │               │   Hotfix    │
+             │ Branch      │               │   Branch    │
+             └──────┬──────┘               └──────┬──────┘
+                    │                             │
+                    │ PR                          │ PR
+                    ▼                             ▼
+             ┌─────────────┐               ┌─────────────┐
+             │  dev branch │               │ main branch │
+             │             │               │             │
+             │ • CI runs   │               │ • CI runs   │
+             │ • Docker →  │               │ • Docker →  │
+             │   ACR:dev   │               │   ACR:staging│
+             └──────┬──────┘               └──────┬──────┘
+                    │                             │
+                    │ PR (1 approval)             │
+                    ▼                             │
+             ┌─────────────┐                      │
+             │ main branch │◀─────────────────────┘
+             │             │
+             │ • Auto      │
+             │   staging   │
+             │   deploy    │
+             └──────┬──────┘
+                    │
+                    │ staging-release.yml
+                    ▼
+             ┌─────────────┐
+             │   STAGING   │
+             │   AKS       │
+             │ mys-staging │
+             └──────┬──────┘
+                    │
+                    │ Manual trigger
+                    │ "DEPLOY TO PRODUCTION"
+                    ▼
+             ┌─────────────┐
+             │ PRODUCTION  │
+             │   AKS       │
+             │  mys-prod   │
+             └─────────────┘
+```
+
+### Workflow Files
+
+| Workflow                              | Trigger                      | Action                                |
+| ------------------------------------- | ---------------------------- | ------------------------------------- |
+| `publisher-ci.yml`                    | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `chain-ci.yml`                        | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `story-generator-ci.yml`              | Push/PR to dev/main          | Lint, test, build, Docker push        |
+| `submodule-deploy-dev.yml`            | `repository_dispatch`        | Deploy submodule to dev K8s           |
+| `submodule-deploy-dev-appservice.yml` | `repository_dispatch`        | Deploy Mystira.App to dev App Service |
+| `contracts-publish.yml`               | Push to dev/main, Changesets | Publish Mystira.Contracts NuGet       |
+| `shared-publish.yml`                  | Push to dev/main             | Publish Mystira.Shared NuGet          |
+| `nuget-publish.yml`                   | `repository_dispatch`        | ⚠️ Legacy submodule packages          |
+| `release.yml`                         | Push to main                 | NPM + NuGet publish (Changesets)      |
+| `staging-release.yml`                 | Push to main                 | Auto-deploy to staging AKS            |
+| `production-release.yml`              | Manual                       | Deploy to production AKS              |
+| `infra-deploy.yml`                    | Manual/Push                  | Full infrastructure deployment        |
+
+---
+
+## Submodule Deployment (Dev Only)
+
+Submodule repositories (Admin.Api, Admin.UI, etc.) use `repository_dispatch` to trigger deployments to the **dev environment only**.
+
+> **Full Setup Guide**: See [Submodule CI/CD Setup](./submodule-cicd-setup.md) for complete instructions including workflow templates and secrets configuration.
+
+### Trigger Behavior
+
+| Event             | CI (lint/test/build) | Deploy to Dev |
+| ----------------- | -------------------- | ------------- |
+| PR opened/updated | ✅                   | ❌            |
+| Draft PR          | ❌ skip              | ❌            |
+| Push/merge to dev | ✅                   | ✅            |
+| Push to main      | ✅                   | ❌            |
+| Manual dispatch   | ✅                   | ✅            |
+
+### Flow Diagram
+
+```
+┌─────────────────────────┐     ┌─────────────────────────────┐
+│   Submodule Repository  │     │      Mystira.workspace      │
+│   (e.g., Admin.Api)     │     │                             │
+├─────────────────────────┤     ├─────────────────────────────┤
+│ 1. PR merged to dev     │     │                             │
+│    (push event fires)   │     │                             │
+│         ↓               │     │                             │
+│ 2. Build Docker image   │     │                             │
+│ 3. Push to ACR          │────►│ 4. repository_dispatch      │
+│         ↓               │     │    event received           │
+│ 4. Trigger dispatch     │     │         ↓                   │
+│    (admin-api-deploy)   │     │ 5. Update K8s deployment    │
+└─────────────────────────┘     │    with new image tag       │
+                                │         ↓                   │
+                                │ 6. Rollout to dev AKS       │
+                                │         ↓                   │
+                                │ 7. Update submodule ref     │
+                                │    and commit to dev        │
+                                └─────────────────────────────┘
+```
+
+> **Note**: After successful deployment, the workspace automatically updates the submodule reference to the deployed commit and pushes to `dev`. This keeps the workspace in sync with deployed versions.
+
+### Supported Event Types
+
+| Event Type                   | Target                      | Handler Workflow                      |
+| ---------------------------- | --------------------------- | ------------------------------------- |
+| `admin-api-deploy`           | `mys-admin-api` (K8s)       | `submodule-deploy-dev.yml`            |
+| `admin-ui-deploy`            | `mys-admin-ui` (K8s)        | `submodule-deploy-dev.yml`            |
+| `story-generator-deploy`     | `mys-story-generator` (K8s) | `submodule-deploy-dev.yml`            |
+| `publisher-deploy`           | `mys-publisher` (K8s)       | `submodule-deploy-dev.yml`            |
+| `chain-deploy`               | `mys-chain` (K8s)           | `submodule-deploy-dev.yml`            |
+| `app-deploy`                 | App Service                 | `submodule-deploy-dev-appservice.yml` |
+| `app-swa-deploy`             | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `devhub-deploy`              | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `story-generator-swa-deploy` | Static Web App              | `submodule-deploy-dev-appservice.yml` |
+| `contracts-nuget-publish`    | GitHub/NuGet.org            | `contracts-publish.yml`               |
+| `nuget-publish`              | GitHub/NuGet.org            | `nuget-publish.yml` (⚠️ legacy)       |
+
+> **Note**: `Mystira.StoryGenerator` follows the same API/Web pattern as `Mystira.App`:
+>
+> - **API** (`Mystira.StoryGenerator.Api`) → Kubernetes via `story-generator-deploy`
+> - **Web** (`Mystira.StoryGenerator.Web`, Blazor WASM) → Static Web App via `story-generator-swa-deploy`
+
+### Client Payload Format
+
+Submodules should send the following payload:
+
+```json
+{
+  "environment": "dev",
+  "ref": "<commit-sha>",
+  "triggered_by": "<github-actor>",
+  "run_id": "<workflow-run-id>",
+  "repository": "<owner/repo>",
+  "image_tag": "dev-<commit-sha>",
+  "pr_number": "<pr-number-or-empty>"
+}
+```
+
+### Example Submodule Workflow (Dispatch Job Only)
+
+```yaml
+# In submodule repository - add this job to your CI workflow
+# Full template: docs/cicd/submodule-cicd-setup.md
+
+trigger-workspace-deploy:
+  name: Trigger Workspace Deployment
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  # Only deploy on push to dev (includes merges) or manual dispatch
+  if: |
+    needs.build-and-push.result == 'success' &&
+    github.ref == 'refs/heads/dev' &&
+    (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+  steps:
+    - name: Trigger deployment via workspace
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: admin-api-deploy # Change per service
+        client-payload: |
+          {
+            "environment": "dev",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "repository": "${{ github.repository }}",
+            "image_tag": "dev-${{ github.sha }}",
+            "pr_number": ""
+          }
+```
+
+### Required Secrets (Submodule Repositories)
+
+| Secret                                  | Description                                      |
+| --------------------------------------- | ------------------------------------------------ |
+| `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` | GitHub PAT with `repo` scope to trigger dispatch |
+| `AZURE_CLIENT_ID`                       | Azure service principal client ID                |
+| `AZURE_TENANT_ID`                       | Azure tenant ID                                  |
+| `AZURE_SUBSCRIPTION_ID`                 | Azure subscription ID                            |
+| `GH_PACKAGES_TOKEN`                     | GitHub PAT for NuGet package restore             |
+
+> **Token Setup**: `MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN` is the standard PAT used across all Mystira repositories. It must have `repo` scope to trigger `repository_dispatch` events in the workspace.
+
+### Why Dev Only?
+
+Submodule-triggered deployments are **intentionally limited to the dev environment**:
+
+- **Staging/Production**: Managed through workspace release workflows (`staging-release.yml`, `production-release.yml`)
+- **Rationale**: Production deployments require coordinated releases, approval gates, and testing
+- **Dev**: Enables rapid iteration and testing of individual services
+
+---
+
+## Legacy NuGet Package Publishing (Submodules)
+
+> ⚠️ **Deprecated**: This section describes the legacy submodule-triggered NuGet publishing. For new packages, use the unified `Mystira.Contracts` and `Mystira.Shared` packages which publish automatically on push to dev/main.
+
+Submodules with shared contracts can trigger NuGet package publishing via the workspace's `nuget-publish.yml` workflow.
+
+### Version Strategy (Legacy)
+
+| Branch | Version                  | Destination                 |
+| ------ | ------------------------ | --------------------------- |
+| `dev`  | `1.0.0-dev.{run_number}` | GitHub Packages only        |
+| `main` | `1.0.0` (stable)         | GitHub Packages + NuGet.org |
+
+### Triggering NuGet Publish (Legacy)
+
+Add this job to your submodule workflow (after successful build):
+
+```yaml
+trigger-nuget-publish:
+  name: Trigger NuGet Publish
+  runs-on: ubuntu-latest
+  needs: build-and-push
+  if: |
+    needs.build-and-push.result == 'success' &&
+    (github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main')
+  steps:
+    - name: Trigger NuGet publish
+      uses: peter-evans/repository-dispatch@v3
+      with:
+        token: ${{ secrets.MYSTIRA_GITHUB_SUBMODULE_ACCESS_TOKEN }}
+        repository: phoenixvc/Mystira.workspace
+        event-type: nuget-publish
+        client-payload: |
+          {
+            "package": "app-contracts",
+            "ref": "${{ github.sha }}",
+            "triggered_by": "${{ github.actor }}",
+            "run_id": "${{ github.run_id }}",
+            "version_suffix": "${{ github.ref == 'refs/heads/dev' && format('dev.{0}', github.run_number) || '' }}",
+            "is_prerelease": "${{ github.ref == 'refs/heads/dev' }}"
+          }
+```
+
+### Supported Legacy Packages
+
+| Package Name                     | Event Payload `package` Value |
+| -------------------------------- | ----------------------------- |
+| Mystira.App.Contracts            | `app-contracts`               |
+| Mystira.StoryGenerator.Contracts | `story-generator-contracts`   |
+
+> **Recommendation**: Migrate to `Mystira.Contracts` which consolidates both packages and is managed via Changesets.
+
+---
+
+## GitHub Secrets Required
+
+| Secret                  | Purpose                      | Required For          |
+| ----------------------- | ---------------------------- | --------------------- |
+| `AZURE_CREDENTIALS`     | Azure service principal JSON | All Azure operations  |
+| `NPM_TOKEN`             | npm publish token            | NPM releases          |
+| `NUGET_API_KEY`         | NuGet.org API key            | NuGet releases        |
+| `AZURE_CLIENT_ID`       | Azure client ID (OIDC)       | Federated auth        |
+| `AZURE_TENANT_ID`       | Azure tenant ID (OIDC)       | Federated auth        |
+| `AZURE_SUBSCRIPTION_ID` | Azure subscription ID        | Federated auth        |
+| `GH_PACKAGES_TOKEN`     | GitHub PAT for packages      | NuGet package restore |
+
+---
+
+## Quick Reference Commands
+
+### Check Published Docker Images
+
+```bash
+az acr repository list --name myssharedacr
+az acr repository show-tags --name myssharedacr --repository publisher
+```
+
+### Check NPM Package
+
+```bash
+npm view @mystira/publisher versions
+```
+
+### Check NuGet Package
+
+```bash
+dotnet nuget list source
+dotnet package search Mystira.Contracts --source github
+```
+
+### Trigger Manual Deployment
+
+```bash
+# Via GitHub CLI
+gh workflow run "Infrastructure Deploy" -f environment=dev
+gh workflow run "Production Release" -f confirm="DEPLOY TO PRODUCTION"
+```
+
+---
+
+## Related Documentation
+
+- [CI/CD Setup](./cicd-setup.md) - Branch protection and CI configuration
+- [ADR-0003: Release Pipeline Strategy](../architecture/adr/0003-release-pipeline-strategy.md)
+- [ADR-0004: Branching Strategy](../architecture/adr/0004-branching-strategy-and-cicd.md)

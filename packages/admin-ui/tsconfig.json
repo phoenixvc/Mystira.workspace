@@ -22,6 +22,7 @@
     }
   },
   "include": ["src"],
+<<<<<<< HEAD
   "exclude": [
     "node_modules",
     "dist",
@@ -30,5 +31,8 @@
     "**/*.test.ts",
     "**/*.test.tsx"
   ],
+=======
+  "exclude": ["node_modules", "dist", "src/test", "src/test/**", "**/*.test.ts", "**/*.test.tsx"],
+>>>>>>> origin/dev
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -32,7 +32,7 @@ interface LogFilterBarProps {
       | "runtime-warnings"
       | "all-errors"
       | "build-only"
-      | "runtime-only",
+      | "runtime-only"
   ) => void;
   onClearLogs?: () => void;
 }
@@ -295,7 +295,7 @@ export function LogFilterBar({
           value={timestampFormat}
           onChange={(e) =>
             onTimestampFormatChange(
-              e.target.value as "time" | "full" | "relative",
+              e.target.value as "time" | "full" | "relative"
             )
           }
           className="px-1.5 py-0.5 border border-gray-300 dark:border-gray-600 rounded text-[10px] bg-white dark:bg-gray-800 text-gray-900 dark:text-white"

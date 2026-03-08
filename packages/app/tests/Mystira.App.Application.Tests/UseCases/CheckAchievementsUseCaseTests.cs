@@ -14,7 +14,11 @@ public class CheckAchievementsUseCaseTests
     private readonly Mock<IGameSessionRepository> _sessionRepository;
     private readonly Mock<IBadgeConfigurationRepository> _badgeRepository;
     private readonly Mock<IUnitOfWork> _unitOfWork;
+<<<<<<< HEAD
     private readonly Mock<IDistributedLockService> _distributedLockService;
+=======
+    private readonly Mock<IDistributedLockService> _lockService;
+>>>>>>> origin/dev
     private readonly Mock<ILogger<CheckAchievementsUseCase>> _logger;
     private readonly CheckAchievementsUseCase _useCase;
 
@@ -23,14 +27,22 @@ public class CheckAchievementsUseCaseTests
         _sessionRepository = new Mock<IGameSessionRepository>();
         _badgeRepository = new Mock<IBadgeConfigurationRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
+<<<<<<< HEAD
         _distributedLockService = new Mock<IDistributedLockService>();
+=======
+        _lockService = new Mock<IDistributedLockService>();
+>>>>>>> origin/dev
         _logger = new Mock<ILogger<CheckAchievementsUseCase>>();
 
         _useCase = new CheckAchievementsUseCase(
             _sessionRepository.Object,
             _badgeRepository.Object,
             _unitOfWork.Object,
+<<<<<<< HEAD
             _distributedLockService.Object,
+=======
+            _lockService.Object,
+>>>>>>> origin/dev
             _logger.Object);
     }
 

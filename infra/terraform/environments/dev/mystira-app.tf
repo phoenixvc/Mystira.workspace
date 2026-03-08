@@ -115,9 +115,6 @@ module "mystira_app" {
   # -----------------------------------------------------------------------------
   enable_static_web_app = true
   static_web_app_sku    = "Free"
-  github_repository_url = "https://github.com/phoenixvc/Mystira.workspace"
-  github_branch         = "dev"
-
   # Custom domain - DISABLED in module, created separately in dns-records.tf
   enable_app_custom_domain = false
   app_custom_domain        = "dev.mystira.app"

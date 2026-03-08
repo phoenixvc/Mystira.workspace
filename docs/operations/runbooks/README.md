@@ -87,21 +87,10 @@ Procedures for managing infrastructure components.
 
 ### Contact Information
 
-<<<<<<< HEAD
-| Role | Primary | Backup | Method |
-| ---------------- | -------------------- | -------------------- | ------ |
-| Technical Lead | jurie@phoenixvc.tech | eben@phoenixvc.tech | Email |
-| Founder/Business | eben@phoenixvc.tech | jurie@phoenixvc.tech | Email |
-=======
-| Role | Primary | Backup | Method |
-| ------------------- | ------------------ | -------------------- | ------------- |
-| On-call Engineer | PagerDuty rotation | - | PagerDuty |
-| On-call Lead | PagerDuty rotation | - | PagerDuty |
-| Engineering Manager | @eng-manager | @eng-director | Slack + Phone |
-| DBA | @dba-team | @platform-team | Slack |
-| Security | @security-team | security@mystira.app | Slack + Email |
-
-> > > > > > > origin/feat/consolidate_backlog
+| Role             | Primary              | Backup               | Method        |
+| ---------------- | -------------------- | -------------------- | ------------- |
+| Technical Lead   | jurie@phoenixvc.tech | eben@phoenixvc.tech  | Email         |
+| Founder/Business | eben@phoenixvc.tech  | jurie@phoenixvc.tech | Email         |
 
 ---
 

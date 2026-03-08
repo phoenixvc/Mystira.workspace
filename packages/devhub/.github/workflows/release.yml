@@ -52,7 +52,11 @@ jobs:
       build_leptos: ${{ steps.determine.outputs.build_leptos }}
       build_react: ${{ steps.determine.outputs.build_react }}
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
+=======
+      - uses: actions/checkout@v6
+>>>>>>> origin/dev
         with:
           fetch-depth: 0
 
@@ -132,7 +136,11 @@ jobs:
       run:
         working-directory: Mystira.Leptos
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
+=======
+      - uses: actions/checkout@v6
+>>>>>>> origin/dev
 
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -156,9 +164,15 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: Setup Node.js
+<<<<<<< HEAD
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+=======
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+>>>>>>> origin/dev
 
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -178,7 +192,11 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: Upload artifacts
+<<<<<<< HEAD
         uses: actions/upload-artifact@v4
+=======
+        uses: actions/upload-artifact@v7
+>>>>>>> origin/dev
         with:
           name: ${{ matrix.platform.artifact }}
           path: |
@@ -220,6 +238,7 @@ jobs:
       run:
         working-directory: Mystira.DevHub
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
@@ -227,6 +246,15 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+=======
+      - uses: actions/checkout@v6
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+>>>>>>> origin/dev
           cache: "pnpm"
           cache-dependency-path: Mystira.DevHub/pnpm-lock.yaml
 
@@ -257,7 +285,11 @@ jobs:
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
 
       - name: Upload artifacts
+<<<<<<< HEAD
         uses: actions/upload-artifact@v4
+=======
+        uses: actions/upload-artifact@v7
+>>>>>>> origin/dev
         with:
           name: ${{ matrix.platform.artifact }}
           path: |
@@ -280,12 +312,20 @@ jobs:
     needs: [prepare, build-leptos, build-react]
     if: always() && (needs.build-leptos.result == 'success' || needs.build-react.result == 'success')
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
+=======
+      - uses: actions/checkout@v6
+>>>>>>> origin/dev
         with:
           fetch-depth: 0
 
       - name: Download all artifacts
+<<<<<<< HEAD
         uses: actions/download-artifact@v4
+=======
+        uses: actions/download-artifact@v8
+>>>>>>> origin/dev
         with:
           path: artifacts
 

@@ -1,4 +1,4 @@
-name: "[Deploy] Prod App API"
+name: "[Deploy] App API Blue-Green"
 
 # Production Blue-Green Deployment for Mystira App API
 # Strategy: Deploy to staging slot, health check, then swap to production
@@ -17,12 +17,12 @@ on:
         required: true
         type: string
       skip_health_check:
-        description: "Skip health checks (emergency only)"
+        description: 'Skip health checks (emergency only)'
         required: false
         type: boolean
         default: false
       warm_up_seconds:
-        description: "Warm-up time in seconds before swap"
+        description: 'Warm-up time in seconds before swap'
         required: false
         type: number
         default: 60
@@ -44,7 +44,6 @@ jobs:
   validate-confirmation:
     name: Validate Confirmation
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     outputs:
       deployment_id: ${{ steps.generate_id.outputs.deployment_id }}
     steps:
@@ -64,7 +63,6 @@ jobs:
   deploy-to-staging-slot:
     name: Deploy to Staging Slot
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     needs: [validate-confirmation]
     environment:
       name: production-staging
@@ -79,17 +77,15 @@ jobs:
         with:
           ref: main
 
-      - name: Azure Login (OIDC)
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "10.0.x"
+          dotnet-version: '8.0.x'
 
       - name: Build Application
         run: |
@@ -116,7 +112,6 @@ jobs:
   health-check-staging:
     name: Health Check Staging Slot
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: [deploy-to-staging-slot]
     if: ${{ github.event.inputs.skip_health_check != 'true' }}
     steps:
@@ -188,7 +183,6 @@ jobs:
   swap-to-production:
     name: Swap Staging to Production
     runs-on: ubuntu-latest
-    timeout-minutes: 20
     needs: [validate-confirmation, deploy-to-staging-slot, health-check-staging]
     if: ${{ always() && needs.deploy-to-staging-slot.result == 'success' && (needs.health-check-staging.result == 'success' || needs.health-check-staging.result == 'skipped') }}
     environment:
@@ -198,12 +192,10 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Azure Login (OIDC)
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          creds: ${{ secrets.MYSTIRA_AZURE_CREDENTIALS }}
 
       - name: Record pre-swap state
         id: pre_swap
@@ -264,7 +256,6 @@ jobs:
   post-deployment-monitoring:
     name: Post-Deployment Monitoring
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     needs: [swap-to-production]
     steps:
       - name: Monitor error rates
@@ -305,15 +296,7 @@ jobs:
   notify:
     name: Deployment Notification
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs:
-      [
-        validate-confirmation,
-        deploy-to-staging-slot,
-        health-check-staging,
-        swap-to-production,
-        post-deployment-monitoring,
-      ]
+    needs: [validate-confirmation, deploy-to-staging-slot, health-check-staging, swap-to-production, post-deployment-monitoring]
     if: always()
     steps:
       - name: Generate deployment summary

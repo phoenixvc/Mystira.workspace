@@ -92,7 +92,11 @@ public class MediaControllerTests
     {
         // Arrange
         var mediaId = "image-final-logo-fe3f75db";
+<<<<<<< HEAD
         using var stream = new MemoryStream(new byte[] { 1, 2, 3, 4 });
+=======
+        var stream = new MemoryStream(new byte[] { 1, 2, 3, 4 });
+>>>>>>> origin/dev
         var contentType = "image/png";
         var fileName = "logo.png";
         var bus = new Mock<IMessageBus>();

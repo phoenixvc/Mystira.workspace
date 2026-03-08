@@ -1,11 +1,11 @@
 /**
  * Mystira Typography System
- * Based on Publisher's comprehensive token system
+ * Brand fonts: Baloo 2 (headings/display), Nunito (body/sans)
  */
 
 export const fontFamily = {
   sans: [
-    "Inter",
+    "Nunito",
     "system-ui",
     "-apple-system",
     "BlinkMacSystemFont",
@@ -21,7 +21,7 @@ export const fontFamily = {
     "Consolas",
     "monospace",
   ],
-  display: ["Inter", "system-ui", "sans-serif"],
+  display: ["Baloo 2", "system-ui", "sans-serif"],
 } as const;
 
 export const fontSize = {

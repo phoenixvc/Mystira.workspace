@@ -28,26 +28,8 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "vnet_id" {
-  description = "Virtual Network ID for admin-api deployment"
-  type        = string
-  default     = null
-}
-
-variable "subnet_id" {
-  description = "Subnet ID for admin-api service"
-  type        = string
-  default     = null
-}
-
 variable "shared_log_analytics_workspace_id" {
   description = "ID of shared Log Analytics workspace (from shared monitoring module)"
-  type        = string
-  default     = null
-}
-
-variable "shared_postgresql_server_id" {
-  description = "ID of shared PostgreSQL server (from shared/postgresql module)"
   type        = string
   default     = null
 }
@@ -56,17 +38,4 @@ variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
   default     = {}
-}
-
-# Scaling configuration
-variable "min_replicas" {
-  description = "Minimum number of API replicas"
-  type        = number
-  default     = 1
-}
-
-variable "max_replicas" {
-  description = "Maximum number of API replicas"
-  type        = number
-  default     = 3
 }

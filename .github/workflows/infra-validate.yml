@@ -1,4 +1,4 @@
-name: "Infrastructure: Validate"
+name: "[CI] Infra Validate (Bicep)"
 
 # Infrastructure Validation: Validates Terraform, Kubernetes, and Docker configurations
 # Checks: Terraform format/validate, K8s manifest validation, Dockerfile linting, security scans
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "1.5.0"
 

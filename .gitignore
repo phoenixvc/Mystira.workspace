@@ -28,6 +28,7 @@ target/
 pkg/
 wasm-pack.log
 
+
 # Cache
 .cache/
 *.tsbuildinfo
@@ -39,14 +40,10 @@ wasm-pack.log
 !.env.example
 !.env.*.example
 
-# Allow template .env files for debug configurations at workspace root
-!.env.admin-api
-!.env.publisher
-!.env.story-generator
-
 # IDE - JetBrains
 .idea/
 *.DotSettings.user
+
 
 # IDE - Visual Studio
 .vs/
@@ -265,7 +262,6 @@ packages/devhub/Mystira.DevHub/tools/
 packages/devhub/Mystira.DevHub/MEDIA_*.md
 packages/devhub/Mystira.DevHub/PWA_*.md
 packages/devhub/Mystira.DevHub/SRI_*.md
-
 # Temporary documentation files
 CHAIN_COMPARISON.md
 REPO_SETUP_COMPLETE.md

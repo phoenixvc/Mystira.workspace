@@ -1,24 +1,25 @@
 /**
  * Mystira Color Palette
- * Primary: Purple (#7c3aed) - Unified across all packages
- * Based on Publisher's comprehensive token system
+ * Primary: Twilight Amethyst (#5B3CC4) - Brand guide canonical color
+ * Note: Legacy code uses #7C3AED — migration to #5B3CC4 will be completed
+ * as part of Phase 1A token system rollout (see docs/design/06-phase-1a-design-tokens.md)
  */
 
 export const colors = {
-  // Primary Purple (brand color)
+  // Primary Purple — Twilight Amethyst (brand color)
   primary: {
-    50: "#faf5ff",
-    100: "#f3e8ff",
-    200: "#e9d5ff",
-    300: "#d8b4fe",
-    400: "#c084fc",
-    500: "#a855f7",
-    600: "#9333ea",
-    700: "#7c3aed", // Main brand color
-    800: "#6b21a8",
-    900: "#581c87",
-    950: "#3b0764",
-    DEFAULT: "#7c3aed", // Convenience accessor for the main brand color
+    50: "#f5f0ff",
+    100: "#ede5ff",
+    200: "#ddd0ff",
+    300: "#c7b8ff",
+    400: "#a68eff",
+    500: "#8668e5",
+    600: "#6d4fd4",
+    700: "#5b3cc4", // Main brand color (Twilight Amethyst)
+    800: "#4a2fa3",
+    900: "#3a2482",
+    950: "#231560",
+    DEFAULT: "#5b3cc4", // Twilight Amethyst — canonical brand primary
   },
 
   // Neutral Gray

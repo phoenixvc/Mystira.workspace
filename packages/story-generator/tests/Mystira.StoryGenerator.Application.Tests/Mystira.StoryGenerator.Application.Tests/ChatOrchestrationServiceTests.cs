@@ -187,7 +187,11 @@ public class ChatOrchestrationServiceTests
         };
         _mockMessageBus
             .Setup(x => x.InvokeAsync<GenerateJsonStoryResponse>(It.IsAny<GenerateStoryCommand>(), It.IsAny<CancellationToken>()))
+<<<<<<< HEAD
             .ReturnsAsync((GenerateStoryCommand cmd, CancellationToken ct) => mockStoryResponse);
+=======
+            .ReturnsAsync(mockStoryResponse);
+>>>>>>> origin/dev
 
         // Act
         var result = await _service.CompleteAsync(context, CancellationToken.None);
@@ -219,7 +223,11 @@ public class ChatOrchestrationServiceTests
 
         _mockMessageBus
             .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<HelpCommand>(), It.IsAny<CancellationToken>()))
+<<<<<<< HEAD
             .ReturnsAsync((HelpCommand cmd, CancellationToken ct) => helpResponse);
+=======
+            .ReturnsAsync(helpResponse);
+>>>>>>> origin/dev
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);
 
@@ -248,7 +256,11 @@ public class ChatOrchestrationServiceTests
 
         _mockMessageBus
             .Setup(x => x.InvokeAsync<ChatCompletionResponse>(It.IsAny<FreeTextCommand>(), It.IsAny<CancellationToken>()))
+<<<<<<< HEAD
             .ReturnsAsync((FreeTextCommand cmd, CancellationToken ct) => fallbackResponse);
+=======
+            .ReturnsAsync(fallbackResponse);
+>>>>>>> origin/dev
 
         var result = await _service.CompleteAsync(context, CancellationToken.None);
 

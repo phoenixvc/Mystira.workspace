@@ -240,7 +240,7 @@ public static class TroubleshootingHelper
             Solutions = new[]
             {
                 "Check your internet connection",
-                "Verify NuGet.config has the correct package sources",
+                "Verify NuGet package sources are configured correctly",
                 "Clear NuGet cache: dotnet nuget locals all --clear",
                 "Try restoring with verbose logging: dotnet restore --verbosity detailed"
             }

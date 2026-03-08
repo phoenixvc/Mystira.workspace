@@ -194,6 +194,63 @@ public class UnifiedAuthService : IAuthService
 }
 ```
 
+#### React Admin UI Configuration
+
+**MSAL Configuration (authConfig.ts)**:
+
+```typescript
+import { Configuration, LogLevel } from "@azure/msal-browser";
+
+export const msalConfig: Configuration = {
+  auth: {
+    clientId: import.meta.env.VITE_AZURE_CLIENT_ID,
+    authority: `https://login.microsoftonline.com/${import.meta.env.VITE_AZURE_TENANT_ID}`,
+    redirectUri: import.meta.env.VITE_REDIRECT_URI,
+    postLogoutRedirectUri: import.meta.env.VITE_POST_LOGOUT_URI,
+  },
+  cache: {
+    cacheLocation: "sessionStorage",
+    storeAuthStateInCookie: false,
+  },
+  system: {
+    loggerOptions: {
+      logLevel: LogLevel.Warning,
+    },
+  },
+};
+
+export const loginRequest = {
+  scopes: ["api://mystira-admin-api/Admin.Read"],
+};
+
+export const apiScopes = {
+  admin: [
+    "api://mystira-admin-api/Admin.Read",
+    "api://mystira-admin-api/Admin.Write",
+  ],
+  users: ["api://mystira-admin-api/Users.Manage"],
+  content: ["api://mystira-admin-api/Content.Moderate"],
+};
+```
+
+**Auth Provider (App.tsx)**:
+
+```typescript
+import { MsalProvider } from '@azure/msal-react';
+import { PublicClientApplication } from '@azure/msal-browser';
+import { msalConfig } from './authConfig';
+
+const msalInstance = new PublicClientApplication(msalConfig);
+
+function App() {
+  return (
+    <MsalProvider instance={msalInstance}>
+      <AuthenticatedApp />
+    </MsalProvider>
+  );
+}
+```
+
 ### 5. Role Mapping
 
 #### Entra ID App Roles

@@ -14,6 +14,7 @@ This directory contains getting started guides and development documentation for
 
 | Guide                                         | Description                          |
 | --------------------------------------------- | ------------------------------------ |
+| [Submodules Guide](./submodules.md)           | Working with git submodules          |
 | [Commit Conventions](./commit-conventions.md) | Commit message format and guidelines |
 | [Architecture Overview](./architecture.md)    | System architecture and design       |
 

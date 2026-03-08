@@ -43,8 +43,7 @@ export const authApi = {
   },
 
   status: async (): Promise<AuthStatusResponse> => {
-    const response =
-      await apiClient.get<AuthStatusResponse>("/api/auth/status");
+    const response = await apiClient.get<AuthStatusResponse>("/api/auth/status");
     return response.data;
   },
 };

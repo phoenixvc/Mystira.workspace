@@ -74,7 +74,7 @@ public class AudioCacheServiceTests
                 ItExpr.IsAny<HttpRequestMessage>(),
                 ItExpr.IsAny<CancellationToken>()
             )
-            .ReturnsAsync(() => new HttpResponseMessage
+            .ReturnsAsync(new HttpResponseMessage
             {
                 StatusCode = HttpStatusCode.OK
             });

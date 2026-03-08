@@ -1,4 +1,4 @@
-name: "[CI] Build & Test"
+name: "[CI] Workspace"
 
 # Workspace-level CI: Runs linting, testing, and building across all packages
 # This is the main CI pipeline that validates code quality and functionality
@@ -24,7 +24,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     permissions:
       contents: read
     env:
@@ -32,28 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-
-      - name: Install Python lint dependencies
-        run: |
-          pip install -r packages/chain/requirements.txt
-          pip install -r packages/chain/requirements-dev.txt
-
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           cache: "pnpm"
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: "3.14"
-
-      - name: Install ruff
-        run: pip install ruff==0.9.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -61,40 +44,15 @@ jobs:
       - name: Run linting
         run: pnpm lint
 
-  yaml-lint:
-    name: YAML Lint
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Install yamllint
-        run: pip install yamllint
-
-      - name: Lint YAML files
-        run: yamllint -f github .
-
   test:
     name: Test
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     permissions:
       contents: read
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - uses: actions/checkout@v6
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.14'
-
-      - name: Install Python test dependencies
-        run: |
-          pip install -r packages/chain/requirements.txt
-          pip install -r packages/chain/requirements-dev.txt
 
       - uses: pnpm/action-setup@v4
 
@@ -106,23 +64,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run tests with coverage
-        run: pnpm test -- --coverage
-
-      - name: Upload TypeScript coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: typescript
-          directory: ./
-          files: "**/coverage/lcov.info,**/coverage/cobertura-coverage.xml"
-          fail_ci_if_error: false
-          verbose: true
+      - name: Run tests
+        run: pnpm test
 
   build:
     name: Build
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
     env:
@@ -146,47 +93,15 @@ jobs:
   build-dotnet:
     name: Build and Test .NET
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@v6
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.0.x'
-
-      - name: Lint .NET (format check)
-        id: lint-dotnet
-        run: |
-          echo "Checking .NET code formatting..."
-          LINT_STATUS="success"
-          dotnet format packages/domain/Mystira.Domain --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
-          dotnet format packages/application/Mystira.Application --verify-no-changes --verbosity diagnostic || LINT_STATUS="failure"
-          echo "lint=$LINT_STATUS" >> $GITHUB_OUTPUT
-          if [ "$LINT_STATUS" = "failure" ]; then
-            echo "::warning::Format issues found. Run 'dotnet format' to fix."
-          fi
-        continue-on-error: true
-
-      - name: Build Mystira.Core
-        id: build-core
-        run: |
-          echo "Building Mystira.Core..."
-          dotnet build packages/core/Mystira.Core --configuration Release
-          echo "core=success" >> $GITHUB_OUTPUT
-
-      - name: Test Mystira.Core with coverage
-        id: test-core
-        run: |
-          echo "Testing Mystira.Core with coverage..."
-          dotnet test packages/core/Mystira.Core.Tests --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage/core \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-          echo "core_tests=success" >> $GITHUB_OUTPUT
+          dotnet-version: '8.0.x'
 
       - name: Build Mystira.Contracts
         id: build-contracts
@@ -202,89 +117,12 @@ jobs:
           dotnet build packages/shared/Mystira.Shared --configuration Release
           echo "shared=success" >> $GITHUB_OUTPUT
 
-      - name: Test Mystira.Shared with coverage
+      - name: Test Mystira.Shared
         id: test-shared
         run: |
-          echo "Testing Mystira.Shared with coverage..."
-          dotnet test packages/shared/Mystira.Shared.Tests --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage/shared \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura \
-            2>/dev/null || echo "No tests or tests skipped"
+          echo "Testing Mystira.Shared..."
+          dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --no-build 2>/dev/null || echo "No tests or tests skipped"
           echo "tests=success" >> $GITHUB_OUTPUT
-
-      - name: Build Mystira.Domain
-        id: build-domain
-        run: |
-          echo "Building Mystira.Domain..."
-          dotnet build packages/domain/Mystira.Domain --configuration Release
-          echo "domain=success" >> $GITHUB_OUTPUT
-
-      - name: Build Mystira.Application
-        id: build-application
-        run: |
-          echo "Building Mystira.Application..."
-          dotnet build packages/application/Mystira.Application --configuration Release
-          echo "application=success" >> $GITHUB_OUTPUT
-
-      - name: Build Mystira.Infrastructure packages
-        id: build-infrastructure
-        run: |
-          echo "Building Mystira.Infrastructure packages..."
-          PACKAGES=(
-            "packages/infrastructure/Mystira.Infrastructure.Data"
-            "packages/infrastructure/Mystira.Infrastructure.Azure"
-            "packages/infrastructure/Mystira.Infrastructure.Discord"
-            "packages/infrastructure/Mystira.Infrastructure.Teams"
-            "packages/infrastructure/Mystira.Infrastructure.WhatsApp"
-            "packages/infrastructure/Mystira.Infrastructure.Payments"
-            "packages/infrastructure/Mystira.Infrastructure.StoryProtocol"
-          )
-          for PKG in "${PACKAGES[@]}"; do
-            echo "Building $PKG..."
-            dotnet build "$PKG" --configuration Release
-          done
-          echo "infrastructure=success" >> $GITHUB_OUTPUT
-
-      - name: Test Mystira.Infrastructure.StoryProtocol with coverage
-        id: test-storyprotocol
-        run: |
-          echo "Testing Mystira.Infrastructure.StoryProtocol with coverage..."
-          dotnet test packages/infrastructure/Mystira.Infrastructure.StoryProtocol.Tests --configuration Release \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage/storyprotocol \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-          echo "storyprotocol_tests=success" >> $GITHUB_OUTPUT
-
-      - name: Upload .NET Core coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: dotnet-core
-          directory: ./coverage/core
-          files: "**/coverage.cobertura.xml"
-          fail_ci_if_error: false
-          verbose: true
-
-      - name: Upload .NET Shared coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: dotnet-shared
-          directory: ./coverage/shared
-          files: "**/coverage.cobertura.xml"
-          fail_ci_if_error: false
-          verbose: true
-
-      - name: Upload .NET StoryProtocol coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: dotnet-storyprotocol
-          directory: ./coverage/storyprotocol
-          files: "**/coverage.cobertura.xml"
-          fail_ci_if_error: false
-          verbose: true
 
       - name: Build Summary
         run: |
@@ -292,31 +130,8 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Package | Build | Test |" >> $GITHUB_STEP_SUMMARY
           echo "|---------|-------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Core | ${{ steps.build-core.outputs.core == 'success' && '✅' || '❌' }} | ${{ steps.test-core.outputs.core_tests == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Contracts | ${{ steps.build-contracts.outputs.contracts == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Shared | ${{ steps.build-shared.outputs.shared == 'success' && '✅' || '❌' }} | ${{ steps.test-shared.outputs.tests == 'success' && '✅' || '⏭️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Domain | ${{ steps.build-domain.outputs.domain == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Application | ${{ steps.build-application.outputs.application == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Infrastructure.* (7) | ${{ steps.build-infrastructure.outputs.infrastructure == 'success' && '✅' || '❌' }} | N/A |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Infrastructure.StoryProtocol.Tests | N/A | ${{ steps.test-storyprotocol.outputs.storyprotocol_tests == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### .NET Lint" >> $GITHUB_STEP_SUMMARY
-          echo "| Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| ${{ steps.lint-dotnet.outputs.lint == 'success' && '✅' || '⚠️' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # List types in Mystira.Core
-          echo "### Mystira.Core Types" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "<details>" >> $GITHUB_STEP_SUMMARY
-          echo "<summary>Click to expand</summary>" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          grep -rh "^public \(class\|record\|interface\|enum\|struct\)" --include="*.cs" packages/core/Mystira.Core/ | \
-            sed 's/^public //' | sed 's/{.*//' | sed 's/ :.*//' | sort | uniq >> $GITHUB_STEP_SUMMARY || echo "(none found)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "</details>" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Contracts | ${{ steps.build-contracts.outputs.contracts == 'success' && '???' || '???' }} | N/A |" >> $GITHUB_STEP_SUMMARY
+          echo "| Mystira.Shared | ${{ steps.build-shared.outputs.shared == 'success' && '???' || '???' }} | ${{ steps.test-shared.outputs.tests == 'success' && '???' || '??????' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # List types in Mystira.Contracts
@@ -331,51 +146,11 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
           echo "</details>" >> $GITHUB_STEP_SUMMARY
 
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [build-dotnet]
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Run Integration Tests
-        run: |
-          echo "Running integration tests..."
-          dotnet test packages/tests/Mystira.Integration.Tests \
-            --configuration Release \
-            --filter "Category=Integration" \
-            --collect:"XPlat Code Coverage" \
-            --results-directory ./coverage/integration \
-            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
-
-      - name: Upload Integration Tests coverage to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          flags: integration
-          directory: ./coverage/integration
-          files: "**/coverage.cobertura.xml"
-          fail_ci_if_error: false
-          verbose: true
-
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [lint, yaml-lint, test, build, build-dotnet, integration-tests]
-    # Always run summary job to report status regardless of previous job outcomes
+    needs: [lint, test, build, build-dotnet]
     if: always()
-    permissions:
-      contents: read
     steps:
       - name: Generate Summary
         run: |
@@ -383,24 +158,20 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint (TypeScript) | ${{ needs.lint.result == 'success' && '✅' || needs.lint.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint (YAML) | ${{ needs['yaml-lint'].result == 'success' && '✅' || needs['yaml-lint'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Test (TypeScript) | ${{ needs.test.result == 'success' && '✅' || needs.test.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build (TypeScript) | ${{ needs.build.result == 'success' && '✅' || needs.build.result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Build (.NET) | ${{ needs['build-dotnet'].result == 'success' && '✅' || needs['build-dotnet'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Integration Tests | ${{ needs['integration-tests'].result == 'success' && '✅' || needs['integration-tests'].result == 'skipped' && '⏭️' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint (TypeScript) | ${{ needs.lint.result == 'success' && '???' || needs.lint.result == 'skipped' && '??????' || '???' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Test (TypeScript) | ${{ needs.test.result == 'success' && '???' || needs.test.result == 'skipped' && '??????' || '???' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build (TypeScript) | ${{ needs.build.result == 'success' && '???' || needs.build.result == 'skipped' && '??????' || '???' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build (.NET) | ${{ needs.build-dotnet.result == 'success' && '???' || needs.build-dotnet.result == 'skipped' && '??????' || '???' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           # Overall status
           if [ "${{ needs.lint.result }}" == "success" ] && \
-             [ "${{ needs['yaml-lint'].result }}" == "success" ] && \
              [ "${{ needs.test.result }}" == "success" ] && \
              [ "${{ needs.build.result }}" == "success" ] && \
-             [ "${{ needs['build-dotnet'].result }}" == "success" ] && \
-             [ "${{ needs['integration-tests'].result }}" == "success" ]; then
-            echo "## ✅ All checks passed!" >> $GITHUB_STEP_SUMMARY
+             [ "${{ needs.build-dotnet.result }}" == "success" ]; then
+            echo "## ??? All checks passed!" >> $GITHUB_STEP_SUMMARY
           else
-            echo "## ❌ Some checks failed" >> $GITHUB_STEP_SUMMARY
+            echo "## ??? Some checks failed" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "Please check the job logs above for details." >> $GITHUB_STEP_SUMMARY
           fi

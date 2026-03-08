@@ -1,4 +1,3 @@
-using Microsoft.ApplicationInsights.Extensibility;
 using Mystira.App.Api.Adapters;
 using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;
@@ -22,6 +21,7 @@ using Mystira.Shared.Locking;
 using Mystira.Shared.Middleware;
 using Mystira.Shared.Telemetry;
 using OpenTelemetry.Resources;
+using Microsoft.ApplicationInsights.Extensibility;
 using Serilog;
 using Serilog.Events;
 using Wolverine;

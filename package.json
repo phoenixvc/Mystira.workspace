@@ -10,15 +10,15 @@
     "url": "https://github.com/phoenixvc/Mystira.workspace.git"
   },
   "scripts": {
-    "build": "npx turbo run build",
-    "dev": "npx turbo run dev",
-    "dev:ts": "npx turbo run dev --filter='./packages/publisher' --filter='./packages/admin-ui' --filter='./packages/devhub/Mystira.DevHub'",
-    "dev:admin": "npx turbo run dev --filter='./packages/admin-ui'",
-    "dev:publisher": "npx turbo run dev --filter='./packages/publisher'",
-    "test": "npx turbo run test",
-    "test:coverage": "npx turbo run test:coverage",
-    "test:affected": "npx turbo run test --filter='...[HEAD~1]'",
-    "lint": "npx turbo run lint",
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "dev:ts": "turbo run dev --filter='./packages/publisher' --filter='./packages/admin-ui' --filter='./packages/devhub/Mystira.DevHub'",
+    "dev:admin": "turbo run dev --filter='./packages/admin-ui'",
+    "dev:publisher": "turbo run dev --filter='./packages/publisher'",
+    "test": "turbo run test",
+    "test:coverage": "turbo run test:coverage",
+    "test:affected": "turbo run test --filter='...[HEAD~1]'",
+    "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "clean": "turbo run clean && rm -rf node_modules",
     "docker:up": "docker compose up -d postgres redis hardhat",
@@ -27,26 +27,26 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.2",
-    "@commitlint/config-conventional": "^20.4.2",
-    "@eslint/js": "^10.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.52.0",
-    "@typescript-eslint/parser": "^8.52.0",
-    "eslint": "^10.0.0",
-    "eslint-config-prettier": "^10.0.0",
-    "eslint-plugin-react-hooks": "^7.0.0",
-    "eslint-plugin-react-refresh": "^0.5.0",
-    "globals": "^17.0.0",
+    "@commitlint/cli": "^20.4.3",
+    "@commitlint/config-conventional": "^20.4.3",
+    "@eslint/js": "^10.0.1",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "@vitejs/plugin-react": "^5.1.4",
+    "@vitest/coverage-v8": "^4.0.18",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.5.2",
+    "globals": "^17.4.0",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "^3.4.1",
-    "tsx": "^4.19.0",
-    "turbo": "^2.8.10",
-    "typescript": "^5.9.0",
-    "typescript-eslint": "^8.52.0",
-    "@vitejs/plugin-react": "^5.1.2",
-    "vitest": "^4.0.18",
-    "@vitest/coverage-v8": "^4.0.18"
+    "lint-staged": "^16.3.2",
+    "prettier": "^3.8.1",
+    "tsx": "^4.21.0",
+    "turbo": "^2.8.14",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "vitest": "^4.0.18"
   },
   "pnpm": {
     "overrides": {
@@ -54,10 +54,10 @@
       "@types/react-dom": "^19.0.0",
       "fast-xml-parser": ">=5.3.6",
       "minimatch": ">=10.2.1",
-      "ajv@<6.12.3": "^6.12.6"
+      "ajv@<6.12.3": "^8.0.0"
     }
   },
-  "packageManager": "pnpm@10.30.2",
+  "packageManager": "pnpm@10.30.3",
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"

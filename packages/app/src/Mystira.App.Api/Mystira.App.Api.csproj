@@ -16,7 +16,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
+<<<<<<< HEAD
     <PackageReference Include="Azure.Identity" Version="1.17.1" />
+=======
+    <PackageReference Include="Azure.Identity" Version="1.18.0" />
+>>>>>>> origin/dev
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Enrichers.CorrelationId" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
@@ -42,8 +46,8 @@
     <ProjectReference Include="../../../contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
     <ProjectReference Include="../../../shared/Mystira.Shared/Mystira.Shared.csproj" />
     <!-- Wolverine HTTP integration for API endpoints -->
-    <PackageReference Include="WolverineFx" Version="5.16.2" />
-    <PackageReference Include="WolverineFx.Http" Version="5.16.2" />
+    <PackageReference Include="WolverineFx" Version="5.17.0" />
+    <PackageReference Include="WolverineFx.Http" Version="5.17.0" />
     <ProjectReference Include="..\Mystira.App.Application\Mystira.App.Application.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Discord\Mystira.App.Infrastructure.Discord.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Payments\Mystira.App.Infrastructure.Payments.csproj" />

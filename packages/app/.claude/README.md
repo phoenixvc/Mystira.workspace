@@ -4,14 +4,14 @@ This directory contains the Claude Code configuration for the Mystira Applicatio
 
 ## Quick Reference
 
-| What | Where | How to Use |
-|------|-------|------------|
-| Slash Commands | `.claude/commands/*.md` | Type `/command-name` in Claude Code |
-| Hooks | `.claude/settings.json` → `hooks` | Run automatically on events |
-| MCP Servers | `.mcp/config.json` → `mcpServers` | Available to MCP-compatible tools |
-| MCP Prompts | `.mcp/config.json` → `prompts` | Reusable prompt templates |
-| Project Settings | `.claude/settings.json` | Auto-loaded by Claude Code |
-| Setup Script | `.claude/install_tools.sh` | Run manually for environment setup |
+| What             | Where                             | How to Use                          |
+| ---------------- | --------------------------------- | ----------------------------------- |
+| Slash Commands   | `.claude/commands/*.md`           | Type `/command-name` in Claude Code |
+| Hooks            | `.claude/settings.json` → `hooks` | Run automatically on events         |
+| MCP Servers      | `.mcp/config.json` → `mcpServers` | Available to MCP-compatible tools   |
+| MCP Prompts      | `.mcp/config.json` → `prompts`    | Reusable prompt templates           |
+| Project Settings | `.claude/settings.json`           | Auto-loaded by Claude Code          |
+| Setup Script     | `.claude/install_tools.sh`        | Run manually for environment setup  |
 
 ---
 
@@ -24,12 +24,14 @@ Invoke these by typing the command name in Claude Code. Each command is a markdo
 Scaffolds a complete API endpoint across all architectural layers.
 
 **Usage:**
+
 ```
 /create-endpoint GameSession Create
 /create-endpoint UserProfile Update --admin
 ```
 
 **What it generates:**
+
 1. Request/Response DTOs in `Mystira.Contracts.App/`
 2. CQRS Command/Query + Handler in `Mystira.App.Application/`
 3. Controller method in the appropriate API project
@@ -44,12 +46,14 @@ Scaffolds a complete API endpoint across all architectural layers.
 Generates a CQRS Command or Query with Handler in the Application layer.
 
 **Usage:**
+
 ```
 /create-use-case CreateGameSession --description "Creates a new game session for a user"
 /create-use-case GetUserBadges --type query
 ```
 
 **What it generates:**
+
 1. Command or Query record (auto-detected from name prefix)
 2. Handler class with repository injection
 3. Verifies/creates required port interfaces
@@ -63,6 +67,7 @@ Generates a CQRS Command or Query with Handler in the Application layer.
 Generates xUnit tests for a source file or feature.
 
 **Usage:**
+
 ```
 /add-tests src/Mystira.App.Application/CQRS/GameSessions/Commands/CreateGameSessionCommandHandler.cs
 /add-tests GameSession --unit
@@ -70,6 +75,7 @@ Generates xUnit tests for a source file or feature.
 ```
 
 **What it generates:**
+
 - Test class with Arrange/Act/Assert pattern
 - Uses FluentAssertions + Moq
 - Follows `MethodName_Scenario_ExpectedResult` naming
@@ -84,12 +90,14 @@ Generates xUnit tests for a source file or feature.
 Scans for hexagonal architecture violations.
 
 **Usage:**
+
 ```
 /architecture-check src/Mystira.App.Api/
 /architecture-check --full
 ```
 
 **What it checks:**
+
 - No business logic in Controllers
 - No services in API layer
 - Application layer has no Infrastructure references
@@ -106,6 +114,7 @@ Scans for hexagonal architecture violations.
 Audits code for COPPA compliance -- critical for a children's platform.
 
 **Usage:**
+
 ```
 /coppa-audit registration
 /coppa-audit src/Mystira.App.Api/Controllers/UserProfilesController.cs
@@ -113,6 +122,7 @@ Audits code for COPPA compliance -- critical for a children's platform.
 ```
 
 **What it checks:**
+
 - PII collection without consent
 - Missing age verification
 - Data retention without TTL
@@ -129,12 +139,14 @@ Audits code for COPPA compliance -- critical for a children's platform.
 Extracts inline service registrations from Program.cs into extension methods.
 
 **Usage:**
+
 ```
 /refactor-program-cs --analyze
 /refactor-program-cs authentication
 ```
 
 **What it does:**
+
 - Identifies inline registrations not yet extracted
 - Creates extension methods in `src/Mystira.App.Api/Configuration/`
 - Follows the established `Add{Feature}` / `Use{Feature}` pattern
@@ -171,20 +183,20 @@ Configured in `.mcp/config.json`. These provide additional capabilities to MCP-c
 
 ### Existing Servers (6)
 
-| Server | Package | Purpose |
-|--------|---------|---------|
-| **filesystem** | `@modelcontextprotocol/server-filesystem` | Repository file and directory access |
-| **github** | `@modelcontextprotocol/server-github` | GitHub operations, issues, PRs |
-| **git** | `@modelcontextprotocol/server-git` | Version control operations |
-| **playwright** | `@playwright/mcp` | Browser automation for PWA testing |
-| **memory** | `@modelcontextprotocol/server-memory` | Knowledge graph persistence across sessions |
-| **sequential-thinking** | `@modelcontextprotocol/server-sequential-thinking` | Structured reasoning with reflection |
+| Server                  | Package                                            | Purpose                                     |
+| ----------------------- | -------------------------------------------------- | ------------------------------------------- |
+| **filesystem**          | `@modelcontextprotocol/server-filesystem`          | Repository file and directory access        |
+| **github**              | `@modelcontextprotocol/server-github`              | GitHub operations, issues, PRs              |
+| **git**                 | `@modelcontextprotocol/server-git`                 | Version control operations                  |
+| **playwright**          | `@playwright/mcp`                                  | Browser automation for PWA testing          |
+| **memory**              | `@modelcontextprotocol/server-memory`              | Knowledge graph persistence across sessions |
+| **sequential-thinking** | `@modelcontextprotocol/server-sequential-thinking` | Structured reasoning with reflection        |
 
 ### New Servers (2)
 
-| Server | Package | Purpose |
-|--------|---------|---------|
-| **fetch** | `mcp-server-fetch` (via `uvx`) | Fetch external web content -- .NET docs, Azure API reference, NuGet package info |
+| Server     | Package                                  | Purpose                                                                                               |
+| ---------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **fetch**  | `mcp-server-fetch` (via `uvx`)           | Fetch external web content -- .NET docs, Azure API reference, NuGet package info                      |
 | **docker** | `mcp/docker` (official Docker MCP image) | Manage Docker containers for local dev (Cosmos DB emulator, API containers from `docker-compose.yml`) |
 
 ---
@@ -195,20 +207,20 @@ Reusable prompt templates in `.mcp/config.json`. These can be invoked by MCP-com
 
 ### Existing Prompts (3)
 
-| Prompt | Purpose |
-|--------|---------|
-| `architecture-check` | Verify Hexagonal/Clean Architecture compliance |
+| Prompt                | Purpose                                          |
+| --------------------- | ------------------------------------------------ |
+| `architecture-check`  | Verify Hexagonal/Clean Architecture compliance   |
 | `create-api-endpoint` | Generate API endpoint following project patterns |
-| `create-use-case` | Generate Application layer use case |
+| `create-use-case`     | Generate Application layer use case              |
 
 ### New Prompts (4)
 
-| Prompt | Purpose |
-|--------|---------|
-| `coppa-compliance-check` | Audit for COPPA violations: PII handling, consent, data retention, children's privacy |
-| `generate-tests` | Generate xUnit + FluentAssertions + Moq tests following `MethodName_Scenario_ExpectedResult` naming |
-| `security-review` | Review for OWASP Top 10, auth bypass, injection, secrets exposure |
-| `blazor-component` | Scaffold Blazor component with scoped CSS, lifecycle, offline-first, WCAG 2.1 AA accessibility |
+| Prompt                   | Purpose                                                                                             |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| `coppa-compliance-check` | Audit for COPPA violations: PII handling, consent, data retention, children's privacy               |
+| `generate-tests`         | Generate xUnit + FluentAssertions + Moq tests following `MethodName_Scenario_ExpectedResult` naming |
+| `security-review`        | Review for OWASP Top 10, auth bypass, injection, secrets exposure                                   |
+| `blazor-component`       | Scaffold Blazor component with scoped CSS, lifecycle, offline-first, WCAG 2.1 AA accessibility      |
 
 ---
 
@@ -218,22 +230,22 @@ Registered resources in `.mcp/config.json` that MCP tools can reference for cont
 
 ### Existing Resources (6)
 
-| Resource | Path |
-|----------|------|
-| `documentation` | `./docs` |
-| `readme` | `./README.md` |
+| Resource             | Path                                         |
+| -------------------- | -------------------------------------------- |
+| `documentation`      | `./docs`                                     |
+| `readme`             | `./README.md`                                |
 | `architecture-rules` | `./docs/architecture/ARCHITECTURAL_RULES.md` |
-| `best-practices` | `./docs/best-practices.md` |
-| `contributing` | `./CONTRIBUTING.md` |
-| `solution` | `./Mystira.App.sln` |
+| `best-practices`     | `./docs/best-practices.md`                   |
+| `contributing`       | `./CONTRIBUTING.md`                          |
+| `solution`           | `./Mystira.App.sln`                          |
 
 ### New Resources (3)
 
-| Resource | Path | Why |
-|----------|------|-----|
-| `copilot-instructions` | `./.github/copilot-instructions.md` | 574 lines of AI guidance not previously exposed to MCP |
-| `claude-settings` | `./.claude/settings.json` | Lets MCP tools know the project config, hooks, and commands |
-| `product-requirements` | `./docs/prd` | PRDs for context when implementing features |
+| Resource               | Path                                | Why                                                         |
+| ---------------------- | ----------------------------------- | ----------------------------------------------------------- |
+| `copilot-instructions` | `./.github/copilot-instructions.md` | 574 lines of AI guidance not previously exposed to MCP      |
+| `claude-settings`      | `./.claude/settings.json`           | Lets MCP tools know the project config, hooks, and commands |
+| `product-requirements` | `./docs/prd`                        | PRDs for context when implementing features                 |
 
 ---
 
@@ -243,28 +255,28 @@ Registered resources in `.mcp/config.json` that MCP tools can reference for cont
 
 Set automatically when Claude Code runs:
 
-| Variable | Value | Purpose |
-|----------|-------|---------|
-| `DOTNET_CLI_TELEMETRY_OPTOUT` | `1` | Disable .NET telemetry |
-| `DOTNET_NOLOGO` | `1` | Suppress .NET CLI logo |
-| `ASPNETCORE_ENVIRONMENT` | `Development` | Use dev configuration |
+| Variable                      | Value         | Purpose                |
+| ----------------------------- | ------------- | ---------------------- |
+| `DOTNET_CLI_TELEMETRY_OPTOUT` | `1`           | Disable .NET telemetry |
+| `DOTNET_NOLOGO`               | `1`           | Suppress .NET CLI logo |
+| `ASPNETCORE_ENVIRONMENT`      | `Development` | Use dev configuration  |
 
 ### Built-in Commands
 
 Quick commands available in settings:
 
-| Command | Action |
-|---------|--------|
-| `build` | `dotnet build Mystira.App.sln` |
-| `test` | `dotnet test Mystira.App.sln --no-build` |
-| `test:coverage` | Run tests with Coverlet code coverage |
-| `clean` | Clean solution + remove bin/obj/TestResults |
-| `restore` | `dotnet restore Mystira.App.sln` |
-| `format` | `dotnet format Mystira.App.sln` |
-| `api:run` | Run the public API |
-| `pwa:run` | Run the Blazor PWA |
-| `watch:api` | Run API with hot reload |
-| `watch:pwa` | Run PWA with hot reload |
+| Command         | Action                                      |
+| --------------- | ------------------------------------------- |
+| `build`         | `dotnet build Mystira.App.sln`              |
+| `test`          | `dotnet test Mystira.App.sln --no-build`    |
+| `test:coverage` | Run tests with Coverlet code coverage       |
+| `clean`         | Clean solution + remove bin/obj/TestResults |
+| `restore`       | `dotnet restore Mystira.App.sln`            |
+| `format`        | `dotnet format Mystira.App.sln`             |
+| `api:run`       | Run the public API                          |
+| `pwa:run`       | Run the Blazor PWA                          |
+| `watch:api`     | Run API with hot reload                     |
+| `watch:pwa`     | Run PWA with hot reload                     |
 
 ### Permissions
 
@@ -284,6 +296,7 @@ chmod +x .claude/install_tools.sh
 This installs .NET SDK 9.0, Docker (optional), Azure CLI (optional), GitHub CLI, and restores NuGet packages.
 
 **Requirements:**
+
 - .NET SDK 9.0.310+
 - Docker (optional, for `docker-compose.yml` local dev)
 - Azure CLI (optional, for deployment)

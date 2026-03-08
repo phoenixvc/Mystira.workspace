@@ -53,15 +53,9 @@ module "entra_id" {
 
 | Environment | Redirect URIs |
 | ----------- | ------------- |
-
-<<<<<<< HEAD
-| Dev | `http://localhost:*`, `https://dev.admin.mystira.app/*` |
-=======
-| Dev | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
-
-> > > > > > > origin/feat/consolidate_backlog
-> > > > > > > | Staging | `https://admin.staging.mystira.app/*` |
-> > > > > > > | Prod | `https://admin.mystira.app/*` |
+| Dev         | `http://localhost:*`, `https://admin.dev.mystira.app/*` |
+| Staging     | `https://admin.staging.mystira.app/*` |
+| Prod        | `https://admin.mystira.app/*` |
 
 ## External Entities
 
