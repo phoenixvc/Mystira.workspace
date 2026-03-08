@@ -26,20 +26,8 @@ public class MediaMetadataController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<MediaMetadataFile>> GetMediaMetadataFile()
     {
-        try
-        {
-            var query = new GetMediaMetadataFileQuery();
-            var metadataFile = await _bus.InvokeAsync<MediaMetadataFile>(query);
-            return Ok(metadataFile);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting media metadata file");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while getting media metadata file",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetMediaMetadataFileQuery();
+        var metadataFile = await _bus.InvokeAsync<MediaMetadataFile>(query);
+        return Ok(metadataFile);
     }
 }

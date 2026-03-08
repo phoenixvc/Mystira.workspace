@@ -104,43 +104,7 @@ public class RoyaltiesControllerTests
         errorResponse.Message.Should().Contain("Invalid IP Asset ID");
     }
 
-    [Fact]
-    public async Task GetClaimableRoyalties_WithInvalidOperationException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<RoyaltyBalance>(
-                It.IsAny<GetClaimableRoyaltiesQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new InvalidOperationException("Operation failed"));
 
-        // Act
-        var result = await _controller.GetClaimableRoyalties("ip-asset-123");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
-
-    [Fact]
-    public async Task GetClaimableRoyalties_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<RoyaltyBalance>(
-                It.IsAny<GetClaimableRoyaltiesQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetClaimableRoyalties("ip-asset-123");
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -366,26 +330,7 @@ public class RoyaltiesControllerTests
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task ClaimRoyalties_WithException_ReturnsInternalServerError()
-    {
-        // Arrange
-        var request = new ClaimRoyaltiesRequest { ContributorWallet = "0x1234567890abcdef" };
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<string>(
-                It.IsAny<ClaimRoyaltiesCommand>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Blockchain error"));
-
-        // Act
-        var result = await _controller.ClaimRoyalties("ip-asset-123", request);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 }

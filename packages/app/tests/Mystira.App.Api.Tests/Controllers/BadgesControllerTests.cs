@@ -91,26 +91,7 @@ public class BadgesControllerTests
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task GetBadgesByAgeGroup_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var ageGroup = "8-12";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<BadgeResponse>>(
-                It.IsAny<GetBadgesByAgeGroupQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetBadgesByAgeGroup(ageGroup);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -155,26 +136,7 @@ public class BadgesControllerTests
         result.Result.Should().BeOfType<BadRequestObjectResult>();
     }
 
-    [Fact]
-    public async Task GetAxisAchievements_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var ageGroupId = "age-8-12";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<AxisAchievementResponse>>(
-                It.IsAny<GetAxisAchievementsQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetAxisAchievements(ageGroupId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -223,26 +185,7 @@ public class BadgesControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetBadgeDetail_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var badgeId = "badge-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<BadgeResponse?>(
-                It.IsAny<GetBadgeDetailQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetBadgeDetail(badgeId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -291,26 +234,7 @@ public class BadgesControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetProfileBadgeProgress_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var profileId = "profile-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<BadgeProgressResponse?>(
-                It.IsAny<GetProfileBadgeProgressQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetProfileBadgeProgress(profileId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -457,30 +381,7 @@ public class BadgesControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task CalculateBadgeScores_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var request = new CalculateBadgeScoresRequest
-        {
-            ContentBundleId = "bundle-1",
-            Percentiles = new List<double> { 50, 75 }
-        };
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<CompassAxisScoreResult>>(
-                It.IsAny<CalculateBadgeScoresQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.CalculateBadgeScores(request);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 }

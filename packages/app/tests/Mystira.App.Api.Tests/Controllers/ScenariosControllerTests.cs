@@ -110,25 +110,7 @@ public class ScenariosControllerTests
         capturedQuery.Genre.Should().Be("fantasy");
     }
 
-    [Fact]
-    public async Task GetScenarios_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var request = new ScenarioQueryRequest();
-        _mockBus
-            .Setup(x => x.InvokeAsync<ScenarioListResponse>(
-                It.IsAny<GetPaginatedScenariosQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetScenarios(request);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -177,26 +159,7 @@ public class ScenariosControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetScenario_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var scenarioId = "scenario-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<Scenario?>(
-                It.IsAny<GetScenarioQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetScenario(scenarioId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -229,26 +192,7 @@ public class ScenariosControllerTests
         returnedScenarios.Should().HaveCount(2);
     }
 
-    [Fact]
-    public async Task GetScenariosByAgeGroup_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var ageGroup = "8-12";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<Scenario>>(
-                It.IsAny<GetScenariosByAgeGroupQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetScenariosByAgeGroup(ageGroup);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -279,24 +223,7 @@ public class ScenariosControllerTests
         returnedScenarios.Should().HaveCount(1);
     }
 
-    [Fact]
-    public async Task GetFeaturedScenarios_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        _mockBus
-            .Setup(x => x.InvokeAsync<List<Scenario>>(
-                It.IsAny<GetFeaturedScenariosQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
 
-        // Act
-        var result = await _controller.GetFeaturedScenarios();
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 
@@ -327,26 +254,7 @@ public class ScenariosControllerTests
         okResult.Value.Should().BeOfType<ScenarioGameStateResponse>();
     }
 
-    [Fact]
-    public async Task GetScenariosWithGameState_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var accountId = "account-1";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<ScenarioGameStateResponse>(
-                It.IsAny<GetScenariosWithGameStateQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetScenariosWithGameState(accountId);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 

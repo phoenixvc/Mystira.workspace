@@ -30,22 +30,14 @@ public class AccountsController : ControllerBase
     [HttpGet("email/{email}")]
     public async Task<ActionResult<Account>> GetAccountByEmail(string email)
     {
-        try
+        var query = new GetAccountByEmailQuery(email);
+        var account = await _bus.InvokeAsync<Account?>(query);
+        if (account == null)
         {
-            var query = new GetAccountByEmailQuery(email);
-            var account = await _bus.InvokeAsync<Account?>(query);
-            if (account == null)
-            {
-                return NotFound($"Account with email {email} not found");
-            }
+            return NotFound($"Account with email {email} not found");
+        }
 
-            return Ok(account);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting account by email");
-            return StatusCode(500, "Internal server error");
-        }
+        return Ok(account);
     }
 
     /// <summary>
@@ -54,22 +46,14 @@ public class AccountsController : ControllerBase
     [HttpGet("{accountId}")]
     public async Task<ActionResult<Account>> GetAccountById(string accountId)
     {
-        try
+        var query = new GetAccountQuery(accountId);
+        var account = await _bus.InvokeAsync<Account?>(query);
+        if (account == null)
         {
-            var query = new GetAccountQuery(accountId);
-            var account = await _bus.InvokeAsync<Account?>(query);
-            if (account == null)
-            {
-                return NotFound($"Account with ID {accountId} not found");
-            }
+            return NotFound($"Account with ID {accountId} not found");
+        }
 
-            return Ok(account);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting account by ID");
-            return StatusCode(500, "Internal server error");
-        }
+        return Ok(account);
     }
 
     /// <summary>
@@ -78,39 +62,31 @@ public class AccountsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<Account>> CreateAccount([FromBody] CreateAccountRequest request)
     {
-        try
+        if (string.IsNullOrEmpty(request.Email))
         {
-            if (string.IsNullOrEmpty(request.Email))
-            {
-                return BadRequest("Email is required");
-            }
-
-            if (string.IsNullOrEmpty(request.ExternalUserId))
-            {
-                return BadRequest("External User ID is required");
-            }
-
-            var command = new CreateAccountCommand(
-                request.ExternalUserId,
-                request.Email,
-                request.DisplayName,
-                request.UserProfileIds,
-                request.Subscription,
-                request.Settings);
-
-            var createdAccount = await _bus.InvokeAsync<Account?>(command);
-            if (createdAccount == null)
-            {
-                return Conflict("Account with this email already exists");
-            }
-
-            return CreatedAtAction(nameof(GetAccountById), new { accountId = createdAccount.Id }, createdAccount);
+            return BadRequest("Email is required");
         }
-        catch (Exception ex)
+
+        if (string.IsNullOrEmpty(request.ExternalUserId))
         {
-            _logger.LogError(ex, "Error creating account");
-            return StatusCode(500, "Internal server error");
+            return BadRequest("External User ID is required");
         }
+
+        var command = new CreateAccountCommand(
+            request.ExternalUserId,
+            request.Email,
+            request.DisplayName,
+            request.UserProfileIds,
+            request.Subscription,
+            request.Settings);
+
+        var createdAccount = await _bus.InvokeAsync<Account?>(command);
+        if (createdAccount == null)
+        {
+            return Conflict("Account with this email already exists");
+        }
+
+        return CreatedAtAction(nameof(GetAccountById), new { accountId = createdAccount.Id }, createdAccount);
     }
 
     /// <summary>
@@ -119,28 +95,20 @@ public class AccountsController : ControllerBase
     [HttpPut("{accountId}")]
     public async Task<ActionResult<Account>> UpdateAccount(string accountId, [FromBody] UpdateAccountRequest request)
     {
-        try
-        {
-            var command = new UpdateAccountCommand(
-                accountId,
-                request.DisplayName,
-                request.UserProfileIds,
-                request.Subscription,
-                request.Settings);
+        var command = new UpdateAccountCommand(
+            accountId,
+            request.DisplayName,
+            request.UserProfileIds,
+            request.Subscription,
+            request.Settings);
 
-            var updatedAccount = await _bus.InvokeAsync<Account?>(command);
-            if (updatedAccount == null)
-            {
-                return NotFound($"Account with ID {accountId} not found");
-            }
-
-            return Ok(updatedAccount);
-        }
-        catch (Exception ex)
+        var updatedAccount = await _bus.InvokeAsync<Account?>(command);
+        if (updatedAccount == null)
         {
-            _logger.LogError(ex, "Error updating account");
-            return StatusCode(500, "Internal server error");
+            return NotFound($"Account with ID {accountId} not found");
         }
+
+        return Ok(updatedAccount);
     }
 
     /// <summary>
@@ -149,22 +117,14 @@ public class AccountsController : ControllerBase
     [HttpDelete("{accountId}")]
     public async Task<ActionResult> DeleteAccount(string accountId)
     {
-        try
+        var command = new DeleteAccountCommand(accountId);
+        var success = await _bus.InvokeAsync<bool>(command);
+        if (!success)
         {
-            var command = new DeleteAccountCommand(accountId);
-            var success = await _bus.InvokeAsync<bool>(command);
-            if (!success)
-            {
-                return NotFound($"Account with ID {accountId} not found");
-            }
+            return NotFound($"Account with ID {accountId} not found");
+        }
 
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting account");
-            return StatusCode(500, "Internal server error");
-        }
+        return NoContent();
     }
 
     /// <summary>
@@ -173,27 +133,19 @@ public class AccountsController : ControllerBase
     [HttpPost("{accountId}/profiles")]
     public async Task<ActionResult> LinkProfilesToAccount(string accountId, [FromBody] LinkProfilesRequest request)
     {
-        try
+        if (request.UserProfileIds == null || !request.UserProfileIds.Any())
         {
-            if (request.UserProfileIds == null || !request.UserProfileIds.Any())
-            {
-                return BadRequest("User profile IDs are required");
-            }
-
-            var command = new LinkProfilesToAccountCommand(accountId, request.UserProfileIds);
-            var success = await _bus.InvokeAsync<bool>(command);
-            if (!success)
-            {
-                return NotFound($"Account with ID {accountId} not found or no profiles were linked");
-            }
-
-            return Ok();
+            return BadRequest("User profile IDs are required");
         }
-        catch (Exception ex)
+
+        var command = new LinkProfilesToAccountCommand(accountId, request.UserProfileIds);
+        var success = await _bus.InvokeAsync<bool>(command);
+        if (!success)
         {
-            _logger.LogError(ex, "Error linking profiles to account");
-            return StatusCode(500, "Internal server error");
+            return NotFound($"Account with ID {accountId} not found or no profiles were linked");
         }
+
+        return Ok();
     }
 
     /// <summary>
@@ -202,17 +154,9 @@ public class AccountsController : ControllerBase
     [HttpGet("{accountId}/profiles")]
     public async Task<ActionResult<List<UserProfile>>> GetAccountProfiles(string accountId)
     {
-        try
-        {
-            var query = new GetProfilesByAccountQuery(accountId);
-            var profiles = await _bus.InvokeAsync<List<UserProfile>>(query);
-            return Ok(profiles);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting profiles for account");
-            return StatusCode(500, "Internal server error");
-        }
+        var query = new GetProfilesByAccountQuery(accountId);
+        var profiles = await _bus.InvokeAsync<List<UserProfile>>(query);
+        return Ok(profiles);
     }
 
     /// <summary>

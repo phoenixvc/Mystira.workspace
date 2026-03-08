@@ -27,18 +27,7 @@ public class RoyaltiesController : ControllerBase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Helper to filter system-critical exceptions that should not
-    /// be caught and handled locally.
-    /// </summary>
-    private static bool IsCriticalException(Exception ex)
-    {
-        return ex is OutOfMemoryException
-               || ex is StackOverflowException
-               || ex is AccessViolationException
-               || ex is AppDomainUnloadedException
-               || ex is ThreadAbortException;
-    }
+
     /// Get claimable royalties for an IP Asset
     /// </summary>
     /// <param name="ipAssetId">The Story Protocol IP Asset ID</param>
@@ -49,17 +38,17 @@ public class RoyaltiesController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<RoyaltyBalance>> GetClaimableRoyalties(string ipAssetId)
     {
+        if (string.IsNullOrWhiteSpace(ipAssetId))
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "IP Asset ID is required",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
         try
         {
-            if (string.IsNullOrWhiteSpace(ipAssetId))
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "IP Asset ID is required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
             var query = new GetClaimableRoyaltiesQuery(ipAssetId);
             var balance = await _bus.InvokeAsync<RoyaltyBalance>(query);
 
@@ -83,16 +72,6 @@ public class RoyaltiesController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
-        catch (Exception ex) when (!IsCriticalException(ex))
-        {
-            _logger.LogError(ex, "Error getting claimable royalties for IP Asset {IpAssetId}", ipAssetId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching royalty balance",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        // Let critical exceptions propagate
-        }
     }
 
     /// <summary>
@@ -111,26 +90,26 @@ public class RoyaltiesController : ControllerBase
         string ipAssetId,
         [FromBody] PayRoyaltyRequest request)
     {
+        if (string.IsNullOrWhiteSpace(ipAssetId))
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "IP Asset ID is required",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        if (request.Amount <= 0)
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "Amount must be greater than zero",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
         try
         {
-            if (string.IsNullOrWhiteSpace(ipAssetId))
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "IP Asset ID is required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            if (request.Amount <= 0)
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Amount must be greater than zero",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
             var command = new PayRoyaltyCommand(ipAssetId, request.Amount, request.PayerReference);
             var result = await _bus.InvokeAsync<RoyaltyPaymentResult>(command);
 
@@ -163,33 +142,9 @@ public class RoyaltiesController : ControllerBase
                 TraceId = HttpContext.TraceIdentifier
             });
         }
-        // Optionally, catch specific custom exceptions here.
-        catch (Exception ex) when (!IsFatalException(ex)) // As a last resort, only handle non-fatal exceptions
-        {
-            _logger.LogError(ex, "Unexpected error paying royalty to IP Asset {IpAssetId}", ipAssetId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while processing royalty payment",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
     }
 
-    /// <summary>
-    /// <summary>
-    /// Helper to determine if an exception is fatal and should not be caught by controller.
-    /// </summary>
-    private static bool IsFatalException(Exception ex)
-    {
-        return ex is OutOfMemoryException
-            || ex is StackOverflowException
-            || ex is ThreadAbortException
-            || ex is AccessViolationException
-            || ex is AppDomainUnloadedException
-            || ex is BadImageFormatException
-            || ex is CannotUnloadAppDomainException
-            || ex is InvalidProgramException;
-    }
+
     /// Claim accumulated royalties for a contributor wallet. Requires authentication.
     /// </summary>
     /// <param name="ipAssetId">The Story Protocol IP Asset ID</param>
@@ -205,26 +160,26 @@ public class RoyaltiesController : ControllerBase
         string ipAssetId,
         [FromBody] ClaimRoyaltiesRequest request)
     {
+        if (string.IsNullOrWhiteSpace(ipAssetId))
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "IP Asset ID is required",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.ContributorWallet))
+        {
+            return BadRequest(new ErrorResponse
+            {
+                Message = "Contributor wallet address is required",
+                TraceId = HttpContext.TraceIdentifier
+            });
+        }
+
         try
         {
-            if (string.IsNullOrWhiteSpace(ipAssetId))
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "IP Asset ID is required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            if (string.IsNullOrWhiteSpace(request.ContributorWallet))
-            {
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Contributor wallet address is required",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
             var command = new ClaimRoyaltiesCommand(ipAssetId, request.ContributorWallet);
             var txHash = await _bus.InvokeAsync<string>(command);
 
@@ -242,15 +197,6 @@ public class RoyaltiesController : ControllerBase
             return BadRequest(new ErrorResponse
             {
                 Message = ex.Message,
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error claiming royalties for IP Asset {IpAssetId}", ipAssetId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while claiming royalties",
                 TraceId = HttpContext.TraceIdentifier
             });
         }

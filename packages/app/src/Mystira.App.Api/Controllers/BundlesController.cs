@@ -29,17 +29,9 @@ public class BundlesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ContentBundle>>> GetBundles()
     {
-        try
-        {
-            var query = new GetAllContentBundlesQuery();
-            var bundles = await _bus.InvokeAsync<IEnumerable<ContentBundle>>(query);
-            return Ok(bundles);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching content bundles");
-            return StatusCode(500, new { Message = "Internal server error while fetching bundles", TraceId = HttpContext.TraceIdentifier });
-        }
+        var query = new GetAllContentBundlesQuery();
+        var bundles = await _bus.InvokeAsync<IEnumerable<ContentBundle>>(query);
+        return Ok(bundles);
     }
 
     /// <summary>
@@ -61,11 +53,6 @@ public class BundlesController : ControllerBase
             _logger.LogWarning(ex, "Invalid age group parameter: {AgeGroup}", ageGroup);
             return BadRequest(new { ex.Message });
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error fetching content bundles for age group {AgeGroup}", ageGroup);
-            return StatusCode(500, new { Message = "Internal server error while fetching bundles by age group", TraceId = HttpContext.TraceIdentifier });
-        }
     }
 
     /// <summary>
@@ -80,31 +67,19 @@ public class BundlesController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<ContentAttributionResponse>> GetBundleAttribution(string id)
     {
-        try
-        {
-            var query = new GetBundleAttributionQuery(id);
-            var attribution = await _bus.InvokeAsync<ContentAttributionResponse?>(query);
+        var query = new GetBundleAttributionQuery(id);
+        var attribution = await _bus.InvokeAsync<ContentAttributionResponse?>(query);
 
-            if (attribution == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Content bundle not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(attribution);
-        }
-        catch (Exception ex)
+        if (attribution == null)
         {
-            _logger.LogError(ex, "Error getting attribution for bundle {BundleId}", id);
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while fetching bundle attribution",
+                Message = $"Content bundle not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(attribution);
     }
 
     /// <summary>
@@ -119,30 +94,18 @@ public class BundlesController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<IpVerificationResponse>> GetBundleIpStatus(string id)
     {
-        try
-        {
-            var query = new GetBundleIpStatusQuery(id);
-            var ipStatus = await _bus.InvokeAsync<IpVerificationResponse?>(query);
+        var query = new GetBundleIpStatusQuery(id);
+        var ipStatus = await _bus.InvokeAsync<IpVerificationResponse?>(query);
 
-            if (ipStatus == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Content bundle not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(ipStatus);
-        }
-        catch (Exception ex)
+        if (ipStatus == null)
         {
-            _logger.LogError(ex, "Error getting IP status for bundle {BundleId}", id);
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while fetching bundle IP status",
+                Message = $"Content bundle not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(ipStatus);
     }
 }

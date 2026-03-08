@@ -74,26 +74,7 @@ public class AccountsControllerTests
         result.Result.Should().BeOfType<NotFoundObjectResult>();
     }
 
-    [Fact]
-    public async Task GetAccountByEmail_WhenExceptionThrown_ReturnsInternalServerError()
-    {
-        // Arrange
-        var email = "test@example.com";
 
-        _mockBus
-            .Setup(x => x.InvokeAsync<Account?>(
-                It.IsAny<GetAccountByEmailQuery>(),
-                It.IsAny<CancellationToken>(),
-                It.IsAny<TimeSpan?>()))
-            .ThrowsAsync(new Exception("Database error"));
-
-        // Act
-        var result = await _controller.GetAccountByEmail(email);
-
-        // Assert
-        var statusResult = result.Result.Should().BeOfType<ObjectResult>().Subject;
-        statusResult.StatusCode.Should().Be(500);
-    }
 
     #endregion
 

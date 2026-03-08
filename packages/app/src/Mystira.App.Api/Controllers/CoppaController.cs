@@ -51,28 +51,20 @@ public class CoppaController : ControllerBase
     public async Task<ActionResult<ParentalConsentResult>> RequestConsent(
         [FromBody] RequestConsentDto request)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(request.ChildProfileId))
-                return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
-            if (string.IsNullOrWhiteSpace(request.ParentEmail))
-                return BadRequest(new ErrorResponse { Message = "Parent email is required", TraceId = HttpContext.TraceIdentifier });
-            if (!MailAddress.TryCreate(request.ParentEmail, out _))
-                return BadRequest(new ErrorResponse { Message = "Parent email format is invalid", TraceId = HttpContext.TraceIdentifier });
+        if (string.IsNullOrWhiteSpace(request.ChildProfileId))
+            return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
+        if (string.IsNullOrWhiteSpace(request.ParentEmail))
+            return BadRequest(new ErrorResponse { Message = "Parent email is required", TraceId = HttpContext.TraceIdentifier });
+        if (!MailAddress.TryCreate(request.ParentEmail, out _))
+            return BadRequest(new ErrorResponse { Message = "Parent email format is invalid", TraceId = HttpContext.TraceIdentifier });
 
-            var command = new RequestParentalConsentCommand(
-                request.ChildProfileId,
-                request.ParentEmail,
-                request.ChildDisplayName ?? "Child");
+        var command = new RequestParentalConsentCommand(
+            request.ChildProfileId,
+            request.ParentEmail,
+            request.ChildDisplayName ?? "Child");
 
-            var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
-            return Ok(result);
-        }
-        catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
-        {
-            _logger.LogError(ex, "Error requesting parental consent for profile {ProfileIdHash}", LogAnonymizer.HashId(request.ChildProfileId));
-            return StatusCode(500, new ErrorResponse { Message = "Failed to process consent request", TraceId = HttpContext.TraceIdentifier });
-        }
+        var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
+        return Ok(result);
     }
 
     /// <summary>
@@ -102,24 +94,16 @@ public class CoppaController : ControllerBase
 
     private async Task<ActionResult<ParentalConsentResult>> ProcessVerification(string? token, string method)
     {
-        try
-        {
-            if (string.IsNullOrWhiteSpace(token))
-                return BadRequest(new ErrorResponse { Message = "Verification token is required", TraceId = HttpContext.TraceIdentifier });
+        if (string.IsNullOrWhiteSpace(token))
+            return BadRequest(new ErrorResponse { Message = "Verification token is required", TraceId = HttpContext.TraceIdentifier });
 
-            var command = new VerifyParentalConsentCommand(token, method);
-            var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
+        var command = new VerifyParentalConsentCommand(token, method);
+        var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
 
-            if (result.Status == "NotFound" || result.Status == "Expired")
-                return BadRequest(new ErrorResponse { Message = result.Message, TraceId = HttpContext.TraceIdentifier });
+        if (result.Status == "NotFound" || result.Status == "Expired")
+            return BadRequest(new ErrorResponse { Message = result.Message, TraceId = HttpContext.TraceIdentifier });
 
-            return Ok(result);
-        }
-        catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
-        {
-            _logger.LogError(ex, "Error verifying parental consent");
-            return StatusCode(500, new ErrorResponse { Message = "Failed to verify consent", TraceId = HttpContext.TraceIdentifier });
-        }
+        return Ok(result);
     }
 
     /// <summary>
@@ -134,34 +118,26 @@ public class CoppaController : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ConsentStatusResult>> GetConsentStatus(string childProfileId)
     {
-        try
+        if (string.IsNullOrWhiteSpace(childProfileId))
+            return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
+
+        // Verify the caller owns this child profile
+        var accountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(accountId))
+            return Unauthorized();
+
+        var accountProfiles = await _profileRepo.GetByAccountIdAsync(accountId);
+        if (!accountProfiles.Any(p => p.Id == childProfileId))
         {
-            if (string.IsNullOrWhiteSpace(childProfileId))
-                return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
-
-            // Verify the caller owns this child profile
-            var accountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(accountId))
-                return Unauthorized();
-
-            var accountProfiles = await _profileRepo.GetByAccountIdAsync(accountId);
-            if (!accountProfiles.Any(p => p.Id == childProfileId))
-            {
-                _logger.LogWarning(
-                    "Forbidden: account {AccountIdHash} attempted to access consent status for profile {ProfileIdHash}",
-                    LogAnonymizer.HashId(accountId), LogAnonymizer.HashId(childProfileId));
-                return Forbid();
-            }
-
-            var query = new GetConsentStatusQuery(childProfileId);
-            var result = await _bus.InvokeAsync<ConsentStatusResult>(query);
-            return Ok(result);
+            _logger.LogWarning(
+                "Forbidden: account {AccountIdHash} attempted to access consent status for profile {ProfileIdHash}",
+                LogAnonymizer.HashId(accountId), LogAnonymizer.HashId(childProfileId));
+            return Forbid();
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
-        {
-            _logger.LogError(ex, "Error getting consent status for profile {ProfileIdHash}", LogAnonymizer.HashId(childProfileId));
-            return StatusCode(500, new ErrorResponse { Message = "Failed to retrieve consent status", TraceId = HttpContext.TraceIdentifier });
-        }
+
+        var query = new GetConsentStatusQuery(childProfileId);
+        var result = await _bus.InvokeAsync<ConsentStatusResult>(query);
+        return Ok(result);
     }
 
     /// <summary>
@@ -177,44 +153,36 @@ public class CoppaController : ControllerBase
     public async Task<ActionResult<ParentalConsentResult>> RevokeConsent(
         [FromBody] RevokeConsentDto request)
     {
-        try
+        if (string.IsNullOrWhiteSpace(request.ChildProfileId))
+            return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
+        if (string.IsNullOrWhiteSpace(request.ParentEmail))
+            return BadRequest(new ErrorResponse { Message = "Parent email is required", TraceId = HttpContext.TraceIdentifier });
+
+        // Verify the caller owns this child profile
+        var accountId = _currentUser.GetAccountId();
+        if (string.IsNullOrEmpty(accountId))
+            return Unauthorized();
+
+        var accountProfiles = await _profileRepo.GetByAccountIdAsync(accountId);
+        if (!accountProfiles.Any(p => p.Id == request.ChildProfileId))
         {
-            if (string.IsNullOrWhiteSpace(request.ChildProfileId))
-                return BadRequest(new ErrorResponse { Message = "Child profile ID is required", TraceId = HttpContext.TraceIdentifier });
-            if (string.IsNullOrWhiteSpace(request.ParentEmail))
-                return BadRequest(new ErrorResponse { Message = "Parent email is required", TraceId = HttpContext.TraceIdentifier });
-
-            // Verify the caller owns this child profile
-            var accountId = _currentUser.GetAccountId();
-            if (string.IsNullOrEmpty(accountId))
-                return Unauthorized();
-
-            var accountProfiles = await _profileRepo.GetByAccountIdAsync(accountId);
-            if (!accountProfiles.Any(p => p.Id == request.ChildProfileId))
-            {
-                _logger.LogWarning(
-                    "Forbidden: account {AccountIdHash} attempted to revoke consent for profile {ProfileIdHash}",
-                    LogAnonymizer.HashId(accountId), LogAnonymizer.HashId(request.ChildProfileId));
-                return Forbid();
-            }
-
-            var emailHash = EmailHasher.Hash(request.ParentEmail);
-
-            var command = new RevokeConsentCommand(request.ChildProfileId, emailHash);
-            var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
-
-            if (result.Status == "Unauthorized")
-                return Forbid();
-            if (result.Status == "NotFound")
-                return BadRequest(new ErrorResponse { Message = result.Message, TraceId = HttpContext.TraceIdentifier });
-
-            return Ok(result);
+            _logger.LogWarning(
+                "Forbidden: account {AccountIdHash} attempted to revoke consent for profile {ProfileIdHash}",
+                LogAnonymizer.HashId(accountId), LogAnonymizer.HashId(request.ChildProfileId));
+            return Forbid();
         }
-        catch (Exception ex) when (ex is not OutOfMemoryException and not StackOverflowException)
-        {
-            _logger.LogError(ex, "Error revoking consent for profile {ProfileIdHash}", LogAnonymizer.HashId(request.ChildProfileId));
-            return StatusCode(500, new ErrorResponse { Message = "Failed to revoke consent", TraceId = HttpContext.TraceIdentifier });
-        }
+
+        var emailHash = EmailHasher.Hash(request.ParentEmail);
+
+        var command = new RevokeConsentCommand(request.ChildProfileId, emailHash);
+        var result = await _bus.InvokeAsync<ParentalConsentResult>(command);
+
+        if (result.Status == "Unauthorized")
+            return Forbid();
+        if (result.Status == "NotFound")
+            return BadRequest(new ErrorResponse { Message = result.Message, TraceId = HttpContext.TraceIdentifier });
+
+        return Ok(result);
     }
 
     /// <summary>

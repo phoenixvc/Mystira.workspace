@@ -35,27 +35,15 @@ public class ScenariosController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<ScenarioListResponse>> GetScenarios([FromQuery] ScenarioQueryRequest request)
     {
-        try
-        {
-            var query = new GetPaginatedScenariosQuery(
-                request.Page,
-                request.PageSize,
-                request.Search,
-                request.AgeGroup,
-                request.Genre);
+        var query = new GetPaginatedScenariosQuery(
+            request.Page,
+            request.PageSize,
+            request.Search,
+            request.AgeGroup,
+            request.Genre);
 
-            var result = await _bus.InvokeAsync<ScenarioListResponse>(query);
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting scenarios");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching scenarios",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var result = await _bus.InvokeAsync<ScenarioListResponse>(query);
+        return Ok(result);
     }
 
     /// <summary>
@@ -64,31 +52,19 @@ public class ScenariosController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<Scenario>> GetScenario(string id)
     {
-        try
-        {
-            var query = new GetScenarioQuery(id);
-            var scenario = await _bus.InvokeAsync<Scenario?>(query);
+        var query = new GetScenarioQuery(id);
+        var scenario = await _bus.InvokeAsync<Scenario?>(query);
 
-            if (scenario == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Scenario not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(scenario);
-        }
-        catch (Exception ex)
+        if (scenario == null)
         {
-            _logger.LogError(ex, "Error getting scenario {ScenarioId}", id);
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while fetching scenario",
+                Message = $"Scenario not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(scenario);
     }
 
     /// <summary>
@@ -97,21 +73,9 @@ public class ScenariosController : ControllerBase
     [HttpGet("age-group/{ageGroup}")]
     public async Task<ActionResult<List<Scenario>>> GetScenariosByAgeGroup(string ageGroup)
     {
-        try
-        {
-            var query = new GetScenariosByAgeGroupQuery(ageGroup);
-            var scenarios = await _bus.InvokeAsync<List<Scenario>>(query);
-            return Ok(scenarios);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting scenarios for age group {AgeGroup}", ageGroup);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching scenarios by age group",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetScenariosByAgeGroupQuery(ageGroup);
+        var scenarios = await _bus.InvokeAsync<List<Scenario>>(query);
+        return Ok(scenarios);
     }
 
     /// <summary>
@@ -120,21 +84,9 @@ public class ScenariosController : ControllerBase
     [HttpGet("featured")]
     public async Task<ActionResult<List<Scenario>>> GetFeaturedScenarios()
     {
-        try
-        {
-            var query = new GetFeaturedScenariosQuery();
-            var scenarios = await _bus.InvokeAsync<List<Scenario>>(query);
-            return Ok(scenarios);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting featured scenarios");
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching featured scenarios",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var query = new GetFeaturedScenariosQuery();
+        var scenarios = await _bus.InvokeAsync<List<Scenario>>(query);
+        return Ok(scenarios);
     }
 
     /// <summary>
@@ -143,24 +95,12 @@ public class ScenariosController : ControllerBase
     [HttpGet("with-game-state/{accountId}")]
     public async Task<ActionResult<ScenarioGameStateResponse>> GetScenariosWithGameState(string accountId)
     {
-        try
-        {
-            _logger.LogInformation("Fetching scenarios with game state for account: {AccountId}", LogAnonymizer.HashId(accountId));
+        _logger.LogInformation("Fetching scenarios with game state for account: {AccountId}", LogAnonymizer.HashId(accountId));
 
-            var query = new GetScenariosWithGameStateQuery(accountId);
-            var result = await _bus.InvokeAsync<ScenarioGameStateResponse>(query);
+        var query = new GetScenariosWithGameStateQuery(accountId);
+        var result = await _bus.InvokeAsync<ScenarioGameStateResponse>(query);
 
-            return Ok(result);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting scenarios with game state for account {AccountId}", LogAnonymizer.HashId(accountId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching scenarios with game state",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        return Ok(result);
     }
 
     /// <summary>

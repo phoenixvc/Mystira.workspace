@@ -28,29 +28,17 @@ public class MediaController : ControllerBase
     [AllowAnonymous]
     public async Task<ActionResult<MediaAsset>> GetMediaById(string mediaId)
     {
-        try
+        var query = new GetMediaAssetQuery(mediaId);
+        var media = await _bus.InvokeAsync<MediaAsset?>(query);
+        if (media == null)
         {
-            var query = new GetMediaAssetQuery(mediaId);
-            var media = await _bus.InvokeAsync<MediaAsset?>(query);
-            if (media == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Media not found: {mediaId}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-            return Ok(media);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting media: {MediaId}", mediaId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while getting media",
+                Message = $"Media not found: {mediaId}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+        return Ok(media);
     }
 
     /// <summary>
@@ -61,31 +49,19 @@ public class MediaController : ControllerBase
     [ResponseCache(Duration = 31536000, Location = ResponseCacheLocation.Any)]
     public async Task<IActionResult> GetMediaFile(string mediaId)
     {
-        try
-        {
-            var query = new GetMediaFileQuery(mediaId);
-            var result = await _bus.InvokeAsync<(Stream, string, string)?>(query);
+        var query = new GetMediaFileQuery(mediaId);
+        var result = await _bus.InvokeAsync<(Stream, string, string)?>(query);
 
-            if (result == null)
-            {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Media file not found: {mediaId}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            var (stream, contentType, fileName) = result.Value;
-            return File(stream, contentType, fileName);
-        }
-        catch (Exception ex)
+        if (result == null)
         {
-            _logger.LogError(ex, "Error serving media file: {MediaId}", mediaId);
-            return StatusCode(500, new ErrorResponse
+            return NotFound(new ErrorResponse
             {
-                Message = "Internal server error while serving media file",
+                Message = $"Media file not found: {mediaId}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        var (stream, contentType, fileName) = result.Value;
+        return File(stream, contentType, fileName);
     }
 }

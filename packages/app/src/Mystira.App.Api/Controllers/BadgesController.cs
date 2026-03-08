@@ -40,20 +40,8 @@ public class BadgesController : ControllerBase
             });
         }
 
-        try
-        {
-            var response = await _bus.InvokeAsync<List<BadgeResponse>>(new GetBadgesByAgeGroupQuery(ageGroup));
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badges for age group {AgeGroup}", ageGroup);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badges",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var response = await _bus.InvokeAsync<List<BadgeResponse>>(new GetBadgesByAgeGroupQuery(ageGroup));
+        return Ok(response);
     }
 
     /// <summary>
@@ -71,20 +59,8 @@ public class BadgesController : ControllerBase
             });
         }
 
-        try
-        {
-            var response = await _bus.InvokeAsync<List<AxisAchievementResponse>>(new GetAxisAchievementsQuery(ageGroupId));
-            return Ok(response);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting axis achievements for age group {AgeGroup}", ageGroupId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching axis achievements",
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
+        var response = await _bus.InvokeAsync<List<AxisAchievementResponse>>(new GetAxisAchievementsQuery(ageGroupId));
+        return Ok(response);
     }
 
     /// <summary>
@@ -93,29 +69,17 @@ public class BadgesController : ControllerBase
     [HttpGet("{badgeId}")]
     public async Task<ActionResult<BadgeResponse>> GetBadgeDetail(string badgeId)
     {
-        try
+        var badge = await _bus.InvokeAsync<BadgeResponse?>(new GetBadgeDetailQuery(badgeId));
+        if (badge == null)
         {
-            var badge = await _bus.InvokeAsync<BadgeResponse?>(new GetBadgeDetailQuery(badgeId));
-            if (badge == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = "Badge not found",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(badge);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badge {BadgeId}", badgeId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badge",
+                Message = "Badge not found",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(badge);
     }
 
     /// <summary>
@@ -126,28 +90,16 @@ public class BadgesController : ControllerBase
     [HttpGet("profile/{profileId}")]
     public async Task<ActionResult<BadgeProgressResponse>> GetProfileBadgeProgress(string profileId)
     {
-        try
+        var progress = await _bus.InvokeAsync<BadgeProgressResponse?>(new GetProfileBadgeProgressQuery(profileId));
+        if (progress == null)
         {
-            var progress = await _bus.InvokeAsync<BadgeProgressResponse?>(new GetProfileBadgeProgressQuery(profileId));
-            if (progress == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = "Profile not found",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-            return Ok(progress);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error getting badge progress for profile {ProfileId}", LogAnonymizer.HashId(profileId));
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while fetching badge progress",
+                Message = "Profile not found",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+        return Ok(progress);
     }
 
     /// <summary>
@@ -216,15 +168,6 @@ public class BadgesController : ControllerBase
             return NotFound(new ErrorResponse
             {
                 Message = ex.Message,
-                TraceId = HttpContext.TraceIdentifier
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error calculating badge scores for bundle {BundleId}", request.ContentBundleId);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while calculating badge scores",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
