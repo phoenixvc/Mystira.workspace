@@ -146,30 +146,18 @@ public class GameSessionsController : ControllerBase
     [Authorize]
     public async Task<ActionResult<GameSession>> EndSession(string id)
     {
-        try
+        var command = new EndGameSessionCommand(id);
+        var session = await _bus.InvokeAsync<GameSession?>(command);
+        if (session == null)
         {
-            var command = new EndGameSessionCommand(id);
-            var session = await _bus.InvokeAsync<GameSession?>(command);
-            if (session == null)
+            return NotFound(new ErrorResponse
             {
-                return NotFound(new ErrorResponse
-                {
-                    Message = $"Session not found: {id}",
-                    TraceId = HttpContext.TraceIdentifier
-                });
-            }
-
-            return Ok(session);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error ending session {SessionId}", id);
-            return StatusCode(500, new ErrorResponse
-            {
-                Message = "Internal server error while ending session",
+                Message = $"Session not found: {id}",
                 TraceId = HttpContext.TraceIdentifier
             });
         }
+
+        return Ok(session);
     }
 
     /// <summary>
