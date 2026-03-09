@@ -1,4 +1,4 @@
-namespace Mystira.Core.Results;
+namespace Mystira.Domain.Results;
 
 /// <summary>
 /// Represents the result of an operation that can succeed or fail.
@@ -137,7 +137,7 @@ public readonly struct Result<T> : IEquatable<Result<T>>
     /// Determines whether two results are equal.
     /// </summary>
     public static bool operator ==(Result<T> left, Result<T> right) => left.Equals(right);
-    
+
     /// <summary>
     /// Determines whether two results are not equal.
     /// </summary>
@@ -210,7 +210,7 @@ public readonly struct Result : IEquatable<Result>
 
     /// <inheritdoc />
     public override bool Equals(object? obj) => obj is Result other && Equals(other);
-    
+
     /// <inheritdoc />
     public override int GetHashCode() => IsSuccess ? HashCode.Combine(true) : HashCode.Combine(false, _error);
 
@@ -218,7 +218,7 @@ public readonly struct Result : IEquatable<Result>
     /// Determines whether two results are equal.
     /// </summary>
     public static bool operator ==(Result left, Result right) => left.Equals(right);
-    
+
     /// <summary>
     /// Determines whether two results are not equal.
     /// </summary>

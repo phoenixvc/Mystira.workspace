@@ -1,4 +1,4 @@
-namespace Mystira.Core.Results;
+namespace Mystira.Domain.Results;
 
 /// <summary>
 /// Extension methods for working with Result types.

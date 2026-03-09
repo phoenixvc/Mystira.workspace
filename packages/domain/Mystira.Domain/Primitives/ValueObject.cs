@@ -1,4 +1,4 @@
-namespace Mystira.Core.Domain;
+namespace Mystira.Domain.Primitives;
 
 /// <summary>
 /// Base class for value objects. Value objects are compared by their values, not identity.

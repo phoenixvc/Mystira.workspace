@@ -1,4 +1,4 @@
-namespace Mystira.Core.Results;
+namespace Mystira.Domain.Results;
 
 /// <summary>
 /// Represents an error in the Result pattern.

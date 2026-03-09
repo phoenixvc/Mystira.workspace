@@ -165,24 +165,6 @@ jobs:
     outputs:
       has_changes: ${{ steps.changes.outputs.has_changes }}
 
-  build-core:
-    name: Build Mystira.Core
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v6
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Build Mystira.Core
-        run: dotnet build packages/core/Mystira.Core.Tests --configuration Release
-
-      - name: Test Mystira.Core
-        run: dotnet test packages/core/Mystira.Core.Tests --configuration Release --no-build
-
   build-core-types:
     name: Build @mystira/core-types
     runs-on: ubuntu-latest
@@ -209,7 +191,7 @@ jobs:
     name: Commit Generated Changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [generate-typescript, generate-csharp, build-core, build-core-types]
+    needs: [generate-typescript, generate-csharp, build-core-types]
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.commit_changes == 'true')
@@ -274,7 +256,7 @@ jobs:
     name: Generation Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [generate-typescript, generate-csharp, build-core, build-core-types]
+    needs: [generate-typescript, generate-csharp, build-core-types]
     if: always()
     steps:
       - name: Generate Summary
@@ -285,7 +267,6 @@ jobs:
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| TypeScript Generation | ${{ needs.generate-typescript.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| C# Generation | ${{ needs.generate-csharp.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Core Build | ${{ needs.build-core.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| @mystira/core-types Build | ${{ needs.build-core-types.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
@@ -314,6 +295,5 @@ jobs:
           echo "│   └── packages/contracts/dotnet/Mystira.Contracts/Generated/" >> $GITHUB_STEP_SUMMARY
           echo "│" >> $GITHUB_STEP_SUMMARY
           echo "└── Internal Types (Not Generated)" >> $GITHUB_STEP_SUMMARY
-          echo "    ├── packages/core/Mystira.Core/" >> $GITHUB_STEP_SUMMARY
           echo "    └── packages/core-types/" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY

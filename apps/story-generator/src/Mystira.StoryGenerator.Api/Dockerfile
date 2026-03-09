@@ -19,7 +19,6 @@ COPY apps/story-generator/src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.
 COPY apps/story-generator/src/Mystira.StoryGenerator.Infrastructure/Mystira.StoryGenerator.Infrastructure.csproj apps/story-generator/src/Mystira.StoryGenerator.Infrastructure/
 COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
 COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
-COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
 
 # Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
@@ -29,7 +28,6 @@ RUN dotnet restore "apps/story-generator/src/Mystira.StoryGenerator.Api/Mystira.
 COPY apps/story-generator/src/ apps/story-generator/src/
 COPY packages/contracts/dotnet/ packages/contracts/dotnet/
 COPY packages/shared/ packages/shared/
-COPY packages/core/ packages/core/
 COPY packages/domain/ packages/domain/
 
 # Build and publish

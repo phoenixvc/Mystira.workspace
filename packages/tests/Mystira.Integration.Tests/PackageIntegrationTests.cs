@@ -1,4 +1,4 @@
-using Mystira.Core.Results;
+using Mystira.Domain.Results;
 using Mystira.Domain.Entities;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

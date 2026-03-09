@@ -22,7 +22,6 @@
 /packages/contracts/       @phoenixvc/mystira-core
 /packages/core-types/      @phoenixvc/mystira-core
 /packages/shared-utils/    @phoenixvc/mystira-core
-/packages/core/            @phoenixvc/mystira-core
 /packages/domain/          @phoenixvc/mystira-core
 /packages/application/     @phoenixvc/mystira-core
 /packages/infrastructure/  @phoenixvc/mystira-core

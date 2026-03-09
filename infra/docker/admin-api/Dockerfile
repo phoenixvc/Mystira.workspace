@@ -16,7 +16,6 @@ COPY global.json ./
 # Copy csproj files for restore (admin-api + all project-referenced packages)
 COPY apps/admin/api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj apps/admin/api/src/Mystira.Admin.Api/
 COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
-COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 COPY packages/application/Mystira.Application/Mystira.Application.csproj packages/application/Mystira.Application/
 COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
 COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
@@ -35,7 +34,6 @@ RUN dotnet restore "apps/admin/api/src/Mystira.Admin.Api/Mystira.Admin.Api.cspro
 # Copy all source files
 COPY apps/admin/api/src/ apps/admin/api/src/
 COPY packages/domain/ packages/domain/
-COPY packages/core/ packages/core/
 COPY packages/application/ packages/application/
 COPY packages/contracts/dotnet/ packages/contracts/dotnet/
 COPY packages/shared/ packages/shared/

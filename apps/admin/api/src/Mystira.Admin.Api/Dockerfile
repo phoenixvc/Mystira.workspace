@@ -23,7 +23,6 @@ COPY packages/infrastructure/Mystira.Infrastructure.Data/Mystira.Infrastructure.
 COPY packages/infrastructure/Mystira.Infrastructure.Discord/Mystira.Infrastructure.Discord.csproj packages/infrastructure/Mystira.Infrastructure.Discord/
 COPY packages/infrastructure/Mystira.Infrastructure.StoryProtocol/Mystira.Infrastructure.StoryProtocol.csproj packages/infrastructure/Mystira.Infrastructure.StoryProtocol/
 COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
-COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 
 # Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
 RUN dotnet restore "apps/admin/api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj"
@@ -38,7 +37,6 @@ COPY packages/infrastructure/Mystira.Infrastructure.Data/ packages/infrastructur
 COPY packages/infrastructure/Mystira.Infrastructure.Discord/ packages/infrastructure/Mystira.Infrastructure.Discord/
 COPY packages/infrastructure/Mystira.Infrastructure.StoryProtocol/ packages/infrastructure/Mystira.Infrastructure.StoryProtocol/
 COPY packages/shared/ packages/shared/
-COPY packages/core/ packages/core/
 
 WORKDIR "/src/apps/admin/api/src/Mystira.Admin.Api"
 

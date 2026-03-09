@@ -30,7 +30,6 @@
 
   <!-- References to packages being integrated -->
   <ItemGroup>
-    <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
     <ProjectReference Include="..\..\contracts\dotnet\Mystira.Contracts\Mystira.Contracts.csproj" />
     <ProjectReference Include="..\..\shared\Mystira.Shared\Mystira.Shared.csproj" />
     <ProjectReference Include="..\..\domain\Mystira.Domain\Mystira.Domain.csproj" />

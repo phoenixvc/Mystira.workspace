@@ -64,11 +64,6 @@ flags:
     carryforward: true
 
   # .NET packages
-  dotnet-core:
-    paths:
-      - packages/core/Mystira.Core/
-    carryforward: true
-
   dotnet-shared:
     paths:
       - packages/shared/Mystira.Shared/
@@ -112,10 +107,6 @@ component_management:
         - packages/shared-utils/**
         - apps/admin/ui/**
         - apps/publisher/**
-    - component_id: dotnet-core
-      name: .NET Core
-      paths:
-        - packages/core/**
     - component_id: dotnet-shared
       name: .NET Shared
       paths:

@@ -27,7 +27,6 @@ COPY apps/app/src/Mystira.App.Infrastructure.Chain/Mystira.App.Infrastructure.Ch
 COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
 COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
 COPY packages/shared/Mystira.Shared.Generators/Mystira.Shared.Generators.csproj packages/shared/Mystira.Shared.Generators/
-COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
 COPY packages/application/Mystira.Application/Mystira.Application.csproj packages/application/Mystira.Application/
 
@@ -38,7 +37,6 @@ RUN dotnet restore "apps/app/src/Mystira.App.Api/Mystira.App.Api.csproj"
 COPY apps/app/src/ apps/app/src/
 COPY packages/contracts/dotnet/ packages/contracts/dotnet/
 COPY packages/shared/ packages/shared/
-COPY packages/core/ packages/core/
 COPY packages/domain/ packages/domain/
 COPY packages/application/ packages/application/
 
