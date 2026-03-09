@@ -13,8 +13,8 @@
       "path": "packages/shared"
     },
     {
-      "name": "packages/shared-utils",
-      "path": "packages/shared-utils"
+      "name": "packages/shared-ts",
+      "path": "packages/shared-ts"
     },
     {
       "name": "packages/design-tokens",

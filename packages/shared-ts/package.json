@@ -1,8 +1,8 @@
 {
-  "name": "@mystira/shared-utils",
+  "name": "@mystira/shared-ts",
   "version": "0.5.2-alpha",
   "type": "module",
-  "description": "Shared utilities for Mystira platform packages",
+  "description": "Shared TypeScript types and utilities for the Mystira platform",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -27,15 +27,19 @@
   },
   "keywords": [
     "mystira",
+    "types",
     "utilities",
-    "shared"
+    "shared",
+    "typescript",
+    "result-pattern",
+    "error-handling"
   ],
   "author": "Mystira <jurie@phoenixvc.tech>",
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
     "url": "https://github.com/phoenixvc/Mystira.workspace.git",
-    "directory": "packages/shared-utils"
+    "directory": "packages/shared-ts"
   },
   "private": true,
   "devDependencies": {
@@ -51,7 +55,7 @@
   },
   "peerDependencies": {
     "@microsoft/signalr": ">=8.0.0",
-    "typescript": ">=4.7.0"
+    "typescript": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "typescript": {

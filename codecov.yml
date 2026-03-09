@@ -58,7 +58,7 @@ flags:
   # TypeScript packages
   typescript:
     paths:
-      - packages/shared-utils/
+      - packages/shared-ts/
       - apps/admin/ui/
       - apps/publisher/
     carryforward: true
@@ -104,7 +104,7 @@ component_management:
     - component_id: typescript-packages
       name: TypeScript Packages
       paths:
-        - packages/shared-utils/**
+        - packages/shared-ts/**
         - apps/admin/ui/**
         - apps/publisher/**
     - component_id: dotnet-shared

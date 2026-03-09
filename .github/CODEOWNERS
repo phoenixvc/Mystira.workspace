@@ -20,8 +20,7 @@
 
 # Shared packages (broader review recommended)
 /packages/contracts/       @phoenixvc/mystira-core
-/packages/core-types/      @phoenixvc/mystira-core
-/packages/shared-utils/    @phoenixvc/mystira-core
+/packages/shared-ts/       @phoenixvc/mystira-core
 /packages/domain/          @phoenixvc/mystira-core
 /packages/application/     @phoenixvc/mystira-core
 /packages/infrastructure/  @phoenixvc/mystira-core

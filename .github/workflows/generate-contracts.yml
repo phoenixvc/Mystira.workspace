@@ -165,8 +165,8 @@ jobs:
     outputs:
       has_changes: ${{ steps.changes.outputs.has_changes }}
 
-  build-core-types:
-    name: Build @mystira/core-types
+  build-shared-ts:
+    name: Build @mystira/shared-ts
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -182,16 +182,16 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build core-types
+      - name: Build shared-ts
         run: |
-          cd packages/core-types
+          cd packages/shared-ts
           pnpm run build
 
   commit-changes:
     name: Commit Generated Changes
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [generate-typescript, generate-csharp, build-core-types]
+    needs: [generate-typescript, generate-csharp, build-shared-ts]
     if: |
       github.event_name == 'push' ||
       (github.event_name == 'workflow_dispatch' && github.event.inputs.commit_changes == 'true')
@@ -256,7 +256,7 @@ jobs:
     name: Generation Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [generate-typescript, generate-csharp, build-core-types]
+    needs: [generate-typescript, generate-csharp, build-shared-ts]
     if: always()
     steps:
       - name: Generate Summary
@@ -267,7 +267,7 @@ jobs:
           echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| TypeScript Generation | ${{ needs.generate-typescript.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| C# Generation | ${{ needs.generate-csharp.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| @mystira/core-types Build | ${{ needs.build-core-types.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| @mystira/shared-ts Build | ${{ needs.build-shared-ts.result == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
           echo "## Changes Detected" >> $GITHUB_STEP_SUMMARY
@@ -295,5 +295,5 @@ jobs:
           echo "│   └── packages/contracts/dotnet/Mystira.Contracts/Generated/" >> $GITHUB_STEP_SUMMARY
           echo "│" >> $GITHUB_STEP_SUMMARY
           echo "└── Internal Types (Not Generated)" >> $GITHUB_STEP_SUMMARY
-          echo "    └── packages/core-types/" >> $GITHUB_STEP_SUMMARY
+          echo "    └── packages/shared-ts/" >> $GITHUB_STEP_SUMMARY
           echo "```" >> $GITHUB_STEP_SUMMARY
