@@ -1,0 +1,7 @@
+{
+  "extends": "../../../configs/typescript/tsconfig.vite-node.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}

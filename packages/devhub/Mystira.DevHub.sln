@@ -1,0 +1,45 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli", "cli", "{1A2B3C4D-5E6F-7890-ABCD-EF1234567890}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.CLI", "cli\Mystira.DevHub.CLI\Mystira.DevHub.CLI.csproj", "{2A3B4C5D-6E7F-8901-BCDE-F12345678901}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "services", "services", "{3A4B5C6D-7E8F-9012-CDEF-123456789012}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.Services", "services\Mystira.DevHub.Services\Mystira.DevHub.Services.csproj", "{4A5B6C7D-8E9F-A123-DEF0-12345678901A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{5A6B7C8D-9EAF-B234-EF01-23456789012B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.CosmosConsole", "tools\cosmos-console\Mystira.App.CosmosConsole\Mystira.App.CosmosConsole.csproj", "{6A7B8C9D-AEB0-C345-F012-3456789012C9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A3B4C5D-6E7F-8901-BCDE-F12345678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A3B4C5D-6E7F-8901-BCDE-F12345678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A3B4C5D-6E7F-8901-BCDE-F12345678901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A3B4C5D-6E7F-8901-BCDE-F12345678901}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A5B6C7D-8E9F-A123-DEF0-12345678901A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A5B6C7D-8E9F-A123-DEF0-12345678901A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A5B6C7D-8E9F-A123-DEF0-12345678901A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A5B6C7D-8E9F-A123-DEF0-12345678901A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A7B8C9D-AEB0-C345-F012-3456789012C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A7B8C9D-AEB0-C345-F012-3456789012C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A7B8C9D-AEB0-C345-F012-3456789012C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A7B8C9D-AEB0-C345-F012-3456789012C9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2A3B4C5D-6E7F-8901-BCDE-F12345678901} = {1A2B3C4D-5E6F-7890-ABCD-EF1234567890}
+		{4A5B6C7D-8E9F-A123-DEF0-12345678901A} = {3A4B5C6D-7E8F-9012-CDEF-123456789012}
+		{6A7B8C9D-AEB0-C345-F012-3456789012C9} = {5A6B7C8D-9EAF-B234-EF01-23456789012B}
+	EndGlobalSection
+EndGlobal
