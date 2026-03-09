@@ -10,30 +10,30 @@ COPY global.json ./
 COPY Mystira.sln ./
 
 # Copy csproj files for restore (story-generator + all project-referenced packages)
-COPY packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj packages/story-generator/src/Mystira.StoryGenerator.Api/
-COPY packages/story-generator/src/Mystira.StoryGenerator.Application/Mystira.StoryGenerator.Application.csproj packages/story-generator/src/Mystira.StoryGenerator.Application/
-COPY packages/story-generator/src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj packages/story-generator/src/Mystira.StoryGenerator.Contracts/
-COPY packages/story-generator/src/Mystira.StoryGenerator.Domain/Mystira.StoryGenerator.Domain.csproj packages/story-generator/src/Mystira.StoryGenerator.Domain/
-COPY packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/Mystira.StoryGenerator.GraphTheory.csproj packages/story-generator/src/Mystira.StoryGenerator.GraphTheory/
-COPY packages/story-generator/src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.Llm.csproj packages/story-generator/src/Mystira.StoryGenerator.Llm/
-COPY packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/Mystira.StoryGenerator.Infrastructure.csproj packages/story-generator/src/Mystira.StoryGenerator.Infrastructure/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj apps/story-generator/src/Mystira.StoryGenerator.Api/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Application/Mystira.StoryGenerator.Application.csproj apps/story-generator/src/Mystira.StoryGenerator.Application/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Contracts/Mystira.StoryGenerator.Contracts.csproj apps/story-generator/src/Mystira.StoryGenerator.Contracts/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Domain/Mystira.StoryGenerator.Domain.csproj apps/story-generator/src/Mystira.StoryGenerator.Domain/
+COPY apps/story-generator/src/Mystira.StoryGenerator.GraphTheory/Mystira.StoryGenerator.GraphTheory.csproj apps/story-generator/src/Mystira.StoryGenerator.GraphTheory/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Llm/Mystira.StoryGenerator.Llm.csproj apps/story-generator/src/Mystira.StoryGenerator.Llm/
+COPY apps/story-generator/src/Mystira.StoryGenerator.Infrastructure/Mystira.StoryGenerator.Infrastructure.csproj apps/story-generator/src/Mystira.StoryGenerator.Infrastructure/
 COPY packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj packages/contracts/dotnet/Mystira.Contracts/
 COPY packages/shared/Mystira.Shared/Mystira.Shared.csproj packages/shared/Mystira.Shared/
 COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
 
 # Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
-RUN dotnet restore "packages/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj"
+RUN dotnet restore "apps/story-generator/src/Mystira.StoryGenerator.Api/Mystira.StoryGenerator.Api.csproj"
 
 # Copy source code
-COPY packages/story-generator/src/ packages/story-generator/src/
+COPY apps/story-generator/src/ apps/story-generator/src/
 COPY packages/contracts/dotnet/ packages/contracts/dotnet/
 COPY packages/shared/ packages/shared/
 COPY packages/core/ packages/core/
 COPY packages/domain/ packages/domain/
 
 # Build and publish
-WORKDIR "/src/packages/story-generator/src/Mystira.StoryGenerator.Api"
+WORKDIR "/src/apps/story-generator/src/Mystira.StoryGenerator.Api"
 RUN dotnet publish -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 # Runtime stage
