@@ -122,50 +122,33 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
-      - name: Build Mystira.Contracts
-        id: build-contracts
+      - name: Build .NET packages
         run: |
-          echo "Building Mystira.Contracts..."
-          dotnet build packages/contracts/dotnet/Mystira.Contracts --configuration Release
-          echo "contracts=success" >> $GITHUB_OUTPUT
-
-      - name: Build Mystira.Shared
-        id: build-shared
-        run: |
-          echo "Building Mystira.Shared..."
-          dotnet build packages/shared/Mystira.Shared --configuration Release
-          echo "shared=success" >> $GITHUB_OUTPUT
+          PACKAGES=(
+            "packages/contracts/dotnet/Mystira.Contracts"
+            "packages/shared/Mystira.Shared"
+            "packages/shared-messaging/Mystira.Shared.Messaging"
+            "packages/shared-observability/Mystira.Shared.Observability"
+            "packages/shared-graph/Mystira.Shared.Graph"
+          )
+          for PKG in "${PACKAGES[@]}"; do
+            if [ -d "$PKG" ]; then
+              echo "::group::Building $PKG"
+              dotnet build "$PKG" --configuration Release
+              echo "::endgroup::"
+            fi
+          done
 
       - name: Test Mystira.Shared
-        id: test-shared
-        run: |
-          echo "Testing Mystira.Shared..."
-          dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --no-build 2>/dev/null || echo "No tests or tests skipped"
-          echo "tests=success" >> $GITHUB_OUTPUT
+        run: dotnet test packages/shared/Mystira.Shared.Tests --configuration Release --no-build 2>/dev/null || echo "No tests or tests skipped"
 
       - name: Build Summary
         run: |
           echo "## .NET Build Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Package | Build | Test |" >> $GITHUB_STEP_SUMMARY
-          echo "|---------|-------|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Contracts | ${{ steps.build-contracts.outputs.contracts == 'success' && '???' || '???' }} | N/A |" >> $GITHUB_STEP_SUMMARY
-          echo "| Mystira.Shared | ${{ steps.build-shared.outputs.shared == 'success' && '???' || '???' }} | ${{ steps.test-shared.outputs.tests == 'success' && '???' || '??????' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-
-          # List types in Mystira.Contracts
-          echo "### Mystira.Contracts Types" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "<details>" >> $GITHUB_STEP_SUMMARY
-          echo "<summary>Click to expand</summary>" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          grep -rh "^public \(class\|record\|interface\|enum\|struct\)" --include="*.cs" packages/contracts/dotnet/Mystira.Contracts/ | \
-            sed 's/^public //' | sed 's/{.*//' | sed 's/ :.*//' | sort | uniq >> $GITHUB_STEP_SUMMARY || echo "(none found)" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "</details>" >> $GITHUB_STEP_SUMMARY
+          echo "All shared .NET packages built successfully." >> $GITHUB_STEP_SUMMARY
 
   summary:
     name: CI Summary

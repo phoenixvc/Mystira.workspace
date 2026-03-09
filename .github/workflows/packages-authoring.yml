@@ -5,6 +5,7 @@ on:
     paths:
       - "packages/authoring/**"
       - "packages/shared/**"
+      - "packages/shared-graph/**"
       - "packages/ai/**"
       - "packages/contracts/**"
       - "packages/domain/**"
@@ -16,6 +17,7 @@ on:
     paths:
       - "packages/authoring/**"
       - "packages/shared/**"
+      - "packages/shared-graph/**"
       - "packages/ai/**"
       - "packages/contracts/**"
       - "packages/domain/**"

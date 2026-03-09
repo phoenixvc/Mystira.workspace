@@ -69,6 +69,21 @@ flags:
       - packages/shared/Mystira.Shared/
     carryforward: true
 
+  dotnet-shared-messaging:
+    paths:
+      - packages/shared-messaging/Mystira.Shared.Messaging/
+    carryforward: true
+
+  dotnet-shared-observability:
+    paths:
+      - packages/shared-observability/Mystira.Shared.Observability/
+    carryforward: true
+
+  dotnet-shared-graph:
+    paths:
+      - packages/shared-graph/Mystira.Shared.Graph/
+    carryforward: true
+
   dotnet-domain:
     paths:
       - packages/domain/Mystira.Domain/
@@ -108,9 +123,21 @@ component_management:
         - apps/admin/ui/**
         - apps/publisher/**
     - component_id: dotnet-shared
-      name: .NET Shared
+      name: .NET Shared (Kernel)
       paths:
         - packages/shared/**
+    - component_id: dotnet-shared-messaging
+      name: .NET Shared Messaging
+      paths:
+        - packages/shared-messaging/**
+    - component_id: dotnet-shared-observability
+      name: .NET Shared Observability
+      paths:
+        - packages/shared-observability/**
+    - component_id: dotnet-shared-graph
+      name: .NET Shared Graph
+      paths:
+        - packages/shared-graph/**
     - component_id: dotnet-domain
       name: .NET Domain
       paths:

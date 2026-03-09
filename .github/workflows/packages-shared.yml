@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - "packages/shared/**"
+      - "packages/shared-messaging/**"
+      - "packages/shared-observability/**"
+      - "packages/shared-graph/**"
       - "packages/domain/**"
       - ".github/workflows/packages-shared.yml"
     branches:
@@ -12,6 +15,9 @@ on:
   pull_request:
     paths:
       - "packages/shared/**"
+      - "packages/shared-messaging/**"
+      - "packages/shared-observability/**"
+      - "packages/shared-graph/**"
       - "packages/domain/**"
       - ".github/workflows/packages-shared.yml"
 
