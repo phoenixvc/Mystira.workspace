@@ -254,9 +254,9 @@ jobs:
       matrix:
         consumer:
           - name: admin-ui
-            path: packages/admin-ui
+            path: apps/admin/ui
           - name: app-pwa
-            path: packages/app
+            path: apps/app
     steps:
       - uses: actions/checkout@v6
 

@@ -22,5 +22,5 @@ ignore:
   - pnpm-lock.yaml
   - infra/gitops/
   - infra/kubernetes/
-  - packages/story-generator/test-data/
-  - packages/story-generator/tests/
+  - apps/story-generator/test-data/
+  - apps/story-generator/tests/

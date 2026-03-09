@@ -40,7 +40,7 @@ jobs:
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: csharp
-      working_directory: packages/admin-api
+      working_directory: apps/admin/api
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
@@ -54,7 +54,7 @@ jobs:
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
-      working_directory: packages/admin-ui
+      working_directory: apps/admin/ui
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
@@ -82,7 +82,7 @@ jobs:
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
-      working_directory: packages/devhub
+      working_directory: apps/devhub
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
@@ -96,7 +96,7 @@ jobs:
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: javascript
-      working_directory: packages/publisher
+      working_directory: apps/publisher
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high
@@ -110,7 +110,7 @@ jobs:
     uses: ./.github/workflows/reusable-security-scan.yml
     with:
       language: csharp
-      working_directory: packages/story-generator
+      working_directory: apps/story-generator
       scan_dependencies: true
       scan_container: false
       fail_on_severity: high

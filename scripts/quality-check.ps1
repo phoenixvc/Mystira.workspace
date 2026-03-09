@@ -150,8 +150,8 @@ if (Test-Path "packages/chain/pyproject.toml") {
 Write-Status "Step 7: Rust Projects"
 Write-Host "Running Rust tests..."
 
-if (Test-Path "packages/devhub/Mystira.DevHub/src-tauri/Cargo.toml") {
-    Push-Location "packages/devhub/Mystira.DevHub/src-tauri"
+if (Test-Path "apps/devhub/Mystira.DevHub/src-tauri/Cargo.toml") {
+    Push-Location "apps/devhub/Mystira.DevHub/src-tauri"
     try {
         if (-not $SkipTests) {
             cargo test

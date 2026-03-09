@@ -12,9 +12,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:ts": "turbo run dev --filter='./packages/publisher' --filter='./packages/admin-ui' --filter='./packages/devhub/Mystira.DevHub'",
-    "dev:admin": "turbo run dev --filter='./packages/admin-ui'",
-    "dev:publisher": "turbo run dev --filter='./packages/publisher'",
+    "dev:ts": "turbo run dev --filter='./apps/publisher' --filter='./apps/admin/ui' --filter='./apps/devhub/Mystira.DevHub'",
+    "dev:admin": "turbo run dev --filter='./apps/admin/ui'",
+    "dev:publisher": "turbo run dev --filter='./apps/publisher'",
     "test": "turbo run test",
     "test:coverage": "turbo run test:coverage",
     "test:affected": "turbo run test --filter='...[HEAD~1]'",

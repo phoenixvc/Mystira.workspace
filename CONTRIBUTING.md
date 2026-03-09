@@ -108,12 +108,12 @@ This is a monorepo managed with pnpm workspaces and Turborepo. Each package has 
 | Package                | Path                        | Technology         | Description         |
 | ---------------------- | --------------------------- | ------------------ | ------------------- |
 | Mystira.Chain          | `packages/chain/`           | Python, gRPC       | Blockchain service  |
-| Mystira.App            | `packages/app/`             | .NET, Blazor       | Main application    |
-| Mystira.StoryGenerator | `packages/story-generator/` | .NET               | AI story generation |
-| Mystira.Publisher      | `packages/publisher/`       | TypeScript, React  | Content publishing  |
-| Mystira.DevHub         | `packages/devhub/`          | TypeScript         | Developer portal    |
-| Mystira.Admin.Api      | `packages/admin-api/`       | .NET, ASP.NET Core | Admin backend       |
-| Mystira.Admin.UI       | `packages/admin-ui/`        | TypeScript, React  | Admin dashboard     |
+| Mystira.App            | `apps/app/`                 | .NET, Blazor       | Main application    |
+| Mystira.StoryGenerator | `apps/story-generator/`     | .NET               | AI story generation |
+| Mystira.Publisher      | `apps/publisher/`           | TypeScript, React  | Content publishing  |
+| Mystira.DevHub         | `apps/devhub/`              | TypeScript         | Developer portal    |
+| Mystira.Admin.Api      | `apps/admin/api/`           | .NET, ASP.NET Core | Admin backend       |
+| Mystira.Admin.UI       | `apps/admin/ui/`            | TypeScript, React  | Admin dashboard     |
 
 ### Shared Packages
 

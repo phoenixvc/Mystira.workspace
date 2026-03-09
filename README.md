@@ -27,31 +27,39 @@ For detailed setup instructions, see [Quick Start Guide](./docs/guides/quick-sta
 
 ## Components
 
-All components live in the `packages/` directory:
+Deployable apps live in `apps/`, shared libraries in `packages/`:
 
 | Component                  | Path                        | Description                             | Tech Stack        |
 | -------------------------- | --------------------------- | --------------------------------------- | ----------------- |
 | **Mystira.Chain**          | `packages/chain/`           | Blockchain integration & Story Protocol | Python, gRPC      |
-| **Mystira.App**            | `packages/app/`             | Main storytelling application           | C#, .NET          |
-| **Mystira.StoryGenerator** | `packages/story-generator/` | AI-powered story generation engine      | C#, .NET          |
-| **Mystira.Publisher**      | `packages/publisher/`       | Content publishing service              | TypeScript, Node  |
-| **Mystira.DevHub**         | `packages/devhub/`          | Developer portal and tools              | TypeScript        |
-| **Mystira.Admin.Api**      | `packages/admin-api/`       | Admin backend API                       | C#, ASP.NET Core  |
-| **Mystira.Admin.UI**       | `packages/admin-ui/`        | Admin dashboard frontend                | TypeScript, React |
+| **Mystira.App**            | `apps/app/`                 | Main storytelling application           | C#, .NET          |
+| **Mystira.StoryGenerator** | `apps/story-generator/`     | AI-powered story generation engine      | C#, .NET          |
+| **Mystira.Publisher**      | `apps/publisher/`           | Content publishing service              | TypeScript, Node  |
+| **Mystira.DevHub**         | `apps/devhub/`              | Developer portal and tools              | TypeScript        |
+| **Mystira.Admin.Api**      | `apps/admin/api/`           | Admin backend API                       | C#, ASP.NET Core  |
+| **Mystira.Admin.UI**       | `apps/admin/ui/`            | Admin dashboard frontend                | TypeScript, React |
 | **Infrastructure**         | `infra/`                    | Terraform, Kubernetes, CI/CD            | HCL, YAML         |
 
 ## Repository Structure
 
 ```
 Mystira.workspace/
-├── packages/               # Application packages
-│   ├── admin-api/         # Admin backend (C# API)
-│   ├── admin-ui/          # Admin frontend (React)
+├── apps/                  # Deployable applications
+│   ├── admin/
+│   │   ├── api/           # Admin backend (C# API)
+│   │   └── ui/            # Admin frontend (React)
 │   ├── app/               # Main application (C#)
-│   ├── chain/             # Blockchain service (Python)
 │   ├── devhub/            # Developer portal (TypeScript)
+│   ├── identity/          # Identity/auth API (C#)
 │   ├── publisher/         # Publishing service (TypeScript)
 │   └── story-generator/   # AI story engine (C#)
+│
+├── packages/              # Shared libraries
+│   ├── chain/             # Blockchain service (Python)
+│   ├── contracts/         # API contracts (TS + C#)
+│   ├── shared/            # .NET shared infrastructure
+│   ├── domain/            # Domain models (C#)
+│   └── ...                # Other shared packages
 │
 ├── infra/                 # Infrastructure as Code
 │   ├── terraform/         # Terraform modules & environments

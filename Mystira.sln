@@ -61,97 +61,97 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "story-generator", "story-ge
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "devhub", "devhub", "{35BC2F61-752B-5E87-8BC5-93589E90CFEF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Admin.Api", "packages\admin-api\src\Mystira.Admin.Api\Mystira.Admin.Api.csproj", "{7F889918-DA7E-5A0E-BC55-9A69BB35961C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Admin.Api", "apps\admin\api\src\Mystira.Admin.Api\Mystira.Admin.Api.csproj", "{7F889918-DA7E-5A0E-BC55-9A69BB35961C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Admin.Api.Tests", "packages\admin-api\tests\Mystira.Admin.Api.Tests\Mystira.Admin.Api.Tests.csproj", "{B56978A3-69EF-5AC5-AB2D-86DF43A013CC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Admin.Api.Tests", "apps\admin\api\tests\Mystira.Admin.Api.Tests\Mystira.Admin.Api.Tests.csproj", "{B56978A3-69EF-5AC5-AB2D-86DF43A013CC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Api", "packages\app\src\Mystira.App.Api\Mystira.App.Api.csproj", "{2BE20C7D-70DC-595F-9FE8-F60FB35F0694}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Api", "apps\app\src\Mystira.App.Api\Mystira.App.Api.csproj", "{2BE20C7D-70DC-595F-9FE8-F60FB35F0694}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Application", "packages\app\src\Mystira.App.Application\Mystira.App.Application.csproj", "{712B0EFB-3B24-581E-8817-A16D77EDBA18}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Application", "apps\app\src\Mystira.App.Application\Mystira.App.Application.csproj", "{712B0EFB-3B24-581E-8817-A16D77EDBA18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Domain", "packages\app\src\Mystira.App.Domain\Mystira.App.Domain.csproj", "{5C4AB0FF-529D-5822-B03C-C8B135598998}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Domain", "apps\app\src\Mystira.App.Domain\Mystira.App.Domain.csproj", "{5C4AB0FF-529D-5822-B03C-C8B135598998}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Azure", "packages\app\src\Mystira.App.Infrastructure.Azure\Mystira.App.Infrastructure.Azure.csproj", "{27219775-BB60-58E6-96E7-A24BF077B150}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Azure", "apps\app\src\Mystira.App.Infrastructure.Azure\Mystira.App.Infrastructure.Azure.csproj", "{27219775-BB60-58E6-96E7-A24BF077B150}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Chain", "packages\app\src\Mystira.App.Infrastructure.Chain\Mystira.App.Infrastructure.Chain.csproj", "{12E9000E-FFB7-59EE-A476-2DF28A5930FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Chain", "apps\app\src\Mystira.App.Infrastructure.Chain\Mystira.App.Infrastructure.Chain.csproj", "{12E9000E-FFB7-59EE-A476-2DF28A5930FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Data", "packages\app\src\Mystira.App.Infrastructure.Data\Mystira.App.Infrastructure.Data.csproj", "{F5899A52-3E15-5218-B34B-44B901EC0A71}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Data", "apps\app\src\Mystira.App.Infrastructure.Data\Mystira.App.Infrastructure.Data.csproj", "{F5899A52-3E15-5218-B34B-44B901EC0A71}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Discord", "packages\app\src\Mystira.App.Infrastructure.Discord\Mystira.App.Infrastructure.Discord.csproj", "{035D9E98-021F-5BB3-9AA6-3B20AE66A338}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Discord", "apps\app\src\Mystira.App.Infrastructure.Discord\Mystira.App.Infrastructure.Discord.csproj", "{035D9E98-021F-5BB3-9AA6-3B20AE66A338}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Payments", "packages\app\src\Mystira.App.Infrastructure.Payments\Mystira.App.Infrastructure.Payments.csproj", "{8268E1C1-B27A-5B4C-A9D7-6FAF0B18BA47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Payments", "apps\app\src\Mystira.App.Infrastructure.Payments\Mystira.App.Infrastructure.Payments.csproj", "{8268E1C1-B27A-5B4C-A9D7-6FAF0B18BA47}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Teams", "packages\app\src\Mystira.App.Infrastructure.Teams\Mystira.App.Infrastructure.Teams.csproj", "{59C5968A-578D-571D-A3B7-2B23079BB57E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Teams", "apps\app\src\Mystira.App.Infrastructure.Teams\Mystira.App.Infrastructure.Teams.csproj", "{59C5968A-578D-571D-A3B7-2B23079BB57E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.WhatsApp", "packages\app\src\Mystira.App.Infrastructure.WhatsApp\Mystira.App.Infrastructure.WhatsApp.csproj", "{8B1A5F15-F976-5661-B9C1-B57B3E7356DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.WhatsApp", "apps\app\src\Mystira.App.Infrastructure.WhatsApp\Mystira.App.Infrastructure.WhatsApp.csproj", "{8B1A5F15-F976-5661-B9C1-B57B3E7356DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.PWA", "packages\app\src\Mystira.App.PWA\Mystira.App.PWA.csproj", "{F733178D-CBF7-599B-BCAE-591B6EE30B51}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.PWA", "apps\app\src\Mystira.App.PWA\Mystira.App.PWA.csproj", "{F733178D-CBF7-599B-BCAE-591B6EE30B51}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Api.Tests", "packages\app\tests\Mystira.App.Api.Tests\Mystira.App.Api.Tests.csproj", "{A2D62466-003E-5FB0-8998-FE04E8D8425C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Api.Tests", "apps\app\tests\Mystira.App.Api.Tests\Mystira.App.Api.Tests.csproj", "{A2D62466-003E-5FB0-8998-FE04E8D8425C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Application.Tests", "packages\app\tests\Mystira.App.Application.Tests\Mystira.App.Application.Tests.csproj", "{EF68ABC7-6C9C-5C82-A06E-B68D18225B1C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Application.Tests", "apps\app\tests\Mystira.App.Application.Tests\Mystira.App.Application.Tests.csproj", "{EF68ABC7-6C9C-5C82-A06E-B68D18225B1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Domain.Tests", "packages\app\tests\Mystira.App.Domain.Tests\Mystira.App.Domain.Tests.csproj", "{F91D129B-94FA-5853-BD66-A2EADFED4304}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Domain.Tests", "apps\app\tests\Mystira.App.Domain.Tests\Mystira.App.Domain.Tests.csproj", "{F91D129B-94FA-5853-BD66-A2EADFED4304}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Data.Tests", "packages\app\tests\Mystira.App.Infrastructure.Data.Tests\Mystira.App.Infrastructure.Data.Tests.csproj", "{CC921FF9-859E-5582-B806-B7833C6AEF6B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Data.Tests", "apps\app\tests\Mystira.App.Infrastructure.Data.Tests\Mystira.App.Infrastructure.Data.Tests.csproj", "{CC921FF9-859E-5582-B806-B7833C6AEF6B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Discord.Tests", "packages\app\tests\Mystira.App.Infrastructure.Discord.Tests\Mystira.App.Infrastructure.Discord.Tests.csproj", "{D1354215-6E10-5CE1-BADF-C46D644FD16D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Discord.Tests", "apps\app\tests\Mystira.App.Infrastructure.Discord.Tests\Mystira.App.Infrastructure.Discord.Tests.csproj", "{D1354215-6E10-5CE1-BADF-C46D644FD16D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Payments.Tests", "packages\app\tests\Mystira.App.Infrastructure.Payments.Tests\Mystira.App.Infrastructure.Payments.Tests.csproj", "{B8B8327C-2207-5D70-91D2-C73C06E8A034}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Payments.Tests", "apps\app\tests\Mystira.App.Infrastructure.Payments.Tests\Mystira.App.Infrastructure.Payments.Tests.csproj", "{B8B8327C-2207-5D70-91D2-C73C06E8A034}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Teams.Tests", "packages\app\tests\Mystira.App.Infrastructure.Teams.Tests\Mystira.App.Infrastructure.Teams.Tests.csproj", "{056211B1-06AD-5171-BD7B-86485E60B4F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.Teams.Tests", "apps\app\tests\Mystira.App.Infrastructure.Teams.Tests\Mystira.App.Infrastructure.Teams.Tests.csproj", "{056211B1-06AD-5171-BD7B-86485E60B4F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.WhatsApp.Tests", "packages\app\tests\Mystira.App.Infrastructure.WhatsApp.Tests\Mystira.App.Infrastructure.WhatsApp.Tests.csproj", "{B932B87C-1870-5CCA-BBA0-283ACADD17C2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.Infrastructure.WhatsApp.Tests", "apps\app\tests\Mystira.App.Infrastructure.WhatsApp.Tests\Mystira.App.Infrastructure.WhatsApp.Tests.csproj", "{B932B87C-1870-5CCA-BBA0-283ACADD17C2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.PWA.Tests", "packages\app\tests\Mystira.App.PWA.Tests\Mystira.App.PWA.Tests.csproj", "{761D50BD-59B9-57EF-A82B-E1E639C9426B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.PWA.Tests", "apps\app\tests\Mystira.App.PWA.Tests\Mystira.App.PWA.Tests.csproj", "{761D50BD-59B9-57EF-A82B-E1E639C9426B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Web", "packages\story-generator\src\Mystira.StoryGenerator.Web\Mystira.StoryGenerator.Web.csproj", "{0DB3F142-F92B-56B2-A29C-6D538F4E824E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Web", "apps\story-generator\src\Mystira.StoryGenerator.Web\Mystira.StoryGenerator.Web.csproj", "{0DB3F142-F92B-56B2-A29C-6D538F4E824E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.AgentSetup", "packages\story-generator\src\Mystira.StoryGenerator.AgentSetup\Mystira.StoryGenerator.AgentSetup.csproj", "{97A9C735-63CA-5AFC-8EF7-EBC5DD8EECD4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.AgentSetup", "apps\story-generator\src\Mystira.StoryGenerator.AgentSetup\Mystira.StoryGenerator.AgentSetup.csproj", "{97A9C735-63CA-5AFC-8EF7-EBC5DD8EECD4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.RagIndexer", "packages\story-generator\src\Mystira.StoryGenerator.RagIndexer\Mystira.StoryGenerator.RagIndexer.csproj", "{FF598D12-FD01-599A-8B5A-FBD811434D42}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.RagIndexer", "apps\story-generator\src\Mystira.StoryGenerator.RagIndexer\Mystira.StoryGenerator.RagIndexer.csproj", "{FF598D12-FD01-599A-8B5A-FBD811434D42}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Application", "packages\story-generator\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj", "{02EB6AF2-7414-5D01-823C-03A121240523}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Application", "apps\story-generator\src\Mystira.StoryGenerator.Application\Mystira.StoryGenerator.Application.csproj", "{02EB6AF2-7414-5D01-823C-03A121240523}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Console", "packages\story-generator\src\Mystira.StoryGenerator.Console\Mystira.StoryGenerator.Console.csproj", "{55AFB45A-A607-5AE3-9A27-7933A9995321}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Console", "apps\story-generator\src\Mystira.StoryGenerator.Console\Mystira.StoryGenerator.Console.csproj", "{55AFB45A-A607-5AE3-9A27-7933A9995321}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Domain", "packages\story-generator\src\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj", "{09CADD67-DDDC-508D-B662-3AB552744DB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Domain", "apps\story-generator\src\Mystira.StoryGenerator.Domain\Mystira.StoryGenerator.Domain.csproj", "{09CADD67-DDDC-508D-B662-3AB552744DB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm", "packages\story-generator\src\Mystira.StoryGenerator.Llm\Mystira.StoryGenerator.Llm.csproj", "{3F0C2408-647A-5DA2-B9D0-6C0F151EBCB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm", "apps\story-generator\src\Mystira.StoryGenerator.Llm\Mystira.StoryGenerator.Llm.csproj", "{3F0C2408-647A-5DA2-B9D0-6C0F151EBCB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.GraphTheory", "packages\story-generator\src\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj", "{6B7CF93E-E8A0-5CA2-ACDD-15BB5CE71DA3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.GraphTheory", "apps\story-generator\src\Mystira.StoryGenerator.GraphTheory\Mystira.StoryGenerator.GraphTheory.csproj", "{6B7CF93E-E8A0-5CA2-ACDD-15BB5CE71DA3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm.Console", "packages\story-generator\src\Mystira.StoryGenerator.Llm.Console\Mystira.StoryGenerator.Llm.Console.csproj", "{FF632AB9-4517-5C67-BFEB-54C2BF08DE12}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm.Console", "apps\story-generator\src\Mystira.StoryGenerator.Llm.Console\Mystira.StoryGenerator.Llm.Console.csproj", "{FF632AB9-4517-5C67-BFEB-54C2BF08DE12}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Infrastructure", "packages\story-generator\src\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj", "{0AE0FB01-DF10-5BFD-A857-E32A52D5ABA8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Infrastructure", "apps\story-generator\src\Mystira.StoryGenerator.Infrastructure\Mystira.StoryGenerator.Infrastructure.csproj", "{0AE0FB01-DF10-5BFD-A857-E32A52D5ABA8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Api", "packages\story-generator\src\Mystira.StoryGenerator.Api\Mystira.StoryGenerator.Api.csproj", "{B81F7B83-1E4C-5405-9714-99E3DECDEE0D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Api", "apps\story-generator\src\Mystira.StoryGenerator.Api\Mystira.StoryGenerator.Api.csproj", "{B81F7B83-1E4C-5405-9714-99E3DECDEE0D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Contracts", "packages\story-generator\src\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj", "{842B3A9C-9F4E-53A5-B461-80310791EC68}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Contracts", "apps\story-generator\src\Mystira.StoryGenerator.Contracts\Mystira.StoryGenerator.Contracts.csproj", "{842B3A9C-9F4E-53A5-B461-80310791EC68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.GraphTheory.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.GraphTheory.Tests\Mystira.StoryGenerator.GraphTheory.Tests.csproj", "{BF009736-F6A0-52F4-9AC5-6081B45DA735}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.GraphTheory.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.GraphTheory.Tests\Mystira.StoryGenerator.GraphTheory.Tests.csproj", "{BF009736-F6A0-52F4-9AC5-6081B45DA735}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Api.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.Api.Tests\Mystira.StoryGenerator.Api.Tests.csproj", "{20307939-1BBD-57EB-92FB-BC34FA7B957D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Api.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.Api.Tests\Mystira.StoryGenerator.Api.Tests.csproj", "{20307939-1BBD-57EB-92FB-BC34FA7B957D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.Llm.Tests\Mystira.StoryGenerator.Llm.Tests.csproj", "{50C41FE7-A2AD-52E4-A81B-20E5A8986EA0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Llm.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.Llm.Tests\Mystira.StoryGenerator.Llm.Tests.csproj", "{50C41FE7-A2AD-52E4-A81B-20E5A8986EA0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Infrastructure.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.Infrastructure.Tests\Mystira.StoryGenerator.Infrastructure.Tests.csproj", "{7AE19E17-2C32-5E65-9904-7F7F4CC9D10C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Infrastructure.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.Infrastructure.Tests\Mystira.StoryGenerator.Infrastructure.Tests.csproj", "{7AE19E17-2C32-5E65-9904-7F7F4CC9D10C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Application.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.Application.Tests\Mystira.StoryGenerator.Application.Tests\Mystira.StoryGenerator.Application.Tests.csproj", "{3C1354F8-7954-5539-9C2B-DD1DA35E3A43}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Application.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.Application.Tests\Mystira.StoryGenerator.Application.Tests\Mystira.StoryGenerator.Application.Tests.csproj", "{3C1354F8-7954-5539-9C2B-DD1DA35E3A43}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Domain.Tests", "packages\story-generator\tests\Mystira.StoryGenerator.Domain.Tests\Mystira.StoryGenerator.Domain.Tests.csproj", "{B68C7286-5A1A-5A7F-A207-D13E91F52A21}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.StoryGenerator.Domain.Tests", "apps\story-generator\tests\Mystira.StoryGenerator.Domain.Tests\Mystira.StoryGenerator.Domain.Tests.csproj", "{B68C7286-5A1A-5A7F-A207-D13E91F52A21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.CLI", "packages\devhub\Mystira.DevHub.CLI\Mystira.DevHub.CLI.csproj", "{DB9FF2CC-7CB9-50E9-9749-2754B74387E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.CLI", "apps\devhub\Mystira.DevHub.CLI\Mystira.DevHub.CLI.csproj", "{DB9FF2CC-7CB9-50E9-9749-2754B74387E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.Services", "packages\devhub\Mystira.DevHub.Services\Mystira.DevHub.Services.csproj", "{0118E1F5-4557-554B-ACB3-77579A090BAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.DevHub.Services", "apps\devhub\Mystira.DevHub.Services\Mystira.DevHub.Services.csproj", "{0118E1F5-4557-554B-ACB3-77579A090BAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.CosmosConsole", "packages\devhub\Mystira.App.CosmosConsole\Mystira.App.CosmosConsole.csproj", "{9EDF5B08-5547-5084-9646-D9534B16B8C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.App.CosmosConsole", "apps\devhub\Mystira.App.CosmosConsole\Mystira.App.CosmosConsole.csproj", "{9EDF5B08-5547-5084-9646-D9534B16B8C8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "identity", "identity", "{60496732-1924-3149-8485-DE0F6F547EF3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C7088015-47BD-8CD2-A6ED-6A78CF854FF1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Identity.Api", "packages\identity\src\Mystira.Identity.Api\Mystira.Identity.Api.csproj", "{EBCB4CE0-28BB-4F5B-ABD3-2D3A136AA837}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mystira.Identity.Api", "apps\identity\src\Mystira.Identity.Api\Mystira.Identity.Api.csproj", "{EBCB4CE0-28BB-4F5B-ABD3-2D3A136AA837}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{0B13A727-2A1A-6133-8C1A-C897D8F08931}"
 EndProject

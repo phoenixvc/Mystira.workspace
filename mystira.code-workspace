@@ -21,32 +21,36 @@
       "path": "packages/design-tokens"
     },
     {
-      "name": "packages/app",
-      "path": "packages/app"
+      "name": "apps/app",
+      "path": "apps/app"
     },
     {
-      "name": "packages/admin-api",
-      "path": "packages/admin-api"
+      "name": "apps/admin/api",
+      "path": "apps/admin/api"
     },
     {
-      "name": "packages/admin-ui",
-      "path": "packages/admin-ui"
+      "name": "apps/admin/ui",
+      "path": "apps/admin/ui"
     },
     {
       "name": "packages/chain",
       "path": "packages/chain"
     },
     {
-      "name": "packages/devhub",
-      "path": "packages/devhub"
+      "name": "apps/devhub",
+      "path": "apps/devhub"
     },
     {
-      "name": "packages/publisher",
-      "path": "packages/publisher"
+      "name": "apps/identity",
+      "path": "apps/identity"
     },
     {
-      "name": "packages/story-generator",
-      "path": "packages/story-generator"
+      "name": "apps/publisher",
+      "path": "apps/publisher"
+    },
+    {
+      "name": "apps/story-generator",
+      "path": "apps/story-generator"
     },
     {
       "name": "infra",

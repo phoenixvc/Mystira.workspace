@@ -24,7 +24,7 @@
   ],
   "overrides": [
     {
-      "files": ["packages/admin-ui/**/*.{ts,tsx}"],
+      "files": ["apps/admin/ui/**/*.{ts,tsx}"],
       "env": {
         "browser": true,
         "node": true
@@ -47,7 +47,7 @@
       }
     },
     {
-      "files": ["packages/publisher/**/*.{ts,tsx,js}"],
+      "files": ["apps/publisher/**/*.{ts,tsx,js}"],
       "env": {
         "browser": true,
         "node": true

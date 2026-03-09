@@ -223,13 +223,13 @@ $legacyRepos = @(
 )
 
 $targetMap = @{
-    "Mystira.App"            = "packages/app"
-    "Mystira.StoryGenerator" = "packages/story-generator"
-    "Mystira.Publisher"      = "packages/publisher"
+    "Mystira.App"            = "apps/app"
+    "Mystira.StoryGenerator" = "apps/story-generator"
+    "Mystira.Publisher"      = "apps/publisher"
     "Mystira.Chain"          = "packages/chain"
-    "Mystira.Devhub"         = "packages/devhub"
-    "Mystira.Admin.Api"      = "packages/admin-api"
-    "Mystira.Admin.UI"       = "packages/admin-ui"
+    "Mystira.Devhub"         = "apps/devhub"
+    "Mystira.Admin.Api"      = "apps/admin/api"
+    "Mystira.Admin.UI"       = "apps/admin/ui"
     "Mystira.Infra"          = "infra"
 }
 

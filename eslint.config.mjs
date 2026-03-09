@@ -14,6 +14,10 @@ export default tseslint.config(
       "node_modules",
       "packages/*/dist",
       "packages/*/node_modules",
+      "apps/*/dist",
+      "apps/*/node_modules",
+      "apps/*/*/dist",
+      "apps/*/*/node_modules",
       "**/wwwroot/**",
       "**/service-worker*.js",
       "**/*.min.js",
@@ -43,7 +47,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ["**/packages/devhub/**/*.{ts,tsx}"],
+    files: ["**/apps/devhub/**/*.{ts,tsx}"],
     rules: {
       "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-empty-object-type": "off",

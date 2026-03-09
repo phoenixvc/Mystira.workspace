@@ -12,7 +12,7 @@ on:
     branches:
       - dev
     paths:
-      - "packages/admin-ui/**"
+      - "apps/admin/ui/**"
       - ".github/workflows/deploy-admin-ui-swa.yml"
 
   workflow_dispatch:
@@ -62,7 +62,7 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install
-        working-directory: packages/admin-ui
+        working-directory: apps/admin/ui
 
       - name: Set environment variables
         run: |
@@ -82,7 +82,7 @@ jobs:
 
       - name: Build application
         run: pnpm build
-        working-directory: packages/admin-ui
+        working-directory: apps/admin/ui
         env:
           VITE_API_URL: ${{ env.VITE_API_URL }}
           VITE_AZURE_TENANT_ID: ${{ env.VITE_AZURE_TENANT_ID }}
@@ -129,7 +129,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ steps.swa-token.outputs.token }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "packages/admin-ui"
+          app_location: "apps/admin/ui"
           output_location: "dist"
           skip_app_build: true # We already built it
 

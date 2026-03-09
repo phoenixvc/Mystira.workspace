@@ -14,7 +14,7 @@ WORKDIR /src
 COPY global.json ./
 
 # Copy csproj files for restore (admin-api + all project-referenced packages)
-COPY packages/admin-api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj packages/admin-api/src/Mystira.Admin.Api/
+COPY apps/admin/api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj apps/admin/api/src/Mystira.Admin.Api/
 COPY packages/domain/Mystira.Domain/Mystira.Domain.csproj packages/domain/Mystira.Domain/
 COPY packages/core/Mystira.Core/Mystira.Core.csproj packages/core/Mystira.Core/
 COPY packages/application/Mystira.Application/Mystira.Application.csproj packages/application/Mystira.Application/
@@ -30,10 +30,10 @@ COPY packages/infrastructure/Mystira.Infrastructure.StoryProtocol/Mystira.Infras
 COPY protos/ protos/
 
 # Restore dependencies (no NuGet auth needed — internal packages are ProjectReferences)
-RUN dotnet restore "packages/admin-api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj"
+RUN dotnet restore "apps/admin/api/src/Mystira.Admin.Api/Mystira.Admin.Api.csproj"
 
 # Copy all source files
-COPY packages/admin-api/src/ packages/admin-api/src/
+COPY apps/admin/api/src/ apps/admin/api/src/
 COPY packages/domain/ packages/domain/
 COPY packages/core/ packages/core/
 COPY packages/application/ packages/application/
@@ -41,7 +41,7 @@ COPY packages/contracts/dotnet/ packages/contracts/dotnet/
 COPY packages/shared/ packages/shared/
 COPY packages/infrastructure/ packages/infrastructure/
 
-WORKDIR "/src/packages/admin-api/src/Mystira.Admin.Api"
+WORKDIR "/src/apps/admin/api/src/Mystira.Admin.Api"
 
 # Build the application
 RUN dotnet build "Mystira.Admin.Api.csproj" -c Release -o /app/build

@@ -4,13 +4,13 @@ This directory contains configuration files that are copied to specific packages
 
 ## ESLint presets
 
-Vite/Vitest configuration for `packages/admin-ui`. Copied to `packages/admin-ui/vite.config.ts` by CI before running tests.
+Vite/Vitest configuration for `apps/admin/ui`. Copied to `apps/admin/ui/vite.config.ts` by CI before running tests.
 
 Adds `passWithNoTests: true` so Vitest passes gracefully when no test files exist yet.
 
 ## admin-ui.eslint.config.mjs
 
-ESLint configuration for `packages/admin-ui` and `packages/publisher`. Copied by CI before running lint.
+ESLint configuration for `apps/admin/ui` and `apps/publisher`. Copied by CI before running lint.
 
 Provides:
 

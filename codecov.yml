@@ -59,8 +59,8 @@ flags:
   typescript:
     paths:
       - packages/shared-utils/
-      - packages/admin-ui/
-      - packages/publisher/
+      - apps/admin/ui/
+      - apps/publisher/
     carryforward: true
 
   # .NET packages
@@ -91,12 +91,12 @@ flags:
 
   dotnet-admin-api:
     paths:
-      - packages/admin-api/
+      - apps/admin/api/
     carryforward: true
 
   dotnet-app:
     paths:
-      - packages/app/
+      - apps/app/
     carryforward: true
 
 # Component configuration for better PR comments
@@ -110,8 +110,8 @@ component_management:
       name: TypeScript Packages
       paths:
         - packages/shared-utils/**
-        - packages/admin-ui/**
-        - packages/publisher/**
+        - apps/admin/ui/**
+        - apps/publisher/**
     - component_id: dotnet-core
       name: .NET Core
       paths:
@@ -135,52 +135,52 @@ component_management:
     - component_id: admin-api
       name: Admin API
       paths:
-        - packages/admin-api/**
+        - apps/admin/api/**
     - component_id: app
       name: App
       paths:
-        - packages/app/**
+        - apps/app/**
     - component_id: app-api
       name: App API
       paths:
-        - packages/app/src/Mystira.App.Api/**
+        - apps/app/src/Mystira.App.Api/**
     - component_id: app-admin-api
       name: App Admin API
       paths:
-        - packages/app/src/Mystira.App.Admin.Api/**
+        - apps/app/src/Mystira.App.Admin.Api/**
     - component_id: app-pwa
       name: App PWA
       paths:
-        - packages/app/src/Mystira.App.PWA/**
+        - apps/app/src/Mystira.App.PWA/**
     - component_id: app-domain
       name: App Domain
       paths:
-        - packages/app/src/Mystira.App.Domain/**
+        - apps/app/src/Mystira.App.Domain/**
     - component_id: app-application
       name: App Application
       paths:
-        - packages/app/src/Mystira.App.Application/**
+        - apps/app/src/Mystira.App.Application/**
     - component_id: app-contracts
       name: App Contracts
       paths:
-        - packages/app/src/Mystira.Contracts.App/**
+        - apps/app/src/Mystira.Contracts.App/**
     - component_id: app-infrastructure-data
       name: App Infrastructure Data
       paths:
-        - packages/app/src/Mystira.App.Infrastructure.Data/**
+        - apps/app/src/Mystira.App.Infrastructure.Data/**
     - component_id: app-infrastructure-azure
       name: App Infrastructure Azure
       paths:
-        - packages/app/src/Mystira.App.Infrastructure.Azure/**
+        - apps/app/src/Mystira.App.Infrastructure.Azure/**
     - component_id: app-infrastructure-discord
       name: App Infrastructure Discord
       paths:
-        - packages/app/src/Mystira.App.Infrastructure.Discord/**
+        - apps/app/src/Mystira.App.Infrastructure.Discord/**
     - component_id: app-infrastructure-storyprotocol
       name: App Infrastructure StoryProtocol
       paths:
-        - packages/app/src/Mystira.App.Infrastructure.StoryProtocol/**
+        - apps/app/src/Mystira.App.Infrastructure.StoryProtocol/**
     - component_id: app-shared
       name: App Shared
       paths:
-        - packages/app/src/Mystira.App.Shared/**
+        - apps/app/src/Mystira.App.Shared/**

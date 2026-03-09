@@ -83,8 +83,8 @@ fi
 print_status "Step 7: Rust Projects"
 echo "Running Rust tests..."
 
-if [ -f "packages/devhub/Mystira.DevHub/src-tauri/Cargo.toml" ]; then
-    cd packages/devhub/Mystira.DevHub/src-tauri
+if [ -f "apps/devhub/Mystira.DevHub/src-tauri/Cargo.toml" ]; then
+    cd apps/devhub/Mystira.DevHub/src-tauri
     print_status "Testing Rust DevHub package..."
     cargo test || print_warning "Rust tests failed"
     cd - > /dev/null

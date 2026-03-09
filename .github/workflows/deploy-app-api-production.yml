@@ -89,7 +89,7 @@ jobs:
 
       - name: Build Application
         run: |
-          cd packages/app
+          cd apps/app
           dotnet restore
           dotnet build --configuration Release --no-restore
           dotnet publish --configuration Release --no-build --output ./publish
@@ -100,7 +100,7 @@ jobs:
         with:
           app-name: ${{ env.APP_SERVICE_NAME }}
           slot-name: ${{ env.STAGING_SLOT }}
-          package: packages/app/publish
+          package: apps/app/publish
 
       - name: Set staging URL output
         run: |

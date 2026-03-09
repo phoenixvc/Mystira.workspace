@@ -195,7 +195,7 @@ fi
 # -----------------------------------------------------------------------------
 # Rust toolchain (packages/devhub)
 # -----------------------------------------------------------------------------
-DEVHUB_DIR="$PROJECT_DIR/packages/devhub"
+DEVHUB_DIR="$PROJECT_DIR/apps/devhub"
 echo "Setting up Rust toolchain..."
 if [ -f "$DEVHUB_DIR/rust-toolchain.toml" ]; then
     if command -v rustup &> /dev/null; then

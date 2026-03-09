@@ -252,16 +252,16 @@ temp/
 yarn.lock
 
 # Package-scoped migration/legacy artifacts
-packages/app/packages/
-packages/app/tools/
-packages/app/**/tools/
-packages/devhub/Mystira.DevHub/Mystira.App.*/
-packages/devhub/Mystira.DevHub/src/Mystira.App.*/
-packages/devhub/Mystira.DevHub/.github/
-packages/devhub/Mystira.DevHub/tools/
-packages/devhub/Mystira.DevHub/MEDIA_*.md
-packages/devhub/Mystira.DevHub/PWA_*.md
-packages/devhub/Mystira.DevHub/SRI_*.md
+apps/app/packages/
+apps/app/tools/
+apps/app/**/tools/
+apps/devhub/Mystira.DevHub/Mystira.App.*/
+apps/devhub/Mystira.DevHub/src/Mystira.App.*/
+apps/devhub/Mystira.DevHub/.github/
+apps/devhub/Mystira.DevHub/tools/
+apps/devhub/Mystira.DevHub/MEDIA_*.md
+apps/devhub/Mystira.DevHub/PWA_*.md
+apps/devhub/Mystira.DevHub/SRI_*.md
 # Temporary documentation files
 CHAIN_COMPARISON.md
 REPO_SETUP_COMPLETE.md

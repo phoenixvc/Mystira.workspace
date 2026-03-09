@@ -5,14 +5,15 @@
 * @phoenixvc/mystira-core
 
 # TypeScript services
-/packages/publisher/       @phoenixvc/mystira-core
-/packages/admin-ui/        @phoenixvc/mystira-core
-/packages/devhub/          @phoenixvc/mystira-core
+/apps/publisher/           @phoenixvc/mystira-core
+/apps/admin/ui/            @phoenixvc/mystira-core
+/apps/devhub/              @phoenixvc/mystira-core
 
 # C# services
-/packages/admin-api/       @phoenixvc/mystira-core
-/packages/app/             @phoenixvc/mystira-core
-/packages/story-generator/ @phoenixvc/mystira-core
+/apps/admin/api/           @phoenixvc/mystira-core
+/apps/app/                 @phoenixvc/mystira-core
+/apps/identity/            @phoenixvc/mystira-core
+/apps/story-generator/     @phoenixvc/mystira-core
 
 # Python services
 /packages/chain/           @phoenixvc/mystira-core

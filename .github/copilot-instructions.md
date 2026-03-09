@@ -9,12 +9,13 @@ Mystira is an AI-powered interactive storytelling platform combining blockchain 
 The monorepo contains the following packages:
 
 - **packages/chain** (Python, gRPC) - Blockchain integration & Story Protocol
-- **packages/app** (C#, .NET) - Main storytelling application
-- **packages/story-generator** (C#, .NET) - AI-powered story generation engine
-- **packages/publisher** (TypeScript, Node.js) - Content publishing service
-- **packages/devhub** (TypeScript) - Developer portal and tools
-- **packages/admin-api** (C#, ASP.NET Core) - Admin backend API
-- **packages/admin-ui** (TypeScript, React) - Admin dashboard frontend
+- **apps/app** (C#, .NET) - Main storytelling application
+- **apps/story-generator** (C#, .NET) - AI-powered story generation engine
+- **apps/publisher** (TypeScript, Node.js) - Content publishing service
+- **apps/devhub** (TypeScript) - Developer portal and tools
+- **apps/admin/api** (C#, ASP.NET Core) - Admin backend API
+- **apps/admin/ui** (TypeScript, React) - Admin dashboard frontend
+- **apps/identity** (C#, .NET) - Identity service
 - **packages/contracts** (TypeScript + .NET) - Shared contracts
 - **packages/shared** (.NET) - Shared .NET libraries
 - **packages/shared-utils** (TypeScript) - Shared TypeScript utilities
