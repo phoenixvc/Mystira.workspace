@@ -23,6 +23,10 @@
         new("book", "Replayable adventures")
     };
 
+    // SAFETY: MarkupString is only used with hardcoded SVG paths from the switch below.
+    // If the Pills parameter is ever extended to accept arbitrary icon names from user input,
+    // the default case returns "" (empty string) which is safe, but the pattern should be
+    // reviewed for XSS if user-supplied markup is ever introduced.
     private string GetIconPath(string icon) => icon switch
     {
         "compass" => "<circle cx='12' cy='12' r='10'/><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'/>",

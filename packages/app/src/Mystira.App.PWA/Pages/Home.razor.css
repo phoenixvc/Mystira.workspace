@@ -68,13 +68,15 @@
     border-radius: 0 0 20px 20px;
 }
 
+/* Reset box-sizing to prevent Bootstrap .card styles from leaking in */
 .feature-card-v2 {
+    box-sizing: border-box;
     padding: 28px 24px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     height: 100%;
 }

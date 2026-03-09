@@ -83,6 +83,8 @@
     {
         _transitioning = true;
         StateHasChanged();
+        // 150ms matches the CSS transition duration on .story-demo-card (opacity 0.2s ease).
+        // Slightly shorter than the CSS duration so the new content renders mid-fade.
         await Task.Delay(150);
         _currentNodeId = nextNodeId;
         _transitioning = false;

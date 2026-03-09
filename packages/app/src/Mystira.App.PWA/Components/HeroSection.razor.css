@@ -218,6 +218,7 @@
     border-radius: 14px;
     text-decoration: none;
     cursor: pointer;
+    -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
     transition: all 0.25s ease;
 }

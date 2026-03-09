@@ -170,6 +170,7 @@
 
 /* Gem sparkle animation */
 .gem-sparkle {
+    transform-origin: center;
     animation: gemSparkle 3s ease-in-out infinite;
 }
 
@@ -178,9 +179,11 @@
 .corner-bl .gem-sparkle { animation-delay: 1.4s; }
 .corner-br .gem-sparkle { animation-delay: 2.1s; }
 
+/* Use transform: scale() instead of animating the SVG r attribute,
+   which has inconsistent browser support (Firefox < 128 ignores it). */
 @keyframes gemSparkle {
-    0%, 100% { opacity: 0.5; r: 3; }
-    50% { opacity: 1; r: 4; }
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.35); }
 }
 
 /* Frame shimmer sweep */

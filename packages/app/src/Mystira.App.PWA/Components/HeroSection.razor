@@ -90,16 +90,11 @@
     public EventCallback OnWatchDemoClick { get; set; }
 
     private bool _particlesInitialized = false;
+    // Default false to prevent flash for return visitors. The static logo renders
+    // first; we only switch to the video after confirming localStorage doesn't
+    // already have the "intro seen" flag.
     private bool _showIntroVideo = false;
     private bool _introSeen = false;
-
-    protected override void OnInitialized()
-    {
-        // First visit: show intro video; return visits: skip
-        // The JS side checks localStorage; we default to showing it
-        // and let the portal component handle the transition
-        _showIntroVideo = true;
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -110,14 +105,21 @@
             {
                 await JSRuntime.InvokeVoidAsync("MystiraParticles.init", "particle-canvas");
 
-                // Check if intro was already seen
+                // Check localStorage to decide whether to show the intro video.
+                // Runs after first render so the static logo is the default state,
+                // avoiding a flash for return visitors.
                 var seen = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "mystira-hero-intro-seen");
-                if (!string.IsNullOrEmpty(seen))
+                if (string.IsNullOrEmpty(seen))
                 {
-                    _showIntroVideo = false;
-                    _introSeen = true;
-                    StateHasChanged();
+                    // First visit — show the intro video
+                    _showIntroVideo = true;
                 }
+                else
+                {
+                    // Return visit — keep static logo, enable replay button
+                    _introSeen = true;
+                }
+                StateHasChanged();
             }
             catch
             {
