@@ -31,12 +31,24 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install Python lint dependencies
+        run: |
+          pip install -r packages/chain/requirements.txt
+          pip install -r packages/chain/requirements-dev.txt
+
       - uses: pnpm/action-setup@v4
 
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
           cache: "pnpm"
+
+      - name: Install ruff
+        run: pip install ruff==0.9.0
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -53,6 +65,15 @@ jobs:
       NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN || 'dummy' }}
     steps:
       - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install Python test dependencies
+        run: |
+          pip install -r packages/chain/requirements.txt
+          pip install -r packages/chain/requirements-dev.txt
 
       - uses: pnpm/action-setup@v4
 
