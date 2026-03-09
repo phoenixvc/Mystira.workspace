@@ -77,4 +77,8 @@
     <_ContentIncludedByDefault Remove="Views\_ViewStart.cshtml" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\packages\shared-observability\Mystira.Shared.Observability\Mystira.Shared.Observability.csproj" />
+  </ItemGroup>
+
 </Project>

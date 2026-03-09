@@ -70,6 +70,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\application\Mystira.Application\Mystira.Application.csproj" />
     <ProjectReference Include="..\..\domain\Mystira.Domain\Mystira.Domain.csproj" />
+    <ProjectReference Include="..\..\shared-observability\Mystira.Shared.Observability\Mystira.Shared.Observability.csproj" />
   </ItemGroup>
 
   <ItemGroup>
