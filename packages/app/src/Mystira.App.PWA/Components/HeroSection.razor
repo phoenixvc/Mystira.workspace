@@ -12,9 +12,6 @@
         <div class="hero-bg-fade-bottom"></div>
     </div>
 
-    <!-- Particle canvas — scoped to background -->
-    <canvas id="particle-canvas" class="hero-particle-canvas" aria-hidden="true"></canvas>
-
     <div class="hero-container">
         <div class="hero-grid">
             <!-- Left column: copy, CTAs, trust pills, interactive demo -->
@@ -59,6 +56,9 @@
 
             <!-- Right column: portal visual with ornate frame -->
             <div class="hero-visual-col">
+                <!-- Particle canvas — localized to artifact area -->
+                <canvas id="particle-canvas" class="hero-particle-canvas" aria-hidden="true"></canvas>
+
                 <HeroPortalVisual
                     ShowIntroVideo="@_showIntroVideo"
                     OnIntroComplete="HandleIntroComplete" />

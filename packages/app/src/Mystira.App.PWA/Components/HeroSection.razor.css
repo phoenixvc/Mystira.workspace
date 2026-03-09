@@ -27,7 +27,7 @@
 
 .hero-bg-accent-1 {
     position: absolute;
-    left: 10%;
+    left: 55%;
     top: 10%;
     width: 280px;
     height: 280px;
@@ -85,14 +85,11 @@
     background: linear-gradient(to top, #070B1D, transparent);
 }
 
-/* ---- Particle Canvas ---- */
+/* ---- Particle Canvas (localized to right visual column) ---- */
 
 .hero-particle-canvas {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    inset: 0;
     pointer-events: auto;
     z-index: 0;
 }
@@ -127,7 +124,26 @@
 
 .hero-text-col {
     max-width: 640px;
-    animation: heroTextFadeIn 0.45s ease-out;
+}
+
+/* Staggered entrance animation for text column children */
+.hero-text-col > :nth-child(1) { /* HeroBadgePill */
+    animation: heroTextFadeIn 0.45s ease-out 0s both;
+}
+.hero-text-col > :nth-child(2) { /* headline */
+    animation: heroTextFadeIn 0.45s ease-out 0.1s both;
+}
+.hero-text-col > :nth-child(3) { /* subtext */
+    animation: heroTextFadeIn 0.45s ease-out 0.2s both;
+}
+.hero-text-col > :nth-child(4) { /* CTA group */
+    animation: heroTextFadeIn 0.45s ease-out 0.35s both;
+}
+.hero-text-col > :nth-child(5) { /* trust pills */
+    animation: heroTextFadeIn 0.45s ease-out 0.45s both;
+}
+.hero-text-col > :nth-child(6) { /* story demo */
+    animation: heroTextFadeIn 0.45s ease-out 0.55s both;
 }
 
 @keyframes heroTextFadeIn {
@@ -344,8 +360,8 @@
     .hero-bg-accent-1,
     .hero-bg-accent-2,
     .hero-bg-stars,
-    .hero-text-col,
-    .hero-visual-col {
+    .hero-visual-col,
+    .hero-text-col > * {
         animation: none;
     }
 }

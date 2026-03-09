@@ -6,6 +6,8 @@
     max-width: 520px;
     aspect-ratio: 0.85;
     margin: 0 auto;
+    --pointer-x: 0.5;
+    --pointer-y: 0.5;
 }
 
 /* Ambient glow behind everything */
@@ -15,9 +17,36 @@
     border-radius: 2rem;
     background:
         radial-gradient(circle at 50% 42%, rgba(56, 189, 248, 0.12), transparent 42%),
-        radial-gradient(circle at 48% 58%, rgba(246, 196, 83, 0.1), transparent 34%);
+        radial-gradient(circle at 48% 58%, rgba(139, 117, 48, 0.08), transparent 34%);
     filter: blur(30px);
     z-index: 0;
+}
+
+/* Observatory light tubes behind the portal */
+.observatory-tube {
+    position: absolute;
+    width: 3px;
+    top: 0;
+    bottom: 30%;
+    filter: blur(20px);
+    z-index: 0;
+    animation: tubePulse 7s ease-in-out infinite;
+}
+
+.observatory-tube-left {
+    left: 30%;
+    background: linear-gradient(to top, rgba(122, 92, 255, 0.15), transparent);
+}
+
+.observatory-tube-right {
+    right: 30%;
+    background: linear-gradient(to top, rgba(103, 232, 249, 0.12), transparent);
+    animation-delay: 3.5s;
+}
+
+@keyframes tubePulse {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.18; }
 }
 
 /* Floating particles */
@@ -59,7 +88,7 @@
     top: 76%;
     width: 5px;
     height: 5px;
-    background: #f6c453;
+    background: #8B7530;
     animation-duration: 4.8s;
     animation-delay: 1.4s;
 }
@@ -101,12 +130,16 @@
     }
 }
 
-/* Gentle floating bob on the entire portal */
+/* Gentle floating bob on the entire portal — with pointer parallax */
 .portal-float-wrapper {
     position: relative;
     width: 100%;
     height: 100%;
     animation: portalFloat 7.5s ease-in-out infinite;
+    transform: perspective(800px)
+               rotateY(calc((var(--pointer-x) - 0.5) * 6deg))
+               rotateX(calc((var(--pointer-y) - 0.5) * -4deg));
+    transition: transform 0.3s ease-out;
 }
 
 @keyframes portalFloat {
@@ -133,7 +166,7 @@
     border-radius: 2rem;
     background:
         radial-gradient(circle at 50% 40%, rgba(122, 92, 255, 0.2), transparent 48%),
-        radial-gradient(circle at 50% 75%, rgba(246, 196, 83, 0.12), transparent 24%);
+        radial-gradient(circle at 50% 75%, rgba(139, 117, 48, 0.08), transparent 24%);
     filter: blur(30px);
     z-index: 0;
     animation: innerGlowPulse 5.2s ease-in-out infinite;
@@ -151,7 +184,7 @@
     z-index: 2;
 }
 
-/* Ornate SVG frame */
+/* Ornate SVG frame — antique gold with restrained glow */
 .ornate-frame-svg {
     position: absolute;
     inset: 0;
@@ -159,16 +192,41 @@
     height: 100%;
     z-index: 10;
     pointer-events: none;
-    filter: drop-shadow(0 0 12px rgba(246, 196, 83, 0.15));
-    animation: frameGlowPulse 4.8s ease-in-out infinite;
+    filter: drop-shadow(0 0 12px rgba(139, 117, 48, 0.12));
+    animation: frameGlowPulse 6s ease-in-out infinite;
 }
 
 @keyframes frameGlowPulse {
-    0%, 100% { filter: drop-shadow(0 0 12px rgba(246, 196, 83, 0.1)); }
-    50% { filter: drop-shadow(0 0 22px rgba(246, 196, 83, 0.25)); }
+    0%, 100% { filter: drop-shadow(0 0 12px rgba(139, 117, 48, 0.08)); }
+    50% { filter: drop-shadow(0 0 22px rgba(139, 117, 48, 0.2)); }
 }
 
-/* Gem sparkle animation */
+/* Purple/cyan edge reflections */
+.frame-reflection-purple,
+.frame-reflection-cyan {
+    animation: reflectionShift 8s ease-in-out infinite;
+}
+
+.frame-reflection-cyan {
+    animation-delay: 4s;
+}
+
+@keyframes reflectionShift {
+    0%, 100% { opacity: 0.08; }
+    50% { opacity: 0.2; }
+}
+
+/* Inner rim glow */
+.inner-rim-glow {
+    animation: innerRimPulse 6s ease-in-out infinite;
+}
+
+@keyframes innerRimPulse {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Gem sparkle animation — restrained scale */
 .gem-sparkle {
     transform-origin: center;
     animation: gemSparkle 3s ease-in-out infinite;
@@ -183,27 +241,15 @@
    which has inconsistent browser support (Firefox < 128 ignores it). */
 @keyframes gemSparkle {
     0%, 100% { opacity: 0.5; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.35); }
+    50% { opacity: 1; transform: scale(1.2); }
 }
 
-/* Frame shimmer sweep */
-.frame-shimmer {
-    animation: shimmerSweep 6s ease-in-out infinite;
-}
-
-@keyframes shimmerSweep {
-    0%, 100% { opacity: 0; stroke-dashoffset: 0; }
-    40% { opacity: 0.3; }
-    60% { opacity: 0.3; }
-    50% { stroke-dashoffset: 800; }
-}
-
-/* Top/bottom ornament pulse */
+/* Top/bottom ornament pulse — slowed for subtlety */
 .top-gem, .bottom-gem {
-    animation: ornamentPulse 4s ease-in-out infinite;
+    animation: ornamentPulse 6s ease-in-out infinite;
 }
 
-.bottom-gem { animation-delay: 2s; }
+.bottom-gem { animation-delay: 3s; }
 
 @keyframes ornamentPulse {
     0%, 100% { opacity: 0.7; }
@@ -226,7 +272,7 @@
     position: absolute;
     inset: 0;
     background:
-        radial-gradient(circle at 50% 30%, rgba(246, 196, 83, 0.1), transparent 35%),
+        radial-gradient(circle at 50% 30%, rgba(139, 117, 48, 0.06), transparent 35%),
         radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15), transparent 42%),
         radial-gradient(circle at 50% 78%, rgba(122, 92, 255, 0.18), transparent 30%);
     animation: cosmicPulse 6s ease-in-out infinite;
@@ -261,6 +307,60 @@
 @keyframes orbitSpin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+}
+
+/* Slow dimensional swirl — conic gradient rotating */
+.portal-depth-swirl {
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: conic-gradient(
+        from 0deg,
+        rgba(56, 189, 248, 0.12),
+        rgba(122, 92, 255, 0.18),
+        rgba(139, 117, 48, 0.06),
+        rgba(56, 189, 248, 0.12)
+    );
+    filter: blur(16px);
+    z-index: 2;
+    animation: swirlRotate 40s linear infinite;
+}
+
+@keyframes swirlRotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* World hint — faint silhouette inside portal depth */
+.portal-world-hint {
+    position: absolute;
+    inset: 30%;
+    border-radius: 50%;
+    background:
+        radial-gradient(ellipse at 50% 80%, rgba(122, 92, 255, 0.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 40%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
+    z-index: 2;
+    opacity: 0.12;
+    animation: worldHintPulse 8s ease-in-out infinite;
+}
+
+@keyframes worldHintPulse {
+    0%, 100% { opacity: 0.08; transform: scale(0.98); }
+    50% { opacity: 0.18; transform: scale(1.02); }
+}
+
+/* Portal light beams — faint radial from artifact center */
+.portal-light-beams {
+    position: absolute;
+    inset: 10%;
+    background: radial-gradient(circle, rgba(139, 117, 48, 0.06), transparent 60%);
+    z-index: 2;
+    animation: beamPulse 5s ease-in-out infinite;
+}
+
+@keyframes beamPulse {
+    0%, 100% { opacity: 0.04; }
+    50% { opacity: 0.12; }
 }
 
 /* Vignette */
@@ -329,14 +429,17 @@
     transform: scale(0.96);
 }
 
+/* Video → artifact transition emerges from glow burst */
 @keyframes logoFadeIn {
     from {
         opacity: 0;
-        transform: scale(0.96);
+        transform: scale(0.8);
+        filter: drop-shadow(0 0 60px rgba(122, 92, 255, 0.6));
     }
     to {
         opacity: 1;
         transform: scale(1);
+        filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
     }
 }
 
@@ -355,7 +458,7 @@
     50% { opacity: 0.38; transform: scale(1.02); }
 }
 
-/* The M logo image */
+/* The M logo image — three-phase energy loop with pointer parallax offset */
 .portal-logo-img {
     position: relative;
     z-index: 5;
@@ -364,16 +467,24 @@
     object-fit: contain;
     animation: logoHover 5.8s ease-in-out infinite;
     filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
+    transform: translateX(calc((var(--pointer-x) - 0.5) * -8px))
+               translateY(calc((var(--pointer-y) - 0.5) * -6px));
+    transition: transform 0.3s ease-out;
 }
 
+/* Three-phase energy loop: gather → pulse → stabilize */
 @keyframes logoHover {
-    0%, 100% {
-        transform: translateY(0) scale(1);
+    /* Phase A: Energy gathering */
+    0% {
         filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
     }
-    50% {
-        transform: translateY(-8px) scale(1.018);
-        filter: drop-shadow(0 0 30px rgba(122, 92, 255, 0.3));
+    /* Phase B: Portal pulse — glow burst, tiny rotation */
+    45% {
+        filter: drop-shadow(0 0 44px rgba(122, 92, 255, 0.42));
+    }
+    /* Phase C: Stabilize */
+    100% {
+        filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
     }
 }
 
@@ -411,7 +522,6 @@
     .portal-particle,
     .ornate-frame-svg,
     .gem-sparkle,
-    .frame-shimmer,
     .portal-cosmic-bg,
     .orbit-ring,
     .portal-inner-glow,
@@ -419,8 +529,23 @@
     .logo-glow-aura,
     .portal-reflection,
     .top-gem,
-    .bottom-gem {
+    .bottom-gem,
+    .observatory-tube,
+    .portal-depth-swirl,
+    .portal-world-hint,
+    .portal-light-beams,
+    .frame-reflection-purple,
+    .frame-reflection-cyan,
+    .inner-rim-glow {
         animation: none;
+    }
+
+    .portal-float-wrapper {
+        transform: none;
+    }
+
+    .portal-logo-img {
+        transform: none;
     }
 }
 
