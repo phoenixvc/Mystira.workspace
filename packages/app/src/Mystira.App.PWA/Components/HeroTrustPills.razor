@@ -1,0 +1,33 @@
+@* Trust indicator pills for the hero section *@
+
+<div class="hero-trust-pills">
+    @foreach (var pill in Pills)
+    {
+        <div class="trust-pill">
+            <svg class="trust-pill-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                @((MarkupString)GetIconPath(pill.Icon))
+            </svg>
+            <span>@pill.Label</span>
+        </div>
+    }
+</div>
+
+@code {
+    public record TrustPillData(string Icon, string Label);
+
+    [Parameter]
+    public IReadOnlyList<TrustPillData> Pills { get; set; } = new List<TrustPillData>
+    {
+        new("compass", "Choice-driven stories"),
+        new("shield", "Safe for young explorers"),
+        new("book", "Replayable adventures")
+    };
+
+    private string GetIconPath(string icon) => icon switch
+    {
+        "compass" => "<circle cx='12' cy='12' r='10'/><polygon points='16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76'/>",
+        "shield" => "<path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><polyline points='9 12 11 14 15 10'/>",
+        "book" => "<path d='M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z'/><path d='M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z'/>",
+        _ => ""
+    };
+}
