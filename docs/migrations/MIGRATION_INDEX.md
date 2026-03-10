@@ -77,7 +77,7 @@ All infrastructure patterns are implemented:
 | Wolverine + Service Bus | ✅     | `Mystira.Shared.Messaging`                  |
 | Ardalis.Specification   | ✅     | `Mystira.Shared.Data`                       |
 | Redis Caching           | ✅     | `Mystira.Shared.Caching`                    |
-| EntityId (string IDs)   | ✅     | `Mystira.Shared.Data.EntityId`              |
+| EntityId (string IDs)   | ✅     | `Mystira.Domain.Entities.EntityId`          |
 | AsyncExtensions         | ✅     | `Mystira.Shared.Extensions.AsyncExtensions` |
 | RateLimitingMiddleware  | ✅     | `Mystira.Shared.Middleware`                 |
 | SecurityMetrics         | ✅     | `Mystira.Shared.Telemetry`                  |
@@ -102,7 +102,7 @@ These issues were identified in code reviews and have been addressed:
 
 | Issue                       | Solution                 | Location                                       |
 | --------------------------- | ------------------------ | ---------------------------------------------- |
-| `Guid.Parse` crashes        | `EntityId` class         | `Mystira.Shared.Data.EntityId`                 |
+| `Guid.Parse` crashes        | `EntityId` class         | `Mystira.Domain.Entities.EntityId`             |
 | Missing `CancellationToken` | `EnsureToken()`          | `Mystira.Shared.Extensions.AsyncExtensions`    |
 | Fire-and-forget patterns    | `SafeExecuteAsync()`     | `Mystira.Shared.Extensions.AsyncExtensions`    |
 | Rate limiting               | `RateLimitingMiddleware` | `Mystira.Shared.Middleware`                    |

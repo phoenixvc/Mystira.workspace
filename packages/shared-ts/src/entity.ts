@@ -1,6 +1,6 @@
 /**
  * Entity types for Mystira platform.
- * Mirrors Mystira.Shared.Data.Entities in C#.
+ * Mirrors Mystira.Domain.Entities in C#.
  */
 
 /**

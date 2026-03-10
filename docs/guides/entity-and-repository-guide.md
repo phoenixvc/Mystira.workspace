@@ -19,9 +19,9 @@ This guide covers the complete workflow for adding new entities, repositories, a
 
 ```csharp
 // Domain/Entities/Product.cs
-using Mystira.Shared.Data.Entities;
+using Mystira.Domain.Entities;
 
-public class Product : Entity<Guid>  // or AuditableEntity<Guid> for timestamps
+public class Product : Entity<Guid>  // includes audit fields (CreatedAt, UpdatedAt, etc.)
 {
     public required string Name { get; set; }
     public required string Sku { get; set; }

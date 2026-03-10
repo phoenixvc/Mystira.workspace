@@ -1,5 +1,4 @@
-using Mystira.Shared.Data;
-using Mystira.Shared.Data.Entities;
+using Mystira.Domain.Entities;
 
 namespace Mystira.Shared.Polyglot;
 
@@ -38,11 +37,6 @@ public class PolyglotSyncLog : Entity
     /// The target backend where the operation needs to be applied.
     /// </summary>
     public BackendType TargetBackend { get; set; }
-
-    /// <summary>
-    /// Timestamp when the sync was initiated.
-    /// </summary>
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     /// <summary>
     /// Timestamp when the sync completed (successfully or failed).

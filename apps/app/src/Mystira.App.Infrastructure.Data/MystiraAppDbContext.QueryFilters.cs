@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Entities;
 
 namespace Mystira.App.Infrastructure.Data;
 
@@ -14,14 +14,14 @@ public partial class MystiraAppDbContext
     /// </summary>
     private void ApplyGlobalQueryFilters(ModelBuilder modelBuilder)
     {
-        // Apply soft delete filter to all entities that inherit from SoftDeletableEntity
+        // Apply soft delete filter to all entities that implement ISoftDeletable
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(SoftDeletableEntity).IsAssignableFrom(entityType.ClrType))
+            if (typeof(ISoftDeletable).IsAssignableFrom(entityType.ClrType))
             {
                 // Create filter expression: entity => !entity.IsDeleted
                 var parameter = System.Linq.Expressions.Expression.Parameter(entityType.ClrType, "e");
-                var property = System.Linq.Expressions.Expression.Property(parameter, nameof(SoftDeletableEntity.IsDeleted));
+                var property = System.Linq.Expressions.Expression.Property(parameter, nameof(ISoftDeletable.IsDeleted));
                 var filter = System.Linq.Expressions.Expression.Lambda(
                     System.Linq.Expressions.Expression.Not(property),
                     parameter);
