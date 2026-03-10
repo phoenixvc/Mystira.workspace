@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.CharacterMaps;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.UseCases.CharacterMaps;
 
@@ -47,7 +49,7 @@ public class GetCharacterMapUseCaseTests
         result.Should().NotBeNull();
         result!.Id.Should().Be("char-1");
         result.Name.Should().Be("Elarion");
-        result.Metadata.Species.Should().Be("elf");
+        result.Metadata!.Species.Should().Be("elf");
     }
 
     [Fact]

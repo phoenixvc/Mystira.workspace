@@ -56,6 +56,11 @@ public class SubscriptionDetails
     public DateTime? StartDate { get; set; }
 
     /// <summary>
+    /// Gets or sets the subscription end date.
+    /// </summary>
+    public DateTime? EndDate { get; set; }
+
+    /// <summary>
     /// Checks if the subscription is currently active.
     /// </summary>
     /// <returns>True if subscription is active and valid.</returns>

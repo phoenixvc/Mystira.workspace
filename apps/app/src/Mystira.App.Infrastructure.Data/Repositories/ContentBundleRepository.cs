@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data.Repositories;
 
@@ -15,6 +17,6 @@ public class ContentBundleRepository : Repository<ContentBundle>, IContentBundle
 
     public async Task<IEnumerable<ContentBundle>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default)
     {
-        return await _dbSet.Where(b => b.AgeGroup == ageGroup).ToListAsync(ct);
+        return await _dbSet.Where(b => b.AgeGroupId == ageGroup).ToListAsync(ct);
     }
 }

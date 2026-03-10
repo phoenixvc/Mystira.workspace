@@ -41,7 +41,7 @@ public static class GetFeaturedScenariosQueryHandler
                 CoreAxes = s.CoreAxes,
                 CreatedAt = s.CreatedAt,
                 Image = s.CoverImageUrl,
-                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultMood : null,
+                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultProfile.ToString() : null,
                 IsFeatured = s.IsFeatured,
                 ThumbnailUrl = s.ThumbnailUrl
             })

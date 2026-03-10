@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Scenarios;
+using Mystira.Domain.Enums;
+using ScenarioGameState = Mystira.Contracts.App.Responses.Scenarios.ScenarioGameState;
 
 namespace Mystira.App.Application.CQRS.Scenarios.Queries;
 
@@ -49,10 +51,10 @@ public static class GetScenariosWithGameStateQueryHandler
             // Only treat sessions that are currently active as "InProgress".
             // This avoids showing scenarios as in-progress when all sessions are Completed/Abandoned.
             var hasActiveSession = sessions.Any(gs =>
-                gs.Status == Domain.Models.SessionStatus.InProgress
-                || gs.Status == Domain.Models.SessionStatus.Paused);
+                gs.Status == SessionStatus.InProgress
+                || gs.Status == SessionStatus.Paused);
 
-            var hasCompletedSession = sessions.Any(gs => gs.Status == Domain.Models.SessionStatus.Completed);
+            var hasCompletedSession = sessions.Any(gs => gs.Status == SessionStatus.Completed);
 
             var gameState = hasActiveSession
                 ? ScenarioGameState.InProgress
@@ -65,12 +67,12 @@ public static class GetScenariosWithGameStateQueryHandler
                 ScenarioId = scenario.Id,
                 Title = scenario.Title,
                 Description = scenario.Description,
-                AgeGroup = scenario.AgeGroup,
+                AgeGroup = scenario.AgeGroupId,
                 Difficulty = scenario.Difficulty.ToString(),
                 SessionLength = scenario.SessionLength.ToString(),
-                CoreAxes = scenario.CoreAxes?.Select(a => a.Value).ToList() ?? new List<string>(),
+                CoreAxes = scenario.CoreAxes?.ToList() ?? new List<string>(),
                 Tags = scenario.Tags?.ToList() ?? new List<string>(),
-                Archetypes = scenario.Archetypes?.Select(a => a.ToString()).ToList() ?? new List<string>(),
+                Archetypes = scenario.Archetypes?.ToList() ?? new List<string>(),
                 GameState = gameState.ToString(),
                 LastPlayedAt = lastSession?.StartTime,
                 PlayCount = sessions.Count,

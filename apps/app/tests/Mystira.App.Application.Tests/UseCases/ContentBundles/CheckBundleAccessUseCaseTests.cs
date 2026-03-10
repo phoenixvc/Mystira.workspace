@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.ContentBundles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.UseCases.ContentBundles;
 
@@ -27,7 +29,7 @@ public class CheckBundleAccessUseCaseTests
     [Fact]
     public async Task ExecuteAsync_WithFreeBundle_ReturnsTrue()
     {
-        var bundle = new ContentBundle { Id = "b1", IsFree = true };
+        var bundle = new ContentBundle { Id = "b1", PriceCents = 0 };
         _bundleRepository.Setup(r => r.GetByIdAsync("b1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(bundle);
 
@@ -39,7 +41,7 @@ public class CheckBundleAccessUseCaseTests
     [Fact]
     public async Task ExecuteAsync_WithPaidBundleAndActiveSubscription_ReturnsTrue()
     {
-        var bundle = new ContentBundle { Id = "b1", IsFree = false };
+        var bundle = new ContentBundle { Id = "b1", PriceCents = 999 };
         var account = new Account
         {
             Id = "acc-1",

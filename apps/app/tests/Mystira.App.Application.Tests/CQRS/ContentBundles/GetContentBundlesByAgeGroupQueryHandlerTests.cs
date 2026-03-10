@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.ContentBundles.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.ContentBundles;
 

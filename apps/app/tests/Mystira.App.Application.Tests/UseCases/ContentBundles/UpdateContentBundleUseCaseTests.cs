@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.ContentBundles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.UseCases.ContentBundles;
 
@@ -45,8 +47,8 @@ public class UpdateContentBundleUseCaseTests
             Id = "b1",
             Title = "Original",
             Description = "Original Desc",
-            AgeGroup = "6-8",
-            IsFree = false
+            AgeGroupId = "middle_childhood",
+            PriceCents = 999
         };
         _repository.Setup(r => r.GetByIdAsync("b1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(bundle);
@@ -55,7 +57,7 @@ public class UpdateContentBundleUseCaseTests
 
         result.Title.Should().Be("Original");
         result.Description.Should().Be("Updated Desc");
-        result.AgeGroup.Should().Be("6-8");
+        result.AgeGroupId.Should().Be("middle_childhood");
     }
 
     [Fact]

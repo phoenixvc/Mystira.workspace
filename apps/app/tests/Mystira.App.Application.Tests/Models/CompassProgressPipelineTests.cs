@@ -2,7 +2,9 @@ using System.Text.Json;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Mystira.Contracts.App.Requests.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 
 namespace Mystira.App.Application.Tests.Models;
@@ -10,7 +12,7 @@ namespace Mystira.App.Application.Tests.Models;
 public class CompassProgressPipelineTests
 {
     [Fact]
-    public void GameSession_RecalculateCompassProgressFromHistory_ComputesPerPlayerAndAxisTotals()
+    public void GameSession_RecalculateCompassProgressFromHistory_ComputesAxisTotals()
     {
         var session = new GameSession
         {
@@ -27,7 +29,7 @@ public class CompassProgressPipelineTests
                     CharacterName = "Hero",
                     PlayerAssignment = new SessionPlayerAssignment
                     {
-                        Type = "Player",
+                        Type = PlayerType.Profile,
                         ProfileId = "p1",
                         ProfileName = "Player One"
                     }
@@ -42,9 +44,7 @@ public class CompassProgressPipelineTests
                 ChoiceText = "A",
                 NextScene = "scene2",
                 PlayerId = "p1",
-                CompassAxis = "honesty",
-                CompassDirection = "positive",
-                CompassDelta = 1.0
+                CompassChange = new CompassChange { AxisId = "honesty", Delta = 1 }
             },
             new SessionChoice
             {
@@ -52,16 +52,14 @@ public class CompassProgressPipelineTests
                 ChoiceText = "B",
                 NextScene = "scene3",
                 PlayerId = "p1",
-                CompassAxis = "honesty",
-                CompassDirection = "negative",
-                CompassDelta = -0.5
+                CompassChange = new CompassChange { AxisId = "honesty", Delta = -1 }
             },
             new SessionChoice
             {
                 SceneId = "scene3",
                 ChoiceText = "C",
                 NextScene = "scene4",
-                CompassChange = new CompassChange { Axis = "honesty", Delta = 0.7 }
+                CompassChange = new CompassChange { AxisId = "honesty", Delta = 1 }
             },
             new SessionChoice
             {
@@ -69,36 +67,21 @@ public class CompassProgressPipelineTests
                 ChoiceText = "D",
                 NextScene = "scene5",
                 PlayerId = "guest:buddy",
-                CompassAxis = "kindness",
-                CompassDirection = "positive",
-                CompassDelta = 10.0
+                CompassChange = new CompassChange { AxisId = "kindness", Delta = 10 }
             }
         ]);
 
         session.RecalculateCompassProgressFromHistory();
 
-        session.PlayerCompassProgressTotals.Should().ContainEquivalentOf(new PlayerCompassProgress
-        {
-            PlayerId = "p1",
-            Axis = "honesty",
-            Total = 0.5
-        });
-
-        session.PlayerCompassProgressTotals.Should().ContainEquivalentOf(new PlayerCompassProgress
-        {
-            PlayerId = "owner",
-            Axis = "honesty",
-            Total = 0.7
-        });
-
-        session.PlayerCompassProgressTotals.Should().NotContain(p => p.PlayerId == "guest:buddy");
-
-        session.CompassValues["honesty"].CurrentValue.Should().BeApproximately(1.2, 0.0001);
-        session.CompassValues["kindness"].CurrentValue.Should().BeApproximately(10.0, 0.0001);
+        // New model aggregates per-axis, not per-player
+        session.PlayerCompassProgressTotals.Should().ContainKey("honesty");
+        session.PlayerCompassProgressTotals["honesty"].Should().Be(1); // 1 + (-1) + 1 = 1
+        session.PlayerCompassProgressTotals.Should().ContainKey("kindness");
+        session.PlayerCompassProgressTotals["kindness"].Should().Be(10);
     }
 
     [Fact]
-    public async Task MystiraAppDbContext_Persists_ChoiceCompassFields_And_PlayerTotals()
+    public async Task MystiraAppDbContext_Persists_ChoiceCompassFields()
     {
         var options = new DbContextOptionsBuilder<MystiraAppDbContext>()
             .UseInMemoryDatabase($"TestDb_{Guid.NewGuid()}")
@@ -121,7 +104,7 @@ public class CompassProgressPipelineTests
                     CharacterName = "Hero",
                     PlayerAssignment = new SessionPlayerAssignment
                     {
-                        Type = "Player",
+                        Type = PlayerType.Profile,
                         ProfileId = "p1",
                         ProfileName = "Player One"
                     }
@@ -137,7 +120,8 @@ public class CompassProgressPipelineTests
             PlayerId = "p1",
             CompassAxis = "honesty",
             CompassDirection = "positive",
-            CompassDelta = 1.0
+            CompassDelta = 1.0,
+            CompassChange = new CompassChange { AxisId = "honesty", Delta = 1 }
         });
 
         session.RecalculateCompassProgressFromHistory();
@@ -155,7 +139,8 @@ public class CompassProgressPipelineTests
         loaded.ChoiceHistory[0].CompassDirection.Should().Be("positive");
         loaded.ChoiceHistory[0].CompassDelta.Should().Be(1.0);
 
-        loaded.PlayerCompassProgressTotals.Should().ContainSingle(p => p.PlayerId == "p1" && p.Axis == "honesty" && p.Total == 1.0);
+        loaded.PlayerCompassProgressTotals.Should().ContainKey("honesty");
+        loaded.PlayerCompassProgressTotals["honesty"].Should().Be(1);
     }
 
     [Fact]

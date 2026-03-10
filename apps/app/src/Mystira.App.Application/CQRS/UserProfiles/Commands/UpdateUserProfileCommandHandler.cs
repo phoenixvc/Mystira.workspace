@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.UserProfiles.Commands;
@@ -35,24 +37,28 @@ public static class UpdateUserProfileCommandHandler
         // Update profile fields
         if (request.PreferredFantasyThemes != null)
         {
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes
-                .Select(t => new FantasyTheme(t))
-                .ToList();
+            // Validate fantasy themes
+            foreach (var t in request.PreferredFantasyThemes)
+            {
+                if (FantasyTheme.FromValue(t) == null)
+                    throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy theme: {t}");
+            }
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes;
         }
 
         if (!string.IsNullOrWhiteSpace(request.AgeGroup))
         {
-            if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+            if (!AgeGroupConstants.GetAll().Contains(request.AgeGroup))
             {
-                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.GetAll())}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.AgeGroupId = request.AgeGroup;
         }
 
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             profile.UpdateAgeGroupFromBirthDate();
         }
 

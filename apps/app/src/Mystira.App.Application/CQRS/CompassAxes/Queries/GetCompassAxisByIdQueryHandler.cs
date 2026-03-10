@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.CompassAxes.Queries;
 
@@ -9,7 +11,7 @@ namespace Mystira.App.Application.CQRS.CompassAxes.Queries;
 /// </summary>
 public static class GetCompassAxisByIdQueryHandler
 {
-    public static async Task<CompassAxis?> Handle(
+    public static async Task<CompassAxisDefinition?> Handle(
         GetCompassAxisByIdQuery query,
         ICompassAxisRepository repository,
         ILogger<GetCompassAxisByIdQuery> logger,

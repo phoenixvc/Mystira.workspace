@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 using Mystira.Shared.Exceptions;
 

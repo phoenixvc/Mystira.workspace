@@ -31,7 +31,7 @@ public static class GetInProgressSessionsQueryHandler
 
         // Filter out "zombie" sessions: active status but with no starting scene and no history.
         var meaningfulSessions = ordered
-            .Where(s => !s.IsEffectivelyEmpty())
+            .Where(s => !string.IsNullOrWhiteSpace(s.CurrentSceneId) || s.ChoiceHistory.Count > 0)
             .ToList();
 
         if (meaningfulSessions.Count != ordered.Count)

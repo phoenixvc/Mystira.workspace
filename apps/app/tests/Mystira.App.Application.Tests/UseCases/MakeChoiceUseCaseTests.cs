@@ -5,7 +5,9 @@ using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Contracts.App.Requests.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 using Mystira.Shared.Locking;
 
@@ -62,14 +64,14 @@ public class MakeChoiceUseCaseTests
     public async Task ExecuteAsync_WithCompassChange_TracksCompassDelta()
     {
         var session = CreateTestSession();
-        session.CompassValues["courage"] = new CompassTracking
+        session.CompassValues.Add(new CompassTracking
         {
             Axis = "courage",
             CurrentValue = 0,
             StartingValue = 0,
-            History = new List<CompassChange>(),
+            History = new List<CompassChangeRecord>(),
             LastUpdated = DateTime.UtcNow
-        };
+        });
         var scenario = CreateTestScenarioWithCompassChange();
         SetupRepositories(session, scenario);
 
@@ -85,7 +87,7 @@ public class MakeChoiceUseCaseTests
 
         result.Should().NotBeNull();
         result!.ChoiceHistory[0].CompassAxis.Should().Be("courage");
-        result.ChoiceHistory[0].CompassDelta.Should().Be(1.5);
+        result.ChoiceHistory[0].CompassDelta.Should().Be(2);
     }
 
     [Fact]
@@ -107,7 +109,7 @@ public class MakeChoiceUseCaseTests
 
         result.Should().NotBeNull();
         result!.EchoHistory.Should().HaveCount(1);
-        result.EchoHistory[0].EchoType.Should().Be("moral");
+        result.EchoHistory[0].EchoTypeId.Should().Be("moral");
     }
 
     [Fact]
@@ -286,7 +288,7 @@ public class MakeChoiceUseCaseTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>(StringComparer.OrdinalIgnoreCase),
+            CompassValues = new List<CompassTracking>(),
             CharacterAssignments = new List<SessionCharacterAssignment>()
         };
     }
@@ -297,7 +299,7 @@ public class MakeChoiceUseCaseTests
         {
             Id = "scenario-1",
             Title = "Test Scenario",
-            CoreAxes = new List<CoreAxis> { new("courage") },
+            CoreAxes = new List<string> { "courage" },
             Scenes = new List<Scene>
             {
                 new()
@@ -328,7 +330,7 @@ public class MakeChoiceUseCaseTests
         {
             Id = "scenario-1",
             Title = "Test",
-            CoreAxes = new List<CoreAxis> { new("courage") },
+            CoreAxes = new List<string> { "courage" },
             Scenes = new List<Scene>
             {
                 new()
@@ -342,7 +344,7 @@ public class MakeChoiceUseCaseTests
                         {
                             Choice = "Be brave",
                             NextSceneId = "scene-2",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.5 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 2 }
                         }
                     },
                     EchoReveals = new List<EchoReveal>()
@@ -358,7 +360,7 @@ public class MakeChoiceUseCaseTests
         {
             Id = "scenario-1",
             Title = "Test",
-            CoreAxes = new List<CoreAxis> { new("courage") },
+            CoreAxes = new List<string> { "courage" },
             Scenes = new List<Scene>
             {
                 new()
@@ -374,7 +376,7 @@ public class MakeChoiceUseCaseTests
                             NextSceneId = "scene-2",
                             EchoLog = new EchoLog
                             {
-                                EchoType = "moral",
+                                EchoTypeId = "moral",
                                 Description = "Showed courage",
                                 Strength = 1.0
                             }
@@ -393,7 +395,7 @@ public class MakeChoiceUseCaseTests
         {
             Id = "scenario-1",
             Title = "Test",
-            CoreAxes = new List<CoreAxis> { new("courage") },
+            CoreAxes = new List<string> { "courage" },
             Scenes = new List<Scene>
             {
                 new()

@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 
@@ -124,7 +126,7 @@ public class MediaAssetRepositoryTests : IDisposable
             FileSizeBytes = 1024,
             Tags = new List<string>(),
             Hash = "abc123",
-            Version = "1.0",
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

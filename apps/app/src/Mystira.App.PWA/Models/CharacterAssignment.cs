@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.PWA.Models;
 
@@ -104,7 +106,7 @@ public class CharacterAssignmentResponse
 /// </summary>
 public static class AgeRanges
 {
-    public static readonly string[] All = AgeGroupConstants.AllAgeGroups;
+    public static readonly string[] All = AgeGroupConstants.GetAll().ToArray();
 
     public static string GetDisplayName(string ageRange)
     {

@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 using Mystira.Shared.Data.Repositories;
@@ -56,19 +58,19 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             Id = "profile1",
             Name = "Test Player",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var badge = new Badge
         {
             Id = "badge1",
-            AgeGroupId = "6-9",
+            AgeGroupId = "middle_childhood",
             CompassAxisId = "honesty",
             Tier = "bronze",
             TierOrder = 1,
             Title = "Honest Spark",
             Description = "First step on honesty",
-            RequiredScore = 10f,
+            RequiredScore = 10,
             ImageId = "image1"
         };
 
@@ -97,19 +99,19 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             Id = "profile1",
             Name = "Test Player",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var badge = new Badge
         {
             Id = "badge1",
-            AgeGroupId = "6-9",
+            AgeGroupId = "middle_childhood",
             CompassAxisId = "honesty",
             Tier = "bronze",
             TierOrder = 1,
             Title = "Honest Spark",
             Description = "First step on honesty",
-            RequiredScore = 10f,
+            RequiredScore = 10,
             ImageId = "image1"
         };
 
@@ -134,7 +136,7 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             Id = "profile1",
             Name = "Test Player",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var badges = new List<Badge>
@@ -142,34 +144,34 @@ public class BadgeAwardingServiceTests : IDisposable
             new()
             {
                 Id = "badge1",
-                AgeGroupId = "6-9",
+                AgeGroupId = "middle_childhood",
                 CompassAxisId = "honesty",
                 Tier = "bronze",
                 TierOrder = 1,
                 Title = "Honest Spark",
-                RequiredScore = 10f,
+                RequiredScore = 10,
                 ImageId = "image1"
             },
             new()
             {
                 Id = "badge2",
-                AgeGroupId = "6-9",
+                AgeGroupId = "middle_childhood",
                 CompassAxisId = "honesty",
                 Tier = "silver",
                 TierOrder = 2,
                 Title = "Honest Light",
-                RequiredScore = 25f,
+                RequiredScore = 25,
                 ImageId = "image2"
             },
             new()
             {
                 Id = "badge3",
-                AgeGroupId = "6-9",
+                AgeGroupId = "middle_childhood",
                 CompassAxisId = "honesty",
                 Tier = "gold",
                 TierOrder = 3,
                 Title = "Honest Star",
-                RequiredScore = 50f,
+                RequiredScore = 50,
                 ImageId = "image3"
             }
         };
@@ -201,18 +203,18 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             Id = "profile1",
             Name = "Test Player",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var badge = new Badge
         {
             Id = "badge1",
-            AgeGroupId = "6-9",
+            AgeGroupId = "middle_childhood",
             CompassAxisId = "honesty",
             Tier = "bronze",
             TierOrder = 1,
             Title = "Honest Spark",
-            RequiredScore = 10f,
+            RequiredScore = 10,
             ImageId = "image1"
         };
 
@@ -225,7 +227,7 @@ public class BadgeAwardingServiceTests : IDisposable
             BadgeMessage = "Already earned",
             Axis = "honesty",
             TriggerValue = 15f,
-            Threshold = 10f,
+            Threshold = 10,
             ImageId = "image1"
         };
 
@@ -251,7 +253,7 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             Id = "profile1",
             Name = "Test Player",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var badges = new List<Badge>
@@ -259,23 +261,23 @@ public class BadgeAwardingServiceTests : IDisposable
             new()
             {
                 Id = "badge1",
-                AgeGroupId = "6-9",
+                AgeGroupId = "middle_childhood",
                 CompassAxisId = "honesty",
                 Tier = "bronze",
                 TierOrder = 1,
                 Title = "Honest Spark",
-                RequiredScore = 10f,
+                RequiredScore = 10,
                 ImageId = "image1"
             },
             new()
             {
                 Id = "badge2",
-                AgeGroupId = "6-9",
+                AgeGroupId = "middle_childhood",
                 CompassAxisId = "bravery",
                 Tier = "bronze",
                 TierOrder = 1,
                 Title = "Brave Heart",
-                RequiredScore = 10f,
+                RequiredScore = 10,
                 ImageId = "image2"
             }
         };

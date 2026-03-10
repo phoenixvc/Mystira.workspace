@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.CQRS.UserProfiles;
@@ -69,7 +71,7 @@ public class RemoveProfileFromAccountCommandHandlerTests
     [Fact]
     public async Task Handle_ProfileNotLinkedToAccount_ReturnsTrue()
     {
-        var profile = new UserProfile { Id = "profile-1", AccountId = null };
+        var profile = new UserProfile { Id = "profile-1", AccountId = null! };
         var command = new RemoveProfileFromAccountCommand("profile-1");
 
         _profileRepository.Setup(r => r.GetByIdAsync("profile-1", It.IsAny<CancellationToken>()))

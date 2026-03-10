@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -53,8 +55,8 @@ public class CreateContentBundleUseCase
             ScenarioIds = scenarioIds,
             ImageId = imageId ?? string.Empty,
             Prices = prices ?? new List<BundlePrice>(),
-            IsFree = isFree,
-            AgeGroup = ageGroup ?? string.Empty
+            PriceCents = isFree ? 0 : 0, // Will be overridden by prices if applicable
+            AgeGroupId = ageGroup ?? string.Empty
         };
 
         await _repository.AddAsync(bundle, ct);

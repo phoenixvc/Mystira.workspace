@@ -566,11 +566,12 @@ public partial class MystiraAppDbContext : DbContext
             entity.OwnsOne(e => e.MusicPalette, palette =>
             {
                 palette.ToJsonProperty("MusicPalette");
-                palette.Property(p => p.DefaultMood)
-                       .ToJsonProperty("DefaultMood");
+                palette.Property(p => p.DefaultProfile)
+                       .ToJsonProperty("DefaultProfile")
+                       .HasConversion<string>();
 
-                palette.Property(p => p.MoodTracks)
-                       .ToJsonProperty("MoodTracks")
+                palette.Property(p => p.TracksByProfile)
+                       .ToJsonProperty("TracksByProfile")
                        .HasConversion(isInMemoryDatabase
                            ? (ValueConverter)new InMemoryDictionaryConverter()
                            : (ValueConverter)new CosmosDictionaryConverter())
@@ -637,21 +638,24 @@ public partial class MystiraAppDbContext : DbContext
                 scene.OwnsOne(s => s.Music, music =>
                 {
                     music.ToJsonProperty("Music");
-                    music.Property(m => m.MoodProfile).ToJsonProperty("MoodProfile");
-                    music.Property(m => m.TrackId).ToJsonProperty("TrackId");
-                    music.Property(m => m.Volume).ToJsonProperty("Volume");
-                    music.Property(m => m.Loop).ToJsonProperty("Loop");
-                    music.Property(m => m.FadeInSeconds).ToJsonProperty("FadeInSeconds");
-                    music.Property(m => m.FadeOutSeconds).ToJsonProperty("FadeOutSeconds");
+                    music.Property(m => m.Profile).ToJsonProperty("Profile")
+                         .HasConversion<string>();
+                    music.Property(m => m.Energy).ToJsonProperty("Energy");
+                    music.Property(m => m.Continuity).ToJsonProperty("Continuity")
+                         .HasConversion<string>();
+                    music.Property(m => m.TransitionHint).ToJsonProperty("TransitionHint")
+                         .HasConversion<string>();
+                    music.Property(m => m.Priority).ToJsonProperty("Priority")
+                         .HasConversion<string>();
+                    music.Property(m => m.Ducking).ToJsonProperty("Ducking")
+                         .HasConversion<string>();
                 });
                 scene.OwnsMany(s => s.SoundEffects, sfx =>
                 {
                     sfx.ToJsonProperty("SoundEffects");
-                    sfx.Property(s => s.TrackId).ToJsonProperty("TrackId");
-                    sfx.Property(s => s.Volume).ToJsonProperty("Volume");
-                    sfx.Property(s => s.Loop).ToJsonProperty("Loop");
-                    sfx.Property(s => s.TriggerType).ToJsonProperty("TriggerType");
-                    sfx.Property(s => s.DelaySeconds).ToJsonProperty("DelaySeconds");
+                    sfx.Property(f => f.Track).ToJsonProperty("Track");
+                    sfx.Property(f => f.Loopable).ToJsonProperty("Loopable");
+                    sfx.Property(f => f.Energy).ToJsonProperty("Energy");
                 });
                 scene.OwnsMany(s => s.Branches, branch =>
                 {

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Badges;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.Shared.Data.Repositories;
 
@@ -35,7 +37,7 @@ public class AwardBadgeUseCaseTests
     public async Task ExecuteAsync_WithValidRequest_AwardsBadge()
     {
         var profile = new UserProfile { Id = "profile-1", Name = "Player" };
-        var badge = new Badge { Id = "badge-config-1", Title = "Courage I", CompassAxisId = "courage", RequiredScore = 5.0f };
+        var badge = new Badge { Id = "badge-config-1", Title = "Courage I", CompassAxisId = "courage", RequiredScore = 5 };
 
         _profileRepository.Setup(r => r.GetByIdAsync("profile-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(profile);

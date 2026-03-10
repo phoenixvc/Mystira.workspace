@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -26,7 +28,7 @@ public class SetScenarioContributorsUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, SetContributorsRequest request, CancellationToken ct = default)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, SetContributorsRequest request, CancellationToken ct = default)
     {
         // Get the scenario
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
@@ -51,7 +53,7 @@ public class SetScenarioContributorsUseCase
         // Initialize Story Protocol metadata if it doesn't exist
         if (scenario.StoryProtocol == null)
         {
-            scenario.StoryProtocol = new StoryProtocolMetadata();
+            scenario.StoryProtocol = new ScenarioStoryProtocol();
         }
 
         // Set the contributors

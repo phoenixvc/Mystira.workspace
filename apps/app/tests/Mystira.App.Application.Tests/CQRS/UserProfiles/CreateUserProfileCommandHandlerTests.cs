@@ -5,7 +5,9 @@ using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.UserProfiles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Shared.Data.Repositories;
 
@@ -31,7 +33,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Test Profile",
-            AgeGroup = "6-9",
+            AgeGroup = AgeGroupConstants.MiddleChildhood,
             AccountId = "acc-123"
         };
         var command = new CreateUserProfileCommand(request);
@@ -44,7 +46,7 @@ public class CreateUserProfileCommandHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.Name.Should().Be("Test Profile");
-        result.AgeGroupName.Should().Be("6-9");
+        result.AgeGroupId.Should().Be(AgeGroupConstants.MiddleChildhood);
         result.AccountId.Should().Be("acc-123");
         result.Id.Should().NotBeNullOrEmpty();
 
@@ -59,7 +61,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "",
-            AgeGroup = "6-9"
+            AgeGroup = AgeGroupConstants.MiddleChildhood
         };
         var command = new CreateUserProfileCommand(request);
         var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
@@ -80,7 +82,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = null!,
-            AgeGroup = "6-9"
+            AgeGroup = AgeGroupConstants.MiddleChildhood
         };
         var command = new CreateUserProfileCommand(request);
         var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
@@ -101,7 +103,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "A",
-            AgeGroup = "6-9"
+            AgeGroup = AgeGroupConstants.MiddleChildhood
         };
         var command = new CreateUserProfileCommand(request);
         var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
@@ -158,12 +160,11 @@ public class CreateUserProfileCommandHandlerTests
     }
 
     [Theory]
-    [InlineData("1-2")]
-    [InlineData("3-5")]
-    [InlineData("6-9")]
-    [InlineData("10-12")]
-    [InlineData("13-18")]
-    [InlineData("19-150")]
+    [InlineData(AgeGroupConstants.EarlyChildhood)]
+    [InlineData(AgeGroupConstants.MiddleChildhood)]
+    [InlineData(AgeGroupConstants.Preteen)]
+    [InlineData(AgeGroupConstants.Teen)]
+    [InlineData(AgeGroupConstants.Adult)]
     public async Task Handle_WithValidAgeGroups_CreatesProfile(string ageGroup)
     {
         // Arrange
@@ -180,18 +181,18 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        result.AgeGroupName.Should().Be(ageGroup);
+        result.AgeGroupId.Should().Be(ageGroup);
     }
 
     [Fact]
     public async Task Handle_WithDateOfBirth_UpdatesAgeGroupFromBirthDate()
     {
         // Arrange
-        var birthDate = DateTime.Today.AddYears(-7); // 7 years old -> 6-9 age group
+        var birthDate = DateTime.Today.AddYears(-7); // 7 years old -> middle_childhood age group
         var request = new CreateUserProfileRequest
         {
             Name = "Child Profile",
-            AgeGroup = "1-2", // Initial age group (will be updated by UseCase)
+            AgeGroup = AgeGroupConstants.EarlyChildhood, // Initial age group (will be updated by UseCase)
             DateOfBirth = birthDate
         };
         var command = new CreateUserProfileCommand(request);
@@ -202,8 +203,8 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        result.DateOfBirth.Should().Be(birthDate);
-        result.AgeGroupName.Should().Be("6-9");
+        result.DateOfBirth.Should().Be(DateOnly.FromDateTime(birthDate));
+        result.AgeGroupId.Should().Be(AgeGroupConstants.MiddleChildhood);
     }
 
     [Fact]
@@ -213,7 +214,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Guest User",
-            AgeGroup = "6-9",
+            AgeGroup = AgeGroupConstants.MiddleChildhood,
             IsGuest = true
         };
         var command = new CreateUserProfileCommand(request);
@@ -234,7 +235,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "NPC Character",
-            AgeGroup = "10-12",
+            AgeGroup = AgeGroupConstants.Preteen,
             IsNpc = true
         };
         var command = new CreateUserProfileCommand(request);
@@ -255,7 +256,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Pronoun User",
-            AgeGroup = "13-18",
+            AgeGroup = AgeGroupConstants.Teen,
             Pronouns = "they/them"
         };
         var command = new CreateUserProfileCommand(request);
@@ -276,7 +277,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Bio User",
-            AgeGroup = "19-150",
+            AgeGroup = AgeGroupConstants.Adult,
             Bio = "Hello, I love adventures!"
         };
         var command = new CreateUserProfileCommand(request);
@@ -297,7 +298,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Avatar User",
-            AgeGroup = "6-9",
+            AgeGroup = AgeGroupConstants.MiddleChildhood,
             SelectedAvatarMediaId = "avatar-123"
         };
         var command = new CreateUserProfileCommand(request);
@@ -319,7 +320,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Onboarded User",
-            AgeGroup = "10-12",
+            AgeGroup = AgeGroupConstants.Preteen,
             HasCompletedOnboarding = true
         };
         var command = new CreateUserProfileCommand(request);
@@ -340,7 +341,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "Timestamp User",
-            AgeGroup = "6-9"
+            AgeGroup = AgeGroupConstants.MiddleChildhood
         };
         var command = new CreateUserProfileCommand(request);
         var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
@@ -361,7 +362,7 @@ public class CreateUserProfileCommandHandlerTests
         var request = new CreateUserProfileRequest
         {
             Name = "No ID User",
-            AgeGroup = "6-9"
+            AgeGroup = AgeGroupConstants.MiddleChildhood
         };
         var command = new CreateUserProfileCommand(request);
         var useCase = new CreateUserProfileUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);

@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.CQRS.MasterData;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.CompassAxes.Commands;
 
@@ -11,7 +13,7 @@ namespace Mystira.App.Application.CQRS.CompassAxes.Commands;
 /// </summary>
 public static class UpdateCompassAxisCommandHandler
 {
-    public static async Task<CompassAxis?> Handle(
+    public static async Task<CompassAxisDefinition?> Handle(
         UpdateCompassAxisCommand command,
         ICompassAxisRepository repository,
         IUnitOfWork unitOfWork,
@@ -26,7 +28,6 @@ public static class UpdateCompassAxisCommandHandler
             {
                 existing.Name = command.Name;
                 existing.Description = command.Description;
-                existing.UpdatedAt = DateTime.UtcNow;
             }, ct);
     }
 }

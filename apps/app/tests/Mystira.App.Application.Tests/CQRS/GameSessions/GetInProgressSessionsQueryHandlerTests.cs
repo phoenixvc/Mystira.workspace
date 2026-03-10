@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 
@@ -35,7 +37,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -131,7 +133,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow.AddHours(-2),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             },
             new GameSession
             {
@@ -142,7 +144,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-2",
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -180,7 +182,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 CurrentSceneId = null!, // No scene
                 ChoiceHistory = new List<SessionChoice>(), // No history
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             },
             new GameSession
             {
@@ -191,7 +193,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-1", // Has scene
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -232,7 +234,7 @@ public class GetInProgressSessionsQueryHandlerTests
                     new SessionChoice { SceneId = "scene-1", ChoiceText = "Option A" }
                 },
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -269,7 +271,7 @@ public class GetInProgressSessionsQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow,
-                TargetAgeGroup = new AgeGroup { Value = "6-9" },
+                TargetAgeGroup = "6-9",
                 CharacterAssignments = new List<SessionCharacterAssignment>
                 {
                     new SessionCharacterAssignment

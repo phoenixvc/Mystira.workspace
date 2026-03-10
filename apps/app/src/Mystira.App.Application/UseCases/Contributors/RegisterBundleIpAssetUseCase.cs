@@ -3,7 +3,9 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
@@ -30,7 +32,7 @@ public class RegisterBundleIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string bundleId, RegisterIpAssetRequest request, CancellationToken ct = default)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the bundle
         var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
@@ -68,7 +70,10 @@ public class RegisterBundleIpAssetUseCase
             ct);
 
         // Update the bundle with Story Protocol metadata
-        bundle.StoryProtocol = storyProtocolMetadata;
+        bundle.StoryProtocol.IpAssetId = storyProtocolMetadata.IpAssetId;
+        bundle.StoryProtocol.RegistrationTxHash = storyProtocolMetadata.RegistrationTxHash;
+        bundle.StoryProtocol.RegisteredAt = storyProtocolMetadata.RegisteredAt;
+        bundle.StoryProtocol.IsRegistered = true;
 
         await _bundleRepository.UpdateAsync(bundle, ct);
 
@@ -85,6 +90,6 @@ public class RegisterBundleIpAssetUseCase
         _logger.LogInformation("Registered bundle {BundleId} as IP Asset: {IpAssetId}",
             bundleId, storyProtocolMetadata.IpAssetId);
 
-        return storyProtocolMetadata;
+        return bundle.StoryProtocol;
     }
 }

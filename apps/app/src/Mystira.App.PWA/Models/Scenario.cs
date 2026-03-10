@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.PWA.Models;
 
@@ -145,7 +147,7 @@ public class GameSession
     public int ChoiceCount { get; set; }
     // Align with API contract which returns SessionStatus enum
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public Mystira.App.Domain.Models.SessionStatus Status { get; set; }
+    public Mystira.Domain.Enums.SessionStatus Status { get; set; }
 
     // Selected character assignments for this session (story character -> player)
     public List<CharacterAssignment> CharacterAssignments { get; set; } = new();

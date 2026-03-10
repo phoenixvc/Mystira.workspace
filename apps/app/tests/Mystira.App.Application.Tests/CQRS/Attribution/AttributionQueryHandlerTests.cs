@@ -6,7 +6,8 @@ using Moq;
 using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.CQRS.Attribution.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Application.Tests.CQRS.Attribution;
 
@@ -32,7 +33,7 @@ public class AttributionQueryHandlerTests
         {
             Id = "bundle-1",
             Title = "Test Bundle",
-            StoryProtocol = new StoryProtocolMetadata
+            StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-1",
                 Contributors = new List<Contributor>
@@ -90,7 +91,7 @@ public class AttributionQueryHandlerTests
         {
             Id = "bundle-1",
             Title = "Test Bundle",
-            StoryProtocol = new StoryProtocolMetadata
+            StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-asset-123",
                 RegisteredAt = DateTime.UtcNow,
@@ -146,7 +147,7 @@ public class AttributionQueryHandlerTests
         {
             Id = "scenario-1",
             Title = "Test Scenario",
-            StoryProtocol = new StoryProtocolMetadata
+            StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-1",
                 Contributors = new List<Contributor>
@@ -191,7 +192,7 @@ public class AttributionQueryHandlerTests
         {
             Id = "scenario-1",
             Title = "Test Scenario",
-            StoryProtocol = new StoryProtocolMetadata
+            StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-scenario-456",
                 RegisteredAt = DateTime.UtcNow
@@ -216,7 +217,7 @@ public class AttributionQueryHandlerTests
         {
             Id = "scenario-1",
             Title = "Unregistered",
-            StoryProtocol = new StoryProtocolMetadata()
+            StoryProtocol = new ScenarioStoryProtocol()
         };
         _scenarioRepository.Setup(r => r.GetByIdAsync("scenario-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(scenario);

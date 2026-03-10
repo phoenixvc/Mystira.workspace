@@ -2,7 +2,9 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data;
 
@@ -27,7 +29,7 @@ public partial class MystiraAppDbContext : DbContext
     public DbSet<ContentBundle> ContentBundles { get; set; }
     public DbSet<CharacterMap> CharacterMaps { get; set; }
     public DbSet<BadgeConfiguration> BadgeConfigurations { get; set; }
-    public DbSet<CompassAxis> CompassAxes { get; set; }
+    public DbSet<CompassAxisDefinition> CompassAxes { get; set; }
     public DbSet<ArchetypeDefinition> ArchetypeDefinitions { get; set; }
     public DbSet<EchoTypeDefinition> EchoTypeDefinitions { get; set; }
     public DbSet<FantasyThemeDefinition> FantasyThemeDefinitions { get; set; }
@@ -92,12 +94,9 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.Property(e => e.PreferredFantasyThemes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => FantasyTheme.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<FantasyTheme>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                       (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                       c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                       c => c.ToList()));
@@ -216,6 +215,9 @@ public partial class MystiraAppDbContext : DbContext
             // Own StoryProtocol metadata to avoid separate entity with PK requirement in tests
             entity.OwnsOne(e => e.StoryProtocol, sp =>
             {
+                // Ignore alias properties
+                sp.Ignore(s => s.RegistrationTxHash);
+                sp.Ignore(s => s.RoyaltyModuleId);
                 sp.OwnsMany(s => s.Contributors);
             });
         });
@@ -402,6 +404,11 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<Scenario>(entity =>
         {
             entity.HasKey(e => e.Id);
+            // Ignore computed value-object / navigation properties
+            entity.Ignore(e => e.AgeGroup);
+            entity.Ignore(e => e.Theme);
+            entity.Ignore(e => e.StartScene);
+            entity.Ignore(e => e.Image);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -427,24 +434,18 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.Property(e => e.Archetypes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => Archetype.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<Archetype>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                         (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
 
             entity.Property(e => e.CoreAxes)
                   .HasConversion(
-                        v => string.Join(',', v.Select(e => e.Value)),
-                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                            .Select(s => CoreAxis.Parse(s))
-                            .Where(x => x != null)
-                            .ToList()!)
-                  .Metadata.SetValueComparer(new ValueComparer<List<CoreAxis>>(
+                        v => string.Join(',', v),
+                        v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                  .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                         (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                         c => c.ToList()));
@@ -471,9 +472,20 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.OwnsMany(e => e.Characters, character =>
             {
+                // Ignore computed Archetype value object property; persist ArchetypeId string
+                character.Ignore(c => c.Archetype);
+
                 character.OwnsOne(c => c.Metadata, metadata =>
                 {
-                    metadata.Property(m => m.Role)
+                    // Ignore computed value-object properties; persist only the string ID lists
+                    metadata.Ignore(m => m.Roles);
+                    metadata.Ignore(m => m.Role);
+                    metadata.Ignore(m => m.Archetypes);
+                    metadata.Ignore(m => m.Archetype);
+                    metadata.Ignore(m => m.Traits);
+                    metadata.Ignore(m => m.Species);
+
+                    metadata.Property(m => m.RoleIds)
                             .HasConversion(
                                 v => string.Join(',', v),
                                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
@@ -482,19 +494,16 @@ public partial class MystiraAppDbContext : DbContext
                                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                                 c => c.ToList()));
 
-                    metadata.Property(m => m.Archetype)
+                    metadata.Property(m => m.ArchetypeIds)
                             .HasConversion(
-                                v => string.Join(',', v.Select(e => e.Value)),
-                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(s => Archetype.Parse(s))
-                                    .Where(x => x != null)
-                                    .ToList()!)
-                            .Metadata.SetValueComparer(new ValueComparer<List<Archetype>>(
+                                v => string.Join(',', v),
+                                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
+                            .Metadata.SetValueComparer(new ValueComparer<List<string>>(
                                 (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
                                 c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                                 c => c.ToList()));
 
-                    metadata.Property(m => m.Traits)
+                    metadata.Property(m => m.TraitIds)
                             .HasConversion(
                                 v => string.Join(',', v),
                                 v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList())
@@ -530,25 +539,37 @@ public partial class MystiraAppDbContext : DbContext
                     sfx.Property(s => s.Loopable).ToJsonProperty("Loopable");
                     sfx.Property(s => s.Energy).ToJsonProperty("Energy");
                 });
+                // Ignore computed alias properties on Scene
+                scene.Ignore(s => s.Description);
+
                 scene.OwnsMany(s => s.Branches, branch =>
                 {
+                    // Ignore computed alias properties on Branch
+                    branch.Ignore(b => b.Choice);
+                    branch.Ignore(b => b.NextSceneId);
+
                     branch.OwnsOne(b => b.EchoLog, echoLog =>
                     {
-                        // EchoType is now a plain string
-                        echoLog.Property(e => e.EchoType);
+                        // Map stored EchoTypeId string; ignore computed EchoType value object and Description alias
+                        echoLog.Property(e => e.EchoTypeId);
+                        echoLog.Ignore(e => e.EchoType);
+                        echoLog.Ignore(e => e.Description);
                     });
-                    branch.OwnsOne(b => b.CompassChange);
+                    branch.OwnsOne(b => b.CompassChange, cc =>
+                    {
+                        // Ignore computed Axis value object
+                        cc.Ignore(c => c.Axis);
+                    });
                 });
-                scene.OwnsMany(s => s.EchoReveals, reveal =>
-                {
-                    // EchoType is now a plain string
-                    reveal.Property(r => r.EchoType);
-                });
+                scene.OwnsMany(s => s.EchoReveals);
             });
 
             // Own StoryProtocol metadata to avoid separate entity with PK requirement in tests
             entity.OwnsOne(e => e.StoryProtocol, sp =>
             {
+                // Ignore alias properties
+                sp.Ignore(s => s.RegistrationTxHash);
+                sp.Ignore(s => s.RoyaltyModuleId);
                 sp.OwnsMany(s => s.Contributors);
             });
         });
@@ -557,6 +578,11 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<GameSession>(entity =>
         {
             entity.HasKey(e => e.Id);
+            // Ignore computed alias / derived properties
+            entity.Ignore(e => e.StartTime);
+            entity.Ignore(e => e.EndTime);
+            entity.Ignore(e => e.Duration);
+            entity.Ignore(e => e.IsActive);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -581,27 +607,32 @@ public partial class MystiraAppDbContext : DbContext
 
             entity.OwnsMany(e => e.ChoiceHistory, choice =>
             {
-                choice.OwnsOne(c => c.EchoGenerated, echo =>
+                // EchoGenerated is a bool property, not an owned type
+                choice.Property(c => c.EchoGenerated);
+                choice.OwnsOne(c => c.CompassChange, cc =>
                 {
-                    // EchoType is now a plain string
-                    echo.Property(e => e.EchoType);
+                    // Ignore computed Axis value object
+                    cc.Ignore(c => c.Axis);
                 });
-                choice.OwnsOne(c => c.CompassChange);
             });
 
             entity.OwnsMany(e => e.EchoHistory, echo =>
             {
-                // EchoType is now a plain string
-                echo.Property(e => e.EchoType);
+                // Map the stored EchoTypeId string; ignore the computed EchoType value object
+                echo.Property(e => e.EchoTypeId);
+                echo.Ignore(e => e.EchoType);
+                echo.Ignore(e => e.Description);
             });
             entity.OwnsMany(e => e.Achievements);
 
-            entity.OwnsMany(e => e.PlayerCompassProgressTotals, progress =>
-            {
-                progress.WithOwner();
-                progress.Property(p => p.PlayerId).IsRequired();
-                progress.Property(p => p.Axis).IsRequired();
-            });
+            entity.Property(e => e.PlayerCompassProgressTotals)
+                  .HasConversion(
+                      v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                      v => JsonSerializer.Deserialize<Dictionary<string, int>>(v, (JsonSerializerOptions?)null) ?? new())
+                  .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, int>>(
+                      (c1, c2) => c1 != null && c2 != null && c1.Count == c2.Count && !c1.Except(c2).Any(),
+                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.GetHashCode())),
+                      c => new Dictionary<string, int>(c)));
 
             // CharacterAssignments owned collection with nested owned PlayerAssignment
             entity.OwnsMany(e => e.CharacterAssignments, assignment =>
@@ -633,12 +664,12 @@ public partial class MystiraAppDbContext : DbContext
             entity.Property(e => e.CompassValues)
                   .HasConversion(
                       v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                      v => JsonSerializer.Deserialize<Dictionary<string, CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new()
+                      v => JsonSerializer.Deserialize<List<CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new()
                   )
-                  .Metadata.SetValueComparer(new ValueComparer<Dictionary<string, CompassTracking>>(
-                      (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.GetHashCode())),
-                      c => new Dictionary<string, CompassTracking>(c)));
+                  .Metadata.SetValueComparer(new ValueComparer<List<CompassTracking>>(
+                      (c1, c2) => c1 != null && c2 != null && c1.Count == c2.Count,
+                      c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                      c => c.ToList()));
         });
 
         // Configure PlayerScenarioScore
@@ -680,6 +711,13 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<MediaAsset>(entity =>
         {
             entity.HasKey(e => e.Id);
+            // Ignore computed alias / derived properties
+            entity.Ignore(e => e.MediaId);
+            entity.Ignore(e => e.FileSizeBytes);
+            entity.Ignore(e => e.Description);
+            entity.Ignore(e => e.Hash);
+            entity.Ignore(e => e.SizeFormatted);
+            entity.Ignore(e => e.Extension);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -698,24 +736,13 @@ public partial class MystiraAppDbContext : DbContext
                       v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
                   );
 
-            entity.OwnsOne(e => e.Metadata, metadata =>
-            {
-                metadata.Property(m => m.AdditionalProperties)
-                        .HasConversion(
-                            v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                            v => JsonSerializer.Deserialize<Dictionary<string, object>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, object>(),
-                            new ValueComparer<Dictionary<string, object>>(
-                                (c1, c2) => c1 != null && c2 != null && c1.Count == c2.Count && !c1.Except(c2).Any(),
-                                c => c != null ? c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value != null ? v.Value.GetHashCode() : 0)) : 0,
-                                c => c != null ? new Dictionary<string, object>(c) : new Dictionary<string, object>()
-                            )
-                        );
-            });
+            // MetadataJson is a plain string property; no owned type mapping needed
+            entity.Property(e => e.MetadataJson);
 
             // Only apply indexes when using in-memory database (Cosmos DB doesn't support HasIndex)
             if (isInMemoryDatabase)
             {
-                entity.HasIndex(e => e.MediaId).IsUnique();
+                entity.HasIndex(e => e.Id).IsUnique();
                 entity.HasIndex(e => e.MediaType);
                 entity.HasIndex(e => e.CreatedAt);
             }

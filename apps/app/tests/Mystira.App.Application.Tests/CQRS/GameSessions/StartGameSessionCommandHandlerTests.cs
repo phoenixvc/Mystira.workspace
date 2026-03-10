@@ -4,7 +4,9 @@ using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
@@ -83,7 +85,7 @@ public class StartGameSessionCommandHandlerTests
             StartTime = DateTime.UtcNow.AddMinutes(-10),
             PlayerNames = new List<string> { "ExistingPlayer" },
             ChoiceHistory = new List<SessionChoice>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
 
         _sessionRepository.Setup(r => r.GetActiveSessionsByScenarioAndAccountAsync(request.ScenarioId, request.AccountId, It.IsAny<CancellationToken>()))
@@ -248,7 +250,7 @@ public class StartGameSessionCommandHandlerTests
         result.Should().NotBeNull();
         result!.PlayerNames.Should().Contain("TestPlayer");
         result.CharacterAssignments.Should().HaveCount(1);
-        result.CharacterAssignments[0].CharacterName.Should().Be("Hero");
+        result.CharacterAssignments.First().CharacterName.Should().Be("Hero");
     }
 
     [Fact]
@@ -257,10 +259,10 @@ public class StartGameSessionCommandHandlerTests
         // Arrange
         var request = CreateValidRequest();
         var scenario = CreateTestScenario();
-        scenario.CoreAxes = new List<CoreAxis>
+        scenario.CoreAxes = new List<string>
         {
-            CoreAxis.Parse("courage")!,
-            CoreAxis.Parse("wisdom")!
+            "courage",
+            "wisdom"
         };
 
         _sessionRepository.Setup(r => r.GetActiveSessionsByScenarioAndAccountAsync(request.ScenarioId, request.AccountId, It.IsAny<CancellationToken>()))
@@ -279,9 +281,9 @@ public class StartGameSessionCommandHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.CompassValues.Should().ContainKey("courage");
-        result.CompassValues.Should().ContainKey("wisdom");
-        result.CompassValues["courage"].CurrentValue.Should().Be(0.0);
+        result!.CompassValues.Should().Contain(cv => cv.Axis == "courage");
+        result.CompassValues.Should().Contain(cv => cv.Axis == "wisdom");
+        result.CompassValues.First(cv => cv.Axis == "courage").CurrentValue.Should().Be(0.0);
     }
 
     #region Duplicate Session Cleanup Tests
@@ -413,8 +415,8 @@ public class StartGameSessionCommandHandlerTests
         // Assert
         result.Should().NotBeNull();
         result!.CharacterAssignments.Should().HaveCount(1);
-        result.CharacterAssignments[0].CharacterId.Should().Be("char1");
-        result.CharacterAssignments[0].CharacterName.Should().Be("Hero");
+        result.CharacterAssignments.First().CharacterId.Should().Be("char1");
+        result.CharacterAssignments.First().CharacterName.Should().Be("Hero");
         _sessionRepository.Verify(r => r.UpdateAsync(existingSession, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -622,7 +624,7 @@ public class StartGameSessionCommandHandlerTests
             Id = "test-scenario-id",
             Title = "Test Scenario",
             MinimumAge = 6,
-            CoreAxes = new List<CoreAxis> { CoreAxis.Parse("courage")! },
+            CoreAxes = new List<string> { "courage" },
             Scenes = new List<Scene>
             {
                 new Scene { Id = "scene1", Title = "Opening Scene" }
@@ -645,7 +647,7 @@ public class StartGameSessionCommandHandlerTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
     }
 

@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 
@@ -38,7 +40,7 @@ public class ScenarioRepositoryTests : IDisposable
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().OnlyContain(s => s.AgeGroup == "6-9");
+        result.Should().OnlyContain(s => s.AgeGroupId == "6-9");
     }
 
     [Fact]
@@ -130,7 +132,7 @@ public class ScenarioRepositoryTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var count = await _repository.CountAsync(s => s.AgeGroup == "6-9");
+        var count = await _repository.CountAsync(s => s.AgeGroupId == "6-9");
 
         // Assert
         count.Should().Be(1);
@@ -143,11 +145,11 @@ public class ScenarioRepositoryTests : IDisposable
             Id = id,
             Title = title,
             Description = "Test scenario",
-            AgeGroup = ageGroup,
+            AgeGroupId = ageGroup,
             MinimumAge = 6,
             Tags = new List<string>(),
-            Archetypes = new List<Archetype>(),
-            CoreAxes = new List<CoreAxis>(),
+            Archetypes = new List<string>(),
+            CoreAxes = new List<string>(),
             Characters = new List<ScenarioCharacter>(),
             Scenes = new List<Scene>(),
             CreatedAt = DateTime.UtcNow

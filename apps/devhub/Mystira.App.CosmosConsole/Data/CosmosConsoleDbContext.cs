@@ -3,7 +3,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.CosmosConsole.Data;
 
@@ -125,31 +127,15 @@ public class CosmosConsoleDbContext : DbContext
         ConfigureListStringProperty<GameSession>(modelBuilder, e => e.PlayerNames);
 
         // Configure all List<string> properties on Scenario
-        modelBuilder.Entity<Scenario>().Property(e => e.Archetypes).HasConversion(
-            v => SerializeList(v.Select(e => e.Value).ToList()),
-            v => DeserializeList(v).Select(s => Archetype.Parse(s)).Where(x => x != null).ToList()!);
-        modelBuilder.Entity<Scenario>().Property(e => e.CoreAxes).HasConversion(
-            v => SerializeList(v.Select(e => e.Value).ToList()),
-            v => DeserializeList(v).Select(s => CoreAxis.Parse(s)).Where(x => x != null).ToList()!);
+        ConfigureListStringProperty<Scenario>(modelBuilder, e => e.Archetypes);
+        ConfigureListStringProperty<Scenario>(modelBuilder, e => e.CoreAxes);
         ConfigureListStringProperty<Scenario>(modelBuilder, e => e.Tags);
 
         // Add configuration for the Character class
         modelBuilder.Entity<ScenarioCharacter>().OwnsOne(c => c.Metadata, metadata =>
         {
-            // Configure the Archetype property if it should be a List<string>
-            metadata.Property(m => m.Archetype)
-                .HasConversion(
-                    v => SerializeList(v.Select(e => e.Value).ToList()),
-                    v => DeserializeList(v).Select(s => Archetype.Parse(s)).Where(x => x != null).ToList()!
-                )
-                .Metadata.SetValueComparer(new ValueComparer<List<Archetype>>(
-                    (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
-                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
-                    c => c.ToList()
-                ));
-
-            // Also configure any other properties in Metadata that might need conversion
-            metadata.Property(m => m.Role)
+            // Configure the ArchetypeIds property (List<string> stored in database)
+            metadata.Property(m => m.ArchetypeIds)
                 .HasConversion(
                     v => SerializeList(v),
                     v => DeserializeList(v)
@@ -160,7 +146,8 @@ public class CosmosConsoleDbContext : DbContext
                     c => c.ToList()
                 ));
 
-            metadata.Property(m => m.Traits)
+            // Configure the RoleIds property (List<string> stored in database)
+            metadata.Property(m => m.RoleIds)
                 .HasConversion(
                     v => SerializeList(v),
                     v => DeserializeList(v)
@@ -170,6 +157,26 @@ public class CosmosConsoleDbContext : DbContext
                     c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
                     c => c.ToList()
                 ));
+
+            // Configure the TraitIds property (List<string> stored in database)
+            metadata.Property(m => m.TraitIds)
+                .HasConversion(
+                    v => SerializeList(v),
+                    v => DeserializeList(v)
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<string>>(
+                    (c1, c2) => c1 != null && c2 != null && c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                ));
+
+            // Ignore computed value object properties (derived from *Ids)
+            metadata.Ignore(m => m.Archetypes);
+            metadata.Ignore(m => m.Archetype);
+            metadata.Ignore(m => m.Roles);
+            metadata.Ignore(m => m.Role);
+            metadata.Ignore(m => m.Traits);
+            metadata.Ignore(m => m.Species);
         });
     }
 

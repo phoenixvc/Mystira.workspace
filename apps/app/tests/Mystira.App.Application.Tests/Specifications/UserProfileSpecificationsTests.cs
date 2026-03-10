@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Mystira.App.Application.Specifications;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.Specifications;
 
@@ -15,11 +17,11 @@ public class UserProfileSpecificationsTests
     {
         _profiles = new List<UserProfile>
         {
-            CreateProfile("1", "account1", "Player One", isGuest: false, isNpc: false, hasOnboarded: true, ageGroup: "teen"),
-            CreateProfile("2", "account1", "Player Two", isGuest: false, isNpc: false, hasOnboarded: true, ageGroup: "adult"),
-            CreateProfile("3", "account2", "Guest Player", isGuest: true, isNpc: false, hasOnboarded: false, ageGroup: "teen"),
-            CreateProfile("4", "account2", "NPC Character", isGuest: false, isNpc: true, hasOnboarded: false, ageGroup: "adult"),
-            CreateProfile("5", "account3", "New Player", isGuest: false, isNpc: false, hasOnboarded: false, ageGroup: "child"),
+            CreateProfile("1", "account1", "Player One", isGuest: false, isNpc: false, hasOnboarded: true, ageGroupId: "teen"),
+            CreateProfile("2", "account1", "Player Two", isGuest: false, isNpc: false, hasOnboarded: true, ageGroupId: "adult"),
+            CreateProfile("3", "account2", "Guest Player", isGuest: true, isNpc: false, hasOnboarded: false, ageGroupId: "teen"),
+            CreateProfile("4", "account2", "NPC Character", isGuest: false, isNpc: true, hasOnboarded: false, ageGroupId: "adult"),
+            CreateProfile("5", "account3", "New Player", isGuest: false, isNpc: false, hasOnboarded: false, ageGroupId: "early_childhood"),
         };
     }
 
@@ -104,7 +106,7 @@ public class UserProfileSpecificationsTests
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().OnlyContain(p => p.AgeGroupName == "teen");
+        result.Should().OnlyContain(p => p.AgeGroupId == "teen");
     }
 
     [Fact]
@@ -141,7 +143,7 @@ public class UserProfileSpecificationsTests
         bool isGuest,
         bool isNpc,
         bool hasOnboarded,
-        string ageGroup)
+        string ageGroupId)
     {
         return new UserProfile
         {
@@ -151,7 +153,7 @@ public class UserProfileSpecificationsTests
             IsGuest = isGuest,
             IsNpc = isNpc,
             HasCompletedOnboarding = hasOnboarded,
-            AgeGroupName = ageGroup,
+            AgeGroupId = ageGroupId,
             CreatedAt = DateTime.UtcNow
         };
     }

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 
@@ -36,7 +38,7 @@ public class GetSessionsByAccountQueryHandlerTests
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow.AddHours(-2),
                 EndTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             },
             new GameSession
             {
@@ -47,7 +49,7 @@ public class GetSessionsByAccountQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-5",
                 StartTime = DateTime.UtcNow.AddMinutes(-30),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -145,7 +147,7 @@ public class GetSessionsByAccountQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow,
-                TargetAgeGroup = new AgeGroup { Value = "6-9" },
+                TargetAgeGroup = "6-9",
                 CharacterAssignments = new List<SessionCharacterAssignment>
                 {
                     new SessionCharacterAssignment
@@ -155,7 +157,7 @@ public class GetSessionsByAccountQueryHandlerTests
                         Role = "protagonist",
                         PlayerAssignment = new SessionPlayerAssignment
                         {
-                            Type = "profile",
+                            Type = PlayerType.Profile,
                             ProfileId = "profile-1",
                             ProfileName = "Player One"
                         }
@@ -203,7 +205,7 @@ public class GetSessionsByAccountQueryHandlerTests
                 Status = SessionStatus.Completed,
                 CurrentSceneId = "scene-5",
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" },
+                TargetAgeGroup = "6-9",
                 ChoiceHistory = new List<SessionChoice>
                 {
                     new SessionChoice { SceneId = "scene-1", ChoiceText = "Option A" },
@@ -212,7 +214,7 @@ public class GetSessionsByAccountQueryHandlerTests
                 },
                 EchoHistory = new List<EchoLog>
                 {
-                    new EchoLog { EchoType = "honesty", Description = "Told the truth" }
+                    new EchoLog { EchoTypeId = "honesty", Description = "Told the truth" }
                 }
             }
         };

@@ -4,7 +4,9 @@ using Moq;
 using Mystira.App.Application.CQRS.Accounts.Queries;
 using Mystira.App.Application.CQRS.UserBadges.Queries;
 using Mystira.App.Application.CQRS.UserProfiles.Queries;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Wolverine;
 
 namespace Mystira.App.Application.Tests.CQRS.UserBadges;

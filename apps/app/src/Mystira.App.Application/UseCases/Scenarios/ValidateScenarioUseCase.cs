@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -37,9 +39,9 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
 
             foreach (var axis in scenario.CoreAxes)
             {
-                if (!validAxisNames.Contains(axis.Value))
+                if (!validAxisNames.Contains(axis))
                 {
-                    throw new ValidationException("coreAxes", $"Invalid compass axis: '{axis.Value}'. Valid values: {string.Join(", ", validAxisNames)}");
+                    throw new ValidationException("coreAxes", $"Invalid compass axis: '{axis}'. Valid values: {string.Join(", ", validAxisNames)}");
                 }
             }
         }
@@ -52,9 +54,9 @@ public class ValidateScenarioUseCase : IValidateScenarioUseCase
 
             foreach (var archetype in scenario.Archetypes)
             {
-                if (!validArchetypeNames.Contains(archetype.Value))
+                if (!validArchetypeNames.Contains(archetype))
                 {
-                    throw new ValidationException("archetypes", $"Invalid archetype: '{archetype.Value}'. Valid values: {string.Join(", ", validArchetypeNames)}");
+                    throw new ValidationException("archetypes", $"Invalid archetype: '{archetype}'. Valid values: {string.Join(", ", validArchetypeNames)}");
                 }
             }
         }

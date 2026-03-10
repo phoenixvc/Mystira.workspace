@@ -5,7 +5,9 @@ using Moq;
 using Moq.Protected;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Net;
 
 namespace Mystira.App.Application.Tests.UseCases.Media;

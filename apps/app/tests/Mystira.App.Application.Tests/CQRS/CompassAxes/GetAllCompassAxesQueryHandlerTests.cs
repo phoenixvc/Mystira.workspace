@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.CompassAxes.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.CompassAxes;
 
@@ -22,12 +24,12 @@ public class GetAllCompassAxesQueryHandlerTests
     public async Task Handle_ReturnsAllCompassAxes()
     {
         // Arrange
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis { Id = "courage", Name = "Courage", Description = "Bravery in the face of fear" },
-            new CompassAxis { Id = "wisdom", Name = "Wisdom", Description = "Knowledge and good judgment" },
-            new CompassAxis { Id = "kindness", Name = "Kindness", Description = "Compassion towards others" },
-            new CompassAxis { Id = "honesty", Name = "Honesty", Description = "Truthfulness and integrity" }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage", Description = "Bravery in the face of fear" },
+            new CompassAxisDefinition { Id = "wisdom", Name = "Wisdom", Description = "Knowledge and good judgment" },
+            new CompassAxisDefinition { Id = "kindness", Name = "Kindness", Description = "Compassion towards others" },
+            new CompassAxisDefinition { Id = "honesty", Name = "Honesty", Description = "Truthfulness and integrity" }
         };
 
         var query = new GetAllCompassAxesQuery();
@@ -58,7 +60,7 @@ public class GetAllCompassAxesQueryHandlerTests
         var query = new GetAllCompassAxesQuery();
 
         _repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
 
         // Act
         var result = await GetAllCompassAxesQueryHandler.Handle(
@@ -78,9 +80,9 @@ public class GetAllCompassAxesQueryHandlerTests
         // Arrange
         var createdAt = DateTime.UtcNow.AddDays(-30);
         var updatedAt = DateTime.UtcNow.AddDays(-5);
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis
+            new CompassAxisDefinition
             {
                 Id = "courage",
                 Name = "Courage",
@@ -120,10 +122,10 @@ public class GetAllCompassAxesQueryHandlerTests
         // Arrange
         // This test verifies the handler passes through all axes returned by the repository
         // Filtering of deleted axes is the repository's responsibility
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis { Id = "courage", Name = "Courage", IsDeleted = false },
-            new CompassAxis { Id = "wisdom", Name = "Wisdom", IsDeleted = false }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage", IsDeleted = false },
+            new CompassAxisDefinition { Id = "wisdom", Name = "Wisdom", IsDeleted = false }
         };
 
         var query = new GetAllCompassAxesQuery();
@@ -150,7 +152,7 @@ public class GetAllCompassAxesQueryHandlerTests
         var query = new GetAllCompassAxesQuery();
 
         _repository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
 
         // Act
         await GetAllCompassAxesQueryHandler.Handle(
@@ -171,7 +173,7 @@ public class GetAllCompassAxesQueryHandlerTests
         var query = new GetAllCompassAxesQuery();
 
         _repository.Setup(r => r.GetAllAsync(cts.Token))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
 
         // Act
         await GetAllCompassAxesQueryHandler.Handle(

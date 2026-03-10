@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.Avatars.Queries;
 
@@ -27,7 +29,7 @@ public static class GetAvatarsQueryHandler
         };
 
         // Ensure all age groups are present
-        foreach (var ageGroup in AgeGroupConstants.AllAgeGroups)
+        foreach (var ageGroup in AgeGroupConstants.GetAll())
         {
             response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());
         }

@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Scenarios.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Scenarios;
 
@@ -23,8 +25,8 @@ public class GetScenariosByAgeGroupQueryHandlerTests
     {
         var scenarios = new List<Scenario>
         {
-            new() { Id = "scen-1", Title = "Adventure", AgeGroup = "6-9" },
-            new() { Id = "scen-2", Title = "Mystery", AgeGroup = "6-9" }
+            new() { Id = "scen-1", Title = "Adventure", AgeGroupId = "6-9" },
+            new() { Id = "scen-2", Title = "Mystery", AgeGroupId = "6-9" }
         };
         _repository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(scenarios);

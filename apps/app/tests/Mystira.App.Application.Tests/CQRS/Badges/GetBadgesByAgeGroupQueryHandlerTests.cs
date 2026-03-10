@@ -2,7 +2,9 @@ using FluentAssertions;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Badges;
 
@@ -31,7 +33,7 @@ public class GetBadgesByAgeGroupQueryHandlerTests
                 TierOrder = 1,
                 Title = "Kind Explorer",
                 Description = "First step in kindness",
-                RequiredScore = 10.0f,
+                RequiredScore = 10,
                 ImageId = "badge-kindness-1"
             },
             new Badge
@@ -43,7 +45,7 @@ public class GetBadgesByAgeGroupQueryHandlerTests
                 TierOrder = 2,
                 Title = "Kind Adventurer",
                 Description = "Growing in kindness",
-                RequiredScore = 25.0f,
+                RequiredScore = 25,
                 ImageId = "badge-kindness-2"
             }
         };
@@ -137,7 +139,7 @@ public class GetBadgesByAgeGroupQueryHandlerTests
             TierOrder = 3,
             Title = "Truth Seeker",
             Description = "Master of honesty",
-            RequiredScore = 50.0f,
+            RequiredScore = 50,
             ImageId = "badge-honesty-gold"
         };
 
@@ -161,7 +163,7 @@ public class GetBadgesByAgeGroupQueryHandlerTests
         response.TierOrder.Should().Be(3);
         response.Title.Should().Be("Truth Seeker");
         response.Description.Should().Be("Master of honesty");
-        response.RequiredScore.Should().Be(50.0f);
+        response.RequiredScore.Should().Be(50);
         response.ImageId.Should().Be("badge-honesty-gold");
     }
 

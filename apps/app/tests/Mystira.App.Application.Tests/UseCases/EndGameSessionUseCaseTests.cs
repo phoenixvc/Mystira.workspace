@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases;
@@ -85,7 +87,7 @@ public class EndGameSessionUseCaseTests
 
         var result = await _useCase.ExecuteAsync("session-1");
 
-        result.ElapsedTime.TotalMinutes.Should().BeApproximately(30, 1);
+        result.ElapsedTime!.Value.TotalMinutes.Should().BeApproximately(30, 1);
     }
 
     [Fact]
@@ -124,7 +126,7 @@ public class EndGameSessionUseCaseTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
     }
 }

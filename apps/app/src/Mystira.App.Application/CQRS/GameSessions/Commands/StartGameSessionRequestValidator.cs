@@ -1,4 +1,5 @@
 using Mystira.Contracts.App.Requests.GameSessions;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
@@ -46,9 +47,9 @@ public static class StartGameSessionRequestValidator
     /// </summary>
     public static void ValidateAgeGroup(int scenarioMinimumAge, string targetAgeGroup)
     {
-        var targetAge = Domain.Models.AgeGroup.Parse(targetAgeGroup) ?? Domain.Models.AgeGroup.Default;
+        var targetAge = AgeGroup.Parse(targetAgeGroup) ?? AgeGroup.MiddleChildhood;
 
-        if (scenarioMinimumAge > targetAge.MinimumAge)
+        if (scenarioMinimumAge > targetAge.MinAge)
         {
             throw new ValidationException("input",
                 $"Scenario minimum age ({scenarioMinimumAge}) exceeds target age group ({targetAgeGroup})");

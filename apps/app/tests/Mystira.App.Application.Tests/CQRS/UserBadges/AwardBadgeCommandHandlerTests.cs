@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserBadges.Commands;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.Shared.Data.Repositories;
 
@@ -36,7 +38,7 @@ public class AwardBadgeCommandHandlerTests
             Id = "badge-config-123",
             Name = "Honesty Champion",
             Message = "You showed great honesty!",
-            Axis = "honesty",
+            AxisId = "honesty",
             Threshold = 10,
             ImageId = "img-123"
         };
@@ -147,7 +149,7 @@ public class AwardBadgeCommandHandlerTests
         {
             Id = "badge-config-123",
             Name = "Courage Badge",
-            Axis = "courage"
+            AxisId = "courage"
         };
 
         var profile = new UserProfile
@@ -199,7 +201,7 @@ public class AwardBadgeCommandHandlerTests
         {
             Id = "badge-config-123",
             Name = "Courage Badge",
-            Axis = "courage"
+            AxisId = "courage"
         };
 
         _badgeRepository.Setup(r => r.GetByUserProfileIdAndBadgeConfigIdAsync(
@@ -361,7 +363,7 @@ public class AwardBadgeCommandHandlerTests
         {
             Id = "badge-config-456",
             Name = "Courage Badge",
-            Axis = "courage"
+            AxisId = "courage"
         };
 
         var request = new AwardBadgeRequest
@@ -402,7 +404,7 @@ public class AwardBadgeCommandHandlerTests
         {
             Id = "badge-config-789",
             Name = "Kindness Badge",
-            Axis = "kindness"
+            AxisId = "kindness"
         };
 
         var request = new AwardBadgeRequest
@@ -449,7 +451,7 @@ public class AwardBadgeCommandHandlerTests
         {
             Id = $"badge-{axis}",
             Name = $"{axis} Badge",
-            Axis = axis
+            AxisId = axis
         };
 
         var request = new AwardBadgeRequest

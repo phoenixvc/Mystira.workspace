@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 
@@ -80,11 +82,11 @@ public class RepositoryTests : IDisposable
         await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repository.FindAsync(e => e.Axis == targetAxis);
+        var result = await _repository.FindAsync(e => e.AxisId == targetAxis);
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().OnlyContain(e => e.Axis == targetAxis);
+        result.Should().OnlyContain(e => e.AxisId == targetAxis);
     }
 
     [Fact]
@@ -181,8 +183,8 @@ public class RepositoryTests : IDisposable
         {
             Id = Guid.NewGuid().ToString(),
             Name = "Test Badge",
-            Axis = axis ?? "default",
-            Threshold = 3.0f,
+            AxisId = axis ?? "default",
+            Threshold = (int?)3,
             Message = "Test message"
         };
     }

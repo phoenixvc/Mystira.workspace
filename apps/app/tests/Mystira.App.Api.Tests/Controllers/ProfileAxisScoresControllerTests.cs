@@ -4,7 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Mystira.App.Api.Controllers;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Api.Tests.Controllers;
 
@@ -35,10 +37,10 @@ public class ProfileAxisScoresControllerTests
                 ScenarioId = "scenario-1",
                 GameSessionId = "session-1",
                 CreatedAt = DateTime.UtcNow,
-                AxisScores = new Dictionary<string, float>
+                AxisScores = new Dictionary<string, int>
                 {
-                    { "courage", 7.5f },
-                    { "honesty", 5.0f }
+                    { "courage", 8 },
+                    { "honesty", 5 }
                 }
             }
         };
@@ -54,7 +56,7 @@ public class ProfileAxisScoresControllerTests
         response.Items.Should().HaveCount(1);
         response.Items[0].ScenarioId.Should().Be("scenario-1");
         response.Items[0].AxisScores.Should().ContainKey("courage");
-        response.Items[0].AxisScores["courage"].Should().Be(7.5f);
+        response.Items[0].AxisScores["courage"].Should().Be(8);
     }
 
     [Fact]
@@ -80,9 +82,9 @@ public class ProfileAxisScoresControllerTests
                 ScenarioId = "s1",
                 GameSessionId = "gs1",
                 CreatedAt = DateTime.UtcNow,
-                AxisScores = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
+                AxisScores = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
                 {
-                    { "Courage", 5.0f }
+                    { "Courage", 5 }
                 }
             }
         };

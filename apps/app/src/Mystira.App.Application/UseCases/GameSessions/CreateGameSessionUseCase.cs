@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Mappers;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.UseCases.GameSessions;
 
@@ -66,12 +68,12 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
         if (targetAgeGroup == null)
         {
             _logger.LogWarning(
-                "TargetAgeGroup '{TargetAgeGroup}' could not be parsed, defaulting to AgeGroup(6, 9)",
+                "TargetAgeGroup '{TargetAgeGroup}' could not be parsed, defaulting to middle_childhood",
                 request.TargetAgeGroup);
-            targetAgeGroup = new AgeGroup(6, 9);
+            targetAgeGroup = AgeGroup.MiddleChildhood;
         }
 
-        if (scenarioEntity.MinimumAge > targetAgeGroup.MinimumAge)
+        if (scenarioEntity.MinimumAge > targetAgeGroup.MinAge)
         {
             return UseCaseResult<GameSession>.Failure(
                 $"Scenario minimum age ({scenarioEntity.MinimumAge}) exceeds target age group ({request.TargetAgeGroup})");
@@ -84,25 +86,25 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
             AccountId = request.AccountId,
             ProfileId = request.ProfileId,
             PlayerNames = request.PlayerNames ?? new List<string>(),
-            TargetAgeGroup = targetAgeGroup,
+            TargetAgeGroup = targetAgeGroup.Id,
             Status = SessionStatus.InProgress,
             StartTime = DateTime.UtcNow,
             CurrentSceneId = DetermineStartingSceneId(scenarioEntity),
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>(StringComparer.OrdinalIgnoreCase),
+            CompassValues = new List<CompassTracking>(),
             SceneCount = scenarioEntity.Scenes?.Count ?? 0
         };
 
         if (request.CharacterAssignments != null && request.CharacterAssignments.Any())
         {
-            session.CharacterAssignments = request.CharacterAssignments
+            session.CharacterAssignments = (ICollection<SessionCharacterAssignment>)request.CharacterAssignments
                 .Select(GameSessionMapper.ToDomain).ToList();
 
             if (session.PlayerNames == null || !session.PlayerNames.Any())
             {
-                session.PlayerNames = DerivePlayerNames(session.CharacterAssignments);
+                session.PlayerNames = DerivePlayerNames(session.CharacterAssignments.ToList());
             }
         }
 
@@ -145,7 +147,7 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
 
             foreach (var duplicate in duplicates)
             {
-                if (duplicate.IsEffectivelyEmpty())
+                if (string.IsNullOrWhiteSpace(duplicate.CurrentSceneId) && duplicate.ChoiceHistory.Count == 0)
                 {
                     await _repository.DeleteAsync(duplicate.Id, ct);
                 }
@@ -197,7 +199,7 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
             && request.CharacterAssignments != null
             && request.CharacterAssignments.Any())
         {
-            session.CharacterAssignments = request.CharacterAssignments
+            session.CharacterAssignments = (ICollection<SessionCharacterAssignment>)request.CharacterAssignments
                 .Select(GameSessionMapper.ToDomain).ToList();
             updated = true;
         }
@@ -214,7 +216,7 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
             && session.CharacterAssignments != null
             && session.CharacterAssignments.Any())
         {
-            session.PlayerNames = DerivePlayerNames(session.CharacterAssignments);
+            session.PlayerNames = DerivePlayerNames(session.CharacterAssignments.ToList());
             updated = true;
         }
 
@@ -236,14 +238,17 @@ public class CreateGameSessionUseCase : ICreateGameSessionUseCase
 
         foreach (var axis in scenario.CoreAxes)
         {
-            session.CompassValues[axis.Value] = new CompassTracking
+            if (!session.CompassValues.Any(cv => cv.Axis == axis))
             {
-                Axis = axis.Value,
-                CurrentValue = 0.0,
-                StartingValue = 0.0,
-                History = new List<CompassChange>(),
-                LastUpdated = DateTime.UtcNow
-            };
+                session.CompassValues.Add(new CompassTracking
+                {
+                    Axis = axis,
+                    CurrentValue = 0.0,
+                    StartingValue = 0,
+                    History = new List<CompassChangeRecord>(),
+                    LastUpdated = DateTime.UtcNow
+                });
+            }
         }
     }
 

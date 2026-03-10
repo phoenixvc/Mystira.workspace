@@ -2,7 +2,9 @@ using FluentAssertions;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Badges;
 
@@ -27,7 +29,7 @@ public class GetBadgeDetailQueryHandlerTests
             TierOrder = 1,
             Title = "Brave Explorer",
             Description = "First courageous choice",
-            RequiredScore = 10.0f,
+            RequiredScore = 10,
             ImageId = "img-1"
         };
         _repository.Setup(r => r.GetByIdAsync("badge-1", It.IsAny<CancellationToken>()))
@@ -39,7 +41,7 @@ public class GetBadgeDetailQueryHandlerTests
         result.Should().NotBeNull();
         result!.Title.Should().Be("Brave Explorer");
         result.Tier.Should().Be("Bronze");
-        result.RequiredScore.Should().Be(10.0f);
+        result.RequiredScore.Should().Be(10);
     }
 
     [Fact]

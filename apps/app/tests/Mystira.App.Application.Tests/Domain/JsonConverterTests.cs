@@ -1,6 +1,8 @@
 using System.Text.Json;
 using FluentAssertions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Xunit;
 
 namespace Mystira.App.Application.Tests.Domain;
@@ -18,7 +20,7 @@ public class JsonConverterTests
     public void CoreAxisJsonConverter_Serialize_WritesStringValue()
     {
         // Arrange
-        var coreAxis = new CoreAxis("courage");
+        var coreAxis = CoreAxis.Courage;
 
         // Act
         var json = JsonSerializer.Serialize(coreAxis, _options);
@@ -71,7 +73,7 @@ public class JsonConverterTests
     public void CoreAxisJsonConverter_RoundTrip_PreservesValue()
     {
         // Arrange
-        var original = new CoreAxis("empathy");
+        var original = CoreAxis.Compassion;
 
         // Act
         var json = JsonSerializer.Serialize(original, _options);
@@ -86,7 +88,7 @@ public class JsonConverterTests
     public void CoreAxisJsonConverter_InObject_SerializesCorrectly()
     {
         // Arrange
-        var testObject = new TestCoreAxisContainer { Axis = new CoreAxis("kindness") };
+        var testObject = new TestCoreAxisContainer { Axis = CoreAxis.Kindness };
 
         // Act
         var json = JsonSerializer.Serialize(testObject, _options);
@@ -112,27 +114,27 @@ public class JsonConverterTests
     public void EchoTypeJsonConverter_Serialize_WritesStringValue()
     {
         // Arrange
-        var echoType = new EchoType("discovery");
+        var echoType = EchoType.Memory;
 
         // Act
         var json = JsonSerializer.Serialize(echoType, _options);
 
         // Assert
-        json.Should().Be("\"discovery\"");
+        json.Should().Be("\"memory\"");
     }
 
     [Fact]
     public void EchoTypeJsonConverter_Deserialize_ReadsStringValue()
     {
         // Arrange
-        var json = "\"challenge\"";
+        var json = "\"vision\"";
 
         // Act
         var echoType = JsonSerializer.Deserialize<EchoType>(json, _options);
 
         // Assert
         echoType.Should().NotBeNull();
-        echoType!.Value.Should().Be("challenge");
+        echoType!.Value.Should().Be("vision");
     }
 
     [Fact]
@@ -165,7 +167,7 @@ public class JsonConverterTests
     public void EchoTypeJsonConverter_RoundTrip_PreservesValue()
     {
         // Arrange
-        var original = new EchoType("transformation");
+        var original = EchoType.Revelation;
 
         // Act
         var json = JsonSerializer.Serialize(original, _options);
@@ -184,7 +186,7 @@ public class JsonConverterTests
     public void ArchetypeJsonConverter_Serialize_WritesStringValue()
     {
         // Arrange
-        var archetype = new Archetype("hero");
+        var archetype = Archetype.Hero;
 
         // Act
         var json = JsonSerializer.Serialize(archetype, _options);
@@ -197,14 +199,14 @@ public class JsonConverterTests
     public void ArchetypeJsonConverter_Deserialize_ReadsStringValue()
     {
         // Arrange
-        var json = "\"mentor\"";
+        var json = "\"sage\"";
 
         // Act
         var archetype = JsonSerializer.Deserialize<Archetype>(json, _options);
 
         // Assert
         archetype.Should().NotBeNull();
-        archetype!.Value.Should().Be("mentor");
+        archetype!.Value.Should().Be("sage");
     }
 
     [Fact]
@@ -224,7 +226,7 @@ public class JsonConverterTests
     public void ArchetypeJsonConverter_RoundTrip_PreservesValue()
     {
         // Arrange
-        var original = new Archetype("trickster");
+        var original = Archetype.Explorer;
 
         // Act
         var json = JsonSerializer.Serialize(original, _options);
@@ -261,8 +263,8 @@ public class JsonConverterTests
                             NextSceneId = "scene-2",
                             CompassChange = new CompassChange
                             {
-                                Axis = "courage",
-                                Delta = 1.0
+                                AxisId = "courage",
+                                Delta = 1
                             }
                         }
                     }
@@ -277,10 +279,12 @@ public class JsonConverterTests
         // Assert
         deserialized.Should().NotBeNull();
         deserialized!.Scenes.Should().HaveCount(1);
-        deserialized.Scenes![0].Branches.Should().HaveCount(1);
-        deserialized.Scenes[0].Branches![0].Choice.Should().Be("Be brave");
-        deserialized.Scenes[0].Branches![0].CompassChange.Should().NotBeNull();
-        deserialized.Scenes[0].Branches![0].CompassChange!.Axis.Should().Be("courage");
+        var scene = deserialized.Scenes.First();
+        scene.Branches.Should().HaveCount(1);
+        var branch = scene.Branches.First();
+        branch.Choice.Should().Be("Be brave");
+        branch.CompassChange.Should().NotBeNull();
+        branch.CompassChange!.AxisId.Should().Be("courage");
     }
 
     [Fact]
@@ -289,9 +293,9 @@ public class JsonConverterTests
         // Arrange
         var axes = new List<CoreAxis>
         {
-            new CoreAxis("courage"),
-            new CoreAxis("wisdom"),
-            new CoreAxis("empathy")
+            CoreAxis.Courage,
+            CoreAxis.Wisdom,
+            CoreAxis.Compassion
         };
 
         // Act
@@ -299,11 +303,11 @@ public class JsonConverterTests
         var deserialized = JsonSerializer.Deserialize<List<CoreAxis>>(json, _options);
 
         // Assert
-        json.Should().Be("[\"courage\",\"wisdom\",\"empathy\"]");
+        json.Should().Be("[\"courage\",\"wisdom\",\"compassion\"]");
         deserialized.Should().HaveCount(3);
         deserialized![0].Value.Should().Be("courage");
         deserialized[1].Value.Should().Be("wisdom");
-        deserialized[2].Value.Should().Be("empathy");
+        deserialized[2].Value.Should().Be("compassion");
     }
 
     #endregion

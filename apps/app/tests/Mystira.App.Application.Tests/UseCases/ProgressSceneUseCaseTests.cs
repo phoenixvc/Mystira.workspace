@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
 using Mystira.Shared.Locking;
@@ -138,7 +140,7 @@ public class ProgressSceneUseCaseTests
 
         var result = await _useCase.ExecuteAsync(request);
 
-        result!.ElapsedTime.TotalMinutes.Should().BeApproximately(15, 1);
+        result!.ElapsedTime!.Value.TotalMinutes.Should().BeApproximately(15, 1);
     }
 
     private void SetupRepositories(GameSession session, Scenario scenario)
@@ -164,7 +166,7 @@ public class ProgressSceneUseCaseTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
     }
 
@@ -179,7 +181,7 @@ public class ProgressSceneUseCaseTests
                 new() { Id = "scene-1", Title = "Scene 1", Branches = new List<Branch>(), EchoReveals = new List<EchoReveal>() },
                 new() { Id = "scene-2", Title = "Scene 2", Branches = new List<Branch>(), EchoReveals = new List<EchoReveal>() }
             },
-            CoreAxes = new List<CoreAxis>()
+            CoreAxes = new List<string>()
         };
     }
 }

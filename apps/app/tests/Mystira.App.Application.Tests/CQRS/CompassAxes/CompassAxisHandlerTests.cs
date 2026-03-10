@@ -6,7 +6,9 @@ using Mystira.App.Application.CQRS.CompassAxes.Commands;
 using Mystira.App.Application.CQRS.CompassAxes.Queries;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.CQRS.CompassAxes;
@@ -49,7 +51,7 @@ public class CompassAxisHandlerTests
         result.Name.Should().Be("Courage");
         result.Description.Should().Be("Measures bravery and boldness");
         result.Id.Should().NotBeNullOrEmpty();
-        _repository.Verify(r => r.AddAsync(It.IsAny<CompassAxis>(), It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.AddAsync(It.IsAny<CompassAxisDefinition>(), It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
         _cacheInvalidation.Verify(c => c.InvalidateCacheByPrefixAsync("MasterData:CompassAxes"), Times.Once);
     }
@@ -73,7 +75,7 @@ public class CompassAxisHandlerTests
     [Fact]
     public async Task Delete_WithExistingId_ReturnsTrue()
     {
-        var axis = new CompassAxis { Id = "axis-1", Name = "Courage" };
+        var axis = new CompassAxisDefinition { Id = "axis-1", Name = "Courage" };
         _repository.Setup(r => r.GetByIdAsync("axis-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(axis);
 
@@ -91,7 +93,7 @@ public class CompassAxisHandlerTests
     public async Task Delete_WithNonExistingId_ReturnsFalse()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(default(CompassAxis));
+            .ReturnsAsync(default(CompassAxisDefinition));
 
         var result = await DeleteCompassAxisCommandHandler.Handle(
             new DeleteCompassAxisCommand("missing"), _repository.Object, _unitOfWork.Object,
@@ -108,7 +110,7 @@ public class CompassAxisHandlerTests
     [Fact]
     public async Task Update_WithExistingId_ReturnsUpdatedCompassAxis()
     {
-        var existing = new CompassAxis { Id = "axis-1", Name = "Old", Description = "Old desc" };
+        var existing = new CompassAxisDefinition { Id = "axis-1", Name = "Old", Description = "Old desc" };
         _repository.Setup(r => r.GetByIdAsync("axis-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(existing);
 
@@ -128,14 +130,14 @@ public class CompassAxisHandlerTests
     public async Task Update_WithNonExistingId_ReturnsNull()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(default(CompassAxis));
+            .ReturnsAsync(default(CompassAxisDefinition));
 
         var result = await UpdateCompassAxisCommandHandler.Handle(
             new UpdateCompassAxisCommand("missing", "Name", "Desc"), _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _updateLogger.Object, CancellationToken.None);
 
         result.Should().BeNull();
-        _repository.Verify(r => r.UpdateAsync(It.IsAny<CompassAxis>(), It.IsAny<CancellationToken>()), Times.Never);
+        _repository.Verify(r => r.UpdateAsync(It.IsAny<CompassAxisDefinition>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     #endregion
@@ -145,7 +147,7 @@ public class CompassAxisHandlerTests
     [Fact]
     public async Task GetById_WithExistingId_ReturnsCompassAxis()
     {
-        var axis = new CompassAxis { Id = "axis-1", Name = "Courage" };
+        var axis = new CompassAxisDefinition { Id = "axis-1", Name = "Courage" };
         _repository.Setup(r => r.GetByIdAsync("axis-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(axis);
 
@@ -160,7 +162,7 @@ public class CompassAxisHandlerTests
     public async Task GetById_WithNonExistingId_ReturnsNull()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
-            .ReturnsAsync(default(CompassAxis));
+            .ReturnsAsync(default(CompassAxisDefinition));
 
         var result = await GetCompassAxisByIdQueryHandler.Handle(
             new GetCompassAxisByIdQuery("missing"), _repository.Object, _getByIdLogger.Object, CancellationToken.None);

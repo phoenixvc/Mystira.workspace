@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Scenarios.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Scenarios;
 
@@ -116,7 +118,7 @@ public class GetScenariosQueryHandlerTests
                 Id = "full-scenario",
                 Title = "Complete Adventure",
                 Description = "A fully detailed scenario",
-                AgeGroup = "10-12",
+                AgeGroupId = "10-12",
                 Scenes = new List<Scene>
                 {
                     new Scene { Id = "scene-1", Title = "Opening" }
@@ -144,7 +146,7 @@ public class GetScenariosQueryHandlerTests
         var scenario = result.First();
         scenario.Title.Should().Be("Complete Adventure");
         scenario.Description.Should().Be("A fully detailed scenario");
-        scenario.AgeGroup.Should().Be("10-12");
+        scenario.AgeGroupId.Should().Be("10-12");
         scenario.Scenes.Should().HaveCount(1);
         scenario.Characters.Should().HaveCount(1);
     }

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.ContentBundles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.UseCases.ContentBundles;
 
@@ -26,15 +28,15 @@ public class GetContentBundlesByAgeGroupUseCaseTests
     {
         var bundles = new List<ContentBundle>
         {
-            new() { Id = "b1", Title = "Kids Bundle", AgeGroup = "6-8" }
+            new() { Id = "b1", Title = "Kids Bundle", AgeGroupId = "middle_childhood" }
         };
-        _repository.Setup(r => r.GetByAgeGroupAsync("6-8", It.IsAny<CancellationToken>()))
+        _repository.Setup(r => r.GetByAgeGroupAsync("middle_childhood", It.IsAny<CancellationToken>()))
             .ReturnsAsync(bundles);
 
-        var result = await _useCase.ExecuteAsync("6-8");
+        var result = await _useCase.ExecuteAsync("middle_childhood");
 
         result.Should().HaveCount(1);
-        result[0].AgeGroup.Should().Be("6-8");
+        result[0].AgeGroupId.Should().Be("middle_childhood");
     }
 
     [Fact]

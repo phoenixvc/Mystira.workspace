@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.MediaMetadata.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.MediaMetadata;
 
@@ -33,7 +35,7 @@ public class GetMediaMetadataFileQueryHandlerTests
                     FileName = "bg.mp3",
                     Type = "audio",
                     ClassificationTags = new List<ClassificationTag>(),
-                    Modifiers = new List<Modifier>()
+                    Modifiers = new List<MetadataModifier>()
                 }
             },
             Version = "1"

@@ -4,7 +4,9 @@ using Mystira.App.Application.CQRS.Attribution.Queries;
 using Mystira.App.Application.CQRS.ContentBundles.Queries;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Contracts.App.Responses.Common;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Api.Controllers;
 

@@ -2,7 +2,9 @@ using FluentAssertions;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Badges;
 
@@ -24,9 +26,9 @@ public class GetAxisAchievementsQueryHandlerTests
         {
             new() { Id = "ach-1", AgeGroupId = "6-9", CompassAxisId = "courage", AxesDirection = "positive", Description = "Brave choice" }
         };
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new() { Id = "courage", Name = "Courage" }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage" }
         };
         _achievementRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(achievements);
@@ -48,7 +50,7 @@ public class GetAxisAchievementsQueryHandlerTests
         _achievementRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<AxisAchievement>());
         _axisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
 
         var result = await GetAxisAchievementsQueryHandler.Handle(
             new GetAxisAchievementsQuery("6-9"), _achievementRepository.Object,
@@ -67,7 +69,7 @@ public class GetAxisAchievementsQueryHandlerTests
         _achievementRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(achievements);
         _axisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
 
         var result = await GetAxisAchievementsQueryHandler.Handle(
             new GetAxisAchievementsQuery("6-9"), _achievementRepository.Object,

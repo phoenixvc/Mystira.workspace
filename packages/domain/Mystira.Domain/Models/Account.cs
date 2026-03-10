@@ -49,6 +49,11 @@ public class Account : SoftDeletableEntity
     public AuthProvider AuthProvider { get; set; } = AuthProvider.Local;
 
     /// <summary>
+    /// Gets or sets the Entra user object ID for provisioning linkage.
+    /// </summary>
+    public string? EntraObjectId { get; set; }
+
+    /// <summary>
     /// Gets or sets the external provider ID (for OAuth accounts).
     /// </summary>
     public string? ExternalProviderId { get; set; }

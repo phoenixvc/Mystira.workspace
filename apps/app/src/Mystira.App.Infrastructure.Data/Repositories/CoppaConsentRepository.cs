@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Application.Ports;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data.Repositories;
 

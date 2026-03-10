@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Scenarios.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Scenarios;
 
@@ -29,7 +31,7 @@ public class GetScenarioQueryHandlerTests
             Id = scenarioId,
             Title = "The Dragon's Quest",
             Description = "An epic adventure",
-            AgeGroup = "6-9"
+            AgeGroupId = "6-9"
         };
 
         var query = new GetScenarioQuery(scenarioId);
@@ -48,7 +50,7 @@ public class GetScenarioQueryHandlerTests
         result.Should().NotBeNull();
         result!.Id.Should().Be(scenarioId);
         result.Title.Should().Be("The Dragon's Quest");
-        result.AgeGroup.Should().Be("6-9");
+        result.AgeGroupId.Should().Be("6-9");
 
         _repository.Verify(r => r.GetByIdAsync(scenarioId, It.IsAny<CancellationToken>()), Times.Once);
     }

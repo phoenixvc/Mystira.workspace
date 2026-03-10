@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 using Xunit;
@@ -85,7 +87,7 @@ public class ScenarioRepositoryTests
 
             // Scenes should have music and sfx
             result.Scenes.Should().HaveCount(1);
-            var scene = result.Scenes[0];
+            var scene = result.Scenes.First();
             scene.Music.Should().NotBeNull();
             scene.Music!.Profile.Should().Be(MusicProfile.Cozy);
             scene.Music.Energy.Should().Be(0.5);

@@ -2,7 +2,9 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Polyglot;
 
 namespace Mystira.App.Infrastructure.Data;
@@ -218,16 +220,16 @@ public class PostgresDbContext : DbContext
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<Dictionary<string, CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, CompassTracking>())
-                .Metadata.SetValueComparer(CreateDictionaryComparer<string, CompassTracking>());
+                    v => JsonSerializer.Deserialize<List<CompassTracking>>(v, (JsonSerializerOptions?)null) ?? new List<CompassTracking>())
+                .Metadata.SetValueComparer(CreateListComparer<CompassTracking>());
 
             entity.Property(e => e.PlayerCompassProgressTotals)
                 .HasColumnName("player_compass_progress_totals")
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<List<PlayerCompassProgress>>(v, (JsonSerializerOptions?)null) ?? new List<PlayerCompassProgress>())
-                .Metadata.SetValueComparer(CreateListComparer<PlayerCompassProgress>());
+                    v => JsonSerializer.Deserialize<Dictionary<string, int>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, int>())
+                .Metadata.SetValueComparer(CreateDictionaryComparer<string, int>());
 
             entity.Property(e => e.Achievements)
                 .HasColumnName("achievements")
@@ -290,8 +292,8 @@ public class PostgresDbContext : DbContext
                 .HasColumnType("jsonb")
                 .HasConversion(
                     v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => JsonSerializer.Deserialize<Dictionary<string, float>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase))
-                .Metadata.SetValueComparer(CreateDictionaryComparer<string, float>());
+                    v => JsonSerializer.Deserialize<Dictionary<string, int>>(v, (JsonSerializerOptions?)null) ?? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase))
+                .Metadata.SetValueComparer(CreateDictionaryComparer<string, int>());
 
             // Indexes
             entity.HasIndex(e => e.ProfileId).HasDatabaseName("ix_player_scenario_scores_profile_id");

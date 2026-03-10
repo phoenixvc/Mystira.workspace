@@ -42,7 +42,7 @@ public class ProfileAxisScoresController : ControllerBase
             ScenarioId = s.ScenarioId,
             GameSessionId = s.GameSessionId,
             CreatedAt = s.CreatedAt,
-            AxisScores = new Dictionary<string, float>(s.AxisScores, StringComparer.OrdinalIgnoreCase)
+            AxisScores = s.AxisScores.ToDictionary(kv => kv.Key, kv => (float)kv.Value, StringComparer.OrdinalIgnoreCase)
         }).ToList();
 
         var response = new AxisScoresResponse

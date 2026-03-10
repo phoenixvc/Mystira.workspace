@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data.Repositories;
 
@@ -13,7 +15,7 @@ public class CompassAxisRepository : ICompassAxisRepository
         _context = context;
     }
 
-    public async Task<List<CompassAxis>> GetAllAsync(CancellationToken ct = default)
+    public async Task<List<CompassAxisDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _context.CompassAxes
             .Where(x => !x.IsDeleted)
@@ -21,12 +23,12 @@ public class CompassAxisRepository : ICompassAxisRepository
             .ToListAsync(ct);
     }
 
-    public async Task<CompassAxis?> GetByIdAsync(string id, CancellationToken ct = default)
+    public async Task<CompassAxisDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
         return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
-    public async Task<CompassAxis?> GetByNameAsync(string name, CancellationToken ct = default)
+    public async Task<CompassAxisDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
         return await _context.CompassAxes.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
@@ -36,12 +38,12 @@ public class CompassAxisRepository : ICompassAxisRepository
         return await _context.CompassAxes.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
-    public async Task AddAsync(CompassAxis axis, CancellationToken ct = default)
+    public async Task AddAsync(CompassAxisDefinition axis, CancellationToken ct = default)
     {
         await _context.CompassAxes.AddAsync(axis, ct);
     }
 
-    public Task UpdateAsync(CompassAxis axis, CancellationToken ct = default)
+    public Task UpdateAsync(CompassAxisDefinition axis, CancellationToken ct = default)
     {
         _context.CompassAxes.Update(axis);
         return Task.CompletedTask;

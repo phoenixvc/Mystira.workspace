@@ -1,5 +1,7 @@
 using Ardalis.Specification;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Specifications;
 
@@ -22,7 +24,7 @@ public sealed class ScenariosByAgeGroupSpec : BaseEntitySpecification<Scenario>
 {
     public ScenariosByAgeGroupSpec(string ageGroup)
     {
-        Query.Where(s => s.AgeGroup == ageGroup)
+        Query.Where(s => s.AgeGroupId == ageGroup)
              .OrderBy(s => s.Title);
     }
 }
@@ -70,7 +72,7 @@ public sealed class ScenariosPaginatedSpec : BaseEntitySpecification<Scenario>
 
         if (!string.IsNullOrWhiteSpace(ageGroup))
         {
-            query = query.Where(s => s.AgeGroup == ageGroup);
+            query = query.Where(s => s.AgeGroupId == ageGroup);
         }
 
         if (difficulty.HasValue)
@@ -97,7 +99,7 @@ public sealed class ScenariosByArchetypeSpec : BaseEntitySpecification<Scenario>
 {
     public ScenariosByArchetypeSpec(string archetypeName)
     {
-        Query.Where(s => s.Archetypes != null && s.Archetypes.Any(a => a.Value == archetypeName))
+        Query.Where(s => s.Archetypes != null && s.Archetypes.Contains(archetypeName))
              .OrderBy(s => s.Title);
     }
 }

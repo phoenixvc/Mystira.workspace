@@ -4,7 +4,9 @@ using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.App.Application.Validation;
 using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using NJsonSchema;
 
@@ -52,10 +54,10 @@ public static class CreateScenarioCommandHandler
             Tags = request.Tags ?? new List<string>(),
             Difficulty = ScenarioMapper.MapDifficultyLevel((int)request.Difficulty),
             SessionLength = ScenarioMapper.MapSessionLength((int)request.SessionLength),
-            Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes),
-            AgeGroup = request.AgeGroup,
+            Archetypes = request.Archetypes?.ToList() ?? new(),
+            AgeGroupId = request.AgeGroup,
             MinimumAge = request.MinimumAge,
-            CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes),
+            CoreAxes = request.CoreAxes?.ToList() ?? new(),
             Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>(),
             Scenes = request.Scenes?.Select(ScenarioMapper.ToScene).ToList() ?? new List<Scene>(),
             CreatedAt = DateTime.UtcNow

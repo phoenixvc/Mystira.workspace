@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
+using Mystira.Domain.Models;
 
 namespace Mystira.App.Application.CQRS.MediaAssets.Queries;
 
@@ -103,7 +104,7 @@ public static class GetMediaFileQueryHandler
         return segments.Last().TrimStart('/');
     }
 
-    private static string GetFileName(Domain.Models.MediaAsset mediaAsset)
+    private static string GetFileName(MediaAsset mediaAsset)
     {
         // Prefer explicit filename, fallback to MediaId with extension
         if (!string.IsNullOrEmpty(mediaAsset.MediaId))

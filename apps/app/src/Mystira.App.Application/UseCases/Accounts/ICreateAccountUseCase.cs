@@ -1,5 +1,7 @@
 using Mystira.App.Application.CQRS.Accounts.Commands;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.UseCases.Accounts;
 

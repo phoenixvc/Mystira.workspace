@@ -128,27 +128,117 @@ public class ScenarioCharacterMetadata
 }
 
 /// <summary>
+/// Music mood profiles for scene atmosphere.
+/// </summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum MusicProfile
+{
+    /// <summary>No music.</summary>
+    None,
+    /// <summary>Neutral ambient.</summary>
+    Neutral,
+    /// <summary>Warm and comfortable.</summary>
+    Cozy,
+    /// <summary>Light and fun.</summary>
+    Playful,
+    /// <summary>Awe and discovery.</summary>
+    Wonder,
+    /// <summary>Suspense and intrigue.</summary>
+    Mystery,
+    /// <summary>Tension and danger.</summary>
+    Tense,
+    /// <summary>High energy action.</summary>
+    Action,
+    /// <summary>Melancholy or loss.</summary>
+    Sad,
+    /// <summary>Triumph and celebration.</summary>
+    Victory
+}
+
+/// <summary>
+/// Controls whether music continues or changes between scenes.
+/// </summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum MusicContinuity
+{
+    /// <summary>Continue current track if compatible.</summary>
+    PreferContinue,
+    /// <summary>Allow track change.</summary>
+    AllowChange,
+    /// <summary>Force a track change.</summary>
+    ForceChange,
+    /// <summary>Silence the music.</summary>
+    ForceSilence
+}
+
+/// <summary>
+/// Transition style between music tracks.
+/// </summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum MusicTransitionHint
+{
+    /// <summary>Automatic transition.</summary>
+    Auto,
+    /// <summary>Keep current track.</summary>
+    Keep,
+    /// <summary>Short crossfade.</summary>
+    CrossfadeShort,
+    /// <summary>Normal crossfade.</summary>
+    CrossfadeNormal,
+    /// <summary>Long crossfade.</summary>
+    CrossfadeLong,
+    /// <summary>Hard cut.</summary>
+    HardCut
+}
+
+/// <summary>
+/// Music priority level.
+/// </summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum MusicPriority
+{
+    /// <summary>Background ambient music.</summary>
+    Background,
+    /// <summary>Important thematic music.</summary>
+    Important
+}
+
+/// <summary>
+/// Audio ducking behavior during narration or dialogue.
+/// </summary>
+[System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+public enum MusicDucking
+{
+    /// <summary>No ducking.</summary>
+    None,
+    /// <summary>Duck during narration.</summary>
+    Narration,
+    /// <summary>Duck during dialogue.</summary>
+    Dialogue
+}
+
+/// <summary>
 /// Scene music settings for scenarios.
 /// </summary>
 public class SceneMusicSettings
 {
-    /// <summary>Gets or sets the mood profile.</summary>
-    public string? MoodProfile { get; set; }
+    /// <summary>Gets or sets the music mood profile.</summary>
+    public MusicProfile Profile { get; set; }
 
-    /// <summary>Gets or sets the track ID.</summary>
-    public string? TrackId { get; set; }
+    /// <summary>Gets or sets the energy level.</summary>
+    public double? Energy { get; set; }
 
-    /// <summary>Gets or sets the volume level.</summary>
-    public float? Volume { get; set; }
+    /// <summary>Gets or sets the continuity behavior.</summary>
+    public MusicContinuity Continuity { get; set; } = MusicContinuity.PreferContinue;
 
-    /// <summary>Gets or sets whether to loop.</summary>
-    public bool? Loop { get; set; }
+    /// <summary>Gets or sets the transition hint.</summary>
+    public MusicTransitionHint TransitionHint { get; set; } = MusicTransitionHint.Auto;
 
-    /// <summary>Gets or sets the fade in duration in seconds.</summary>
-    public float? FadeInSeconds { get; set; }
+    /// <summary>Gets or sets the priority level.</summary>
+    public MusicPriority Priority { get; set; } = MusicPriority.Background;
 
-    /// <summary>Gets or sets the fade out duration in seconds.</summary>
-    public float? FadeOutSeconds { get; set; }
+    /// <summary>Gets or sets the ducking behavior.</summary>
+    public MusicDucking Ducking { get; set; } = MusicDucking.None;
 }
 
 /// <summary>
@@ -156,35 +246,26 @@ public class SceneMusicSettings
 /// </summary>
 public class SceneSoundEffect
 {
-    /// <summary>Gets or sets the sound effect ID.</summary>
-    public string Id { get; set; } = string.Empty;
+    /// <summary>Gets or sets the track reference.</summary>
+    public string Track { get; set; } = string.Empty;
 
-    /// <summary>Gets or sets the track ID.</summary>
-    public string? TrackId { get; set; }
+    /// <summary>Gets or sets whether the effect can loop.</summary>
+    public bool Loopable { get; set; }
 
-    /// <summary>Gets or sets the volume level.</summary>
-    public float? Volume { get; set; }
-
-    /// <summary>Gets or sets whether to loop.</summary>
-    public bool? Loop { get; set; }
-
-    /// <summary>Gets or sets the trigger type.</summary>
-    public string? TriggerType { get; set; }
-
-    /// <summary>Gets or sets the delay in seconds.</summary>
-    public float? DelaySeconds { get; set; }
+    /// <summary>Gets or sets the energy level.</summary>
+    public double Energy { get; set; }
 }
 
 /// <summary>
-/// Music palette for scenarios - allowed background-music tracks grouped by mood profile.
+/// Music palette for scenarios — maps mood profiles to track lists.
 /// </summary>
 public class MusicPalette
 {
-    /// <summary>Gets or sets the mood to tracks mapping.</summary>
-    public Dictionary<string, List<string>> MoodTracks { get; set; } = new();
+    /// <summary>Gets or sets the default mood profile.</summary>
+    public MusicProfile DefaultProfile { get; set; } = MusicProfile.Neutral;
 
-    /// <summary>Gets or sets the default mood.</summary>
-    public string? DefaultMood { get; set; }
+    /// <summary>Gets or sets the tracks keyed by profile name (case-insensitive).</summary>
+    public Dictionary<string, List<string>> TracksByProfile { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
 
 /// <summary>

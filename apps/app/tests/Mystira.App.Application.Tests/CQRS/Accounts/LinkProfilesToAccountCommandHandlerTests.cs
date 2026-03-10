@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Accounts.Commands;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.CQRS.Accounts;
@@ -27,7 +29,7 @@ public class LinkProfilesToAccountCommandHandlerTests
     public async Task Handle_LinksProfileToAccount()
     {
         var account = new Account { Id = "acc-1", UserProfileIds = new List<string>() };
-        var profile = new UserProfile { Id = "profile-1", AccountId = null };
+        var profile = new UserProfile { Id = "profile-1", AccountId = null! };
         var command = new LinkProfilesToAccountCommand("acc-1", new List<string> { "profile-1" });
 
         _accountRepository.Setup(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>()))
@@ -83,7 +85,7 @@ public class LinkProfilesToAccountCommandHandlerTests
     public async Task Handle_MissingProfile_SkipsAndContinues()
     {
         var account = new Account { Id = "acc-1", UserProfileIds = new List<string>() };
-        var profile2 = new UserProfile { Id = "profile-2", AccountId = null };
+        var profile2 = new UserProfile { Id = "profile-2", AccountId = null! };
         var command = new LinkProfilesToAccountCommand("acc-1", new List<string> { "missing", "profile-2" });
 
         _accountRepository.Setup(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>()))

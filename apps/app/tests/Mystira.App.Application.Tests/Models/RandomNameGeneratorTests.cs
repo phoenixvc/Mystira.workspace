@@ -1,70 +1,69 @@
 using FluentAssertions;
-using Mystira.App.Domain.Models;
+using Mystira.Shared.Utilities;
 
 namespace Mystira.App.Application.Tests.Models;
 
 public class RandomNameGeneratorTests
 {
     [Fact]
-    public void GenerateFantasyName_ReturnsNameFromFantasyList()
+    public void GenerateFirstName_ReturnsNonEmptyString()
     {
         // Act
-        var name = RandomNameGenerator.GenerateFantasyName();
+        var name = RandomNameGenerator.GenerateFirstName();
 
         // Assert
         name.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
-    public void GenerateAdjectiveName_ReturnsAdjectiveAndName()
+    public void GenerateFullName_ReturnsNameWithSpace()
     {
         // Act
-        var name = RandomNameGenerator.GenerateAdjectiveName();
+        var name = RandomNameGenerator.GenerateFullName();
 
         // Assert
         name.Should().Contain(" ");
     }
 
     [Fact]
-    public void GenerateGuestName_CanReturnBothTypes()
+    public void GenerateGuestName_ReturnsPrefixedName()
     {
         // Act
-        var fantasyName = RandomNameGenerator.GenerateGuestName();
-        var adjectiveName = RandomNameGenerator.GenerateGuestName(true);
+        var guestName = RandomNameGenerator.GenerateGuestName();
 
         // Assert
-        fantasyName.Should().NotBeNullOrEmpty();
-        adjectiveName.Should().Contain(" ");
+        guestName.Should().NotBeNullOrEmpty();
+        guestName.Should().StartWith("Guest_");
     }
 
     [Fact]
-    public void GenerateUniqueGuestNames_ReturnsCorrectCount()
+    public void GenerateFirstNames_ReturnsCorrectCount()
     {
         // Arrange
         const int count = 5;
 
         // Act
-        var names = RandomNameGenerator.GenerateUniqueGuestNames(count);
+        var names = RandomNameGenerator.GenerateFirstNames(count);
 
         // Assert
         names.Should().HaveCount(count);
     }
 
     [Fact]
-    public void GenerateUniqueGuestNames_ReturnsUniqueNames()
+    public void GenerateFullNames_ReturnsUniqueNames()
     {
         // Arrange
         const int count = 10;
 
         // Act
-        var names = RandomNameGenerator.GenerateUniqueGuestNames(count, useAdjective: true);
+        var names = RandomNameGenerator.GenerateFullNames(count);
 
         // Assert
         names.Should().OnlyHaveUniqueItems();
     }
 
     [Fact]
-    public async Task GenerateUniqueGuestNames_ThreadSafetyTest()
+    public async Task GenerateFullNames_ThreadSafetyTest()
     {
         // Arrange
         const int numThreads = 10;
@@ -74,7 +73,7 @@ public class RandomNameGeneratorTests
         // Act
         for (var i = 0; i < numThreads; i++)
         {
-            tasks[i] = Task.Run(() => RandomNameGenerator.GenerateUniqueGuestNames(namesPerThread, true));
+            tasks[i] = Task.Run(() => RandomNameGenerator.GenerateFullNames(namesPerThread));
         }
 
         await Task.WhenAll(tasks);
@@ -88,18 +87,4 @@ public class RandomNameGeneratorTests
 
         allNames.Should().HaveCount(numThreads * namesPerThread);
     }
-
-    [Fact]
-    public void GenerateUniqueGuestNames_ThrowsExceptionWhenRequestingTooManyNames()
-    {
-        // Arrange
-        const int count = 10000;
-
-        // Act
-        Action act = () => RandomNameGenerator.GenerateUniqueGuestNames(count, useAdjective: true);
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
-    }
-
 }

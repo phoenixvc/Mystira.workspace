@@ -1,4 +1,6 @@
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
@@ -25,7 +27,7 @@ public static class EchoLogParser
             throw new ValidationException("echoType", "Required field 'echoType'/'type' is missing or null in echo log data");
         }
 
-        echoLog.EchoType = echoTypeObj.ToString() ?? string.Empty;
+        echoLog.EchoTypeId = echoTypeObj.ToString() ?? string.Empty;
 
         // Parse Description (required)
         var descFound = echoLogDict.TryGetValue("description", out var descObj) ||

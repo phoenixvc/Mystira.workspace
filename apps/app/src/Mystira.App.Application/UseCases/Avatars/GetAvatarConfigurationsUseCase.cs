@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Avatars;
@@ -32,8 +34,7 @@ public class GetAvatarConfigurationsUseCase
         };
 
         // Ensure all age groups are present
-        var allAgeGroups = AgeGroup.ValueMap.Values.Select(a => a.Value).ToList();
-        foreach (var ageGroup in allAgeGroups)
+        foreach (var ageGroup in AgeGroupConstants.GetAll())
         {
             response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());
         }

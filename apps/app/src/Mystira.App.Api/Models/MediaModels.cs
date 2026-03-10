@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Api.Models;
 

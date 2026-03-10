@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Services;
 
@@ -59,9 +61,9 @@ public class AxisScoringService : IAxisScoringService
         return playerScore;
     }
 
-    private Dictionary<string, float> AggregateAxisScores(GameSession session, string profileId)
+    private Dictionary<string, int> AggregateAxisScores(GameSession session, string profileId)
     {
-        var axisScores = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+        var axisScores = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var choice in session.ChoiceHistory)
         {
@@ -69,9 +71,9 @@ public class AxisScoringService : IAxisScoringService
 
             if (!TryGetCompassDelta(choice, out var axis, out var delta)) continue;
 
-            if (!axisScores.ContainsKey(axis)) axisScores[axis] = 0f;
+            if (!axisScores.ContainsKey(axis)) axisScores[axis] = 0;
 
-            axisScores[axis] += (float)delta;
+            axisScores[axis] += (int)delta;
         }
 
         return axisScores;
@@ -82,16 +84,16 @@ public class AxisScoringService : IAxisScoringService
         axis = string.Empty;
         delta = 0.0;
 
-        if (!string.IsNullOrWhiteSpace(choice.CompassAxis) && choice.CompassDelta.HasValue)
+        if (!string.IsNullOrWhiteSpace(choice.CompassAxis) && choice.CompassDelta != 0)
         {
             axis = choice.CompassAxis;
-            delta = choice.CompassDelta.Value;
+            delta = choice.CompassDelta;
             return true;
         }
 
-        if (choice.CompassChange != null && !string.IsNullOrWhiteSpace(choice.CompassChange.Axis))
+        if (choice.CompassChange != null && !string.IsNullOrWhiteSpace(choice.CompassChange.AxisId))
         {
-            axis = choice.CompassChange.Axis;
+            axis = choice.CompassChange.AxisId;
             delta = choice.CompassChange.Delta;
             return true;
         }

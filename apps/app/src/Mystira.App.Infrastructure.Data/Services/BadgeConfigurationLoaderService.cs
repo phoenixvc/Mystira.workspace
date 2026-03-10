@@ -4,7 +4,9 @@ using Json.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data.Services;
 
@@ -150,7 +152,7 @@ public class BadgeConfigurationLoaderService
                 TierOrder = badge.TierOrder,
                 Title = badge.Title,
                 Description = badge.Description,
-                RequiredScore = badge.RequiredScore,
+                RequiredScore = (int?)badge.RequiredScore,
                 ImageId = badge.ImageId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow

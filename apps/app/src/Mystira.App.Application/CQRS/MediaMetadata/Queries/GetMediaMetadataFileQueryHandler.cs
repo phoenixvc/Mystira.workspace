@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.MediaMetadata.Queries;
 
@@ -46,7 +48,7 @@ public static class GetMediaMetadataFileQueryHandler
                     Key = ct.Key,
                     Value = ct.Value
                 }).ToList(),
-                Modifiers = e.Modifiers.Select(m => new Modifier
+                Modifiers = e.Modifiers.Select(m => new MetadataModifier
                 {
                     Key = m.Key,
                     Value = m.Value

@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 using Mystira.Shared.Data.Repositories;
@@ -78,8 +80,8 @@ public class AxisScoringServiceTests : IDisposable
         Assert.Equal(profile.Id, result.ProfileId);
         Assert.Equal("scenario1", result.ScenarioId);
         Assert.Equal("session1", result.GameSessionId);
-        Assert.Equal(8f, result.AxisScores["honesty"], 0.01f);
-        Assert.Equal(-2f, result.AxisScores["bravery"], 0.01f);
+        Assert.Equal(8, result.AxisScores["honesty"]);
+        Assert.Equal(-2, result.AxisScores["bravery"]);
     }
 
     [Fact]
@@ -107,7 +109,7 @@ public class AxisScoringServiceTests : IDisposable
             ProfileId = "profile1",
             ScenarioId = "scenario1",
             GameSessionId = "session1",
-            AxisScores = new Dictionary<string, float> { { "honesty", 5f } }
+            AxisScores = new Dictionary<string, int> { { "honesty", 5 } }
         };
         await _dbContext.PlayerScenarioScores.AddAsync(existingScore);
         await _dbContext.SaveChangesAsync();
@@ -135,8 +137,8 @@ public class AxisScoringServiceTests : IDisposable
             ScenarioId = "scenario1",
             ChoiceHistory = new List<SessionChoice>
             {
-                new() { CompassAxis = null }, // No axis
-                new() { CompassDelta = null } // No delta
+                new() { CompassAxis = null },
+                new() { CompassDelta = 0 }
             }
         };
 
@@ -178,38 +180,38 @@ public class AxisScoringServiceTests : IDisposable
         // Assert - verify it can be retrieved
         var retrieved = await _scoreRepository.GetByProfileAndScenarioAsync("profile1", "scenario1");
         Assert.NotNull(retrieved);
-        Assert.Equal(10f, retrieved.AxisScores["honesty"]);
+        Assert.Equal(10, retrieved.AxisScores["honesty"]);
     }
 
     [Fact]
     public async Task ScoreSessionAsync_TwoSessionsSameAxis_AwardsBronzeThenSilverCollectively()
     {
         // Arrange
-        var profile = new UserProfile { Id = "profile1", Name = "Test Player", AgeGroupName = "6-9" };
+        var profile = new UserProfile { Id = "profile1", Name = "Test Player", AgeGroupId = "middle_childhood" };
 
-        // Badges for honesty axis, age group 6-9
+        // Badges for honesty axis, age group middle_childhood
         var bronze = new Badge
         {
             Id = "honesty-bronze",
-            AgeGroupId = "6-9",
+            AgeGroupId = "middle_childhood",
             CompassAxisId = "honesty",
             Tier = "bronze",
             TierOrder = 1,
             Title = "Honesty Bronze",
             Description = "Bronze honesty tier",
-            RequiredScore = 0.5f,
+            RequiredScore = 1,
             ImageId = "img-bronze"
         };
         var silver = new Badge
         {
             Id = "honesty-silver",
-            AgeGroupId = "6-9",
+            AgeGroupId = "middle_childhood",
             CompassAxisId = "honesty",
             Tier = "silver",
             TierOrder = 2,
             Title = "Honesty Silver",
             Description = "Silver honesty tier",
-            RequiredScore = 1.0f,
+            RequiredScore = 1,
             ImageId = "img-silver"
         };
 

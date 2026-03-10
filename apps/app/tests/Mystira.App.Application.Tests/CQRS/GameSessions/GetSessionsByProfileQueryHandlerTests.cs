@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 
@@ -36,7 +38,7 @@ public class GetSessionsByProfileQueryHandlerTests
                 CurrentSceneId = "scene-1",
                 StartTime = DateTime.UtcNow.AddHours(-2),
                 EndTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             },
             new GameSession
             {
@@ -47,7 +49,7 @@ public class GetSessionsByProfileQueryHandlerTests
                 Status = SessionStatus.InProgress,
                 CurrentSceneId = "scene-5",
                 StartTime = DateTime.UtcNow.AddMinutes(-30),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 
@@ -143,7 +145,7 @@ public class GetSessionsByProfileQueryHandlerTests
                 Status = SessionStatus.Completed,
                 CurrentSceneId = "scene-5",
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" },
+                TargetAgeGroup = "6-9",
                 ChoiceHistory = new List<SessionChoice>
                 {
                     new SessionChoice { SceneId = "scene-1", ChoiceText = "Option A" },
@@ -152,8 +154,8 @@ public class GetSessionsByProfileQueryHandlerTests
                 },
                 EchoHistory = new List<EchoLog>
                 {
-                    new EchoLog { EchoType = "honesty", Description = "Told the truth" },
-                    new EchoLog { EchoType = "courage", Description = "Faced fear" }
+                    new EchoLog { EchoTypeId = "honesty", Description = "Told the truth" },
+                    new EchoLog { EchoTypeId = "courage", Description = "Faced fear" }
                 },
                 Achievements = new List<SessionAchievement>
                 {
@@ -195,7 +197,7 @@ public class GetSessionsByProfileQueryHandlerTests
                 ProfileId = profileId,
                 Status = SessionStatus.Paused,
                 StartTime = DateTime.UtcNow.AddHours(-1),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             },
             new GameSession
             {
@@ -203,7 +205,7 @@ public class GetSessionsByProfileQueryHandlerTests
                 ProfileId = profileId,
                 Status = SessionStatus.InProgress,
                 StartTime = DateTime.UtcNow.AddMinutes(-30),
-                TargetAgeGroup = new AgeGroup { Value = "6-9" }
+                TargetAgeGroup = "6-9"
             }
         };
 

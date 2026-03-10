@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Badges;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -77,7 +79,7 @@ public class AwardBadgeUseCase
 
         await _badgeRepository.AddAsync(newBadge, ct);
 
-        userProfile.AddEarnedBadge(newBadge);
+        userProfile.EarnedBadges.Add(newBadge);
         await _userProfileRepository.UpdateAsync(userProfile, ct);
 
         await _unitOfWork.SaveChangesAsync(ct);

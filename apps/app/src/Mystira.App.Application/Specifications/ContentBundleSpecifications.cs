@@ -1,5 +1,7 @@
 using Ardalis.Specification;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Specifications;
 
@@ -24,7 +26,7 @@ public sealed class ContentBundlesByAgeGroupSpec : BaseEntitySpecification<Conte
 {
     public ContentBundlesByAgeGroupSpec(string ageGroup)
     {
-        Query.Where(b => b.AgeGroup == ageGroup)
+        Query.Where(b => b.AgeGroupId == ageGroup)
              .OrderBy(b => b.Title);
     }
 }

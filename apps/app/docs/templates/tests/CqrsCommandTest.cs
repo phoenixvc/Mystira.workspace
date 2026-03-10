@@ -4,7 +4,9 @@
 using FluentAssertions;
 using Mystira.App.Application.CQRS.Scenarios.Commands;
 using Mystira.Contracts.App.Requests.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Xunit;
 
 namespace Mystira.App.Application.Tests.CQRS.Scenarios;

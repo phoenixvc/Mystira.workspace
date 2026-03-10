@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Commands;
 
@@ -24,12 +26,14 @@ public static class ResumeGameSessionCommandHandler
             return null;
         }
 
-        if (!session.Resume())
+        if (session.Status != SessionStatus.Paused)
         {
             logger.LogWarning("Cannot resume session {SessionId} - not paused. Current status: {Status}",
                 command.SessionId, session.Status);
             return null;
         }
+
+        session.Resume();
 
         await repository.UpdateAsync(session, ct);
         await unitOfWork.SaveChangesAsync(ct);

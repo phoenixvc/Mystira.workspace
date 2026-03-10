@@ -1,4 +1,6 @@
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Shared.Exceptions;
 using Riok.Mapperly.Abstractions;
@@ -145,7 +147,7 @@ public static partial class ScenarioMapper
     private static SceneType ParseSceneType(string? type)
         => Enum.TryParse<SceneType>(type, true, out var sceneType)
             ? sceneType
-            : SceneType.Narrative;
+            : SceneType.Standard;
 
     private static int? ParseDifficulty(string? difficulty)
         => string.IsNullOrEmpty(difficulty) ? null : int.TryParse(difficulty, out var diff) ? diff : null;
@@ -166,8 +168,8 @@ public static partial class ScenarioMapper
             CompassChange = (b.CompassAxis != null || b.CompassDelta.HasValue)
                 ? new CompassChange
                 {
-                    Axis = b.CompassAxis ?? string.Empty,
-                    Delta = b.CompassDelta ?? 0.0
+                    AxisId = b.CompassAxis ?? string.Empty,
+                    Delta = (int)(b.CompassDelta ?? 0.0)
                 }
                 : null
         }).ToList() ?? new List<Branch>();

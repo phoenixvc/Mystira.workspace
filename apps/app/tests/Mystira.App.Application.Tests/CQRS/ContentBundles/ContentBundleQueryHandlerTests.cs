@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.ContentBundles.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.ContentBundles;
 
@@ -31,8 +33,8 @@ public class ContentBundleQueryHandlerTests
                 Id = "bundle-1",
                 Title = "Adventure Pack",
                 Description = "Exciting adventures for young explorers",
-                AgeGroup = "6-9",
-                IsFree = false,
+                AgeGroupId = "6-9",
+                PriceCents = 999,
                 ScenarioIds = new List<string> { "scenario-1", "scenario-2" }
             },
             new ContentBundle
@@ -40,8 +42,8 @@ public class ContentBundleQueryHandlerTests
                 Id = "bundle-2",
                 Title = "Story Time",
                 Description = "Bedtime stories for little ones",
-                AgeGroup = "3-5",
-                IsFree = true
+                AgeGroupId = "3-5",
+                PriceCents = 0
             }
         };
 
@@ -128,8 +130,8 @@ public class ContentBundleQueryHandlerTests
             Id = "complete-bundle",
             Title = "Complete Bundle",
             Description = "A fully populated bundle",
-            AgeGroup = "10-12",
-            IsFree = false,
+            AgeGroupId = "10-12",
+            PriceCents = 999,
             ImageId = "bundle-image-1",
             ScenarioIds = new List<string> { "s1", "s2", "s3" },
             Prices = new List<BundlePrice>
@@ -155,7 +157,7 @@ public class ContentBundleQueryHandlerTests
         returnedBundle.Id.Should().Be("complete-bundle");
         returnedBundle.Title.Should().Be("Complete Bundle");
         returnedBundle.Description.Should().Be("A fully populated bundle");
-        returnedBundle.AgeGroup.Should().Be("10-12");
+        returnedBundle.AgeGroupId.Should().Be("10-12");
         returnedBundle.IsFree.Should().BeFalse();
         returnedBundle.ImageId.Should().Be("bundle-image-1");
         returnedBundle.ScenarioIds.Should().HaveCount(3);
@@ -168,8 +170,8 @@ public class ContentBundleQueryHandlerTests
         // Arrange
         var bundles = new List<ContentBundle>
         {
-            new ContentBundle { Id = "free-bundle", Title = "Free Bundle", IsFree = true },
-            new ContentBundle { Id = "paid-bundle", Title = "Paid Bundle", IsFree = false }
+            new ContentBundle { Id = "free-bundle", Title = "Free Bundle", PriceCents = 0 },
+            new ContentBundle { Id = "paid-bundle", Title = "Paid Bundle", PriceCents = 999 }
         };
 
         var query = new GetAllContentBundlesQuery();
@@ -222,7 +224,7 @@ public class ContentBundleQueryHandlerTests
         {
             Id = "sp-bundle",
             Title = "Story Protocol Bundle",
-            StoryProtocol = new StoryProtocolMetadata
+            StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "0x123456",
                 RoyaltyModuleId = "royalty-1"

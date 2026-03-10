@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.UserProfiles;
 
@@ -28,7 +30,7 @@ public class GetUserProfileQueryHandlerTests
             Id = profileId,
             Name = "Test User",
             AccountId = "account-1",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var query = new GetUserProfileQuery(profileId);
@@ -48,7 +50,7 @@ public class GetUserProfileQueryHandlerTests
         result!.Id.Should().Be(profileId);
         result.Name.Should().Be("Test User");
         result.AccountId.Should().Be("account-1");
-        result.AgeGroupName.Should().Be("6-9");
+        result.AgeGroupId.Should().Be("middle_childhood");
     }
 
     [Fact]
@@ -139,7 +141,7 @@ public class GetUserProfileQueryHandlerTests
             Id = profileId,
             Name = "Complete User",
             AccountId = "account-456",
-            AgeGroupName = "10-12",
+            AgeGroupId = "preteen",
             AvatarMediaId = "avatar-1",
             IsGuest = false,
             HasCompletedOnboarding = true,
@@ -164,7 +166,7 @@ public class GetUserProfileQueryHandlerTests
         result!.Id.Should().Be(profileId);
         result.Name.Should().Be("Complete User");
         result.AccountId.Should().Be("account-456");
-        result.AgeGroupName.Should().Be("10-12");
+        result.AgeGroupId.Should().Be("preteen");
         result.AvatarMediaId.Should().Be("avatar-1");
         result.IsGuest.Should().BeFalse();
         result.HasCompletedOnboarding.Should().BeTrue();
@@ -225,17 +227,17 @@ public class GetUserProfileQueryHandlerTests
     }
 
     [Theory]
-    [InlineData("3-5")]
-    [InlineData("6-9")]
-    [InlineData("10-12")]
-    public async Task Handle_ReturnsProfilesWithDifferentAgeGroups(string ageGroup)
+    [InlineData("early_childhood")]
+    [InlineData("middle_childhood")]
+    [InlineData("preteen")]
+    public async Task Handle_ReturnsProfilesWithDifferentAgeGroups(string ageGroupId)
     {
         // Arrange
-        var profileId = $"profile-{ageGroup}";
+        var profileId = $"profile-{ageGroupId}";
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroupName = ageGroup
+            AgeGroupId = ageGroupId
         };
 
         var query = new GetUserProfileQuery(profileId);
@@ -252,6 +254,6 @@ public class GetUserProfileQueryHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.AgeGroupName.Should().Be(ageGroup);
+        result!.AgeGroupId.Should().Be(ageGroupId);
     }
 }

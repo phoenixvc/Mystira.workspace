@@ -40,16 +40,16 @@ public class GetSessionStatsUseCase
         session.RecalculateCompassProgressFromHistory();
 
         var compassValues = session.CompassValues.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.CurrentValue
+            cv => cv.Axis,
+            cv => cv.CurrentValue
         );
 
         var progress = session.PlayerCompassProgressTotals
             .Select(p => new PlayerCompassProgressDto
             {
-                PlayerId = p.PlayerId,
-                Axis = p.Axis,
-                Total = (int)Math.Round(p.Total)
+                PlayerId = string.Empty,
+                Axis = p.Key,
+                Total = p.Value
             })
             .ToList();
 
@@ -64,9 +64,9 @@ public class GetSessionStatsUseCase
             CompassValues = compassValues,
             PlayerCompassProgressTotals = progress,
             RecentEchoes = recentEchoes,
-            Achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>(),
+            Achievements = session.Achievements.Cast<object>().ToList(),
             TotalChoices = session.ChoiceHistory?.Count ?? 0,
-            SessionDuration = session.EndTime?.Subtract(session.StartTime) ?? DateTime.UtcNow.Subtract(session.StartTime)
+            SessionDuration = session.EndTime?.Subtract(session.StartTime ?? DateTime.MinValue) ?? DateTime.UtcNow.Subtract(session.StartTime ?? DateTime.MinValue)
         };
 
         _logger.LogDebug("Retrieved stats for game session: {SessionId}", sessionId);

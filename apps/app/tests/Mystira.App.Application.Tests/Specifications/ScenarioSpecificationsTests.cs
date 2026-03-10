@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Mystira.App.Application.Specifications;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.Specifications;
 
@@ -16,12 +18,12 @@ public class ScenarioSpecificationsTests
     {
         _scenarios = new List<Scenario>
         {
-            CreateScenario("1", "Dragon Quest", "children", DifficultyLevel.Easy, new[] { "fantasy", "featured" }, true),
-            CreateScenario("2", "Space Adventure", "teens", DifficultyLevel.Medium, new[] { "scifi" }, true),
-            CreateScenario("3", "Mystery Manor", "adults", DifficultyLevel.Hard, new[] { "mystery", "featured" }, true),
-            CreateScenario("4", "Pirate Treasure", "children", DifficultyLevel.Easy, new[] { "adventure" }, true),
-            CreateScenario("5", "Zombie Apocalypse", "teens", DifficultyLevel.Hard, new[] { "horror" }, false),
-            CreateScenario("6", "Dragon's Lair", "children", DifficultyLevel.Medium, new[] { "fantasy" }, true),
+            CreateScenario("1", "Dragon Quest", "early_childhood", DifficultyLevel.Easy, new[] { "fantasy", "featured" }, true),
+            CreateScenario("2", "Space Adventure", "teen", DifficultyLevel.Medium, new[] { "scifi" }, true),
+            CreateScenario("3", "Mystery Manor", "adult", DifficultyLevel.Hard, new[] { "mystery", "featured" }, true),
+            CreateScenario("4", "Pirate Treasure", "early_childhood", DifficultyLevel.Easy, new[] { "adventure" }, true),
+            CreateScenario("5", "Zombie Apocalypse", "teen", DifficultyLevel.Hard, new[] { "horror" }, false),
+            CreateScenario("6", "Dragon's Lair", "early_childhood", DifficultyLevel.Medium, new[] { "fantasy" }, true),
         };
     }
 
@@ -57,14 +59,14 @@ public class ScenarioSpecificationsTests
     public void ScenariosByAgeGroupSpec_ShouldFilterByAgeGroup()
     {
         // Arrange
-        var spec = new ScenariosByAgeGroupSpec("children");
+        var spec = new ScenariosByAgeGroupSpec("early_childhood");
 
         // Act
         var result = _scenarios.AsQueryable().Where(spec.WhereExpressions.First().Filter).ToList();
 
         // Assert
         result.Should().HaveCount(3);
-        result.Should().AllSatisfy(s => s.AgeGroup.Should().Be("children"));
+        result.Should().AllSatisfy(s => s.AgeGroupId.Should().Be("early_childhood"));
     }
 
     [Fact]
@@ -172,7 +174,7 @@ public class ScenarioSpecificationsTests
     private static Scenario CreateScenario(
         string id,
         string title,
-        string ageGroup,
+        string ageGroupId,
         DifficultyLevel difficulty,
         string[] tags,
         bool isActive)
@@ -181,7 +183,7 @@ public class ScenarioSpecificationsTests
         {
             Id = id,
             Title = title,
-            AgeGroup = ageGroup,
+            AgeGroupId = ageGroupId,
             Difficulty = difficulty,
             Tags = tags.ToList(),
             IsActive = isActive,
@@ -195,11 +197,11 @@ public class ScenarioSpecificationsTests
         {
             Id = id,
             Title = title,
-            AgeGroup = "children",
+            AgeGroupId = "early_childhood",
             Difficulty = DifficultyLevel.Easy,
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
-            Archetypes = archetypes.Select(a => new Archetype(a)).ToList()
+            Archetypes = archetypes.ToList()
         };
     }
 }

@@ -2,7 +2,9 @@ using Wolverine;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Application.CQRS.Archetypes.Queries;
 using Mystira.App.Api.Models;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Api.Controllers;
 

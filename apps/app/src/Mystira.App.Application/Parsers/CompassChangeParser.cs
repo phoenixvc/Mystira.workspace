@@ -1,4 +1,6 @@
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.Parsers;
@@ -21,7 +23,7 @@ public static class CompassChangeParser
         {
             throw new ValidationException("axis", "Required field 'axis' is missing or null in compass change data");
         }
-        compassChange.Axis = axisObj.ToString() ?? string.Empty;
+        compassChange.AxisId = axisObj.ToString() ?? string.Empty;
 
         // Parse Delta (required) with validation
         var deltaFound = compassChangeDict.TryGetValue("delta", out var deltaObj) ||
@@ -33,13 +35,13 @@ public static class CompassChangeParser
         {
             throw new ValidationException("delta", "Required field 'delta'/'change'/'impact' is invalid or null in compass change data");
         }
-        // Validate delta is between -1.0 and 1.0
-        compassChange.Delta = Math.Clamp(delta, -1.0, 1.0);
+        // Validate delta is between -100 and 100 (int range)
+        compassChange.Delta = (int)Math.Clamp(delta, -100.0, 100.0);
 
         if (compassChangeDict.TryGetValue("developmental_link", out var devLinkObj) ||
             compassChangeDict.TryGetValue("developmentalLink", out devLinkObj))
         {
-            compassChange.DevelopmentalLink = devLinkObj?.ToString();
+            compassChange.Reason = devLinkObj?.ToString();
         }
 
         return compassChange;

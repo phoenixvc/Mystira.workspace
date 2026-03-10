@@ -1,68 +1,51 @@
 using FluentAssertions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.ValueObjects;
 using Xunit;
 
 namespace Mystira.App.Application.Tests.Domain;
 
 public class AgeGroupConstantsTests
 {
-    #region AllAgeGroups Tests
+    #region GetAll Tests
 
     [Fact]
-    public void AllAgeGroups_ContainsExpectedGroups()
+    public void GetAll_ContainsExpectedGroups()
     {
         // Assert
-        AgeGroupConstants.AllAgeGroups.Should().HaveCount(6);
-        AgeGroupConstants.AllAgeGroups.Should().Contain("1-2");
-        AgeGroupConstants.AllAgeGroups.Should().Contain("3-5");
-        AgeGroupConstants.AllAgeGroups.Should().Contain("6-9");
-        AgeGroupConstants.AllAgeGroups.Should().Contain("10-12");
-        AgeGroupConstants.AllAgeGroups.Should().Contain("13-18");
-        AgeGroupConstants.AllAgeGroups.Should().Contain("19-150");
+        AgeGroupConstants.GetAll().Should().HaveCount(5);
+        AgeGroupConstants.GetAll().Should().Contain(AgeGroupConstants.EarlyChildhood);
+        AgeGroupConstants.GetAll().Should().Contain(AgeGroupConstants.MiddleChildhood);
+        AgeGroupConstants.GetAll().Should().Contain(AgeGroupConstants.Preteen);
+        AgeGroupConstants.GetAll().Should().Contain(AgeGroupConstants.Teen);
+        AgeGroupConstants.GetAll().Should().Contain(AgeGroupConstants.Adult);
     }
 
     #endregion
 
-    #region GetAgeGroupForAge Tests
+    #region AgeGroup.ForAge Tests
 
     [Theory]
-    [InlineData(1, "1-2")]
-    [InlineData(2, "1-2")]
-    [InlineData(3, "3-5")]
-    [InlineData(4, "3-5")]
-    [InlineData(5, "3-5")]
-    [InlineData(6, "6-9")]
-    [InlineData(7, "6-9")]
-    [InlineData(8, "6-9")]
-    [InlineData(9, "6-9")]
-    [InlineData(10, "10-12")]
-    [InlineData(11, "10-12")]
-    [InlineData(12, "10-12")]
-    [InlineData(13, "13-18")]
-    [InlineData(15, "13-18")]
-    [InlineData(18, "13-18")]
-    [InlineData(19, "19-150")]
-    [InlineData(25, "19-150")]
-    [InlineData(50, "19-150")]
-    public void GetAgeGroupForAge_ReturnsCorrectGroup(int age, string expectedGroup)
+    [InlineData(4, "early_childhood")]
+    [InlineData(6, "early_childhood")]
+    [InlineData(7, "middle_childhood")]
+    [InlineData(8, "middle_childhood")]
+    [InlineData(9, "middle_childhood")]
+    [InlineData(10, "preteen")]
+    [InlineData(11, "preteen")]
+    [InlineData(12, "preteen")]
+    [InlineData(13, "teen")]
+    [InlineData(15, "teen")]
+    [InlineData(17, "teen")]
+    [InlineData(18, "adult")]
+    [InlineData(25, "adult")]
+    [InlineData(50, "adult")]
+    public void ForAge_ReturnsCorrectGroup(int age, string expectedGroupId)
     {
         // Act
-        var result = AgeGroupConstants.GetAgeGroupForAge(age);
+        var result = AgeGroup.ForAge(age);
 
         // Assert
-        result.Should().Be(expectedGroup);
-    }
-
-    [Theory]
-    [InlineData(0, "1-2")]   // Edge case: under 1
-    [InlineData(-1, "1-2")]  // Edge case: negative
-    public void GetAgeGroupForAge_WithEdgeCases_ReturnsDefaultGroup(int age, string expectedGroup)
-    {
-        // Act
-        var result = AgeGroupConstants.GetAgeGroupForAge(age);
-
-        // Assert
-        result.Should().Be(expectedGroup);
+        result.Id.Should().Be(expectedGroupId);
     }
 
     #endregion
@@ -70,16 +53,15 @@ public class AgeGroupConstantsTests
     #region GetDisplayName Tests
 
     [Theory]
-    [InlineData("1-2", "Ages 1-2")]
-    [InlineData("3-5", "Ages 3-5")]
-    [InlineData("6-9", "Ages 6-9")]
-    [InlineData("10-12", "Ages 10-12")]
-    [InlineData("13-18", "Ages 13-18")]
-    [InlineData("19-150", "Ages 19+")]
-    public void GetDisplayName_ReturnsCorrectDisplayName(string ageGroup, string expectedName)
+    [InlineData("early_childhood", "Early Childhood (4-6)")]
+    [InlineData("middle_childhood", "Middle Childhood (7-9)")]
+    [InlineData("preteen", "Preteen (10-12)")]
+    [InlineData("teen", "Teen (13-17)")]
+    [InlineData("adult", "Adult (18+)")]
+    public void GetDisplayName_ReturnsCorrectDisplayName(string ageGroupId, string expectedName)
     {
         // Act
-        var result = AgeGroupConstants.GetDisplayName(ageGroup);
+        var result = AgeGroupConstants.GetDisplayName(ageGroupId);
 
         // Assert
         result.Should().Be(expectedName);

@@ -1,5 +1,7 @@
 using FluentAssertions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.Models;
 
@@ -14,21 +16,21 @@ public class UserProfileTests
         // Assert
         userProfile.Name.Should().BeEmpty();
         userProfile.PreferredFantasyThemes.Should().NotBeNull().And.BeEmpty();
-        userProfile.AgeGroup.Should().Be(new AgeGroup("6-9")); // Default value
+        userProfile.AgeGroupId.Should().BeNull();
         userProfile.HasCompletedOnboarding.Should().BeFalse();
         userProfile.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
     }
 
     [Fact]
-    public void UserProfile_CurrentAge_CalculatesCorrectly()
+    public void UserProfile_Age_CalculatesCorrectly()
     {
         // Arrange
         var userProfile = new UserProfile();
-        var today = DateTime.Today;
-        userProfile.DateOfBirth = new DateTime(today.Year - 10, today.Month, today.Day);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        userProfile.DateOfBirth = new DateOnly(today.Year - 10, today.Month, today.Day);
 
         // Act
-        var age = userProfile.CurrentAge;
+        var age = userProfile.Age;
 
         // Assert
         age.Should().Be(10);

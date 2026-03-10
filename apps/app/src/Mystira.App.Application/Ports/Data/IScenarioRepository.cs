@@ -1,5 +1,7 @@
 using System.Linq.Expressions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Ports.Data;

@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.UserProfiles;
 
@@ -31,14 +33,14 @@ public class GetProfilesByAccountQueryHandlerTests
                 Id = "profile-1",
                 AccountId = accountId,
                 Name = "Child One",
-                AgeGroup = new AgeGroup { Value = "6-9" }
+                AgeGroupId = "middle_childhood"
             },
             new UserProfile
             {
                 Id = "profile-2",
                 AccountId = accountId,
                 Name = "Child Two",
-                AgeGroup = new AgeGroup { Value = "10-12" }
+                AgeGroupId = "preteen"
             }
         };
 
@@ -133,7 +135,7 @@ public class GetProfilesByAccountQueryHandlerTests
                 Id = "profile-1",
                 AccountId = accountId,
                 Name = "Test Child",
-                AgeGroup = new AgeGroup { Value = "6-9" },
+                AgeGroupId = "middle_childhood",
                 AvatarMediaId = "avatar-001",
                 IsGuest = false,
                 HasCompletedOnboarding = true,
@@ -159,7 +161,7 @@ public class GetProfilesByAccountQueryHandlerTests
         profile.Id.Should().Be("profile-1");
         profile.AccountId.Should().Be(accountId);
         profile.Name.Should().Be("Test Child");
-        profile.AgeGroup!.Value.Should().Be("6-9");
+        profile.AgeGroupId.Should().Be("middle_childhood");
         profile.AvatarMediaId.Should().Be("avatar-001");
         profile.IsGuest.Should().BeFalse();
         profile.HasCompletedOnboarding.Should().BeTrue();

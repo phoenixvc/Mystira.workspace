@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
 
@@ -88,10 +90,10 @@ public class CreateGameSessionUseCaseTests
         var result = await _useCase.ExecuteAsync(request);
 
         result.IsSuccess.Should().BeTrue();
-        result.Data!.CompassValues.Should().ContainKey("courage");
-        result.Data.CompassValues.Should().ContainKey("honesty");
-        result.Data.CompassValues["courage"].CurrentValue.Should().Be(0.0f);
-        result.Data.CompassValues["honesty"].CurrentValue.Should().Be(0.0f);
+        result.Data!.CompassValues.Should().Contain(cv => cv.Axis == "courage");
+        result.Data.CompassValues.Should().Contain(cv => cv.Axis == "honesty");
+        result.Data.CompassValues.First(cv => cv.Axis == "courage").CurrentValue.Should().Be(0.0);
+        result.Data.CompassValues.First(cv => cv.Axis == "honesty").CurrentValue.Should().Be(0.0);
     }
 
     [Fact]
@@ -275,10 +277,10 @@ public class CreateGameSessionUseCaseTests
             Id = "test-scenario",
             Title = "Test Scenario",
             MinimumAge = 1,
-            CoreAxes = new List<CoreAxis>
+            CoreAxes = new List<string>
             {
-                new("courage"),
-                new("honesty")
+                "courage",
+                "honesty"
             },
             Scenes = new List<Scene>
             {

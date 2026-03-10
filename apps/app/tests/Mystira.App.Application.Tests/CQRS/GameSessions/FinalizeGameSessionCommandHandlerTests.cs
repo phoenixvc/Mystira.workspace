@@ -4,7 +4,9 @@ using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.CQRS.GameSessions;
@@ -55,7 +57,7 @@ public class FinalizeGameSessionCommandHandlerTests
         {
             ProfileId = "profile-1",
             ScenarioId = session.ScenarioId,
-            AxisScores = new Dictionary<string, float> { ["courage"] = 5.0f }
+            AxisScores = new Dictionary<string, int> { ["courage"] = 5 }
         };
         var badge = new UserBadge { BadgeName = "Brave Heart", Axis = "courage" };
 
@@ -201,11 +203,11 @@ public class FinalizeGameSessionCommandHandlerTests
         var profile = new UserProfile { Id = "profile-1", Name = "Alice" };
         var newScore = new PlayerScenarioScore
         {
-            AxisScores = new Dictionary<string, float> { ["courage"] = 3.0f }
+            AxisScores = new Dictionary<string, int> { ["courage"] = 3 }
         };
         var previousScore = new PlayerScenarioScore
         {
-            AxisScores = new Dictionary<string, float> { ["courage"] = 2.0f, ["wisdom"] = 1.5f }
+            AxisScores = new Dictionary<string, int> { ["courage"] = 2, ["wisdom"] = 1 }
         };
 
         SetupSession(session);
@@ -228,7 +230,7 @@ public class FinalizeGameSessionCommandHandlerTests
         // Assert - cumulative should be sum of all scores
         capturedCumulative.Should().NotBeNull();
         capturedCumulative!["courage"].Should().Be(5.0f);
-        capturedCumulative["wisdom"].Should().Be(1.5f);
+        capturedCumulative["wisdom"].Should().Be(1.0f);
     }
 
     [Fact]
@@ -309,7 +311,7 @@ public class FinalizeGameSessionCommandHandlerTests
     private void SetupDefaultScoring()
     {
         _scoringService.Setup(s => s.ScoreSessionAsync(It.IsAny<GameSession>(), It.IsAny<UserProfile>()))
-            .ReturnsAsync(new PlayerScenarioScore { AxisScores = new Dictionary<string, float>() });
+            .ReturnsAsync(new PlayerScenarioScore { AxisScores = new Dictionary<string, int>() });
         _scoreRepository.Setup(r => r.GetByProfileIdAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<PlayerScenarioScore>());
         _badgeService.Setup(b => b.AwardBadgesAsync(It.IsAny<UserProfile>(), It.IsAny<Dictionary<string, float>>()))
@@ -328,7 +330,7 @@ public class FinalizeGameSessionCommandHandlerTests
             CharacterAssignments = new List<SessionCharacterAssignment>(),
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
     }
 

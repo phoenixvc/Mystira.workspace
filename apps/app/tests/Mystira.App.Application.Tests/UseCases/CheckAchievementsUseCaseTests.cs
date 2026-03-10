@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 using Mystira.Shared.Locking;
 
@@ -114,14 +116,14 @@ public class CheckAchievementsUseCaseTests
     {
         // Arrange
         var session = CreateTestSession();
-        session.CompassValues = new Dictionary<string, CompassTracking>
+        session.CompassValues = new List<CompassTracking>
         {
-            ["courage"] = new CompassTracking
+            new CompassTracking
             {
                 Axis = "courage",
                 CurrentValue = 4.0, // Above default threshold of 3.0
-                StartingValue = 0.0,
-                History = new List<CompassChange>()
+                StartingValue = 0,
+                History = new List<CompassChangeRecord>()
             }
         };
 
@@ -129,8 +131,8 @@ public class CheckAchievementsUseCaseTests
         {
             Id = "courage-badge",
             Name = "Brave Heart",
-            Axis = "courage",
-            Threshold = 3.0f,
+            AxisId = "courage",
+            Threshold = 3,
             Message = "You showed great courage!"
         };
 
@@ -154,14 +156,14 @@ public class CheckAchievementsUseCaseTests
     {
         // Arrange
         var session = CreateTestSession();
-        session.CompassValues = new Dictionary<string, CompassTracking>
+        session.CompassValues = new List<CompassTracking>
         {
-            ["caution"] = new CompassTracking
+            new CompassTracking
             {
                 Axis = "caution",
                 CurrentValue = -4.0, // Absolute value above threshold
-                StartingValue = 0.0,
-                History = new List<CompassChange>()
+                StartingValue = 0,
+                History = new List<CompassChangeRecord>()
             }
         };
 
@@ -214,14 +216,14 @@ public class CheckAchievementsUseCaseTests
     {
         // Arrange
         var session = CreateTestSession();
-        session.CompassValues = new Dictionary<string, CompassTracking>
+        session.CompassValues = new List<CompassTracking>
         {
-            ["courage"] = new CompassTracking
+            new CompassTracking
             {
                 Axis = "courage",
                 CurrentValue = 2.0, // Below default threshold of 3.0
-                StartingValue = 0.0,
-                History = new List<CompassChange>()
+                StartingValue = 0,
+                History = new List<CompassChangeRecord>()
             }
         };
 
@@ -247,14 +249,14 @@ public class CheckAchievementsUseCaseTests
         {
             new SessionChoice { SceneId = "scene1", ChoiceText = "First choice" }
         };
-        session.CompassValues = new Dictionary<string, CompassTracking>
+        session.CompassValues = new List<CompassTracking>
         {
-            ["courage"] = new CompassTracking
+            new CompassTracking
             {
                 Axis = "courage",
                 CurrentValue = 4.0,
-                StartingValue = 0.0,
-                History = new List<CompassChange>()
+                StartingValue = 0,
+                History = new List<CompassChangeRecord>()
             }
         };
 
@@ -279,7 +281,7 @@ public class CheckAchievementsUseCaseTests
         // Arrange
         var session = CreateTestSession();
         session.ChoiceHistory = new List<SessionChoice>(); // No choices
-        session.CompassValues = new Dictionary<string, CompassTracking>(); // No compass values
+        session.CompassValues = new List<CompassTracking>(); // No compass values
 
         _sessionRepository.Setup(r => r.GetByIdAsync(session.Id, It.IsAny<CancellationToken>()))
             .ReturnsAsync(session);
@@ -308,7 +310,7 @@ public class CheckAchievementsUseCaseTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>()
+            CompassValues = new List<CompassTracking>()
         };
     }
 }

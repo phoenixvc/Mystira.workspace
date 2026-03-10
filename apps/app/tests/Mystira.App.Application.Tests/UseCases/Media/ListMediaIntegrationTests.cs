@@ -3,7 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
 using Mystira.Contracts.App.Requests.Media;
@@ -166,7 +168,7 @@ public class ListMediaIntegrationTests : IDisposable
             Description = description,
             Tags = new List<string>(),
             Hash = "abc123",
-            Version = "1.0",
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

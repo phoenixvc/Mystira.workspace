@@ -6,7 +6,9 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
 using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Media;
 
 namespace Mystira.App.Application.Tests.UseCases.Media;

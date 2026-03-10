@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases;
@@ -33,7 +35,7 @@ public class AddUserProfileToAccountUseCaseTests
     public async Task ExecuteAsync_WithValidIds_LinksProfileToAccount()
     {
         var account = new Account { Id = "acc-1", UserProfileIds = new List<string>() };
-        var profile = new UserProfile { Id = "profile-1", AccountId = null };
+        var profile = new UserProfile { Id = "profile-1", AccountId = null!};
 
         _accountRepository.Setup(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>()))
             .ReturnsAsync(account);

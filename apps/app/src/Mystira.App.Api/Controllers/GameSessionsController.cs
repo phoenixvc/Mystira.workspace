@@ -10,7 +10,9 @@ using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.GameSessions;
 using Mystira.App.Api.Models;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Api.Controllers;
 

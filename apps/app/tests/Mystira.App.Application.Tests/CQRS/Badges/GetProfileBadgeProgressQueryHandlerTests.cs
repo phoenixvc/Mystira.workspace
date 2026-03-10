@@ -2,7 +2,9 @@ using FluentAssertions;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Badges;
 
@@ -29,7 +31,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroup = new AgeGroup { Value = "6-9" }
+            AgeGroupId = "6-9"
         };
 
         var badges = new List<Badge>
@@ -46,9 +48,9 @@ public class GetProfileBadgeProgressQueryHandlerTests
             }
         };
 
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis { Id = "courage", Name = "Courage" }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage" }
         };
 
         var query = new GetProfileBadgeProgressQuery(profileId);
@@ -108,7 +110,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroup = new AgeGroup { Value = "6-9" }
+            AgeGroupId = "6-9"
         };
 
         var badges = new List<Badge>
@@ -148,9 +150,9 @@ public class GetProfileBadgeProgressQueryHandlerTests
             }
         };
 
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis { Id = "courage", Name = "Courage" }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage" }
         };
 
         var query = new GetProfileBadgeProgressQuery(profileId);
@@ -195,7 +197,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroup = new AgeGroup { Value = "6-9" }
+            AgeGroupId = "6-9"
         };
 
         var badges = new List<Badge>
@@ -223,9 +225,9 @@ public class GetProfileBadgeProgressQueryHandlerTests
             }
         };
 
-        var axes = new List<CompassAxis>
+        var axes = new List<CompassAxisDefinition>
         {
-            new CompassAxis { Id = "courage", Name = "Courage" }
+            new CompassAxisDefinition { Id = "courage", Name = "Courage" }
         };
 
         var query = new GetProfileBadgeProgressQuery(profileId);
@@ -262,7 +264,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroup = new AgeGroup { Value = "6-9" }
+            AgeGroupId = "6-9"
         };
 
         var query = new GetProfileBadgeProgressQuery(profileId);
@@ -272,7 +274,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         _badgeRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Badge>());
         _axisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
         _userBadgeRepository.Setup(r => r.GetByUserProfileIdAsync(profileId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<UserBadge>());
 
@@ -298,7 +300,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         var profile = new UserProfile
         {
             Id = profileId,
-            AgeGroup = null! // Intentionally null to test default age group fallback
+            AgeGroupId = null! // Intentionally null to test default age group fallback
         };
 
         var query = new GetProfileBadgeProgressQuery(profileId);
@@ -308,7 +310,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
         _badgeRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Badge>());
         _axisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>());
+            .ReturnsAsync(new List<CompassAxisDefinition>());
         _userBadgeRepository.Setup(r => r.GetByUserProfileIdAsync(profileId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<UserBadge>());
 

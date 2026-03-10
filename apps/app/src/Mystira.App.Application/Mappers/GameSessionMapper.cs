@@ -1,4 +1,6 @@
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Models.GameSessions;
 using Mystira.Contracts.App.Responses.GameSessions;
 using ContractCharacterAssignmentDto = Mystira.Contracts.App.Models.CharacterAssignmentDto;
@@ -26,12 +28,12 @@ public static class GameSessionMapper
             AccountId = session.AccountId,
             ProfileId = session.ProfileId,
             PlayerNames = session.PlayerNames,
-            CharacterAssignments = MapCharacterAssignments(session.CharacterAssignments),
+            CharacterAssignments = MapCharacterAssignments(session.CharacterAssignments?.ToList()),
             PlayerCompassProgressTotals = session.PlayerCompassProgressTotals.Select(p => new PlayerCompassProgressDto
             {
-                PlayerId = p.PlayerId,
-                Axis = p.Axis,
-                Total = (int)Math.Round(p.Total)
+                PlayerId = string.Empty,
+                Axis = p.Key,
+                Total = p.Value
             }).ToList(),
             Status = session.Status.ToString(),
             CurrentSceneId = session.CurrentSceneId,
@@ -43,7 +45,7 @@ public static class GameSessionMapper
             ElapsedTime = session.GetTotalElapsedTime(),
             IsPaused = session.Status == SessionStatus.Paused,
             SceneCount = session.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
-            TargetAgeGroup = session.TargetAgeGroup.Value
+            TargetAgeGroup = session.TargetAgeGroup ?? string.Empty
         };
     }
 
@@ -75,7 +77,7 @@ public static class GameSessionMapper
             IsUnused = ca.IsUnused,
             PlayerAssignment = ca.PlayerAssignment == null ? null : new PlayerAssignmentDto
             {
-                Type = ca.PlayerAssignment.Type,
+                Type = ca.PlayerAssignment.Type.ToString(),
                 ProfileId = ca.PlayerAssignment.ProfileId,
                 ProfileName = ca.PlayerAssignment.ProfileName,
                 ProfileImage = ca.PlayerAssignment.ProfileImage,
@@ -106,7 +108,7 @@ public static class GameSessionMapper
                 ? null
                 : new SessionPlayerAssignment
                 {
-                    Type = dto.PlayerAssignment.Type,
+                    Type = Enum.TryParse<PlayerType>(dto.PlayerAssignment?.Type, out var pt) ? pt : PlayerType.Profile,
                     ProfileId = dto.PlayerAssignment.ProfileId,
                     ProfileName = dto.PlayerAssignment.ProfileName,
                     ProfileImage = dto.PlayerAssignment.ProfileImage,

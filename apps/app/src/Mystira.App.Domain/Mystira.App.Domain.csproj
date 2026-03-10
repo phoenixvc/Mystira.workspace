@@ -26,6 +26,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\..\packages\domain\Mystira.Domain\Mystira.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
       <EmbeddedResource Include="Data\**\*.json" />
     </ItemGroup>
 

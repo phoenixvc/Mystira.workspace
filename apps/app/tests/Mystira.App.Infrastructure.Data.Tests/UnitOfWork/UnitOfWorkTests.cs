@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Data;
 
 namespace Mystira.App.Infrastructure.Data.Tests.UnitOfWork;
@@ -34,8 +36,8 @@ public class UnitOfWorkTests : IDisposable
         {
             Id = "badge-1",
             Name = "Test Badge",
-            Axis = "courage",
-            Threshold = 3.0f,
+            AxisId = "courage",
+            Threshold = (int?)3,
             Message = "Brave!"
         };
         await _context.Set<BadgeConfiguration>().AddAsync(badge);

@@ -3,7 +3,9 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Identity.Api.Services;
 
@@ -24,7 +26,7 @@ public class IdentityTokenService : IIdentityTokenService
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.Name, account.DisplayName),
             new(ClaimTypes.Email, account.Email),
-            new(ClaimTypes.Role, account.Role),
+            new(ClaimTypes.Role, account.Role ?? string.Empty),
             new("account_id", account.Id),
             new("auth_provider", authProvider)
         };

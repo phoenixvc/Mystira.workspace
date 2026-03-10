@@ -3,7 +3,9 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Validation;
 using Mystira.App.Application.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Scenarios;
@@ -45,10 +47,10 @@ public class UpdateScenarioUseCase
         scenario.Tags = request.Tags ?? new List<string>();
         scenario.Difficulty = ScenarioMapper.MapDifficultyLevel((int)request.Difficulty);
         scenario.SessionLength = ScenarioMapper.MapSessionLength((int)request.SessionLength);
-        scenario.Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes);
-        scenario.AgeGroup = request.AgeGroup;
+        scenario.Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes).Select(a => a.Value).ToList();
+        scenario.AgeGroupId = request.AgeGroup;
         scenario.MinimumAge = request.MinimumAge;
-        scenario.CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes);
+        scenario.CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes).Select(a => a.Value).ToList();
         scenario.Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>();
         scenario.Scenes = request.Scenes?.Select(ScenarioMapper.ToScene).ToList() ?? new List<Scene>();
 

@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Locking;
 using System.Threading;
 
@@ -100,8 +102,8 @@ public class MakeChoiceUseCase
             ? playerId
             : (!string.IsNullOrWhiteSpace(request.PlayerId) ? request.PlayerId : session.ProfileId);
 
-        var compassAxis = request.CompassAxis ?? branch.CompassChange?.Axis;
-        var compassDelta = request.CompassDelta ?? branch.CompassChange?.Delta;
+        var compassAxis = request.CompassAxis ?? branch.CompassChange?.AxisId;
+        var compassDelta = request.CompassDelta ?? (double?)branch.CompassChange?.Delta;
         var compassDirection = request.CompassDirection;
 
         var sessionChoice = new SessionChoice
@@ -113,11 +115,11 @@ public class MakeChoiceUseCase
             PlayerId = playerId ?? string.Empty,
             CompassAxis = compassAxis,
             CompassDirection = compassDirection,
-            CompassDelta = compassDelta,
+            CompassDelta = compassDelta ?? 0.0,
             ChosenAt = DateTime.UtcNow,
-            EchoGenerated = branch.EchoLog,
+            EchoGenerated = branch.EchoLog != null,
             CompassChange = !string.IsNullOrWhiteSpace(compassAxis) && compassDelta.HasValue
-                ? new CompassChange { Axis = compassAxis, Delta = compassDelta.Value }
+                ? new CompassChange { AxisId = compassAxis, Delta = (int)compassDelta.Value }
                 : null
         };
 
@@ -127,31 +129,31 @@ public class MakeChoiceUseCase
         {
             session.EchoHistory.Add(new EchoLog
             {
-                EchoType = branch.EchoLog.EchoType,
-                Description = branch.EchoLog.Description,
+                EchoTypeId = branch.EchoLog.EchoTypeId,
+                Content = branch.EchoLog.Content,
                 Strength = branch.EchoLog.Strength,
                 Timestamp = DateTime.UtcNow
             });
         }
 
-        session.CompassValues ??= new Dictionary<string, CompassTracking>();
+        session.CompassValues ??= new List<CompassTracking>();
         foreach (var axis in scenario.CoreAxes)
         {
-            if (!session.CompassValues.ContainsKey(axis.Value))
+            if (!session.CompassValues.Any(cv => cv.Axis == axis))
             {
-                session.CompassValues[axis.Value] = new CompassTracking
+                session.CompassValues.Add(new CompassTracking
                 {
-                    Axis = axis.Value,
+                    Axis = axis,
                     CurrentValue = 0.0,
-                    StartingValue = 0.0,
-                    History = new List<CompassChange>(),
+                    StartingValue = 0,
+                    History = new List<CompassChangeRecord>(),
                     LastUpdated = DateTime.UtcNow
-                };
+                });
             }
         }
 
         session.CurrentSceneId = request.NextSceneId;
-        session.ElapsedTime = DateTime.UtcNow - session.StartTime;
+        session.ElapsedTime = DateTime.UtcNow - (session.StartTime ?? DateTime.UtcNow);
 
         var nextScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.NextSceneId);
         if (nextScene == null || (!nextScene.Branches.Any() && string.IsNullOrEmpty(nextScene.NextSceneId)))

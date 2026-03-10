@@ -3,7 +3,9 @@ using Mystira.App.Application.Ports;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Contributors;
@@ -30,7 +32,7 @@ public class RegisterScenarioIpAssetUseCase
         _logger = logger;
     }
 
-    public async Task<StoryProtocolMetadata> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request, CancellationToken ct = default)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the scenario
         var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
@@ -68,7 +70,10 @@ public class RegisterScenarioIpAssetUseCase
             ct);
 
         // Update the scenario with Story Protocol metadata
-        scenario.StoryProtocol = storyProtocolMetadata;
+        scenario.StoryProtocol.IpAssetId = storyProtocolMetadata.IpAssetId;
+        scenario.StoryProtocol.RegistrationTxHash = storyProtocolMetadata.RegistrationTxHash;
+        scenario.StoryProtocol.RegisteredAt = storyProtocolMetadata.RegisteredAt;
+        scenario.StoryProtocol.IsRegistered = true;
 
         await _scenarioRepository.UpdateAsync(scenario, ct);
 
@@ -85,6 +90,6 @@ public class RegisterScenarioIpAssetUseCase
         _logger.LogInformation("Registered scenario {ScenarioId} as IP Asset: {IpAssetId}",
             scenarioId, storyProtocolMetadata.IpAssetId);
 
-        return storyProtocolMetadata;
+        return scenario.StoryProtocol;
     }
 }

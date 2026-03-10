@@ -1,7 +1,9 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Infrastructure.Data.Repositories;
 
@@ -16,7 +18,7 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
 
     public async Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default)
     {
-        return await _dbSet.Where(s => s.AgeGroup == ageGroup).ToListAsync(ct);
+        return await _dbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync(ct);
     }
 
     public async Task<Scenario?> GetByTitleAsync(string title, CancellationToken ct = default)

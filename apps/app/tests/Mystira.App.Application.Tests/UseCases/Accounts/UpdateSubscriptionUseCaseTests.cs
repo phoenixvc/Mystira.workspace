@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Accounts;
 using ContractSubscriptionType = Mystira.Contracts.App.Enums.SubscriptionType;
 using Mystira.Shared.Data.Repositories;
@@ -40,7 +42,7 @@ public class UpdateSubscriptionUseCaseTests
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
 
-        result.Subscription.Type.Should().Be(Mystira.App.Domain.Models.SubscriptionType.Monthly);
+        result.Subscription.Type.Should().Be(SubscriptionType.Monthly);
         _repository.Verify(r => r.UpdateAsync(account, It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }

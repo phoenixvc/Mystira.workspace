@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Models.GameSessions;
 using Mystira.Contracts.App.Responses.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Queries;
 
@@ -33,16 +35,16 @@ public static class GetSessionStatsQueryHandler
         session.RecalculateCompassProgressFromHistory();
 
         var compassValues = session.CompassValues?.ToDictionary(
-            kvp => kvp.Key,
-            kvp => kvp.Value.CurrentValue
+            cv => cv.Axis,
+            cv => cv.CurrentValue
         ) ?? new Dictionary<string, double>();
 
         var playerProgress = session.PlayerCompassProgressTotals
             .Select(p => new PlayerCompassProgressDto
             {
-                PlayerId = p.PlayerId,
-                Axis = p.Axis,
-                Total = (int)Math.Round(p.Total)
+                PlayerId = string.Empty,
+                Axis = p.Key,
+                Total = p.Value
             })
             .ToList();
 

@@ -4,7 +4,9 @@ using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.Tests.TestUtilities;
 using Mystira.App.Application.UseCases.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Scenarios;
 
 namespace Mystira.App.Application.Tests.UseCases.Scenarios;
@@ -134,11 +136,11 @@ public class GetScenariosIntegrationTests
             Id = id,
             Title = title,
             Description = "Test scenario",
-            AgeGroup = ageGroup,
+            AgeGroupId = ageGroup,
             MinimumAge = minAge,
             Tags = new List<string>(),
-            Archetypes = new List<Archetype>(),
-            CoreAxes = new List<CoreAxis>(),
+            Archetypes = new List<string>(),
+            CoreAxes = new List<string>(),
             Characters = new List<ScenarioCharacter>(),
             Scenes = new List<Scene>(),
             CreatedAt = DateTime.UtcNow

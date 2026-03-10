@@ -1,6 +1,8 @@
 using FluentAssertions;
 using Mystira.App.Application.Services;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.Services;
 
@@ -43,7 +45,7 @@ public class ScenarioGraphTraversalTests
                         new()
                         {
                             Choice = "End",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 1 }
                         }
                     }
                 }
@@ -74,13 +76,13 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Brave path",
                             NextSceneId = "scene-2a",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 2.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 2 }
                         },
                         new()
                         {
                             Choice = "Cautious path",
                             NextSceneId = "scene-2b",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = -1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = -1 }
                         }
                     }
                 },
@@ -111,7 +113,7 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Loop back",
                             NextSceneId = "scene-1", // Cycle!
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 1 }
                         }
                     }
                 }
@@ -143,7 +145,7 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Go forward",
                             NextSceneId = "scene-2",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 2.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 2 }
                         }
                     }
                 },
@@ -156,7 +158,7 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Loop back to start",
                             NextSceneId = "scene-1", // Cycle back to scene-1
-                            CompassChange = new CompassChange { Axis = "honesty", Delta = 3.0 }
+                            CompassChange = new CompassChange { AxisId = "honesty", Delta = 3 }
                         }
                     }
                 }
@@ -188,7 +190,7 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Go",
                             NextSceneId = "scene-2",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 1 }
                         }
                     }
                 },
@@ -200,7 +202,7 @@ public class ScenarioGraphTraversalTests
                         new()
                         {
                             Choice = "Continue",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 2.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 2 }
                         }
                     }
                 }
@@ -230,7 +232,7 @@ public class ScenarioGraphTraversalTests
                         {
                             Choice = "Go",
                             NextSceneId = "scene-2",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 1 }
                         }
                     }
                 },
@@ -242,7 +244,7 @@ public class ScenarioGraphTraversalTests
                         new()
                         {
                             Choice = "End",
-                            CompassChange = new CompassChange { Axis = "honesty", Delta = 2.0 }
+                            CompassChange = new CompassChange { AxisId = "honesty", Delta = 2 }
                         }
                     }
                 }
@@ -287,7 +289,7 @@ public class ScenarioGraphTraversalTests
                         new()
                         {
                             Choice = "End",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 1.0 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 1 }
                         }
                     }
                 }

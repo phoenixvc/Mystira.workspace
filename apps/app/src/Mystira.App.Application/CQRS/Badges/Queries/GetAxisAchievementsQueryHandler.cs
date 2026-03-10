@@ -1,5 +1,7 @@
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Responses.Badges;
 
 namespace Mystira.App.Application.CQRS.Badges.Queries;
@@ -23,7 +25,7 @@ public static class GetAxisAchievementsQueryHandler
         var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId, ct);
         var axes = await axisRepository.GetAllAsync();
 
-        var axisLookup = new Dictionary<string, CompassAxis>(StringComparer.OrdinalIgnoreCase);
+        var axisLookup = new Dictionary<string, CompassAxisDefinition>(StringComparer.OrdinalIgnoreCase);
         foreach (var a in axes)
         {
             if (!string.IsNullOrWhiteSpace(a.Id))

@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using ContractEnums = Mystira.Contracts.App.Enums;
 
 namespace Mystira.App.Application.Parsers;
@@ -142,11 +144,11 @@ public static class ScenarioParser
             Audio = character.Audio,
             Metadata = new CharacterMetadataRequest
             {
-                Role = character.Metadata.Role,
+                Role = character.Metadata.RoleIds,
                 Archetype = character.Metadata.Archetype.Select(a => a.Value).ToList(),
                 Species = character.Metadata.Species,
                 Age = character.Metadata.Age,
-                Traits = character.Metadata.Traits,
+                Traits = character.Metadata.TraitIds,
                 Backstory = character.Metadata.Backstory
             }
         };
@@ -173,7 +175,7 @@ public static class ScenarioParser
             {
                 Text = b.Choice,
                 NextSceneId = b.NextSceneId,
-                CompassAxis = b.CompassChange?.Axis,
+                CompassAxis = b.CompassChange?.AxisId,
                 CompassDelta = b.CompassChange?.Delta
             }).ToList(),
             EchoReveals = scene.EchoReveals.Select(e => new EchoRevealRequest

@@ -30,7 +30,7 @@ public static class GetBadgeDetailQueryHandler
             TierOrder = badge.TierOrder,
             Title = badge.Title,
             Description = badge.Description,
-            RequiredScore = badge.RequiredScore,
+            RequiredScore = badge.RequiredScore ?? 0,
             ImageId = badge.ImageId
         };
     }

@@ -1,6 +1,8 @@
 ﻿using Microsoft.JSInterop;
 using Moq;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.PWA.Services;
 using Mystira.App.PWA.Services.Music;
 using Xunit;

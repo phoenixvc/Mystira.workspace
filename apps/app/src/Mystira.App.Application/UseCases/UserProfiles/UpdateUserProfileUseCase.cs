@@ -1,7 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -38,29 +40,29 @@ public class UpdateUserProfileUseCase
         if (request.PreferredFantasyThemes != null)
         {
             // Validate fantasy themes
-            var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
+            var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.FromValue(t) == null).ToList();
             if (invalidThemes.Any())
             {
                 throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.Select(t => FantasyTheme.Parse(t)!).ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes;
         }
 
         if (request.AgeGroup != null)
         {
             // Validate age group
-            if (!AgeGroupConstants.AllAgeGroups.Contains(request.AgeGroup))
+            if (!AgeGroupConstants.GetAll().Contains(request.AgeGroup))
             {
-                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.AllAgeGroups)}");
+                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.GetAll())}");
             }
 
-            profile.AgeGroupName = request.AgeGroup;
+            profile.AgeGroupId = request.AgeGroup;
         }
 
         if (request.DateOfBirth.HasValue)
         {
-            profile.DateOfBirth = request.DateOfBirth;
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
             // Update age group automatically if date of birth is provided
             profile.UpdateAgeGroupFromBirthDate();
         }

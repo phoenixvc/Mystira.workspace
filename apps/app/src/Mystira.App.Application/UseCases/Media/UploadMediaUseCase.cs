@@ -5,7 +5,9 @@ using Mystira.App.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Media;
 using System.Threading;
 
@@ -72,7 +74,7 @@ public class UploadMediaUseCase
             Description = request.Description,
             Tags = request.Tags ?? new List<string>(),
             Hash = hash,
-            Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
+            Version = 1,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

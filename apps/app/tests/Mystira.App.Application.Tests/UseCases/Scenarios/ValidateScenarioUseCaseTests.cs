@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Scenarios;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.UseCases.Scenarios;
 
@@ -77,7 +79,7 @@ public class ValidateScenarioUseCaseTests
     public async Task ExecuteAsync_WithInvalidCoreAxis_ThrowsValidationException()
     {
         var scenario = CreateValidScenario();
-        scenario.CoreAxes = new List<CoreAxis> { new("nonexistent_axis") };
+        scenario.CoreAxes = new List<string> { "nonexistent_axis" };
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
@@ -100,7 +102,7 @@ public class ValidateScenarioUseCaseTests
     public async Task ExecuteAsync_WithEmptyCoreAxes_DoesNotThrow()
     {
         var scenario = CreateValidScenario();
-        scenario.CoreAxes = new List<CoreAxis>();
+        scenario.CoreAxes = new List<string>();
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
@@ -115,7 +117,7 @@ public class ValidateScenarioUseCaseTests
     public async Task ExecuteAsync_WithInvalidArchetype_ThrowsValidationException()
     {
         var scenario = CreateValidScenario();
-        scenario.Archetypes = new List<Archetype> { new("nonexistent_archetype") };
+        scenario.Archetypes = new List<string> { "nonexistent_archetype" };
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
@@ -377,7 +379,7 @@ public class ValidateScenarioUseCaseTests
     private void SetupValidAxesAndArchetypes()
     {
         _compassAxisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new List<CompassAxis>
+            .ReturnsAsync(new List<CompassAxisDefinition>
             {
                 new() { Id = "1", Name = "courage" },
                 new() { Id = "2", Name = "honesty" },
@@ -399,8 +401,8 @@ public class ValidateScenarioUseCaseTests
         {
             Id = "scenario-1",
             Title = "Valid Scenario",
-            CoreAxes = new List<CoreAxis> { new("courage"), new("honesty") },
-            Archetypes = new List<Archetype> { new("Hero") },
+            CoreAxes = new List<string> { "courage", "honesty" },
+            Archetypes = new List<string> { "Hero" },
             Characters = new List<ScenarioCharacter>
             {
                 new() { Id = "hero", Name = "Hero Character" }

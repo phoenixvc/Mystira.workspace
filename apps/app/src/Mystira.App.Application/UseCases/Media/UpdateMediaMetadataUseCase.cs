@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.Media;
@@ -61,7 +63,7 @@ public class UpdateMediaMetadataUseCase
         }
 
         mediaAsset.UpdatedAt = DateTime.UtcNow;
-        mediaAsset.Version = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ");
+        mediaAsset.Version += 1;
 
         await _repository.UpdateAsync(mediaAsset, ct);
         await _unitOfWork.SaveChangesAsync(ct);

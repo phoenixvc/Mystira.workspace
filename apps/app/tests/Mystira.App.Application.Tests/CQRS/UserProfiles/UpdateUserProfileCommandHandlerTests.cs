@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Shared.Data.Repositories;
 
@@ -32,7 +34,7 @@ public class UpdateUserProfileCommandHandlerTests
         {
             Id = profileId,
             Name = "Original Name",
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var request = new UpdateUserProfileRequest
@@ -95,7 +97,7 @@ public class UpdateUserProfileCommandHandlerTests
         var existingProfile = new UserProfile
         {
             Id = profileId,
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var request = new UpdateUserProfileRequest
@@ -117,7 +119,7 @@ public class UpdateUserProfileCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        result!.AgeGroupName.Should().Be("10-12");
+        result!.AgeGroupId.Should().Be("preteen");
     }
 
     [Fact]
@@ -128,7 +130,7 @@ public class UpdateUserProfileCommandHandlerTests
         var existingProfile = new UserProfile
         {
             Id = profileId,
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
         var request = new UpdateUserProfileRequest
@@ -162,14 +164,15 @@ public class UpdateUserProfileCommandHandlerTests
         var existingProfile = new UserProfile
         {
             Id = profileId,
-            AgeGroupName = "6-9"
+            AgeGroupId = "middle_childhood"
         };
 
-        var newBirthDate = DateTime.Today.AddYears(-15); // 15 years old -> 13-18
+        var newBirthDateTime = DateTime.Today.AddYears(-15); // 15 years old -> teen
+        var newBirthDate = DateOnly.FromDateTime(newBirthDateTime);
 
         var request = new UpdateUserProfileRequest
         {
-            DateOfBirth = newBirthDate
+            DateOfBirth = newBirthDateTime
         };
 
         _repository.Setup(r => r.GetByIdAsync(profileId, It.IsAny<CancellationToken>()))
@@ -187,7 +190,7 @@ public class UpdateUserProfileCommandHandlerTests
 
         // Assert
         result!.DateOfBirth.Should().Be(newBirthDate);
-        result.AgeGroupName.Should().Be("13-18");
+        result.AgeGroupId.Should().Be("teen");
     }
 
     [Fact]
@@ -396,7 +399,7 @@ public class UpdateUserProfileCommandHandlerTests
         var existingProfile = new UserProfile
         {
             Id = profileId,
-            PreferredFantasyThemes = new List<FantasyTheme> { new("Fantasy") }
+            PreferredFantasyThemes = new List<string> { "Fantasy" }
         };
 
         var request = new UpdateUserProfileRequest

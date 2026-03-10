@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Tests.CQRS.Badges;
 
@@ -48,7 +50,7 @@ public class CalculateBadgeScoresQueryHandlerTests
                         {
                             Choice = "Option A",
                             NextSceneId = "",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 10 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 10 }
                         }
                     }
                 }
@@ -231,7 +233,7 @@ public class CalculateBadgeScoresQueryHandlerTests
                         {
                             Choice = "Option A",
                             NextSceneId = "",
-                            CompassChange = new CompassChange { Axis = "wisdom", Delta = 5 }
+                            CompassChange = new CompassChange { AxisId = "wisdom", Delta = 5 }
                         }
                     }
                 }
@@ -285,13 +287,13 @@ public class CalculateBadgeScoresQueryHandlerTests
                         {
                             Choice = "Option A",
                             NextSceneId = "",
-                            CompassChange = new CompassChange { Axis = "courage", Delta = 10 }
+                            CompassChange = new CompassChange { AxisId = "courage", Delta = 10 }
                         },
                         new Branch
                         {
                             Choice = "Option B",
                             NextSceneId = "",
-                            CompassChange = new CompassChange { Axis = "wisdom", Delta = 15 }
+                            CompassChange = new CompassChange { AxisId = "wisdom", Delta = 15 }
                         }
                     }
                 }

@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Queries;
 
@@ -28,7 +30,7 @@ public static class GetAchievementsQueryHandler
             return new List<SessionAchievement>();
         }
 
-        var achievements = session.Achievements ?? new List<SessionAchievement>();
+        var achievements = session.Achievements?.ToList() ?? new List<SessionAchievement>();
 
         logger.LogDebug("Retrieved {Count} achievements for session {SessionId}",
             achievements.Count, request.SessionId);

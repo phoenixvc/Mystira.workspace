@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.Ports;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.Application.Services;
 
@@ -37,8 +39,7 @@ public class StubStoryProtocolService : IStoryProtocolService
             IpAssetId = $"stub-ip-{contentId}-{Guid.NewGuid():N}",
             RegistrationTxHash = $"0x{Guid.NewGuid():N}",
             RegisteredAt = DateTime.UtcNow,
-            RoyaltyModuleId = $"stub-royalty-{Guid.NewGuid():N}",
-            Contributors = contributors
+            RoyaltyModuleId = $"stub-royalty-{Guid.NewGuid():N}"
         };
 
         return Task.FromResult(metadata);
@@ -65,8 +66,7 @@ public class StubStoryProtocolService : IStoryProtocolService
         var metadata = new StoryProtocolMetadata
         {
             IpAssetId = ipAssetId,
-            RegisteredAt = DateTime.UtcNow,
-            Contributors = contributors
+            RegisteredAt = DateTime.UtcNow
         };
 
         return Task.FromResult(metadata);

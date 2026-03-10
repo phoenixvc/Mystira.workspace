@@ -5,7 +5,9 @@ using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Shared.Data.Repositories;
 using Mystira.Shared.Locking;
@@ -187,7 +189,7 @@ public class MakeChoiceCommandHandlerTests
             ChoiceHistory = new List<SessionChoice>(),
             EchoHistory = new List<EchoLog>(),
             Achievements = new List<SessionAchievement>(),
-            CompassValues = new Dictionary<string, CompassTracking>(),
+            CompassValues = new List<CompassTracking>(),
             CharacterAssignments = new List<SessionCharacterAssignment>()
         };
     }
@@ -199,7 +201,7 @@ public class MakeChoiceCommandHandlerTests
         {
             Id = scenarioId,
             Title = "Test Scenario",
-            CoreAxes = new List<CoreAxis>(),
+            CoreAxes = new List<string>(),
             Scenes = new List<Scene>
             {
                 new()

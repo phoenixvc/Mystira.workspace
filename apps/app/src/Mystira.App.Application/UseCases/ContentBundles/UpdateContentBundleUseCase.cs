@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Exceptions;
 using System.Threading;
 
@@ -75,12 +77,12 @@ public class UpdateContentBundleUseCase
 
         if (isFree.HasValue)
         {
-            bundle.IsFree = isFree.Value;
+            bundle.PriceCents = isFree.Value ? 0 : bundle.PriceCents;
         }
 
         if (ageGroup != null)
         {
-            bundle.AgeGroup = ageGroup;
+            bundle.AgeGroupId = ageGroup;
         }
 
         await _repository.UpdateAsync(bundle, ct);

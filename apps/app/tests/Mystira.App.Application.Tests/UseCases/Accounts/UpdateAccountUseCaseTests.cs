@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Requests.Accounts;
 using ContractAccountSettings = Mystira.Contracts.App.Models.AccountSettings;
 
@@ -60,7 +62,7 @@ public class UpdateAccountUseCaseTests
 
         var result = await _useCase.ExecuteAsync("acc-1", request);
 
-        result.Settings.PreferredLanguage.Should().Be("fr");
+        result.Settings!.PreferredLanguage.Should().Be("fr");
         result.Settings.NotificationsEnabled.Should().BeFalse();
         result.Settings.Theme.Should().Be("Dark");
     }

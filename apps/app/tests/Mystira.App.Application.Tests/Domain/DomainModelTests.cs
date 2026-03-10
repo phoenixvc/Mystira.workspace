@@ -1,5 +1,8 @@
 using FluentAssertions;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Utilities;
 using Xunit;
 
 namespace Mystira.App.Application.Tests.Domain;
@@ -9,10 +12,10 @@ public class DomainModelTests
     #region CoreAxis Tests
 
     [Fact]
-    public void CoreAxis_Constructor_SetsValue()
+    public void CoreAxis_StaticInstance_HasValue()
     {
         // Arrange & Act
-        var coreAxis = new CoreAxis("courage");
+        var coreAxis = CoreAxis.Courage;
 
         // Assert
         coreAxis.Value.Should().Be("courage");
@@ -22,7 +25,7 @@ public class DomainModelTests
     public void CoreAxis_ToString_ReturnsValue()
     {
         // Arrange
-        var coreAxis = new CoreAxis("wisdom");
+        var coreAxis = CoreAxis.Wisdom;
 
         // Act & Assert
         coreAxis.ToString().Should().Be("wisdom");
@@ -32,8 +35,8 @@ public class DomainModelTests
     public void CoreAxis_Equals_WithSameValue_ReturnsTrue()
     {
         // Arrange
-        var axis1 = new CoreAxis("integrity");
-        var axis2 = new CoreAxis("integrity");
+        var axis1 = CoreAxis.Parse("courage");
+        var axis2 = CoreAxis.Parse("courage");
 
         // Act & Assert
         axis1.Equals(axis2).Should().BeTrue();
@@ -44,19 +47,19 @@ public class DomainModelTests
     public void CoreAxis_Equals_CaseInsensitive()
     {
         // Arrange
-        var axis1 = new CoreAxis("Courage");
-        var axis2 = new CoreAxis("COURAGE");
+        var axis1 = CoreAxis.FromValue("Courage");
+        var axis2 = CoreAxis.FromValue("COURAGE");
 
         // Act & Assert
-        axis1.Equals(axis2).Should().BeTrue();
+        axis1!.Equals(axis2).Should().BeTrue();
     }
 
     [Fact]
     public void CoreAxis_Equals_WithDifferentValue_ReturnsFalse()
     {
         // Arrange
-        var axis1 = new CoreAxis("courage");
-        var axis2 = new CoreAxis("wisdom");
+        var axis1 = CoreAxis.Courage;
+        var axis2 = CoreAxis.Wisdom;
 
         // Act & Assert
         (axis1 != axis2).Should().BeTrue();
@@ -66,32 +69,39 @@ public class DomainModelTests
     public void CoreAxis_GetHashCode_SameForEqualValues()
     {
         // Arrange
-        var axis1 = new CoreAxis("Courage");
-        var axis2 = new CoreAxis("courage");
+        var axis1 = CoreAxis.FromValue("Courage");
+        var axis2 = CoreAxis.FromValue("courage");
 
         // Act & Assert
-        axis1.GetHashCode().Should().Be(axis2.GetHashCode());
+        axis1!.GetHashCode().Should().Be(axis2!.GetHashCode());
     }
 
     [Fact]
     public void CoreAxis_Parse_WithValidValue_ReturnsCoreAxis()
     {
         // Act
-        var result = CoreAxis.Parse("empathy");
+        var result = CoreAxis.Parse("courage");
 
         // Assert
         result.Should().NotBeNull();
-        result!.Value.Should().Be("empathy");
+        result.Value.Should().Be("courage");
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    [InlineData(null)]
-    public void CoreAxis_Parse_WithEmptyOrNull_ReturnsNull(string? value)
+    public void CoreAxis_Parse_WithEmptyOrWhitespace_Throws(string? value)
+    {
+        // Act & Assert
+        FluentActions.Invoking(() => CoreAxis.Parse(value!))
+            .Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void CoreAxis_FromValue_WithNull_ReturnsNull()
     {
         // Act
-        var result = CoreAxis.Parse(value);
+        var result = CoreAxis.FromValue(null);
 
         // Assert
         result.Should().BeNull();
@@ -102,10 +112,10 @@ public class DomainModelTests
     #region Archetype Tests
 
     [Fact]
-    public void Archetype_Constructor_SetsValue()
+    public void Archetype_StaticInstance_HasValue()
     {
         // Arrange & Act
-        var archetype = new Archetype("hero");
+        var archetype = Archetype.Hero;
 
         // Assert
         archetype.Value.Should().Be("hero");
@@ -115,18 +125,18 @@ public class DomainModelTests
     public void Archetype_ToString_ReturnsValue()
     {
         // Arrange
-        var archetype = new Archetype("mentor");
+        var archetype = Archetype.Hero;
 
         // Act & Assert
-        archetype.ToString().Should().Be("mentor");
+        archetype.ToString().Should().Be("hero");
     }
 
     [Fact]
     public void Archetype_Equals_WithSameValue_ReturnsTrue()
     {
         // Arrange
-        var arch1 = new Archetype("hero");
-        var arch2 = new Archetype("hero");
+        var arch1 = Archetype.Parse("hero");
+        var arch2 = Archetype.Parse("hero");
 
         // Act & Assert
         arch1.Equals(arch2).Should().BeTrue();
@@ -137,19 +147,19 @@ public class DomainModelTests
     public void Archetype_Equals_CaseInsensitive()
     {
         // Arrange
-        var arch1 = new Archetype("Hero");
-        var arch2 = new Archetype("HERO");
+        var arch1 = Archetype.FromValue("Hero");
+        var arch2 = Archetype.FromValue("HERO");
 
         // Act & Assert
-        arch1.Equals(arch2).Should().BeTrue();
+        arch1!.Equals(arch2).Should().BeTrue();
     }
 
     [Fact]
     public void Archetype_Equals_WithDifferentValue_ReturnsFalse()
     {
         // Arrange
-        var arch1 = new Archetype("hero");
-        var arch2 = new Archetype("villain");
+        var arch1 = Archetype.Hero;
+        var arch2 = Archetype.Sage;
 
         // Act & Assert
         (arch1 != arch2).Should().BeTrue();
@@ -159,32 +169,39 @@ public class DomainModelTests
     public void Archetype_GetHashCode_SameForEqualValues()
     {
         // Arrange
-        var arch1 = new Archetype("Hero");
-        var arch2 = new Archetype("hero");
+        var arch1 = Archetype.FromValue("Hero");
+        var arch2 = Archetype.FromValue("hero");
 
         // Act & Assert
-        arch1.GetHashCode().Should().Be(arch2.GetHashCode());
+        arch1!.GetHashCode().Should().Be(arch2!.GetHashCode());
     }
 
     [Fact]
     public void Archetype_Parse_WithValidValue_ReturnsArchetype()
     {
         // Act
-        var result = Archetype.Parse("trickster");
+        var result = Archetype.Parse("hero");
 
         // Assert
         result.Should().NotBeNull();
-        result!.Value.Should().Be("trickster");
+        result.Value.Should().Be("hero");
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    [InlineData(null)]
-    public void Archetype_Parse_WithEmptyOrNull_ReturnsNull(string? value)
+    public void Archetype_Parse_WithEmptyOrWhitespace_Throws(string? value)
+    {
+        // Act & Assert
+        FluentActions.Invoking(() => Archetype.Parse(value!))
+            .Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void Archetype_FromValue_WithNull_ReturnsNull()
     {
         // Act
-        var result = Archetype.Parse(value);
+        var result = Archetype.FromValue(null);
 
         // Assert
         result.Should().BeNull();
@@ -195,31 +212,31 @@ public class DomainModelTests
     #region EchoType Tests
 
     [Fact]
-    public void EchoType_Constructor_SetsValue()
+    public void EchoType_StaticInstance_HasValue()
     {
         // Arrange & Act
-        var echoType = new EchoType("discovery");
+        var echoType = EchoType.Memory;
 
         // Assert
-        echoType.Value.Should().Be("discovery");
+        echoType.Value.Should().Be("memory");
     }
 
     [Fact]
     public void EchoType_ToString_ReturnsValue()
     {
         // Arrange
-        var echoType = new EchoType("challenge");
+        var echoType = EchoType.Vision;
 
         // Act & Assert
-        echoType.ToString().Should().Be("challenge");
+        echoType.ToString().Should().Be("vision");
     }
 
     [Fact]
     public void EchoType_Equals_WithSameValue_ReturnsTrue()
     {
         // Arrange
-        var echo1 = new EchoType("discovery");
-        var echo2 = new EchoType("discovery");
+        var echo1 = EchoType.Parse("memory");
+        var echo2 = EchoType.Parse("memory");
 
         // Act & Assert
         echo1.Equals(echo2).Should().BeTrue();
@@ -230,19 +247,19 @@ public class DomainModelTests
     public void EchoType_Equals_CaseInsensitive()
     {
         // Arrange
-        var echo1 = new EchoType("Discovery");
-        var echo2 = new EchoType("DISCOVERY");
+        var echo1 = EchoType.FromValue("Memory");
+        var echo2 = EchoType.FromValue("MEMORY");
 
         // Act & Assert
-        echo1.Equals(echo2).Should().BeTrue();
+        echo1!.Equals(echo2).Should().BeTrue();
     }
 
     [Fact]
     public void EchoType_Equals_WithDifferentValue_ReturnsFalse()
     {
         // Arrange
-        var echo1 = new EchoType("discovery");
-        var echo2 = new EchoType("challenge");
+        var echo1 = EchoType.Memory;
+        var echo2 = EchoType.Vision;
 
         // Act & Assert
         (echo1 != echo2).Should().BeTrue();
@@ -252,32 +269,39 @@ public class DomainModelTests
     public void EchoType_GetHashCode_SameForEqualValues()
     {
         // Arrange
-        var echo1 = new EchoType("Challenge");
-        var echo2 = new EchoType("challenge");
+        var echo1 = EchoType.FromValue("Vision");
+        var echo2 = EchoType.FromValue("vision");
 
         // Act & Assert
-        echo1.GetHashCode().Should().Be(echo2.GetHashCode());
+        echo1!.GetHashCode().Should().Be(echo2!.GetHashCode());
     }
 
     [Fact]
     public void EchoType_Parse_WithValidValue_ReturnsEchoType()
     {
         // Act
-        var result = EchoType.Parse("transformation");
+        var result = EchoType.Parse("memory");
 
         // Assert
         result.Should().NotBeNull();
-        result!.Value.Should().Be("transformation");
+        result.Value.Should().Be("memory");
     }
 
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    [InlineData(null)]
-    public void EchoType_Parse_WithEmptyOrNull_ReturnsNull(string? value)
+    public void EchoType_Parse_WithEmptyOrWhitespace_Throws(string? value)
+    {
+        // Act & Assert
+        FluentActions.Invoking(() => EchoType.Parse(value!))
+            .Should().Throw<ArgumentException>();
+    }
+
+    [Fact]
+    public void EchoType_FromValue_WithNull_ReturnsNull()
     {
         // Act
-        var result = EchoType.Parse(value);
+        var result = EchoType.FromValue(null);
 
         // Assert
         result.Should().BeNull();
@@ -285,96 +309,23 @@ public class DomainModelTests
 
     #endregion
 
-    #region BadgeThresholds Tests
-
-    [Fact]
-    public void BadgeThresholds_AgeGroupThresholds_ContainsSchoolAgeGroup()
-    {
-        // Assert - BadgeThresholds uses name-based AgeGroups (school, preteens, teens)
-        // which may differ from the value-based approach in StringEnum
-        BadgeThresholds.AgeGroupThresholds.Should().NotBeEmpty();
-    }
-
-    [Fact]
-    public void BadgeThresholds_GetThresholdsForAgeGroup_WithUnknownGroup_ReturnsEmpty()
-    {
-        // Arrange - Create an age group that isn't in the thresholds
-        var ageGroup = new AgeGroup("unknown");
-
-        // Act
-        var thresholds = BadgeThresholds.GetThresholdsForAgeGroup(ageGroup);
-
-        // Assert
-        thresholds.Should().NotBeNull();
-        thresholds.Should().BeEmpty();
-    }
-
-    [Fact]
-    public void BadgeThresholds_GetThreshold_WithUnknownGroup_ReturnsZero()
-    {
-        // Arrange
-        var ageGroup = new AgeGroup("unknown");
-
-        // Act
-        var threshold = BadgeThresholds.GetThreshold(ageGroup, "kindness");
-
-        // Assert
-        threshold.Should().Be(0f);
-    }
-
-    [Fact]
-    public void BadgeThresholds_IsThresholdMet_WithZeroThreshold_AlwaysReturnsTrue()
-    {
-        // Arrange - Unknown axis returns 0 threshold
-        var ageGroup = new AgeGroup("unknown");
-
-        // Act
-        var result = BadgeThresholds.IsThresholdMet(ageGroup, "nonexistent", 0.0f);
-
-        // Assert
-        result.Should().BeTrue();
-    }
-
-    #endregion
-
     #region RandomNameGenerator Tests
 
     [Fact]
-    public void RandomNameGenerator_GenerateFantasyName_ReturnsNonEmptyString()
+    public void RandomNameGenerator_GenerateFirstName_ReturnsNonEmptyString()
     {
         // Act
-        var name = RandomNameGenerator.GenerateFantasyName();
+        var name = RandomNameGenerator.GenerateFirstName();
 
         // Assert
         name.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
-    public void RandomNameGenerator_GenerateAdjectiveName_ReturnsNameWithSpace()
+    public void RandomNameGenerator_GenerateFullName_ReturnsNameWithSpace()
     {
         // Act
-        var name = RandomNameGenerator.GenerateAdjectiveName();
-
-        // Assert
-        name.Should().NotBeNullOrEmpty();
-        name.Should().Contain(" ");
-    }
-
-    [Fact]
-    public void RandomNameGenerator_GenerateGuestName_WithoutAdjective_ReturnsSingleWord()
-    {
-        // Act
-        var name = RandomNameGenerator.GenerateGuestName(useAdjective: false);
-
-        // Assert
-        name.Should().NotBeNullOrEmpty();
-    }
-
-    [Fact]
-    public void RandomNameGenerator_GenerateGuestName_WithAdjective_ReturnsMultipleWords()
-    {
-        // Act
-        var name = RandomNameGenerator.GenerateGuestName(useAdjective: true);
+        var name = RandomNameGenerator.GenerateFullName();
 
         // Assert
         name.Should().NotBeNullOrEmpty();
@@ -382,24 +333,24 @@ public class DomainModelTests
     }
 
     [Fact]
-    public void RandomNameGenerator_GenerateUniqueGuestNames_ReturnsRequestedCount()
+    public void RandomNameGenerator_GenerateGuestName_ReturnsPrefixedName()
     {
         // Act
-        var names = RandomNameGenerator.GenerateUniqueGuestNames(5, useAdjective: false);
+        var name = RandomNameGenerator.GenerateGuestName();
+
+        // Assert
+        name.Should().NotBeNullOrEmpty();
+        name.Should().StartWith("Guest_");
+    }
+
+    [Fact]
+    public void RandomNameGenerator_GenerateFirstNames_ReturnsRequestedCount()
+    {
+        // Act
+        var names = RandomNameGenerator.GenerateFirstNames(5);
 
         // Assert
         names.Should().HaveCount(5);
-        names.Should().OnlyHaveUniqueItems();
-    }
-
-    [Fact]
-    public void RandomNameGenerator_GenerateUniqueGuestNames_WithAdjective_ReturnsUniqueNames()
-    {
-        // Act
-        var names = RandomNameGenerator.GenerateUniqueGuestNames(10, useAdjective: true);
-
-        // Assert
-        names.Should().HaveCount(10);
         names.Should().OnlyHaveUniqueItems();
     }
 
@@ -408,75 +359,73 @@ public class DomainModelTests
     #region AgeGroup Tests
 
     [Fact]
-    public void AgeGroup_Parse_SchoolAge_ReturnsCorrectAgeGroup()
-    {
-        // Act - Parse uses the "value" field from JSON ("6-9")
-        var ageGroup = AgeGroup.Parse("6-9");
-
-        // Assert
-        ageGroup.Should().NotBeNull();
-        ageGroup!.Value.Should().Be("6-9");
-    }
-
-    [Fact]
-    public void AgeGroup_Parse_Preteens_ReturnsCorrectAgeGroup()
-    {
-        // Act - Parse uses the "value" field from JSON ("10-12")
-        var ageGroup = AgeGroup.Parse("10-12");
-
-        // Assert
-        ageGroup.Should().NotBeNull();
-        ageGroup!.Value.Should().Be("10-12");
-    }
-
-    [Fact]
-    public void AgeGroup_Parse_Teens_ReturnsCorrectAgeGroup()
-    {
-        // Act - Parse uses the "value" field from JSON ("13-18")
-        var ageGroup = AgeGroup.Parse("13-18");
-
-        // Assert
-        ageGroup.Should().NotBeNull();
-        ageGroup!.Value.Should().Be("13-18");
-    }
-
-    [Fact]
-    public void AgeGroup_TryParse_WithValidValue_ReturnsTrue()
+    public void AgeGroup_Parse_MiddleChildhood_ReturnsCorrectAgeGroup()
     {
         // Act
-        var result = AgeGroup.TryParse("6-9", out var ageGroup);
+        var ageGroup = AgeGroup.Parse("middle_childhood");
 
         // Assert
-        result.Should().BeTrue();
         ageGroup.Should().NotBeNull();
+        ageGroup!.Id.Should().Be("middle_childhood");
     }
 
     [Fact]
-    public void AgeGroup_TryParse_WithInvalidValue_ReturnsFalse()
+    public void AgeGroup_Parse_Preteen_ReturnsCorrectAgeGroup()
     {
         // Act
-        var result = AgeGroup.TryParse("invalid", out var ageGroup);
+        var ageGroup = AgeGroup.Parse("preteen");
 
         // Assert
-        result.Should().BeFalse();
-        ageGroup.Should().BeNull();
+        ageGroup.Should().NotBeNull();
+        ageGroup!.Id.Should().Be("preteen");
     }
 
     [Fact]
-    public void AgeGroup_ValueMap_ContainsExpectedAgeGroups()
+    public void AgeGroup_Parse_Teen_ReturnsCorrectAgeGroup()
     {
-        // Assert - ValueMap uses "value" field from JSON
-        AgeGroup.ValueMap.Should().ContainKey("6-9");
-        AgeGroup.ValueMap.Should().ContainKey("10-12");
-        AgeGroup.ValueMap.Should().ContainKey("13-18");
+        // Act
+        var ageGroup = AgeGroup.Parse("teen");
+
+        // Assert
+        ageGroup.Should().NotBeNull();
+        ageGroup!.Id.Should().Be("teen");
+    }
+
+    [Fact]
+    public void AgeGroup_FromId_WithValidValue_ReturnsAgeGroup()
+    {
+        // Act
+        var result = AgeGroup.FromId("middle_childhood");
+
+        // Assert
+        result.Should().NotBeNull();
+    }
+
+    [Fact]
+    public void AgeGroup_FromId_WithInvalidValue_ReturnsNull()
+    {
+        // Act
+        var result = AgeGroup.FromId("invalid");
+
+        // Assert
+        result.Should().BeNull();
+    }
+
+    [Fact]
+    public void AgeGroup_All_ContainsExpectedValues()
+    {
+        // Assert
+        AgeGroup.All.Should().Contain(ag => ag.Id == "middle_childhood");
+        AgeGroup.All.Should().Contain(ag => ag.Id == "preteen");
+        AgeGroup.All.Should().Contain(ag => ag.Id == "teen");
     }
 
     [Fact]
     public void AgeGroup_Equals_WithSameValue_ReturnsTrue()
     {
         // Arrange
-        var group1 = AgeGroup.Parse("6-9");
-        var group2 = AgeGroup.Parse("6-9");
+        var group1 = AgeGroup.Parse("middle_childhood");
+        var group2 = AgeGroup.Parse("middle_childhood");
 
         // Act & Assert
         group1!.Equals(group2).Should().BeTrue();
@@ -485,43 +434,36 @@ public class DomainModelTests
     [Fact]
     public void AgeGroup_GetHashCode_SameForEqualValues()
     {
-        // Arrange - Note: case sensitivity depends on implementation
-        var group1 = new AgeGroup("6-9");
-        var group2 = new AgeGroup("6-9");
+        // Arrange
+        var group1 = AgeGroup.Parse("middle_childhood");
+        var group2 = AgeGroup.Parse("middle_childhood");
 
         // Act & Assert
-        group1.GetHashCode().Should().Be(group2.GetHashCode());
+        group1!.GetHashCode().Should().Be(group2!.GetHashCode());
     }
 
     [Fact]
-    public void AgeGroup_Constructor_ParsesMinMaxAge()
+    public void AgeGroup_ForAge_ReturnsCorrectAgeGroup()
     {
         // Arrange & Act
-        var ageGroup = new AgeGroup("10-12");
+        var ageGroup = AgeGroup.ForAge(10);
 
         // Assert
-        ageGroup.MinimumAge.Should().Be(10);
-        ageGroup.MaximumAge.Should().Be(12);
+        ageGroup.MinAge.Should().Be(10);
+        ageGroup.MaxAge.Should().Be(12);
     }
 
     [Fact]
-    public void AgeGroup_Constructor_WithInvalidFormat_UsesDefaults()
+    public void AgeGroup_Contains_ReturnsTrue_WhenAgeIsInRange()
     {
-        // Arrange & Act
-        var ageGroup = new AgeGroup("invalid");
+        // Arrange
+        var ageGroup = AgeGroup.Preteen;
 
-        // Assert - defaults to 6-9 range per the implementation
-        ageGroup.MinimumAge.Should().Be(6);
-        ageGroup.MaximumAge.Should().Be(9);
-    }
-
-    [Fact]
-    public void AgeGroup_All_ContainsExpectedValues()
-    {
         // Assert
-        AgeGroup.All.Should().Contain("6-9");
-        AgeGroup.All.Should().Contain("10-12");
-        AgeGroup.All.Should().Contain("13-18");
+        ageGroup.Contains(10).Should().BeTrue();
+        ageGroup.Contains(12).Should().BeTrue();
+        ageGroup.Contains(9).Should().BeFalse();
+        ageGroup.Contains(13).Should().BeFalse();
     }
 
     #endregion

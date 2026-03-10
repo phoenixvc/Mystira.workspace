@@ -4,7 +4,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.Ports;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.App.Infrastructure.Chain.Protos;
 
 namespace Mystira.App.Infrastructure.Chain.Services;
@@ -41,7 +43,7 @@ public class GrpcChainServiceAdapter : IStoryProtocolService, IAsyncDisposable
     public async Task<StoryProtocolMetadata> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
-        List<Domain.Models.Contributor> contributors,
+        List<Mystira.Domain.Models.Contributor> contributors,
         string? metadataUri = null,
         string? licenseTermsId = null,
         CancellationToken ct = default)
@@ -58,7 +60,7 @@ public class GrpcChainServiceAdapter : IStoryProtocolService, IAsyncDisposable
 
         try
         {
-            var grpcContributors = (contributors ?? new List<Domain.Models.Contributor>()).Select(c => new Protos.Contributor
+            var grpcContributors = (contributors ?? new List<Mystira.Domain.Models.Contributor>()).Select(c => new Protos.Contributor
             {
                 Name = c.Name,
                 Address = c.WalletAddress,
@@ -114,8 +116,7 @@ public class GrpcChainServiceAdapter : IStoryProtocolService, IAsyncDisposable
             {
                 IpAssetId = response.IpAssetId,
                 RegistrationTxHash = response.TxHash,
-                RegisteredAt = DateTime.UtcNow,
-                Contributors = contributors ?? new List<Domain.Models.Contributor>()
+                RegisteredAt = DateTime.UtcNow
             };
         }
         catch (OperationCanceledException) { throw; }
@@ -163,17 +164,6 @@ public class GrpcChainServiceAdapter : IStoryProtocolService, IAsyncDisposable
                 RegisteredAt = response.RegisteredAt?.ToDateTime()
             };
 
-            foreach (var c in response.Contributors)
-            {
-                metadata.Contributors.Add(new Domain.Models.Contributor
-                {
-                    Name = c.Name,
-                    WalletAddress = c.Address,
-                    Role = MapContributorRole(c.Type),
-                    ContributionPercentage = (decimal)c.SharePercentage
-                });
-            }
-
             return metadata;
         }
         catch (OperationCanceledException) { throw; }
@@ -184,11 +174,11 @@ public class GrpcChainServiceAdapter : IStoryProtocolService, IAsyncDisposable
         }
     }
 
-    public Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Domain.Models.Contributor> contributors, CancellationToken ct = default)
+    public Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Mystira.Domain.Models.Contributor> contributors, CancellationToken ct = default)
     {
         // Royalty split updates require on-chain transactions not yet in Chain proto
         _logger.LogWarning("UpdateRoyaltySplitAsync not yet supported by Chain gRPC for {IpAssetId}", ipAssetId);
-        return Task.FromResult(new StoryProtocolMetadata { IpAssetId = ipAssetId, Contributors = contributors });
+        return Task.FromResult(new StoryProtocolMetadata { IpAssetId = ipAssetId });
     }
 
     public Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null, CancellationToken ct = default)

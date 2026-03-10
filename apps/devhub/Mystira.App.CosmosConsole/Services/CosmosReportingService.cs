@@ -2,7 +2,9 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mystira.App.CosmosConsole.Data;
-using Mystira.App.Domain.Models;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.App.CosmosConsole.Services;
 
@@ -43,9 +45,9 @@ public class CosmosReportingService : ICosmosReportingService
                 return new SessionTableRow
                 {
                     SessionId = session.Id,
-                    StartedUtc = session.StartTime,
+                    StartedUtc = session.StartTime ?? DateTime.MinValue,
                     CompletedUtc = session.EndTime,
-                    Duration = session.EndTime.HasValue ? (session.EndTime.Value - session.StartTime).ToString(@"hh\:mm\:ss") : "",
+                    Duration = session.EndTime.HasValue && session.StartTime.HasValue ? (session.EndTime.Value - session.StartTime.Value).ToString(@"hh\:mm\:ss") : "",
                     Status = session.EndTime.HasValue ? "Completed" : "In Progress",
 
                     // Account information
