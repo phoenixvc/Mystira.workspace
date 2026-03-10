@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -76,7 +77,7 @@ public class CalculateBadgeScoresQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyBundleId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyBundleId_ThrowsValidationException()
     {
         // Arrange
         var query = new CalculateBadgeScoresQuery("", new List<double> { 50 });
@@ -90,12 +91,12 @@ public class CalculateBadgeScoresQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Content bundle ID*");
     }
 
     [Fact]
-    public async Task Handle_WithNullPercentiles_ThrowsArgumentException()
+    public async Task Handle_WithNullPercentiles_ThrowsValidationException()
     {
         // Arrange
         var query = new CalculateBadgeScoresQuery("bundle-123", null!);
@@ -109,12 +110,12 @@ public class CalculateBadgeScoresQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Percentiles*");
     }
 
     [Fact]
-    public async Task Handle_WithEmptyPercentiles_ThrowsArgumentException()
+    public async Task Handle_WithEmptyPercentiles_ThrowsValidationException()
     {
         // Arrange
         var query = new CalculateBadgeScoresQuery("bundle-123", new List<double>());
@@ -128,12 +129,12 @@ public class CalculateBadgeScoresQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Percentiles*");
     }
 
     [Fact]
-    public async Task Handle_WithInvalidPercentiles_ThrowsArgumentException()
+    public async Task Handle_WithInvalidPercentiles_ThrowsValidationException()
     {
         // Arrange
         var query = new CalculateBadgeScoresQuery("bundle-123", new List<double> { -10, 150 });
@@ -147,7 +148,7 @@ public class CalculateBadgeScoresQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*between 0 and 100*");
     }
 

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -28,11 +29,11 @@ public class ValidateScenarioUseCaseTests
     #region Null Input Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithNullScenario_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullScenario_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion
@@ -73,14 +74,14 @@ public class ValidateScenarioUseCaseTests
     #region CoreAxes Validation Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidCoreAxis_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidCoreAxis_ThrowsValidationException()
     {
         var scenario = CreateValidScenario();
         scenario.CoreAxes = new List<CoreAxis> { new("nonexistent_axis") };
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Invalid compass axis*nonexistent_axis*");
     }
 
@@ -111,14 +112,14 @@ public class ValidateScenarioUseCaseTests
     #region Archetype Validation Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidArchetype_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidArchetype_ThrowsValidationException()
     {
         var scenario = CreateValidScenario();
         scenario.Archetypes = new List<Archetype> { new("nonexistent_archetype") };
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Invalid archetype*nonexistent_archetype*");
     }
 
@@ -138,7 +139,7 @@ public class ValidateScenarioUseCaseTests
     #region Scene Reference Validation Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithNoScenes_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNoScenes_ThrowsValidationException()
     {
         var scenario = new Scenario
         {
@@ -148,12 +149,12 @@ public class ValidateScenarioUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*at least one scene*");
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullScenes_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullScenes_ThrowsValidationException()
     {
         var scenario = new Scenario
         {
@@ -163,11 +164,11 @@ public class ValidateScenarioUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidNextSceneReference_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidNextSceneReference_ThrowsValidationException()
     {
         var scenario = new Scenario
         {
@@ -186,12 +187,12 @@ public class ValidateScenarioUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*references non-existent next scene*");
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidBranchReference_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidBranchReference_ThrowsValidationException()
     {
         var scenario = new Scenario
         {
@@ -212,7 +213,7 @@ public class ValidateScenarioUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*branch references non-existent scene*");
     }
 
@@ -243,7 +244,7 @@ public class ValidateScenarioUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidEchoRevealReference_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidEchoRevealReference_ThrowsValidationException()
     {
         var scenario = new Scenario
         {
@@ -264,7 +265,7 @@ public class ValidateScenarioUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(scenario);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*echo reveal references non-existent scene*");
     }
 

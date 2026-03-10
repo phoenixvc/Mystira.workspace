@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -48,10 +49,10 @@ public class GetAccountByEmailUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyEmail_ThrowsArgumentException(string? email)
+    public async Task ExecuteAsync_WithNullOrEmptyEmail_ThrowsValidationException(string? email)
     {
         var act = () => _useCase.ExecuteAsync(email!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

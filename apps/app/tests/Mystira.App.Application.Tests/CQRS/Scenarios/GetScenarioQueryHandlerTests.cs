@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -78,7 +79,7 @@ public class GetScenarioQueryHandlerTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Handle_WithInvalidScenarioId_ThrowsArgumentException(string? scenarioId)
+    public async Task Handle_WithInvalidScenarioId_ThrowsValidationException(string? scenarioId)
     {
         // Arrange
         var query = new GetScenarioQuery(scenarioId!);
@@ -91,7 +92,7 @@ public class GetScenarioQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*cannot be null or empty*");
     }
 

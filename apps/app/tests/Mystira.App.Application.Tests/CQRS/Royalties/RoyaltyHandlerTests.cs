@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -35,7 +36,7 @@ public class RoyaltyHandlerTests
     }
 
     [Fact]
-    public async Task ClaimRoyalties_WithEmptyIpAssetId_ThrowsArgumentException()
+    public async Task ClaimRoyalties_WithEmptyIpAssetId_ThrowsValidationException()
     {
         var act = () => ClaimRoyaltiesCommandHandler.Handle(
             new ClaimRoyaltiesCommand("", "0xWallet123"),
@@ -43,11 +44,11 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<ClaimRoyaltiesCommand>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ClaimRoyalties_WithEmptyWallet_ThrowsArgumentException()
+    public async Task ClaimRoyalties_WithEmptyWallet_ThrowsValidationException()
     {
         var act = () => ClaimRoyaltiesCommandHandler.Handle(
             new ClaimRoyaltiesCommand("ip-1", ""),
@@ -55,7 +56,7 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<ClaimRoyaltiesCommand>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion
@@ -88,7 +89,7 @@ public class RoyaltyHandlerTests
     }
 
     [Fact]
-    public async Task PayRoyalty_WithEmptyIpAssetId_ThrowsArgumentException()
+    public async Task PayRoyalty_WithEmptyIpAssetId_ThrowsValidationException()
     {
         var act = () => PayRoyaltyCommandHandler.Handle(
             new PayRoyaltyCommand("", 100m),
@@ -96,11 +97,11 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<PayRoyaltyCommand>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task PayRoyalty_WithZeroAmount_ThrowsArgumentException()
+    public async Task PayRoyalty_WithZeroAmount_ThrowsValidationException()
     {
         var act = () => PayRoyaltyCommandHandler.Handle(
             new PayRoyaltyCommand("ip-1", 0m),
@@ -108,11 +109,11 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<PayRoyaltyCommand>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task PayRoyalty_WithNegativeAmount_ThrowsArgumentException()
+    public async Task PayRoyalty_WithNegativeAmount_ThrowsValidationException()
     {
         var act = () => PayRoyaltyCommandHandler.Handle(
             new PayRoyaltyCommand("ip-1", -50m),
@@ -120,7 +121,7 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<PayRoyaltyCommand>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion
@@ -151,7 +152,7 @@ public class RoyaltyHandlerTests
     }
 
     [Fact]
-    public async Task GetClaimableRoyalties_WithEmptyIpAssetId_ThrowsArgumentException()
+    public async Task GetClaimableRoyalties_WithEmptyIpAssetId_ThrowsValidationException()
     {
         var act = () => GetClaimableRoyaltiesQueryHandler.Handle(
             new GetClaimableRoyaltiesQuery(""),
@@ -159,7 +160,7 @@ public class RoyaltyHandlerTests
             Mock.Of<ILogger<GetClaimableRoyaltiesQuery>>(),
             CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

@@ -1,10 +1,15 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+import { invoke } from "@tauri-apps/api/core";
 import { useResourcesStore } from "../resourcesStore";
 import {
   mockTauriInvoke,
   mockAzureResourcesResponse,
   createTestResource,
 } from "../../test/utils";
+
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: vi.fn(),
+}));
 
 describe("resourcesStore", () => {
   beforeEach(() => {
@@ -58,9 +63,8 @@ describe("resourcesStore", () => {
     });
 
     it("should respect cache", async () => {
-      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
       const testResource = createTestResource();
-      invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
+      vi.mocked(invoke).mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
       // First fetch
       await useResourcesStore.getState().fetchResources();
@@ -72,9 +76,8 @@ describe("resourcesStore", () => {
     });
 
     it("should bypass cache with forceRefresh", async () => {
-      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
       const testResource = createTestResource();
-      invoke.mockResolvedValue(mockAzureResourcesResponse([testResource]));
+      vi.mocked(invoke).mockResolvedValue(mockAzureResourcesResponse([testResource]));
 
       // First fetch
       await useResourcesStore.getState().fetchResources();
@@ -86,8 +89,7 @@ describe("resourcesStore", () => {
     });
 
     it("should prevent duplicate concurrent requests", async () => {
-      const { invoke } = vi.mocked(await import("@tauri-apps/api/core"));
-      invoke.mockImplementation(
+      vi.mocked(invoke).mockImplementation(
         () =>
           new Promise((resolve) =>
             setTimeout(() => resolve(mockAzureResourcesResponse([])), 100)

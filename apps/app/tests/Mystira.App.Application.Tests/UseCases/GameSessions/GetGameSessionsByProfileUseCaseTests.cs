@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -51,10 +52,10 @@ public class GetGameSessionsByProfileUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyProfileId_ThrowsArgumentException(string? profileId)
+    public async Task ExecuteAsync_WithNullOrEmptyProfileId_ThrowsValidationException(string? profileId)
     {
         var act = () => _useCase.ExecuteAsync(profileId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

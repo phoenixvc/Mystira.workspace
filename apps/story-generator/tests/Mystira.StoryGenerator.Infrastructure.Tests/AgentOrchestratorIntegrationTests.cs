@@ -23,10 +23,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
     private readonly Mock<ILogger<AgentOrchestrator>> _mockLogger;
     private readonly Mock<IAgentStreamPublisher> _mockEventPublisher;
     private readonly Mock<IStorySessionRepository> _mockSessionRepository;
-    private readonly Mock<FoundryAgentClient> _mockFoundryClient;
+    private readonly Mock<IFoundryAgentClient> _mockFoundryClient;
     private readonly Mock<IKnowledgeProvider> _mockKnowledgeProvider;
     private readonly Mock<IPromptGenerator> _mockPromptGenerator;
-    private readonly Mock<StorySchemaValidator> _mockSchemaValidator;
+    private readonly Mock<IStorySchemaValidator> _mockSchemaValidator;
     private readonly Mock<IStorySchemaProvider> _mockSchemaProvider;
     private readonly Mock<IStoryMediaProcessor> _mockMediaProcessor;
     private readonly Mock<IOptions<FoundryAgentConfig>> _mockConfig;
@@ -38,10 +38,10 @@ public class AgentOrchestratorIntegrationTests : IDisposable
         _mockLogger = new Mock<ILogger<AgentOrchestrator>>();
         _mockEventPublisher = new Mock<IAgentStreamPublisher>();
         _mockSessionRepository = new Mock<IStorySessionRepository>();
-        _mockFoundryClient = new Mock<FoundryAgentClient>();
+        _mockFoundryClient = new Mock<IFoundryAgentClient>();
         _mockKnowledgeProvider = new Mock<IKnowledgeProvider>();
         _mockPromptGenerator = new Mock<IPromptGenerator>();
-        _mockSchemaValidator = new Mock<StorySchemaValidator>();
+        _mockSchemaValidator = new Mock<IStorySchemaValidator>();
         _mockSchemaProvider = new Mock<IStorySchemaProvider>();
         _mockMediaProcessor = new Mock<IStoryMediaProcessor>();
         _mockConfig = new Mock<IOptions<FoundryAgentConfig>>();

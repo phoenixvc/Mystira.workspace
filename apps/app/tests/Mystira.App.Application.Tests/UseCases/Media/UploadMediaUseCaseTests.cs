@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -32,17 +33,17 @@ public class UploadMediaUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         // Act
         var act = () => _useCase.ExecuteAsync(null!);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullFileStream_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullFileStream_ThrowsValidationException()
     {
         // Arrange
         var request = new UploadMediaRequest
@@ -57,11 +58,11 @@ public class UploadMediaUseCaseTests
         var act = () => _useCase.ExecuteAsync(request);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithZeroFileSize_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithZeroFileSize_ThrowsValidationException()
     {
         // Arrange
         using var stream = new MemoryStream(new byte[] { 1 });
@@ -77,7 +78,7 @@ public class UploadMediaUseCaseTests
         var act = () => _useCase.ExecuteAsync(request);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

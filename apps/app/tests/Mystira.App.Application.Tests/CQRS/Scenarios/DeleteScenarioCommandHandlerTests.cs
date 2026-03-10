@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -50,12 +51,12 @@ public class DeleteScenarioCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyScenarioId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyScenarioId_ThrowsValidationException()
     {
         var act = () => DeleteScenarioCommandHandler.Handle(
             new DeleteScenarioCommand(""),
             _repository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

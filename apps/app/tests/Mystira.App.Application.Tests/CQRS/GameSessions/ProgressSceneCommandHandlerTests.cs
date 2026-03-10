@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -75,7 +76,7 @@ public class ProgressSceneCommandHandlerTests
     [Theory]
     [InlineData("", "scene-1")]
     [InlineData("session-1", "")]
-    public async Task Handle_MissingRequiredFields_ThrowsArgumentException(string sessionId, string sceneId)
+    public async Task Handle_MissingRequiredFields_ThrowsValidationException(string sessionId, string sceneId)
     {
         var request = new ProgressSceneRequest { SessionId = sessionId, SceneId = sceneId };
         var command = new ProgressSceneCommand(request);
@@ -83,7 +84,7 @@ public class ProgressSceneCommandHandlerTests
         var act = () => ProgressSceneCommandHandler.Handle(
             command, _repository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

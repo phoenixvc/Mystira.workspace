@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -53,10 +54,10 @@ public class GetBadgesByAxisUseCaseTests
     [InlineData("", "courage")]
     [InlineData("profile-1", null)]
     [InlineData("profile-1", "")]
-    public async Task ExecuteAsync_WithNullOrEmptyInputs_ThrowsArgumentException(string? profileId, string? axis)
+    public async Task ExecuteAsync_WithNullOrEmptyInputs_ThrowsValidationException(string? profileId, string? axis)
     {
         var act = () => _useCase.ExecuteAsync(profileId!, axis!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

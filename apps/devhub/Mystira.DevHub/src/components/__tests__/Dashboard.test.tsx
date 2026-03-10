@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { invoke } from "@tauri-apps/api/core";
 import { useConnectionStore } from "../../stores/connectionStore";
 import {
   mockConnectionTestSuccess,
@@ -6,6 +7,10 @@ import {
   renderWithProviders,
 } from "../../test/utils";
 import Dashboard from "../dashboard/Dashboard";
+
+vi.mock("@tauri-apps/api/core", () => ({
+  invoke: vi.fn(),
+}));
 
 describe("Dashboard", () => {
   const mockNavigate = vi.fn();
@@ -38,7 +43,6 @@ describe("Dashboard", () => {
   });
 
   it("should test connections on mount", async () => {
-    const { invoke } = await import("@tauri-apps/api/core");
     vi.mocked(invoke).mockResolvedValue(mockConnectionTestSuccess("test", {}));
 
     renderWithProviders(<Dashboard onNavigate={mockNavigate} />);

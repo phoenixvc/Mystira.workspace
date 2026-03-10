@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -62,10 +63,10 @@ public class AwardBadgeUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

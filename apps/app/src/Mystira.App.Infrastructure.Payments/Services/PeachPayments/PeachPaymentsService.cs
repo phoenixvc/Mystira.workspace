@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
@@ -213,7 +214,7 @@ public class PeachPaymentsService : IPaymentService
                 EventId = webhookData.Id ?? Guid.NewGuid().ToString(),
                 Type = eventType,
                 TransactionId = webhookData.PaymentId ?? string.Empty,
-                Amount = decimal.TryParse(webhookData.Amount, out var amount) ? amount : null,
+                Amount = decimal.TryParse(webhookData.Amount, NumberStyles.Any, CultureInfo.InvariantCulture, out var amount) ? amount : null,
                 Currency = webhookData.Currency,
                 PaymentStatus = paymentStatus,
                 Timestamp = webhookData.Timestamp ?? DateTime.UtcNow,
@@ -246,7 +247,7 @@ public class PeachPaymentsService : IPaymentService
             {
                 TransactionId = transactionId,
                 Status = status ?? PaymentResultStatus.Pending,
-                Amount = decimal.TryParse(result?.Amount, out var amount) ? amount : 0,
+                Amount = decimal.TryParse(result?.Amount, NumberStyles.Any, CultureInfo.InvariantCulture, out var amount) ? amount : 0,
                 Currency = result?.Currency ?? "ZAR",
                 CreatedAt = result?.Timestamp ?? DateTime.UtcNow,
                 CompletedAt = status == PaymentResultStatus.Succeeded ? result?.Timestamp : null,

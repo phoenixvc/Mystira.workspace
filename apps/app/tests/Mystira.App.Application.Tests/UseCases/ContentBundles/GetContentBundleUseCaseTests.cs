@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -49,10 +50,10 @@ public class GetContentBundleUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? bundleId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? bundleId)
     {
         var act = () => _useCase.ExecuteAsync(bundleId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

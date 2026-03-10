@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -93,9 +94,9 @@ public class DeleteMediaUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? mediaId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? mediaId)
     {
         var act = () => _useCase.ExecuteAsync(mediaId!);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

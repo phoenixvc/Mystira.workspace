@@ -32,8 +32,8 @@ public class StorySessionRepositoryTests
         Assert.NotNull(session.StoryVersions);
         Assert.Null(session.LastEvaluationReport);
         Assert.Null(session.UserFocus);
-        Assert.Equal(default, session.CreatedAt);
-        Assert.Equal(default, session.UpdatedAt);
+        Assert.True(session.CreatedAt <= DateTime.UtcNow && session.CreatedAt > DateTime.UtcNow.AddSeconds(-5), "CreatedAt should default to approximately DateTime.UtcNow");
+        Assert.True(session.UpdatedAt <= DateTime.UtcNow && session.UpdatedAt > DateTime.UtcNow.AddSeconds(-5), "UpdatedAt should default to approximately DateTime.UtcNow");
         Assert.Equal(0m, session.CostEstimate);
     }
 
@@ -71,7 +71,7 @@ public class StorySessionRepositoryTests
         // Assert
         Assert.Equal(0, snapshot.VersionNumber);
         Assert.Equal(string.Empty, snapshot.StoryJson);
-        Assert.Equal(default, snapshot.CreatedAt);
+        Assert.True(snapshot.CreatedAt <= DateTime.UtcNow && snapshot.CreatedAt > DateTime.UtcNow.AddSeconds(-5), "CreatedAt should default to approximately DateTime.UtcNow");
         Assert.Equal(string.Empty, snapshot.StageWhenCreated);
         Assert.Equal(0, snapshot.IterationNumber);
     }
@@ -103,7 +103,7 @@ public class StorySessionRepositoryTests
 
         // Assert
         Assert.Equal(0, report.IterationNumber);
-        Assert.Equal(default, report.EvaluationTimestamp);
+        Assert.True(report.EvaluationTimestamp <= DateTime.UtcNow && report.EvaluationTimestamp > DateTime.UtcNow.AddSeconds(-5), "EvaluationTimestamp should default to approximately DateTime.UtcNow");
         Assert.Equal(EvaluationStatus.Pass, report.OverallStatus);
         Assert.False(report.SafetyGatePassed);
         Assert.Equal(0f, report.AxesAlignmentScore);

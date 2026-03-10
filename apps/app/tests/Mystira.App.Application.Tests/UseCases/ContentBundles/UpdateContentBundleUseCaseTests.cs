@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -58,25 +59,25 @@ public class UpdateContentBundleUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistingBundle_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistingBundle_ThrowsValidationException()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(ContentBundle));
 
         var act = () => _useCase.ExecuteAsync("missing", title: "New Title");
 
-        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*not found*");
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("*not found*");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyBundleId_ThrowsArgumentException(string? bundleId)
+    public async Task ExecuteAsync_WithNullOrEmptyBundleId_ThrowsValidationException(string? bundleId)
     {
         var act = () => _useCase.ExecuteAsync(bundleId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

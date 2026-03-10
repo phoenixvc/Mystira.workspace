@@ -72,7 +72,7 @@ public class FoundryAgentClientConfig
 /// Azure AI Foundry Agent Client Wrapper.
 /// Provides a thread-safe singleton pattern for interacting with Azure AI Foundry Agent Service.
 /// </summary>
-public class FoundryAgentClient : IDisposable
+public class FoundryAgentClient : IFoundryAgentClient
 {
     private static FoundryAgentClient? _instance;
     private static readonly object _lock = new();

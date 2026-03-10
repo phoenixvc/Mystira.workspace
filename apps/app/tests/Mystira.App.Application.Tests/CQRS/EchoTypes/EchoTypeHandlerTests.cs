@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -52,7 +53,7 @@ public class EchoTypeHandlerTests
     }
 
     [Fact]
-    public async Task Create_WithEmptyName_ThrowsArgumentException()
+    public async Task Create_WithEmptyName_ThrowsValidationException()
     {
         var command = new CreateEchoTypeCommand("", "Description", "moral");
 
@@ -60,7 +61,7 @@ public class EchoTypeHandlerTests
             command, _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion
@@ -237,7 +238,7 @@ public class EchoTypeHandlerTests
     #region Category Validation Tests
 
     [Fact]
-    public async Task Create_WithInvalidCategory_ThrowsArgumentException()
+    public async Task Create_WithInvalidCategory_ThrowsValidationException()
     {
         var command = new CreateEchoTypeCommand("Echo", "Description", "invalid_category");
 
@@ -245,7 +246,7 @@ public class EchoTypeHandlerTests
             command, _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Theory]
@@ -268,7 +269,7 @@ public class EchoTypeHandlerTests
     }
 
     [Fact]
-    public async Task Update_WithInvalidCategory_ThrowsArgumentException()
+    public async Task Update_WithInvalidCategory_ThrowsValidationException()
     {
         var existing = new EchoTypeDefinition { Id = "echo-1", Name = "Echo", Category = "moral" };
         _repository.Setup(r => r.GetByIdAsync("echo-1", It.IsAny<CancellationToken>()))
@@ -279,7 +280,7 @@ public class EchoTypeHandlerTests
             _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

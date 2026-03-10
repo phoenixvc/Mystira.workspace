@@ -1,5 +1,5 @@
 {
-  "extends": "../../configs/typescript/tsconfig.react-vite.json",
+  "extends": "../../../configs/typescript/tsconfig.react-vite.json",
   "compilerOptions": {
     "moduleDetection": "force",
 

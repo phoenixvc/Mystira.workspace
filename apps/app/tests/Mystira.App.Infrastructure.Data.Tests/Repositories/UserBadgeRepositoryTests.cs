@@ -190,6 +190,8 @@ public class UserBadgeRepositoryTests : IDisposable
             Id = Guid.NewGuid().ToString(),
             UserProfileId = userProfileId,
             BadgeConfigurationId = badgeConfigId ?? Guid.NewGuid().ToString(),
+            BadgeName = "Test Badge",
+            BadgeMessage = "Test badge message",
             GameSessionId = gameSessionId ?? Guid.NewGuid().ToString(),
             ScenarioId = scenarioId ?? Guid.NewGuid().ToString(),
             Axis = axis ?? "default",

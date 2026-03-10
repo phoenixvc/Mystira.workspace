@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -72,27 +73,27 @@ public class AddUserProfileToAccountUseCaseTests
     [InlineData("", "profile-1")]
     [InlineData("acc-1", null)]
     [InlineData("acc-1", "")]
-    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsArgumentException(string? accountId, string? profileId)
+    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsValidationException(string? accountId, string? profileId)
     {
         var act = () => _useCase.ExecuteAsync(accountId!, profileId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithMissingAccount_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithMissingAccount_ThrowsValidationException()
     {
         _accountRepository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         var act = () => _useCase.ExecuteAsync("missing", "profile-1");
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Account not found*");
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithMissingProfile_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithMissingProfile_ThrowsValidationException()
     {
         var account = new Account { Id = "acc-1", UserProfileIds = new List<string>() };
         _accountRepository.Setup(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>()))
@@ -102,7 +103,7 @@ public class AddUserProfileToAccountUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("acc-1", "missing");
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*User profile not found*");
     }
 

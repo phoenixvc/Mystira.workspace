@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -49,11 +50,11 @@ public class GetScenarioUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? scenarioId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? scenarioId)
     {
         var act = () => _useCase.ExecuteAsync(scenarioId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -74,11 +75,11 @@ public class RevokeBadgeUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyBadgeId_ThrowsArgumentException(string? badgeId)
+    public async Task ExecuteAsync_WithNullOrEmptyBadgeId_ThrowsValidationException(string? badgeId)
     {
         var act = () => _useCase.ExecuteAsync(badgeId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -35,12 +36,12 @@ public class CheckAchievementsUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsValidationException()
     {
         // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(() => _useCase.ExecuteAsync(null!));
-        await Assert.ThrowsAsync<ArgumentException>(() => _useCase.ExecuteAsync(""));
-        await Assert.ThrowsAsync<ArgumentException>(() => _useCase.ExecuteAsync("   "));
+        await Assert.ThrowsAsync<ValidationException>(() => _useCase.ExecuteAsync(null!));
+        await Assert.ThrowsAsync<ValidationException>(() => _useCase.ExecuteAsync(""));
+        await Assert.ThrowsAsync<ValidationException>(() => _useCase.ExecuteAsync("   "));
     }
 
     [Fact]

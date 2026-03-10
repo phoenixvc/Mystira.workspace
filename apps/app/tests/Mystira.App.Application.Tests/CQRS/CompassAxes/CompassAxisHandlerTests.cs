@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -54,7 +55,7 @@ public class CompassAxisHandlerTests
     }
 
     [Fact]
-    public async Task Create_WithEmptyName_ThrowsArgumentException()
+    public async Task Create_WithEmptyName_ThrowsValidationException()
     {
         var command = new CreateCompassAxisCommand("", "Description");
 
@@ -62,7 +63,7 @@ public class CompassAxisHandlerTests
             command, _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _createLogger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

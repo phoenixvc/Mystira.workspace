@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -112,7 +113,7 @@ public class ProgressSceneUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidSceneId_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidSceneId_ThrowsValidationException()
     {
         var session = CreateTestSession(SessionStatus.InProgress);
         var scenario = CreateTestScenario();
@@ -122,7 +123,7 @@ public class ProgressSceneUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

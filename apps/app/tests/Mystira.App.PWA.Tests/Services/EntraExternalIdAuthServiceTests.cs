@@ -366,8 +366,10 @@ public class EntraExternalIdAuthServiceTests : IDisposable
         var act = async () => await _service.LoginWithEntraAsync();
 
         // Assert
+        // ValidateEntraConfiguration throws ArgumentException, which is caught
+        // and wrapped as InvalidOperationException("Failed to initiate login due to invalid argument")
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*not configured*");
+            .WithMessage("*invalid argument*");
     }
 
     [Fact]
@@ -380,8 +382,10 @@ public class EntraExternalIdAuthServiceTests : IDisposable
         var act = async () => await _service.LoginWithEntraAsync();
 
         // Assert
+        // ValidateEntraConfiguration throws ArgumentException, which is caught
+        // and wrapped as InvalidOperationException("Failed to initiate login due to invalid argument")
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*not configured*");
+            .WithMessage("*invalid argument*");
     }
 
     [Fact]
@@ -663,10 +667,10 @@ public class EntraExternalIdAuthServiceTests : IDisposable
         await _service.LogoutAsync();
 
         // Assert
-        // The implementation now performs local-only logout and redirects to home
+        // The implementation performs local-only logout (clears storage and state)
+        // and does NOT navigate — navigation is handled by the caller
         var capturedUrl = _navigationManager.NavigatedUrl;
-        capturedUrl.Should().NotBeNull();
-        capturedUrl.Should().Be("/");
+        capturedUrl.Should().BeNull();
     }
 
     [Fact]
@@ -686,10 +690,10 @@ public class EntraExternalIdAuthServiceTests : IDisposable
         await _service.LogoutAsync();
 
         // Assert
-        // The implementation now performs local-only logout and redirects to home
+        // The implementation performs local-only logout (clears storage and state)
+        // and does NOT navigate — navigation is handled by the caller
         var capturedUrl = _navigationManager.NavigatedUrl;
-        capturedUrl.Should().NotBeNull();
-        capturedUrl.Should().Be("/");
+        capturedUrl.Should().BeNull();
     }
 
     #endregion

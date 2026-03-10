@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -49,10 +50,10 @@ public class CreateAvatarConfigurationUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullInput_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNullInput_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

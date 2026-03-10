@@ -80,12 +80,13 @@ public class RepositoryTests : IDisposable
         await _context.Set<BadgeConfiguration>().AddRangeAsync(entity1, entity2, entity3);
         await _context.SaveChangesAsync();
 
-        // Act
-        var result = await _repository.FindAsync(e => e.Axis == CoreAxis.Courage);
+        // Act — query by AxisId (the persisted property), since Axis is a computed
+        // CoreAxis value object that EF ignores and cannot translate in LINQ queries.
+        var result = await _repository.FindAsync(e => e.AxisId == targetAxis);
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().OnlyContain(e => e.Axis == CoreAxis.Courage);
+        result.Should().OnlyContain(e => e.AxisId == targetAxis);
     }
 
     [Fact]

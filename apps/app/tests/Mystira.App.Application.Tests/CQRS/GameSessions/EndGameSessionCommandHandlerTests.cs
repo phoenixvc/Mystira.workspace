@@ -103,7 +103,7 @@ public class EndGameSessionCommandHandlerTests
     [Fact]
     public async Task Handle_WithEmptySessionId_ReturnsNull()
     {
-        // Arrange - UseCase throws ArgumentException for empty ID, handler catches and returns null
+        // Arrange - UseCase throws ValidationException for empty ID, handler catches and returns null
         var useCase = new EndGameSessionUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
         var command = new EndGameSessionCommand("");
 

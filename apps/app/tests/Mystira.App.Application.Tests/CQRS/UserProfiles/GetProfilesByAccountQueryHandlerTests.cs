@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -63,7 +64,7 @@ public class GetProfilesByAccountQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyAccountId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyAccountId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetProfilesByAccountQuery("");
@@ -76,12 +77,12 @@ public class GetProfilesByAccountQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*AccountId is required*");
     }
 
     [Fact]
-    public async Task Handle_WithNullAccountId_ThrowsArgumentException()
+    public async Task Handle_WithNullAccountId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetProfilesByAccountQuery(null!);
@@ -94,7 +95,7 @@ public class GetProfilesByAccountQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

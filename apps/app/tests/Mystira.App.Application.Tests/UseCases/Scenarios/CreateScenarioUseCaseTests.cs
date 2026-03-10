@@ -37,7 +37,7 @@ public class CreateScenarioUseCaseTests
             _logger.Object, _validateScenarioUseCase.Object);
 
         // Act - null request will fail at schema validation (NullReferenceException)
-        // or ArgumentNullException depending on serializer behavior
+        // or ValidationException depending on serializer behavior
         var act = () => useCase.ExecuteAsync(null!);
 
         // Assert
@@ -55,7 +55,7 @@ public class CreateScenarioUseCaseTests
         // Act - empty request fails schema validation
         var act = () => useCase.ExecuteAsync(new CreateScenarioRequest());
 
-        // Assert - ScenarioSchemaValidator throws ArgumentException for invalid schema
+        // Assert - ScenarioSchemaValidator throws ValidationException for invalid schema
         await act.Should().ThrowAsync<Exception>();
     }
 }

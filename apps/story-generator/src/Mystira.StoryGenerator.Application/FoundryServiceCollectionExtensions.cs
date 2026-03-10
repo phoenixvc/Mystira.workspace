@@ -15,7 +15,7 @@ public static class FoundryServiceCollectionExtensions
     public static IServiceCollection AddFoundryAgentServices(
         this IServiceCollection services)
     {
-        services.AddSingleton<FoundryAgentClient>(sp =>
+        services.AddSingleton<IFoundryAgentClient>(sp =>
         {
             var logger = sp.GetRequiredService<ILogger<FoundryAgentClient>>();
             var foundryConfig = sp.GetRequiredService<IOptions<FoundryAgentConfig>>().Value;
@@ -45,7 +45,7 @@ public static class FoundryServiceCollectionExtensions
 
         services.AddScoped<IKnowledgeProvider>(sp =>
         {
-            var client = sp.GetRequiredService<FoundryAgentClient>();
+            var client = sp.GetRequiredService<IFoundryAgentClient>();
             var foundryConfig = sp.GetRequiredService<IOptions<FoundryAgentConfig>>().Value;
 
             if (foundryConfig.KnowledgeMode.Equals("AISearch", StringComparison.OrdinalIgnoreCase))
@@ -83,7 +83,7 @@ public static class FoundryServiceCollectionExtensions
         services.AddSingleton<IProjectGuidelinesService, ProjectGuidelinesService>();
         services.AddScoped<IStoryMediaProcessor, StoryMediaProcessor>();
         services.AddScoped<IPromptGenerator, PromptGenerator>();
-        services.AddSingleton<StorySchemaValidator>();
+        services.AddSingleton<IStorySchemaValidator, StorySchemaValidator>();
 
         services.AddScoped<IStorySessionRepository>(sp =>
         {

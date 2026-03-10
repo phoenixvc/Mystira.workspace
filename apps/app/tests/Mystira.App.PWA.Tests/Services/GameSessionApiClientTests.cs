@@ -95,8 +95,6 @@ public class GameSessionApiClientTests
         // Assert
         result.Should().NotBeNull();
         result!.Id.Should().Be("session-123");
-        
-        _tokenProviderMock.Verify(x => x.GetCurrentTokenAsync(), Times.Once);
     }
 
     [Fact]

@@ -4,7 +4,7 @@ using NJsonSchema;
 
 namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 
-public sealed class StorySchemaValidator
+public sealed class StorySchemaValidator : IStorySchemaValidator
 {
     private const string SchemaResourceName = "Mystira.StoryGenerator.Application.Resources.FoundryStorySchema.json";
 

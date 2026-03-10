@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -69,13 +70,13 @@ public class AttributionQueryHandlerTests
     }
 
     [Fact]
-    public async Task GetBundleAttribution_WithEmptyId_ThrowsArgumentException()
+    public async Task GetBundleAttribution_WithEmptyId_ThrowsValidationException()
     {
         var act = () => GetBundleAttributionQueryHandler.Handle(
             new GetBundleAttributionQuery(""), _bundleRepository.Object,
             Mock.Of<ILogger<GetBundleAttributionQuery>>(), CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion
@@ -125,13 +126,13 @@ public class AttributionQueryHandlerTests
     }
 
     [Fact]
-    public async Task GetBundleIpStatus_WithEmptyId_ThrowsArgumentException()
+    public async Task GetBundleIpStatus_WithEmptyId_ThrowsValidationException()
     {
         var act = () => GetBundleIpStatusQueryHandler.Handle(
             new GetBundleIpStatusQuery(""), _bundleRepository.Object,
             Mock.Of<ILogger<GetBundleIpStatusQuery>>(), _options, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

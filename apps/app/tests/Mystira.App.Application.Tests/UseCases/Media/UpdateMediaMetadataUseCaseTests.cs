@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -75,17 +76,17 @@ public class UpdateMediaMetadataUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? mediaId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? mediaId)
     {
         var act = () => _useCase.ExecuteAsync(mediaId!, new MediaUpdateRequest());
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync("media-1", null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

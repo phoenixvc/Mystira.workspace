@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -51,22 +52,22 @@ public class ResumeGameSessionUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsArgumentException(string? sessionId)
+    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsValidationException(string? sessionId)
     {
         var act = () => _useCase.ExecuteAsync(sessionId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistentSession_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistentSession_ThrowsValidationException()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(GameSession));
 
         var act = () => _useCase.ExecuteAsync("missing");
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*not found*");
     }
 

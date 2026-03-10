@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -79,14 +80,14 @@ public class ImportCharacterMapUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullStream_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullStream_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithMissingCharacters_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithMissingCharacters_ThrowsValidationException()
     {
         // Arrange - YAML with characters explicitly null
         var yaml = @"characters:
@@ -97,7 +98,7 @@ public class ImportCharacterMapUseCaseTests
         var act = () => _useCase.ExecuteAsync(stream);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*missing characters*");
     }
 }

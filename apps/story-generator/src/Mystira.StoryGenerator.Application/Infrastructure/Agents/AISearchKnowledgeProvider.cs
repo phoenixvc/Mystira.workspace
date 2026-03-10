@@ -13,7 +13,7 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// </summary>
 public class AISearchKnowledgeProvider : IKnowledgeProvider
 {
-    private readonly FoundryAgentClient _client;
+    private readonly IFoundryAgentClient _client;
     private readonly AISearchConfiguration _config;
     private readonly ILogger<AISearchKnowledgeProvider> _logger;
     private SearchClient? _searchClient;
@@ -21,7 +21,7 @@ public class AISearchKnowledgeProvider : IKnowledgeProvider
     public string ProviderName => "AISearch";
 
     public AISearchKnowledgeProvider(
-        FoundryAgentClient client,
+        IFoundryAgentClient client,
         AISearchConfiguration config,
         ILogger<AISearchKnowledgeProvider> logger)
     {

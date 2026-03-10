@@ -45,7 +45,7 @@ public class UpdateScenarioUseCaseTests
 
     /// <summary>
     /// When scenario exists, the static ScenarioSchemaValidator.ValidateAgainstSchema runs
-    /// and will reject an empty request with an ArgumentException.
+    /// and will reject an empty request with a ValidationException.
     /// </summary>
     [Fact]
     public async Task ExecuteAsync_WithExistingScenarioAndInvalidRequest_ThrowsFromSchemaValidation()

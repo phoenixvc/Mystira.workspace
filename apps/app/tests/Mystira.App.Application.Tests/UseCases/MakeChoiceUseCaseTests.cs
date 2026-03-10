@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -166,7 +167,7 @@ public class MakeChoiceUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidSceneId_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidSceneId_ThrowsValidationException()
     {
         var session = CreateTestSession();
         var scenario = CreateTestScenario();
@@ -182,11 +183,11 @@ public class MakeChoiceUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithInvalidChoiceText_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithInvalidChoiceText_ThrowsValidationException()
     {
         var session = CreateTestSession();
         var scenario = CreateTestScenario();
@@ -202,7 +203,7 @@ public class MakeChoiceUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

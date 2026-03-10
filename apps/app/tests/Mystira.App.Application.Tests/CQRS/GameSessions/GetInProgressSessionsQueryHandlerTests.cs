@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -58,7 +59,7 @@ public class GetInProgressSessionsQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyAccountId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyAccountId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetInProgressSessionsQuery("");
@@ -71,12 +72,12 @@ public class GetInProgressSessionsQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*AccountId is required*");
     }
 
     [Fact]
-    public async Task Handle_WithNullAccountId_ThrowsArgumentException()
+    public async Task Handle_WithNullAccountId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetInProgressSessionsQuery(null!);
@@ -89,7 +90,7 @@ public class GetInProgressSessionsQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

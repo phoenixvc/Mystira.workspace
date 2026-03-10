@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -78,32 +79,32 @@ public class UpdateAccountUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistingAccount_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistingAccount_ThrowsValidationException()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(Account));
 
         var act = () => _useCase.ExecuteAsync("missing", new UpdateAccountRequest());
 
-        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*not found*");
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("*not found*");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? accountId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? accountId)
     {
         var act = () => _useCase.ExecuteAsync(accountId!, new UpdateAccountRequest());
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync("acc-1", null!);
 
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

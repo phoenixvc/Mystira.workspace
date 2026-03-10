@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -75,10 +76,10 @@ public class CheckBundleAccessUseCaseTests
     [InlineData("", "b1")]
     [InlineData("acc-1", null)]
     [InlineData("acc-1", "")]
-    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsArgumentException(string? accountId, string? bundleId)
+    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsValidationException(string? accountId, string? bundleId)
     {
         var act = () => _useCase.ExecuteAsync(accountId!, bundleId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -39,36 +40,36 @@ public class SelectCharacterUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistentSession_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistentSession_ThrowsValidationException()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(GameSession));
 
         var act = () => _useCase.ExecuteAsync("missing", "char-1");
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsArgumentException(string? sessionId)
+    public async Task ExecuteAsync_WithNullOrEmptySessionId_ThrowsValidationException(string? sessionId)
     {
         var act = () => _useCase.ExecuteAsync(sessionId!, "char-1");
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyCharacterId_ThrowsArgumentException(string? characterId)
+    public async Task ExecuteAsync_WithNullOrEmptyCharacterId_ThrowsValidationException(string? characterId)
     {
         var act = () => _useCase.ExecuteAsync("session-1", characterId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

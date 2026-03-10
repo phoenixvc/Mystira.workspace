@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -36,12 +37,12 @@ public class GetContentBundlesByAgeGroupQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyAgeGroup_ThrowsArgumentException()
+    public async Task Handle_WithEmptyAgeGroup_ThrowsValidationException()
     {
         var act = () => GetContentBundlesByAgeGroupQueryHandler.Handle(
             new GetContentBundlesByAgeGroupQuery(""), _repository.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

@@ -13,14 +13,14 @@ namespace Mystira.StoryGenerator.Application.Infrastructure.Agents;
 /// </summary>
 public class FileSearchKnowledgeProvider : IKnowledgeProvider
 {
-    private readonly FoundryAgentClient _client;
+    private readonly IFoundryAgentClient _client;
     private readonly FileSearchConfig _config;
     private readonly ILogger<FileSearchKnowledgeProvider> _logger;
 
     public string ProviderName => "FileSearch";
 
     public FileSearchKnowledgeProvider(
-        FoundryAgentClient client,
+        IFoundryAgentClient client,
         FileSearchConfig config,
         ILogger<FileSearchKnowledgeProvider> logger)
     {

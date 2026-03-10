@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -24,7 +25,7 @@ public class VerifyParentalConsentCommandHandlerTests
     #region Empty Token Validation
 
     [Fact]
-    public async Task Handle_EmptyVerificationToken_ThrowsArgumentException()
+    public async Task Handle_EmptyVerificationToken_ThrowsValidationException()
     {
         // Arrange
         var command = new VerifyParentalConsentCommand("", "Email");
@@ -34,12 +35,11 @@ public class VerifyParentalConsentCommandHandlerTests
             command, _consentRepository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("VerificationToken");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_WhitespaceVerificationToken_ThrowsArgumentException()
+    public async Task Handle_WhitespaceVerificationToken_ThrowsValidationException()
     {
         // Arrange
         var command = new VerifyParentalConsentCommand("   ", "Email");
@@ -49,12 +49,11 @@ public class VerifyParentalConsentCommandHandlerTests
             command, _consentRepository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("VerificationToken");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_NullVerificationToken_ThrowsArgumentException()
+    public async Task Handle_NullVerificationToken_ThrowsValidationException()
     {
         // Arrange
         var command = new VerifyParentalConsentCommand(null!, "Email");
@@ -64,7 +63,7 @@ public class VerifyParentalConsentCommandHandlerTests
             command, _consentRepository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

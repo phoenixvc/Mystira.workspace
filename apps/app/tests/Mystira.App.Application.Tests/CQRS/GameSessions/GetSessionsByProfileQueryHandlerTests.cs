@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -70,7 +71,7 @@ public class GetSessionsByProfileQueryHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyProfileId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyProfileId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetSessionsByProfileQuery("");
@@ -83,12 +84,12 @@ public class GetSessionsByProfileQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*ProfileId is required*");
     }
 
     [Fact]
-    public async Task Handle_WithNullProfileId_ThrowsArgumentException()
+    public async Task Handle_WithNullProfileId_ThrowsValidationException()
     {
         // Arrange
         var query = new GetSessionsByProfileQuery(null!);
@@ -101,7 +102,7 @@ public class GetSessionsByProfileQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -52,7 +53,7 @@ public class CreateUserProfileCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyName_ThrowsArgumentException()
+    public async Task Handle_WithEmptyName_ThrowsValidationException()
     {
         // Arrange
         var request = new CreateUserProfileRequest
@@ -68,12 +69,12 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*name is required*");
     }
 
     [Fact]
-    public async Task Handle_WithNullName_ThrowsArgumentException()
+    public async Task Handle_WithNullName_ThrowsValidationException()
     {
         // Arrange
         var request = new CreateUserProfileRequest
@@ -89,12 +90,12 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*name is required*");
     }
 
     [Fact]
-    public async Task Handle_WithShortName_ThrowsArgumentException()
+    public async Task Handle_WithShortName_ThrowsValidationException()
     {
         // Arrange
         var request = new CreateUserProfileRequest
@@ -110,12 +111,12 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*at least 2 characters*");
     }
 
     [Fact]
-    public async Task Handle_WithEmptyAgeGroup_ThrowsArgumentException()
+    public async Task Handle_WithEmptyAgeGroup_ThrowsValidationException()
     {
         // Arrange - UseCase validates age group
         var request = new CreateUserProfileRequest
@@ -131,12 +132,12 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Invalid age group*");
     }
 
     [Fact]
-    public async Task Handle_WithInvalidAgeGroup_ThrowsArgumentException()
+    public async Task Handle_WithInvalidAgeGroup_ThrowsValidationException()
     {
         // Arrange
         var request = new CreateUserProfileRequest
@@ -152,7 +153,7 @@ public class CreateUserProfileCommandHandlerTests
             command, useCase, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Invalid age group*");
     }
 

@@ -24,14 +24,9 @@ public static class CachingServiceCollectionExtensions
         var cacheOptions = new CacheOptions();
         configuration.GetSection(CacheOptions.SectionName).Bind(cacheOptions);
 
-        // Validate Redis configuration if enabled
-        if (cacheOptions.Enabled)
+        // Validate Redis configuration if enabled and connection string is provided
+        if (cacheOptions.Enabled && !string.IsNullOrEmpty(cacheOptions.ConnectionString))
         {
-            if (string.IsNullOrEmpty(cacheOptions.ConnectionString))
-            {
-                throw new InvalidOperationException("Redis caching is enabled but ConnectionString is not configured. Please set CacheOptions:ConnectionString in configuration.");
-            }
-
             // Basic connection string validation
             if (!IsValidRedisConnectionString(cacheOptions.ConnectionString))
             {
@@ -45,6 +40,7 @@ public static class CachingServiceCollectionExtensions
             }
         }
 
+        // Fall back to in-memory cache when disabled or no connection string configured
         if (!cacheOptions.Enabled || string.IsNullOrEmpty(cacheOptions.ConnectionString))
         {
             // Use in-memory cache as fallback

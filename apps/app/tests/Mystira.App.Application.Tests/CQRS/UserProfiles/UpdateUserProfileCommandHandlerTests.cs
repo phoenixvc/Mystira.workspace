@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -120,7 +121,7 @@ public class UpdateUserProfileCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithInvalidAgeGroup_ThrowsArgumentException()
+    public async Task Handle_WithInvalidAgeGroup_ThrowsValidationException()
     {
         // Arrange
         var profileId = "profile-invalid-age";
@@ -149,7 +150,7 @@ public class UpdateUserProfileCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Invalid age group*");
     }
 

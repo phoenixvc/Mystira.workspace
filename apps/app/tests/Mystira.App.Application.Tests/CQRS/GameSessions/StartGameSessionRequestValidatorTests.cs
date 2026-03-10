@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.Contracts.App.Models;
@@ -8,16 +9,15 @@ namespace Mystira.App.Application.Tests.CQRS.GameSessions;
 public class StartGameSessionRequestValidatorTests
 {
     [Fact]
-    public void Validate_WithNullRequest_ThrowsArgumentNullException()
+    public void Validate_WithNullRequest_ThrowsValidationException()
     {
         var act = () => StartGameSessionRequestValidator.Validate(null!);
 
-        act.Should().Throw<ArgumentNullException>()
-            .WithParameterName("request");
+        act.Should().Throw<ValidationException>();
     }
 
     [Fact]
-    public void Validate_WithEmptyScenarioId_ThrowsArgumentException()
+    public void Validate_WithEmptyScenarioId_ThrowsValidationException()
     {
         var request = new StartGameSessionRequest
         {
@@ -29,12 +29,12 @@ public class StartGameSessionRequestValidatorTests
 
         var act = () => StartGameSessionRequestValidator.Validate(request);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage("*ScenarioId*");
     }
 
     [Fact]
-    public void Validate_WithEmptyAccountId_ThrowsArgumentException()
+    public void Validate_WithEmptyAccountId_ThrowsValidationException()
     {
         var request = new StartGameSessionRequest
         {
@@ -46,12 +46,12 @@ public class StartGameSessionRequestValidatorTests
 
         var act = () => StartGameSessionRequestValidator.Validate(request);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage("*AccountId*");
     }
 
     [Fact]
-    public void Validate_WithEmptyProfileId_ThrowsArgumentException()
+    public void Validate_WithEmptyProfileId_ThrowsValidationException()
     {
         var request = new StartGameSessionRequest
         {
@@ -63,12 +63,12 @@ public class StartGameSessionRequestValidatorTests
 
         var act = () => StartGameSessionRequestValidator.Validate(request);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage("*ProfileId*");
     }
 
     [Fact]
-    public void Validate_WithNoPlayersAndNoAssignments_ThrowsArgumentException()
+    public void Validate_WithNoPlayersAndNoAssignments_ThrowsValidationException()
     {
         var request = new StartGameSessionRequest
         {
@@ -81,7 +81,7 @@ public class StartGameSessionRequestValidatorTests
 
         var act = () => StartGameSessionRequestValidator.Validate(request);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage("*player or character assignment*");
     }
 
@@ -121,7 +121,7 @@ public class StartGameSessionRequestValidatorTests
     }
 
     [Fact]
-    public void Validate_WithNullPlayerNamesAndNullAssignments_ThrowsArgumentException()
+    public void Validate_WithNullPlayerNamesAndNullAssignments_ThrowsValidationException()
     {
         var request = new StartGameSessionRequest
         {
@@ -134,7 +134,7 @@ public class StartGameSessionRequestValidatorTests
 
         var act = () => StartGameSessionRequestValidator.Validate(request);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage("*player or character assignment*");
     }
 
@@ -154,11 +154,11 @@ public class StartGameSessionRequestValidatorTests
     [InlineData(12, "6-9")]   // Scenario too mature for target
     [InlineData(10, "6-9")]   // Scenario min exceeds target min
     [InlineData(18, "10-12")] // Teens scenario for preteens
-    public void ValidateAgeGroup_WhenScenarioMinExceedsTargetMin_ThrowsArgumentException(int scenarioMin, string targetAgeGroup)
+    public void ValidateAgeGroup_WhenScenarioMinExceedsTargetMin_ThrowsValidationException(int scenarioMin, string targetAgeGroup)
     {
         var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(scenarioMin, targetAgeGroup);
 
-        act.Should().Throw<ArgumentException>()
+        act.Should().Throw<ValidationException>()
             .WithMessage($"*{scenarioMin}*{targetAgeGroup}*");
     }
 
@@ -177,6 +177,6 @@ public class StartGameSessionRequestValidatorTests
         // Invalid age group defaults to AgeGroup(6, 9), so scenario min 10 should fail
         var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(10, "invalid");
 
-        act.Should().Throw<ArgumentException>();
+        act.Should().Throw<ValidationException>();
     }
 }

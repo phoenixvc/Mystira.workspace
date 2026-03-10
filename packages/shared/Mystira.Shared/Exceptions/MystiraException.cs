@@ -101,7 +101,7 @@ public class ValidationException : MystiraException
     /// <param name="field">The field name.</param>
     /// <param name="error">The error message.</param>
     public ValidationException(string field, string error)
-        : this(new Dictionary<string, string[]> { { field, [error] } })
+        : this(error, new Dictionary<string, string[]> { { field, [error] } })
     {
     }
 }

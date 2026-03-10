@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -43,14 +44,14 @@ public class RemoveScenarioFromBundleUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistingBundle_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistingBundle_ThrowsValidationException()
     {
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
             .ReturnsAsync(default(ContentBundle));
 
         var act = () => _useCase.ExecuteAsync("missing", "scen-1");
 
-        await act.Should().ThrowAsync<ArgumentException>().WithMessage("*not found*");
+        await act.Should().ThrowAsync<ValidationException>().WithMessage("*not found*");
     }
 
     [Theory]
@@ -58,10 +59,10 @@ public class RemoveScenarioFromBundleUseCaseTests
     [InlineData("", "scen-1")]
     [InlineData("b1", null)]
     [InlineData("b1", "")]
-    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsArgumentException(string? bundleId, string? scenarioId)
+    public async Task ExecuteAsync_WithNullOrEmptyIds_ThrowsValidationException(string? bundleId, string? scenarioId)
     {
         var act = () => _useCase.ExecuteAsync(bundleId!, scenarioId!);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

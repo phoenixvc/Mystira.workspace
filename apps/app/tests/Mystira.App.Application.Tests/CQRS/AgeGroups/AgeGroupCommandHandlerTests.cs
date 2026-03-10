@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -65,7 +66,7 @@ public class AgeGroupCommandHandlerTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Create_WithEmptyName_ThrowsArgumentException(string? name)
+    public async Task Create_WithEmptyName_ThrowsValidationException(string? name)
     {
         var command = new CreateAgeGroupCommand(name!, "6-9", 6, 9, "Description");
 
@@ -73,14 +74,14 @@ public class AgeGroupCommandHandlerTests
             command, _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task Create_WithEmptyValue_ThrowsArgumentException(string? value)
+    public async Task Create_WithEmptyValue_ThrowsValidationException(string? value)
     {
         var command = new CreateAgeGroupCommand("Name", value!, 6, 9, "Description");
 
@@ -88,7 +89,7 @@ public class AgeGroupCommandHandlerTests
             command, _repository.Object, _unitOfWork.Object,
             _cacheInvalidation.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

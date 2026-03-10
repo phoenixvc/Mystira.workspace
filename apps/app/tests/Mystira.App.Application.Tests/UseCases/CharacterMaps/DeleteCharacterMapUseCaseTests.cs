@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -57,9 +58,9 @@ public class DeleteCharacterMapUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? id)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? id)
     {
         var act = () => _useCase.ExecuteAsync(id!);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -55,7 +56,7 @@ public class UpdateCharacterMapUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNonExistingId_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithNonExistingId_ThrowsValidationException()
     {
         // Arrange
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
@@ -67,7 +68,7 @@ public class UpdateCharacterMapUseCaseTests
         var act = () => _useCase.ExecuteAsync("missing", request);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*not found*");
     }
 
@@ -75,18 +76,18 @@ public class UpdateCharacterMapUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? id)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? id)
     {
         var request = new UpdateCharacterMapRequest { Name = "Test" };
         var act = () => _useCase.ExecuteAsync(id!, request);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync("char-1", null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

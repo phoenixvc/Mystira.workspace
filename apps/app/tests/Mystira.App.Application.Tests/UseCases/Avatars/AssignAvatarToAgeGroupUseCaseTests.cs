@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -50,10 +51,10 @@ public class AssignAvatarToAgeGroupUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyAgeGroup_ThrowsArgumentException(string? ageGroup)
+    public async Task ExecuteAsync_WithNullOrEmptyAgeGroup_ThrowsValidationException(string? ageGroup)
     {
         var act = () => _useCase.ExecuteAsync(ageGroup!, new List<string> { "avatar-1" });
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -74,10 +75,10 @@ public class CreateCharacterMapUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithNullRequest_ThrowsArgumentNullException()
+    public async Task ExecuteAsync_WithNullRequest_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
-        await act.Should().ThrowAsync<ArgumentNullException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

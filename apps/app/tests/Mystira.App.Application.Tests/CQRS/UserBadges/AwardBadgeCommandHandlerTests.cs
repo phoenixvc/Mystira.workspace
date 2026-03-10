@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -238,7 +239,7 @@ public class AwardBadgeCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptyUserProfileId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyUserProfileId_ThrowsValidationException()
     {
         // Arrange
         var request = new AwardBadgeRequest
@@ -260,12 +261,12 @@ public class AwardBadgeCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*UserProfileId*required*");
     }
 
     [Fact]
-    public async Task Handle_WithNullUserProfileId_ThrowsArgumentException()
+    public async Task Handle_WithNullUserProfileId_ThrowsValidationException()
     {
         // Arrange
         var request = new AwardBadgeRequest
@@ -287,12 +288,12 @@ public class AwardBadgeCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*UserProfileId*required*");
     }
 
     [Fact]
-    public async Task Handle_WithEmptyBadgeConfigurationId_ThrowsArgumentException()
+    public async Task Handle_WithEmptyBadgeConfigurationId_ThrowsValidationException()
     {
         // Arrange
         var request = new AwardBadgeRequest
@@ -314,12 +315,12 @@ public class AwardBadgeCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*BadgeConfigurationId*required*");
     }
 
     [Fact]
-    public async Task Handle_WithNonexistentBadgeConfig_ThrowsArgumentException()
+    public async Task Handle_WithNonexistentBadgeConfig_ThrowsValidationException()
     {
         // Arrange
         var request = new AwardBadgeRequest
@@ -348,7 +349,7 @@ public class AwardBadgeCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Badge not found*");
     }
 

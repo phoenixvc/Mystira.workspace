@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -89,9 +90,9 @@ public class GetMediaByFilenameUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyFilename_ThrowsArgumentException(string? fileName)
+    public async Task ExecuteAsync_WithNullOrEmptyFilename_ThrowsValidationException(string? fileName)
     {
         var act = () => _useCase.ExecuteAsync(fileName!);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

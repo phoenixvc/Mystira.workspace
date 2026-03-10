@@ -26,9 +26,9 @@ public partial class AgentOrchestrator : IAgentOrchestrator
     private readonly ILogger<AgentOrchestrator> _logger;
     private readonly IAgentStreamPublisher _eventPublisher;
     private readonly IStorySessionRepository _sessionRepository;
-    private readonly FoundryAgentClient _foundryClient;
+    private readonly IFoundryAgentClient _foundryClient;
     private readonly IPromptGenerator _promptGenerator;
-    private readonly StorySchemaValidator _schemaValidator;
+    private readonly IStorySchemaValidator _schemaValidator;
     private readonly IKnowledgeProvider _knowledgeProvider;
     private readonly IStorySchemaProvider _schemaProvider;
     private readonly IStoryMediaProcessor _mediaProcessor;
@@ -38,9 +38,9 @@ public partial class AgentOrchestrator : IAgentOrchestrator
         ILogger<AgentOrchestrator> logger,
         IAgentStreamPublisher eventPublisher,
         IStorySessionRepository sessionRepository,
-        FoundryAgentClient foundryClient,
+        IFoundryAgentClient foundryClient,
         IPromptGenerator promptGenerator,
-        StorySchemaValidator schemaValidator,
+        IStorySchemaValidator schemaValidator,
         IKnowledgeProvider knowledgeProvider,
         IStorySchemaProvider schemaProvider,
         IStoryMediaProcessor mediaProcessor,

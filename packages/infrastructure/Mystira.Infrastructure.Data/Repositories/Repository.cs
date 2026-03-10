@@ -39,17 +39,26 @@ public class Repository<TEntity> : Ardalis.Specification.EntityFrameworkCore.Rep
     /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(string id, CancellationToken cancellationToken = default)
     {
-        if (Guid.TryParse(id, out var guidId))
-        {
-            return await GetByIdAsync(guidId, cancellationToken);
-        }
+        // Always pass the id as a string to FindAsync. The entity's primary key type
+        // determines what EF expects — since our entities use string IDs, we must
+        // not convert to Guid even if the string is a valid Guid representation.
         return await DbSet.FindAsync(new object[] { id }, cancellationToken);
     }
 
     /// <inheritdoc />
     public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+        // Convert Guid to string since all domain entities use string IDs.
+        return await DbSet.FindAsync(new object[] { id.ToString() }, cancellationToken);
+    }
+
+    /// <summary>
+    /// Adds the specified entity, with an explicit null guard.
+    /// </summary>
+    public override async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(entity);
+        return await base.AddAsync(entity, cancellationToken);
     }
 
     /// <inheritdoc />

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -56,12 +57,12 @@ public class CreateContentBundleUseCaseTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithEmptyTitle_ThrowsArgumentException()
+    public async Task ExecuteAsync_WithEmptyTitle_ThrowsValidationException()
     {
         var act = () => _useCase.ExecuteAsync(
             "", "Description",
             new List<string>(), "img-1", new List<BundlePrice>(), true, "6-8");
 
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }

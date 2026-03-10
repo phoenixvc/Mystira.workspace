@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using System.Security.Cryptography;
 using System.Text;
 using FluentAssertions;
@@ -41,7 +42,7 @@ public class RequestParentalConsentCommandHandlerTests
     #region Validation
 
     [Fact]
-    public async Task Handle_EmptyChildProfileId_ThrowsArgumentException()
+    public async Task Handle_EmptyChildProfileId_ThrowsValidationException()
     {
         // Arrange
         var command = new RequestParentalConsentCommand("", "parent@example.com", "ChildName");
@@ -51,12 +52,11 @@ public class RequestParentalConsentCommandHandlerTests
             command, _consentRepo.Object, _emailService.Object, _emailBuilder, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("ChildProfileId");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_WhitespaceChildProfileId_ThrowsArgumentException()
+    public async Task Handle_WhitespaceChildProfileId_ThrowsValidationException()
     {
         // Arrange
         var command = new RequestParentalConsentCommand("   ", "parent@example.com", "ChildName");
@@ -66,12 +66,11 @@ public class RequestParentalConsentCommandHandlerTests
             command, _consentRepo.Object, _emailService.Object, _emailBuilder, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("ChildProfileId");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_EmptyParentEmail_ThrowsArgumentException()
+    public async Task Handle_EmptyParentEmail_ThrowsValidationException()
     {
         // Arrange
         var command = new RequestParentalConsentCommand("child-123", "", "ChildName");
@@ -81,12 +80,11 @@ public class RequestParentalConsentCommandHandlerTests
             command, _consentRepo.Object, _emailService.Object, _emailBuilder, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("ParentEmail");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_WhitespaceParentEmail_ThrowsArgumentException()
+    public async Task Handle_WhitespaceParentEmail_ThrowsValidationException()
     {
         // Arrange
         var command = new RequestParentalConsentCommand("child-123", "   ", "ChildName");
@@ -96,12 +94,11 @@ public class RequestParentalConsentCommandHandlerTests
             command, _consentRepo.Object, _emailService.Object, _emailBuilder, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("ParentEmail");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]
-    public async Task Handle_NullParentEmail_ThrowsArgumentException()
+    public async Task Handle_NullParentEmail_ThrowsValidationException()
     {
         // Arrange
         var command = new RequestParentalConsentCommand("child-123", null!, "ChildName");
@@ -111,8 +108,7 @@ public class RequestParentalConsentCommandHandlerTests
             command, _consentRepo.Object, _emailService.Object, _emailBuilder, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithParameterName("ParentEmail");
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     #endregion

@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -168,7 +169,7 @@ public class MakeChoiceCommandHandlerTests
         var act = () => MakeChoiceCommandHandler.Handle(
             new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        await act.Should().ThrowAsync<ArgumentException>()
+        await act.Should().ThrowAsync<ValidationException>()
             .WithMessage("*Scene not found*");
     }
 

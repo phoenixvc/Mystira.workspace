@@ -1,3 +1,4 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -125,9 +126,9 @@ public class GetSessionStatsUseCaseTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsArgumentException(string? sessionId)
+    public async Task ExecuteAsync_WithNullOrEmptyId_ThrowsValidationException(string? sessionId)
     {
         var act = () => _useCase.ExecuteAsync(sessionId!);
-        await act.Should().ThrowAsync<ArgumentException>();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 }
