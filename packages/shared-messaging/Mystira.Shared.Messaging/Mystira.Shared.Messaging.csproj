@@ -10,9 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WolverineFx" Version="5.17.0" />
-    <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.17.0" />
-    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.17.0" />
+    <PackageReference Include="WolverineFx" Version="5.18.0" />
+    <PackageReference Include="WolverineFx.AzureServiceBus" Version="5.18.0" />
+    <PackageReference Include="WolverineFx.EntityFrameworkCore" Version="5.18.0" />
     <!-- Validation middleware (Wolverine pipeline integration) -->
     <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />

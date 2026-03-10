@@ -24,11 +24,11 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
     <!-- PostgreSQL provider for polyglot persistence migration (per ADR-0013/0014) -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-    <PackageReference Include="JsonSchema.Net" Version="9.1.1" />
+    <PackageReference Include="JsonSchema.Net" Version="9.1.2" />
     <!-- Ardalis.Specification EF Core integration (per workspace ADR-0014) -->
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
     <!-- Polly for resilience patterns (per workspace ADR-0014) -->
-    <PackageReference Include="Polly" Version="8.6.5" />
+    <PackageReference Include="Polly" Version="8.6.6" />
     <!-- Redis caching (per workspace ADR-0014) -->
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.3" />
     <PackageReference Include="AspNetCore.HealthChecks.Redis" Version="9.0.0" />
