@@ -52,9 +52,7 @@ wasm-pack.log
 *.userosscache
 *.sln.docstates
 
-# IDE - VS Code / Windsurf / Cursor
-.vscode/
-.windsurf/
+# IDE - Cascade
 .cascade/
 
 # IDE - Vim
