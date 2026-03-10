@@ -16,7 +16,7 @@ Stream A merges to main.
 
 ## Stream A: Workspace Consolidation
 
-**Branch**: `refactor/workspace-consolidation`
+**Branch**: `refactor/workspace-consolidation` → `refactor/port-consolidation`
 
 Phase 0 (branch setup) and Phase 1 (folder restructure) are complete. Phases 2-7
 eliminate duplicate domain stacks left from an incomplete migration.
@@ -24,15 +24,35 @@ eliminate duplicate domain stacks left from an incomplete migration.
 **Rules**: Never delete without confirming functionality exists elsewhere. Each phase
 is one atomic commit. Gates are mandatory.
 
-| Step | What                                                                                              | Key Files                                                                                                                                           | Gate                                               |
-| ---- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| A.0  | Pop `stash@{0}` — 24-file dep update (NuGet, SDK, Dockerfiles)                                    | `global.json`, ~20 `.csproj`                                                                                                                        | `dotnet build` succeeds                            |
-| A.1  | Entity Base Class Consolidation — audit 4 Entity impls, migrate all consumers to Domain           | `packages/shared/Mystira.Shared/Data/Entities/`, `packages/domain/Mystira.Domain/Entities/`, `apps/app/src/Mystira.App.Domain/Models/BaseEntity.cs` | Zero refs to `Mystira.Shared.Data.Entities.Entity` |
-| A.2  | Port Interface Consolidation — reconcile 50+ duplicated ports                                     | `apps/app/src/Mystira.App.Application/Ports/` vs `packages/application/Mystira.Application/Ports/`                                                  | Zero duplicate port refs                           |
-| A.3  | Domain Model Consolidation — merge Account, Scenario, GameSession, Badge, UserProfile, MediaAsset | Domain versions are richer; App versions are DTOs. Keep Domain, migrate App consumers                                                               | All duplicates documented + build passes           |
-| A.4  | CQRS Handler Deduplication — merge enhanced handlers into workspace                               | `apps/app/src/Mystira.App.Application/CQRS/` vs `packages/application/Mystira.Application/CQRS/`                                                    | No business logic lost                             |
-| A.5  | Auth Extraction + Identity Decoupling — create `packages/contracts/auth/`                         | Decouple Identity.Api from App.Application, add missing infra (PendingSignupRepository, AzureEmailService)                                          | Identity builds without App.Application refs       |
-| A.6  | Final Cleanup + PR to main                                                                        | Audit remaining App.Application, clean configs, CI pass                                                                                             | Full build+test suite green                        |
+| Step | What                                                                                                                                         | Status                  | Gate                                               |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------- |
+| A.0  | Pop `stash@{0}` — 24-file dep update (NuGet, SDK, Dockerfiles)                                                                               | **DONE** `921606886`    | `dotnet build` succeeds                            |
+| A.1  | Entity Base Class Consolidation — migrate consumers to Domain, delete Shared+App entity bases                                                | **DONE** `fe3661f4d`    | Zero refs to `Mystira.Shared.Data.Entities.Entity` |
+| A.2  | Port Interface Consolidation — service ports (7/9 done), data repos deferred to after A.3                                                    | **PARTIAL** `31e51878c` | Zero duplicate port refs                           |
+| A.3  | Domain Model Consolidation — merge Account, Scenario, GameSession, Badge, UserProfile, MediaAsset; then complete A.2 repos + remaining ports | **NEXT**                | All duplicates resolved + build passes             |
+| A.4  | CQRS Handler Deduplication — merge enhanced handlers into workspace                                                                          |                         | No business logic lost                             |
+| A.5  | Auth Extraction + Identity Decoupling — create `packages/contracts/auth/`                                                                    |                         | Identity builds without App.Application refs       |
+| A.6  | Final Cleanup + PR to main                                                                                                                   |                         | Full build+test suite green                        |
+
+### A.2 Details
+
+**Completed** (service ports deleted from App, consumers redirected to workspace):
+
+- `ICurrentUserService`, `IBlobService`, `IAudioTranscodingService`
+- `IMessagingService`, `IChatBotService`, `IBotCommandService`, `IPaymentService`
+
+**Deferred to A.3** (blocked by domain model namespace split `Mystira.App.Domain.Models` vs `Mystira.Domain.Models`):
+
+- `IMediaMetadataService` — references different domain model types
+- `IStoryProtocolService` — incompatible return types (`StoryProtocolMetadata` vs `ScenarioStoryProtocol`)
+- 21 data repository ports — different base classes (`IRepository<T,TKey>` vs Ardalis `IRepositoryBase<T>`) + different domain namespaces
+- App-only ports to promote to workspace: `ICoppaConsentRepository`, `IDataDeletionRepository`, `IDataDeletionService`, `IEmailService`
+
+### Revised Dependency
+
+```text
+A.3 (domain models) must complete BEFORE finishing A.2 (repos + remaining service ports)
+```
 
 ### Post-Consolidation Architecture
 
