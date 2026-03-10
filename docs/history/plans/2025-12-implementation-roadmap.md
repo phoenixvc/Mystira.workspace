@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # Implementation Roadmap
 
 This roadmap outlines the strategic implementation plan for the Mystira workspace, covering infrastructure, documentation, tooling, and operational improvements.

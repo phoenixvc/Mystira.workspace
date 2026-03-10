@@ -84,7 +84,7 @@ External dependencies (NuGet.org packages) are still restored via standard `dotn
 
 - [ADR-0024: True Monorepo Migration](./0024-true-monorepo-migration.md) - The superseding decision
 - [packages-publish.yml](../../../.github/workflows/packages-publish.yml) - CI validation (build only, no publish)
-- [ROADMAP.md](../../../ROADMAP.md) - Current platform status
+- [Workspace Plan](../../planning/PLAN.md) - Current platform status
 
 ---
 

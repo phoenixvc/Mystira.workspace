@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # ADR-0014: Polyglot Persistence Framework Implementation Roadmap
 
 ## Executive Summary

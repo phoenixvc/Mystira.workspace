@@ -250,17 +250,13 @@ _Build performance currently blocks all development work with failing builds and
 
 ## Recently removed / already acted on
 
-- `MIGRATION_SUMMARY.md` (deleted)
 - `docs/analysis/package-inventory.md` (deleted)
 - `docs/pr-analysis.md` (deleted)
 - `configs/` override directory (deleted)
 - `docs/app-workflow-cleanup.md` (deleted)
-- `DEV_RESOURCES_STANDARDIZATION_PLAN.md` (consolidated into backlog, deleted)
-- `docs/architecture/migrations/remaining-issues-and-opportunities.md` (consolidated into backlog, deleted)
-- `docs/reviews/pr-analysis-mystira-shared.md` (consolidated into backlog, deleted)
-- `docs/planning/master-implementation-checklist.md` (deleted)
-- `docs/planning/implementation-roadmap.md` (deleted)
-- `docs/architecture/migrations/` entire directory (consolidated into backlog, deleted)
+- `docs/architecture/migrations/remaining-issues-and-opportunities.md` (consolidated into backlog)
+- `docs/reviews/pr-analysis-mystira-shared.md` (consolidated into backlog)
+- 12 planning documents archived to `docs/history/plans/` (2026-03-10) — see `docs/planning/PLAN.md`
 
 ## Maintenance rule
 

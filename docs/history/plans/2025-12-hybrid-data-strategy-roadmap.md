@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # Mystira Platform: Hybrid Data Strategy Roadmap
 
 ## Executive Summary

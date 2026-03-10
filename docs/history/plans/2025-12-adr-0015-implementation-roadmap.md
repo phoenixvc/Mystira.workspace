@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # ADR-0015: Event-Driven Architecture Implementation Roadmap
 
 ## Overview

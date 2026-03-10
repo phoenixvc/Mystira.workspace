@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # Data Migration Plan - Azure v2.2 Naming Convention
 
 **Status**: Draft

@@ -358,7 +358,7 @@ echo "=== Deployment complete for ${ENVIRONMENT} ==="
 
 ### Step 3: Migrate Data
 
-See [DATA_MIGRATION_PLAN.md](./DATA_MIGRATION_PLAN.md) for detailed procedures.
+See [Data Migration Plan](../history/plans/2025-12-data-migration-plan.md) for detailed procedures.
 
 **Summary:**
 
@@ -685,7 +685,7 @@ Issue Detected?
 
 ## References
 
-- [Data Migration Plan](./DATA_MIGRATION_PLAN.md)
+- [Data Migration Plan](../history/plans/2025-12-data-migration-plan.md)
 - [Testing Checklist](./TESTING_CHECKLIST.md)
 - [Rollback Procedure](./ROLLBACK_PROCEDURE.md)
 - [Azure Resource Naming Convention ADR](../architecture/adr/0008-azure-resource-naming-conventions.md)

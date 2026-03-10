@@ -1,3 +1,5 @@
+> ARCHIVED — January 2026. Superseded by docs/planning/PLAN.md
+
 # Mystira 2026 Roadmap
 
 **Last Updated**: February 2026

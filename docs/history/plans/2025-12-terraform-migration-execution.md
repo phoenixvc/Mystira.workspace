@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # Terraform State Migration Execution Guide
 
 This guide walks through the wave-based migration from monolithic to product-based Terraform state structure.

@@ -1,3 +1,5 @@
+> ARCHIVED — March 2026. Superseded by docs/planning/PLAN.md
+
 # Mystira Infrastructure Scaledown Plan
 
 **Date:** 2026-03-09

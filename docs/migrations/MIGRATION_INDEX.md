@@ -140,7 +140,7 @@ These issues were identified in code reviews and have been addressed:
 
 ## Related Documents
 
-- [2026 Roadmap](../../ROADMAP.md) - Single source of truth for planning
+- [Workspace Plan](../planning/PLAN.md) - Single source of truth for planning
 - [Architecture ADRs](../architecture/adr/) - Decision records
 - [Architecture Migrations](../architecture/migrations/) - Technical specifications
 - [Service Rollback](../operations/runbooks/service-rollback.md) - Rollback procedures

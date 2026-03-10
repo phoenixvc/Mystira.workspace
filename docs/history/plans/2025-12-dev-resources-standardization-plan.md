@@ -1,3 +1,5 @@
+> ARCHIVED — December 2025. Superseded by docs/planning/PLAN.md
+
 # Dev Resources Standardization Plan (v2.2 Compliant)
 
 ## Azure Naming Convention v2.2 Standard

@@ -603,7 +603,7 @@ After a rollback:
 ## References
 
 - [Deployment Strategy](./DEPLOYMENT_STRATEGY.md)
-- [Data Migration Plan](./DATA_MIGRATION_PLAN.md)
+- [Data Migration Plan](../history/plans/2025-12-data-migration-plan.md)
 - [Testing Checklist](./TESTING_CHECKLIST.md)
 - [Incident Response Plan](./INCIDENT_RESPONSE.md) (if exists)
 

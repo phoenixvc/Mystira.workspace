@@ -87,10 +87,10 @@ Procedures for managing infrastructure components.
 
 ### Contact Information
 
-| Role             | Primary              | Backup               | Method        |
-| ---------------- | -------------------- | -------------------- | ------------- |
-| Technical Lead   | jurie@phoenixvc.tech | eben@phoenixvc.tech  | Email         |
-| Founder/Business | eben@phoenixvc.tech  | jurie@phoenixvc.tech | Email         |
+| Role             | Primary              | Backup               | Method |
+| ---------------- | -------------------- | -------------------- | ------ |
+| Technical Lead   | jurie@phoenixvc.tech | eben@phoenixvc.tech  | Email  |
+| Founder/Business | eben@phoenixvc.tech  | jurie@phoenixvc.tech | Email  |
 
 ---
 
@@ -225,7 +225,7 @@ gh run list --workflow=mystira-app-api-cicd-prod.yml
 - [Deployment Strategy](../DEPLOYMENT_STRATEGY.md)
 - [Rollback Procedure](../ROLLBACK_PROCEDURE.md)
 - [Testing Checklist](../TESTING_CHECKLIST.md)
-- [Data Migration Plan](../DATA_MIGRATION_PLAN.md)
+- [Data Migration Plan](../../history/plans/2025-12-data-migration-plan.md)
 
 ---
 
