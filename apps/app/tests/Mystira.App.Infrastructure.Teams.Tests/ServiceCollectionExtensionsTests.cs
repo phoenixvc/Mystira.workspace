@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Mystira.App.Application.Ports.Messaging;
+using Mystira.Application.Ports.Messaging;
 using Mystira.App.Infrastructure.Teams.Configuration;
 using Mystira.App.Infrastructure.Teams.Services;
 

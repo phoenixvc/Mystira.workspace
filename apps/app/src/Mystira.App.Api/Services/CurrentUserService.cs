@@ -1,4 +1,4 @@
-using Mystira.App.Application.Ports.Services;
+using Mystira.Application.Ports.Services;
 using Mystira.Shared.Extensions;
 
 namespace Mystira.App.Api.Services;

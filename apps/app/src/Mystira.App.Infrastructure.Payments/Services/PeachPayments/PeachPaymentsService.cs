@@ -5,7 +5,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.App.Application.Ports.Payments;
+using Mystira.Application.Ports.Payments;
 using Mystira.App.Infrastructure.Payments.Configuration;
 using Mystira.Contracts.App.Enums;
 using Mystira.Contracts.App.Requests.Payments;

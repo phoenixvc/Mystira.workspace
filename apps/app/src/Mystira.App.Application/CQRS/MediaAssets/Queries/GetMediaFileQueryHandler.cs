@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Application.Ports.Storage;
+using Mystira.Application.Ports.Storage;
 
 namespace Mystira.App.Application.CQRS.MediaAssets.Queries;
 

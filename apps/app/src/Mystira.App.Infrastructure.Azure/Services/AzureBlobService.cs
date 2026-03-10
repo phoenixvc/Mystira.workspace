@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Storage;
+using Mystira.Application.Ports.Storage;
 
 namespace Mystira.App.Infrastructure.Azure.Services;
 

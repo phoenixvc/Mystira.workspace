@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Mystira.App.Application.Ports.Messaging;
+using Mystira.Application.Ports.Messaging;
 using Mystira.App.Infrastructure.WhatsApp.Configuration;
 using Mystira.App.Infrastructure.WhatsApp.Services;
 

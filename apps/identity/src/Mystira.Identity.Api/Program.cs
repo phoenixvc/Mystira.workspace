@@ -5,7 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Mystira.App.Application;
 using Mystira.App.Application.CQRS.Auth.Commands;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Application.Ports.Services;
+using Mystira.Application.Ports.Services;
 using Mystira.App.Application.Services;
 using Mystira.App.Infrastructure.Azure;
 using Mystira.App.Infrastructure.Data;

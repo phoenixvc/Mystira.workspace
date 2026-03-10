@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.App.Application.Ports.Payments;
+using Mystira.Application.Ports.Payments;
 using Mystira.App.Infrastructure.Payments.Configuration;
 
 namespace Mystira.App.Infrastructure.Payments.HealthChecks;

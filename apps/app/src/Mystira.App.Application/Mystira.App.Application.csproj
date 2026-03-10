@@ -35,6 +35,7 @@
     <ProjectReference Include="..\Mystira.App.Domain\Mystira.App.Domain.csproj" />
     <ProjectReference Include="../../../../packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
     <ProjectReference Include="../../../../packages/shared/Mystira.Shared/Mystira.Shared.csproj" />
+    <ProjectReference Include="../../../../packages/application/Mystira.Application/Mystira.Application.csproj" />
     <ProjectReference Include="..\..\..\..\packages\shared-observability\Mystira.Shared.Observability\Mystira.Shared.Observability.csproj" />
   </ItemGroup>
 </Project>

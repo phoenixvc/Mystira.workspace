@@ -3,8 +3,8 @@ using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;
 using Mystira.App.Application;
 using Mystira.App.Application.Ports;
-using Mystira.App.Application.Ports.Media;
-using Mystira.App.Application.Ports.Messaging;
+using Mystira.Application.Ports.Media;
+using Mystira.Application.Ports.Messaging;
 using Mystira.App.Infrastructure.Azure;
 using Mystira.App.Infrastructure.Azure.HealthChecks;
 using Mystira.App.Infrastructure.Azure.Services;
@@ -132,7 +132,7 @@ try
     builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
 
     builder.Services.AddHttpContextAccessor();
-    builder.Services.AddScoped<Mystira.App.Application.Ports.Services.ICurrentUserService, CurrentUserService>();
+    builder.Services.AddScoped<Mystira.Application.Ports.Services.ICurrentUserService, CurrentUserService>();
 
     builder.Services.AddMystiraRepositories();
     builder.Services.AddScoped<MasterDataSeederService>();

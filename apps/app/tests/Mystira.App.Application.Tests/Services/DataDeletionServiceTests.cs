@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Application.Ports.Storage;
+using Mystira.Application.Ports.Storage;
 using Mystira.App.Application.Services;
 using Mystira.App.Domain.Models;
 using Mystira.Shared.Data.Repositories;

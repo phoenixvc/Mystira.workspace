@@ -36,8 +36,9 @@ public class AzureBlobService : IBlobService
     /// <param name="fileStream">The file stream to upload.</param>
     /// <param name="fileName">The original file name.</param>
     /// <param name="contentType">The content type of the file.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The URI of the uploaded blob.</returns>
-    public async Task<string> UploadMediaAsync(Stream fileStream, string fileName, string contentType)
+    public async Task<string> UploadMediaAsync(Stream fileStream, string fileName, string contentType, CancellationToken ct = default)
     {
         try
         {
@@ -73,8 +74,9 @@ public class AzureBlobService : IBlobService
     /// Gets the URL for a media file stored in Azure Blob Storage.
     /// </summary>
     /// <param name="blobName">The name of the blob.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The URL of the blob.</returns>
-    public Task<string> GetMediaUrlAsync(string blobName)
+    public Task<string> GetMediaUrlAsync(string blobName, CancellationToken ct = default)
     {
         try
         {
@@ -95,8 +97,9 @@ public class AzureBlobService : IBlobService
     /// Deletes a media file from Azure Blob Storage.
     /// </summary>
     /// <param name="blobName">The name of the blob to delete.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>True if the blob was deleted; otherwise, false.</returns>
-    public async Task<bool> DeleteMediaAsync(string blobName)
+    public async Task<bool> DeleteMediaAsync(string blobName, CancellationToken ct = default)
     {
         try
         {
@@ -127,8 +130,9 @@ public class AzureBlobService : IBlobService
     /// Lists all media files in Azure Blob Storage with an optional prefix filter.
     /// </summary>
     /// <param name="prefix">The optional prefix to filter blob names.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A list of blob names matching the prefix.</returns>
-    public async Task<List<string>> ListMediaAsync(string prefix = "")
+    public async Task<List<string>> ListMediaAsync(string prefix = "", CancellationToken ct = default)
     {
         try
         {
@@ -153,8 +157,9 @@ public class AzureBlobService : IBlobService
     /// Downloads a media file from Azure Blob Storage.
     /// </summary>
     /// <param name="blobName">The name of the blob to download.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A stream containing the blob content, or null if the blob does not exist.</returns>
-    public async Task<Stream?> DownloadMediaAsync(string blobName)
+    public async Task<Stream?> DownloadMediaAsync(string blobName, CancellationToken ct = default)
     {
         try
         {

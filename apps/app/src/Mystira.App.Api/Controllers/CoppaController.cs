@@ -8,7 +8,7 @@ using Mystira.App.Application.CQRS.Coppa.Commands;
 using Mystira.App.Application.CQRS.Coppa.Queries;
 using Mystira.App.Application.Helpers;
 using Mystira.App.Application.Ports.Data;
-using Mystira.App.Application.Ports.Services;
+using Mystira.Application.Ports.Services;
 using Mystira.App.Application.Services;
 using Mystira.App.Api.Models;
 

@@ -12,7 +12,7 @@ using Mystira.App.Api.Controllers;
 using Mystira.App.Application.CQRS.Accounts.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
-using Mystira.App.Application.Ports.Services;
+using Mystira.Application.Ports.Services;
 using Mystira.App.Domain.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Requests.Scenarios;

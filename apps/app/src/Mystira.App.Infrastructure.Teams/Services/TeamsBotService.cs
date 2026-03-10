@@ -9,7 +9,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Rest;
-using Mystira.App.Application.Ports.Messaging;
+using Mystira.Application.Ports.Messaging;
 using Mystira.App.Infrastructure.Teams.Configuration;
 
 namespace Mystira.App.Infrastructure.Teams.Services;
