@@ -32,12 +32,13 @@ public class MediaMetadataService : IMediaMetadataService
     /// Retrieves the media metadata file from the repository.
     /// Ensures that the Entries collection is initialized.
     /// </summary>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The media metadata file, or null if not found.</returns>
-    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync()
+    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync(CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await _repository.GetAsync();
+            var metadataFile = await _repository.GetAsync(ct);
             if (metadataFile != null && metadataFile.Entries == null)
             {
                 metadataFile.Entries = new List<MediaMetadataEntry>();
@@ -56,8 +57,9 @@ public class MediaMetadataService : IMediaMetadataService
     /// Sets the UpdatedAt timestamp and ensures Entries collection is initialized.
     /// </summary>
     /// <param name="metadataFile">The metadata file to update.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated media metadata file.</returns>
-    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile, CancellationToken ct = default)
     {
         try
         {
@@ -66,7 +68,7 @@ public class MediaMetadataService : IMediaMetadataService
             {
                 metadataFile.Entries = new List<MediaMetadataEntry>();
             }
-            return await _repository.AddOrUpdateAsync(metadataFile);
+            return await _repository.AddOrUpdateAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -81,12 +83,13 @@ public class MediaMetadataService : IMediaMetadataService
     /// Throws an exception if an entry with the same ID already exists.
     /// </summary>
     /// <param name="entry">The media metadata entry to add.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated media metadata file.</returns>
-    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 metadataFile = new MediaMetadataFile
@@ -111,7 +114,7 @@ public class MediaMetadataService : IMediaMetadataService
             }
 
             metadataFile.Entries.Add(entry);
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -126,12 +129,13 @@ public class MediaMetadataService : IMediaMetadataService
     /// </summary>
     /// <param name="entryId">The ID of the entry to update.</param>
     /// <param name="entry">The updated entry data.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated media metadata file.</returns>
-    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -152,7 +156,7 @@ public class MediaMetadataService : IMediaMetadataService
             entry.Id = entryId;
             metadataFile.Entries[index] = entry;
 
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -166,12 +170,13 @@ public class MediaMetadataService : IMediaMetadataService
     /// Throws an exception if the metadata file or entry is not found.
     /// </summary>
     /// <param name="entryId">The ID of the entry to remove.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated media metadata file.</returns>
-    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 throw new InvalidOperationException("Media metadata file not found");
@@ -189,7 +194,7 @@ public class MediaMetadataService : IMediaMetadataService
             }
 
             metadataFile.Entries.Remove(existingEntry);
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -202,12 +207,13 @@ public class MediaMetadataService : IMediaMetadataService
     /// Retrieves a specific media metadata entry by its ID.
     /// </summary>
     /// <param name="entryId">The ID of the entry to retrieve.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The media metadata entry, or null if not found.</returns>
-    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         try
         {
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null || metadataFile.Entries == null)
             {
                 return null;
@@ -229,8 +235,9 @@ public class MediaMetadataService : IMediaMetadataService
     /// </summary>
     /// <param name="jsonData">The JSON string containing the metadata entries to import.</param>
     /// <param name="overwriteExisting">Whether to overwrite existing entries. Default is false.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The updated media metadata file.</returns>
-    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false)
+    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false, CancellationToken ct = default)
     {
         try
         {
@@ -249,7 +256,7 @@ public class MediaMetadataService : IMediaMetadataService
                 throw new ArgumentException("No valid media metadata entries found in data");
             }
 
-            var metadataFile = await GetMediaMetadataFileAsync();
+            var metadataFile = await GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 metadataFile = new MediaMetadataFile
@@ -288,7 +295,7 @@ public class MediaMetadataService : IMediaMetadataService
                 }
             }
 
-            return await UpdateMediaMetadataFileAsync(metadataFile);
+            return await UpdateMediaMetadataFileAsync(metadataFile, ct);
         }
         catch (Exception ex)
         {
@@ -297,4 +304,3 @@ public class MediaMetadataService : IMediaMetadataService
         }
     }
 }
-

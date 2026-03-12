@@ -16,7 +16,7 @@ namespace Mystira.Infrastructure.StoryProtocol.Services.Mock;
 public class MockStoryProtocolService : IStoryProtocolService
 {
     private readonly ILogger<MockStoryProtocolService> _logger;
-    private readonly ConcurrentDictionary<string, ScenarioStoryProtocol> _registeredAssets = new();
+    private readonly ConcurrentDictionary<string, StoryProtocolMetadata> _registeredAssets = new();
     private readonly ConcurrentDictionary<string, RoyaltyBalance> _balances = new();
     private readonly ConcurrentDictionary<string, List<RoyaltyPaymentResult>> _payments = new();
     private readonly object _paymentLock = new();
@@ -33,12 +33,13 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when contentId, contentTitle is null/empty or contributors is null/empty.</exception>
-    public Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
+    public Task<StoryProtocolMetadata> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
         List<Contributor> contributors,
         string? metadataUri = null,
-        string? licenseTermsId = null)
+        string? licenseTermsId = null,
+        CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
         ArgumentException.ThrowIfNullOrWhiteSpace(contentTitle, nameof(contentTitle));
@@ -57,15 +58,13 @@ public class MockStoryProtocolService : IStoryProtocolService
         var ipAssetId = $"0x{Guid.NewGuid():N}";
         var txHash = $"0x{Guid.NewGuid():N}";
 
-        var result = new ScenarioStoryProtocol
+        var result = new StoryProtocolMetadata
         {
             IpAssetId = ipAssetId,
-            TransactionHash = txHash,
+            RegistrationTxHash = txHash,
             RegisteredAt = DateTime.UtcNow,
-            IsRegistered = true,
             LicenseTermsId = licenseTermsId ?? "mock-license-001",
-            RoyaltyPolicyId = $"0x{Guid.NewGuid():N}",
-            Contributors = contributors
+            RoyaltyModuleId = $"0x{Guid.NewGuid():N}"
         };
 
         _registeredAssets[contentId] = result;
@@ -100,7 +99,7 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when contentId is null or empty.</exception>
-    public Task<bool> IsRegisteredAsync(string contentId)
+    public Task<bool> IsRegisteredAsync(string contentId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
 
@@ -113,7 +112,7 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
-    public Task<ScenarioStoryProtocol?> GetRoyaltyConfigurationAsync(string ipAssetId)
+    public Task<StoryProtocolMetadata?> GetRoyaltyConfigurationAsync(string ipAssetId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -125,7 +124,7 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or contributors is null/empty.</exception>
-    public Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors)
+    public Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<Contributor> contributors, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
         ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
@@ -146,29 +145,27 @@ public class MockStoryProtocolService : IStoryProtocolService
             throw new InvalidOperationException($"IP Asset {ipAssetId} not found");
         }
 
-        var updated = new ScenarioStoryProtocol
+        var updated = new StoryProtocolMetadata
         {
             IpAssetId = ipAssetId,
-            TransactionHash = $"0x{Guid.NewGuid():N}",
+            RegistrationTxHash = $"0x{Guid.NewGuid():N}",
             RegisteredAt = entry.Value.RegisteredAt,
-            IsRegistered = true,
             LicenseTermsId = entry.Value.LicenseTermsId,
-            RoyaltyPolicyId = entry.Value.RoyaltyPolicyId,
-            Contributors = contributors
+            RoyaltyModuleId = entry.Value.RoyaltyModuleId
         };
 
         _registeredAssets[entry.Key] = updated;
 
         _logger.LogInformation(
             "Mock: Royalty split updated: IpAssetId={IpAssetId}, TxHash={TxHash}",
-            ipAssetId, updated.TransactionHash);
+            ipAssetId, updated.RegistrationTxHash);
 
         return Task.FromResult(updated);
     }
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or amount is invalid.</exception>
-    public Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null)
+    public Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -244,7 +241,7 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
-    public Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId)
+    public Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -270,7 +267,7 @@ public class MockStoryProtocolService : IStoryProtocolService
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId or contributorWallet is null or empty.</exception>
-    public Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet)
+    public Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
         ArgumentException.ThrowIfNullOrWhiteSpace(contributorWallet, nameof(contributorWallet));

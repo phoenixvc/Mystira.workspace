@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -34,7 +34,7 @@ public class UpdateUserProfileUseCaseTests
 
         var request = new UpdateUserProfileRequest
         {
-            AgeGroup = "10-12",
+            AgeGroup = "preteen",
             HasCompletedOnboarding = true
         };
 

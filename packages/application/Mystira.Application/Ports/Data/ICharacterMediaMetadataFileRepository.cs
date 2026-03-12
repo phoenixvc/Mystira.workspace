@@ -10,19 +10,15 @@ public interface ICharacterMediaMetadataFileRepository
     /// <summary>
     /// Gets the character media metadata file.
     /// </summary>
-    /// <returns>The character media metadata file if found; otherwise, null.</returns>
-    Task<CharacterMediaMetadataFile?> GetAsync();
+    Task<CharacterMediaMetadataFile?> GetAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Adds or updates the character media metadata file.
     /// </summary>
-    /// <param name="entity">The character media metadata file to add or update.</param>
-    /// <returns>The added or updated character media metadata file.</returns>
-    Task<CharacterMediaMetadataFile> AddOrUpdateAsync(CharacterMediaMetadataFile entity);
+    Task<CharacterMediaMetadataFile> AddOrUpdateAsync(CharacterMediaMetadataFile entity, CancellationToken ct = default);
 
     /// <summary>
     /// Deletes the character media metadata file.
     /// </summary>
-    Task DeleteAsync();
+    Task DeleteAsync(CancellationToken ct = default);
 }
-

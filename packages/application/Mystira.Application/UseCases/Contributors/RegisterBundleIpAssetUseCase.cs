@@ -70,7 +70,7 @@ public class RegisterBundleIpAssetUseCase
         }
 
         // Register on Story Protocol
-        var storyProtocolMetadata = await _storyProtocolService.RegisterIpAssetAsync(
+        var registrationResult = await _storyProtocolService.RegisterIpAssetAsync(
             bundle.Id,
             bundle.Title,
             bundle.StoryProtocol.Contributors,
@@ -78,7 +78,10 @@ public class RegisterBundleIpAssetUseCase
             request.LicenseTermsId);
 
         // Update the bundle with Story Protocol metadata
-        bundle.StoryProtocol = storyProtocolMetadata;
+        bundle.StoryProtocol.IpAssetId = registrationResult.IpAssetId;
+        bundle.StoryProtocol.TransactionHash = registrationResult.RegistrationTxHash;
+        bundle.StoryProtocol.RegisteredAt = registrationResult.RegisteredAt;
+        bundle.StoryProtocol.IsRegistered = true;
 
         await _bundleRepository.UpdateAsync(bundle);
 
@@ -93,8 +96,8 @@ public class RegisterBundleIpAssetUseCase
         }
 
         _logger.LogInformation("Registered bundle {BundleId} as IP Asset: {IpAssetId}",
-            bundleId, storyProtocolMetadata.IpAssetId);
+            bundleId, registrationResult.IpAssetId);
 
-        return storyProtocolMetadata;
+        return bundle.StoryProtocol;
     }
 }

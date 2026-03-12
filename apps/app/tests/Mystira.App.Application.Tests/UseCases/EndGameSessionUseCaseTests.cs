@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -98,7 +98,7 @@ public class EndGameSessionUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("missing");
 
-        await act.Should().ThrowAsync<ValidationException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Theory]

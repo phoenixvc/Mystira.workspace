@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
 using Mystira.App.Application.UseCases.Media;
 using Mystira.Domain.Models;
@@ -49,7 +49,7 @@ public class DeleteMediaUseCaseTests
         // Assert
         result.Should().BeTrue();
         _blobService.Verify(b => b.DeleteMediaAsync("test.jpg", It.IsAny<CancellationToken>()), Times.Once);
-        _repository.Verify(r => r.DeleteAsync("id-1", It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.DeleteAsync("media-1", It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -88,7 +88,7 @@ public class DeleteMediaUseCaseTests
 
         // Assert
         result.Should().BeTrue();
-        _repository.Verify(r => r.DeleteAsync("id-1", It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.DeleteAsync("media-1", It.IsAny<CancellationToken>()), Times.Once);
         _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Mystira.App.Application.CQRS.Coppa.Commands;
 using Mystira.App.Application.CQRS.Coppa.Queries;
 using Mystira.App.Application.Helpers;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Application.Ports.Services;
 using Mystira.App.Application.Services;
 using Mystira.App.Api.Models;

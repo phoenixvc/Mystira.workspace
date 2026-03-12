@@ -1,6 +1,6 @@
 # Mystira Workspace Plan
 
-**Last Updated**: 2026-03-10
+**Last Updated**: 2026-03-11
 **Branch**: `refactor/workspace-consolidation`
 **Backlog**: [BACKLOG.md](../../BACKLOG.md)
 
@@ -24,15 +24,15 @@ eliminate duplicate domain stacks left from an incomplete migration.
 **Rules**: Never delete without confirming functionality exists elsewhere. Each phase
 is one atomic commit. Gates are mandatory.
 
-| Step | What                                                                                                                                         | Status                  | Gate                                               |
-| ---- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- | -------------------------------------------------- |
-| A.0  | Pop `stash@{0}` — 24-file dep update (NuGet, SDK, Dockerfiles)                                                                               | **DONE** `921606886`    | `dotnet build` succeeds                            |
-| A.1  | Entity Base Class Consolidation — migrate consumers to Domain, delete Shared+App entity bases                                                | **DONE** `fe3661f4d`    | Zero refs to `Mystira.Shared.Data.Entities.Entity` |
-| A.2  | Port Interface Consolidation — service ports (7/9 done), data repos deferred to after A.3                                                    | **PARTIAL** `31e51878c` | Zero duplicate port refs                           |
-| A.3  | Domain Model Consolidation — merge Account, Scenario, GameSession, Badge, UserProfile, MediaAsset; then complete A.2 repos + remaining ports | **NEXT**                | All duplicates resolved + build passes             |
-| A.4  | CQRS Handler Deduplication — merge enhanced handlers into workspace                                                                          |                         | No business logic lost                             |
-| A.5  | Auth Extraction + Identity Decoupling — create `packages/contracts/auth/`                                                                    |                         | Identity builds without App.Application refs       |
-| A.6  | Final Cleanup + PR to main                                                                                                                   |                         | Full build+test suite green                        |
+| Step | What                                                                                                                                 | Status               | Gate                                               |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------ | -------------------- | -------------------------------------------------- |
+| A.0  | Pop `stash@{0}` — 24-file dep update (NuGet, SDK, Dockerfiles)                                                                       | **DONE** `921606886` | `dotnet build` succeeds                            |
+| A.1  | Entity Base Class Consolidation — migrate consumers to Domain, delete Shared+App entity bases                                        | **DONE** `fe3661f4d` | Zero refs to `Mystira.Shared.Data.Entities.Entity` |
+| A.2  | Port Interface Consolidation — service ports (7/9 done), data repos + 2 service ports remaining                                      | **NEXT**             | Zero duplicate port refs                           |
+| A.3  | Domain Model Consolidation — 539 files migrated to `Mystira.Domain` DDD types (value objects, definition models, EF mappings, tests) | **DONE** `4d25a0acf` | All duplicates resolved + build passes             |
+| A.4  | CQRS Handler Deduplication — merge enhanced handlers into workspace                                                                  |                      | No business logic lost                             |
+| A.5  | Auth Extraction + Identity Decoupling — create `packages/contracts/auth/`                                                            |                      | Identity builds without App.Application refs       |
+| A.6  | Final Cleanup + PR to main                                                                                                           |                      | Full build+test suite green                        |
 
 ### A.2 Details
 
@@ -41,18 +41,12 @@ is one atomic commit. Gates are mandatory.
 - `ICurrentUserService`, `IBlobService`, `IAudioTranscodingService`
 - `IMessagingService`, `IChatBotService`, `IBotCommandService`, `IPaymentService`
 
-**Deferred to A.3** (blocked by domain model namespace split `Mystira.App.Domain.Models` vs `Mystira.Domain.Models`):
+**Remaining** (unblocked by A.3 completion):
 
-- `IMediaMetadataService` — references different domain model types
-- `IStoryProtocolService` — incompatible return types (`StoryProtocolMetadata` vs `ScenarioStoryProtocol`)
-- 21 data repository ports — different base classes (`IRepository<T,TKey>` vs Ardalis `IRepositoryBase<T>`) + different domain namespaces
-- App-only ports to promote to workspace: `ICoppaConsentRepository`, `IDataDeletionRepository`, `IDataDeletionService`, `IEmailService`
-
-### Revised Dependency
-
-```text
-A.3 (domain models) must complete BEFORE finishing A.2 (repos + remaining service ports)
-```
+- `IMediaMetadataService` — both now use `Mystira.Domain`, delete App duplicate
+- `IStoryProtocolService` — verify signatures match, delete App duplicate
+- 21 data repository ports — reconcile base interfaces, redirect consumers, delete App duplicates
+- App-only ports to promote: `ICoppaConsentRepository`, `IDataDeletionRepository`, `IDataDeletionService`, `IEmailService`
 
 ### Post-Consolidation Architecture
 

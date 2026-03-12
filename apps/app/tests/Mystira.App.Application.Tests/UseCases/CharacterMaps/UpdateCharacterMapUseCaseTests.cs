@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.CharacterMaps;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -70,7 +70,7 @@ public class UpdateCharacterMapUseCaseTests
         var act = () => _useCase.ExecuteAsync("missing", request);
 
         // Assert
-        await act.Should().ThrowAsync<ValidationException>()
+        await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage("*not found*");
     }
 

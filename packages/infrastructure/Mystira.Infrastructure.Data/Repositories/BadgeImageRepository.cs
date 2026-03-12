@@ -27,11 +27,12 @@ public class BadgeImageRepository : Repository<BadgeImage>, IBadgeImageRepositor
     /// Retrieves a badge image by its ID.
     /// </summary>
     /// <param name="imageId">The image ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The badge image, or null if not found.</returns>
-    public async Task<BadgeImage?> GetByImageIdAsync(string imageId)
+    public async Task<BadgeImage?> GetByImageIdAsync(string imageId, CancellationToken ct = default)
     {
         // BadgeImage uses Id as its identifier (there's no separate ImageId property)
         return await _appContext.BadgeImages
-            .FirstOrDefaultAsync(x => x.Id == imageId);
+            .FirstOrDefaultAsync(x => x.Id == imageId, ct);
     }
 }

@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.ContentBundles;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -48,7 +48,7 @@ public class AddScenarioToBundleUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("missing", "scen-1");
 
-        await act.Should().ThrowAsync<ValidationException>().WithMessage("*not found*");
+        await act.Should().ThrowAsync<NotFoundException>().WithMessage("*not found*");
     }
 
     [Theory]

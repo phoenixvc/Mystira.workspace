@@ -23,24 +23,26 @@ public class PlayerScenarioScoreRepository : Repository<PlayerScenarioScore>, IP
     /// </summary>
     /// <param name="profileId">The player profile ID.</param>
     /// <param name="scenarioId">The scenario ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The player scenario score, or null if not found.</returns>
-    public async Task<PlayerScenarioScore?> GetByProfileAndScenarioAsync(string profileId, string scenarioId)
+    public async Task<PlayerScenarioScore?> GetByProfileAndScenarioAsync(string profileId, string scenarioId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_dbContext).PlayerScenarioScores
-            .FirstOrDefaultAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId);
+            .FirstOrDefaultAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId, ct);
     }
 
     /// <summary>
     /// Retrieves all scenario scores for a specific player profile, ordered by creation date descending.
     /// </summary>
     /// <param name="profileId">The player profile ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A collection of player scenario scores.</returns>
-    public async Task<IEnumerable<PlayerScenarioScore>> GetByProfileIdAsync(string profileId)
+    public async Task<IEnumerable<PlayerScenarioScore>> GetByProfileIdAsync(string profileId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_dbContext).PlayerScenarioScores
             .Where(x => x.ProfileId == profileId)
             .OrderByDescending(x => x.CreatedAt)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
@@ -48,10 +50,11 @@ public class PlayerScenarioScoreRepository : Repository<PlayerScenarioScore>, IP
     /// </summary>
     /// <param name="profileId">The player profile ID.</param>
     /// <param name="scenarioId">The scenario ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>True if the player has scored the scenario; otherwise, false.</returns>
-    public async Task<bool> IsScenarioScoredAsync(string profileId, string scenarioId)
+    public async Task<bool> IsScenarioScoredAsync(string profileId, string scenarioId, CancellationToken ct = default)
     {
         return await ((MystiraAppDbContext)_dbContext).PlayerScenarioScores
-            .AnyAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId);
+            .AnyAsync(x => x.ProfileId == profileId && x.ScenarioId == scenarioId, ct);
     }
 }

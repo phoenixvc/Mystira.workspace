@@ -18,15 +18,14 @@ public class CharacterMapRepository : Repository<CharacterMap>, ICharacterMapRep
     }
 
     /// <inheritdoc/>
-    public async Task<CharacterMap?> GetByNameAsync(string name)
+    public async Task<CharacterMap?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await DbSet.FirstOrDefaultAsync(c => c.Name == name);
+        return await DbSet.FirstOrDefaultAsync(c => c.Name == name, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await DbSet.AnyAsync(c => c.Name == name);
+        return await DbSet.AnyAsync(c => c.Name == name, ct);
     }
 }
-

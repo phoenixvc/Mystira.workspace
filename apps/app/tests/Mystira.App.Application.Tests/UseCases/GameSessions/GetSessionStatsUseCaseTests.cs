@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -34,6 +34,11 @@ public class GetSessionStatsUseCaseTests
             StartTime = DateTime.UtcNow.AddHours(-1),
             EndTime = DateTime.UtcNow,
             Status = SessionStatus.Completed,
+            CompassValues = new List<CompassTracking>
+            {
+                new() { Axis = "empathy", CurrentValue = 0.5 },
+                new() { Axis = "generosity", CurrentValue = 0.3 }
+            },
             ChoiceHistory = new List<SessionChoice>
             {
                 new()
@@ -43,7 +48,8 @@ public class GetSessionStatsUseCaseTests
                     CompassAxis = "empathy",
                     CompassDelta = 0.5,
                     PlayerId = "profile-1",
-                    ChosenAt = DateTime.UtcNow.AddMinutes(-30)
+                    ChosenAt = DateTime.UtcNow.AddMinutes(-30),
+                    CompassChange = new CompassChange { AxisId = "empathy", Delta = 1 }
                 },
                 new()
                 {
@@ -52,7 +58,8 @@ public class GetSessionStatsUseCaseTests
                     CompassAxis = "generosity",
                     CompassDelta = 0.3,
                     PlayerId = "profile-1",
-                    ChosenAt = DateTime.UtcNow.AddMinutes(-15)
+                    ChosenAt = DateTime.UtcNow.AddMinutes(-15),
+                    CompassChange = new CompassChange { AxisId = "generosity", Delta = 1 }
                 }
             },
             EchoHistory = new List<EchoLog>

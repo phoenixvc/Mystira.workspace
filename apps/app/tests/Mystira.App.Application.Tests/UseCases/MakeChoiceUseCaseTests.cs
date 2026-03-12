@@ -1,8 +1,8 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Domain.Models;
@@ -28,6 +28,14 @@ public class MakeChoiceUseCaseTests
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _lockService = new Mock<IDistributedLockService>();
+        _lockService.Setup(l => l.ExecuteWithLockAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<CancellationToken, Task<GameSession?>>>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<string, Func<CancellationToken, Task<GameSession?>>, TimeSpan, TimeSpan, CancellationToken>(
+                (_, action, _, _, ct) => action(ct));
         _logger = new Mock<ILogger<MakeChoiceUseCase>>();
         _useCase = new MakeChoiceUseCase(
             _repository.Object, _scenarioRepository.Object,
@@ -143,7 +151,7 @@ public class MakeChoiceUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<BusinessRuleException>();
     }
 
     [Fact]
@@ -165,7 +173,7 @@ public class MakeChoiceUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]

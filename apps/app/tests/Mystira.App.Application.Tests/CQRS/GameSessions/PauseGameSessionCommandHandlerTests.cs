@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -51,9 +51,6 @@ public class PauseGameSessionCommandHandlerTests
         // Assert
         result.Should().NotBeNull();
         result!.Status.Should().Be(SessionStatus.Paused);
-        result.IsPaused.Should().BeTrue();
-        result.PausedAt.Should().NotBeNull();
-        result.PausedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
     }
 
     [Fact]

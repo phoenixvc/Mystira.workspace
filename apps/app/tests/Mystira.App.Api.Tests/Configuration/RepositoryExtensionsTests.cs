@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.App.Api.Configuration;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Api.Tests.Configuration;

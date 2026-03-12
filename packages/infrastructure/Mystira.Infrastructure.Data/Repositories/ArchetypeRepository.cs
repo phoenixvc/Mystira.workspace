@@ -25,60 +25,65 @@ public class ArchetypeRepository : IArchetypeRepository
     /// Retrieves all non-deleted archetypes, ordered by name.
     /// </summary>
     /// <returns>A list of archetype definitions.</returns>
-    public async Task<List<ArchetypeDefinition>> GetAllAsync()
+    public async Task<List<ArchetypeDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _appContext.ArchetypeDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
     /// Retrieves an archetype by its unique identifier.
     /// </summary>
     /// <param name="id">The archetype ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The archetype definition, or null if not found or deleted.</returns>
-    public async Task<ArchetypeDefinition?> GetByIdAsync(string id)
+    public async Task<ArchetypeDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
-        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Retrieves an archetype by its name (case-insensitive).
     /// </summary>
     /// <param name="name">The archetype name.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The archetype definition, or null if not found or deleted.</returns>
-    public async Task<ArchetypeDefinition?> GetByNameAsync(string name)
+    public async Task<ArchetypeDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Checks if an archetype with the specified name exists (case-insensitive).
     /// </summary>
     /// <param name="name">The archetype name to check.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>True if the archetype exists and is not deleted; otherwise, false.</returns>
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _appContext.ArchetypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
+        return await _appContext.ArchetypeDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Adds a new archetype to the repository.
     /// </summary>
     /// <param name="archetype">The archetype to add.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task AddAsync(ArchetypeDefinition archetype)
+    public async Task AddAsync(ArchetypeDefinition archetype, CancellationToken ct = default)
     {
-        await _appContext.ArchetypeDefinitions.AddAsync(archetype);
+        await _appContext.ArchetypeDefinitions.AddAsync(archetype, ct);
     }
 
     /// <summary>
     /// Updates an existing archetype in the repository.
     /// </summary>
     /// <param name="archetype">The archetype to update.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task UpdateAsync(ArchetypeDefinition archetype)
+    public Task UpdateAsync(ArchetypeDefinition archetype, CancellationToken ct = default)
     {
         _appContext.ArchetypeDefinitions.Update(archetype);
         return Task.CompletedTask;
@@ -88,10 +93,11 @@ public class ArchetypeRepository : IArchetypeRepository
     /// Soft deletes an archetype by marking it as deleted.
     /// </summary>
     /// <param name="id">The ID of the archetype to delete.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var archetype = await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var archetype = await _appContext.ArchetypeDefinitions.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (archetype != null)
         {
             // Soft delete instead of hard delete

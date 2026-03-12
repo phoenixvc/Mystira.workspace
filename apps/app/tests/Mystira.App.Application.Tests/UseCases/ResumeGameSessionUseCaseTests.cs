@@ -1,13 +1,12 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
-using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Application.Tests.UseCases;
 
@@ -69,7 +68,7 @@ public class ResumeGameSessionUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("missing");
 
-        await act.Should().ThrowAsync<ValidationException>()
+        await act.Should().ThrowAsync<NotFoundException>()
             .WithMessage("*not found*");
     }
 
@@ -83,7 +82,7 @@ public class ResumeGameSessionUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("session-1");
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<BusinessRuleException>()
             .WithMessage("*only resume paused sessions*");
     }
 
@@ -97,7 +96,7 @@ public class ResumeGameSessionUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("session-1");
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<BusinessRuleException>()
             .WithMessage("*only resume paused sessions*");
     }
 }

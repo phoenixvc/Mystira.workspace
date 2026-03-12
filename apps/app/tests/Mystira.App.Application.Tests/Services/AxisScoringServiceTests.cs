@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -211,11 +211,11 @@ public class AxisScoringServiceTests : IDisposable
             TierOrder = 2,
             Title = "Honesty Silver",
             Description = "Silver honesty tier",
-            RequiredScore = 1,
+            RequiredScore = 3,
             ImageId = "img-silver"
         };
 
-        // Two different scenarios, each session has two honesty choices of 0.25 (total 0.5 per session)
+        // Two different scenarios, each session has two honesty choices of 1 (total 2 per session)
         var session1 = new GameSession
         {
             Id = "session1",
@@ -223,8 +223,8 @@ public class AxisScoringServiceTests : IDisposable
             ScenarioId = "scenario1",
             ChoiceHistory = new List<SessionChoice>
             {
-                new() { CompassAxis = "honesty", CompassDelta = 0.25, PlayerId = profile.Id },
-                new() { CompassAxis = "honesty", CompassDelta = 0.25, PlayerId = profile.Id }
+                new() { CompassAxis = "honesty", CompassDelta = 1, PlayerId = profile.Id },
+                new() { CompassAxis = "honesty", CompassDelta = 1, PlayerId = profile.Id }
             }
         };
 
@@ -235,8 +235,8 @@ public class AxisScoringServiceTests : IDisposable
             ScenarioId = "scenario2",
             ChoiceHistory = new List<SessionChoice>
             {
-                new() { CompassAxis = "honesty", CompassDelta = 0.25, PlayerId = profile.Id },
-                new() { CompassAxis = "honesty", CompassDelta = 0.25, PlayerId = profile.Id }
+                new() { CompassAxis = "honesty", CompassDelta = 1, PlayerId = profile.Id },
+                new() { CompassAxis = "honesty", CompassDelta = 1, PlayerId = profile.Id }
             }
         };
 

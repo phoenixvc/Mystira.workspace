@@ -1,8 +1,8 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -28,6 +28,14 @@ public class ProgressSceneUseCaseTests
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _lockService = new Mock<IDistributedLockService>();
+        _lockService.Setup(l => l.ExecuteWithLockAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<CancellationToken, Task<GameSession?>>>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<string, Func<CancellationToken, Task<GameSession?>>, TimeSpan, TimeSpan, CancellationToken>(
+                (_, action, _, _, ct) => action(ct));
         _logger = new Mock<ILogger<ProgressSceneUseCase>>();
         _useCase = new ProgressSceneUseCase(
             _repository.Object, _scenarioRepository.Object,
@@ -95,7 +103,7 @@ public class ProgressSceneUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<BusinessRuleException>();
     }
 
     [Fact]
@@ -111,7 +119,7 @@ public class ProgressSceneUseCaseTests
 
         var act = () => _useCase.ExecuteAsync(request);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]

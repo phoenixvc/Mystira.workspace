@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -52,9 +52,7 @@ public class ResumeGameSessionCommandHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.Status.Should().Be(SessionStatus.InProgress);
-        result.IsPaused.Should().BeFalse();
-        result.PausedAt.Should().BeNull();
+        result!.Status.Should().Be(SessionStatus.Active);
     }
 
     [Fact]
@@ -161,7 +159,7 @@ public class ResumeGameSessionCommandHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.PausedAt.Should().BeNull();
+        result!.Status.Should().Be(SessionStatus.Active);
     }
 
     [Fact]

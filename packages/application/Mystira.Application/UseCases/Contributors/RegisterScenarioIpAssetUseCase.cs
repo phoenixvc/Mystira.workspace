@@ -70,7 +70,7 @@ public class RegisterScenarioIpAssetUseCase
         }
 
         // Register on Story Protocol
-        var storyProtocolMetadata = await _storyProtocolService.RegisterIpAssetAsync(
+        var registrationResult = await _storyProtocolService.RegisterIpAssetAsync(
             scenario.Id,
             scenario.Title,
             scenario.StoryProtocol.Contributors,
@@ -78,7 +78,10 @@ public class RegisterScenarioIpAssetUseCase
             request.LicenseTermsId);
 
         // Update the scenario with Story Protocol metadata
-        scenario.StoryProtocol = storyProtocolMetadata;
+        scenario.StoryProtocol.IpAssetId = registrationResult.IpAssetId;
+        scenario.StoryProtocol.TransactionHash = registrationResult.RegistrationTxHash;
+        scenario.StoryProtocol.RegisteredAt = registrationResult.RegisteredAt;
+        scenario.StoryProtocol.IsRegistered = true;
 
         await _scenarioRepository.UpdateAsync(scenario);
 
@@ -93,8 +96,8 @@ public class RegisterScenarioIpAssetUseCase
         }
 
         _logger.LogInformation("Registered scenario {ScenarioId} as IP Asset: {IpAssetId}",
-            scenarioId, storyProtocolMetadata.IpAssetId);
+            scenarioId, registrationResult.IpAssetId);
 
-        return storyProtocolMetadata;
+        return scenario.StoryProtocol;
     }
 }

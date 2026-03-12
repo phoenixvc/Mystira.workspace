@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -307,7 +307,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
 
         _profileRepository.Setup(r => r.GetByIdAsync(profileId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(profile);
-        _badgeRepository.Setup(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()))
+        _badgeRepository.Setup(r => r.GetByAgeGroupAsync("middle_childhood", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<Badge>());
         _axisRepository.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(new List<CompassAxisDefinition>());
@@ -325,7 +325,7 @@ public class GetProfileBadgeProgressQueryHandlerTests
 
         // Assert
         result.Should().NotBeNull();
-        result!.AgeGroupId.Should().Be("6-9"); // Default age group
-        _badgeRepository.Verify(r => r.GetByAgeGroupAsync("6-9", It.IsAny<CancellationToken>()), Times.Once);
+        result!.AgeGroupId.Should().Be("middle_childhood"); // Default age group
+        _badgeRepository.Verify(r => r.GetByAgeGroupAsync("middle_childhood", It.IsAny<CancellationToken>()), Times.Once);
     }
 }

@@ -18,32 +18,32 @@ public class UserProfileRepository : Repository<UserProfile>, IUserProfileReposi
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId)
+    public async Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId, CancellationToken ct = default)
     {
         return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => p.AccountId == accountId)
             .OrderBy(p => p.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<UserProfile>> GetGuestProfilesAsync()
+    public async Task<IEnumerable<UserProfile>> GetGuestProfilesAsync(CancellationToken ct = default)
     {
         return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => p.IsGuest)
             .OrderBy(p => p.CreatedAt)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync()
+    public async Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync(CancellationToken ct = default)
     {
         return await DbSet
             .Include(p => p.EarnedBadges)
             .Where(p => !p.IsGuest)
             .OrderBy(p => p.Name)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 }

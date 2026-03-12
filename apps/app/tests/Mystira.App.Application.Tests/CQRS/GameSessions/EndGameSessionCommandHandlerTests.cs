@@ -1,8 +1,9 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -57,7 +58,7 @@ public class EndGameSessionCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithNonExistingSession_ReturnsNull()
+    public async Task Handle_WithNonExistingSession_ThrowsNotFoundException()
     {
         // Arrange
         var sessionId = "non-existent";
@@ -68,10 +69,10 @@ public class EndGameSessionCommandHandlerTests
         var command = new EndGameSessionCommand(sessionId);
 
         // Act
-        var result = await EndGameSessionCommandHandler.Handle(command, useCase, CancellationToken.None);
+        var act = () => EndGameSessionCommandHandler.Handle(command, useCase, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]
@@ -103,17 +104,17 @@ public class EndGameSessionCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_WithEmptySessionId_ReturnsNull()
+    public async Task Handle_WithEmptySessionId_ThrowsValidationException()
     {
-        // Arrange - UseCase throws ValidationException for empty ID, handler catches and returns null
+        // Arrange
         var useCase = new EndGameSessionUseCase(_repository.Object, _unitOfWork.Object, _logger.Object);
         var command = new EndGameSessionCommand("");
 
         // Act
-        var result = await EndGameSessionCommandHandler.Handle(command, useCase, CancellationToken.None);
+        var act = () => EndGameSessionCommandHandler.Handle(command, useCase, CancellationToken.None);
 
         // Assert
-        result.Should().BeNull();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

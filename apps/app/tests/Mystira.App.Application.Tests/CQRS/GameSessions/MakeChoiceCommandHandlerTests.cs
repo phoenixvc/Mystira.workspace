@@ -1,9 +1,9 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -28,6 +28,14 @@ public class MakeChoiceCommandHandlerTests
         _scenarioRepository = new Mock<IScenarioRepository>();
         _unitOfWork = new Mock<IUnitOfWork>();
         _lockService = new Mock<IDistributedLockService>();
+        _lockService.Setup(l => l.ExecuteWithLockAsync(
+                It.IsAny<string>(),
+                It.IsAny<Func<CancellationToken, Task<GameSession?>>>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<TimeSpan>(),
+                It.IsAny<CancellationToken>()))
+            .Returns<string, Func<CancellationToken, Task<GameSession?>>, TimeSpan, TimeSpan, CancellationToken>(
+                (_, action, _, _, ct) => action(ct));
         _logger = new Mock<ILogger<MakeChoiceUseCase>>();
     }
 
@@ -111,7 +119,7 @@ public class MakeChoiceCommandHandlerTests
         var act = () => MakeChoiceCommandHandler.Handle(
             new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<BusinessRuleException>();
     }
 
     [Fact]
@@ -137,8 +145,8 @@ public class MakeChoiceCommandHandlerTests
         var act = () => MakeChoiceCommandHandler.Handle(
             new MakeChoiceCommand(request), useCase, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Scenario not found*");
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*Scenario*not found*");
     }
 
     [Fact]

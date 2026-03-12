@@ -139,10 +139,10 @@ public class StartGameSessionRequestValidatorTests
     }
 
     [Theory]
-    [InlineData(6, "6-9")]   // Exact match: scenario min == target min
-    [InlineData(3, "6-9")]   // Scenario allows younger: scenario min < target min
-    [InlineData(1, "10-12")] // Scenario allows much younger
-    [InlineData(9, "10-12")] // Scenario max within target range
+    [InlineData(7, "middle_childhood")]   // Exact match: scenario min == target min
+    [InlineData(3, "middle_childhood")]   // Scenario allows younger: scenario min < target min
+    [InlineData(1, "preteen")] // Scenario allows much younger
+    [InlineData(9, "preteen")] // Scenario max within target range
     public void ValidateAgeGroup_WhenScenarioMinIsLessOrEqual_DoesNotThrow(int scenarioMin, string targetAgeGroup)
     {
         var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(scenarioMin, targetAgeGroup);
@@ -151,9 +151,9 @@ public class StartGameSessionRequestValidatorTests
     }
 
     [Theory]
-    [InlineData(12, "6-9")]   // Scenario too mature for target
-    [InlineData(10, "6-9")]   // Scenario min exceeds target min
-    [InlineData(18, "10-12")] // Teens scenario for preteens
+    [InlineData(12, "middle_childhood")]   // Scenario too mature for target
+    [InlineData(10, "middle_childhood")]   // Scenario min exceeds target min
+    [InlineData(18, "preteen")] // Teens scenario for preteens
     public void ValidateAgeGroup_WhenScenarioMinExceedsTargetMin_ThrowsValidationException(int scenarioMin, string targetAgeGroup)
     {
         var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(scenarioMin, targetAgeGroup);
@@ -163,10 +163,10 @@ public class StartGameSessionRequestValidatorTests
     }
 
     [Fact]
-    public void ValidateAgeGroup_WithInvalidAgeGroup_DefaultsTo6_9()
+    public void ValidateAgeGroup_WithInvalidAgeGroup_DefaultsToMiddleChildhood()
     {
-        // Invalid age group string defaults to AgeGroup(6, 9), so scenario min 6 should pass
-        var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(6, "invalid");
+        // Invalid age group string defaults to MiddleChildhood (min=7), so scenario min 7 should pass
+        var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(7, "invalid");
 
         act.Should().NotThrow();
     }
@@ -174,7 +174,7 @@ public class StartGameSessionRequestValidatorTests
     [Fact]
     public void ValidateAgeGroup_WithInvalidAgeGroup_RejectsHigherMin()
     {
-        // Invalid age group defaults to AgeGroup(6, 9), so scenario min 10 should fail
+        // Invalid age group defaults to MiddleChildhood (min=7), so scenario min 10 should fail (10 > 7)
         var act = () => StartGameSessionRequestValidator.ValidateAgeGroup(10, "invalid");
 
         act.Should().Throw<ValidationException>();

@@ -1,8 +1,9 @@
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Accounts.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -73,7 +74,7 @@ public class AddCompletedScenarioCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_AccountNotFound_ReturnsFalse()
+    public async Task Handle_AccountNotFound_ThrowsNotFoundException()
     {
         var command = new AddCompletedScenarioCommand("missing", "scenario-1");
         _repository.Setup(r => r.GetByIdAsync("missing", It.IsAny<CancellationToken>()))
@@ -81,10 +82,10 @@ public class AddCompletedScenarioCommandHandlerTests
 
         var useCase = new AddCompletedScenarioUseCase(_repository.Object, _unitOfWork.Object, _useCaseLogger.Object);
 
-        var result = await AddCompletedScenarioCommandHandler.Handle(
+        var act = () => AddCompletedScenarioCommandHandler.Handle(
             command, useCase, _handlerLogger.Object, CancellationToken.None);
 
-        result.Should().BeFalse();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Theory]
@@ -92,16 +93,16 @@ public class AddCompletedScenarioCommandHandlerTests
     [InlineData("", "scenario-1")]
     [InlineData("acc-1", null)]
     [InlineData("acc-1", "")]
-    public async Task Handle_WithNullOrEmptyIds_ReturnsFalse(string? accountId, string? scenarioId)
+    public async Task Handle_WithNullOrEmptyIds_ThrowsValidationException(string? accountId, string? scenarioId)
     {
         var command = new AddCompletedScenarioCommand(accountId!, scenarioId!);
 
         var useCase = new AddCompletedScenarioUseCase(_repository.Object, _unitOfWork.Object, _useCaseLogger.Object);
 
-        var result = await AddCompletedScenarioCommandHandler.Handle(
+        var act = () => AddCompletedScenarioCommandHandler.Handle(
             command, useCase, _handlerLogger.Object, CancellationToken.None);
 
-        result.Should().BeFalse();
+        await act.Should().ThrowAsync<ValidationException>();
     }
 
     [Fact]

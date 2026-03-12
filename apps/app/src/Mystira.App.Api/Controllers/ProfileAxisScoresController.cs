@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 
 namespace Mystira.App.Api.Controllers;
 

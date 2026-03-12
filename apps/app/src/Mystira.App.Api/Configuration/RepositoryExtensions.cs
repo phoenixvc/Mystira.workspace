@@ -1,7 +1,6 @@
-using Mystira.App.Application.Ports;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Infrastructure.Data.Repositories;
-using Mystira.Shared.Data.Repositories;
 
 namespace Mystira.App.Api.Configuration;
 

@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.Contracts.App.Responses.Media;
 using System.Threading;
@@ -30,9 +30,9 @@ public class ListMediaUseCase
         // Apply filters
         if (!string.IsNullOrEmpty(request.Search))
         {
-            query = query.Where(m => m.MediaId.Contains(request.Search) ||
+            query = query.Where(m => m.Id.Contains(request.Search) ||
                                     m.Url.Contains(request.Search) ||
-                                    (m.Description != null && m.Description.Contains(request.Search)));
+                                    (m.AltText != null && m.AltText.Contains(request.Search)));
         }
 
         if (!string.IsNullOrEmpty(request.MediaType))
@@ -53,7 +53,7 @@ public class ListMediaUseCase
         {
             "filename" => request.SortDescending ? query.OrderByDescending(m => m.Url) : query.OrderBy(m => m.Url),
             "mediatype" => request.SortDescending ? query.OrderByDescending(m => m.MediaType) : query.OrderBy(m => m.MediaType),
-            "filesize" => request.SortDescending ? query.OrderByDescending(m => m.FileSizeBytes) : query.OrderBy(m => m.FileSizeBytes),
+            "filesize" => request.SortDescending ? query.OrderByDescending(m => m.SizeBytes) : query.OrderBy(m => m.SizeBytes),
             "updatedat" => request.SortDescending ? query.OrderByDescending(m => m.UpdatedAt) : query.OrderBy(m => m.UpdatedAt),
             _ => request.SortDescending ? query.OrderByDescending(m => m.CreatedAt) : query.OrderBy(m => m.CreatedAt)
         };
@@ -66,7 +66,7 @@ public class ListMediaUseCase
             .Take(request.PageSize)
             .Select(m => new MediaItem
             {
-                Id = m.MediaId,
+                Id = m.Id,
                 Url = m.Url,
                 MediaType = m.MediaType
             })

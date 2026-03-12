@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports;
+using Mystira.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Media;

@@ -40,10 +40,13 @@ public static class GetBadgeStatisticsForAccountByEmailQueryHandler
 
         // Get profiles for account
         var profilesQuery = new GetProfilesByAccountQuery(account.Id);
-        var profiles = await messageBus.InvokeAsync<List<Domain.Models.UserProfile>>(profilesQuery, ct);
+        var profiles = await messageBus.InvokeAsync<List<UserProfile>>(profilesQuery, ct);
 
         // Aggregate statistics from all profiles
         var combinedStatistics = new Dictionary<string, int>();
+        if (profiles == null || profiles.Count == 0)
+            return combinedStatistics;
+
         foreach (var profile in profiles)
         {
             var statsQuery = new GetBadgeStatisticsQuery(profile.Id);

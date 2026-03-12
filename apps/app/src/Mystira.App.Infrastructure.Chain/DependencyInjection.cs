@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.App.Application.Configuration.StoryProtocol;
-using Mystira.App.Application.Ports;
+using Mystira.Application.Ports;
 using Mystira.App.Application.Services;
 using Mystira.App.Infrastructure.Chain.Services;
 

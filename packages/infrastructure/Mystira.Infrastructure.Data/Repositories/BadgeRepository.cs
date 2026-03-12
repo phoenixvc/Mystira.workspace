@@ -28,28 +28,30 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     /// Results are not ordered to avoid composite index requirements in Cosmos DB.
     /// </summary>
     /// <param name="ageGroupId">The age group ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A collection of badges for the specified age group.</returns>
-    public async Task<IEnumerable<Badge>> GetByAgeGroupAsync(string ageGroupId)
+    public async Task<IEnumerable<Badge>> GetByAgeGroupAsync(string ageGroupId, CancellationToken ct = default)
     {
         // Avoid Cosmos ORDER BY to prevent composite index requirement; sort in memory at caller.
         return await _appContext.Badges
             .Where(x => x.AgeGroupId == ageGroupId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
     /// Retrieves all badges for a specific compass axis, ordered by age group, tier, and tier order.
     /// </summary>
     /// <param name="compassAxisId">The compass axis ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A collection of badges for the specified compass axis.</returns>
-    public async Task<IEnumerable<Badge>> GetByCompassAxisAsync(string compassAxisId)
+    public async Task<IEnumerable<Badge>> GetByCompassAxisAsync(string compassAxisId, CancellationToken ct = default)
     {
         return await _appContext.Badges
             .Where(x => x.CompassAxisId == compassAxisId)
             .OrderBy(x => x.AgeGroupId)
             .ThenBy(x => x.Tier)
             .ThenBy(x => x.TierOrder)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
@@ -58,12 +60,13 @@ public class BadgeRepository : Repository<Badge>, IBadgeRepository
     /// <param name="ageGroupId">The age group ID.</param>
     /// <param name="compassAxisId">The compass axis ID.</param>
     /// <param name="tierOrder">The tier order.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The matching badge, or null if not found.</returns>
-    public async Task<Badge?> GetByAgeGroupAxisAndTierAsync(string ageGroupId, string compassAxisId, int tierOrder)
+    public async Task<Badge?> GetByAgeGroupAxisAndTierAsync(string ageGroupId, string compassAxisId, int tierOrder, CancellationToken ct = default)
     {
         return await _appContext.Badges
             .FirstOrDefaultAsync(x => x.AgeGroupId == ageGroupId
                                    && x.CompassAxisId == compassAxisId
-                                   && x.TierOrder == tierOrder);
+                                   && x.TierOrder == tierOrder, ct);
     }
 }

@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Mystira.App.Application.Configuration.StoryProtocol;
-using Mystira.App.Application.Ports;
+using Mystira.Application.Ports;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

@@ -18,24 +18,24 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
     }
 
     /// <inheritdoc/>
-    public async Task<MediaAsset?> GetByMediaIdAsync(string mediaId)
+    public async Task<MediaAsset?> GetByMediaIdAsync(string mediaId, CancellationToken ct = default)
     {
-        return await DbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId);
+        return await DbSet.FirstOrDefaultAsync(m => m.MediaId == mediaId, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsByMediaIdAsync(string mediaId)
+    public async Task<bool> ExistsByMediaIdAsync(string mediaId, CancellationToken ct = default)
     {
-        return await DbSet.AnyAsync(m => m.MediaId == mediaId);
+        return await DbSet.AnyAsync(m => m.MediaId == mediaId, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds)
+    public async Task<IEnumerable<string>> GetMediaIdsAsync(IEnumerable<string> mediaIds, CancellationToken ct = default)
     {
         return await DbSet
             .Where(m => mediaIds.Contains(m.MediaId))
             .Select(m => m.MediaId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
@@ -44,4 +44,3 @@ public class MediaAssetRepository : Repository<MediaAsset>, IMediaAssetRepositor
         return DbSet.AsQueryable();
     }
 }
-

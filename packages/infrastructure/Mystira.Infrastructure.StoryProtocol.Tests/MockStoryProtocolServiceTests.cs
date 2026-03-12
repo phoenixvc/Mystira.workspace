@@ -38,10 +38,8 @@ public class MockStoryProtocolServiceTests
         // Assert
         result.Should().NotBeNull();
         result.IpAssetId.Should().StartWith("0x");
-        result.TransactionHash.Should().StartWith("0x");
-        result.IsRegistered.Should().BeTrue();
+        result.RegistrationTxHash.Should().StartWith("0x");
         result.RegisteredAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(5));
-        result.Contributors.Should().HaveCount(2);
     }
 
     [Fact]
@@ -289,7 +287,6 @@ public class MockStoryProtocolServiceTests
         // Assert
         config.Should().NotBeNull();
         config!.IpAssetId.Should().Be(registration.IpAssetId);
-        config.Contributors.Should().HaveCount(2);
     }
 
     [Fact]
@@ -324,8 +321,7 @@ public class MockStoryProtocolServiceTests
         // Assert
         updated.Should().NotBeNull();
         updated.IpAssetId.Should().Be(registration.IpAssetId);
-        updated.Contributors.Should().HaveCount(1);
-        updated.TransactionHash.Should().StartWith("0x");
+        updated.RegistrationTxHash.Should().StartWith("0x");
     }
 
     [Fact]

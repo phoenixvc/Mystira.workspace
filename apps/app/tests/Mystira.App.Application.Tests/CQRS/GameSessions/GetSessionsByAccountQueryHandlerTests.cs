@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -71,7 +71,7 @@ public class GetSessionsByAccountQueryHandlerTests
         result[0].Id.Should().Be("session-1");
         result[0].Status.Should().Be("Completed");
         result[1].Id.Should().Be("session-2");
-        result[1].Status.Should().Be("InProgress");
+        result[1].Status.Should().Be("Active");
     }
 
     [Fact]

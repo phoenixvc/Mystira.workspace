@@ -42,7 +42,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
-    <Using Include="Mystira.Shared.Data.Repositories" />
+    <Using Include="Mystira.Application.Ports.Data" />
   </ItemGroup>
 
 </Project>

@@ -16,46 +16,46 @@ public class MediaMetadataServiceAdapter : IMediaMetadataService
         _apiService = apiService;
     }
 
-    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync()
+    public async Task<MediaMetadataFile?> GetMediaMetadataFileAsync(CancellationToken ct = default)
     {
         var apiFile = await _apiService.GetMediaMetadataFileAsync();
         return apiFile == null ? null : ConvertToDomainFile(apiFile);
     }
 
-    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataFileAsync(MediaMetadataFile metadataFile, CancellationToken ct = default)
     {
         var apiFile = ConvertToApiFile(metadataFile);
         var result = await _apiService.UpdateMediaMetadataFileAsync(apiFile);
         return ConvertToDomainFile(result);
     }
 
-    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> AddMediaMetadataEntryAsync(MediaMetadataEntry entry, CancellationToken ct = default)
     {
         var apiEntry = ConvertToApiEntry(entry);
         var result = await _apiService.AddMediaMetadataEntryAsync(apiEntry);
         return ConvertToDomainFile(result);
     }
 
-    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry)
+    public async Task<MediaMetadataFile> UpdateMediaMetadataEntryAsync(string entryId, MediaMetadataEntry entry, CancellationToken ct = default)
     {
         var apiEntry = ConvertToApiEntry(entry);
         var result = await _apiService.UpdateMediaMetadataEntryAsync(entryId, apiEntry);
         return ConvertToDomainFile(result);
     }
 
-    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataFile> RemoveMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         var result = await _apiService.RemoveMediaMetadataEntryAsync(entryId);
         return ConvertToDomainFile(result);
     }
 
-    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId)
+    public async Task<MediaMetadataEntry?> GetMediaMetadataEntryAsync(string entryId, CancellationToken ct = default)
     {
         var apiEntry = await _apiService.GetMediaMetadataEntryAsync(entryId);
         return apiEntry == null ? null : ConvertToDomainEntry(apiEntry);
     }
 
-    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false)
+    public async Task<MediaMetadataFile> ImportMediaMetadataEntriesAsync(string jsonData, bool overwriteExisting = false, CancellationToken ct = default)
     {
         var result = await _apiService.ImportMediaMetadataEntriesAsync(jsonData, overwriteExisting);
         return ConvertToDomainFile(result);
@@ -135,4 +135,3 @@ public class MediaMetadataServiceAdapter : IMediaMetadataService
         };
     }
 }
-

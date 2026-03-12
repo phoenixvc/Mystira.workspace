@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -32,7 +32,7 @@ public class CreateUserProfileUseCaseTests
         {
             Name = "Player One",
             AccountId = "acc-1",
-            AgeGroup = "6-9",
+            AgeGroup = "middle_childhood",
             IsGuest = false,
             IsNpc = false,
             HasCompletedOnboarding = true
@@ -54,7 +54,7 @@ public class CreateUserProfileUseCaseTests
         {
             Name = "Guest",
             AccountId = "acc-1",
-            AgeGroup = "6-9",
+            AgeGroup = "middle_childhood",
             IsGuest = true
         };
 
@@ -78,7 +78,7 @@ public class CreateUserProfileUseCaseTests
         {
             Name = "",
             AccountId = "acc-1",
-            AgeGroup = "6-9"
+            AgeGroup = "middle_childhood"
         };
 
         var result = await _useCase.ExecuteAsync(request);

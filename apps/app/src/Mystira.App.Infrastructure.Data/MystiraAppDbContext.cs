@@ -182,6 +182,8 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<ContentBundle>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Ignore(e => e.AgeGroup);
+            entity.Ignore(e => e.Theme);
 
             if (!isInMemoryDatabase)
             {
@@ -226,6 +228,8 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<CharacterMap>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Ignore(e => e.Character);
+            entity.Ignore(e => e.Archetype);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -256,7 +260,8 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<BadgeConfiguration>(entity =>
         {
             entity.HasKey(e => e.Id);
-
+            entity.Ignore(e => e.Axis);
+            entity.Ignore(e => e.Archetype);
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
             {
@@ -274,6 +279,8 @@ public partial class MystiraAppDbContext : DbContext
         modelBuilder.Entity<AxisAchievement>(entity =>
         {
             entity.HasKey(e => e.Id);
+            entity.Ignore(e => e.Axis);
+            entity.Ignore(e => e.AgeGroup);
 
             if (!isInMemoryDatabase)
             {
@@ -315,8 +322,8 @@ public partial class MystiraAppDbContext : DbContext
             }
         });
 
-        // Configure CompassAxis
-        modelBuilder.Entity<CompassAxis>(entity =>
+        // Configure CompassAxisDefinition
+        modelBuilder.Entity<CompassAxisDefinition>(entity =>
         {
             entity.HasKey(e => e.Id);
 
@@ -541,12 +548,14 @@ public partial class MystiraAppDbContext : DbContext
                 });
                 // Ignore computed alias properties on Scene
                 scene.Ignore(s => s.Description);
+                scene.Ignore(s => s.CompassChanges);
 
                 scene.OwnsMany(s => s.Branches, branch =>
                 {
                     // Ignore computed alias properties on Branch
                     branch.Ignore(b => b.Choice);
                     branch.Ignore(b => b.NextSceneId);
+                    branch.Ignore(b => b.CompassChanges);
 
                     branch.OwnsOne(b => b.EchoLog, echoLog =>
                     {
@@ -583,6 +592,9 @@ public partial class MystiraAppDbContext : DbContext
             entity.Ignore(e => e.EndTime);
             entity.Ignore(e => e.Duration);
             entity.Ignore(e => e.IsActive);
+            entity.Ignore(e => e.Choices);
+            entity.Ignore(e => e.PlayerAssignments);
+            entity.Ignore(e => e.Scenario);
 
             // Only apply Cosmos DB configurations when not using in-memory database
             if (!isInMemoryDatabase)
@@ -645,10 +657,12 @@ public partial class MystiraAppDbContext : DbContext
                 assignment.Property(a => a.Image).IsRequired(false);
                 assignment.Property(a => a.Audio).IsRequired(false);
                 assignment.Property(a => a.IsUnused).IsRequired();
+                assignment.Ignore(a => a.Character);
+                assignment.Ignore(a => a.Player);
 
                 assignment.OwnsOne(a => a.PlayerAssignment, pa =>
                 {
-                    pa.Property(p => p.Type).IsRequired(false);
+                    pa.Property(p => p.Type).HasConversion<int>();
                     pa.Property(p => p.ProfileId).IsRequired(false);
                     pa.Property(p => p.ProfileName).IsRequired(false);
                     pa.Property(p => p.ProfileImage).IsRequired(false);
@@ -690,18 +704,18 @@ public partial class MystiraAppDbContext : DbContext
             }
 
             // Store AxisScores as JSON string to work with both Cosmos and InMemory providers
-            var dictComparer = new ValueComparer<Dictionary<string, float>>(
+            var dictComparer = new ValueComparer<Dictionary<string, int>>(
                 (d1, d2) =>
                     d1 != null && d2 != null && d1.Count == d2.Count &&
                     d1.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
                       .SequenceEqual(d2.OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)),
                 d => d == null ? 0 : d.Aggregate(0, (a, kv) => HashCode.Combine(a,
                     StringComparer.OrdinalIgnoreCase.GetHashCode(kv.Key), kv.Value.GetHashCode())),
-                d => d == null ? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
-                                : new Dictionary<string, float>(d, StringComparer.OrdinalIgnoreCase));
+                d => d == null ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                                : new Dictionary<string, int>(d, StringComparer.OrdinalIgnoreCase));
 
             entity.Property(e => e.AxisScores)
-                  .HasConversion(new ValueConverter<Dictionary<string, float>, string>(
+                  .HasConversion(new ValueConverter<Dictionary<string, int>, string>(
                       v => AxisScoresSerializer.Serialize(v),
                       v => AxisScoresSerializer.Deserialize(v)))
                   .Metadata.SetValueComparer(dictComparer);
@@ -793,12 +807,12 @@ public partial class MystiraAppDbContext : DbContext
 
                 entry.Property(e => e.Modifiers)
                     .HasConversion(new ModifierListConverter())
-                    .Metadata.SetValueComparer(new ValueComparer<List<Modifier>>(
+                    .Metadata.SetValueComparer(new ValueComparer<List<MetadataModifier>>(
                         (c1, c2) => c1 != null && c2 != null &&
                                     c1.Count == c2.Count &&
                                     !c1.Except(c2, new ModifierComparer()).Any(),
                         c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value.GetHashCode())),
-                        c => c.Select(x => new Modifier { Key = x.Key, Value = x.Value }).ToList()
+                        c => c.Select(x => new MetadataModifier { Key = x.Key, Value = x.Value }).ToList()
                     ));
             });
 
@@ -985,6 +999,7 @@ public partial class MystiraAppDbContext : DbContext
                       .HasPartitionKey(e => e.Axis);
             }
 
+            entity.Ignore(e => e.AxisValues);
             entity.OwnsMany(e => e.History);
         });
     }
@@ -994,20 +1009,20 @@ public partial class MystiraAppDbContext : DbContext
     {
         private static readonly System.Text.Json.JsonSerializerOptions Options = new();
 
-        public static string Serialize(Dictionary<string, float> value)
+        public static string Serialize(Dictionary<string, int> value)
             => System.Text.Json.JsonSerializer.Serialize(value, Options);
 
-        public static Dictionary<string, float> Deserialize(string json)
+        public static Dictionary<string, int> Deserialize(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
             {
-                return new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+                return new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             }
 
-            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, float>>(json, Options);
+            var dict = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, int>>(json, Options);
             return dict == null
-                ? new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, float>(dict, StringComparer.OrdinalIgnoreCase);
+                ? new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+                : new Dictionary<string, int>(dict, StringComparer.OrdinalIgnoreCase);
         }
     }
 
@@ -1152,18 +1167,16 @@ public class ClassificationTagComparer : IEqualityComparer<ClassificationTag>
     }
 }
 
-public class ModifierListConverter : ValueConverter<List<Modifier>, string>
+public class ModifierListConverter : ValueConverter<List<MetadataModifier>, string>
 {
     public ModifierListConverter()
         : base(
-            // Convert to DB type (List<Modifier> -> string)
             modifiers => ConvertToString(modifiers),
-            // Convert from DB type (string -> List<Modifier>)
             dbString => ConvertFromString(dbString))
     {
     }
 
-    private static string ConvertToString(List<Modifier> modifiers)
+    private static string ConvertToString(List<MetadataModifier> modifiers)
     {
         if (modifiers == null || !modifiers.Any())
         {
@@ -1173,18 +1186,18 @@ public class ModifierListConverter : ValueConverter<List<Modifier>, string>
         return string.Join("|", modifiers.Select(mod => $"{mod.Key}:{mod.Value}"));
     }
 
-    private static List<Modifier> ConvertFromString(string dbString)
+    private static List<MetadataModifier> ConvertFromString(string dbString)
     {
         if (string.IsNullOrEmpty(dbString))
         {
-            return new List<Modifier>();
+            return new List<MetadataModifier>();
         }
 
         return dbString.Split('|', StringSplitOptions.RemoveEmptyEntries)
             .Select(s =>
             {
                 var parts = s.Split(':', 2);
-                return new Modifier
+                return new MetadataModifier
                 {
                     Key = parts[0],
                     Value = parts.Length > 1 ? parts[1] : string.Empty
@@ -1194,9 +1207,9 @@ public class ModifierListConverter : ValueConverter<List<Modifier>, string>
     }
 }
 
-public class ModifierComparer : IEqualityComparer<Modifier>
+public class ModifierComparer : IEqualityComparer<MetadataModifier>
 {
-    public bool Equals(Modifier? x, Modifier? y)
+    public bool Equals(MetadataModifier? x, MetadataModifier? y)
     {
         if (x == null && y == null)
         {
@@ -1211,7 +1224,7 @@ public class ModifierComparer : IEqualityComparer<Modifier>
         return x.Key == y.Key && x.Value == y.Value;
     }
 
-    public int GetHashCode(Modifier obj)
+    public int GetHashCode(MetadataModifier obj)
     {
         return HashCode.Combine(obj.Key, obj.Value);
     }

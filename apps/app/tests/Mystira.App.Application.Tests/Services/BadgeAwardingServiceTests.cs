@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -223,6 +223,7 @@ public class BadgeAwardingServiceTests : IDisposable
         {
             UserProfileId = "profile1",
             BadgeId = "badge1",
+            BadgeConfigurationId = "badge1",
             BadgeName = "Honest Spark",
             BadgeMessage = "Already earned",
             Axis = "honesty",

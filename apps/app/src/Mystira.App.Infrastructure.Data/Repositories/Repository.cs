@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Mystira.Shared.Data.Repositories;
+using Mystira.Application.Ports.Data;
 
 namespace Mystira.App.Infrastructure.Data.Repositories;
 
@@ -12,7 +12,7 @@ namespace Mystira.App.Infrastructure.Data.Repositories;
 /// Implements Mystira.Shared.Data.Repositories.IRepository&lt;TEntity, TKey&gt; which extends
 /// Ardalis.Specification.IRepositoryBase&lt;T&gt; for specification pattern and caching decorator support.
 /// </summary>
-public class Repository<TEntity> : IRepository<TEntity, string> where TEntity : class
+public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
     protected readonly DbContext _context;
     protected readonly DbSet<TEntity> _dbSet;
@@ -179,11 +179,11 @@ public class Repository<TEntity> : IRepository<TEntity, string> where TEntity : 
         return entityList;
     }
 
-    public virtual Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public virtual Task<int> UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(entity);
         _dbSet.Update(entity);
-        return Task.CompletedTask;
+        return Task.FromResult(1);
     }
 
     public virtual Task<int> UpdateRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default)

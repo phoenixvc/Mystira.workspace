@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -31,11 +31,11 @@ public class ValidateScenarioUseCaseTests
     #region Null Input Tests
 
     [Fact]
-    public async Task ExecuteAsync_WithNullScenario_ThrowsValidationException()
+    public async Task ExecuteAsync_WithNullScenario_ThrowsArgumentNullException()
     {
         var act = () => _useCase.ExecuteAsync(null!);
 
-        await act.Should().ThrowAsync<ValidationException>();
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     #endregion

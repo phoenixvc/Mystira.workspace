@@ -24,7 +24,7 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId)
+    public async Task<IEnumerable<AxisAchievement>> GetByAgeGroupAsync(string ageGroupId, CancellationToken ct = default)
     {
         // AxisAchievement doesn't have a direct AgeGroupId property.
         // To filter by age group, we join with UserProfile.
@@ -35,15 +35,15 @@ public class AxisAchievementRepository : Repository<AxisAchievement>, IAxisAchie
                 (achievement, profile) => new { achievement, profile })
             .Where(x => x.profile.AgeGroupId == ageGroupId)
             .Select(x => x.achievement)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId)
+    public async Task<IEnumerable<AxisAchievement>> GetByCompassAxisAsync(string compassAxisId, CancellationToken ct = default)
     {
         // CompassAxisId is an alias for AxisId in the AxisAchievement model
         return await _appContext.AxisAchievements
             .Where(x => x.AxisId == compassAxisId)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 }

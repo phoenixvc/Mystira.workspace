@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -106,8 +106,8 @@ public class RemoveUserProfileFromAccountUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("missing", "profile-1");
 
-        await act.Should().ThrowAsync<ValidationException>()
-            .WithMessage("*Account not found*");
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*Account*not found*");
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public class RemoveUserProfileFromAccountUseCaseTests
 
         var act = () => _useCase.ExecuteAsync("acc-1", "missing");
 
-        await act.Should().ThrowAsync<ValidationException>()
-            .WithMessage("*User profile not found*");
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*UserProfile*not found*");
     }
 }

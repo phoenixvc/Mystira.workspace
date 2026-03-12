@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Scenarios.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -49,7 +49,7 @@ public class DeleteScenarioCommandHandlerTests
             new DeleteScenarioCommand("missing"),
             _repository.Object, _unitOfWork.Object, _logger.Object, CancellationToken.None);
 
-        await act.Should().ThrowAsync<InvalidOperationException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Fact]

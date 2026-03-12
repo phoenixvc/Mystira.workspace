@@ -25,81 +25,88 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// Retrieves all non-deleted age groups, ordered by minimum age.
     /// </summary>
     /// <returns>A list of age group definitions.</returns>
-    public async Task<List<AgeGroupDefinition>> GetAllAsync()
+    public async Task<List<AgeGroupDefinition>> GetAllAsync(CancellationToken ct = default)
     {
         return await _appContext.AgeGroupDefinitions
             .Where(x => !x.IsDeleted)
             .OrderBy(x => x.MinimumAge)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <summary>
     /// Retrieves an age group by its unique identifier.
     /// </summary>
     /// <param name="id">The age group ID.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The age group definition, or null if not found or deleted.</returns>
-    public async Task<AgeGroupDefinition?> GetByIdAsync(string id)
+    public async Task<AgeGroupDefinition?> GetByIdAsync(string id, CancellationToken ct = default)
     {
         return await _appContext.AgeGroupDefinitions
-            .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted);
+            .FirstOrDefaultAsync(x => x.Id == id && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Retrieves an age group by its name (case-insensitive).
     /// </summary>
     /// <param name="name">The age group name.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The age group definition, or null if not found or deleted.</returns>
-    public async Task<AgeGroupDefinition?> GetByNameAsync(string name)
+    public async Task<AgeGroupDefinition?> GetByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Retrieves an age group by its value identifier.
     /// </summary>
     /// <param name="value">The age group value.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>The age group definition, or null if not found or deleted.</returns>
-    public async Task<AgeGroupDefinition?> GetByValueAsync(string value)
+    public async Task<AgeGroupDefinition?> GetByValueAsync(string value, CancellationToken ct = default)
     {
-        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Value == value && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Value == value && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Checks if an age group with the specified name exists (case-insensitive).
     /// </summary>
     /// <param name="name">The age group name to check.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>True if the age group exists and is not deleted; otherwise, false.</returns>
-    public async Task<bool> ExistsByNameAsync(string name)
+    public async Task<bool> ExistsByNameAsync(string name, CancellationToken ct = default)
     {
-        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Name.ToLower() == name.ToLower() && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Checks if an age group with the specified value exists.
     /// </summary>
     /// <param name="value">The age group value to check.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>True if the age group exists and is not deleted; otherwise, false.</returns>
-    public async Task<bool> ExistsByValueAsync(string value)
+    public async Task<bool> ExistsByValueAsync(string value, CancellationToken ct = default)
     {
-        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Value == value && !x.IsDeleted);
+        return await _appContext.AgeGroupDefinitions.AnyAsync(x => x.Value == value && !x.IsDeleted, ct);
     }
 
     /// <summary>
     /// Adds a new age group to the repository.
     /// </summary>
     /// <param name="ageGroup">The age group to add.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task AddAsync(AgeGroupDefinition ageGroup)
+    public async Task AddAsync(AgeGroupDefinition ageGroup, CancellationToken ct = default)
     {
-        await _appContext.AgeGroupDefinitions.AddAsync(ageGroup);
+        await _appContext.AgeGroupDefinitions.AddAsync(ageGroup, ct);
     }
 
     /// <summary>
     /// Updates an existing age group in the repository.
     /// </summary>
     /// <param name="ageGroup">The age group to update.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public Task UpdateAsync(AgeGroupDefinition ageGroup)
+    public Task UpdateAsync(AgeGroupDefinition ageGroup, CancellationToken ct = default)
     {
         _appContext.AgeGroupDefinitions.Update(ageGroup);
         return Task.CompletedTask;
@@ -109,10 +116,11 @@ public class AgeGroupRepository : IAgeGroupRepository
     /// Soft deletes an age group by marking it as deleted.
     /// </summary>
     /// <param name="id">The ID of the age group to delete.</param>
+    /// <param name="ct">Cancellation token.</param>
     /// <returns>A task representing the asynchronous operation.</returns>
-    public async Task DeleteAsync(string id)
+    public async Task DeleteAsync(string id, CancellationToken ct = default)
     {
-        var ageGroup = await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Id == id);
+        var ageGroup = await _appContext.AgeGroupDefinitions.FirstOrDefaultAsync(x => x.Id == id, ct);
         if (ageGroup != null)
         {
             // Soft delete instead of hard delete

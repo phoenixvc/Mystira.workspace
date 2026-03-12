@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.Shared.Data.Repositories;
+using Mystira.Application.Ports.Data;
 
 namespace Mystira.App.Infrastructure.Data.UnitOfWork;
 
@@ -22,17 +22,17 @@ public class UnitOfWork : IUnitOfWork
         return await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    public async Task BeginTransactionAsync()
     {
         if (_transaction != null)
         {
             throw new InvalidOperationException("A transaction is already in progress. Commit or rollback the current transaction before starting a new one.");
         }
 
-        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+        _transaction = await _context.Database.BeginTransactionAsync();
     }
 
-    public async Task CommitTransactionAsync(CancellationToken cancellationToken = default)
+    public async Task CommitTransactionAsync()
     {
         if (_transaction == null)
         {
@@ -41,13 +41,12 @@ public class UnitOfWork : IUnitOfWork
 
         try
         {
-            await _context.SaveChangesAsync(cancellationToken);
-            await _transaction.CommitAsync(cancellationToken);
+            await _context.SaveChangesAsync();
+            await _transaction.CommitAsync();
         }
         catch
         {
-            // Use CancellationToken.None to ensure rollback always executes even if cancellation is requested
-            await RollbackTransactionAsync(CancellationToken.None);
+            await RollbackTransactionAsync();
             throw;
         }
         finally
@@ -60,11 +59,11 @@ public class UnitOfWork : IUnitOfWork
         }
     }
 
-    public async Task RollbackTransactionAsync(CancellationToken cancellationToken = default)
+    public async Task RollbackTransactionAsync()
     {
         if (_transaction != null)
         {
-            await _transaction.RollbackAsync(cancellationToken);
+            await _transaction.RollbackAsync();
             await _transaction.DisposeAsync();
             _transaction = null;
         }

@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserBadges.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -351,8 +351,8 @@ public class AwardBadgeCommandHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<ValidationException>()
-            .WithMessage("*Badge not found*");
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*BadgeConfiguration*not found*");
     }
 
     [Fact]

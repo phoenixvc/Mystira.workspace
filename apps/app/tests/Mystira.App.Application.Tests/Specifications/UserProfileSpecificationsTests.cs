@@ -99,7 +99,7 @@ public class UserProfileSpecificationsTests
     public void ProfilesByAgeGroupSpec_ShouldFilterByAgeGroup()
     {
         // Arrange
-        var spec = new ProfilesByAgeGroupSpec("teen");
+        var spec = new ProfilesByAgeGroupSpec("Teen");
 
         // Act
         var result = _profiles.AsQueryable().Where(spec.WhereExpressions.First().Filter).ToList();

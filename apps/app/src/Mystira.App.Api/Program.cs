@@ -2,7 +2,7 @@ using Mystira.App.Api.Adapters;
 using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;
 using Mystira.App.Application;
-using Mystira.App.Application.Ports;
+using Mystira.Application.Ports;
 using Mystira.Application.Ports.Media;
 using Mystira.Application.Ports.Messaging;
 using Mystira.App.Infrastructure.Azure;
@@ -144,7 +144,7 @@ try
     builder.Services.AddChainServices(builder.Configuration);
 
     // COPPA data deletion service + background processor
-    builder.Services.AddScoped<Mystira.App.Application.Ports.IDataDeletionService, Mystira.App.Application.Services.DataDeletionService>();
+    builder.Services.AddScoped<Mystira.Application.Ports.IDataDeletionService, Mystira.App.Application.Services.DataDeletionService>();
     builder.Services.AddHostedService<Mystira.App.Api.Services.DataDeletionBackgroundService>();
 
     // Infrastructure adapters registered at host level

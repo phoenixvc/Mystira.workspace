@@ -1,9 +1,9 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports;
+using Mystira.Application.Ports.Data;
 using Mystira.Application.Ports.Storage;
 using Mystira.App.Application.UseCases.Media;
 using Mystira.Domain.Models;
@@ -114,7 +114,7 @@ public class UploadMediaUseCaseTests
         var act = () => _useCase.ExecuteAsync(request);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<ConflictException>()
             .WithMessage("*already exists*");
     }
 
@@ -139,7 +139,7 @@ public class UploadMediaUseCaseTests
         var act = () => _useCase.ExecuteAsync(request);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
+        await act.Should().ThrowAsync<BusinessRuleException>()
             .WithMessage("*metadata*");
     }
 }

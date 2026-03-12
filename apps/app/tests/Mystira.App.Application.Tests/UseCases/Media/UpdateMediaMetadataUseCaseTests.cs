@@ -1,8 +1,8 @@
-using Mystira.Shared.Exceptions;
+using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.Media;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -71,7 +71,7 @@ public class UpdateMediaMetadataUseCaseTests
         var act = () => _useCase.ExecuteAsync("missing", updateRequest);
 
         // Assert
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        await act.Should().ThrowAsync<NotFoundException>();
     }
 
     [Theory]

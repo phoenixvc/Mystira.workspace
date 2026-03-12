@@ -10,20 +10,15 @@ public interface IMediaMetadataFileRepository
     /// <summary>
     /// Gets the singleton media metadata file.
     /// </summary>
-    /// <returns>The media metadata file if it exists; otherwise, null.</returns>
-    Task<MediaMetadataFile?> GetAsync();
+    Task<MediaMetadataFile?> GetAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Adds or updates the singleton media metadata file.
     /// </summary>
-    /// <param name="entity">The media metadata file entity to add or update.</param>
-    /// <returns>The added or updated media metadata file.</returns>
-    Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity);
+    Task<MediaMetadataFile> AddOrUpdateAsync(MediaMetadataFile entity, CancellationToken ct = default);
 
     /// <summary>
     /// Deletes the singleton media metadata file.
     /// </summary>
-    /// <returns>A task representing the asynchronous operation.</returns>
-    Task DeleteAsync();
+    Task DeleteAsync(CancellationToken ct = default);
 }
-

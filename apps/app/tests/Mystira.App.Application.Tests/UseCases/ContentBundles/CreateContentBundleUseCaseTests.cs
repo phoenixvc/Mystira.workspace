@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.App.Application.UseCases.ContentBundles;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
@@ -41,7 +41,7 @@ public class CreateContentBundleUseCaseTests
         result.ScenarioIds.Should().HaveCount(2);
         result.ImageId.Should().Be("img-1");
         result.IsFree.Should().BeFalse();
-        result.AgeGroup.Should().Be("6-8");
+        result.AgeGroupId.Should().Be("6-8");
         result.Id.Should().NotBeNullOrEmpty();
 
         _repository.Verify(r => r.AddAsync(It.IsAny<ContentBundle>(), It.IsAny<CancellationToken>()), Times.Once);

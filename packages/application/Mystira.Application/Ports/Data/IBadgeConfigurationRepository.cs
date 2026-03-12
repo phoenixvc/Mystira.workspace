@@ -1,14 +1,14 @@
 using Mystira.Domain.Models;
-using Mystira.Domain.Enums;
-using Mystira.Domain.ValueObjects;
-using Mystira.Shared.Data.Repositories;
 
-namespace Mystira.App.Application.Ports.Data;
+namespace Mystira.Application.Ports.Data;
 
 /// <summary>
 /// Repository interface for BadgeConfiguration entity with domain-specific queries
 /// </summary>
-public interface IBadgeConfigurationRepository : IRepository<BadgeConfiguration, string>
+public interface IBadgeConfigurationRepository : IRepository<BadgeConfiguration>
 {
+    /// <summary>
+    /// Gets all badge configurations for a specific axis.
+    /// </summary>
     Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis, CancellationToken ct = default);
 }

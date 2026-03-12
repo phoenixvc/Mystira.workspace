@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Mystira.App.Application;
 using Mystira.App.Application.CQRS.Auth.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Application.Ports.Services;
 using Mystira.App.Application.Services;
 using Mystira.App.Infrastructure.Azure;
@@ -36,7 +36,7 @@ builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<MystiraAppDbCo
 
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<IPendingSignupRepository, PendingSignupRepository>();
-builder.Services.AddScoped<Mystira.Shared.Data.Repositories.IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<Mystira.Application.Ports.Data.IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddAzureEmailService(builder.Configuration);
 builder.Services.AddSingleton<MagicSignupEmailBuilder>();

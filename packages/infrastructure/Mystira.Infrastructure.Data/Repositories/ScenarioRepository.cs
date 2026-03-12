@@ -19,22 +19,22 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup)
+    public async Task<IEnumerable<Scenario>> GetByAgeGroupAsync(string ageGroup, CancellationToken ct = default)
     {
         // Compare against AgeGroupId (the string property), not the computed AgeGroup value object
-        return await DbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync();
+        return await DbSet.Where(s => s.AgeGroupId == ageGroup).ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<Scenario?> GetByTitleAsync(string title)
+    public async Task<Scenario?> GetByTitleAsync(string title, CancellationToken ct = default)
     {
-        return await DbSet.FirstOrDefaultAsync(s => s.Title == title);
+        return await DbSet.FirstOrDefaultAsync(s => s.Title == title, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsByTitleAsync(string title)
+    public async Task<bool> ExistsByTitleAsync(string title, CancellationToken ct = default)
     {
-        return await DbSet.AnyAsync(s => s.Title == title);
+        return await DbSet.AnyAsync(s => s.Title == title, ct);
     }
 
     /// <inheritdoc/>
@@ -44,13 +44,12 @@ public class ScenarioRepository : Repository<Scenario>, IScenarioRepository
     }
 
     /// <inheritdoc/>
-    public async Task<int> CountAsync(Expression<Func<Scenario, bool>>? predicate = null)
+    public async Task<int> CountAsync(Expression<Func<Scenario, bool>>? predicate = null, CancellationToken ct = default)
     {
         if (predicate == null)
         {
-            return await DbSet.CountAsync();
+            return await DbSet.CountAsync(ct);
         }
-        return await DbSet.CountAsync(predicate);
+        return await DbSet.CountAsync(predicate, ct);
     }
 }
-

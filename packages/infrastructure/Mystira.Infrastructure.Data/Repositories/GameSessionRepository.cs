@@ -19,25 +19,25 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId)
+    public async Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId, CancellationToken ct = default)
     {
         return await DbSet
             .Where(s => s.AccountId == accountId)
             .OrderByDescending(s => s.StartTime)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId)
+    public async Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId, CancellationToken ct = default)
     {
         return await DbSet
             .Where(s => s.ProfileId == profileId || s.PlayerNames.Contains(profileId))
             .OrderByDescending(s => s.StartTime)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId)
+    public async Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
             throw new ArgumentException("Account ID cannot be null or empty.", nameof(accountId));
@@ -46,33 +46,32 @@ public class GameSessionRepository : Repository<GameSession>, IGameSessionReposi
             .Where(s => s.AccountId == accountId &&
                        (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused))
             .OrderByDescending(s => s.StartTime)
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId)
+    public async Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId, CancellationToken ct = default)
     {
         return await DbSet
             .FirstOrDefaultAsync(s => s.AccountId == accountId &&
                                       s.ScenarioId == scenarioId &&
-                                      (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused));
+                                      (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused), ct);
     }
 
     /// <inheritdoc/>
-    public async Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId)
+    public async Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId, CancellationToken ct = default)
     {
         return await DbSet
             .Where(s => s.ScenarioId == scenarioId &&
                        s.AccountId == accountId &&
                        (s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused))
-            .ToListAsync();
+            .ToListAsync(ct);
     }
 
     /// <inheritdoc/>
-    public async Task<int> GetActiveSessionsCountAsync()
+    public async Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default)
     {
         return await DbSet
-            .CountAsync(s => s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused);
+            .CountAsync(s => s.Status == SessionStatus.InProgress || s.Status == SessionStatus.Paused, ct);
     }
 }
-

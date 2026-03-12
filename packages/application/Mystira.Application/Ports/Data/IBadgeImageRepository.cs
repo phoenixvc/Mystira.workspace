@@ -10,7 +10,5 @@ public interface IBadgeImageRepository : IRepository<BadgeImage>
     /// <summary>
     /// Gets a badge image by its image identifier.
     /// </summary>
-    /// <param name="imageId">The image identifier.</param>
-    /// <returns>The badge image if found; otherwise, null.</returns>
-    Task<BadgeImage?> GetByImageIdAsync(string imageId);
+    Task<BadgeImage?> GetByImageIdAsync(string imageId, CancellationToken ct = default);
 }

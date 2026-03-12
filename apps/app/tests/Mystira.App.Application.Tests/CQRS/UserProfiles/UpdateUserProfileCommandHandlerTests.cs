@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.UserProfiles.Commands;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -102,7 +102,7 @@ public class UpdateUserProfileCommandHandlerTests
 
         var request = new UpdateUserProfileRequest
         {
-            AgeGroup = "10-12"
+            AgeGroup = "preteen"
         };
 
         _repository.Setup(r => r.GetByIdAsync(profileId, It.IsAny<CancellationToken>()))
@@ -404,7 +404,7 @@ public class UpdateUserProfileCommandHandlerTests
 
         var request = new UpdateUserProfileRequest
         {
-            PreferredFantasyThemes = new List<string> { "Adventure", "Mystery" }
+            PreferredFantasyThemes = new List<string> { "high_fantasy", "mythology" }
         };
 
         _repository.Setup(r => r.GetByIdAsync(profileId, It.IsAny<CancellationToken>()))

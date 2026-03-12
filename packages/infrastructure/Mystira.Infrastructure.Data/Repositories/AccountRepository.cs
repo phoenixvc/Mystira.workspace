@@ -18,22 +18,21 @@ public class AccountRepository : Repository<Account>, IAccountRepository
     }
 
     /// <inheritdoc/>
-    public async Task<Account?> GetByEmailAsync(string email)
+    public async Task<Account?> GetByEmailAsync(string email, CancellationToken ct = default)
     {
         return await DbSet
-            .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower());
+            .FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower(), ct);
     }
 
     /// <inheritdoc/>
-    public async Task<Account?> GetByExternalUserIdAsync(string externalUserId)
+    public async Task<Account?> GetByExternalUserIdAsync(string externalUserId, CancellationToken ct = default)
     {
-        return await DbSet.FirstOrDefaultAsync(a => a.ExternalUserId == externalUserId);
+        return await DbSet.FirstOrDefaultAsync(a => a.ExternalUserId == externalUserId, ct);
     }
 
     /// <inheritdoc/>
-    public async Task<bool> ExistsByEmailAsync(string email)
+    public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
     {
-        return await DbSet.AnyAsync(a => a.Email.ToLower() == email.ToLower());
+        return await DbSet.AnyAsync(a => a.Email.ToLower() == email.ToLower(), ct);
     }
 }
-

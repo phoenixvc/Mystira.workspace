@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Mappers;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Contracts.App.Responses.GameSessions;
 
 namespace Mystira.App.Application.CQRS.GameSessions.Queries;
@@ -20,7 +20,10 @@ public static class GetSessionsByAccountQueryHandler
         Guard.AgainstNullOrEmpty(request.AccountId, nameof(request.AccountId));
 
         var sessions = await repository.GetByAccountIdAsync(request.AccountId, ct);
-        foreach (var s in sessions) { s.RecalculateCompassProgressFromHistory(); }
+        foreach (var s in sessions)
+        {
+            s.RecalculateCompassProgressFromHistory();
+        }
         var response = GameSessionMapper.ToResponseList(sessions);
 
         logger.LogDebug("Retrieved {Count} sessions for account", response.Count);

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.CQRS.Attribution.Queries;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 
@@ -36,6 +36,8 @@ public class AttributionQueryHandlerTests
             StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-1",
+                IsRegistered = true,
+                RegisteredAt = DateTime.UtcNow,
                 Contributors = new List<Contributor>
                 {
                     new() { Name = "Alice", Role = ContributorRole.Writer, ContributionPercentage = 60 },
@@ -94,6 +96,7 @@ public class AttributionQueryHandlerTests
             StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-asset-123",
+                IsRegistered = true,
                 RegisteredAt = DateTime.UtcNow,
                 RegistrationTxHash = "0xabc",
                 Contributors = new List<Contributor> { new() { Name = "Alice" } }
@@ -195,6 +198,7 @@ public class AttributionQueryHandlerTests
             StoryProtocol = new ScenarioStoryProtocol
             {
                 IpAssetId = "ip-scenario-456",
+                IsRegistered = true,
                 RegisteredAt = DateTime.UtcNow
             }
         };

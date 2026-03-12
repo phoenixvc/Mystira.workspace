@@ -10,20 +10,15 @@ public interface IUserProfileRepository : IRepository<UserProfile>
     /// <summary>
     /// Gets all user profiles associated with a specific account.
     /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A collection of user profiles for the specified account.</returns>
-    Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId);
+    Task<IEnumerable<UserProfile>> GetByAccountIdAsync(string accountId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets all guest user profiles.
     /// </summary>
-    /// <returns>A collection of guest user profiles.</returns>
-    Task<IEnumerable<UserProfile>> GetGuestProfilesAsync();
+    Task<IEnumerable<UserProfile>> GetGuestProfilesAsync(CancellationToken ct = default);
 
     /// <summary>
     /// Gets all non-guest user profiles.
     /// </summary>
-    /// <returns>A collection of non-guest user profiles.</returns>
-    Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync();
+    Task<IEnumerable<UserProfile>> GetNonGuestProfilesAsync(CancellationToken ct = default);
 }
-

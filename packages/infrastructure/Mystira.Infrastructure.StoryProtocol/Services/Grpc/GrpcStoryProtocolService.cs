@@ -60,12 +60,13 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when contentId, contentTitle is null/empty or contributors is null/empty.</exception>
-    public async Task<ScenarioStoryProtocol> RegisterIpAssetAsync(
+    public async Task<StoryProtocolMetadata> RegisterIpAssetAsync(
         string contentId,
         string contentTitle,
         List<DomainContributor> contributors,
         string? metadataUri = null,
-        string? licenseTermsId = null)
+        string? licenseTermsId = null,
+        CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
         ArgumentException.ThrowIfNullOrWhiteSpace(contentTitle, nameof(contentTitle));
@@ -128,20 +129,18 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             "IP Asset registered successfully: IpAssetId={IpAssetId}, TxHash={TxHash}",
             response.IpAssetId, response.RegistrationTxHash);
 
-        return new ScenarioStoryProtocol
+        return new StoryProtocolMetadata
         {
             IpAssetId = response.IpAssetId,
-            TransactionHash = response.RegistrationTxHash,
+            RegistrationTxHash = response.RegistrationTxHash,
             RegisteredAt = response.RegisteredAt?.ToDateTime(),
-            IsRegistered = response.Status == IpAssetStatus.Registered,
-            LicenseTermsId = licenseTermsId,
-            Contributors = contributors
+            LicenseTermsId = licenseTermsId
         };
     }
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when contentId is null or empty.</exception>
-    public async Task<bool> IsRegisteredAsync(string contentId)
+    public async Task<bool> IsRegisteredAsync(string contentId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(contentId, nameof(contentId));
 
@@ -167,7 +166,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
-    public async Task<ScenarioStoryProtocol?> GetRoyaltyConfigurationAsync(string ipAssetId)
+    public async Task<StoryProtocolMetadata?> GetRoyaltyConfigurationAsync(string ipAssetId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -189,25 +188,17 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             return null;
         }
 
-        var contributors = response.Recipients.Select(r => new DomainContributor
-        {
-            WalletAddress = r.WalletAddress,
-            ContributionPercentage = r.ShareBasisPoints / 100m, // Convert basis points to %
-            Name = r.Role
-        }).ToList();
-
-        return new ScenarioStoryProtocol
+        return new StoryProtocolMetadata
         {
             IpAssetId = response.IpAssetId,
-            RoyaltyPolicyId = response.RoyaltyModuleId,
-            Contributors = contributors,
-            IsRegistered = true
+            RoyaltyModuleId = response.RoyaltyModuleId,
+            RegisteredAt = DateTime.UtcNow
         };
     }
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or contributors is null/empty.</exception>
-    public async Task<ScenarioStoryProtocol> UpdateRoyaltySplitAsync(string ipAssetId, List<DomainContributor> contributors)
+    public async Task<StoryProtocolMetadata> UpdateRoyaltySplitAsync(string ipAssetId, List<DomainContributor> contributors, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
         ArgumentNullException.ThrowIfNull(contributors, nameof(contributors));
@@ -257,18 +248,17 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
             "Royalty split updated successfully: IpAssetId={IpAssetId}, TxHash={TxHash}",
             ipAssetId, response.TransactionHash);
 
-        return new ScenarioStoryProtocol
+        return new StoryProtocolMetadata
         {
             IpAssetId = ipAssetId,
-            TransactionHash = response.TransactionHash,
-            Contributors = contributors,
-            IsRegistered = true
+            RegistrationTxHash = response.TransactionHash,
+            RegisteredAt = DateTime.UtcNow
         };
     }
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null/empty or amount is invalid.</exception>
-    public async Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null)
+    public async Task<RoyaltyPaymentResult> PayRoyaltyAsync(string ipAssetId, decimal amount, string? payerReference = null, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -335,7 +325,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId is null or empty.</exception>
-    public async Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId)
+    public async Task<RoyaltyBalance> GetClaimableRoyaltiesAsync(string ipAssetId, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
 
@@ -384,7 +374,7 @@ public class GrpcStoryProtocolService : IStoryProtocolService, IDisposable
 
     /// <inheritdoc />
     /// <exception cref="ArgumentException">Thrown when ipAssetId or contributorWallet is null or empty.</exception>
-    public async Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet)
+    public async Task<string> ClaimRoyaltiesAsync(string ipAssetId, string contributorWallet, CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(ipAssetId, nameof(ipAssetId));
         ArgumentException.ThrowIfNullOrWhiteSpace(contributorWallet, nameof(contributorWallet));

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -55,7 +55,7 @@ public class CreateContentBundleUseCase
             ScenarioIds = scenarioIds,
             ImageId = imageId ?? string.Empty,
             Prices = prices ?? new List<BundlePrice>(),
-            PriceCents = isFree ? 0 : 0, // Will be overridden by prices if applicable
+            PriceCents = isFree ? 0 : (int)((prices?.FirstOrDefault()?.Value ?? 0) * 100),
             AgeGroupId = ageGroup ?? string.Empty
         };
 

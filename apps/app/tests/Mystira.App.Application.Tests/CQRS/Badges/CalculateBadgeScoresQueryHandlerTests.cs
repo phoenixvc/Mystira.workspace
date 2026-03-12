@@ -3,7 +3,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Badges.Queries;
-using Mystira.App.Application.Ports.Data;
+using Mystira.Application.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -172,8 +172,8 @@ public class CalculateBadgeScoresQueryHandlerTests
             CancellationToken.None);
 
         // Assert
-        await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage("*Content bundle not found*");
+        await act.Should().ThrowAsync<NotFoundException>()
+            .WithMessage("*ContentBundle*not found*");
     }
 
     [Fact]

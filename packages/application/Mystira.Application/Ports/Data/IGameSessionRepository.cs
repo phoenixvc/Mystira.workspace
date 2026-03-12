@@ -10,44 +10,30 @@ public interface IGameSessionRepository : IRepository<GameSession>
     /// <summary>
     /// Gets all game sessions for a specific account.
     /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A collection of game sessions for the specified account.</returns>
-    Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId);
+    Task<IEnumerable<GameSession>> GetByAccountIdAsync(string accountId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets all game sessions for a specific profile.
     /// </summary>
-    /// <param name="profileId">The profile identifier.</param>
-    /// <returns>A collection of game sessions for the specified profile.</returns>
-    Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId);
+    Task<IEnumerable<GameSession>> GetByProfileIdAsync(string profileId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets all in-progress game sessions for a specific account.
     /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A collection of in-progress game sessions for the specified account.</returns>
-    Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId);
+    Task<IEnumerable<GameSession>> GetInProgressSessionsAsync(string accountId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the active game session for a specific account and scenario combination.
     /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <returns>The active game session if found; otherwise, null.</returns>
-    Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId);
+    Task<GameSession?> GetActiveSessionForScenarioAsync(string accountId, string scenarioId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets all active game sessions for a specific scenario and account combination.
     /// </summary>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A collection of active game sessions.</returns>
-    Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId);
+    Task<IEnumerable<GameSession>> GetActiveSessionsByScenarioAndAccountAsync(string scenarioId, string accountId, CancellationToken ct = default);
 
     /// <summary>
     /// Gets the total count of active game sessions.
     /// </summary>
-    /// <returns>The number of active game sessions.</returns>
-    Task<int> GetActiveSessionsCountAsync();
+    Task<int> GetActiveSessionsCountAsync(CancellationToken ct = default);
 }
-
