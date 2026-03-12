@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Mystira.Application.CQRS.AgeGroups.Commands;
-using Mystira.Application.CQRS.AgeGroups.Queries;
+using Mystira.Core.CQRS.AgeGroups.Commands;
+using Mystira.Core.CQRS.AgeGroups.Queries;
 using Mystira.Domain.Models;
 
 using Wolverine;

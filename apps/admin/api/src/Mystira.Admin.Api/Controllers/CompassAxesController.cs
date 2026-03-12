@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Mystira.Application.CQRS.CompassAxes.Commands;
-using Mystira.Application.CQRS.CompassAxes.Queries;
+using Mystira.Core.CQRS.CompassAxes.Commands;
+using Mystira.Core.CQRS.CompassAxes.Queries;
 using Mystira.Domain.Models;
 using Mystira.Domain.ValueObjects;
 

@@ -6,7 +6,7 @@ using Azure;
 using Azure.Communication.Messages;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 using Mystira.Infrastructure.WhatsApp.Configuration;
 
 namespace Mystira.Infrastructure.WhatsApp.Services;

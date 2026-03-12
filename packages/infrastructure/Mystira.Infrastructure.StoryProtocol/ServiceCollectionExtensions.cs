@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Mystira.Application.Configuration.StoryProtocol;
-using Mystira.Application.Ports;
+using Mystira.Core.Configuration.StoryProtocol;
+using Mystira.Core.Ports;
 using Mystira.Infrastructure.StoryProtocol.HealthChecks;
 using Mystira.Infrastructure.StoryProtocol.Services.Grpc;
 using Mystira.Infrastructure.StoryProtocol.Services.Mock;

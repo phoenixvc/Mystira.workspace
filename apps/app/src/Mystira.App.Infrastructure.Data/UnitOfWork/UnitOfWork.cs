@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 
 namespace Mystira.App.Infrastructure.Data.UnitOfWork;
 

@@ -1,1 +1,1 @@
-global using IUnitOfWork = Mystira.Application.Ports.Data.IUnitOfWork;
+global using IUnitOfWork = Mystira.Core.Ports.Data.IUnitOfWork;

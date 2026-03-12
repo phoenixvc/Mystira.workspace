@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 using Mystira.App.Infrastructure.WhatsApp.Configuration;
 using Mystira.App.Infrastructure.WhatsApp.Services;
 

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Shared.Telemetry;
 using Polly;
 using Polly.CircuitBreaker;

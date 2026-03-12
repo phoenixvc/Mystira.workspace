@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.Domain.Enums;
 using ScenarioGameState = Mystira.Contracts.App.Responses.Scenarios.ScenarioGameState;

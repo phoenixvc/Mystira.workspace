@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports;
+using Mystira.Core.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Domain.Models;

@@ -17,15 +17,15 @@ using Mystira.Admin.Api.Adapters;
 using Mystira.Admin.Api.Configuration;
 using Mystira.Admin.Api.Services;
 using Mystira.Admin.Api.Services.Caching;
-using Mystira.Application.Ports.Data;
-using Mystira.Application.Ports.Media;
-using Mystira.Application.Ports.Messaging;
-using Mystira.Application.Services;
-using Mystira.Application.UseCases.Contributors;
-using Mystira.Application.UseCases.GameSessions;
-using Mystira.Application.UseCases.Media;
-using Mystira.Application.UseCases.Scenarios;
-using Mystira.Application.UseCases.UserProfiles;
+using Mystira.Core.Ports.Data;
+using Mystira.Core.Ports.Media;
+using Mystira.Core.Ports.Messaging;
+using Mystira.Core.Services;
+using Mystira.Core.UseCases.Contributors;
+using Mystira.Core.UseCases.GameSessions;
+using Mystira.Core.UseCases.Media;
+using Mystira.Core.UseCases.Scenarios;
+using Mystira.Core.UseCases.UserProfiles;
 using Mystira.Domain.Models;
 using Mystira.Infrastructure.Azure;
 using Mystira.Infrastructure.Azure.HealthChecks;
@@ -47,7 +47,7 @@ using Serilog.Events;
 
 using Wolverine;
 
-using IUnitOfWork = Mystira.Application.Ports.Data.IUnitOfWork;
+using IUnitOfWork = Mystira.Core.Ports.Data.IUnitOfWork;
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERILOG BOOTSTRAP LOGGING (before host is built)
@@ -56,7 +56,7 @@ Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .CreateBootstrapLogger();
+    .CreateLogger();
 
 try
 {
@@ -67,18 +67,27 @@ try
     // ═══════════════════════════════════════════════════════════════════════════════
     // SERILOG CONFIGURATION (reads from appsettings.json)
     // ═══════════════════════════════════════════════════════════════════════════════
-    builder.Host.UseSerilog((context, services, configuration) => configuration
-        .ReadFrom.Configuration(context.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithThreadId()
-        .Enrich.WithProperty("Application", "Mystira.Admin.Api")
-        .Enrich.WithProperty("Environment", context.HostingEnvironment.EnvironmentName)
-        .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}")
-        .WriteTo.ApplicationInsights(
-            services.GetService<TelemetryConfiguration>(),
-            TelemetryConverter.Traces));
+    builder.Services.AddSerilog((services, configuration) =>
+    {
+        var env = builder.Environment;
+        configuration
+            .ReadFrom.Configuration(builder.Configuration)
+            .Enrich.FromLogContext()
+            .Enrich.WithMachineName()
+            .Enrich.WithThreadId()
+            .Enrich.WithProperty("Application", "Mystira.Admin.Api")
+            .Enrich.WithProperty("Environment", env.EnvironmentName)
+            .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} {Properties:j}{NewLine}{Exception}");
+
+        if (!env.IsEnvironment("Testing"))
+        {
+            var telemetryConfig = services.GetService<TelemetryConfiguration>();
+            if (telemetryConfig != null)
+            {
+                configuration.WriteTo.ApplicationInsights(telemetryConfig, TelemetryConverter.Traces);
+            }
+        }
+    });
 
     // ═══════════════════════════════════════════════════════════════════════════════
     // APPLICATION INSIGHTS TELEMETRY CONFIGURATION
@@ -275,7 +284,7 @@ try
     builder.Host.UseWolverine(opts =>
     {
         // Discover handlers from the Application assembly
-        opts.Discovery.IncludeAssembly(typeof(Mystira.Application.UseCases.Scenarios.GetScenariosUseCase).Assembly);
+        opts.Discovery.IncludeAssembly(typeof(Mystira.Core.UseCases.Scenarios.GetScenariosUseCase).Assembly);
     });
 
     // Register query cache invalidation service
@@ -335,8 +344,8 @@ try
     var jwtRsaPublicKey = builder.Configuration["JwtSettings:RsaPublicKey"];
     var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
 
-    // Fail fast if JWT configuration is missing in non-development environments
-    if (!builder.Environment.IsDevelopment())
+    // Fail fast if JWT configuration is missing in non-development/testing environments
+    if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
     {
         if (string.IsNullOrWhiteSpace(jwtIssuer))
         {
@@ -552,7 +561,7 @@ try
     // TODO: Re-enable email service when AddAzureEmailService is available in Infrastructure.Azure
     // builder.Services.AddAzureEmailService(builder.Configuration);
     // Register Application.Ports.IMediaMetadataService for use cases
-    builder.Services.AddScoped<Mystira.Application.Ports.IMediaMetadataService, MediaMetadataServiceAdapter>();
+    builder.Services.AddScoped<Mystira.Core.Ports.IMediaMetadataService, MediaMetadataServiceAdapter>();
     // Register repositories
     builder.Services.AddScoped<IRepository<GameSession>, Repository<GameSession>>();
     builder.Services.AddScoped<IGameSessionRepository, GameSessionRepository>();

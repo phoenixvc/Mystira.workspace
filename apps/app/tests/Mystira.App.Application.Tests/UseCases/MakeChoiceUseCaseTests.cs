@@ -2,7 +2,7 @@ using Mystira.App.Domain.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.App.Application.UseCases.GameSessions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Domain.Models;

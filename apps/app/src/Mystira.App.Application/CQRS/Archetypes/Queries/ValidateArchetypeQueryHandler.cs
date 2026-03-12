@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 
 namespace Mystira.App.Application.CQRS.Archetypes.Queries;
 

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 using Mystira.Infrastructure.Discord.Configuration;
 using Mystira.Infrastructure.Discord.HealthChecks;
 using Mystira.Infrastructure.Discord.Services;

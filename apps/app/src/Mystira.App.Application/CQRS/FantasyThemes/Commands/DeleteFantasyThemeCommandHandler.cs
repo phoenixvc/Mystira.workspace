@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.CQRS.MasterData;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.App.Application.Services;
 
 namespace Mystira.App.Application.CQRS.FantasyThemes.Commands;

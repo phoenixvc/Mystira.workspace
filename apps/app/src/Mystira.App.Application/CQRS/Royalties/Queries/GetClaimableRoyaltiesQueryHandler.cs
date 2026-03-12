@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

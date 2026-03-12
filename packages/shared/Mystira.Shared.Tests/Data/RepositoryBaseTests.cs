@@ -1,6 +1,6 @@
 using Ardalis.Specification;
 using FluentAssertions;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Xunit;
 
 namespace Mystira.Shared.Tests.Data;

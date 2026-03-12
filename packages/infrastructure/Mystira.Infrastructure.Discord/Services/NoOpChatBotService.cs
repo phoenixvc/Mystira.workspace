@@ -1,6 +1,6 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 
 namespace Mystira.Infrastructure.Discord.Services;
 

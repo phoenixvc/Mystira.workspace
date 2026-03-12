@@ -48,7 +48,7 @@
 
   <!-- Workspace project references -->
   <ItemGroup>
-    <ProjectReference Include="..\..\application\Mystira.Application\Mystira.Application.csproj" />
+    <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
     <ProjectReference Include="..\..\contracts\dotnet\Mystira.Contracts\Mystira.Contracts.csproj" />
   </ItemGroup>
 

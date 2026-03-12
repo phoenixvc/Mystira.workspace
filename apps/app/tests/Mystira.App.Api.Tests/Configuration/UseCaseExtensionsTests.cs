@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.App.Application;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.App.Application.UseCases.Contributors;
 using Mystira.App.Application.UseCases.GameSessions;

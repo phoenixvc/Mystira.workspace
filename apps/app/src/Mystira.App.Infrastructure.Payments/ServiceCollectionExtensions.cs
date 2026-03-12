@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Mystira.Application.Ports.Payments;
+using Mystira.Core.Ports.Payments;
 using Mystira.App.Infrastructure.Payments.Configuration;
 using Mystira.App.Infrastructure.Payments.HealthChecks;
 using Mystira.App.Infrastructure.Payments.Services.Mock;

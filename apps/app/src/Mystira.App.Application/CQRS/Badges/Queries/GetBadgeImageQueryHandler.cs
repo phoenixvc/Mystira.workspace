@@ -1,4 +1,4 @@
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 
 namespace Mystira.App.Application.CQRS.Badges.Queries;
 

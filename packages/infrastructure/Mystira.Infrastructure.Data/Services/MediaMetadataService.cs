@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports;
+using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
 
 namespace Mystira.Infrastructure.Data.Services;

@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Mystira.App.Application.Configuration.StoryProtocol;
 using Mystira.App.Application.CQRS.Attribution.Queries;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Domain.Enums;
 using Mystira.Domain.Models;
 

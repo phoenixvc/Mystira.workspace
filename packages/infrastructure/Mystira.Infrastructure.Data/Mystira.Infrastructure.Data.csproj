@@ -55,7 +55,7 @@
   <!-- Workspace project references -->
   <ItemGroup>
     <ProjectReference Include="..\..\domain\Mystira.Domain\Mystira.Domain.csproj" />
-    <ProjectReference Include="..\..\application\Mystira.Application\Mystira.Application.csproj" />
+    <ProjectReference Include="..\..\core\Mystira.Core\Mystira.Core.csproj" />
     <ProjectReference Include="..\..\shared\Mystira.Shared\Mystira.Shared.csproj" />
     <ProjectReference Include="..\..\shared-observability\Mystira.Shared.Observability\Mystira.Shared.Observability.csproj" />
   </ItemGroup>

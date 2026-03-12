@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.App.Application.UseCases.Scenarios;
 using Mystira.App.Application.Validation;
 using Mystira.App.Application.Mappers;

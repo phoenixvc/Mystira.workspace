@@ -5,7 +5,7 @@ namespace Mystira.Infrastructure.Data.UnitOfWork;
 /// <summary>
 /// Unit of Work implementation for managing transactions and repositories
 /// </summary>
-public class UnitOfWork : Application.Ports.Data.IUnitOfWork
+public class UnitOfWork : Mystira.Core.Ports.Data.IUnitOfWork
 {
     private readonly DbContext _context;
     private Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? _transaction;

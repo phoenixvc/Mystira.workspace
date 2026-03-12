@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Payments;
+using Mystira.Core.Ports.Payments;
 using Mystira.Contracts.App.Enums;
 using Mystira.Contracts.App.Requests.Payments;
 using Mystira.Contracts.App.Responses.Payments;

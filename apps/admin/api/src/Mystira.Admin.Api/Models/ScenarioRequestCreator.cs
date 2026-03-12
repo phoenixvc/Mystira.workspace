@@ -1,4 +1,4 @@
-using Mystira.Application.Parsers;
+using Mystira.Core.Parsers;
 using Mystira.Domain.Models;
 using ContractsCreateScenarioRequest = Mystira.Contracts.App.Requests.Scenarios.CreateScenarioRequest;
 

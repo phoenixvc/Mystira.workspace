@@ -4,7 +4,7 @@ using Moq;
 using Mystira.App.Application.CQRS.Common.Responses;
 using Mystira.App.Application.CQRS.Discord.Commands;
 using Mystira.App.Application.CQRS.Discord.Queries;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 
 namespace Mystira.App.Application.Tests.CQRS.Discord;
 

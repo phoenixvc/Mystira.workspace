@@ -12,7 +12,7 @@ using Mystira.App.Api.Controllers;
 using Mystira.App.Application.CQRS.Accounts.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Commands;
 using Mystira.App.Application.CQRS.GameSessions.Queries;
-using Mystira.Application.Ports.Services;
+using Mystira.Core.Ports.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

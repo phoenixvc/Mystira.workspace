@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.App.Application.Services;
 using Mystira.App.Application.UseCases.Accounts;
 using Mystira.App.Application.UseCases.Contributors;

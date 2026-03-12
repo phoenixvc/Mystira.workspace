@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using System.Threading;
 
 namespace Mystira.App.Application.UseCases.UserProfiles;

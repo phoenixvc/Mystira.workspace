@@ -5,7 +5,7 @@ namespace Mystira.Shared.Data.Repositories;
 /// Use this when you need explicit key type control.
 /// </summary>
 /// <remarks>
-/// For the primary repository interface, use <c>Mystira.Application.Ports.Data.IRepository&lt;TEntity&gt;</c>
+/// For the primary repository interface, use <c>Mystira.Core.Ports.Data.IRepository&lt;TEntity&gt;</c>
 /// which extends <c>Ardalis.Specification.IRepositoryBase&lt;T&gt;</c>.
 /// </remarks>
 /// <typeparam name="TEntity">The entity type.</typeparam>

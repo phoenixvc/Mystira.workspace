@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Application.CQRS.Royalties.Commands;
 using Mystira.App.Application.CQRS.Royalties.Queries;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

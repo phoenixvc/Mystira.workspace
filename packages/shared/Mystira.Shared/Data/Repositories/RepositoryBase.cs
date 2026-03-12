@@ -12,7 +12,7 @@ namespace Mystira.Shared.Data.Repositories;
 /// <remarks>
 /// <para>
 /// This class provides a foundation for repository implementations. Infrastructure layer
-/// repositories should extend this class and implement <c>Mystira.Application.Ports.Data.IRepository&lt;TEntity&gt;</c>.
+/// repositories should extend this class and implement <c>Mystira.Core.Ports.Data.IRepository&lt;TEntity&gt;</c>.
 /// </para>
 /// <para>
 /// Example:

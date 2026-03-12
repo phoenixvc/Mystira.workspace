@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.Domain.Models;
 
 namespace Mystira.Infrastructure.StoryProtocol.Services.Mock;

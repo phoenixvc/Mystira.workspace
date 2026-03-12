@@ -139,7 +139,7 @@ public static class CachingServiceCollectionExtensions
     {
         // Register the cached decorator
         // This requires the base ISpecRepository to be registered first
-        services.Decorate<Application.Ports.Data.ISpecRepository<TEntity>, CachedRepository<TEntity>>();
+        services.Decorate<Mystira.Core.Ports.Data.ISpecRepository<TEntity>, CachedRepository<TEntity>>();
         return services;
     }
 }

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Mystira.Application.CQRS.Archetypes.Commands;
-using Mystira.Application.CQRS.Archetypes.Queries;
+using Mystira.Core.CQRS.Archetypes.Commands;
+using Mystira.Core.CQRS.Archetypes.Queries;
 using Mystira.Domain.Models;
 
 using Wolverine;

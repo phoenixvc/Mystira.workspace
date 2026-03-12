@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 
 namespace Mystira.App.Infrastructure.Azure.Services;
 

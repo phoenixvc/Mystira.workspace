@@ -1,0 +1,119 @@
+using Microsoft.Extensions.Logging;
+using Mystira.Core.Ports.Data;
+using Mystira.Contracts.App.Requests.UserProfiles;
+using Mystira.Domain.Models;
+using Mystira.Domain.ValueObjects;
+
+namespace Mystira.Core.UseCases.UserProfiles;
+
+/// <summary>
+/// Use case for updating an existing user profile
+/// </summary>
+public class UpdateUserProfileUseCase
+{
+    private readonly IUserProfileRepository _repository;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ILogger<UpdateUserProfileUseCase> _logger;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="UpdateUserProfileUseCase"/> class.
+    /// </summary>
+    /// <param name="repository">The user profile repository.</param>
+    /// <param name="unitOfWork">The unit of work for transaction management.</param>
+    /// <param name="logger">The logger instance.</param>
+    public UpdateUserProfileUseCase(
+        IUserProfileRepository repository,
+        IUnitOfWork unitOfWork,
+        ILogger<UpdateUserProfileUseCase> logger)
+    {
+        _repository = repository;
+        _unitOfWork = unitOfWork;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Updates an existing user profile with the provided request data.
+    /// </summary>
+    /// <param name="id">The user profile identifier.</param>
+    /// <param name="request">The update request containing new profile data.</param>
+    /// <returns>The updated user profile if found; otherwise, null.</returns>
+    public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request)
+    {
+        var profile = await _repository.GetByIdAsync(id);
+        if (profile == null)
+        {
+            return null;
+        }
+
+        // Apply updates
+        if (request.PreferredFantasyThemes != null)
+        {
+            // Validate fantasy themes
+            var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
+            if (invalidThemes.Any())
+            {
+                throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+            }
+
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
+        }
+
+        if (request.AgeGroup != null)
+        {
+            // Validate age group
+            var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
+            if (!allAgeGroupIds.Contains(request.AgeGroup))
+            {
+                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
+            }
+
+            profile.AgeGroupId = request.AgeGroup;
+        }
+
+        if (request.DateOfBirth.HasValue)
+        {
+            profile.DateOfBirth = DateOnly.FromDateTime(request.DateOfBirth.Value);
+            // Update age group automatically if date of birth is provided
+            profile.UpdateAgeGroupFromBirthDate();
+        }
+
+        if (request.HasCompletedOnboarding.HasValue)
+        {
+            profile.HasCompletedOnboarding = request.HasCompletedOnboarding.Value;
+        }
+
+        if (request.IsGuest.HasValue)
+        {
+            profile.IsGuest = request.IsGuest.Value;
+        }
+
+        if (request.IsNpc.HasValue)
+        {
+            profile.IsNpc = request.IsNpc.Value;
+        }
+
+        if (request.AccountId != null)
+        {
+            profile.AccountId = request.AccountId;
+        }
+
+        if (request.Pronouns != null)
+        {
+            profile.Pronouns = request.Pronouns;
+        }
+
+        if (request.Bio != null)
+        {
+            profile.Bio = request.Bio;
+        }
+
+        profile.UpdatedAt = DateTime.UtcNow;
+
+        await _repository.UpdateAsync(profile);
+        await _unitOfWork.SaveChangesAsync();
+
+        _logger.LogInformation("Updated user profile: {ProfileId} - {Name}", profile.Id, profile.Name);
+        return profile;
+    }
+}
+

@@ -1,4 +1,4 @@
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Badges;
 using Mystira.Domain.ValueObjects;
 

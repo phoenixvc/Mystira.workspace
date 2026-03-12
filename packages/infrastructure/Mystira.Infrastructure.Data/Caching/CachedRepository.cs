@@ -3,7 +3,7 @@ using Ardalis.Specification;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 
 namespace Mystira.Infrastructure.Data.Caching;
 

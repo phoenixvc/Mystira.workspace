@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
 
 namespace Mystira.App.Application.CQRS.Avatars.Queries;

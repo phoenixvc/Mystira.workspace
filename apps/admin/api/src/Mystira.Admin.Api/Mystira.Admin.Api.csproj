@@ -39,7 +39,7 @@
     <!-- Microsoft Entra ID (Azure AD) authentication -->
     <PackageReference Include="Microsoft.Identity.Web" Version="4.5.0" />
 
-    <!-- Wolverine is provided transitively via Mystira.Application -->
+    <!-- Wolverine is provided transitively via Mystira.Core -->
 
     <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
@@ -52,7 +52,7 @@
   <ItemGroup>
     <!-- Direct project references (monorepo — no longer consumed via NuGet) -->
     <ProjectReference Include="../../../../../packages/domain/Mystira.Domain/Mystira.Domain.csproj" />
-    <ProjectReference Include="../../../../../packages/application/Mystira.Application/Mystira.Application.csproj" />
+    <ProjectReference Include="../../../../../packages/core/Mystira.Core/Mystira.Core.csproj" />
     <ProjectReference Include="../../../../../packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
     <ProjectReference Include="../../../../../packages/infrastructure/Mystira.Infrastructure.Azure/Mystira.Infrastructure.Azure.csproj" />
     <ProjectReference Include="../../../../../packages/infrastructure/Mystira.Infrastructure.Data/Mystira.Infrastructure.Data.csproj" />
@@ -60,7 +60,7 @@
     <ProjectReference Include="../../../../../packages/infrastructure/Mystira.Infrastructure.StoryProtocol/Mystira.Infrastructure.StoryProtocol.csproj" />
     <ProjectReference Include="../../../../../packages/shared/Mystira.Shared/Mystira.Shared.csproj" />
 
-    <!-- Ardalis.Specification for data access patterns (version matches Mystira.Application dependency) -->
+    <!-- Ardalis.Specification for data access patterns (version matches Mystira.Core dependency) -->
     <PackageReference Include="Ardalis.Specification" Version="9.3.1" />
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.3.1" />
   </ItemGroup>

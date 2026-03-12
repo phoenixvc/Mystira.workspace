@@ -16,7 +16,7 @@ public static class DataExtensions
     /// <remarks>
     /// This registers the repository as <see cref="IRepositoryBase{TEntity}"/> from Ardalis.Specification.
     /// For full IRepository functionality, use <c>Mystira.Infrastructure.Data</c> package which provides
-    /// repositories implementing <c>Mystira.Application.Ports.Data.IRepository&lt;TEntity&gt;</c>.
+    /// repositories implementing <c>Mystira.Core.Ports.Data.IRepository&lt;TEntity&gt;</c>.
     /// </remarks>
     /// <typeparam name="TEntity">The entity type.</typeparam>
     /// <typeparam name="TContext">The DbContext type.</typeparam>

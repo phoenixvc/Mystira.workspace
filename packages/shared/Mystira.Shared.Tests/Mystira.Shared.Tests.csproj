@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Mystira.Shared/Mystira.Shared.csproj" />
-    <ProjectReference Include="../../application/Mystira.Application/Mystira.Application.csproj" />
+    <ProjectReference Include="../../core/Mystira.Core/Mystira.Core.csproj" />
     <ProjectReference Include="..\..\shared-messaging\Mystira.Shared.Messaging\Mystira.Shared.Messaging.csproj" />
     <ProjectReference Include="..\..\shared-observability\Mystira.Shared.Observability\Mystira.Shared.Observability.csproj" />
     <ProjectReference Include="..\..\shared-graph\Mystira.Shared.Graph\Mystira.Shared.Graph.csproj" />

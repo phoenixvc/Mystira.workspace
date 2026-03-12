@@ -5,7 +5,7 @@ using Azure;
 using Azure.Communication.Email;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 
 namespace Mystira.App.Infrastructure.Azure.Services;
 

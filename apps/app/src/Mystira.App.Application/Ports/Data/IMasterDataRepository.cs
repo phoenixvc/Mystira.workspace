@@ -1,1 +1,1 @@
-// Consolidated into Mystira.Application.Ports.Data.IMasterDataRepository
+// Consolidated into Mystira.Core.Ports.Data.IMasterDataRepository

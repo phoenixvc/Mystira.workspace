@@ -1,5 +1,5 @@
 using Microsoft.Extensions.Logging;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.App.Domain.Exceptions;
 using Mystira.Shared.Exceptions;
 using NotFoundException = Mystira.Shared.Exceptions.NotFoundException;

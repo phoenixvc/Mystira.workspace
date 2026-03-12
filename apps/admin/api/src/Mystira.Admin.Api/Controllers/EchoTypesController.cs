@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
-using Mystira.Application.CQRS.EchoTypes.Commands;
-using Mystira.Application.CQRS.EchoTypes.Queries;
+using Mystira.Core.CQRS.EchoTypes.Commands;
+using Mystira.Core.CQRS.EchoTypes.Queries;
 using Mystira.Domain.Models;
 
 using Wolverine;

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.Mappers;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

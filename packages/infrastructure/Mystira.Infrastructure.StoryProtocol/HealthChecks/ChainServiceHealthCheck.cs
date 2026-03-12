@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.Application.Configuration.StoryProtocol;
+using Mystira.Core.Configuration.StoryProtocol;
 using Mystira.Infrastructure.StoryProtocol.Services.Grpc;
 
 namespace Mystira.Infrastructure.StoryProtocol.HealthChecks;

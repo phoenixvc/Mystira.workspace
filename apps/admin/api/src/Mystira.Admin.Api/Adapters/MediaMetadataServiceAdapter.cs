@@ -1,4 +1,4 @@
-using Mystira.Application.Ports;
+using Mystira.Core.Ports;
 using Mystira.Domain.Models;
 using ApiModels = Mystira.Admin.Api.Models;
 

@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using Ardalis.Specification;
 using Ardalis.Specification.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Mystira.Application.Ports.Data;
+using Mystira.Core.Ports.Data;
 
 namespace Mystira.Infrastructure.Data.Repositories;
 

@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.App.Application.CQRS.Common.Responses;
-using Mystira.Application.Ports.Messaging;
+using Mystira.Core.Ports.Messaging;
 using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Application.CQRS.Discord.Commands;
