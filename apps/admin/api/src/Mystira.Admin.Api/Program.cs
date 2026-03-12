@@ -92,18 +92,21 @@ try
     // ═══════════════════════════════════════════════════════════════════════════════
     // APPLICATION INSIGHTS TELEMETRY CONFIGURATION
     // ═══════════════════════════════════════════════════════════════════════════════
-    builder.Services.AddApplicationInsightsTelemetry(options =>
+    if (!builder.Environment.IsEnvironment("Testing"))
     {
-        options.EnableDependencyTrackingTelemetryModule = true;
-        options.EnableQuickPulseMetricStream = true; // Live Metrics
-        options.EnablePerformanceCounterCollectionModule = true;
-        options.EnableRequestTrackingTelemetryModule = true;
-    });
+        builder.Services.AddApplicationInsightsTelemetry(options =>
+        {
+            options.EnableDependencyTrackingTelemetryModule = true;
+            options.EnableQuickPulseMetricStream = true; // Live Metrics
+            options.EnablePerformanceCounterCollectionModule = true;
+            options.EnableRequestTrackingTelemetryModule = true;
+        });
 
-    // Configure cloud role name via OpenTelemetry resource attributes (AppInsights 3.x)
-    builder.Services.AddOpenTelemetry()
-        .ConfigureResource(resource => resource
-            .AddCloudRoleAttributes("Mystira.Admin.Api", builder.Environment.EnvironmentName));
+        // Configure cloud role name via OpenTelemetry resource attributes (AppInsights 3.x)
+        builder.Services.AddOpenTelemetry()
+            .ConfigureResource(resource => resource
+                .AddCloudRoleAttributes("Mystira.Admin.Api", builder.Environment.EnvironmentName));
+    }
 
     // Register custom metrics service for business KPIs
     builder.Services.AddCustomMetrics(builder.Environment.EnvironmentName);
@@ -327,7 +330,10 @@ try
     builder.Services.AddScoped<DbContext>(sp => sp.GetRequiredService<MystiraAppDbContext>());
 
     // Add Azure Infrastructure Services
-    builder.Services.AddAzureBlobStorage(builder.Configuration);
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        builder.Services.AddAzureBlobStorage(builder.Configuration);
+    }
     builder.Services.Configure<AudioTranscodingOptions>(builder.Configuration.GetSection(AudioTranscodingOptions.SectionName));
     // Register Application.Ports.Media.IAudioTranscodingService for use cases
     builder.Services.AddSingleton<IAudioTranscodingService, FfmpegAudioTranscodingService>();
@@ -542,7 +548,10 @@ try
     // ═══════════════════════════════════════════════════════════════════════════════
     // DISTRIBUTED LOCKING (Redis-backed, protects concurrent admin operations)
     // ═══════════════════════════════════════════════════════════════════════════════
-    builder.Services.AddMystiraDistributedLocking(builder.Configuration);
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        builder.Services.AddMystiraDistributedLocking(builder.Configuration);
+    }
 
     // Register application services - Admin API services
     builder.Services.AddScoped<IUserProfileService, UserProfileService>();
@@ -653,8 +662,12 @@ try
     // ═══════════════════════════════════════════════════════════════════════════════
     // HEALTH CHECKS (Cosmos DB, PostgreSQL, Redis, Blob Storage)
     // ═══════════════════════════════════════════════════════════════════════════════
-    var healthChecksBuilder = builder.Services.AddHealthChecks()
-        .AddCheck<BlobStorageHealthCheck>("blob_storage");
+    var healthChecksBuilder = builder.Services.AddHealthChecks();
+
+    if (!builder.Environment.IsEnvironment("Testing"))
+    {
+        healthChecksBuilder.AddCheck<BlobStorageHealthCheck>("blob_storage");
+    }
 
     // Only add Cosmos DB health check when using Cosmos DB (not in-memory)
     if (useCosmosDb)

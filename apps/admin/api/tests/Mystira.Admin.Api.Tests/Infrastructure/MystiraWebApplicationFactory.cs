@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -8,12 +9,17 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Moq;
+using Mystira.Core.Ports.Storage;
 using Mystira.Infrastructure.Data;
+using Mystira.Shared.Locking;
 
 namespace Mystira.Admin.Api.Tests.Infrastructure;
 
 /// <summary>
 /// Custom WebApplicationFactory for integration tests with test authentication and in-memory database.
+/// Infrastructure services (Redis, Azure Blob, OpenTelemetry) are skipped via Testing environment
+/// guards in Program.cs. This factory adds test stubs for remaining dependencies.
 /// </summary>
 public class MystiraWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -26,21 +32,20 @@ public class MystiraWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureTestServices(services =>
         {
-            // Remove existing DbContext registration
-            var descriptor = services.SingleOrDefault(
+            // ── Database: replace with in-memory ──
+            var dbDescriptor = services.SingleOrDefault(
                 d => d.ServiceType == typeof(DbContextOptions<MystiraAppDbContext>));
-            if (descriptor != null)
+            if (dbDescriptor != null)
             {
-                services.Remove(descriptor);
+                services.Remove(dbDescriptor);
             }
 
-            // Add in-memory database for testing
             services.AddDbContext<MystiraAppDbContext>(options =>
             {
                 options.UseInMemoryDatabase($"MystiraTestDb_{Guid.NewGuid()}");
             });
 
-            // Add test authentication scheme
+            // ── Authentication: replace with test scheme ──
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = TestAuthHandler.SchemeName;
@@ -49,11 +54,12 @@ public class MystiraWebApplicationFactory : WebApplicationFactory<Program>
             .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>(
                 TestAuthHandler.SchemeName, _ => { });
 
-            // Ensure database is created
-            var sp = services.BuildServiceProvider();
-            using var scope = sp.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<MystiraAppDbContext>();
-            db.Database.EnsureCreated();
+            // ── Distributed Locking: in-memory stub (Redis skipped in Testing) ──
+            services.AddSingleton<IDistributedLockService, InMemoryDistributedLockService>();
+
+            // ── Blob Storage: mock (Azure skipped in Testing) ──
+            services.AddSingleton(_ => new Mock<BlobServiceClient>().Object);
+            services.AddScoped(_ => new Mock<IBlobService>().Object);
         });
     }
 
