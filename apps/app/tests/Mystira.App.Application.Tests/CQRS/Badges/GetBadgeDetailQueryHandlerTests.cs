@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Moq;
-using Mystira.App.Application.CQRS.Badges.Queries;
+using Mystira.Core.CQRS.Badges.Queries;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

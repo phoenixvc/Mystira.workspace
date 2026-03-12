@@ -1,6 +1,6 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Avatars.Queries;
+using Mystira.Core.CQRS.Avatars.Queries;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Contracts.App.Responses.Media;
 

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Api.Controllers;
 using Mystira.App.Api.Models;
-using Mystira.App.Application.CQRS.Health.Queries;
+using Mystira.Core.CQRS.Health.Queries;
 using Wolverine;
 using Xunit;
 

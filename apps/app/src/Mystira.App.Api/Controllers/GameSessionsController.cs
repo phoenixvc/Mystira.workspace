@@ -1,10 +1,10 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Accounts.Commands;
-using Mystira.App.Application.CQRS.GameSessions.Commands;
-using Mystira.App.Application.CQRS.GameSessions.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.Accounts.Commands;
+using Mystira.Core.CQRS.GameSessions.Commands;
+using Mystira.Core.CQRS.GameSessions.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Services;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Contracts.App.Requests.Scenarios;

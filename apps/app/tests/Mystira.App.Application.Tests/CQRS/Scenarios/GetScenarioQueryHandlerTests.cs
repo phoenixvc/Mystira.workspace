@@ -2,7 +2,7 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Scenarios.Queries;
+using Mystira.Core.CQRS.Scenarios.Queries;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

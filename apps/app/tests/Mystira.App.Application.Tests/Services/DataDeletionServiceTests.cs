@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Ports.Storage;
-using Mystira.App.Application.Services;
+using Mystira.Core.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

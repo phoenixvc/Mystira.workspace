@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.Scenarios;
+using Mystira.Core.UseCases.Scenarios;
 using Mystira.Contracts.App.Requests.Scenarios;
 
 namespace Mystira.App.Application.Tests.UseCases.Scenarios;

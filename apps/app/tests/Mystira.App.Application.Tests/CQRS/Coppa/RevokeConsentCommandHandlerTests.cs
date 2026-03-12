@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Coppa.Commands;
+using Mystira.Core.CQRS.Coppa.Commands;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;

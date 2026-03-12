@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.UserBadges.Queries;
+using Mystira.Core.CQRS.UserBadges.Queries;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

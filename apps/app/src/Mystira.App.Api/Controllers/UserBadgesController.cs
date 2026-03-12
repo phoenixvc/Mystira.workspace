@@ -1,8 +1,8 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.UserBadges.Commands;
-using Mystira.App.Application.CQRS.UserBadges.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.UserBadges.Commands;
+using Mystira.Core.CQRS.UserBadges.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Contracts.App.Requests.Badges;
 using Mystira.App.Api.Models;
 using Mystira.Domain.Models;

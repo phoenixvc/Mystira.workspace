@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Health.Queries;
+using Mystira.Core.CQRS.Health.Queries;
 using Mystira.Contracts.App.Ports.Health;
 
 namespace Mystira.App.Application.Tests.CQRS.Health;

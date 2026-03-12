@@ -1,7 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.GameSessions.Commands;
+using Mystira.Core.CQRS.GameSessions.Commands;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

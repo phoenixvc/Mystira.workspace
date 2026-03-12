@@ -4,12 +4,12 @@ using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Mystira.App.Application.CQRS.Coppa.Commands;
-using Mystira.App.Application.CQRS.Coppa.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.Coppa.Commands;
+using Mystira.Core.CQRS.Coppa.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Ports.Services;
-using Mystira.App.Application.Services;
+using Mystira.Core.Services;
 using Mystira.App.Api.Models;
 
 namespace Mystira.App.Api.Controllers;

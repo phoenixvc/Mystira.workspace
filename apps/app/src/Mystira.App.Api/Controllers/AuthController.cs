@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Mystira.App.Api.Services;
-using Mystira.App.Application.CQRS.Auth.Commands;
+using Mystira.Core.CQRS.Auth.Commands;
 using Mystira.Core.Ports.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

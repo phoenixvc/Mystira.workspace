@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Api.Controllers;
-using Mystira.App.Application.CQRS.Badges.Queries;
+using Mystira.Core.CQRS.Badges.Queries;
 using Wolverine;
 
 namespace Mystira.App.Api.Tests.Controllers;

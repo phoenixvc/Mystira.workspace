@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.CharacterMaps;
+using Mystira.Core.UseCases.CharacterMaps;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

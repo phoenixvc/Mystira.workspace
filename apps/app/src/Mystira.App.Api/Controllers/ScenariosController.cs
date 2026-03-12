@@ -1,8 +1,8 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Attribution.Queries;
-using Mystira.App.Application.CQRS.Scenarios.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.Attribution.Queries;
+using Mystira.Core.CQRS.Scenarios.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Contracts.App.Responses.Common;

@@ -1,9 +1,9 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Common.Responses;
-using Mystira.App.Application.CQRS.Discord.Commands;
-using Mystira.App.Application.CQRS.Discord.Queries;
+using Mystira.Core.CQRS.Common.Responses;
+using Mystira.Core.CQRS.Discord.Commands;
+using Mystira.Core.CQRS.Discord.Queries;
 using Mystira.Core.Ports.Messaging;
 
 namespace Mystira.App.Application.Tests.CQRS.Discord;

@@ -1,6 +1,6 @@
 using Mystira.Shared.Exceptions;
 using FluentAssertions;
-using Mystira.App.Application.CQRS.GameSessions.Commands;
+using Mystira.Core.CQRS.GameSessions.Commands;
 using Mystira.Contracts.App.Models;
 using Mystira.Contracts.App.Requests.GameSessions;
 

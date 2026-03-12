@@ -1,9 +1,9 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.UserProfiles.Commands;
-using Mystira.App.Application.CQRS.UserProfiles.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.UserProfiles.Commands;
+using Mystira.Core.CQRS.UserProfiles.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.App.Api.Models;
 using Mystira.Domain.Models;

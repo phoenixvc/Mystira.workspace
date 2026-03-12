@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Mystira.App.Application.Services;
+using Mystira.Core.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

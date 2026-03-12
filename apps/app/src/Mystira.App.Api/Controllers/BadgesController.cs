@@ -1,7 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Badges.Queries;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.CQRS.Badges.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Contracts.App.Responses.Badges;
 using Mystira.App.Api.Models;
 

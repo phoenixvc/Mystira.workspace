@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.Media;
+using Mystira.Core.UseCases.Media;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

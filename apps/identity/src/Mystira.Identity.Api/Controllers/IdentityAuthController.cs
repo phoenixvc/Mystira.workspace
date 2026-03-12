@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Protocols;
-using Mystira.App.Application.CQRS.Auth.Commands;
+using Mystira.Core.CQRS.Auth.Commands;
 using Mystira.Core.Ports.Services;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

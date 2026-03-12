@@ -1,6 +1,6 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.Helpers;
 using Mystira.Shared.Telemetry;
 
 namespace Mystira.App.Api.Configuration;

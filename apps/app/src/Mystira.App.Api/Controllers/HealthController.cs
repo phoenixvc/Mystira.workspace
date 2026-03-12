@@ -1,6 +1,6 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Health.Queries;
+using Mystira.Core.CQRS.Health.Queries;
 using Mystira.App.Api.Models;
 
 namespace Mystira.App.Api.Controllers;

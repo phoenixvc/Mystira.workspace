@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Api.Controllers;
-using Mystira.App.Application.CQRS.MediaAssets.Queries;
+using Mystira.Core.CQRS.MediaAssets.Queries;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

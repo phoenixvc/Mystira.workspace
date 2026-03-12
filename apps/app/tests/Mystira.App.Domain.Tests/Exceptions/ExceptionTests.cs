@@ -1,4 +1,4 @@
-using Mystira.App.Domain.Exceptions;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.App.Domain.Tests.Exceptions;
 

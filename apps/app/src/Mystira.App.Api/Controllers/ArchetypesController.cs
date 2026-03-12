@@ -1,6 +1,6 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Archetypes.Queries;
+using Mystira.Core.CQRS.Archetypes.Queries;
 using Mystira.App.Api.Models;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

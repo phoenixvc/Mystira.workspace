@@ -1,7 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Badges.Queries;
+using Mystira.Core.CQRS.Badges.Queries;
 using Mystira.Contracts.App.Responses.Common;
 
 namespace Mystira.App.Api.Controllers;

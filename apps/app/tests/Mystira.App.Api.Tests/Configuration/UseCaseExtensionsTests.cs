@@ -2,12 +2,12 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Mystira.App.Application;
 using Mystira.Core.Ports;
-using Mystira.App.Application.UseCases.Accounts;
-using Mystira.App.Application.UseCases.Contributors;
-using Mystira.App.Application.UseCases.GameSessions;
-using Mystira.App.Application.UseCases.Media;
-using Mystira.App.Application.UseCases.Scenarios;
-using Mystira.App.Application.UseCases.UserProfiles;
+using Mystira.Core.UseCases.Accounts;
+using Mystira.Core.UseCases.Contributors;
+using Mystira.Core.UseCases.GameSessions;
+using Mystira.Core.UseCases.Media;
+using Mystira.Core.UseCases.Scenarios;
+using Mystira.Core.UseCases.UserProfiles;
 
 namespace Mystira.App.Api.Tests.Configuration;
 

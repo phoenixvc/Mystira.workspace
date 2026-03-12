@@ -124,8 +124,7 @@ try
     builder.Services.AddAzureEmailService(builder.Configuration);
     builder.Services.Configure<AudioTranscodingOptions>(builder.Configuration.GetSection(AudioTranscodingOptions.SectionName));
     builder.Services.AddSingleton<IAudioTranscodingService, FfmpegAudioTranscodingService>();
-    builder.Services.AddSingleton<Mystira.App.Application.Services.ConsentEmailBuilder>();
-    builder.Services.AddSingleton<Mystira.App.Application.Services.MagicSignupEmailBuilder>();
+    // ConsentEmailBuilder and MagicSignupEmailBuilder are registered by AddCoreApplicationServices()
     builder.Services.AddScoped<IApiTokenService, ApiTokenService>();
     builder.Services.AddPaymentServices(builder.Configuration);
 
@@ -144,7 +143,7 @@ try
     builder.Services.AddChainServices(builder.Configuration);
 
     // COPPA data deletion service + background processor
-    builder.Services.AddScoped<Mystira.Core.Ports.IDataDeletionService, Mystira.App.Application.Services.DataDeletionService>();
+    builder.Services.AddScoped<Mystira.Core.Ports.IDataDeletionService, Mystira.Core.Services.DataDeletionService>();
     builder.Services.AddHostedService<Mystira.App.Api.Services.DataDeletionBackgroundService>();
 
     // Infrastructure adapters registered at host level
@@ -167,8 +166,8 @@ try
     builder.Services.AddDistributedTracing("Mystira.App.Api", builder.Environment.EnvironmentName);
     builder.Host.UseWolverine(opts =>
     {
-        // Discover handlers in the Application assembly (where all CQRS handlers live)
-        opts.Discovery.IncludeAssembly(typeof(Mystira.App.Application.CQRS.Accounts.Queries.GetAccountQuery).Assembly);
+        // Discover shared handlers from the Core package
+        opts.Discovery.IncludeAssembly(typeof(Mystira.Core.CQRS.Accounts.Queries.GetAccountQuery).Assembly);
         opts.Policies.UseDurableLocalQueues();
     });
 

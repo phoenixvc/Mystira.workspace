@@ -1,7 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.App.Api.Models;
-using Mystira.App.Application.CQRS.MediaMetadata.Queries;
+using Mystira.Core.CQRS.MediaMetadata.Queries;
 using ErrorResponse = Mystira.Contracts.App.Responses.Common.ErrorResponse;
 
 namespace Mystira.App.Api.Controllers;

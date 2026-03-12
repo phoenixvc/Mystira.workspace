@@ -1,9 +1,9 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Accounts.Commands;
+using Mystira.Core.CQRS.Accounts.Commands;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.Accounts;
+using Mystira.Core.UseCases.Accounts;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

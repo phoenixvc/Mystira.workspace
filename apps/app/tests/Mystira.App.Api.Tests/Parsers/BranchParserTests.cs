@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using Mystira.App.Application.Parsers;
+using Mystira.Core.Parsers;
 using Xunit;
 
 namespace Mystira.App.Api.Tests.Parsers;
@@ -90,6 +90,6 @@ public class BranchParserTests
 
         // Act & Assert
         var act = () => BranchParser.Parse(branchDict);
-        act.Should().Throw<Mystira.Shared.Exceptions.ValidationException>();
+        act.Should().Throw<ArgumentException>();
     }
 }

@@ -1,7 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.MediaAssets.Queries;
+using Mystira.Core.CQRS.MediaAssets.Queries;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

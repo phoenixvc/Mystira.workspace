@@ -1,8 +1,8 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Accounts.Commands;
-using Mystira.App.Application.CQRS.Accounts.Queries;
-using Mystira.App.Application.CQRS.UserProfiles.Queries;
+using Mystira.Core.CQRS.Accounts.Commands;
+using Mystira.Core.CQRS.Accounts.Queries;
+using Mystira.Core.CQRS.UserProfiles.Queries;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

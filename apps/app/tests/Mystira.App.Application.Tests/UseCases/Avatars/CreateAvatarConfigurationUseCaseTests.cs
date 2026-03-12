@@ -1,9 +1,9 @@
-using Mystira.App.Domain.Exceptions;
+using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.Avatars;
+using Mystira.Core.UseCases.Avatars;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;

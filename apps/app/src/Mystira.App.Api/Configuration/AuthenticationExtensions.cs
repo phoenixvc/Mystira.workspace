@@ -1,6 +1,6 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.Helpers;
 using Mystira.Shared.Telemetry;
 using Serilog;
 

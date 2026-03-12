@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
-using Mystira.App.Application.Services;
+using Mystira.Core.Services;
 
 namespace Mystira.App.Application.Tests.Services;
 

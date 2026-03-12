@@ -1,8 +1,8 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Discord.Commands;
-using Mystira.App.Application.CQRS.Discord.Queries;
+using Mystira.Core.CQRS.Discord.Commands;
+using Mystira.Core.CQRS.Discord.Queries;
 
 namespace Mystira.App.Api.Controllers;
 

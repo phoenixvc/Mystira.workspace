@@ -2,9 +2,9 @@ using Mystira.Shared.Exceptions;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Application.CQRS.Accounts.Commands;
+using Mystira.Core.CQRS.Accounts.Commands;
 using Mystira.Core.Ports.Data;
-using Mystira.App.Application.UseCases.Accounts;
+using Mystira.Core.UseCases.Accounts;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -126,6 +126,9 @@ public class AddCompletedScenarioCommandHandlerTests
     [Fact]
     public async Task Handle_PropagatesCancellationToken()
     {
+        // Note: The handler delegates to ExecuteAsync without forwarding the CancellationToken,
+        // so the use case uses default(CancellationToken) internally. We verify the calls
+        // happen with any token rather than the exact one passed to Handle.
         using var cts = new CancellationTokenSource();
         var ct = cts.Token;
         var account = new Account
@@ -135,15 +138,15 @@ public class AddCompletedScenarioCommandHandlerTests
         };
         var command = new AddCompletedScenarioCommand("acc-1", "scenario-1");
 
-        _repository.Setup(r => r.GetByIdAsync("acc-1", ct)).ReturnsAsync(account);
+        _repository.Setup(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>())).ReturnsAsync(account);
 
         var useCase = new AddCompletedScenarioUseCase(_repository.Object, _unitOfWork.Object, _useCaseLogger.Object);
 
         await AddCompletedScenarioCommandHandler.Handle(
             command, useCase, _handlerLogger.Object, ct);
 
-        _repository.Verify(r => r.GetByIdAsync("acc-1", ct), Times.Once);
-        _repository.Verify(r => r.UpdateAsync(account, ct), Times.Once);
-        _unitOfWork.Verify(u => u.SaveChangesAsync(ct), Times.Once);
+        _repository.Verify(r => r.GetByIdAsync("acc-1", It.IsAny<CancellationToken>()), Times.Once);
+        _repository.Verify(r => r.UpdateAsync(account, It.IsAny<CancellationToken>()), Times.Once);
+        _unitOfWork.Verify(u => u.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }

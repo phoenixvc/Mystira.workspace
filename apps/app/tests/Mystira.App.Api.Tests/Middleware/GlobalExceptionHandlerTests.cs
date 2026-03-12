@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Mystira.App.Api.Middleware;
 using Mystira.App.Domain.Exceptions;
+using GlobalExceptionHandler = Mystira.App.Api.Middleware.GlobalExceptionHandler;
 using System.Text.Json;
 
 namespace Mystira.App.Api.Tests.Middleware;
@@ -109,11 +109,11 @@ public class GlobalExceptionHandlerTests
     {
         // Arrange
         var context = CreateHttpContext();
-        var errors = new[]
+        var errors = new List<ValidationError>
         {
-            new ValidationError("Email", "Invalid email format"),
-            new ValidationError("Name", "Name is required"),
-            new ValidationError("Age", "Age must be positive")
+            new("Email", "Invalid email format"),
+            new("Name", "Name is required"),
+            new("Age", "Age must be positive")
         };
         var exception = new ValidationException(errors);
 
@@ -134,7 +134,7 @@ public class GlobalExceptionHandlerTests
     {
         // Arrange
         var context = CreateHttpContext();
-        var exception = new ConflictException("Account", "Resource already exists");
+        var exception = new ConflictException("Resource already exists");
 
         // Act
         var result = await _handler.TryHandleAsync(context, exception, CancellationToken.None);

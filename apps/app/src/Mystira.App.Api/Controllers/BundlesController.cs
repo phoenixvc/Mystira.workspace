@@ -1,7 +1,7 @@
 using Wolverine;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Attribution.Queries;
-using Mystira.App.Application.CQRS.ContentBundles.Queries;
+using Mystira.Core.CQRS.Attribution.Queries;
+using Mystira.Core.CQRS.ContentBundles.Queries;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Contracts.App.Responses.Common;
 using Mystira.Domain.Models;

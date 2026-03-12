@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Mystira.App.Application.Services;
+using Mystira.Core.Services;
 
 namespace Mystira.App.Application.Tests.Services;
 

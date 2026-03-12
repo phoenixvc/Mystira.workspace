@@ -1,4 +1,4 @@
-using Mystira.App.Application.Parsers;
+using Mystira.Core.Parsers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

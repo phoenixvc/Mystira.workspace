@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Api.Controllers;
-using Mystira.App.Application.CQRS.CompassAxes.Queries;
-using Mystira.Domain.Models;
+using Mystira.Core.CQRS.CompassAxes.Queries;
+using Mystira.Domain.ValueObjects;
 using Wolverine;
 using Xunit;
 
@@ -34,13 +34,13 @@ public class CompassAxesControllerTests
     public async Task GetAllCompassAxes_ReturnsOk_WithAxes()
     {
         // Arrange
-        var axes = new List<CompassAxisDefinition>
+        var axes = new List<CompassAxis>
         {
-            new() { Id = "axis-1", Name = "Courage", Description = "Measures bravery" },
-            new() { Id = "axis-2", Name = "Wisdom", Description = "Measures knowledge" }
+            CompassAxis.Courage,
+            CompassAxis.Wisdom
         };
         var bus = new Mock<IMessageBus>();
-        bus.Setup(m => m.InvokeAsync<List<CompassAxisDefinition>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
+        bus.Setup(m => m.InvokeAsync<List<CompassAxis>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
             .ReturnsAsync(axes);
         var controller = CreateController(bus);
 
@@ -51,7 +51,7 @@ public class CompassAxesControllerTests
         result.Result.Should().BeOfType<OkObjectResult>();
         var ok = result.Result as OkObjectResult;
         ok!.Value.Should().BeEquivalentTo(axes);
-        bus.Verify(m => m.InvokeAsync<List<CompassAxisDefinition>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()), Times.Once);
+        bus.Verify(m => m.InvokeAsync<List<CompassAxis>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()), Times.Once);
     }
 
     [Fact]
@@ -59,8 +59,8 @@ public class CompassAxesControllerTests
     {
         // Arrange
         var bus = new Mock<IMessageBus>();
-        bus.Setup(m => m.InvokeAsync<List<CompassAxisDefinition>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
-            .ReturnsAsync(new List<CompassAxisDefinition>());
+        bus.Setup(m => m.InvokeAsync<List<CompassAxis>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
+            .ReturnsAsync(new List<CompassAxis>());
         var controller = CreateController(bus);
 
         // Act
@@ -69,7 +69,7 @@ public class CompassAxesControllerTests
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
         var ok = result.Result as OkObjectResult;
-        var value = ok!.Value as List<CompassAxisDefinition>;
+        var value = ok!.Value as List<CompassAxis>;
         value.Should().BeEmpty();
     }
 
@@ -77,9 +77,9 @@ public class CompassAxesControllerTests
     public async Task GetCompassAxisById_ReturnsOk_WhenFound()
     {
         // Arrange
-        var axis = new CompassAxisDefinition { Id = "axis-1", Name = "Courage", Description = "Measures bravery" };
+        var axis = CompassAxis.Courage;
         var bus = new Mock<IMessageBus>();
-        bus.Setup(m => m.InvokeAsync<CompassAxisDefinition?>(It.IsAny<GetCompassAxisByIdQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
+        bus.Setup(m => m.InvokeAsync<CompassAxis?>(It.IsAny<GetCompassAxisByIdQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
             .ReturnsAsync(axis);
         var controller = CreateController(bus);
 
@@ -97,8 +97,8 @@ public class CompassAxesControllerTests
     {
         // Arrange
         var bus = new Mock<IMessageBus>();
-        bus.Setup(m => m.InvokeAsync<CompassAxisDefinition?>(It.IsAny<GetCompassAxisByIdQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
-            .ReturnsAsync((CompassAxisDefinition?)null);
+        bus.Setup(m => m.InvokeAsync<CompassAxis?>(It.IsAny<GetCompassAxisByIdQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()))
+            .ReturnsAsync((CompassAxis?)null);
         var controller = CreateController(bus);
 
         // Act

@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Mystira.App.Application.Helpers;
+using Mystira.Core.Helpers;
 using Xunit;
 
 namespace Mystira.App.Application.Tests.Helpers;

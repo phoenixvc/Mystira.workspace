@@ -1,5 +1,5 @@
 using FluentAssertions;
-using Mystira.App.Application.Specifications;
+using Mystira.Core.Specifications;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
@@ -18,9 +18,9 @@ public class ScenarioSpecificationsTests
     {
         _scenarios = new List<Scenario>
         {
-            CreateScenario("1", "Dragon Quest", "early_childhood", DifficultyLevel.Easy, new[] { "fantasy", "featured" }, true),
+            CreateScenario("1", "Dragon Quest", "early_childhood", DifficultyLevel.Easy, new[] { "fantasy", "featured" }, true, isFeatured: true),
             CreateScenario("2", "Space Adventure", "teen", DifficultyLevel.Medium, new[] { "scifi" }, true),
-            CreateScenario("3", "Mystery Manor", "adult", DifficultyLevel.Hard, new[] { "mystery", "featured" }, true),
+            CreateScenario("3", "Mystery Manor", "adult", DifficultyLevel.Hard, new[] { "mystery", "featured" }, true, isFeatured: true),
             CreateScenario("4", "Pirate Treasure", "early_childhood", DifficultyLevel.Easy, new[] { "adventure" }, true),
             CreateScenario("5", "Zombie Apocalypse", "teen", DifficultyLevel.Hard, new[] { "horror" }, false),
             CreateScenario("6", "Dragon's Lair", "early_childhood", DifficultyLevel.Medium, new[] { "fantasy" }, true),
@@ -108,7 +108,7 @@ public class ScenarioSpecificationsTests
 
         // Assert
         result.Should().HaveCount(2);
-        result.Should().AllSatisfy(s => s.Tags.Should().Contain("featured"));
+        result.Should().AllSatisfy(s => s.IsFeatured.Should().BeTrue());
     }
 
     [Fact]
@@ -177,7 +177,8 @@ public class ScenarioSpecificationsTests
         string ageGroupId,
         DifficultyLevel difficulty,
         string[] tags,
-        bool isActive)
+        bool isActive,
+        bool isFeatured = false)
     {
         return new Scenario
         {
@@ -187,6 +188,7 @@ public class ScenarioSpecificationsTests
             Difficulty = difficulty,
             Tags = tags.ToList(),
             IsActive = isActive,
+            IsFeatured = isFeatured,
             CreatedAt = DateTime.UtcNow
         };
     }

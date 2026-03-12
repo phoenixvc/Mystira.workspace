@@ -8,8 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Mystira.App.Api.Controllers;
-using Mystira.App.Application.CQRS.Discord.Commands;
-using Mystira.App.Application.CQRS.Discord.Queries;
+using Mystira.Core.CQRS.Discord.Commands;
+using Mystira.Core.CQRS.Discord.Queries;
 using Wolverine;
 using Xunit;
 

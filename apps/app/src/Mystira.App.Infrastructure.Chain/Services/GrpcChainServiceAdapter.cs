@@ -2,7 +2,7 @@ using Grpc.Core;
 using Grpc.Net.Client;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Mystira.App.Application.Configuration.StoryProtocol;
+using Mystira.Core.Configuration.StoryProtocol;
 using Mystira.Core.Ports;
 using Mystira.Domain.Models;
 using Mystira.Domain.Enums;

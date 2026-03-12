@@ -1,8 +1,8 @@
 using Wolverine;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Mystira.App.Application.CQRS.Royalties.Commands;
-using Mystira.App.Application.CQRS.Royalties.Queries;
+using Mystira.Core.CQRS.Royalties.Commands;
+using Mystira.Core.CQRS.Royalties.Queries;
 using Mystira.Contracts.App.Requests.Royalties;
 using Mystira.App.Api.Models;
 using Mystira.Domain.Models;
