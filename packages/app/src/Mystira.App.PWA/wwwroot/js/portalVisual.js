@@ -20,6 +20,32 @@
             }, { once: true });
         },
 
+        /**
+         * Fetch an SVG file and inject its markup into a container element,
+         * so internal class names are part of the DOM and CSS animations apply.
+         * Prefixes all id/url(#...) references with a unique prefix to avoid collisions.
+         */
+        injectFrameSvg: function (containerElement, svgUrl, idPrefix) {
+            if (!containerElement || !svgUrl) return;
+            fetch(svgUrl)
+                .then(function (r) { return r.text(); })
+                .then(function (svgText) {
+                    // Prefix all id="..." and url(#...) references to avoid SVG ID collisions
+                    if (idPrefix) {
+                        svgText = svgText.replace(/id="([^"]+)"/g, 'id="' + idPrefix + '-$1"');
+                        svgText = svgText.replace(/url\(#([^)]+)\)/g, 'url(#' + idPrefix + '-$1)');
+                    }
+                    containerElement.innerHTML = svgText;
+                    // Apply the frame class to the injected <svg> element
+                    var svg = containerElement.querySelector("svg");
+                    if (svg) {
+                        svg.classList.add("ornate-frame-svg");
+                        svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+                        svg.setAttribute("aria-hidden", "true");
+                    }
+                });
+        },
+
         bindParallax: function (selector) {
             var el = document.querySelector(selector);
             if (!el) return;

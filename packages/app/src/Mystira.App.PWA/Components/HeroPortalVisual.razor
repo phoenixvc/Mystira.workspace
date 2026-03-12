@@ -136,8 +136,8 @@
             }
             else
             {
-                <!-- External SVG frame — loaded from file, CSS animations still apply via class names -->
-                <img class="ornate-frame-svg" src="@GetFrameSvgPath()" alt="" aria-hidden="true" />
+                <!-- External SVG frame — injected inline via JS so CSS animations target internal elements -->
+                <div class="frame-inject-container" @ref="_frameContainer" aria-hidden="true"></div>
             }
 
             <!-- Inner content area (video or logo) -->
@@ -208,6 +208,7 @@
     public PortalFrameStyle FrameStyle { get; set; } = PortalFrameStyle.Classic;
 
     private ElementReference _videoElement;
+    private ElementReference _frameContainer;
     private bool _showIntroVideo;
     private bool _videoFading = false;
     private bool _logoEntering = false;
@@ -231,6 +232,19 @@
                 try
                 {
                     await JSRuntime.InvokeVoidAsync("MystiraPortal.bindVideoEnd", _videoElement, _objRef);
+                }
+                catch
+                {
+                    // Silently fail during prerendering
+                }
+            }
+
+            // Inject external SVG frame inline so CSS animations work on internal elements
+            if (FrameStyle != PortalFrameStyle.Classic)
+            {
+                try
+                {
+                    await JSRuntime.InvokeVoidAsync("MystiraPortal.injectFrameSvg", _frameContainer, GetFrameSvgPath(), _idPrefix);
                 }
                 catch
                 {
