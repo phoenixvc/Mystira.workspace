@@ -32,7 +32,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBot(configuration);
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
 
         // Check that IChatBotService is registered
         var chatBotService = serviceProvider.GetService<IChatBotService>();
@@ -61,7 +61,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBot(configuration);
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
         var options = serviceProvider.GetRequiredService<IOptions<DiscordOptions>>().Value;
 
         options.BotToken.Should().Be("test-token-123");
@@ -89,7 +89,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBotHostedService();
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
         var hostedServices = serviceProvider.GetServices<IHostedService>();
 
         hostedServices.Should().Contain(s => s.GetType() == typeof(DiscordBotHostedService));
@@ -116,7 +116,7 @@ public class ServiceCollectionExtensionsTests
             .AddDiscordBotHealthCheck();
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
         var healthCheckService = serviceProvider.GetService<HealthCheckService>();
 
         healthCheckService.Should().NotBeNull();
@@ -140,7 +140,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBot(configuration);
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
         var messagingService = serviceProvider.GetService<IMessagingService>();
 
         messagingService.Should().NotBeNull();
@@ -165,7 +165,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBotKeyed(configuration);
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
 
         // Verify keyed services are registered
         var keyedMessaging = serviceProvider.GetKeyedService<IMessagingService>("discord");
@@ -199,7 +199,7 @@ public class ServiceCollectionExtensionsTests
         services.AddDiscordBotKeyed(configuration, "my-discord-bot");
 
         // Assert
-        var serviceProvider = services.BuildServiceProvider();
+        using var serviceProvider = services.BuildServiceProvider();
 
         var keyedService = serviceProvider.GetKeyedService<IChatBotService>("my-discord-bot");
         keyedService.Should().NotBeNull();
