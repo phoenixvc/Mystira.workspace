@@ -126,7 +126,11 @@
     max-width: 640px;
 }
 
-/* Staggered entrance animation for text column children */
+/* Staggered entrance animation for text column children.
+   WARNING: These :nth-child indices are coupled to the DOM order in HeroSection.razor.
+   If you reorder, add, or remove children of .hero-text-col, update the indices below:
+     1 = HeroBadgePill, 2 = headline, 3 = subtext,
+     4 = CTA group, 5 = trust pills, 6 = story demo */
 .hero-text-col > :nth-child(1) { /* HeroBadgePill */
     animation: hero-text-fade-in 0.45s ease-out 0s both;
 }
@@ -297,6 +301,13 @@
     color: rgba(255, 255, 255, 0.9);
     border-color: rgba(246, 196, 83, 0.25);
     background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-replay-btn:focus-visible {
+    outline: 2px solid rgba(253, 230, 138, 0.7);
+    outline-offset: 2px;
+    color: rgba(255, 255, 255, 0.9);
+    border-color: rgba(246, 196, 83, 0.25);
 }
 
 /* ---- Mobile Responsive ---- */

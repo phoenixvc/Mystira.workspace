@@ -88,7 +88,7 @@
     public bool ShowCallToActions { get; set; } = false;
 
     [Parameter]
-    public EventCallback OnWatchDemoClick { get; set; }
+    public EventCallback OnBeginAdventureClick { get; set; }
 
     private bool _particlesInitialized = false;
     // Default false to prevent flash for return visitors. The static logo renders
@@ -150,9 +150,9 @@
 
     private async Task OnBeginAdventure()
     {
-        if (OnWatchDemoClick.HasDelegate)
+        if (OnBeginAdventureClick.HasDelegate)
         {
-            await OnWatchDemoClick.InvokeAsync();
+            await OnBeginAdventureClick.InvokeAsync();
         }
     }
 

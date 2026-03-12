@@ -149,9 +149,13 @@ jobs:
       - name: Install .NET Playwright browsers
         run: |
           dotnet build packages/app/tests/Mystira.App.PWA.E2E/Mystira.App.PWA.E2E.csproj
-          pwsh packages/app/tests/Mystira.App.PWA.E2E/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+          PLAYWRIGHT_PS1=$(find packages/app/tests/Mystira.App.PWA.E2E/bin -name playwright.ps1 -print -quit)
+          if [ -z "$PLAYWRIGHT_PS1" ]; then echo "playwright.ps1 not found"; exit 1; fi
+          pwsh "$PLAYWRIGHT_PS1" install --with-deps chromium
 
       - name: Run .NET Playwright E2E tests
+        id: dotnet-e2e
+        continue-on-error: true
         env:
           BASE_URL: ${{ needs.setup.outputs.base_url }}
         run: dotnet test packages/app/tests/Mystira.App.PWA.E2E/Mystira.App.PWA.E2E.csproj --no-build --logger "trx;LogFileName=dotnet-e2e-results.trx"
@@ -216,7 +220,22 @@ jobs:
           echo "| Environment | ${{ needs.setup.outputs.environment }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Base URL | ${{ needs.setup.outputs.base_url }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Test Suite | ${{ github.event.inputs.test_suite || 'smoke' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Result | ${{ steps.e2e.outputs.exit_code == '0' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| .NET E2E | ${{ steps.dotnet-e2e.outcome }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Node E2E | ${{ steps.e2e.outputs.exit_code == '0' && 'success' || 'failure' }} |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check test results
+        if: always()
+        run: |
+          FAILED=0
+          if [ "${{ steps.dotnet-e2e.outcome }}" == "failure" ]; then
+            echo "::error::.NET Playwright E2E tests failed"
+            FAILED=1
+          fi
+          if [ "${{ steps.e2e.outputs.exit_code }}" != "0" ]; then
+            echo "::error::Node Playwright E2E tests failed"
+            FAILED=1
+          fi
+          exit $FAILED
 
   notify-failure:
     name: Notify on Failure

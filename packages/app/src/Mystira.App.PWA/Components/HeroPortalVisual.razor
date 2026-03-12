@@ -220,6 +220,10 @@
     // Unique prefix for SVG def IDs to avoid collisions if multiple instances render
     private readonly string _idPrefix = $"portal-{Guid.NewGuid().ToString("N")[..8]}";
 
+    // Timing constants — must stay in sync with CSS transition durations (see COUPLING comment on CompleteIntro)
+    private const int VideoFadeMs = 400;   // matches .portal-video-layer { transition: opacity 0.4s }
+    private const int LogoEnterTickMs = 50; // one-frame tick so .entering class applies before removal
+
     protected override void OnInitialized()
     {
         _showIntroVideo = ShowIntroVideo;
@@ -277,18 +281,17 @@
         await CompleteIntro();
     }
 
-    // COUPLING: The delays below must stay in sync with the CSS transition durations:
-    //   400ms = .portal-video-layer transition (opacity 0.4s) in HeroPortalVisual.razor.css:389
-    //    50ms = one-frame tick so .entering class applies before being removed (triggers CSS transition)
+    // COUPLING: VideoFadeMs and LogoEnterTickMs must stay in sync with CSS transition durations.
+    // See constants above and .portal-video-layer { transition: opacity 0.4s } in HeroPortalVisual.razor.css.
     private async Task CompleteIntro()
     {
         _videoFading = true;
         StateHasChanged();
-        await Task.Delay(400);
+        await Task.Delay(VideoFadeMs);
         _showIntroVideo = false;
         _logoEntering = true;
         StateHasChanged();
-        await Task.Delay(50);
+        await Task.Delay(LogoEnterTickMs);
         _logoEntering = false;
         StateHasChanged();
 

@@ -430,6 +430,13 @@
     color: #ffffff;
 }
 
+.skip-intro-btn:focus-visible {
+    outline: 2px solid rgba(253, 230, 138, 0.7);
+    outline-offset: 2px;
+    background: rgba(10, 16, 39, 0.9);
+    color: #ffffff;
+}
+
 /* Static logo layer */
 .portal-logo-layer {
     position: absolute;
