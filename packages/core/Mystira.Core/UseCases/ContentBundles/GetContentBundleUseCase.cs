@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -12,9 +16,6 @@ public class GetContentBundleUseCase
     private readonly IContentBundleRepository _repository;
     private readonly ILogger<GetContentBundleUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetContentBundleUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetContentBundleUseCase(
         IContentBundleRepository repository,
         ILogger<GetContentBundleUseCase> logger)
@@ -23,17 +24,14 @@ public class GetContentBundleUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves a content bundle by its identifier.</summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <returns>The content bundle if found; otherwise, null.</returns>
-    public async Task<ContentBundle?> ExecuteAsync(string bundleId)
+    public async Task<ContentBundle?> ExecuteAsync(string bundleId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
 
         if (bundle == null)
         {

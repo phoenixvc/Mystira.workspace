@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Badges;
 
@@ -12,9 +16,6 @@ public class GetBadgeUseCase
     private readonly IUserBadgeRepository _repository;
     private readonly ILogger<GetBadgeUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetBadgeUseCase"/> class.</summary>
-    /// <param name="repository">The user badge repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetBadgeUseCase(
         IUserBadgeRepository repository,
         ILogger<GetBadgeUseCase> logger)
@@ -23,17 +24,14 @@ public class GetBadgeUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves a badge by its identifier.</summary>
-    /// <param name="badgeId">The badge identifier.</param>
-    /// <returns>The badge if found; otherwise, null.</returns>
-    public async Task<UserBadge?> ExecuteAsync(string badgeId)
+    public async Task<UserBadge?> ExecuteAsync(string badgeId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(badgeId))
         {
-            throw new ArgumentException("Badge ID cannot be null or empty", nameof(badgeId));
+            throw new ValidationException("badgeId", "badgeId is required");
         }
 
-        var badge = await _repository.GetByIdAsync(badgeId);
+        var badge = await _repository.GetByIdAsync(badgeId, ct);
 
         if (badge == null)
         {

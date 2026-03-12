@@ -1,47 +1,54 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.GameSessions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Locking;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
 /// <summary>
-/// Use case for progressing to a specific scene in a game session
+/// Use case for progressing to a specific scene in a game session.
+/// Uses distributed locking to prevent concurrent modifications to the same session.
 /// </summary>
 public class ProgressSceneUseCase
 {
     private readonly IGameSessionRepository _repository;
     private readonly IScenarioRepository _scenarioRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDistributedLockService _lockService;
     private readonly ILogger<ProgressSceneUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ProgressSceneUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="scenarioRepository">The scenario repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public ProgressSceneUseCase(
         IGameSessionRepository repository,
         IScenarioRepository scenarioRepository,
         IUnitOfWork unitOfWork,
+        IDistributedLockService lockService,
         ILogger<ProgressSceneUseCase> logger)
     {
         _repository = repository;
         _scenarioRepository = scenarioRepository;
         _unitOfWork = unitOfWork;
+        _lockService = lockService;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Progresses a game session to a specific scene.
-    /// </summary>
-    /// <param name="request">The request containing session and scene details.</param>
-    /// <returns>The updated game session if successful; otherwise, null.</returns>
-    public async Task<GameSession?> ExecuteAsync(ProgressSceneRequest request)
+    public async Task<GameSession?> ExecuteAsync(ProgressSceneRequest request, CancellationToken ct = default)
     {
-        var session = await _repository.GetByIdAsync(request.SessionId);
+        return await _lockService.ExecuteWithLockAsync(
+            $"session:{request.SessionId}",
+            async token => await ExecuteInternalAsync(request, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+
+    private async Task<GameSession?> ExecuteInternalAsync(ProgressSceneRequest request, CancellationToken ct)
+    {
+        var session = await _repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             return null;
@@ -49,19 +56,19 @@ public class ProgressSceneUseCase
 
         if (session.Status != SessionStatus.InProgress && session.Status != SessionStatus.Paused)
         {
-            throw new InvalidOperationException($"Cannot progress scene in session with status {session.Status}");
+            throw new BusinessRuleException("SessionNotInProgress", $"Cannot progress scene in session with status {session.Status}");
         }
 
-        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(session.ScenarioId, ct);
         if (scenario == null)
         {
-            throw new InvalidOperationException("Scenario not found for session");
+            throw new NotFoundException("Scenario", session.ScenarioId ?? "unknown");
         }
 
         var targetScene = scenario.Scenes.FirstOrDefault(s => s.Id == request.SceneId);
         if (targetScene == null)
         {
-            throw new ArgumentException($"Scene {request.SceneId} not found in scenario");
+            throw new ValidationException("sceneId", $"Scene {request.SceneId} not found in scenario");
         }
 
         // Update session state
@@ -76,8 +83,8 @@ public class ProgressSceneUseCase
             session.PausedAt = null;
         }
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Progressed session {SessionId} to scene {SceneId}",
             session.Id, request.SceneId);

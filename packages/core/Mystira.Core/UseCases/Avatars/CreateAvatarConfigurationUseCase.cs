@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Avatars;
 
@@ -13,10 +17,6 @@ public class CreateAvatarConfigurationUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateAvatarConfigurationUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="CreateAvatarConfigurationUseCase"/> class.</summary>
-    /// <param name="repository">The avatar configuration file repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public CreateAvatarConfigurationUseCase(
         IAvatarConfigurationFileRepository repository,
         IUnitOfWork unitOfWork,
@@ -27,21 +27,18 @@ public class CreateAvatarConfigurationUseCase
         _logger = logger;
     }
 
-    /// <summary>Creates a new avatar configuration file with the specified age group avatars.</summary>
-    /// <param name="ageGroupAvatars">The dictionary mapping age groups to avatar media IDs.</param>
-    /// <returns>The created avatar configuration file.</returns>
-    public async Task<AvatarConfigurationFile> ExecuteAsync(Dictionary<string, List<string>> ageGroupAvatars)
+    public async Task<AvatarConfigurationFile> ExecuteAsync(Dictionary<string, List<string>> ageGroupAvatars, CancellationToken ct = default)
     {
         if (ageGroupAvatars == null)
         {
-            throw new ArgumentNullException(nameof(ageGroupAvatars));
+            throw new ValidationException("ageGroupAvatars", "ageGroupAvatars is required");
         }
 
         // Check if configuration already exists
-        var existing = await _repository.GetAsync();
+        var existing = await _repository.GetAsync(ct);
         if (existing != null)
         {
-            throw new InvalidOperationException("Avatar configuration file already exists. Use update instead.");
+            throw new ConflictException("Avatar configuration file already exists. Use update instead.");
         }
 
         var configFile = new AvatarConfigurationFile
@@ -53,8 +50,8 @@ public class CreateAvatarConfigurationUseCase
             Version = "1.0"
         };
 
-        await _repository.AddOrUpdateAsync(configFile);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddOrUpdateAsync(configFile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created avatar configuration file with {Count} age groups", ageGroupAvatars.Count);
         return configFile;

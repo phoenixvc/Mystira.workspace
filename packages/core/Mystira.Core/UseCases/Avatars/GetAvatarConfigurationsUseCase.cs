@@ -2,6 +2,9 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Avatars;
 
@@ -13,9 +16,6 @@ public class GetAvatarConfigurationsUseCase
     private readonly IAvatarConfigurationFileRepository _repository;
     private readonly ILogger<GetAvatarConfigurationsUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetAvatarConfigurationsUseCase"/> class.</summary>
-    /// <param name="repository">The avatar configuration file repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetAvatarConfigurationsUseCase(
         IAvatarConfigurationFileRepository repository,
         ILogger<GetAvatarConfigurationsUseCase> logger)
@@ -24,11 +24,9 @@ public class GetAvatarConfigurationsUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves all avatar configurations for all age groups.</summary>
-    /// <returns>The avatar response containing avatar configurations for all age groups.</returns>
-    public async Task<AvatarResponse> ExecuteAsync()
+    public async Task<AvatarResponse> ExecuteAsync(CancellationToken ct = default)
     {
-        var configFile = await _repository.GetAsync();
+        var configFile = await _repository.GetAsync(ct);
 
         var response = new AvatarResponse
         {
@@ -36,8 +34,7 @@ public class GetAvatarConfigurationsUseCase
         };
 
         // Ensure all age groups are present
-        var allAgeGroups = AgeGroup.All.Select(a => a.Id).ToList();
-        foreach (var ageGroup in allAgeGroups)
+        foreach (var ageGroup in AgeGroupConstants.GetAll())
         {
             response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());
         }

@@ -1,8 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Contributors;
 
@@ -16,13 +20,6 @@ public class RegisterBundleIpAssetUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterBundleIpAssetUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterBundleIpAssetUseCase"/> class.
-    /// </summary>
-    /// <param name="bundleRepository">The content bundle repository.</param>
-    /// <param name="storyProtocolService">The Story Protocol service.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public RegisterBundleIpAssetUseCase(
         IContentBundleRepository bundleRepository,
         IStoryProtocolService storyProtocolService,
@@ -35,59 +32,54 @@ public class RegisterBundleIpAssetUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Registers a content bundle as an IP Asset on Story Protocol.
-    /// </summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <param name="request">The registration request.</param>
-    /// <returns>The Story Protocol metadata for the registered asset.</returns>
-    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, RegisterIpAssetRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the bundle
-        var bundle = await _bundleRepository.GetByIdAsync(bundleId);
+        var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}");
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         // Check if already registered
         if (bundle.StoryProtocol?.IsRegistered ?? false)
         {
-            throw new InvalidOperationException($"Bundle {bundleId} is already registered on Story Protocol");
+            throw new ConflictException($"Bundle {bundleId} is already registered on Story Protocol");
         }
 
         // Ensure contributors are set
         if (bundle.StoryProtocol == null || !bundle.StoryProtocol.Contributors.Any())
         {
-            throw new InvalidOperationException("Contributors must be set before registering on Story Protocol");
+            throw new BusinessRuleException("ContributorsRequired", "Contributors must be set before registering on Story Protocol");
         }
 
         // Validate contributor splits
         if (!bundle.StoryProtocol.ValidateContributorSplits(out var errors))
         {
             var errorMessage = string.Join("; ", errors);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Register on Story Protocol
-        var registrationResult = await _storyProtocolService.RegisterIpAssetAsync(
+        var storyProtocolMetadata = await _storyProtocolService.RegisterIpAssetAsync(
             bundle.Id,
             bundle.Title,
             bundle.StoryProtocol.Contributors,
             request.MetadataUri,
-            request.LicenseTermsId);
+            request.LicenseTermsId,
+            ct);
 
         // Update the bundle with Story Protocol metadata
-        bundle.StoryProtocol.IpAssetId = registrationResult.IpAssetId;
-        bundle.StoryProtocol.TransactionHash = registrationResult.RegistrationTxHash;
-        bundle.StoryProtocol.RegisteredAt = registrationResult.RegisteredAt;
+        bundle.StoryProtocol.IpAssetId = storyProtocolMetadata.IpAssetId;
+        bundle.StoryProtocol.RegistrationTxHash = storyProtocolMetadata.RegistrationTxHash;
+        bundle.StoryProtocol.RegisteredAt = storyProtocolMetadata.RegisteredAt;
         bundle.StoryProtocol.IsRegistered = true;
 
-        await _bundleRepository.UpdateAsync(bundle);
+        await _bundleRepository.UpdateAsync(bundle, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {
@@ -96,7 +88,7 @@ public class RegisterBundleIpAssetUseCase
         }
 
         _logger.LogInformation("Registered bundle {BundleId} as IP Asset: {IpAssetId}",
-            bundleId, registrationResult.IpAssetId);
+            bundleId, storyProtocolMetadata.IpAssetId);
 
         return bundle.StoryProtocol;
     }

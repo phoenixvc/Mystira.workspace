@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -13,10 +17,6 @@ public class UpdateContentBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateContentBundleUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="UpdateContentBundleUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public UpdateContentBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -27,16 +27,6 @@ public class UpdateContentBundleUseCase
         _logger = logger;
     }
 
-    /// <summary>Updates an existing content bundle.</summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <param name="title">The optional new title.</param>
-    /// <param name="description">The optional new description.</param>
-    /// <param name="scenarioIds">The optional new list of scenario identifiers.</param>
-    /// <param name="imageId">The optional new image identifier.</param>
-    /// <param name="prices">The optional new list of bundle prices.</param>
-    /// <param name="isFree">The optional free flag.</param>
-    /// <param name="ageGroup">The optional new age group identifier.</param>
-    /// <returns>The updated content bundle.</returns>
     public async Task<ContentBundle> ExecuteAsync(
         string bundleId,
         string? title = null,
@@ -45,17 +35,18 @@ public class UpdateContentBundleUseCase
         string? imageId = null,
         List<BundlePrice>? prices = null,
         bool? isFree = null,
-        string? ageGroup = null)
+        string? ageGroup = null,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}", nameof(bundleId));
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         // Update properties if provided
@@ -94,8 +85,8 @@ public class UpdateContentBundleUseCase
             bundle.AgeGroupId = ageGroup;
         }
 
-        await _repository.UpdateAsync(bundle);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(bundle, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated content bundle: {BundleId}", bundleId);
         return bundle;

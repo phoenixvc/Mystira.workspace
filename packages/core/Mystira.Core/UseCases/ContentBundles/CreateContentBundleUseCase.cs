@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -13,10 +17,6 @@ public class CreateContentBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateContentBundleUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="CreateContentBundleUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public CreateContentBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -27,15 +27,6 @@ public class CreateContentBundleUseCase
         _logger = logger;
     }
 
-    /// <summary>Creates a new content bundle.</summary>
-    /// <param name="title">The bundle title.</param>
-    /// <param name="description">The bundle description.</param>
-    /// <param name="scenarioIds">The list of scenario identifiers.</param>
-    /// <param name="imageId">The image identifier.</param>
-    /// <param name="prices">The list of bundle prices.</param>
-    /// <param name="isFree">Indicates whether the bundle is free.</param>
-    /// <param name="ageGroup">The age group identifier.</param>
-    /// <returns>The created content bundle.</returns>
     public async Task<ContentBundle> ExecuteAsync(
         string title,
         string description,
@@ -43,16 +34,17 @@ public class CreateContentBundleUseCase
         string imageId,
         List<BundlePrice> prices,
         bool isFree,
-        string ageGroup)
+        string ageGroup,
+        CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(title))
         {
-            throw new ArgumentException("Title cannot be null or empty", nameof(title));
+            throw new ValidationException("title", "title is required");
         }
 
         if (scenarioIds == null)
         {
-            throw new ArgumentNullException(nameof(scenarioIds));
+            throw new ValidationException("scenarioIds", "scenarioIds is required");
         }
 
         var bundle = new ContentBundle
@@ -63,12 +55,12 @@ public class CreateContentBundleUseCase
             ScenarioIds = scenarioIds,
             ImageId = imageId ?? string.Empty,
             Prices = prices ?? new List<BundlePrice>(),
-            PriceCents = isFree ? 0 : (int)Math.Round((prices?.FirstOrDefault()?.Value ?? 0) * 100),
+            PriceCents = isFree ? 0 : (int)((prices?.FirstOrDefault()?.Value ?? 0) * 100),
             AgeGroupId = ageGroup ?? string.Empty
         };
 
-        await _repository.AddAsync(bundle);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(bundle, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created content bundle: {BundleId} - {Title}", bundle.Id, bundle.Title);
         return bundle;

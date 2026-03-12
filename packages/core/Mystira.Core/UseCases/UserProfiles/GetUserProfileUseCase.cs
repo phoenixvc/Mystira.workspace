@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.UserProfiles;
 
@@ -12,11 +15,6 @@ public class GetUserProfileUseCase
     private readonly IUserProfileRepository _repository;
     private readonly ILogger<GetUserProfileUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetUserProfileUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The user profile repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetUserProfileUseCase(
         IUserProfileRepository repository,
         ILogger<GetUserProfileUseCase> logger)
@@ -25,17 +23,12 @@ public class GetUserProfileUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves a user profile by its unique identifier.
-    /// </summary>
-    /// <param name="id">The user profile identifier.</param>
-    /// <returns>The user profile if found; otherwise, null.</returns>
-    public async Task<UserProfile?> ExecuteAsync(string id)
+    public async Task<UserProfile?> ExecuteAsync(string id, CancellationToken ct = default)
     {
-        var profile = await _repository.GetByIdAsync(id);
+        var profile = await _repository.GetByIdAsync(id, ct);
         if (profile == null)
         {
-            _logger.LogDebug("Profile not found: {ProfileId}", id);
+            _logger.LogDebug("Profile not found: {ProfileId}", PiiMask.HashId(id));
         }
         return profile;
     }

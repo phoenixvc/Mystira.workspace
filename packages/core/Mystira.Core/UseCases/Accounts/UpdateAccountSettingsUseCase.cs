@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -13,12 +17,6 @@ public class UpdateAccountSettingsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateAccountSettingsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateAccountSettingsUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public UpdateAccountSettingsUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -29,35 +27,29 @@ public class UpdateAccountSettingsUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Updates account settings.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="settings">The new settings.</param>
-    /// <returns>The updated account.</returns>
-    public async Task<Account> ExecuteAsync(string accountId, AccountSettings settings)
+    public async Task<Account> ExecuteAsync(string accountId, AccountSettings settings, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (settings == null)
         {
-            throw new ArgumentNullException(nameof(settings));
+            throw new ValidationException("settings", "settings is required");
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         account.Settings = settings;
-        await _repository.UpdateAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated settings for account: {AccountId}", accountId);
+        _logger.LogInformation("Updated settings for account: {AccountId}", PiiMask.HashId(accountId));
         return account;
     }
 }

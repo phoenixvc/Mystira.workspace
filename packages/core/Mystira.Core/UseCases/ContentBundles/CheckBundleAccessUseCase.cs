@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -12,10 +14,6 @@ public class CheckBundleAccessUseCase
     private readonly IAccountRepository _accountRepository;
     private readonly ILogger<CheckBundleAccessUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="CheckBundleAccessUseCase"/> class.</summary>
-    /// <param name="bundleRepository">The content bundle repository.</param>
-    /// <param name="accountRepository">The account repository.</param>
-    /// <param name="logger">The logger.</param>
     public CheckBundleAccessUseCase(
         IContentBundleRepository bundleRepository,
         IAccountRepository accountRepository,
@@ -26,23 +24,19 @@ public class CheckBundleAccessUseCase
         _logger = logger;
     }
 
-    /// <summary>Checks if an account has access to a content bundle.</summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <returns>True if the account has access to the bundle; otherwise, false.</returns>
-    public async Task<bool> ExecuteAsync(string accountId, string bundleId)
+    public async Task<bool> ExecuteAsync(string accountId, string bundleId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
-        var bundle = await _bundleRepository.GetByIdAsync(bundleId);
+        var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             _logger.LogWarning("Content bundle not found: {BundleId}", bundleId);
@@ -56,10 +50,10 @@ public class CheckBundleAccessUseCase
             return true;
         }
 
-        var account = await _accountRepository.GetByIdAsync(accountId);
+        var account = await _accountRepository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            _logger.LogWarning("Account not found: {AccountId}", accountId);
+            _logger.LogWarning("Account not found: {AccountId}", PiiMask.HashId(accountId));
             return false;
         }
 
@@ -67,7 +61,7 @@ public class CheckBundleAccessUseCase
         if (account.Subscription?.PurchasedScenarios != null &&
             account.Subscription.PurchasedScenarios.Any(s => bundle.ScenarioIds.Contains(s)))
         {
-            _logger.LogDebug("Account {AccountId} has purchased access to bundle {BundleId}", accountId, bundleId);
+            _logger.LogDebug("Account {AccountId} has purchased access to bundle {BundleId}", PiiMask.HashId(accountId), bundleId);
             return true;
         }
 
@@ -75,11 +69,11 @@ public class CheckBundleAccessUseCase
         if (account.Subscription?.IsActive == true)
         {
             // Subscription grants access to all bundles
-            _logger.LogDebug("Account {AccountId} has active subscription, access granted to bundle {BundleId}", accountId, bundleId);
+            _logger.LogDebug("Account {AccountId} has active subscription, access granted to bundle {BundleId}", PiiMask.HashId(accountId), bundleId);
             return true;
         }
 
-        _logger.LogDebug("Account {AccountId} does not have access to bundle {BundleId}", accountId, bundleId);
+        _logger.LogDebug("Account {AccountId} does not have access to bundle {BundleId}", PiiMask.HashId(accountId), bundleId);
         return false;
     }
 }

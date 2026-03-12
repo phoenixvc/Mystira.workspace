@@ -1,24 +1,22 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Scenarios;
 
 /// <summary>
 /// Use case for validating scenario business rules
 /// </summary>
-public class ValidateScenarioUseCase
+public class ValidateScenarioUseCase : IValidateScenarioUseCase
 {
     private readonly ILogger<ValidateScenarioUseCase> _logger;
     private readonly ICompassAxisRepository _compassAxisRepository;
     private readonly IArchetypeRepository _archetypeRepository;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ValidateScenarioUseCase"/> class.
-    /// </summary>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="compassAxisRepository">The compass axis repository for validation.</param>
-    /// <param name="archetypeRepository">The archetype repository for validation.</param>
     public ValidateScenarioUseCase(
         ILogger<ValidateScenarioUseCase> logger,
         ICompassAxisRepository compassAxisRepository,
@@ -29,24 +27,21 @@ public class ValidateScenarioUseCase
         _archetypeRepository = archetypeRepository;
     }
 
-    /// <summary>
-    /// Validates a scenario against business rules and reference data.
-    /// </summary>
-    /// <param name="scenario">The scenario to validate.</param>
-    /// <returns>A task representing the asynchronous validation operation.</returns>
-    public async Task ExecuteAsync(Scenario scenario)
+    public virtual async Task ExecuteAsync(Scenario scenario, CancellationToken ct = default)
     {
+        ArgumentNullException.ThrowIfNull(scenario);
+
         // Validate CoreAxes against DB
         if (scenario.CoreAxes != null && scenario.CoreAxes.Count > 0)
         {
-            var validAxes = await _compassAxisRepository.GetAllAsync();
+            var validAxes = await _compassAxisRepository.GetAllAsync(ct);
             var validAxisNames = validAxes.Select(a => a.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var axis in scenario.CoreAxes)
             {
                 if (!validAxisNames.Contains(axis))
                 {
-                    throw new ArgumentException($"Invalid compass axis: '{axis}'. Valid values: {string.Join(", ", validAxisNames)}");
+                    throw new ValidationException("coreAxes", $"Invalid compass axis: '{axis}'. Valid values: {string.Join(", ", validAxisNames)}");
                 }
             }
         }
@@ -54,19 +49,24 @@ public class ValidateScenarioUseCase
         // Validate Archetypes against DB
         if (scenario.Archetypes != null && scenario.Archetypes.Count > 0)
         {
-            var validArchetypes = await _archetypeRepository.GetAllAsync();
+            var validArchetypes = await _archetypeRepository.GetAllAsync(ct);
             var validArchetypeNames = validArchetypes.Select(a => a.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
 
             foreach (var archetype in scenario.Archetypes)
             {
                 if (!validArchetypeNames.Contains(archetype))
                 {
-                    throw new ArgumentException($"Invalid archetype: '{archetype}'. Valid values: {string.Join(", ", validArchetypeNames)}");
+                    throw new ValidationException("archetypes", $"Invalid archetype: '{archetype}'. Valid values: {string.Join(", ", validArchetypeNames)}");
                 }
             }
         }
 
         // Validate scene references
+        if (scenario.Scenes == null || scenario.Scenes.Count == 0)
+        {
+            throw new ValidationException("scenes", "Scenario must have at least one scene");
+        }
+
         var sceneIds = scenario.Scenes.Select(s => s.Id).ToHashSet();
         var allReferencedScenes = new HashSet<string>();
 
@@ -77,7 +77,7 @@ public class ValidateScenarioUseCase
             {
                 if (!sceneIds.Contains(scene.NextSceneId))
                 {
-                    throw new ArgumentException($"Scene '{scene.Id}' references non-existent next scene '{scene.NextSceneId}'");
+                    throw new ValidationException("scenes", $"Scene '{scene.Id}' references non-existent next scene '{scene.NextSceneId}'");
                 }
 
                 allReferencedScenes.Add(scene.NextSceneId);
@@ -97,7 +97,7 @@ public class ValidateScenarioUseCase
 
                     if (!sceneIds.Contains(branch.NextSceneId))
                     {
-                        throw new ArgumentException($"Scene '{scene.Id}' branch references non-existent scene '{branch.NextSceneId}'");
+                        throw new ValidationException("scenes", $"Scene '{scene.Id}' branch references non-existent scene '{branch.NextSceneId}'");
                     }
 
                     allReferencedScenes.Add(branch.NextSceneId);
@@ -111,18 +111,14 @@ public class ValidateScenarioUseCase
                 {
                     if (!sceneIds.Contains(reveal.TriggerSceneId))
                     {
-                        throw new ArgumentException($"Scene '{scene.Id}' echo reveal references non-existent scene '{reveal.TriggerSceneId}'");
+                        throw new ValidationException("scenes", $"Scene '{scene.Id}' echo reveal references non-existent scene '{reveal.TriggerSceneId}'");
                     }
                 }
             }
         }
 
         // Validate that all scenes are reachable (except the first scene)
-        var firstScene = scenario.Scenes.FirstOrDefault();
-        if (firstScene == null)
-        {
-            throw new ArgumentException("Scenario must have at least one scene");
-        }
+        var firstScene = scenario.Scenes.First();
 
         // Check for unreachable scenes (scenes that are never referenced)
         var unreachableScenes = sceneIds.Except(allReferencedScenes).Where(id => id != firstScene.Id).ToList();
@@ -139,7 +135,7 @@ public class ValidateScenarioUseCase
             var characterIds = scenario.Characters.Select(c => c.Id).ToHashSet(StringComparer.OrdinalIgnoreCase);
             foreach (var scene in scenario.Scenes)
             {
-                if (scene.Type == SceneType.Decision)
+                if (scene.Type == SceneType.Choice)
                 {
                     if (string.IsNullOrWhiteSpace(scene.ActiveCharacter))
                     {

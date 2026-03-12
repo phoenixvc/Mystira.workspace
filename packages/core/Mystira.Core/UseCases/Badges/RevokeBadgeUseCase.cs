@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Badges;
 
@@ -13,11 +15,6 @@ public class RevokeBadgeUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RevokeBadgeUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="RevokeBadgeUseCase"/> class.</summary>
-    /// <param name="badgeRepository">The user badge repository.</param>
-    /// <param name="userProfileRepository">The user profile repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public RevokeBadgeUseCase(
         IUserBadgeRepository badgeRepository,
         IUserProfileRepository userProfileRepository,
@@ -30,17 +27,14 @@ public class RevokeBadgeUseCase
         _logger = logger;
     }
 
-    /// <summary>Revokes a badge from a user profile.</summary>
-    /// <param name="badgeId">The badge identifier.</param>
-    /// <returns>True if the badge was revoked successfully; otherwise, false.</returns>
-    public async Task<bool> ExecuteAsync(string badgeId)
+    public async Task<bool> ExecuteAsync(string badgeId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(badgeId))
         {
-            throw new ArgumentException("Badge ID cannot be null or empty", nameof(badgeId));
+            throw new ValidationException("badgeId", "badgeId is required");
         }
 
-        var badge = await _badgeRepository.GetByIdAsync(badgeId);
+        var badge = await _badgeRepository.GetByIdAsync(badgeId, ct);
         if (badge == null)
         {
             _logger.LogWarning("Badge not found for revocation: {BadgeId}", badgeId);
@@ -48,23 +42,23 @@ public class RevokeBadgeUseCase
         }
 
         // Remove from user profile's earned badges list
-        var userProfile = await _userProfileRepository.GetByIdAsync(badge.UserProfileId);
+        var userProfile = await _userProfileRepository.GetByIdAsync(badge.UserProfileId, ct);
         if (userProfile != null)
         {
             var badgeToRemove = userProfile.EarnedBadges.FirstOrDefault(b => b.Id == badgeId);
             if (badgeToRemove != null)
             {
                 userProfile.EarnedBadges.Remove(badgeToRemove);
-                await _userProfileRepository.UpdateAsync(userProfile);
+                await _userProfileRepository.UpdateAsync(userProfile, ct);
             }
         }
 
         // Delete the badge
-        await _badgeRepository.DeleteAsync(badgeId);
-        await _unitOfWork.SaveChangesAsync();
+        await _badgeRepository.DeleteAsync(badgeId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Revoked badge {BadgeId} from user profile {UserProfileId}",
-            badgeId, badge.UserProfileId);
+            badgeId, PiiMask.HashId(badge.UserProfileId));
         return true;
     }
 }

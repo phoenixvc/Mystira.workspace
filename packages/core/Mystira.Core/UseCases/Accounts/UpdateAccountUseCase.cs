@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Accounts;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -14,12 +18,6 @@ public class UpdateAccountUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateAccountUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateAccountUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public UpdateAccountUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -30,28 +28,22 @@ public class UpdateAccountUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Updates an existing account.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="request">The request containing update details.</param>
-    /// <returns>The updated account.</returns>
-    public async Task<Account> ExecuteAsync(string accountId, UpdateAccountRequest request)
+    public async Task<Account> ExecuteAsync(string accountId, UpdateAccountRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         // Update properties if provided
@@ -72,10 +64,10 @@ public class UpdateAccountUseCase
 
         account.LastLoginAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated account: {AccountId}", accountId);
+        _logger.LogInformation("Updated account: {AccountId}", PiiMask.HashId(accountId));
         return account;
     }
 }

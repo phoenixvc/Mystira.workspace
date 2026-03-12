@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
@@ -13,12 +17,6 @@ public class PauseGameSessionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<PauseGameSessionUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="PauseGameSessionUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public PauseGameSessionUseCase(
         IGameSessionRepository repository,
         IUnitOfWork unitOfWork,
@@ -29,35 +27,30 @@ public class PauseGameSessionUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Pauses an active game session.
-    /// </summary>
-    /// <param name="sessionId">The session identifier.</param>
-    /// <returns>The paused game session.</returns>
-    public async Task<GameSession> ExecuteAsync(string sessionId)
+    public async Task<GameSession> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
-            throw new ArgumentException($"Game session not found: {sessionId}", nameof(sessionId));
+            throw new NotFoundException("GameSession", sessionId);
         }
 
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException($"Can only pause sessions in progress. Current status: {session.Status}");
+            throw new BusinessRuleException("SessionMustBeInProgress", $"Can only pause sessions in progress. Current status: {session.Status}");
         }
 
         session.Status = SessionStatus.Paused;
         session.IsPaused = true;
         session.PausedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Paused game session: {SessionId}", sessionId);
         return session;

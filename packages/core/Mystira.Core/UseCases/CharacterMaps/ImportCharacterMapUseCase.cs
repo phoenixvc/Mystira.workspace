@@ -1,7 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 using YamlDotNet.Serialization;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -14,10 +18,6 @@ public class ImportCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<ImportCharacterMapUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="ImportCharacterMapUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public ImportCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -28,14 +28,11 @@ public class ImportCharacterMapUseCase
         _logger = logger;
     }
 
-    /// <summary>Imports character maps from a YAML stream.</summary>
-    /// <param name="yamlStream">The YAML stream containing character map data.</param>
-    /// <returns>A list of imported character maps.</returns>
-    public async Task<List<CharacterMap>> ExecuteAsync(Stream yamlStream)
+    public async Task<List<CharacterMap>> ExecuteAsync(Stream yamlStream, CancellationToken ct = default)
     {
         if (yamlStream == null)
         {
-            throw new ArgumentNullException(nameof(yamlStream));
+            throw new ValidationException("yamlStream", "yamlStream is required");
         }
 
         var deserializer = new DeserializerBuilder()
@@ -49,7 +46,7 @@ public class ImportCharacterMapUseCase
         var characterMapYaml = deserializer.Deserialize<CharacterMapYaml>(yamlContent);
         if (characterMapYaml?.Characters == null)
         {
-            throw new ArgumentException("Invalid YAML format: missing characters array");
+            throw new ValidationException("input", "Invalid YAML format: missing characters array");
         }
 
         var importedCharacterMaps = new List<CharacterMap>();
@@ -68,17 +65,17 @@ public class ImportCharacterMapUseCase
             };
 
             // Check if it exists and replace
-            var existing = await _repository.GetByIdAsync(characterMap.Id);
+            var existing = await _repository.GetByIdAsync(characterMap.Id, ct);
             if (existing != null)
             {
-                await _repository.DeleteAsync(characterMap.Id);
+                await _repository.DeleteAsync(characterMap.Id, ct);
             }
 
-            await _repository.AddAsync(characterMap);
+            await _repository.AddAsync(characterMap, ct);
             importedCharacterMaps.Add(characterMap);
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Imported {Count} character maps from YAML", importedCharacterMaps.Count);
         return importedCharacterMaps;

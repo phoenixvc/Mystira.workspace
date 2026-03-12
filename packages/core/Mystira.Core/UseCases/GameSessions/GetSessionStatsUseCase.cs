@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Models.GameSessions;
 using Mystira.Contracts.App.Responses.GameSessions;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
@@ -13,11 +15,6 @@ public class GetSessionStatsUseCase
     private readonly IGameSessionRepository _repository;
     private readonly ILogger<GetSessionStatsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetSessionStatsUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetSessionStatsUseCase(
         IGameSessionRepository repository,
         ILogger<GetSessionStatsUseCase> logger)
@@ -26,19 +23,14 @@ public class GetSessionStatsUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves statistics for the specified game session.
-    /// </summary>
-    /// <param name="sessionId">The session identifier.</param>
-    /// <returns>The session statistics if found; otherwise, null.</returns>
-    public async Task<SessionStatsResponse?> ExecuteAsync(string sessionId)
+    public async Task<SessionStatsResponse?> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             _logger.LogWarning("Game session not found: {SessionId}", sessionId);
@@ -48,17 +40,16 @@ public class GetSessionStatsUseCase
         session.RecalculateCompassProgressFromHistory();
 
         var compassValues = session.CompassValues.ToDictionary(
-            ct => ct.Axis,
-            ct => ct.CurrentValue
+            cv => cv.Axis,
+            cv => cv.CurrentValue
         );
 
-        // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
         var progress = session.PlayerCompassProgressTotals
-            .Select(kvp => new PlayerCompassProgressDto
+            .Select(p => new PlayerCompassProgressDto
             {
-                PlayerId = string.Empty, // Dictionary doesn't track individual players
-                Axis = kvp.Key,
-                Total = kvp.Value
+                PlayerId = string.Empty,
+                Axis = p.Key,
+                Total = p.Value
             })
             .ToList();
 
@@ -73,11 +64,9 @@ public class GetSessionStatsUseCase
             CompassValues = compassValues,
             PlayerCompassProgressTotals = progress,
             RecentEchoes = recentEchoes,
-            Achievements = session.Achievements?.Cast<object>().ToList() ?? new List<object>(),
+            Achievements = session.Achievements.Cast<object>().ToList(),
             TotalChoices = session.ChoiceHistory?.Count ?? 0,
-            SessionDuration = session.EndTime.HasValue
-                ? session.EndTime.Value.Subtract(session.StartTime ?? DateTime.UtcNow)
-                : DateTime.UtcNow.Subtract(session.StartTime ?? DateTime.UtcNow)
+            SessionDuration = session.EndTime?.Subtract(session.StartTime ?? DateTime.MinValue) ?? DateTime.UtcNow.Subtract(session.StartTime ?? DateTime.MinValue)
         };
 
         _logger.LogDebug("Retrieved stats for game session: {SessionId}", sessionId);

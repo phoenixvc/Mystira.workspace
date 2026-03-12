@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
@@ -12,11 +16,6 @@ public class GetInProgressSessionsUseCase
     private readonly IGameSessionRepository _repository;
     private readonly ILogger<GetInProgressSessionsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetInProgressSessionsUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetInProgressSessionsUseCase(
         IGameSessionRepository repository,
         ILogger<GetInProgressSessionsUseCase> logger)
@@ -25,22 +24,17 @@ public class GetInProgressSessionsUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves all in-progress game sessions for the specified account.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A list of in-progress game sessions.</returns>
-    public async Task<List<GameSession>> ExecuteAsync(string accountId)
+    public async Task<List<GameSession>> ExecuteAsync(string accountId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
-        var sessions = await _repository.GetInProgressSessionsAsync(accountId);
+        var sessions = await _repository.GetInProgressSessionsAsync(accountId, ct);
         var sessionList = sessions.ToList();
 
-        _logger.LogInformation("Retrieved {Count} in-progress game sessions for account {AccountId}", sessionList.Count, accountId);
+        _logger.LogInformation("Retrieved {Count} in-progress game sessions for account {AccountId}", sessionList.Count, PiiMask.HashId(accountId));
 
         return sessionList;
     }

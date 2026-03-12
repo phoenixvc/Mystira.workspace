@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -14,13 +18,6 @@ public class RemoveUserProfileFromAccountUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RemoveUserProfileFromAccountUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RemoveUserProfileFromAccountUseCase"/> class.
-    /// </summary>
-    /// <param name="accountRepository">The account repository.</param>
-    /// <param name="userProfileRepository">The user profile repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public RemoveUserProfileFromAccountUseCase(
         IAccountRepository accountRepository,
         IUserProfileRepository userProfileRepository,
@@ -33,53 +30,47 @@ public class RemoveUserProfileFromAccountUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Unlinks a user profile from an account.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="profileId">The profile identifier to unlink.</param>
-    /// <returns>The updated account.</returns>
-    public async Task<Account> ExecuteAsync(string accountId, string profileId)
+    public async Task<Account> ExecuteAsync(string accountId, string profileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (string.IsNullOrWhiteSpace(profileId))
         {
-            throw new ArgumentException("Profile ID cannot be null or empty", nameof(profileId));
+            throw new ValidationException("profileId", "profileId is required");
         }
 
-        var account = await _accountRepository.GetByIdAsync(accountId);
+        var account = await _accountRepository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
-        var profile = await _userProfileRepository.GetByIdAsync(profileId);
+        var profile = await _userProfileRepository.GetByIdAsync(profileId, ct);
         if (profile == null)
         {
-            throw new ArgumentException($"User profile not found: {profileId}", nameof(profileId));
+            throw new NotFoundException("UserProfile", profileId);
         }
 
         // Unlink profile from account
         if (profile.AccountId == accountId)
         {
-            profile.AccountId = string.Empty;
-            await _userProfileRepository.UpdateAsync(profile);
+            profile.AccountId = null!;
+            await _userProfileRepository.UpdateAsync(profile, ct);
         }
 
         // Remove profile ID from account's profile list
         if (account.UserProfileIds.Contains(profileId))
         {
             account.UserProfileIds.Remove(profileId);
-            await _accountRepository.UpdateAsync(account);
+            await _accountRepository.UpdateAsync(account, ct);
         }
 
-        await _unitOfWork.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Unlinked profile {ProfileId} from account {AccountId}", profileId, accountId);
+        _logger.LogInformation("Unlinked profile {ProfileId} from account {AccountId}", PiiMask.HashId(profileId), PiiMask.HashId(accountId));
         return account;
     }
 }

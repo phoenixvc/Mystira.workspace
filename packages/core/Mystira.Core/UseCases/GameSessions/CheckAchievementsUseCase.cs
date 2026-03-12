@@ -1,53 +1,59 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
-using Mystira.Core.Specifications;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 using Mystira.Shared.Extensions;
+using Mystira.Shared.Locking;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
 /// <summary>
-/// Use case for checking and awarding session achievements
+/// Use case for checking and awarding session achievements.
+/// Uses distributed locking to prevent duplicate achievement awards.
 /// </summary>
 public class CheckAchievementsUseCase
 {
     private readonly IGameSessionRepository _repository;
-    private readonly IRepository<BadgeConfiguration> _badgeRepository;
+    private readonly IBadgeConfigurationRepository _badgeRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IDistributedLockService _lockService;
     private readonly ILogger<CheckAchievementsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CheckAchievementsUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="badgeRepository">The badge configuration repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public CheckAchievementsUseCase(
         IGameSessionRepository repository,
-        IRepository<BadgeConfiguration> badgeRepository,
+        IBadgeConfigurationRepository badgeRepository,
         IUnitOfWork unitOfWork,
+        IDistributedLockService lockService,
         ILogger<CheckAchievementsUseCase> logger)
     {
         _repository = repository;
         _badgeRepository = badgeRepository;
         _unitOfWork = unitOfWork;
+        _lockService = lockService;
         _logger = logger;
     }
 
-    /// <summary>
-    /// Checks and awards achievements for a game session.
-    /// </summary>
-    /// <param name="sessionId">The session identifier.</param>
-    /// <returns>A list of newly awarded achievements.</returns>
-    public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId)
+    public async Task<List<SessionAchievement>> ExecuteAsync(string sessionId, CancellationToken ct = default)
+    {
+        return await _lockService.ExecuteWithLockAsync(
+            $"achievements:{sessionId}",
+            async token => await ExecuteInternalAsync(sessionId, token),
+            expiry: TimeSpan.FromSeconds(30),
+            wait: TimeSpan.FromSeconds(10),
+            ct);
+    }
+
+    private async Task<List<SessionAchievement>> ExecuteInternalAsync(string sessionId, CancellationToken ct)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
             _logger.LogWarning("Game session not found: {SessionId}", sessionId);
@@ -57,7 +63,7 @@ public class CheckAchievementsUseCase
         var achievements = new List<SessionAchievement>();
 
         // Fetch all badge configurations to check thresholds dynamically
-        var badgeConfigs = await _badgeRepository.ListAsync(new AllBadgeConfigurationsSpec());
+        var badgeConfigs = await _badgeRepository.GetAllAsync(ct);
 
         // Check compass threshold achievements
         foreach (var compassTracking in session.CompassValues)
@@ -65,8 +71,8 @@ public class CheckAchievementsUseCase
             // Find badge configuration for this axis
             var axisBadge = badgeConfigs.FirstOrDefault(b => string.Equals(b.AxisId, compassTracking.Axis, StringComparison.OrdinalIgnoreCase));
 
-            // Use configured threshold or fallback to 3.0f if not found
-            var threshold = axisBadge?.Threshold ?? 3.0f;
+            // Use configured threshold or fallback to 3 if not found
+            var threshold = axisBadge?.Threshold ?? 3;
 
             if (Math.Abs(compassTracking.CurrentValue) >= threshold)
             {
@@ -81,7 +87,7 @@ public class CheckAchievementsUseCase
                         IconName = !string.IsNullOrEmpty(axisBadge?.ImageId) ? axisBadge.ImageId : $"badge_{compassTracking.Axis}",
                         Type = AchievementType.CompassThreshold,
                         CompassAxis = compassTracking.Axis,
-                        ThresholdValue = (int)threshold,
+                        ThresholdValue = threshold,
                         EarnedAt = DateTime.UtcNow
                     });
                 }
@@ -132,8 +138,8 @@ public class CheckAchievementsUseCase
                 session.Achievements.Add(achievement);
             }
 
-            await _repository.UpdateAsync(session);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.UpdateAsync(session, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             _logger.LogInformation("Awarded {Count} achievements to session {SessionId}", achievements.Count, sessionId);
         }

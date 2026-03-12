@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Contributors;
 
@@ -14,12 +18,6 @@ public class SetBundleContributorsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SetBundleContributorsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SetBundleContributorsUseCase"/> class.
-    /// </summary>
-    /// <param name="bundleRepository">The content bundle repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public SetBundleContributorsUseCase(
         IContentBundleRepository bundleRepository,
         IUnitOfWork unitOfWork,
@@ -30,19 +28,13 @@ public class SetBundleContributorsUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Sets the contributors for a content bundle.
-    /// </summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <param name="request">The request containing contributor information.</param>
-    /// <returns>The updated Story Protocol metadata.</returns>
-    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, SetContributorsRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string bundleId, SetContributorsRequest request, CancellationToken ct = default)
     {
         // Get the bundle
-        var bundle = await _bundleRepository.GetByIdAsync(bundleId);
+        var bundle = await _bundleRepository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}");
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         // Convert request to domain models
@@ -72,15 +64,15 @@ public class SetBundleContributorsUseCase
         {
             var errorMessage = string.Join("; ", errors);
             _logger.LogWarning("Invalid contributor splits for bundle {BundleId}: {Errors}", bundleId, errorMessage);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Update the bundle
-        await _bundleRepository.UpdateAsync(bundle);
+        await _bundleRepository.UpdateAsync(bundle, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

@@ -2,7 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.UserProfiles;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.UserProfiles;
 
@@ -15,12 +18,6 @@ public class UpdateUserProfileUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateUserProfileUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateUserProfileUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The user profile repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public UpdateUserProfileUseCase(
         IUserProfileRepository repository,
         IUnitOfWork unitOfWork,
@@ -31,15 +28,9 @@ public class UpdateUserProfileUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Updates an existing user profile with the provided request data.
-    /// </summary>
-    /// <param name="id">The user profile identifier.</param>
-    /// <param name="request">The update request containing new profile data.</param>
-    /// <returns>The updated user profile if found; otherwise, null.</returns>
-    public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request)
+    public async Task<UserProfile?> ExecuteAsync(string id, UpdateUserProfileRequest request, CancellationToken ct = default)
     {
-        var profile = await _repository.GetByIdAsync(id);
+        var profile = await _repository.GetByIdAsync(id, ct);
         if (profile == null)
         {
             return null;
@@ -49,22 +40,21 @@ public class UpdateUserProfileUseCase
         if (request.PreferredFantasyThemes != null)
         {
             // Validate fantasy themes
-            var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.Parse(t) == null).ToList();
+            var invalidThemes = request.PreferredFantasyThemes.Where(t => FantasyTheme.FromValue(t) == null).ToList();
             if (invalidThemes.Any())
             {
-                throw new ArgumentException($"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
+                throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy themes: {string.Join(", ", invalidThemes)}");
             }
 
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes;
         }
 
         if (request.AgeGroup != null)
         {
             // Validate age group
-            var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
-            if (!allAgeGroupIds.Contains(request.AgeGroup))
+            if (!AgeGroupConstants.GetAll().Contains(request.AgeGroup))
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
+                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.GetAll())}");
             }
 
             profile.AgeGroupId = request.AgeGroup;
@@ -109,10 +99,10 @@ public class UpdateUserProfileUseCase
 
         profile.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(profile);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(profile, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated user profile: {ProfileId} - {Name}", profile.Id, profile.Name);
+        _logger.LogInformation("Updated user profile: {ProfileId} - {Name}", PiiMask.HashId(profile.Id), PiiMask.HashId(profile.Name));
         return profile;
     }
 }

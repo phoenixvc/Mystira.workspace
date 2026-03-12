@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
@@ -13,12 +17,6 @@ public class EndGameSessionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<EndGameSessionUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="EndGameSessionUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public EndGameSessionUseCase(
         IGameSessionRepository repository,
         IUnitOfWork unitOfWork,
@@ -29,22 +27,17 @@ public class EndGameSessionUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Ends a game session manually.
-    /// </summary>
-    /// <param name="sessionId">The session identifier.</param>
-    /// <returns>The ended game session.</returns>
-    public async Task<GameSession> ExecuteAsync(string sessionId)
+    public async Task<GameSession> ExecuteAsync(string sessionId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(sessionId))
         {
-            throw new ArgumentException("Session ID cannot be null or empty", nameof(sessionId));
+            throw new ValidationException("sessionId", "sessionId is required");
         }
 
-        var session = await _repository.GetByIdAsync(sessionId);
+        var session = await _repository.GetByIdAsync(sessionId, ct);
         if (session == null)
         {
-            throw new ArgumentException($"Game session not found: {sessionId}", nameof(sessionId));
+            throw new NotFoundException("GameSession", sessionId);
         }
 
         if (session.Status == SessionStatus.Completed)
@@ -59,8 +52,8 @@ public class EndGameSessionUseCase
         session.IsPaused = false;
         session.PausedAt = null;
 
-        await _repository.UpdateAsync(session);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(session, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Ended game session: {SessionId}", sessionId);
         return session;

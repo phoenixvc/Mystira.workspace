@@ -1,7 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -14,10 +18,6 @@ public class CreateCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateCharacterMapUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="CreateCharacterMapUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public CreateCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -28,21 +28,18 @@ public class CreateCharacterMapUseCase
         _logger = logger;
     }
 
-    /// <summary>Creates a new character map.</summary>
-    /// <param name="request">The create character map request.</param>
-    /// <returns>The created character map.</returns>
-    public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request)
+    public async Task<CharacterMap> ExecuteAsync(CreateCharacterMapRequest request, CancellationToken ct = default)
     {
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
         // Check if character map with ID already exists
-        var existingCharacterMap = await _repository.GetByIdAsync(request.Id);
+        var existingCharacterMap = await _repository.GetByIdAsync(request.Id, ct);
         if (existingCharacterMap != null)
         {
-            throw new InvalidOperationException($"Character map with ID {request.Id} already exists");
+            throw new ConflictException($"Character map with ID {request.Id} already exists");
         }
 
         var characterMap = new CharacterMap
@@ -56,8 +53,8 @@ public class CreateCharacterMapUseCase
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(characterMap);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(characterMap, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Created character map: {CharacterMapId} - {Name}", characterMap.Id, characterMap.Name);
         return characterMap;

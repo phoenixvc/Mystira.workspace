@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.GameSessions;
 
@@ -12,11 +16,6 @@ public class GetGameSessionsByProfileUseCase
     private readonly IGameSessionRepository _repository;
     private readonly ILogger<GetGameSessionsByProfileUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetGameSessionsByProfileUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The game session repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetGameSessionsByProfileUseCase(
         IGameSessionRepository repository,
         ILogger<GetGameSessionsByProfileUseCase> logger)
@@ -25,22 +24,17 @@ public class GetGameSessionsByProfileUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves all game sessions for the specified profile.
-    /// </summary>
-    /// <param name="profileId">The profile identifier.</param>
-    /// <returns>A list of game sessions for the profile.</returns>
-    public async Task<List<GameSession>> ExecuteAsync(string profileId)
+    public async Task<List<GameSession>> ExecuteAsync(string profileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(profileId))
         {
-            throw new ArgumentException("Profile ID cannot be null or empty", nameof(profileId));
+            throw new ValidationException("profileId", "profileId is required");
         }
 
-        var sessions = await _repository.GetByProfileIdAsync(profileId);
+        var sessions = await _repository.GetByProfileIdAsync(profileId, ct);
         var sessionList = sessions.ToList();
 
-        _logger.LogInformation("Retrieved {Count} game sessions for profile {ProfileId}", sessionList.Count, profileId);
+        _logger.LogInformation("Retrieved {Count} game sessions for profile {ProfileId}", sessionList.Count, PiiMask.HashId(profileId));
 
         return sessionList;
     }

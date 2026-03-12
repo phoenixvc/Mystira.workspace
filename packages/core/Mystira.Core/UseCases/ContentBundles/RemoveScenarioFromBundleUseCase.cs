@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -13,10 +17,6 @@ public class RemoveScenarioFromBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RemoveScenarioFromBundleUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="RemoveScenarioFromBundleUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public RemoveScenarioFromBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -27,33 +27,29 @@ public class RemoveScenarioFromBundleUseCase
         _logger = logger;
     }
 
-    /// <summary>Removes a scenario from a content bundle.</summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <returns>The updated content bundle.</returns>
-    public async Task<ContentBundle> ExecuteAsync(string bundleId, string scenarioId)
+    public async Task<ContentBundle> ExecuteAsync(string bundleId, string scenarioId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
+            throw new ValidationException("scenarioId", "scenarioId is required");
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
-            throw new ArgumentException($"Content bundle not found: {bundleId}", nameof(bundleId));
+            throw new NotFoundException("ContentBundle", bundleId);
         }
 
         if (bundle.ScenarioIds != null && bundle.ScenarioIds.Contains(scenarioId))
         {
             bundle.ScenarioIds.Remove(scenarioId);
-            await _repository.UpdateAsync(bundle);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.UpdateAsync(bundle, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
             _logger.LogInformation("Removed scenario {ScenarioId} from bundle {BundleId}", scenarioId, bundleId);
         }

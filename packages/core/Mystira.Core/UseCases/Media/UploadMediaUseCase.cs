@@ -3,9 +3,13 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Ports.Storage;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Shared.Media;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -20,14 +24,6 @@ public class UploadMediaUseCase
     private readonly IMediaMetadataService _mediaMetadataService;
     private readonly ILogger<UploadMediaUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UploadMediaUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="blobStorageService">The blob storage service.</param>
-    /// <param name="mediaMetadataService">The media metadata service.</param>
-    /// <param name="logger">The logger instance.</param>
     public UploadMediaUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,
@@ -42,23 +38,18 @@ public class UploadMediaUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Uploads a new media asset.
-    /// </summary>
-    /// <param name="request">The upload request containing file and metadata.</param>
-    /// <returns>The created media asset.</returns>
-    public async Task<MediaAsset> ExecuteAsync(UploadMediaRequest request)
+    public async Task<MediaAsset> ExecuteAsync(UploadMediaRequest request, CancellationToken ct = default)
     {
         ValidateMediaFile(request);
 
         // Validate that media metadata entry exists and resolve the media ID
-        var resolvedMediaId = await ValidateAndResolveMediaId(request.MediaId ?? string.Empty, request.FileName);
+        var resolvedMediaId = await ValidateAndResolveMediaId(request.MediaId ?? string.Empty, request.FileName, ct);
 
         // Check if media with this ID already exists
-        var existingMedia = await _repository.GetByMediaIdAsync(resolvedMediaId);
+        var existingMedia = await _repository.GetByMediaIdAsync(resolvedMediaId, ct);
         if (existingMedia != null)
         {
-            throw new InvalidOperationException($"Media with ID '{resolvedMediaId}' already exists");
+            throw new ConflictException($"Media with ID '{resolvedMediaId}' already exists");
         }
 
         // Calculate file hash
@@ -69,7 +60,7 @@ public class UploadMediaUseCase
         request.FileStream.Position = 0;
 
         // Upload to blob storage and get URL
-        var url = await _blobStorageService.UploadMediaAsync(request.FileStream, request.FileName, request.ContentType ?? GetMimeType(request.FileName));
+        var url = await _blobStorageService.UploadMediaAsync(request.FileStream, request.FileName, request.ContentType ?? GetMimeType(request.FileName), ct);
 
         // Create media asset record
         var mediaAsset = new MediaAsset
@@ -88,8 +79,8 @@ public class UploadMediaUseCase
             UpdatedAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(mediaAsset);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(mediaAsset, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Media uploaded successfully: {MediaId} at {Url}", resolvedMediaId, url);
 
@@ -100,34 +91,34 @@ public class UploadMediaUseCase
     {
         if (request == null || request.FileStream == null)
         {
-            throw new ArgumentException("File is required");
+            throw new ValidationException("file", "File is required");
         }
 
         if (request.FileSizeBytes == 0)
         {
-            throw new ArgumentException("File size must be greater than zero");
+            throw new ValidationException("fileSizeBytes", "File size must be greater than zero");
         }
 
         var maxSizeBytes = MimeTypeRegistry.GetMaxFileSizeBytes(request.MediaType);
         if (request.FileSizeBytes > maxSizeBytes)
         {
-            throw new ArgumentException($"File size exceeds maximum allowed size for {request.MediaType} files");
+            throw new ValidationException("fileSizeBytes", $"File size exceeds maximum allowed size for {request.MediaType} files");
         }
 
         if (!MimeTypeRegistry.IsValidExtension(request.FileName, request.MediaType))
         {
             var extension = Path.GetExtension(request.FileName);
-            throw new ArgumentException($"File extension '{extension}' is not allowed for {request.MediaType} files");
+            throw new ValidationException("fileName", $"File extension '{extension}' is not allowed for {request.MediaType} files");
         }
     }
 
-    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName)
+    private async Task<string> ValidateAndResolveMediaId(string mediaId, string fileName, CancellationToken ct)
     {
         // Get metadata file to validate and resolve media ID
-        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+        var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(ct);
         if (metadataFile == null || metadataFile.Entries.Count == 0)
         {
-            throw new InvalidOperationException("No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
+            throw new BusinessRuleException("MediaMetadataRequired", "No media metadata file found. Media uploads require a valid media metadata file to be uploaded first.");
         }
 
         // Try to find metadata entry by filename first
@@ -141,7 +132,7 @@ public class UploadMediaUseCase
         metadataEntry = metadataFile.Entries.FirstOrDefault(e => e.Id == mediaId);
         if (metadataEntry == null)
         {
-            throw new InvalidOperationException($"No metadata entry found for media ID '{mediaId}' or filename '{fileName}'");
+            throw new NotFoundException("MediaMetadata", mediaId);
         }
 
         return metadataEntry.Id;

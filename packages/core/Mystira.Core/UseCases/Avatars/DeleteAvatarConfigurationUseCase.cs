@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Avatars;
 
@@ -12,10 +13,6 @@ public class DeleteAvatarConfigurationUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteAvatarConfigurationUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="DeleteAvatarConfigurationUseCase"/> class.</summary>
-    /// <param name="repository">The avatar configuration file repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public DeleteAvatarConfigurationUseCase(
         IAvatarConfigurationFileRepository repository,
         IUnitOfWork unitOfWork,
@@ -26,19 +23,17 @@ public class DeleteAvatarConfigurationUseCase
         _logger = logger;
     }
 
-    /// <summary>Deletes the avatar configuration file.</summary>
-    /// <returns>True if the configuration file was deleted successfully; otherwise, false.</returns>
-    public async Task<bool> ExecuteAsync()
+    public async Task<bool> ExecuteAsync(CancellationToken ct = default)
     {
-        var configFile = await _repository.GetAsync();
+        var configFile = await _repository.GetAsync(ct);
         if (configFile == null)
         {
             _logger.LogWarning("Avatar configuration file not found for deletion");
             return false;
         }
 
-        await _repository.DeleteAsync();
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted avatar configuration file");
         return true;

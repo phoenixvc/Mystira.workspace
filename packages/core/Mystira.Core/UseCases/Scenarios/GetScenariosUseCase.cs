@@ -4,6 +4,9 @@ using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Scenarios;
 
@@ -15,11 +18,6 @@ public class GetScenariosUseCase
     private readonly IScenarioRepository _repository;
     private readonly ILogger<GetScenariosUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetScenariosUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The scenario repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetScenariosUseCase(
         IScenarioRepository repository,
         ILogger<GetScenariosUseCase> logger)
@@ -28,12 +26,7 @@ public class GetScenariosUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves scenarios with filtering and pagination.
-    /// </summary>
-    /// <param name="request">The query request containing filter and pagination options.</param>
-    /// <returns>A paginated response containing scenario summaries.</returns>
-    public async Task<ScenarioListResponse> ExecuteAsync(ScenarioQueryRequest request)
+    public async Task<ScenarioListResponse> ExecuteAsync(ScenarioQueryRequest request, CancellationToken ct = default)
     {
         var query = _repository.GetQueryable();
 
@@ -78,7 +71,7 @@ public class GetScenariosUseCase
         }
 
         // Get total count before pagination
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
 
         // Apply pagination
         var scenarios = await query
@@ -98,12 +91,9 @@ public class GetScenariosUseCase
                 AgeGroup = s.AgeGroupId ?? string.Empty,
                 CoreAxes = s.CoreAxes,
                 CreatedAt = s.CreatedAt,
-                Image = s.CoverImageUrl,
-                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultProfile.ToString() : null,
-                IsFeatured = s.IsFeatured,
-                ThumbnailUrl = s.ThumbnailUrl
+                MusicPalette = s.MusicPalette != null ? s.MusicPalette.DefaultProfile.ToString() : null
             })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return new ScenarioListResponse
         {

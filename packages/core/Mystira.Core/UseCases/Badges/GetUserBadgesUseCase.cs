@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Badges;
 
@@ -12,9 +16,6 @@ public class GetUserBadgesUseCase
     private readonly IUserBadgeRepository _repository;
     private readonly ILogger<GetUserBadgesUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetUserBadgesUseCase"/> class.</summary>
-    /// <param name="repository">The user badge repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetUserBadgesUseCase(
         IUserBadgeRepository repository,
         ILogger<GetUserBadgesUseCase> logger)
@@ -23,20 +24,17 @@ public class GetUserBadgesUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves all badges for the specified user profile.</summary>
-    /// <param name="userProfileId">The user profile identifier.</param>
-    /// <returns>A list of user badges.</returns>
-    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId)
+    public async Task<List<UserBadge>> ExecuteAsync(string userProfileId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(userProfileId))
         {
-            throw new ArgumentException("User profile ID cannot be null or empty", nameof(userProfileId));
+            throw new ValidationException("userProfileId", "userProfileId is required");
         }
 
-        var badges = await _repository.GetByUserProfileIdAsync(userProfileId);
+        var badges = await _repository.GetByUserProfileIdAsync(userProfileId, ct);
         var badgeList = badges.ToList();
 
-        _logger.LogInformation("Retrieved {Count} badges for user profile {UserProfileId}", badgeList.Count, userProfileId);
+        _logger.LogInformation("Retrieved {Count} badges for user profile {UserProfileId}", badgeList.Count, PiiMask.HashId(userProfileId));
         return badgeList;
     }
 }

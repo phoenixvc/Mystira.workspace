@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Contributors;
 
@@ -14,12 +18,6 @@ public class SetScenarioContributorsUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<SetScenarioContributorsUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="SetScenarioContributorsUseCase"/> class.
-    /// </summary>
-    /// <param name="scenarioRepository">The scenario repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public SetScenarioContributorsUseCase(
         IScenarioRepository scenarioRepository,
         IUnitOfWork unitOfWork,
@@ -30,19 +28,13 @@ public class SetScenarioContributorsUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Sets the contributors for a scenario.
-    /// </summary>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <param name="request">The request containing contributor information.</param>
-    /// <returns>The updated Story Protocol metadata.</returns>
-    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, SetContributorsRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, SetContributorsRequest request, CancellationToken ct = default)
     {
         // Get the scenario
-        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
         if (scenario == null)
         {
-            throw new ArgumentException($"Scenario not found: {scenarioId}");
+            throw new NotFoundException("Scenario", scenarioId);
         }
 
         // Convert request to domain models
@@ -72,15 +64,15 @@ public class SetScenarioContributorsUseCase
         {
             var errorMessage = string.Join("; ", errors);
             _logger.LogWarning("Invalid contributor splits for scenario {ScenarioId}: {Errors}", scenarioId, errorMessage);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Update the scenario
-        await _scenarioRepository.UpdateAsync(scenario);
+        await _scenarioRepository.UpdateAsync(scenario, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

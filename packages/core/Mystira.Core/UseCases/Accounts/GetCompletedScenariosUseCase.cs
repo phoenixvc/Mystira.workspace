@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -13,10 +17,6 @@ public class GetCompletedScenariosUseCase
     private readonly IScenarioRepository _scenarioRepository;
     private readonly ILogger<GetCompletedScenariosUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetCompletedScenariosUseCase"/> class.</summary>
-    /// <param name="accountRepository">The account repository.</param>
-    /// <param name="scenarioRepository">The scenario repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetCompletedScenariosUseCase(
         IAccountRepository accountRepository,
         IScenarioRepository scenarioRepository,
@@ -27,20 +27,17 @@ public class GetCompletedScenariosUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves all completed scenarios for the specified account.</summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>A list of completed scenarios.</returns>
-    public async Task<List<Scenario>> ExecuteAsync(string accountId)
+    public async Task<List<Scenario>> ExecuteAsync(string accountId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
-        var account = await _accountRepository.GetByIdAsync(accountId);
+        var account = await _accountRepository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         var scenarios = new List<Scenario>();
@@ -48,7 +45,7 @@ public class GetCompletedScenariosUseCase
         {
             foreach (var scenarioId in account.CompletedScenarioIds)
             {
-                var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
+                var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
                 if (scenario != null)
                 {
                     scenarios.Add(scenario);
@@ -56,7 +53,7 @@ public class GetCompletedScenariosUseCase
             }
         }
 
-        _logger.LogInformation("Retrieved {Count} completed scenarios for account {AccountId}", scenarios.Count, accountId);
+        _logger.LogInformation("Retrieved {Count} completed scenarios for account {AccountId}", scenarios.Count, PiiMask.HashId(accountId));
         return scenarios;
     }
 }

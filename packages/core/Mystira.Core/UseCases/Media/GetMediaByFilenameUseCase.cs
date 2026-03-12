@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -14,12 +18,6 @@ public class GetMediaByFilenameUseCase
     private readonly IMediaMetadataService _mediaMetadataService;
     private readonly ILogger<GetMediaByFilenameUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetMediaByFilenameUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="mediaMetadataService">The media metadata service.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetMediaByFilenameUseCase(
         IMediaAssetRepository repository,
         IMediaMetadataService mediaMetadataService,
@@ -30,22 +28,17 @@ public class GetMediaByFilenameUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves a media asset by its filename.
-    /// </summary>
-    /// <param name="fileName">The file name to search for.</param>
-    /// <returns>The media asset if found; otherwise, null.</returns>
-    public async Task<MediaAsset?> ExecuteAsync(string fileName)
+    public async Task<MediaAsset?> ExecuteAsync(string fileName, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(fileName))
         {
-            throw new ArgumentException("File name is required", nameof(fileName));
+            throw new ValidationException("fileName", "fileName is required");
         }
 
         try
         {
             // Get metadata file to resolve filename to media ID
-            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync();
+            var metadataFile = await _mediaMetadataService.GetMediaMetadataFileAsync(ct);
             if (metadataFile == null)
             {
                 _logger.LogWarning("Media metadata file not found");
@@ -61,7 +54,7 @@ public class GetMediaByFilenameUseCase
             }
 
             // Get the media asset by the resolved media ID
-            return await _repository.GetByMediaIdAsync(metadataEntry.Id);
+            return await _repository.GetByMediaIdAsync(metadataEntry.Id, ct);
         }
         catch (Exception ex)
         {

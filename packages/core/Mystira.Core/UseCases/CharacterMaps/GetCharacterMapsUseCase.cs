@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -12,9 +15,6 @@ public class GetCharacterMapsUseCase
     private readonly ICharacterMapRepository _repository;
     private readonly ILogger<GetCharacterMapsUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetCharacterMapsUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetCharacterMapsUseCase(
         ICharacterMapRepository repository,
         ILogger<GetCharacterMapsUseCase> logger)
@@ -23,11 +23,9 @@ public class GetCharacterMapsUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves all character maps.</summary>
-    /// <returns>A list of character maps.</returns>
-    public async Task<List<CharacterMap>> ExecuteAsync()
+    public async Task<List<CharacterMap>> ExecuteAsync(CancellationToken ct = default)
     {
-        var characterMaps = await _repository.GetAllAsync();
+        var characterMaps = await _repository.GetAllAsync(ct);
         var characterMapList = characterMaps.ToList();
 
         _logger.LogInformation("Retrieved {Count} character maps", characterMapList.Count);

@@ -1,25 +1,22 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
-using Mystira.Contracts.App.Requests.Accounts;
+using Mystira.Core.CQRS.Accounts.Commands;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.UseCases.Accounts;
 
 /// <summary>
-/// Use case for creating a new account
+/// Use case for creating a new account.
+/// Called by CreateAccountCommandHandler to perform the core business logic.
 /// </summary>
-public class CreateAccountUseCase
+public class CreateAccountUseCase : ICreateAccountUseCase
 {
     private readonly IAccountRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateAccountUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CreateAccountUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public CreateAccountUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -30,45 +27,38 @@ public class CreateAccountUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Creates a new account.
-    /// </summary>
-    /// <param name="request">The request containing account creation details.</param>
-    /// <returns>The newly created account.</returns>
-    public async Task<Account> ExecuteAsync(CreateAccountRequest request)
+    public async Task<UseCaseResult<Account>> ExecuteAsync(CreateAccountCommand command, CancellationToken ct = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        Guard.AgainstNull(command, nameof(command));
+        Guard.AgainstNullOrEmpty(command.Email, nameof(command.Email));
+        Guard.AgainstNullOrEmpty(command.ExternalUserId, nameof(command.ExternalUserId));
 
         // Check if account with email already exists
-        var existingAccount = await _repository.GetByEmailAsync(request.Email);
+        var existingAccount = await _repository.GetByEmailAsync(command.Email, ct);
         if (existingAccount != null)
         {
-            throw new InvalidOperationException($"Account with email {request.Email} already exists");
+            _logger.LogWarning("Account already exists for email {Email}", PiiMask.MaskEmail(command.Email));
+            return UseCaseResult<Account>.Failure($"Account with this email already exists");
         }
 
         var account = new Account
         {
             Id = Guid.NewGuid().ToString(),
-            ExternalUserId = request.Auth0UserId, // Map from Contracts Auth0UserId to domain ExternalUserId
-            Email = request.Email,
-            DisplayName = request.DisplayName ?? request.Email,
-            Role = "Guest",
-            UserProfileIds = new List<string>(),
+            ExternalUserId = command.ExternalUserId,
+            Email = command.Email,
+            DisplayName = command.DisplayName ?? command.Email.Split('@')[0],
+            UserProfileIds = command.UserProfileIds ?? new List<string>(),
             CompletedScenarioIds = new List<string>(),
-            Subscription = new SubscriptionDetails(),
-            Settings = new AccountSettings(),
+            Subscription = command.Subscription ?? new SubscriptionDetails(),
+            Settings = command.Settings ?? new AccountSettings(),
             CreatedAt = DateTime.UtcNow,
             LastLoginAt = DateTime.UtcNow
         };
 
-        await _repository.AddAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.AddAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Created new account: {AccountId} for {Email}", account.Id, account.Email);
-        return account;
+        _logger.LogInformation("Created new account: {AccountId} for {Email}", PiiMask.HashId(account.Id), PiiMask.MaskEmail(account.Email));
+        return UseCaseResult<Account>.Success(account);
     }
 }
-

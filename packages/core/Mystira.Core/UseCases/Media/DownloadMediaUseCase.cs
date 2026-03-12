@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -12,12 +14,6 @@ public class DownloadMediaUseCase
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<DownloadMediaUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DownloadMediaUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="httpClientFactory">The HTTP client factory.</param>
-    /// <param name="logger">The logger instance.</param>
     public DownloadMediaUseCase(
         IMediaAssetRepository repository,
         IHttpClientFactory httpClientFactory,
@@ -28,21 +24,16 @@ public class DownloadMediaUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Downloads a media file by its identifier.
-    /// </summary>
-    /// <param name="mediaId">The media identifier.</param>
-    /// <returns>A tuple containing the stream, content type, and file name; null if not found.</returns>
-    public async Task<(Stream stream, string contentType, string fileName)?> ExecuteAsync(string mediaId)
+    public async Task<(Stream stream, string contentType, string fileName)?> ExecuteAsync(string mediaId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
-            throw new ArgumentException("Media ID is required", nameof(mediaId));
+            throw new ValidationException("mediaId", "mediaId is required");
         }
 
         try
         {
-            var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+            var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
             if (mediaAsset == null)
             {
                 _logger.LogWarning("Media asset not found: {MediaId}", mediaId);

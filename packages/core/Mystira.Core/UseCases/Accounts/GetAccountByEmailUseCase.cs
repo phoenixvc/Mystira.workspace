@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -12,11 +16,6 @@ public class GetAccountByEmailUseCase
     private readonly IAccountRepository _repository;
     private readonly ILogger<GetAccountByEmailUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetAccountByEmailUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetAccountByEmailUseCase(
         IAccountRepository repository,
         ILogger<GetAccountByEmailUseCase> logger)
@@ -25,27 +24,22 @@ public class GetAccountByEmailUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves an account by email address.
-    /// </summary>
-    /// <param name="email">The email address.</param>
-    /// <returns>The account if found; otherwise, null.</returns>
-    public async Task<Account?> ExecuteAsync(string email)
+    public async Task<Account?> ExecuteAsync(string email, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(email))
         {
-            throw new ArgumentException("Email cannot be null or empty", nameof(email));
+            throw new ValidationException("email", "email is required");
         }
 
-        var account = await _repository.GetByEmailAsync(email);
+        var account = await _repository.GetByEmailAsync(email, ct);
 
         if (account == null)
         {
-            _logger.LogWarning("Account not found for email: {Email}", email);
+            _logger.LogWarning("Account not found for email: {Email}", PiiMask.MaskEmail(email));
         }
         else
         {
-            _logger.LogDebug("Retrieved account by email: {Email}", email);
+            _logger.LogDebug("Retrieved account by email: {Email}", PiiMask.MaskEmail(email));
         }
 
         return account;

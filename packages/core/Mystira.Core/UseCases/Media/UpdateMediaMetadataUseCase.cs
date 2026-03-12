@@ -1,7 +1,11 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -14,12 +18,6 @@ public class UpdateMediaMetadataUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateMediaMetadataUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateMediaMetadataUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public UpdateMediaMetadataUseCase(
         IMediaAssetRepository repository,
         IUnitOfWork unitOfWork,
@@ -30,36 +28,23 @@ public class UpdateMediaMetadataUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Updates metadata for a media asset with optimistic concurrency control.
-    /// </summary>
-    /// <param name="mediaId">The unique identifier of the media asset to update.</param>
-    /// <param name="updateData">The update request containing new metadata values.</param>
-    /// <returns>The updated media asset.</returns>
-    /// <exception cref="ArgumentException">Thrown when mediaId is null or empty.</exception>
-    /// <exception cref="ArgumentNullException">Thrown when updateData is null.</exception>
-    /// <exception cref="KeyNotFoundException">Thrown when the media asset is not found.</exception>
-    /// <exception cref="InvalidOperationException">Thrown when a concurrency conflict is detected.</exception>
-    public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData)
+    public async Task<MediaAsset> ExecuteAsync(string mediaId, MediaUpdateRequest updateData, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
-            throw new ArgumentException("Media ID is required", nameof(mediaId));
+            throw new ValidationException("mediaId", "mediaId is required");
         }
 
         if (updateData == null)
         {
-            throw new ArgumentNullException(nameof(updateData));
+            throw new ValidationException("updateData", "updateData is required");
         }
 
-        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
         if (mediaAsset == null)
         {
-            throw new KeyNotFoundException($"Media with ID '{mediaId}' not found");
+            throw new NotFoundException("Media", mediaId);
         }
-
-        // Capture original version for optimistic concurrency check
-        var originalVersion = mediaAsset.Version;
 
         // Update properties
         if (updateData.Description != null)
@@ -78,25 +63,12 @@ public class UpdateMediaMetadataUseCase
         }
 
         mediaAsset.UpdatedAt = DateTime.UtcNow;
-        mediaAsset.Version = originalVersion + 1;
+        mediaAsset.Version += 1;
 
-        // Perform update with optimistic concurrency - the repository/EF should be
-        // configured with Version as a concurrency token. If another process modified
-        // the record, SaveChangesAsync will throw DbUpdateConcurrencyException.
-        try
-        {
-            await _repository.UpdateAsync(mediaAsset);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        catch (Exception ex) when (ex.GetType().Name.Contains("Concurrency") ||
-                                    ex.InnerException?.GetType().Name.Contains("Concurrency") == true)
-        {
-            _logger.LogWarning("Concurrency conflict updating media {MediaId}. Version {Version} was stale.", mediaId, originalVersion);
-            throw new InvalidOperationException(
-                $"Media asset '{mediaId}' was modified by another process. Please refresh and try again.", ex);
-        }
+        await _repository.UpdateAsync(mediaAsset, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Media updated successfully: {MediaId} (version {Version})", mediaId, mediaAsset.Version);
+        _logger.LogInformation("Media updated successfully: {MediaId}", mediaId);
 
         return mediaAsset;
     }

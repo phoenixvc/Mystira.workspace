@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -12,11 +16,6 @@ public class GetMediaUseCase
     private readonly IMediaAssetRepository _repository;
     private readonly ILogger<GetMediaUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetMediaUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetMediaUseCase(
         IMediaAssetRepository repository,
         ILogger<GetMediaUseCase> logger)
@@ -25,19 +24,14 @@ public class GetMediaUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves a media asset by its identifier.
-    /// </summary>
-    /// <param name="mediaId">The media identifier.</param>
-    /// <returns>The media asset if found; otherwise, null.</returns>
-    public async Task<MediaAsset?> ExecuteAsync(string mediaId)
+    public async Task<MediaAsset?> ExecuteAsync(string mediaId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(mediaId))
         {
-            throw new ArgumentException("Media ID is required", nameof(mediaId));
+            throw new ValidationException("mediaId", "mediaId is required");
         }
 
-        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId);
+        var mediaAsset = await _repository.GetByMediaIdAsync(mediaId, ct);
 
         if (mediaAsset == null)
         {

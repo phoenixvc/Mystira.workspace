@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Media;
 using Mystira.Contracts.App.Responses.Media;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Media;
 
@@ -14,11 +15,6 @@ public class ListMediaUseCase
     private readonly IMediaAssetRepository _repository;
     private readonly ILogger<ListMediaUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="ListMediaUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public ListMediaUseCase(
         IMediaAssetRepository repository,
         ILogger<ListMediaUseCase> logger)
@@ -27,21 +23,16 @@ public class ListMediaUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Lists media assets with filtering and pagination.
-    /// </summary>
-    /// <param name="request">The query request containing filter and pagination options.</param>
-    /// <returns>A paginated response containing media items.</returns>
-    public async Task<MediaQueryResponse> ExecuteAsync(MediaQueryRequest request)
+    public async Task<MediaQueryResponse> ExecuteAsync(MediaQueryRequest request, CancellationToken ct = default)
     {
         var query = _repository.GetQueryable();
 
         // Apply filters
         if (!string.IsNullOrEmpty(request.Search))
         {
-            query = query.Where(m => m.MediaId.Contains(request.Search) ||
+            query = query.Where(m => m.Id.Contains(request.Search) ||
                                     m.Url.Contains(request.Search) ||
-                                    (m.Description != null && m.Description.Contains(request.Search)));
+                                    (m.AltText != null && m.AltText.Contains(request.Search)));
         }
 
         if (!string.IsNullOrEmpty(request.MediaType))
@@ -62,12 +53,12 @@ public class ListMediaUseCase
         {
             "filename" => request.SortDescending ? query.OrderByDescending(m => m.Url) : query.OrderBy(m => m.Url),
             "mediatype" => request.SortDescending ? query.OrderByDescending(m => m.MediaType) : query.OrderBy(m => m.MediaType),
-            "filesize" => request.SortDescending ? query.OrderByDescending(m => m.FileSizeBytes) : query.OrderBy(m => m.FileSizeBytes),
+            "filesize" => request.SortDescending ? query.OrderByDescending(m => m.SizeBytes) : query.OrderBy(m => m.SizeBytes),
             "updatedat" => request.SortDescending ? query.OrderByDescending(m => m.UpdatedAt) : query.OrderBy(m => m.UpdatedAt),
             _ => request.SortDescending ? query.OrderByDescending(m => m.CreatedAt) : query.OrderBy(m => m.CreatedAt)
         };
 
-        var totalCount = await query.CountAsync();
+        var totalCount = await query.CountAsync(ct);
         var totalPages = (int)Math.Ceiling((double)totalCount / request.PageSize);
 
         var media = await query
@@ -75,11 +66,11 @@ public class ListMediaUseCase
             .Take(request.PageSize)
             .Select(m => new MediaItem
             {
-                Id = m.MediaId,
+                Id = m.Id,
                 Url = m.Url,
                 MediaType = m.MediaType
             })
-            .ToListAsync();
+            .ToListAsync(ct);
 
         return new MediaQueryResponse
         {

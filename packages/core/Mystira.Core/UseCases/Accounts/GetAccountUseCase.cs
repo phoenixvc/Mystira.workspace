@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -12,11 +16,6 @@ public class GetAccountUseCase
     private readonly IAccountRepository _repository;
     private readonly ILogger<GetAccountUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GetAccountUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="logger">The logger instance.</param>
     public GetAccountUseCase(
         IAccountRepository repository,
         ILogger<GetAccountUseCase> logger)
@@ -25,27 +24,22 @@ public class GetAccountUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Retrieves an account by its identifier.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <returns>The account if found; otherwise, null.</returns>
-    public async Task<Account?> ExecuteAsync(string accountId)
+    public async Task<Account?> ExecuteAsync(string accountId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
 
         if (account == null)
         {
-            _logger.LogWarning("Account not found: {AccountId}", accountId);
+            _logger.LogWarning("Account not found: {AccountId}", PiiMask.HashId(accountId));
         }
         else
         {
-            _logger.LogDebug("Retrieved account: {AccountId}", accountId);
+            _logger.LogDebug("Retrieved account: {AccountId}", PiiMask.HashId(accountId));
         }
 
         return account;

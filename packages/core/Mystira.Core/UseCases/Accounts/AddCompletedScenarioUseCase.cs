@@ -1,6 +1,11 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -13,10 +18,6 @@ public class AddCompletedScenarioUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<AddCompletedScenarioUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="AddCompletedScenarioUseCase"/> class.</summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public AddCompletedScenarioUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -27,26 +28,22 @@ public class AddCompletedScenarioUseCase
         _logger = logger;
     }
 
-    /// <summary>Marks a scenario as completed for the specified account.</summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <returns>The updated account.</returns>
-    public async Task<Account> ExecuteAsync(string accountId, string scenarioId)
+    public async Task<Account> ExecuteAsync(string accountId, string scenarioId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (string.IsNullOrWhiteSpace(scenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(scenarioId));
+            throw new ValidationException("scenarioId", "scenarioId is required");
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         if (account.CompletedScenarioIds == null)
@@ -57,14 +54,14 @@ public class AddCompletedScenarioUseCase
         if (!account.CompletedScenarioIds.Contains(scenarioId))
         {
             account.CompletedScenarioIds.Add(scenarioId);
-            await _repository.UpdateAsync(account);
-            await _unitOfWork.SaveChangesAsync();
+            await _repository.UpdateAsync(account, ct);
+            await _unitOfWork.SaveChangesAsync(ct);
 
-            _logger.LogInformation("Added completed scenario {ScenarioId} to account {AccountId}", scenarioId, accountId);
+            _logger.LogInformation("Added completed scenario {ScenarioId} to account {AccountId}", scenarioId, LogAnonymizer.HashId(accountId));
         }
         else
         {
-            _logger.LogDebug("Scenario {ScenarioId} already marked as completed for account {AccountId}", scenarioId, accountId);
+            _logger.LogDebug("Scenario {ScenarioId} already marked as completed for account {AccountId}", scenarioId, LogAnonymizer.HashId(accountId));
         }
 
         return account;

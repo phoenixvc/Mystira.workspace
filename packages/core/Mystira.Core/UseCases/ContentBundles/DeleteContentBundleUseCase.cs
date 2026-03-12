@@ -1,5 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -12,10 +14,6 @@ public class DeleteContentBundleUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<DeleteContentBundleUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="DeleteContentBundleUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public DeleteContentBundleUseCase(
         IContentBundleRepository repository,
         IUnitOfWork unitOfWork,
@@ -26,25 +24,22 @@ public class DeleteContentBundleUseCase
         _logger = logger;
     }
 
-    /// <summary>Deletes a content bundle by its identifier.</summary>
-    /// <param name="bundleId">The bundle identifier.</param>
-    /// <returns>True if the content bundle was deleted successfully; otherwise, false.</returns>
-    public async Task<bool> ExecuteAsync(string bundleId)
+    public async Task<bool> ExecuteAsync(string bundleId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(bundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(bundleId));
+            throw new ValidationException("bundleId", "bundleId is required");
         }
 
-        var bundle = await _repository.GetByIdAsync(bundleId);
+        var bundle = await _repository.GetByIdAsync(bundleId, ct);
         if (bundle == null)
         {
             _logger.LogWarning("Content bundle not found for deletion: {BundleId}", bundleId);
             return false;
         }
 
-        await _repository.DeleteAsync(bundleId);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.DeleteAsync(bundleId, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Deleted content bundle: {BundleId}", bundleId);
         return true;

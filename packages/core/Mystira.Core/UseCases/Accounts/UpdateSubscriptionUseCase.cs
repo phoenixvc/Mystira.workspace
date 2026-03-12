@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.Accounts;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Accounts;
 
@@ -14,12 +18,6 @@ public class UpdateSubscriptionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateSubscriptionUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="UpdateSubscriptionUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The account repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public UpdateSubscriptionUseCase(
         IAccountRepository repository,
         IUnitOfWork unitOfWork,
@@ -30,28 +28,22 @@ public class UpdateSubscriptionUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Updates subscription details for an account.
-    /// </summary>
-    /// <param name="accountId">The account identifier.</param>
-    /// <param name="request">The request containing subscription update details.</param>
-    /// <returns>The updated account.</returns>
-    public async Task<Account> ExecuteAsync(string accountId, UpdateSubscriptionRequest request)
+    public async Task<Account> ExecuteAsync(string accountId, UpdateSubscriptionRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(accountId))
         {
-            throw new ArgumentException("Account ID cannot be null or empty", nameof(accountId));
+            throw new ValidationException("accountId", "accountId is required");
         }
 
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
-        var account = await _repository.GetByIdAsync(accountId);
+        var account = await _repository.GetByIdAsync(accountId, ct);
         if (account == null)
         {
-            throw new ArgumentException($"Account not found: {accountId}", nameof(accountId));
+            throw new NotFoundException("Account", accountId);
         }
 
         // Update subscription properties - convert from Contracts enum to Domain enum
@@ -79,10 +71,10 @@ public class UpdateSubscriptionUseCase
 
         account.Subscription.LastVerified = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(account);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(account, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Updated subscription for account: {AccountId}", accountId);
+        _logger.LogInformation("Updated subscription for account: {AccountId}", PiiMask.HashId(accountId));
         return account;
     }
 }

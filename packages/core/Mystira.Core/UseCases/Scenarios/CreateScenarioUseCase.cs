@@ -4,7 +4,9 @@ using Mystira.Core.Validation;
 using Mystira.Core.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Domain.Models;
-using NJsonSchema;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Scenarios;
 
@@ -16,29 +18,13 @@ public class CreateScenarioUseCase
     private readonly IScenarioRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreateScenarioUseCase> _logger;
-    private readonly ValidateScenarioUseCase _validateScenarioUseCase;
+    private readonly IValidateScenarioUseCase _validateScenarioUseCase;
 
-    private static readonly JsonSchema ScenarioJsonSchema = JsonSchema.FromJsonAsync(ScenarioSchemaDefinitions.StorySchema).GetAwaiter().GetResult();
-
-    private static readonly System.Text.Json.JsonSerializerOptions SchemaSerializerOptions = new()
-    {
-        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.SnakeCaseLower,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
-    };
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CreateScenarioUseCase"/> class.
-    /// </summary>
-    /// <param name="repository">The scenario repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="validateScenarioUseCase">The scenario validation use case.</param>
     public CreateScenarioUseCase(
         IScenarioRepository repository,
         IUnitOfWork unitOfWork,
         ILogger<CreateScenarioUseCase> logger,
-        ValidateScenarioUseCase validateScenarioUseCase)
+        IValidateScenarioUseCase validateScenarioUseCase)
     {
         _repository = repository;
         _unitOfWork = unitOfWork;
@@ -46,14 +32,9 @@ public class CreateScenarioUseCase
         _validateScenarioUseCase = validateScenarioUseCase;
     }
 
-    /// <summary>
-    /// Creates a new scenario from the provided request.
-    /// </summary>
-    /// <param name="request">The request containing scenario data.</param>
-    /// <returns>The newly created scenario.</returns>
-    public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request)
+    public async Task<Scenario> ExecuteAsync(CreateScenarioRequest request, CancellationToken ct = default)
     {
-        ValidateAgainstSchema(request);
+        ScenarioSchemaValidator.ValidateAgainstSchema(request);
 
         var scenario = new Scenario
         {
@@ -72,13 +53,13 @@ public class CreateScenarioUseCase
             CreatedAt = DateTime.UtcNow
         };
 
-        await _validateScenarioUseCase.ExecuteAsync(scenario);
+        await _validateScenarioUseCase.ExecuteAsync(scenario, ct);
 
-        await _repository.AddAsync(scenario);
+        await _repository.AddAsync(scenario, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {
@@ -89,18 +70,5 @@ public class CreateScenarioUseCase
         _logger.LogInformation("Created new scenario: {ScenarioId} - {Title}", scenario.Id, scenario.Title);
         return scenario;
     }
-
-    private void ValidateAgainstSchema(CreateScenarioRequest request)
-    {
-        var json = System.Text.Json.JsonSerializer.Serialize(request, SchemaSerializerOptions);
-        var errors = ScenarioJsonSchema.Validate(json);
-
-        if (errors.Count > 0)
-        {
-            var errorMessages = string.Join(", ", errors.Select(e => e.ToString()).ToList());
-            throw new ArgumentException($"Scenario validation failed: {errorMessages}");
-        }
-    }
-
 }
 

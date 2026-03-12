@@ -2,6 +2,10 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Requests.CharacterMaps;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -14,10 +18,6 @@ public class UpdateCharacterMapUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<UpdateCharacterMapUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="UpdateCharacterMapUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="unitOfWork">The unit of work.</param>
-    /// <param name="logger">The logger.</param>
     public UpdateCharacterMapUseCase(
         ICharacterMapRepository repository,
         IUnitOfWork unitOfWork,
@@ -28,26 +28,22 @@ public class UpdateCharacterMapUseCase
         _logger = logger;
     }
 
-    /// <summary>Updates an existing character map.</summary>
-    /// <param name="characterMapId">The character map identifier.</param>
-    /// <param name="request">The update character map request.</param>
-    /// <returns>The updated character map.</returns>
-    public async Task<CharacterMap> ExecuteAsync(string characterMapId, UpdateCharacterMapRequest request)
+    public async Task<CharacterMap> ExecuteAsync(string characterMapId, UpdateCharacterMapRequest request, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
-            throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
+            throw new ValidationException("characterMapId", "characterMapId is required");
         }
 
         if (request == null)
         {
-            throw new ArgumentNullException(nameof(request));
+            throw new ValidationException("request", "request is required");
         }
 
-        var characterMap = await _repository.GetByIdAsync(characterMapId);
+        var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
         if (characterMap == null)
         {
-            throw new ArgumentException($"Character map not found: {characterMapId}", nameof(characterMapId));
+            throw new NotFoundException("CharacterMap", characterMapId);
         }
 
         // Update properties if provided
@@ -73,8 +69,8 @@ public class UpdateCharacterMapUseCase
 
         characterMap.UpdatedAt = DateTime.UtcNow;
 
-        await _repository.UpdateAsync(characterMap);
-        await _unitOfWork.SaveChangesAsync();
+        await _repository.UpdateAsync(characterMap, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
 
         _logger.LogInformation("Updated character map: {CharacterMapId}", characterMapId);
         return characterMap;

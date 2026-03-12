@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using YamlDotNet.Serialization;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -13,9 +16,6 @@ public class ExportCharacterMapUseCase
     private readonly ICharacterMapRepository _repository;
     private readonly ILogger<ExportCharacterMapUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="ExportCharacterMapUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="logger">The logger.</param>
     public ExportCharacterMapUseCase(
         ICharacterMapRepository repository,
         ILogger<ExportCharacterMapUseCase> logger)
@@ -24,11 +24,9 @@ public class ExportCharacterMapUseCase
         _logger = logger;
     }
 
-    /// <summary>Exports all character maps to YAML format.</summary>
-    /// <returns>A YAML string representation of all character maps.</returns>
-    public async Task<string> ExecuteAsync()
+    public async Task<string> ExecuteAsync(CancellationToken ct = default)
     {
-        var characterMaps = await _repository.GetAllAsync();
+        var characterMaps = await _repository.GetAllAsync(ct);
         var characterMapList = characterMaps.ToList();
 
         var characterMapYaml = new CharacterMapYaml
@@ -39,7 +37,7 @@ public class ExportCharacterMapUseCase
                 Name = cm.Name,
                 Image = cm.Image ?? string.Empty,
                 Audio = cm.Audio,
-                Metadata = cm.Metadata ?? new CharacterMetadata()
+                Metadata = cm.Metadata ?? new()
             }).ToList()
         };
 

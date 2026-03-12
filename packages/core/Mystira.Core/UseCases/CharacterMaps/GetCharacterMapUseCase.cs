@@ -1,6 +1,10 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.CharacterMaps;
 
@@ -12,9 +16,6 @@ public class GetCharacterMapUseCase
     private readonly ICharacterMapRepository _repository;
     private readonly ILogger<GetCharacterMapUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetCharacterMapUseCase"/> class.</summary>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetCharacterMapUseCase(
         ICharacterMapRepository repository,
         ILogger<GetCharacterMapUseCase> logger)
@@ -23,17 +24,14 @@ public class GetCharacterMapUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves a character map by its identifier.</summary>
-    /// <param name="characterMapId">The character map identifier.</param>
-    /// <returns>The character map if found; otherwise, null.</returns>
-    public async Task<CharacterMap?> ExecuteAsync(string characterMapId)
+    public async Task<CharacterMap?> ExecuteAsync(string characterMapId, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(characterMapId))
         {
-            throw new ArgumentException("Character map ID cannot be null or empty", nameof(characterMapId));
+            throw new ValidationException("characterMapId", "characterMapId is required");
         }
 
-        var characterMap = await _repository.GetByIdAsync(characterMapId);
+        var characterMap = await _repository.GetByIdAsync(characterMapId, ct);
 
         if (characterMap == null)
         {

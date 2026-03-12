@@ -1,8 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Contracts.App.Requests.Contributors;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.Contributors;
 
@@ -16,13 +20,6 @@ public class RegisterScenarioIpAssetUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<RegisterScenarioIpAssetUseCase> _logger;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="RegisterScenarioIpAssetUseCase"/> class.
-    /// </summary>
-    /// <param name="scenarioRepository">The scenario repository.</param>
-    /// <param name="storyProtocolService">The Story Protocol service.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="logger">The logger instance.</param>
     public RegisterScenarioIpAssetUseCase(
         IScenarioRepository scenarioRepository,
         IStoryProtocolService storyProtocolService,
@@ -35,59 +32,54 @@ public class RegisterScenarioIpAssetUseCase
         _logger = logger;
     }
 
-    /// <summary>
-    /// Registers a scenario as an IP Asset on Story Protocol.
-    /// </summary>
-    /// <param name="scenarioId">The scenario identifier.</param>
-    /// <param name="request">The registration request.</param>
-    /// <returns>The Story Protocol metadata for the registered asset.</returns>
-    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request)
+    public async Task<ScenarioStoryProtocol> ExecuteAsync(string scenarioId, RegisterIpAssetRequest request, CancellationToken ct = default)
     {
         // Get the scenario
-        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId);
+        var scenario = await _scenarioRepository.GetByIdAsync(scenarioId, ct);
         if (scenario == null)
         {
-            throw new ArgumentException($"Scenario not found: {scenarioId}");
+            throw new NotFoundException("Scenario", scenarioId);
         }
 
         // Check if already registered
         if (scenario.StoryProtocol?.IsRegistered ?? false)
         {
-            throw new InvalidOperationException($"Scenario {scenarioId} is already registered on Story Protocol");
+            throw new ConflictException($"Scenario {scenarioId} is already registered on Story Protocol");
         }
 
         // Ensure contributors are set
         if (scenario.StoryProtocol == null || !scenario.StoryProtocol.Contributors.Any())
         {
-            throw new InvalidOperationException("Contributors must be set before registering on Story Protocol");
+            throw new BusinessRuleException("ContributorsRequired", "Contributors must be set before registering on Story Protocol");
         }
 
         // Validate contributor splits
         if (!scenario.StoryProtocol.ValidateContributorSplits(out var errors))
         {
             var errorMessage = string.Join("; ", errors);
-            throw new ArgumentException($"Invalid contributor configuration: {errorMessage}");
+            throw new ValidationException("contributors", $"Invalid contributor configuration: {errorMessage}");
         }
 
         // Register on Story Protocol
-        var registrationResult = await _storyProtocolService.RegisterIpAssetAsync(
+        var storyProtocolMetadata = await _storyProtocolService.RegisterIpAssetAsync(
             scenario.Id,
             scenario.Title,
             scenario.StoryProtocol.Contributors,
             request.MetadataUri,
-            request.LicenseTermsId);
+            request.LicenseTermsId,
+            ct);
 
         // Update the scenario with Story Protocol metadata
-        scenario.StoryProtocol.IpAssetId = registrationResult.IpAssetId;
-        scenario.StoryProtocol.TransactionHash = registrationResult.RegistrationTxHash;
-        scenario.StoryProtocol.RegisteredAt = registrationResult.RegisteredAt;
+        scenario.StoryProtocol.IpAssetId = storyProtocolMetadata.IpAssetId;
+        scenario.StoryProtocol.RegistrationTxHash = storyProtocolMetadata.RegistrationTxHash;
+        scenario.StoryProtocol.RegisteredAt = storyProtocolMetadata.RegisteredAt;
         scenario.StoryProtocol.IsRegistered = true;
 
-        await _scenarioRepository.UpdateAsync(scenario);
+        await _scenarioRepository.UpdateAsync(scenario, ct);
 
         try
         {
-            await _unitOfWork.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {
@@ -96,7 +88,7 @@ public class RegisterScenarioIpAssetUseCase
         }
 
         _logger.LogInformation("Registered scenario {ScenarioId} as IP Asset: {IpAssetId}",
-            scenarioId, registrationResult.IpAssetId);
+            scenarioId, storyProtocolMetadata.IpAssetId);
 
         return scenario.StoryProtocol;
     }

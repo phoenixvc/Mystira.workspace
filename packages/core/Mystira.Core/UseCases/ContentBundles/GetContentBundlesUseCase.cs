@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using System.Threading;
 
 namespace Mystira.Core.UseCases.ContentBundles;
 
@@ -12,9 +15,6 @@ public class GetContentBundlesUseCase
     private readonly IContentBundleRepository _repository;
     private readonly ILogger<GetContentBundlesUseCase> _logger;
 
-    /// <summary>Initializes a new instance of the <see cref="GetContentBundlesUseCase"/> class.</summary>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="logger">The logger.</param>
     public GetContentBundlesUseCase(
         IContentBundleRepository repository,
         ILogger<GetContentBundlesUseCase> logger)
@@ -23,11 +23,9 @@ public class GetContentBundlesUseCase
         _logger = logger;
     }
 
-    /// <summary>Retrieves all content bundles.</summary>
-    /// <returns>A list of content bundles.</returns>
-    public async Task<List<ContentBundle>> ExecuteAsync()
+    public async Task<List<ContentBundle>> ExecuteAsync(CancellationToken ct = default)
     {
-        var bundles = await _repository.GetAllAsync();
+        var bundles = await _repository.GetAllAsync(ct);
         var bundleList = bundles.ToList();
 
         _logger.LogInformation("Retrieved {Count} content bundles", bundleList.Count);
