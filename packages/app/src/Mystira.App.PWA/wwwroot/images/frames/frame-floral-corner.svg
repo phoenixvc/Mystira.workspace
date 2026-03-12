@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" fill="none">
+  <!--
+    Mystira Portal Frame: Floral Corner
+    Style: Stylized flower ornaments at all 8 anchor points (4 corners + 4 mid-edges).
+    Organic/magical feel — lighter weight, clean center for portal animation.
+  -->
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B7530" stop-opacity="0.75"/>
+      <stop offset="30%" stop-color="#6B5420" stop-opacity="0.85"/>
+      <stop offset="50%" stop-color="#8B7530" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#5A4518" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#8B7530" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="goldHL" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A89050" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#8B7530" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="purpleReflect" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cyanReflect" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="rimGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="80%" stop-color="#7c3aed" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0.06"/>
+    </radialGradient>
+    <filter id="fGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.4 0 0 0 0.3
+                0.3 0 0 0 0.15
+                0 0 0 0 0
+                0 0 0 0.5 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.5 0 0 0 0.4
+                0.35 0 0 0 0.2
+                0 0 0 0 0
+                0 0 0 0.6 0"/>
+    </filter>
+  </defs>
+
+  <!-- Outer frame border — slightly rounded for organic feel -->
+  <rect x="14" y="14" width="372" height="452" rx="20" ry="20"
+        fill="none" stroke="url(#goldGrad)" stroke-width="4" filter="url(#fGlow)"
+        class="frame-outer"/>
+
+  <!-- Inner frame border -->
+  <rect x="26" y="26" width="348" height="428" rx="14" ry="14"
+        fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.55"/>
+
+  <!-- Decorative double line -->
+  <rect x="34" y="34" width="332" height="412" rx="10" ry="10"
+        fill="none" stroke="url(#goldHL)" stroke-width="1" opacity="0.35"/>
+
+  <!-- === CORNER FLOWERS === -->
+
+  <!-- Top-Left flower -->
+  <g class="corner-ornament corner-tl" filter="url(#cGlow)">
+    <!-- Petals (4-petal rosette) -->
+    <ellipse cx="14" cy="6" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 14, 14)"/>
+    <ellipse cx="14" cy="22" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 14, 14)"/>
+    <ellipse cx="6" cy="14" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 14, 14)"/>
+    <ellipse cx="22" cy="14" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 14, 14)"/>
+    <!-- Center gem -->
+    <circle cx="14" cy="14" r="6" fill="url(#goldGrad)"/>
+    <circle cx="14" cy="14" r="2.5" fill="#A89050" opacity="0.85" class="gem-sparkle"/>
+    <!-- Trailing vine toward edge -->
+    <path d="M 28 14 Q 42 10, 56 14 Q 48 18, 40 14" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+    <path d="M 14 28 Q 10 42, 14 56 Q 18 48, 14 40" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- Top-Right flower -->
+  <g class="corner-ornament corner-tr" filter="url(#cGlow)">
+    <ellipse cx="386" cy="6" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 386, 14)"/>
+    <ellipse cx="386" cy="22" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 386, 14)"/>
+    <ellipse cx="378" cy="14" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 386, 14)"/>
+    <ellipse cx="394" cy="14" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 386, 14)"/>
+    <circle cx="386" cy="14" r="6" fill="url(#goldGrad)"/>
+    <circle cx="386" cy="14" r="2.5" fill="#A89050" opacity="0.85" class="gem-sparkle"/>
+    <path d="M 372 14 Q 358 10, 344 14 Q 352 18, 360 14" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+    <path d="M 386 28 Q 390 42, 386 56 Q 382 48, 386 40" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- Bottom-Left flower -->
+  <g class="corner-ornament corner-bl" filter="url(#cGlow)">
+    <ellipse cx="14" cy="458" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 14, 466)"/>
+    <ellipse cx="14" cy="474" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 14, 466)"/>
+    <ellipse cx="6" cy="466" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 14, 466)"/>
+    <ellipse cx="22" cy="466" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(-45, 14, 466)"/>
+    <circle cx="14" cy="466" r="6" fill="url(#goldGrad)"/>
+    <circle cx="14" cy="466" r="2.5" fill="#A89050" opacity="0.85" class="gem-sparkle"/>
+    <path d="M 28 466 Q 42 470, 56 466 Q 48 462, 40 466" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+    <path d="M 14 452 Q 10 438, 14 424 Q 18 432, 14 440" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- Bottom-Right flower -->
+  <g class="corner-ornament corner-br" filter="url(#cGlow)">
+    <ellipse cx="386" cy="458" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 386, 466)"/>
+    <ellipse cx="386" cy="474" rx="8" ry="5" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 386, 466)"/>
+    <ellipse cx="378" cy="466" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 386, 466)"/>
+    <ellipse cx="394" cy="466" rx="5" ry="8" fill="url(#goldGrad)" opacity="0.5" transform="rotate(45, 386, 466)"/>
+    <circle cx="386" cy="466" r="6" fill="url(#goldGrad)"/>
+    <circle cx="386" cy="466" r="2.5" fill="#A89050" opacity="0.85" class="gem-sparkle"/>
+    <path d="M 372 466 Q 358 470, 344 466 Q 352 462, 360 466" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+    <path d="M 386 452 Q 390 438, 386 424 Q 382 432, 386 440" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.4"/>
+  </g>
+
+  <!-- === MID-EDGE FLOWERS (smaller, 3-petal) === -->
+
+  <!-- Top center flower -->
+  <g class="top-ornament" filter="url(#cGlow)">
+    <ellipse cx="200" cy="4" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.55"/>
+    <ellipse cx="193" cy="11" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.45"/>
+    <ellipse cx="207" cy="11" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.45"/>
+    <circle cx="200" cy="10" r="5" fill="url(#goldGrad)" class="top-gem"/>
+    <circle cx="200" cy="10" r="2" fill="#A89050" opacity="0.7"/>
+  </g>
+
+  <!-- Bottom center flower -->
+  <g class="bottom-ornament" filter="url(#cGlow)">
+    <ellipse cx="200" cy="476" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.55"/>
+    <ellipse cx="193" cy="469" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.45"/>
+    <ellipse cx="207" cy="469" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.45"/>
+    <circle cx="200" cy="470" r="5" fill="url(#goldGrad)" class="bottom-gem"/>
+    <circle cx="200" cy="470" r="2" fill="#A89050" opacity="0.7"/>
+  </g>
+
+  <!-- Left center flower -->
+  <g filter="url(#cGlow)">
+    <ellipse cx="4" cy="240" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.55"/>
+    <ellipse cx="11" cy="233" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.45"/>
+    <ellipse cx="11" cy="247" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.45"/>
+    <circle cx="10" cy="240" r="5" fill="url(#goldGrad)"/>
+    <circle cx="10" cy="240" r="2" fill="#A89050" opacity="0.7"/>
+  </g>
+
+  <!-- Right center flower -->
+  <g filter="url(#cGlow)">
+    <ellipse cx="396" cy="240" rx="4" ry="6" fill="url(#goldGrad)" opacity="0.55"/>
+    <ellipse cx="389" cy="233" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.45"/>
+    <ellipse cx="389" cy="247" rx="6" ry="4" fill="url(#goldGrad)" opacity="0.45"/>
+    <circle cx="390" cy="240" r="5" fill="url(#goldGrad)"/>
+    <circle cx="390" cy="240" r="2" fill="#A89050" opacity="0.7"/>
+  </g>
+
+  <!-- Purple/cyan edge reflections -->
+  <rect x="14" y="14" width="372" height="452" rx="20" ry="20"
+        fill="none" stroke="url(#purpleReflect)" stroke-width="1.5"
+        class="frame-reflection-purple"/>
+  <rect x="14" y="14" width="372" height="452" rx="20" ry="20"
+        fill="none" stroke="url(#cyanReflect)" stroke-width="1.5"
+        class="frame-reflection-cyan"/>
+
+  <!-- Inner rim glow -->
+  <rect x="32" y="32" width="336" height="416" rx="12" ry="12"
+        fill="url(#rimGlow)" class="inner-rim-glow"/>
+</svg>

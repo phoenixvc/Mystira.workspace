@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" fill="none">
+  <!--
+    Mystira Portal Frame: Ornate Leaf Corner
+    Style: Engraved acanthus leaf fans at corners with double-line border.
+    Museum artifact weight — strong presence, clean center.
+  -->
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8B7530" stop-opacity="0.75"/>
+      <stop offset="30%" stop-color="#6B5420" stop-opacity="0.85"/>
+      <stop offset="50%" stop-color="#8B7530" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#5A4518" stop-opacity="0.75"/>
+      <stop offset="100%" stop-color="#8B7530" stop-opacity="0.7"/>
+    </linearGradient>
+    <linearGradient id="goldHL" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#A89050" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#8B7530" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="purpleReflect" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="cyanReflect" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#67e8f9" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="rimGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="60%" stop-color="transparent"/>
+      <stop offset="80%" stop-color="#7c3aed" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#67e8f9" stop-opacity="0.06"/>
+    </radialGradient>
+    <filter id="fGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.4 0 0 0 0.3
+                0.3 0 0 0 0.15
+                0 0 0 0 0
+                0 0 0 0.5 0" result="glow"/>
+      <feMerge><feMergeNode in="glow"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="cGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feColorMatrix in="blur" type="matrix"
+        values="0.5 0 0 0 0.4
+                0.35 0 0 0 0.2
+                0 0 0 0 0
+                0 0 0 0.7 0"/>
+    </filter>
+  </defs>
+
+  <!-- Outer frame border -->
+  <rect x="12" y="12" width="376" height="456" rx="14" ry="14"
+        fill="none" stroke="url(#goldGrad)" stroke-width="5" filter="url(#fGlow)"
+        class="frame-outer"/>
+
+  <!-- Inner frame border -->
+  <rect x="24" y="24" width="352" height="432" rx="10" ry="10"
+        fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.6"/>
+
+  <!-- Decorative double line -->
+  <rect x="32" y="32" width="336" height="416" rx="6" ry="6"
+        fill="none" stroke="url(#goldHL)" stroke-width="1" opacity="0.4"/>
+
+  <!-- Corner ornament: Top-Left — acanthus leaf fan -->
+  <g class="corner-ornament corner-tl" filter="url(#cGlow)">
+    <!-- Leaf fan radiating from corner -->
+    <path d="M 6 6 C 6 30, 18 42, 40 48 C 28 36, 24 24, 6 6Z" fill="url(#goldGrad)" opacity="0.7"/>
+    <path d="M 6 6 C 14 28, 28 36, 48 40 C 36 28, 28 14, 6 6Z" fill="url(#goldGrad)" opacity="0.6"/>
+    <path d="M 6 6 C 20 18, 32 22, 52 28 C 36 18, 22 10, 6 6Z" fill="url(#goldGrad)" opacity="0.5"/>
+    <!-- Central gem -->
+    <circle cx="12" cy="12" r="8" fill="url(#goldGrad)"/>
+    <circle cx="12" cy="12" r="3" fill="#A89050" opacity="0.8" class="gem-sparkle"/>
+    <!-- Scroll curl -->
+    <path d="M 40 12 Q 52 6, 60 12 Q 52 18, 40 12" fill="url(#goldGrad)" opacity="0.45"/>
+    <path d="M 12 40 Q 6 52, 12 60 Q 18 52, 12 40" fill="url(#goldGrad)" opacity="0.45"/>
+  </g>
+
+  <!-- Corner ornament: Top-Right — acanthus leaf fan (mirrored) -->
+  <g class="corner-ornament corner-tr" filter="url(#cGlow)">
+    <path d="M 394 6 C 394 30, 382 42, 360 48 C 372 36, 376 24, 394 6Z" fill="url(#goldGrad)" opacity="0.7"/>
+    <path d="M 394 6 C 386 28, 372 36, 352 40 C 364 28, 372 14, 394 6Z" fill="url(#goldGrad)" opacity="0.6"/>
+    <path d="M 394 6 C 380 18, 368 22, 348 28 C 364 18, 378 10, 394 6Z" fill="url(#goldGrad)" opacity="0.5"/>
+    <circle cx="388" cy="12" r="8" fill="url(#goldGrad)"/>
+    <circle cx="388" cy="12" r="3" fill="#A89050" opacity="0.8" class="gem-sparkle"/>
+    <path d="M 360 12 Q 348 6, 340 12 Q 348 18, 360 12" fill="url(#goldGrad)" opacity="0.45"/>
+    <path d="M 388 40 Q 394 52, 388 60 Q 382 52, 388 40" fill="url(#goldGrad)" opacity="0.45"/>
+  </g>
+
+  <!-- Corner ornament: Bottom-Left — acanthus leaf fan -->
+  <g class="corner-ornament corner-bl" filter="url(#cGlow)">
+    <path d="M 6 474 C 6 450, 18 438, 40 432 C 28 444, 24 456, 6 474Z" fill="url(#goldGrad)" opacity="0.7"/>
+    <path d="M 6 474 C 14 452, 28 444, 48 440 C 36 452, 28 466, 6 474Z" fill="url(#goldGrad)" opacity="0.6"/>
+    <path d="M 6 474 C 20 462, 32 458, 52 452 C 36 462, 22 470, 6 474Z" fill="url(#goldGrad)" opacity="0.5"/>
+    <circle cx="12" cy="468" r="8" fill="url(#goldGrad)"/>
+    <circle cx="12" cy="468" r="3" fill="#A89050" opacity="0.8" class="gem-sparkle"/>
+    <path d="M 40 468 Q 52 474, 60 468 Q 52 462, 40 468" fill="url(#goldGrad)" opacity="0.45"/>
+    <path d="M 12 440 Q 6 428, 12 420 Q 18 428, 12 440" fill="url(#goldGrad)" opacity="0.45"/>
+  </g>
+
+  <!-- Corner ornament: Bottom-Right — acanthus leaf fan (mirrored) -->
+  <g class="corner-ornament corner-br" filter="url(#cGlow)">
+    <path d="M 394 474 C 394 450, 382 438, 360 432 C 372 444, 376 456, 394 474Z" fill="url(#goldGrad)" opacity="0.7"/>
+    <path d="M 394 474 C 386 452, 372 444, 352 440 C 364 452, 372 466, 394 474Z" fill="url(#goldGrad)" opacity="0.6"/>
+    <path d="M 394 474 C 380 462, 368 458, 348 452 C 364 462, 378 470, 394 474Z" fill="url(#goldGrad)" opacity="0.5"/>
+    <circle cx="388" cy="468" r="8" fill="url(#goldGrad)"/>
+    <circle cx="388" cy="468" r="3" fill="#A89050" opacity="0.8" class="gem-sparkle"/>
+    <path d="M 360 468 Q 348 474, 340 468 Q 348 462, 360 468" fill="url(#goldGrad)" opacity="0.45"/>
+    <path d="M 388 440 Q 394 428, 388 420 Q 382 428, 388 440" fill="url(#goldGrad)" opacity="0.45"/>
+  </g>
+
+  <!-- Top center ornament — leaf crown -->
+  <g class="top-ornament" filter="url(#cGlow)">
+    <path d="M 200 2 L 210 12 L 200 22 L 190 12 Z" fill="url(#goldGrad)" class="top-gem"/>
+    <path d="M 200 5 L 207 12 L 200 19 L 193 12 Z" fill="#A89050" opacity="0.4"/>
+    <!-- Flanking leaves -->
+    <path d="M 180 10 Q 190 2, 195 10 Q 188 14, 180 10" fill="url(#goldGrad)" opacity="0.5"/>
+    <path d="M 220 10 Q 210 2, 205 10 Q 212 14, 220 10" fill="url(#goldGrad)" opacity="0.5"/>
+  </g>
+
+  <!-- Bottom center ornament — leaf crown -->
+  <g class="bottom-ornament" filter="url(#cGlow)">
+    <path d="M 200 458 L 210 468 L 200 478 L 190 468 Z" fill="url(#goldGrad)" class="bottom-gem"/>
+    <path d="M 200 461 L 207 468 L 200 475 L 193 468 Z" fill="#A89050" opacity="0.4"/>
+    <path d="M 180 470 Q 190 478, 195 470 Q 188 466, 180 470" fill="url(#goldGrad)" opacity="0.5"/>
+    <path d="M 220 470 Q 210 478, 205 470 Q 212 466, 220 470" fill="url(#goldGrad)" opacity="0.5"/>
+  </g>
+
+  <!-- Side filigree — left (acanthus scroll) -->
+  <path d="M 4 160 Q -2 200 4 240" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4"/>
+  <path d="M 6 180 Q 0 210 4 240 Q -2 270 6 300" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.3"/>
+  <!-- Left mid-edge leaf -->
+  <path d="M 4 240 C -2 230, -2 250, 4 240" fill="url(#goldGrad)" opacity="0.35"/>
+  <path d="M 8 230 Q 2 240 8 250" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Side filigree — right (acanthus scroll) -->
+  <path d="M 396 160 Q 402 200 396 240" fill="none" stroke="url(#goldGrad)" stroke-width="2" opacity="0.4"/>
+  <path d="M 394 180 Q 400 210 396 240 Q 402 270 394 300" fill="none" stroke="url(#goldGrad)" stroke-width="1.2" opacity="0.3"/>
+  <!-- Right mid-edge leaf -->
+  <path d="M 396 240 C 402 230, 402 250, 396 240" fill="url(#goldGrad)" opacity="0.35"/>
+  <path d="M 392 230 Q 398 240 392 250" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.4"/>
+
+  <!-- Purple/cyan edge reflections -->
+  <rect x="12" y="12" width="376" height="456" rx="14" ry="14"
+        fill="none" stroke="url(#purpleReflect)" stroke-width="1.5"
+        class="frame-reflection-purple"/>
+  <rect x="12" y="12" width="376" height="456" rx="14" ry="14"
+        fill="none" stroke="url(#cyanReflect)" stroke-width="1.5"
+        class="frame-reflection-cyan"/>
+
+  <!-- Inner rim glow -->
+  <rect x="30" y="30" width="340" height="420" rx="8" ry="8"
+        fill="url(#rimGlow)" class="inner-rim-glow"/>
+</svg>
