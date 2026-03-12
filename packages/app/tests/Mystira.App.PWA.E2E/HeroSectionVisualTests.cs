@@ -1,5 +1,6 @@
 using Microsoft.Playwright;
 using Xunit;
+using static Microsoft.Playwright.Assertions;
 
 namespace Mystira.App.PWA.E2E;
 
@@ -45,15 +46,16 @@ public class HeroSectionVisualTests : IAsyncLifetime
     {
         await _page.GotoAsync(BaseUrl, new PageGotoOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
+        // Wait for the video element to appear — _showIntroVideo is toggled in OnAfterRenderAsync
         var video = _page.Locator("video.portal-video");
-        var isVisible = await video.IsVisibleAsync();
+        await video.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
 
-        Assert.True(isVisible, "Intro video should be visible on first visit");
+        Assert.True(await video.IsVisibleAsync(), "Intro video should be visible on first visit");
 
-        await _page.ScreenshotAsync(new PageScreenshotOptions
+        await Expect(_page).ToHaveScreenshotAsync(new PageAssertionsToHaveScreenshotOptions
         {
-            Path = "screenshots/hero-first-visit.png",
-            FullPage = false
+            FullPage = false,
+            MaxDiffPixelRatio = 0.01f
         });
     }
 
@@ -72,10 +74,10 @@ public class HeroSectionVisualTests : IAsyncLifetime
 
         Assert.True(isVisible, "Static logo should be visible on return visit");
 
-        await _page.ScreenshotAsync(new PageScreenshotOptions
+        await Expect(_page).ToHaveScreenshotAsync(new PageAssertionsToHaveScreenshotOptions
         {
-            Path = "screenshots/hero-return-visit.png",
-            FullPage = false
+            FullPage = false,
+            MaxDiffPixelRatio = 0.01f
         });
     }
 
@@ -97,25 +99,26 @@ public class HeroSectionVisualTests : IAsyncLifetime
 
     [Fact]
     [Trait("Category", "E2E")]
-    public async Task HeroSection_StaggeredEntrance_ElementsAppearSequentially()
+    public async Task HeroSection_ElementsVisibleAfterReload()
     {
         await _page.GotoAsync(BaseUrl, new PageGotoOptions { WaitUntil = WaitUntilState.DOMContentLoaded });
         await _page.EvaluateAsync("localStorage.setItem('mystira-hero-intro-seen', '1')");
         await _page.ReloadAsync(new PageReloadOptions { WaitUntil = WaitUntilState.NetworkIdle });
 
-        // Verify the headline and subtext are present after animations complete
+        // Wait for key elements to become visible after entrance animations complete
         var headline = _page.Locator(".hero-headline");
         var subtext = _page.Locator(".hero-subtext");
 
-        await headline.WaitForAsync(new LocatorWaitForOptions { Timeout = 5000 });
+        await headline.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5000 });
+        await subtext.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 5000 });
 
         Assert.True(await headline.IsVisibleAsync(), "Headline should be visible");
         Assert.True(await subtext.IsVisibleAsync(), "Subtext should be visible");
 
-        await _page.ScreenshotAsync(new PageScreenshotOptions
+        await Expect(_page).ToHaveScreenshotAsync(new PageAssertionsToHaveScreenshotOptions
         {
-            Path = "screenshots/hero-staggered-entrance.png",
-            FullPage = false
+            FullPage = false,
+            MaxDiffPixelRatio = 0.01f
         });
     }
 }

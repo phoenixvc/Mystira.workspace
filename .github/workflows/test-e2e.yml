@@ -142,6 +142,28 @@ jobs:
             sleep 10
           done
 
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install .NET Playwright browsers
+        run: |
+          dotnet build packages/app/tests/Mystira.App.PWA.E2E/Mystira.App.PWA.E2E.csproj
+          pwsh packages/app/tests/Mystira.App.PWA.E2E/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+
+      - name: Run .NET Playwright E2E tests
+        env:
+          BASE_URL: ${{ needs.setup.outputs.base_url }}
+        run: dotnet test packages/app/tests/Mystira.App.PWA.E2E/Mystira.App.PWA.E2E.csproj --no-build --logger "trx;LogFileName=dotnet-e2e-results.trx"
+
+      - name: Upload .NET E2E test results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dotnet-e2e-results-${{ needs.setup.outputs.environment }}
+          path: packages/app/tests/Mystira.App.PWA.E2E/TestResults/
+          retention-days: 14
+
       - name: Run E2E tests
         id: e2e
         env:

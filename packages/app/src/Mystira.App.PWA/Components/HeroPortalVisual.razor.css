@@ -30,7 +30,7 @@
     bottom: 30%;
     filter: blur(20px);
     z-index: 0;
-    animation: tubePulse 7s ease-in-out infinite;
+    animation: tube-pulse 7s ease-in-out infinite;
 }
 
 .observatory-tube-left {
@@ -44,7 +44,7 @@
     animation-delay: 3.5s;
 }
 
-@keyframes tubePulse {
+@keyframes tube-pulse {
     0%, 100% { opacity: 0.08; }
     50% { opacity: 0.18; }
 }
@@ -60,7 +60,7 @@
 .portal-particle {
     position: absolute;
     border-radius: 50%;
-    animation: particleDrift linear infinite;
+    animation: particle-drift linear infinite;
 }
 
 .portal-particle.p1 {
@@ -113,7 +113,7 @@
     animation-delay: 0.6s;
 }
 
-@keyframes particleDrift {
+@keyframes particle-drift {
     0% {
         transform: translateY(0) translateX(0);
         opacity: 0.15;
@@ -130,21 +130,28 @@
     }
 }
 
-/* Gentle floating bob on the entire portal — with pointer parallax */
+/* Outer wrapper carries the float animation so transforms compose independently */
+.portal-float-outer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: portal-float 7.5s ease-in-out infinite;
+}
+
+@keyframes portal-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+/* Inner wrapper carries pointer parallax — independent of the float animation */
 .portal-float-wrapper {
     position: relative;
     width: 100%;
     height: 100%;
-    animation: portalFloat 7.5s ease-in-out infinite;
     transform: perspective(800px)
                rotateY(calc((var(--pointer-x) - 0.5) * 6deg))
                rotateX(calc((var(--pointer-y) - 0.5) * -4deg));
     transition: transform 0.3s ease-out;
-}
-
-@keyframes portalFloat {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-8px); }
 }
 
 /* Glass panel behind the frame */
@@ -169,10 +176,10 @@
         radial-gradient(circle at 50% 75%, rgba(139, 117, 48, 0.08), transparent 24%);
     filter: blur(30px);
     z-index: 0;
-    animation: innerGlowPulse 5.2s ease-in-out infinite;
+    animation: inner-glow-pulse 5.2s ease-in-out infinite;
 }
 
-@keyframes innerGlowPulse {
+@keyframes inner-glow-pulse {
     0%, 100% { opacity: 0.16; transform: scale(0.96); }
     50% { opacity: 0.32; transform: scale(1.04); }
 }
@@ -203,10 +210,10 @@
     z-index: 10;
     pointer-events: none;
     filter: drop-shadow(0 0 12px rgba(139, 117, 48, 0.12));
-    animation: frameGlowPulse 6s ease-in-out infinite;
+    animation: frame-glow-pulse 6s ease-in-out infinite;
 }
 
-@keyframes frameGlowPulse {
+@keyframes frame-glow-pulse {
     0%, 100% { filter: drop-shadow(0 0 12px rgba(139, 117, 48, 0.08)); }
     50% { filter: drop-shadow(0 0 22px rgba(139, 117, 48, 0.2)); }
 }
@@ -214,24 +221,24 @@
 /* Purple/cyan edge reflections */
 .frame-reflection-purple,
 .frame-reflection-cyan {
-    animation: reflectionShift 8s ease-in-out infinite;
+    animation: reflection-shift 8s ease-in-out infinite;
 }
 
 .frame-reflection-cyan {
     animation-delay: 4s;
 }
 
-@keyframes reflectionShift {
+@keyframes reflection-shift {
     0%, 100% { opacity: 0.08; }
     50% { opacity: 0.2; }
 }
 
 /* Inner rim glow */
 .inner-rim-glow {
-    animation: innerRimPulse 6s ease-in-out infinite;
+    animation: inner-rim-pulse 6s ease-in-out infinite;
 }
 
-@keyframes innerRimPulse {
+@keyframes inner-rim-pulse {
     0%, 100% { opacity: 0.5; }
     50% { opacity: 1; }
 }
@@ -239,7 +246,7 @@
 /* Gem sparkle animation — restrained scale */
 .gem-sparkle {
     transform-origin: center;
-    animation: gemSparkle 3s ease-in-out infinite;
+    animation: gem-sparkle 3s ease-in-out infinite;
 }
 
 .corner-tl .gem-sparkle { animation-delay: 0s; }
@@ -249,19 +256,19 @@
 
 /* Use transform: scale() instead of animating the SVG r attribute,
    which has inconsistent browser support (Firefox < 128 ignores it). */
-@keyframes gemSparkle {
+@keyframes gem-sparkle {
     0%, 100% { opacity: 0.5; transform: scale(1); }
     50% { opacity: 1; transform: scale(1.2); }
 }
 
 /* Top/bottom ornament pulse — slowed for subtlety */
 .top-gem, .bottom-gem {
-    animation: ornamentPulse 6s ease-in-out infinite;
+    animation: ornament-pulse 6s ease-in-out infinite;
 }
 
 .bottom-gem { animation-delay: 3s; }
 
-@keyframes ornamentPulse {
+@keyframes ornament-pulse {
     0%, 100% { opacity: 0.7; }
     50% { opacity: 1; }
 }
@@ -285,10 +292,10 @@
         radial-gradient(circle at 50% 30%, rgba(139, 117, 48, 0.06), transparent 35%),
         radial-gradient(circle at 50% 50%, rgba(56, 189, 248, 0.15), transparent 42%),
         radial-gradient(circle at 50% 78%, rgba(122, 92, 255, 0.18), transparent 30%);
-    animation: cosmicPulse 6s ease-in-out infinite;
+    animation: cosmic-pulse 6s ease-in-out infinite;
 }
 
-@keyframes cosmicPulse {
+@keyframes cosmic-pulse {
     0%, 100% { opacity: 0.12; }
     50% { opacity: 0.28; }
 }
@@ -304,17 +311,17 @@
 .orbit-ring-1 {
     inset: 20%;
     border-color: rgba(103, 232, 249, 0.12);
-    animation: orbitSpin 20s linear infinite;
+    animation: orbit-spin 20s linear infinite;
 }
 
 .orbit-ring-2 {
     inset: 13%;
     border-color: rgba(196, 181, 253, 0.1);
     border-style: solid;
-    animation: orbitSpin 28s linear infinite reverse;
+    animation: orbit-spin 28s linear infinite reverse;
 }
 
-@keyframes orbitSpin {
+@keyframes orbit-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
@@ -333,10 +340,10 @@
     );
     filter: blur(16px);
     z-index: 2;
-    animation: swirlRotate 40s linear infinite;
+    animation: swirl-rotate 40s linear infinite;
 }
 
-@keyframes swirlRotate {
+@keyframes swirl-rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
@@ -351,10 +358,10 @@
         radial-gradient(ellipse at 50% 40%, rgba(56, 189, 248, 0.06) 0%, transparent 50%);
     z-index: 2;
     opacity: 0.12;
-    animation: worldHintPulse 8s ease-in-out infinite;
+    animation: world-hint-pulse 8s ease-in-out infinite;
 }
 
-@keyframes worldHintPulse {
+@keyframes world-hint-pulse {
     0%, 100% { opacity: 0.08; transform: scale(0.98); }
     50% { opacity: 0.18; transform: scale(1.02); }
 }
@@ -365,10 +372,10 @@
     inset: 10%;
     background: radial-gradient(circle, rgba(139, 117, 48, 0.06), transparent 60%);
     z-index: 2;
-    animation: beamPulse 5s ease-in-out infinite;
+    animation: beam-pulse 5s ease-in-out infinite;
 }
 
-@keyframes beamPulse {
+@keyframes beam-pulse {
     0%, 100% { opacity: 0.04; }
     50% { opacity: 0.12; }
 }
@@ -431,7 +438,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: logoFadeIn 0.55s ease-out;
+    animation: logo-fade-in 0.55s ease-out;
 }
 
 .portal-logo-layer.entering {
@@ -440,7 +447,7 @@
 }
 
 /* Video → artifact transition emerges from glow burst */
-@keyframes logoFadeIn {
+@keyframes logo-fade-in {
     from {
         opacity: 0;
         transform: scale(0.8);
@@ -460,10 +467,10 @@
     border-radius: 50%;
     background: radial-gradient(circle at center, rgba(56, 189, 248, 0.18), rgba(122, 92, 255, 0.15), transparent 72%);
     filter: blur(30px);
-    animation: logoGlowBreath 5.2s ease-in-out infinite;
+    animation: logo-glow-breath 5.2s ease-in-out infinite;
 }
 
-@keyframes logoGlowBreath {
+@keyframes logo-glow-breath {
     0%, 100% { opacity: 0.24; transform: scale(0.98); }
     50% { opacity: 0.38; transform: scale(1.02); }
 }
@@ -475,7 +482,7 @@
     width: 58%;
     max-width: 280px;
     object-fit: contain;
-    animation: logoHover 5.8s ease-in-out infinite;
+    animation: logo-hover 5.8s ease-in-out infinite;
     filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
     transform: translateX(calc((var(--pointer-x) - 0.5) * -8px))
                translateY(calc((var(--pointer-y) - 0.5) * -6px));
@@ -483,7 +490,7 @@
 }
 
 /* Three-phase energy loop: gather → pulse → stabilize */
-@keyframes logoHover {
+@keyframes logo-hover {
     /* Phase A: Energy gathering */
     0% {
         filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.16));
@@ -508,10 +515,10 @@
     height: 10px;
     border-radius: 50%;
     z-index: 1;
-    animation: reflectionPulse 4.8s ease-in-out infinite;
+    animation: reflection-pulse 4.8s ease-in-out infinite;
 }
 
-@keyframes reflectionPulse {
+@keyframes reflection-pulse {
     0%, 100% {
         opacity: 0.1;
         transform: translateX(-50%) scaleX(0.9);
@@ -528,6 +535,7 @@
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
+    .portal-float-outer,
     .portal-float-wrapper,
     .portal-particle,
     .ornate-frame-svg,

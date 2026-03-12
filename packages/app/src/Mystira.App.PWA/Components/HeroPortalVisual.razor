@@ -19,7 +19,8 @@
     <div class="observatory-tube observatory-tube-left" aria-hidden="true"></div>
     <div class="observatory-tube observatory-tube-right" aria-hidden="true"></div>
 
-    <!-- Floating container with gentle bob -->
+    <!-- Floating container with gentle bob (outer = float animation, inner = parallax transform) -->
+    <div class="portal-float-outer">
     <div class="portal-float-wrapper">
         <!-- Glass panel behind the frame -->
         <div class="portal-glass-panel" aria-hidden="true"></div>
@@ -191,6 +192,7 @@
         <!-- Reflection glow beneath the frame -->
         <div class="portal-reflection" aria-hidden="true"></div>
     </div>
+    </div>
 </div>
 
 @code {
@@ -274,6 +276,9 @@
         await CompleteIntro();
     }
 
+    // COUPLING: The delays below must stay in sync with the CSS transition durations:
+    //   400ms = .portal-video-layer transition (opacity 0.4s) in HeroPortalVisual.razor.css:389
+    //    50ms = one-frame tick so .entering class applies before being removed (triggers CSS transition)
     private async Task CompleteIntro()
     {
         _videoFading = true;
@@ -302,6 +307,15 @@
 
     public async ValueTask DisposeAsync()
     {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("MystiraPortal.unbindParallax", ".portal-visual");
+        }
+        catch
+        {
+            // Silently fail during prerendering or if JS is unavailable
+        }
+
         _objRef?.Dispose();
     }
 }
