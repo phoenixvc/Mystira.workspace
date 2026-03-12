@@ -49,8 +49,8 @@ public class CompassAxesControllerTests
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
-        var ok = result.Result as OkObjectResult;
-        ok!.Value.Should().BeEquivalentTo(axes);
+        var ok = (OkObjectResult)result.Result;
+        ok.Value.Should().BeEquivalentTo(axes);
         bus.Verify(m => m.InvokeAsync<List<CompassAxis>>(It.IsAny<GetAllCompassAxesQuery>(), It.IsAny<CancellationToken>(), It.IsAny<TimeSpan?>()), Times.Once);
     }
 
@@ -68,8 +68,8 @@ public class CompassAxesControllerTests
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
-        var ok = result.Result as OkObjectResult;
-        var value = ok!.Value as List<CompassAxis>;
+        var ok = (OkObjectResult)result.Result;
+        var value = ok.Value as List<CompassAxis>;
         value.Should().BeEmpty();
     }
 
@@ -88,8 +88,8 @@ public class CompassAxesControllerTests
 
         // Assert
         result.Result.Should().BeOfType<OkObjectResult>();
-        var ok = result.Result as OkObjectResult;
-        ok!.Value.Should().BeEquivalentTo(axis);
+        var ok = (OkObjectResult)result.Result;
+        ok.Value.Should().BeEquivalentTo(axis);
     }
 
     [Fact]

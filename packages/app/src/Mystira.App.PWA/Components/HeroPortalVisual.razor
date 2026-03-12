@@ -1,4 +1,5 @@
 @* Portal visual — ornate framed M logo with video intro transition *@
+@using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
@@ -235,7 +236,7 @@
                 {
                     await JSRuntime.InvokeVoidAsync("MystiraPortal.bindVideoEnd", _videoElement, _objRef);
                 }
-                catch
+                catch (JSException)
                 {
                     // Silently fail during prerendering
                 }
@@ -248,7 +249,7 @@
                 {
                     await JSRuntime.InvokeVoidAsync("MystiraPortal.injectFrameSvg", _frameContainer, GetFrameSvgPath(), _idPrefix);
                 }
-                catch
+                catch (JSException)
                 {
                     // Silently fail during prerendering
                 }
@@ -258,7 +259,7 @@
             {
                 await JSRuntime.InvokeVoidAsync("MystiraPortal.bindParallax", ".portal-visual");
             }
-            catch
+            catch (JSException)
             {
                 // Silently fail during prerendering
             }
@@ -311,7 +312,7 @@
         {
             await JSRuntime.InvokeVoidAsync("MystiraPortal.unbindParallax", ".portal-visual");
         }
-        catch
+        catch (JSException)
         {
             // Silently fail during prerendering or if JS is unavailable
         }

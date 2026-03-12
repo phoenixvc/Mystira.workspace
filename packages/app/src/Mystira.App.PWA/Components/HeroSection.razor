@@ -1,4 +1,5 @@
 @* Hero Section — two-column layout with portal visual and interactive story demo *@
+@using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
@@ -121,7 +122,7 @@
                 }
                 StateHasChanged();
             }
-            catch
+            catch (JSException)
             {
                 // Silently fail if JS interop is not available
             }
@@ -136,9 +137,9 @@
         {
             await JSRuntime.InvokeVoidAsync("localStorage.setItem", "mystira-hero-intro-seen", "1");
         }
-        catch
+        catch (JSException)
         {
-            // no-op
+            // no-op: ignore JS interop/localStorage failures
         }
     }
 
@@ -161,7 +162,7 @@
         {
             await JSRuntime.InvokeVoidAsync("MystiraParticles.destroy");
         }
-        catch
+        catch (JSException)
         {
             // Silently fail
         }
