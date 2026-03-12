@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Ports.Storage;
+using Mystira.Domain.Models;
 
 namespace Mystira.Core.CQRS.MediaAssets.Queries;
 
@@ -10,15 +11,6 @@ namespace Mystira.Core.CQRS.MediaAssets.Queries;
 /// </summary>
 public static class GetMediaFileQueryHandler
 {
-    /// <summary>
-    /// Handles the GetMediaFileQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="blobService">The blob storage service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A tuple containing the file stream, content type, and file name if found; otherwise, null.</returns>
     public static async Task<(Stream stream, string contentType, string fileName)?> Handle(
         GetMediaFileQuery request,
         IMediaAssetRepository repository,
@@ -29,7 +21,7 @@ public static class GetMediaFileQueryHandler
         logger.LogInformation("Retrieving media file for MediaId: {MediaId}", request.MediaId);
 
         // 1. Get media asset metadata by external MediaId (not DB primary key)
-        var mediaAsset = await repository.GetByMediaIdAsync(request.MediaId);
+        var mediaAsset = await repository.GetByMediaIdAsync(request.MediaId, ct);
         if (mediaAsset == null)
         {
             logger.LogWarning("Media asset not found by MediaId: {MediaId}", request.MediaId);
@@ -112,7 +104,7 @@ public static class GetMediaFileQueryHandler
         return segments.Last().TrimStart('/');
     }
 
-    private static string GetFileName(Domain.Models.MediaAsset mediaAsset)
+    private static string GetFileName(MediaAsset mediaAsset)
     {
         // Prefer explicit filename, fallback to MediaId with extension
         if (!string.IsNullOrEmpty(mediaAsset.MediaId))

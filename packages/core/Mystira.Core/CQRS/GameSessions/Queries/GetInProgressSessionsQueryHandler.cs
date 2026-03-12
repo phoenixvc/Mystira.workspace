@@ -1,54 +1,44 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
+using Mystira.Core.Mappers;
 using Mystira.Core.Ports.Data;
-using Mystira.Core.Specifications;
-using Mystira.Contracts.App.Models.GameSessions;
 using Mystira.Contracts.App.Responses.GameSessions;
-using Mystira.Domain.Models;
 
 namespace Mystira.Core.CQRS.GameSessions.Queries;
 
 /// <summary>
 /// Wolverine handler for GetInProgressSessionsQuery.
 /// Retrieves sessions that are currently in progress or paused.
-/// Uses static method convention for cleaner, more testable code.
+/// Includes zombie session filtering and deduplication.
 /// </summary>
 public static class GetInProgressSessionsQueryHandler
 {
-    /// <summary>
-    /// Handles the GetInProgressSessionsQuery.
-    /// Wolverine injects dependencies as method parameters.
-    /// </summary>
     public static async Task<List<GameSessionResponse>> Handle(
         GetInProgressSessionsQuery request,
         IGameSessionRepository repository,
         ILogger logger,
         CancellationToken ct)
     {
-        if (string.IsNullOrEmpty(request.AccountId))
-        {
-            throw new ArgumentException("AccountId is required");
-        }
+        Guard.AgainstNullOrEmpty(request.AccountId, nameof(request.AccountId));
 
-        var spec = new InProgressSessionsSpec(request.AccountId);
-        var sessions = await repository.ListAsync(spec);
+        var sessions = await repository.GetInProgressSessionsAsync(request.AccountId, ct);
 
-        // Defensive: if historical data contains duplicates (e.g., retries that created multiple active sessions),
-        // only return the most recent active session per (ScenarioId, ProfileId) pair.
+        // Defensive: if historical data contains duplicates, only return the most recent active
+        // session per (ScenarioId, ProfileId) pair.
         var ordered = sessions
             .OrderByDescending(s => s.StartTime)
             .ToList();
 
         // Filter out "zombie" sessions: active status but with no starting scene and no history.
-        // These can be created by partial start flows (e.g., character assignment completed but game never began).
         var meaningfulSessions = ordered
-            .Where(s => !IsEffectivelyEmptyActiveSession(s))
+            .Where(s => !string.IsNullOrWhiteSpace(s.CurrentSceneId) || s.ChoiceHistory.Count > 0)
             .ToList();
 
         if (meaningfulSessions.Count != ordered.Count)
         {
             logger.LogWarning(
                 "Filtered empty in-progress sessions for account {AccountId}: {OriginalCount} -> {FilteredCount}",
-                request.AccountId,
+                LogAnonymizer.HashId(request.AccountId),
                 ordered.Count,
                 meaningfulSessions.Count);
         }
@@ -62,78 +52,17 @@ public static class GetInProgressSessionsQueryHandler
         {
             logger.LogWarning(
                 "Deduplicated in-progress sessions for account {AccountId}: {OriginalCount} -> {UniqueCount}",
-                request.AccountId,
+                LogAnonymizer.HashId(request.AccountId),
                 meaningfulSessions.Count,
                 uniqueSessions.Count);
         }
 
-        var response = uniqueSessions.Select(s =>
-        {
-            s.RecalculateCompassProgressFromHistory();
+        uniqueSessions.ForEach(s => s.RecalculateCompassProgressFromHistory());
+        var response = GameSessionMapper.ToResponseList(uniqueSessions);
 
-            return new GameSessionResponse
-            {
-                Id = s.Id,
-                ScenarioId = s.ScenarioId,
-                AccountId = s.AccountId,
-                ProfileId = s.ProfileId,
-                PlayerNames = s.PlayerNames,
-                CharacterAssignments = s.CharacterAssignments?.Select(ca => new CharacterAssignmentDto
-                {
-                    CharacterId = ca.CharacterId,
-                    CharacterName = ca.CharacterName,
-                    Image = ca.Image,
-                    Audio = ca.Audio,
-                    Role = ca.Role,
-                    Archetype = ca.Archetype,
-                    IsUnused = ca.IsUnused,
-                    PlayerAssignment = ca.PlayerAssignment == null ? null : new PlayerAssignmentDto
-                    {
-                        Type = ca.PlayerAssignment.Type.ToString(),
-                        ProfileId = ca.PlayerAssignment.ProfileId,
-                        ProfileName = ca.PlayerAssignment.ProfileName,
-                        ProfileImage = ca.PlayerAssignment.ProfileImage,
-                        SelectedAvatarMediaId = ca.PlayerAssignment.SelectedAvatarMediaId,
-                        GuestName = ca.PlayerAssignment.GuestName,
-                        GuestAgeRange = ca.PlayerAssignment.GuestAgeRange,
-                        GuestAvatar = ca.PlayerAssignment.GuestAvatar,
-                        SaveAsProfile = ca.PlayerAssignment.SaveAsProfile
-                    }
-                }).ToList() ?? new List<CharacterAssignmentDto>(),
-                // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
-                PlayerCompassProgressTotals = s.PlayerCompassProgressTotals.Select(kvp => new PlayerCompassProgressDto
-                {
-                    PlayerId = string.Empty,
-                    Axis = kvp.Key,
-                    Total = kvp.Value
-                }).ToList(),
-                Status = s.Status.ToString(),
-                CurrentSceneId = s.CurrentSceneId ?? string.Empty,
-                ChoiceCount = s.ChoiceHistory?.Count ?? 0,
-                EchoCount = s.EchoHistory?.Count ?? 0,
-                AchievementCount = s.Achievements?.Count ?? 0,
-                StartTime = s.StartTime ?? DateTime.MinValue,
-                EndTime = s.EndTime,
-                ElapsedTime = s.GetTotalElapsedTime(),
-                IsPaused = s.Status == SessionStatus.Paused,
-                SceneCount = s.ChoiceHistory?.Select(c => c.SceneId).Distinct().Count() ?? 0,
-                TargetAgeGroup = s.TargetAgeGroupName ?? string.Empty
-            };
-        }).ToList();
-
-        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountId}", response.Count, request.AccountId);
+        logger.LogDebug("Retrieved {Count} in-progress sessions for account {AccountId}",
+            response.Count, LogAnonymizer.HashId(request.AccountId));
 
         return response;
-    }
-
-    private static bool IsEffectivelyEmptyActiveSession(GameSession session)
-    {
-        // "Empty" means: no known current scene AND no history. These sessions are not useful to resume.
-        var hasScene = !string.IsNullOrWhiteSpace(session.CurrentSceneId);
-        var hasChoices = session.ChoiceHistory?.Count > 0;
-        var hasEchoes = session.EchoHistory?.Count > 0;
-        var hasAchievements = session.Achievements?.Count > 0;
-
-        return !hasScene && !hasChoices && !hasEchoes && !hasAchievements;
     }
 }

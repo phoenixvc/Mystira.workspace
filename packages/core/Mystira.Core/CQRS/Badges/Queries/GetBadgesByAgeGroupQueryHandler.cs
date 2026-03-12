@@ -18,7 +18,7 @@ public static class GetBadgesByAgeGroupQueryHandler
         IBadgeRepository badgeRepository,
         CancellationToken ct)
     {
-        var badges = await badgeRepository.GetByAgeGroupAsync(query.AgeGroupId);
+        var badges = await badgeRepository.GetByAgeGroupAsync(query.AgeGroupId, ct);
         return badges
             .OrderBy(b => b.CompassAxisId)
             .ThenBy(b => b.TierOrder)

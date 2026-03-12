@@ -1,86 +1,47 @@
-using Microsoft.Extensions.Logging;
-using Mystira.Core.Ports.Data;
+using Mystira.Core.UseCases.UserProfiles;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.UserProfiles.Commands;
 
 /// <summary>
 /// Wolverine handler for CreateUserProfileCommand.
-/// Creates a new user profile with the specified details.
+/// Performs handler-level name validation, then delegates to CreateUserProfileUseCase
+/// which owns the full business logic including duplicate checks, theme validation,
+/// age group validation, and entity creation.
 /// </summary>
 public static class CreateUserProfileCommandHandler
 {
     /// <summary>
-    /// Handles the CreateUserProfileCommand by creating a new user profile.
-    /// Wolverine injects dependencies as method parameters.
+    /// Handles the CreateUserProfileCommand by delegating to the UseCase.
+    /// Wolverine injects the UseCase as a method parameter.
     /// </summary>
     public static async Task<UserProfile> Handle(
         CreateUserProfileCommand command,
-        IUserProfileRepository repository,
-        IUnitOfWork unitOfWork,
-        ILogger logger,
+        CreateUserProfileUseCase createUserProfileUseCase,
         CancellationToken ct)
     {
         var request = command.Request;
 
-        // Validate request
+        // Handler-level name validation (UseCase trusts DataAnnotations on the request)
         if (string.IsNullOrWhiteSpace(request.Name))
         {
-            throw new ArgumentException("Profile name is required");
+            throw new ValidationException("name", "Profile name is required");
         }
 
-        // Enforce minimum length for name to provide a clear error from the API layer
-        // This mirrors DataAnnotations on CreateUserProfileRequest (MinimumLength = 2)
         if (request.Name.Trim().Length < 2)
         {
-            throw new ArgumentException("Profile name must be at least 2 characters long");
+            throw new ValidationException("name", "Profile name must be at least 2 characters long");
         }
 
-        if (string.IsNullOrWhiteSpace(request.AgeGroup))
+        // Pre-fill ID if not provided (handler generates IDs for new profiles)
+        if (string.IsNullOrEmpty(request.Id))
         {
-            throw new ArgumentException("Age group is required");
+            request.Id = Guid.NewGuid().ToString();
         }
 
-        var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
-        if (!allAgeGroupIds.Contains(request.AgeGroup))
-        {
-            throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
-        }
-
-        var profile = new UserProfile
-        {
-            Id = Guid.NewGuid().ToString(),
-            Name = request.Name,
-            DateOfBirth = request.DateOfBirth.HasValue ? DateOnly.FromDateTime(request.DateOfBirth.Value) : null,
-            IsGuest = request.IsGuest,
-            IsNpc = request.IsNpc,
-            AccountId = request.AccountId ?? string.Empty,
-            Pronouns = request.Pronouns,
-            Bio = request.Bio,
-            PreferredFantasyThemes = request.PreferredFantasyThemes?.ToList() ?? new List<string>(),
-            AvatarMediaId = request.SelectedAvatarMediaId,
-            SelectedAvatarMediaId = request.SelectedAvatarMediaId,
-            HasCompletedOnboarding = request.HasCompletedOnboarding,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            AgeGroupId = request.AgeGroup
-        };
-
-        // Update age group from date of birth if provided
-        if (request.DateOfBirth.HasValue)
-        {
-            profile.UpdateAgeGroupFromBirthDate();
-        }
-
-        // Add to repository
-        await repository.AddAsync(profile);
-
-        // Persist changes
-        await unitOfWork.SaveChangesAsync(ct);
-
-        logger.LogInformation("Created user profile {ProfileId} with name {Name}", profile.Id, profile.Name);
-
-        return profile;
+        return await createUserProfileUseCase.ExecuteAsync(request);
     }
 }

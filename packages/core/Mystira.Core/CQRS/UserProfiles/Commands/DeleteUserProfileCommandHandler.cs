@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 
 namespace Mystira.Core.CQRS.UserProfiles.Commands;
@@ -20,20 +21,20 @@ public static class DeleteUserProfileCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var profile = await repository.GetByIdAsync(command.ProfileId);
+        var profile = await repository.GetByIdAsync(command.ProfileId, ct);
         if (profile == null)
         {
-            logger.LogWarning("Profile not found: {ProfileId}", command.ProfileId);
+            logger.LogWarning("Profile not found: {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
             return false;
         }
 
         // Delete profile
-        await repository.DeleteAsync(profile.Id);
+        await repository.DeleteAsync(profile.Id, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Deleted user profile {ProfileId}", command.ProfileId);
+        logger.LogInformation("Deleted user profile {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
 
         return true;
     }

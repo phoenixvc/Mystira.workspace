@@ -4,6 +4,9 @@ using Mystira.Core.Configuration.StoryProtocol;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Attribution.Queries;
 
@@ -12,15 +15,6 @@ namespace Mystira.Core.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetScenarioIpStatusQueryHandler
 {
-    /// <summary>
-    /// Handles the GetScenarioIpStatusQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The scenario repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="options">The Story Protocol configuration options.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The IP verification response if the scenario is found; otherwise, null.</returns>
     public static async Task<IpVerificationResponse?> Handle(
         GetScenarioIpStatusQuery request,
         IScenarioRepository repository,
@@ -30,10 +24,10 @@ public static class GetScenarioIpStatusQueryHandler
     {
         if (string.IsNullOrWhiteSpace(request.ScenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(request.ScenarioId));
+            throw new ValidationException("scenarioId", "Scenario ID cannot be null or empty");
         }
 
-        var scenario = await repository.GetByIdAsync(request.ScenarioId);
+        var scenario = await repository.GetByIdAsync(request.ScenarioId, ct);
 
         if (scenario == null)
         {

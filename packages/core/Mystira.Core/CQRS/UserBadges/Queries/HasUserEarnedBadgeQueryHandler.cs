@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 
 namespace Mystira.Core.CQRS.UserBadges.Queries;
@@ -20,13 +21,13 @@ public static class HasUserEarnedBadgeQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Checking if user {UserProfileId} has earned badge {BadgeId}",
-            query.UserProfileId, query.BadgeConfigurationId);
+            LogAnonymizer.HashId(query.UserProfileId), query.BadgeConfigurationId);
 
-        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId);
+        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId, ct);
         var hasEarned = badges.Any(b => b.BadgeConfigurationId == query.BadgeConfigurationId);
 
         logger.LogInformation("User {UserProfileId} {Status} badge {BadgeId}",
-            query.UserProfileId, hasEarned ? "has earned" : "has not earned", query.BadgeConfigurationId);
+            LogAnonymizer.HashId(query.UserProfileId), hasEarned ? "has earned" : "has not earned", query.BadgeConfigurationId);
 
         return hasEarned;
     }

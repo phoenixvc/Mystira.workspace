@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.UserBadges.Queries;
 
@@ -21,9 +24,9 @@ public static class GetUserBadgesForAxisQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Getting badges for user {UserProfileId} on axis {Axis}",
-            query.UserProfileId, query.Axis);
+            LogAnonymizer.HashId(query.UserProfileId), query.Axis);
 
-        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId);
+        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId, ct);
         var filteredBadges = badges
             .Where(b => b.Axis?.Equals(query.Axis, StringComparison.OrdinalIgnoreCase) == true)
             .ToList();

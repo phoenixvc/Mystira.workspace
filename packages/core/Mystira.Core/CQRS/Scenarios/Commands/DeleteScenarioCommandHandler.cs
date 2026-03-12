@@ -1,5 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
+using NotFoundException = Mystira.Shared.Exceptions.NotFoundException;
+using ValidationException = Mystira.Shared.Exceptions.ValidationException;
 
 namespace Mystira.Core.CQRS.Scenarios.Commands;
 
@@ -22,22 +25,22 @@ public static class DeleteScenarioCommandHandler
     {
         if (string.IsNullOrWhiteSpace(command.ScenarioId))
         {
-            throw new ArgumentException("Scenario ID cannot be null or empty", nameof(command.ScenarioId));
+            throw new ValidationException("scenarioId", "Scenario ID cannot be null or empty");
         }
 
-        var scenario = await repository.GetByIdAsync(command.ScenarioId);
+        var scenario = await repository.GetByIdAsync(command.ScenarioId, ct);
 
         if (scenario == null)
         {
             logger.LogWarning("Scenario not found: {ScenarioId}", command.ScenarioId);
-            throw new InvalidOperationException($"Scenario not found: {command.ScenarioId}");
+            throw new NotFoundException("Scenario", command.ScenarioId);
         }
 
-        await repository.DeleteAsync(command.ScenarioId);
+        await repository.DeleteAsync(command.ScenarioId, ct);
 
         try
         {
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {

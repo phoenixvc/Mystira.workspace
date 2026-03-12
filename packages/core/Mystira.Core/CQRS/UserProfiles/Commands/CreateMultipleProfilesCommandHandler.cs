@@ -1,5 +1,8 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Wolverine;
 
 namespace Mystira.Core.CQRS.UserProfiles.Commands;
@@ -32,7 +35,7 @@ public static class CreateMultipleProfilesCommandHandler
                 createdProfiles.Add(profile);
 
                 logger.LogInformation("Created profile {ProfileId} with name {Name} in batch",
-                    profile.Id, profile.Name);
+                    LogAnonymizer.HashId(profile.Id), profile.Name);
             }
             catch (Exception ex)
             {

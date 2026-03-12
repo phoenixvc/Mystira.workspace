@@ -5,7 +5,6 @@ namespace Mystira.Core.CQRS.MediaAssets.Queries;
 /// Used when creating/updating scenarios, characters, etc. to ensure referenced media exists.
 /// Returns list of missing media IDs (empty list if all valid).
 /// </summary>
-/// <param name="MediaIds">The list of media IDs to validate.</param>
 public record ValidateMediaReferencesQuery(List<string> MediaIds)
     : IQuery<MediaValidationResult>;
 

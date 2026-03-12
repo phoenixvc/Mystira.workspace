@@ -1,5 +1,7 @@
 using Mystira.Core.Interfaces;
-using Mystira.Contracts.App.Responses.Scenarios;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Scenarios.Queries;
 
@@ -8,15 +10,8 @@ namespace Mystira.Core.CQRS.Scenarios.Queries;
 /// Featured scenarios are those marked with IsFeatured = true.
 /// Cached for 10 minutes as featured content changes infrequently.
 /// </summary>
-public record GetFeaturedScenariosQuery : IQuery<List<ScenarioSummary>>, ICacheableQuery
+public record GetFeaturedScenariosQuery : IQuery<List<Scenario>>, ICacheableQuery
 {
-    /// <summary>
-    /// Gets the cache key for storing this query result.
-    /// </summary>
     public string CacheKey => "FeaturedScenarios";
-
-    /// <summary>
-    /// Gets the cache duration in seconds.
-    /// </summary>
-    public int CacheDurationSeconds => 600; // 10 minutes
+    public int CacheDurationSeconds => CacheDefaults.MediumSeconds;
 }

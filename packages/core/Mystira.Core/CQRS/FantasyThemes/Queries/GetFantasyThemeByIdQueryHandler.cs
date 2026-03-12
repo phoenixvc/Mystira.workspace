@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.FantasyThemes.Queries;
 

@@ -1,5 +1,7 @@
 using Mystira.Core.Interfaces;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.CharacterMaps.Queries;
 
@@ -9,13 +11,6 @@ namespace Mystira.Core.CQRS.CharacterMaps.Queries;
 /// </summary>
 public record GetAllCharacterMapsQuery : IQuery<List<CharacterMap>>, ICacheableQuery
 {
-    /// <summary>
-    /// Gets the cache key for storing this query result.
-    /// </summary>
     public string CacheKey => "AllCharacterMaps";
-
-    /// <summary>
-    /// Gets the cache duration in seconds.
-    /// </summary>
-    public int CacheDurationSeconds => 300; // 5 minutes
+    public int CacheDurationSeconds => CacheDefaults.ShortSeconds;
 }

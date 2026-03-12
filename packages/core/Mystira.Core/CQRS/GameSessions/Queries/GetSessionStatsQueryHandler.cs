@@ -3,6 +3,8 @@ using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Models.GameSessions;
 using Mystira.Contracts.App.Responses.GameSessions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.GameSessions.Queries;
 
@@ -23,27 +25,27 @@ public static class GetSessionStatsQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(request.SessionId);
+        var session = await repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", request.SessionId);
             return null;
         }
 
-        session.RecalculateCompassProgressFromHistory();
+        if (session.ChoiceHistory != null)
+            session.RecalculateCompassProgressFromHistory();
 
         var compassValues = session.CompassValues?.ToDictionary(
-            ct => ct.Axis,
-            ct => ct.CurrentValue
+            cv => cv.Axis,
+            cv => cv.CurrentValue
         ) ?? new Dictionary<string, double>();
 
-        // PlayerCompassProgressTotals is Dictionary<string, int> where key is axis, value is total
         var playerProgress = session.PlayerCompassProgressTotals
-            .Select(kvp => new PlayerCompassProgressDto
+            .Select(p => new PlayerCompassProgressDto
             {
-                PlayerId = string.Empty, // Dictionary doesn't track individual players
-                Axis = kvp.Key,
-                Total = kvp.Value
+                PlayerId = string.Empty,
+                Axis = p.Key,
+                Total = p.Value
             })
             .ToList();
 

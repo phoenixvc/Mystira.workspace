@@ -8,8 +8,6 @@ namespace Mystira.Core.CQRS.Badges.Queries;
 /// Performs depth-first traversal of all scenarios in the bundle and calculates
 /// percentile-based score thresholds for each compass axis.
 /// </summary>
-/// <param name="ContentBundleId">The unique identifier of the content bundle.</param>
-/// <param name="Percentiles">The list of percentile values to calculate score thresholds for.</param>
 public record CalculateBadgeScoresQuery(
     string ContentBundleId,
     List<double> Percentiles

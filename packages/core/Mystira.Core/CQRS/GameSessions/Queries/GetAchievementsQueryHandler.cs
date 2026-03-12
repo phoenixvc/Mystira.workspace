@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.GameSessions.Queries;
 
@@ -21,7 +23,7 @@ public static class GetAchievementsQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(request.SessionId);
+        var session = await repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", request.SessionId);

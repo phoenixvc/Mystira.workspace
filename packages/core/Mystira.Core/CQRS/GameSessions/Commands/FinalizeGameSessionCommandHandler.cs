@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Services;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.GameSessions.Commands;
 
@@ -28,7 +31,7 @@ public static class FinalizeGameSessionCommandHandler
     {
         var result = new FinalizeGameSessionResult { SessionId = command.SessionId };
 
-        var session = await sessionRepository.GetByIdAsync(command.SessionId);
+        var session = await sessionRepository.GetByIdAsync(command.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found for finalize: {SessionId}", command.SessionId);
@@ -52,10 +55,10 @@ public static class FinalizeGameSessionCommandHandler
 
         foreach (var profileId in profileIds)
         {
-            var profile = await profileRepository.GetByIdAsync(profileId);
+            var profile = await profileRepository.GetByIdAsync(profileId, ct);
             if (profile == null)
             {
-                logger.LogWarning("Profile {ProfileId} not found while finalizing session {SessionId}", profileId, session.Id);
+                logger.LogWarning("Profile {ProfileId} not found while finalizing session {SessionId}", LogAnonymizer.HashId(profileId), session.Id);
                 continue;
             }
 
@@ -64,7 +67,7 @@ public static class FinalizeGameSessionCommandHandler
             var alreadyPlayed = score == null;
 
             // Compute cumulative axis totals across all scored scenarios for this profile
-            var allScores = await scoreRepository.GetByProfileIdAsync(profile.Id);
+            var allScores = await scoreRepository.GetByProfileIdAsync(profile.Id, ct);
             var cumulative = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
             foreach (var s in allScores)
             {

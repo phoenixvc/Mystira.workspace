@@ -21,6 +21,11 @@ public interface IQueryCacheInvalidationService
     void InvalidateCacheByPrefix(string prefix);
 
     /// <summary>
+    /// Async version of <see cref="InvalidateCacheByPrefix"/> for use in async contexts.
+    /// </summary>
+    Task InvalidateCacheByPrefixAsync(string prefix);
+
+    /// <summary>
     /// Tracks a cache key for prefix-based invalidation.
     /// </summary>
     void TrackCacheKey(string cacheKey);
@@ -93,6 +98,13 @@ public class QueryCacheInvalidationService : IQueryCacheInvalidationService
 
         _logger.LogDebug("Invalidated {Count} cache entries with prefix: {Prefix}",
             keysToRemove.Count, prefix);
+    }
+
+    /// <inheritdoc/>
+    public Task InvalidateCacheByPrefixAsync(string prefix)
+    {
+        InvalidateCacheByPrefix(prefix);
+        return Task.CompletedTask;
     }
 
     /// <summary>

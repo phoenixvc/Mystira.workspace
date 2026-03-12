@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 
 namespace Mystira.Core.CQRS.UserProfiles.Commands;
@@ -22,52 +23,52 @@ public static class RemoveProfileFromAccountCommandHandler
         CancellationToken ct)
     {
         // Get the profile
-        var profile = await profileRepository.GetByIdAsync(command.ProfileId);
+        var profile = await profileRepository.GetByIdAsync(command.ProfileId, ct);
         if (profile == null)
         {
             logger.LogWarning("Cannot remove profile from account: Profile not found {ProfileId}",
-                command.ProfileId);
+                LogAnonymizer.HashId(command.ProfileId));
             return false;
         }
 
         // Check if profile is linked to an account
         if (string.IsNullOrEmpty(profile.AccountId))
         {
-            logger.LogInformation("Profile {ProfileId} is not linked to any account", command.ProfileId);
+            logger.LogInformation("Profile {ProfileId} is not linked to any account", LogAnonymizer.HashId(command.ProfileId));
             return true; // Already unlinked, consider this success
         }
 
         var accountId = profile.AccountId;
 
         // Get the account
-        var account = await accountRepository.GetByIdAsync(accountId);
+        var account = await accountRepository.GetByIdAsync(accountId, ct);
         if (account != null)
         {
             // Remove profile ID from account's profile list
             if (account.UserProfileIds.Contains(command.ProfileId))
             {
                 account.UserProfileIds.Remove(command.ProfileId);
-                await accountRepository.UpdateAsync(account);
+                await accountRepository.UpdateAsync(account, ct);
 
                 logger.LogInformation("Removed profile {ProfileId} from account {AccountId}",
-                    command.ProfileId, accountId);
+                    LogAnonymizer.HashId(command.ProfileId), LogAnonymizer.HashId(accountId));
             }
         }
         else
         {
-            logger.LogWarning("Account {AccountId} not found, but profile still linked to it", accountId);
+            logger.LogWarning("Account {AccountId} not found, but profile still linked to it", LogAnonymizer.HashId(accountId));
         }
 
         // Clear profile's account ID
-        profile.AccountId = string.Empty;
+        profile.AccountId = null!;
         profile.UpdatedAt = DateTime.UtcNow;
-        await profileRepository.UpdateAsync(profile);
+        await profileRepository.UpdateAsync(profile, ct);
 
         // Save all changes
         await unitOfWork.SaveChangesAsync(ct);
 
         logger.LogInformation("Successfully removed profile {ProfileId} from account {AccountId}",
-            command.ProfileId, accountId);
+            LogAnonymizer.HashId(command.ProfileId), LogAnonymizer.HashId(accountId));
 
         return true;
     }

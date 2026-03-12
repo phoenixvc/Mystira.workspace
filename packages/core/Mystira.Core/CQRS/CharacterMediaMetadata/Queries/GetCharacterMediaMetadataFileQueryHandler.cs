@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.CharacterMediaMetadata.Queries;
 
@@ -10,14 +12,6 @@ namespace Mystira.Core.CQRS.CharacterMediaMetadata.Queries;
 /// </summary>
 public static class GetCharacterMediaMetadataFileQueryHandler
 {
-    /// <summary>
-    /// Handles the GetCharacterMediaMetadataFileQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The character media metadata file repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The character media metadata file if found; otherwise, null.</returns>
     public static async Task<CharacterMediaMetadataFile?> Handle(
         GetCharacterMediaMetadataFileQuery request,
         ICharacterMediaMetadataFileRepository repository,

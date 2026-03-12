@@ -5,6 +5,9 @@ using Mystira.Core.Validation;
 using Mystira.Core.Mappers;
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 using NJsonSchema;
 
 namespace Mystira.Core.CQRS.Scenarios.Commands;
@@ -51,10 +54,10 @@ public static class CreateScenarioCommandHandler
             Tags = request.Tags ?? new List<string>(),
             Difficulty = ScenarioMapper.MapDifficultyLevel((int)request.Difficulty),
             SessionLength = ScenarioMapper.MapSessionLength((int)request.SessionLength),
-            Archetypes = ScenarioMapper.ParseArchetypes(request.Archetypes),
+            Archetypes = request.Archetypes?.ToList() ?? new(),
             AgeGroupId = request.AgeGroup,
             MinimumAge = request.MinimumAge,
-            CoreAxes = ScenarioMapper.ParseCoreAxes(request.CoreAxes),
+            CoreAxes = request.CoreAxes?.ToList() ?? new(),
             Characters = request.Characters?.Select(ScenarioMapper.ToScenarioCharacter).ToList() ?? new List<ScenarioCharacter>(),
             Scenes = request.Scenes?.Select(ScenarioMapper.ToScene).ToList() ?? new List<Scene>(),
             CreatedAt = DateTime.UtcNow
@@ -64,11 +67,11 @@ public static class CreateScenarioCommandHandler
         await validateScenarioUseCase.ExecuteAsync(scenario);
 
         // Persist scenario
-        await repository.AddAsync(scenario);
+        await repository.AddAsync(scenario, ct);
 
         try
         {
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.SaveChangesAsync(ct);
         }
         catch (Exception e)
         {
@@ -88,7 +91,7 @@ public static class CreateScenarioCommandHandler
         if (errors.Count > 0)
         {
             var errorMessages = string.Join(", ", errors.Select(e => e.ToString()).ToList());
-            throw new ArgumentException($"Scenario validation failed: {errorMessages}");
+            throw new ValidationException("scenario", $"Scenario validation failed: {errorMessages}");
         }
     }
 }

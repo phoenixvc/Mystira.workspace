@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Characters.Queries;
 
@@ -10,14 +12,6 @@ namespace Mystira.Core.CQRS.Characters.Queries;
 /// </summary>
 public static class GetCharacterQueryHandler
 {
-    /// <summary>
-    /// Handles the GetCharacterQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The character map file repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The character if found; otherwise, null.</returns>
     public static async Task<Character?> Handle(
         GetCharacterQuery request,
         ICharacterMapFileRepository repository,

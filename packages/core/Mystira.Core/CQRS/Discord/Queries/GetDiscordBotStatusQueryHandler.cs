@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Messaging;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Discord.Queries;
 
@@ -9,14 +10,6 @@ namespace Mystira.Core.CQRS.Discord.Queries;
 /// </summary>
 public static class GetDiscordBotStatusQueryHandler
 {
-    /// <summary>
-    /// Handles the GetDiscordBotStatusQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="chatBotService">The chat bot service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The Discord bot status response.</returns>
     public static Task<DiscordBotStatusResponse> Handle(
         GetDiscordBotStatusQuery request,
         IChatBotService chatBotService,
@@ -24,7 +17,7 @@ public static class GetDiscordBotStatusQueryHandler
         CancellationToken ct)
     {
         if (chatBotService == null)
-            throw new ArgumentNullException(nameof(chatBotService));
+            throw new ValidationException("chatBotService", "chatBotService is required");
 
         var status = chatBotService.GetStatus();
 

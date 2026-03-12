@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.EchoTypes.Queries;
 
@@ -9,14 +11,6 @@ namespace Mystira.Core.CQRS.EchoTypes.Queries;
 /// </summary>
 public static class GetAllEchoTypesQueryHandler
 {
-    /// <summary>
-    /// Handles the GetAllEchoTypesQuery.
-    /// </summary>
-    /// <param name="query">The query to handle.</param>
-    /// <param name="repository">The echo type repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A list of all echo type definitions.</returns>
     public static async Task<List<EchoTypeDefinition>> Handle(
         GetAllEchoTypesQuery query,
         IEchoTypeRepository repository,

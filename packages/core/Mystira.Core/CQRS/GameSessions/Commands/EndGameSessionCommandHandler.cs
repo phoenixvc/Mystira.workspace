@@ -1,46 +1,35 @@
-using Microsoft.Extensions.Logging;
-using Mystira.Core.Ports.Data;
+using Mystira.Core.UseCases.GameSessions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.GameSessions.Commands;
 
 /// <summary>
 /// Wolverine handler for EndGameSessionCommand.
-/// Marks a session as completed and sets the end time.
-/// Uses static method convention for cleaner, more testable code.
+/// Delegates to EndGameSessionUseCase which owns the full business logic including
+/// input validation, already-completed check, ElapsedTime calculation, and pause state cleanup.
 /// </summary>
 public static class EndGameSessionCommandHandler
 {
     /// <summary>
-    /// Handles the EndGameSessionCommand.
-    /// Wolverine injects dependencies as method parameters.
+    /// Handles the EndGameSessionCommand by delegating to the UseCase.
+    /// Wolverine injects the UseCase as a method parameter.
     /// </summary>
     public static async Task<GameSession?> Handle(
         EndGameSessionCommand command,
-        IGameSessionRepository repository,
-        IUnitOfWork unitOfWork,
-        ILogger logger,
+        EndGameSessionUseCase endGameSessionUseCase,
         CancellationToken ct)
     {
-        var session = await repository.GetByIdAsync(command.SessionId);
-        if (session == null)
+        try
         {
-            logger.LogWarning("Session not found: {SessionId}", command.SessionId);
+            return await endGameSessionUseCase.ExecuteAsync(command.SessionId);
+        }
+        catch (ArgumentException)
+        {
+            // UseCase throws ArgumentException for not-found or empty session IDs.
+            // Handler preserves nullable return contract for backward compatibility.
             return null;
         }
-
-        // Update session status
-        session.Status = SessionStatus.Completed;
-        session.EndTime = DateTime.UtcNow;
-
-        // Update in repository
-        await repository.UpdateAsync(session);
-
-        // Persist changes
-        await unitOfWork.SaveChangesAsync(ct);
-
-        logger.LogInformation("Ended game session {SessionId}", session.Id);
-
-        return session;
     }
 }

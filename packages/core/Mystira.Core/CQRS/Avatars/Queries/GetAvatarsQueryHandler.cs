@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Media;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Avatars.Queries;
@@ -11,14 +13,6 @@ namespace Mystira.Core.CQRS.Avatars.Queries;
 /// </summary>
 public static class GetAvatarsQueryHandler
 {
-    /// <summary>
-    /// Handles the GetAvatarsQuery.
-    /// </summary>
-    /// <param name="query">The query to handle.</param>
-    /// <param name="repository">The avatar configuration file repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The avatar response containing all avatars grouped by age group.</returns>
     public static async Task<AvatarResponse> Handle(
         GetAvatarsQuery query,
         IAvatarConfigurationFileRepository repository,
@@ -35,9 +29,9 @@ public static class GetAvatarsQueryHandler
         };
 
         // Ensure all age groups are present
-        foreach (var ageGroup in AgeGroup.All)
+        foreach (var ageGroup in AgeGroupConstants.GetAll())
         {
-            response.AgeGroupAvatars.TryAdd(ageGroup.Id, new List<string>());
+            response.AgeGroupAvatars.TryAdd(ageGroup, new List<string>());
         }
 
         logger.LogInformation("Retrieved avatars for {Count} age groups", response.AgeGroupAvatars.Count);

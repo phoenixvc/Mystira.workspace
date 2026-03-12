@@ -1,13 +1,14 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
-using Mystira.Core.Specifications;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Scenarios.Queries;
 
 /// <summary>
 /// Wolverine handler for GetPaginatedScenariosQuery.
-/// Demonstrates how to use Specification Pattern with pagination.
 /// </summary>
 public static class GetPaginatedScenariosQueryHandler
 {
@@ -21,16 +22,14 @@ public static class GetPaginatedScenariosQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        // Create specification for paginated scenarios
-        var spec = new ScenariosPaginatedSpec(
-            skip: (query.PageNumber - 1) * query.PageSize,
-            take: query.PageSize);
-
-        // Use specification to query repository
-        var scenarios = await repository.ListAsync(spec);
+        // Use queryable for pagination
+        var scenarios = await repository.GetQueryable()
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync(ct);
 
         logger.LogDebug("Retrieved page {PageNumber} with {Count} scenarios (page size: {PageSize})",
-            query.PageNumber, scenarios.Count(), query.PageSize);
+            query.PageNumber, scenarios.Count, query.PageSize);
 
         return scenarios;
     }

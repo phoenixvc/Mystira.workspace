@@ -2,7 +2,10 @@ using Wolverine;
 using Microsoft.Extensions.Logging;
 using Mystira.Core.CQRS.Accounts.Queries;
 using Mystira.Core.CQRS.UserProfiles.Queries;
+using Mystira.Core.Helpers;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.UserBadges.Queries;
 
@@ -23,7 +26,7 @@ public static class GetBadgeStatisticsForAccountByEmailQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Getting badge statistics for account with email {Email}", query.Email);
+        logger.LogInformation("Getting badge statistics for account with email {Email}", LogAnonymizer.HashEmail(query.Email));
 
         // Get account by email
         var accountQuery = new GetAccountByEmailQuery(query.Email);
@@ -31,16 +34,19 @@ public static class GetBadgeStatisticsForAccountByEmailQueryHandler
 
         if (account == null)
         {
-            logger.LogWarning("Account not found for email {Email}", query.Email);
+            logger.LogWarning("Account not found for email {Email}", LogAnonymizer.HashEmail(query.Email));
             return new Dictionary<string, int>();
         }
 
         // Get profiles for account
         var profilesQuery = new GetProfilesByAccountQuery(account.Id);
-        var profiles = await messageBus.InvokeAsync<List<Domain.Models.UserProfile>>(profilesQuery, ct);
+        var profiles = await messageBus.InvokeAsync<List<UserProfile>>(profilesQuery, ct);
 
         // Aggregate statistics from all profiles
         var combinedStatistics = new Dictionary<string, int>();
+        if (profiles == null || profiles.Count == 0)
+            return combinedStatistics;
+
         foreach (var profile in profiles)
         {
             var statsQuery = new GetBadgeStatisticsQuery(profile.Id);

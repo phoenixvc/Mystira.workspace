@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.CharacterMaps.Queries;
 
@@ -9,14 +11,6 @@ namespace Mystira.Core.CQRS.CharacterMaps.Queries;
 /// </summary>
 public static class GetCharacterMapQueryHandler
 {
-    /// <summary>
-    /// Handles the GetCharacterMapQuery.
-    /// </summary>
-    /// <param name="query">The query to handle.</param>
-    /// <param name="repository">The character map repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The character map if found; otherwise, null.</returns>
     public static async Task<CharacterMap?> Handle(
         GetCharacterMapQuery query,
         ICharacterMapRepository repository,
@@ -25,7 +19,7 @@ public static class GetCharacterMapQueryHandler
     {
         logger.LogInformation("Retrieving character map {CharacterMapId}", query.Id);
 
-        var characterMap = await repository.GetByIdAsync(query.Id);
+        var characterMap = await repository.GetByIdAsync(query.Id, ct);
 
         if (characterMap == null)
         {

@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 
 namespace Mystira.Core.CQRS.Accounts.Commands;
@@ -35,10 +36,10 @@ public static class LinkProfilesToAccountCommandHandler
             return false;
         }
 
-        var account = await accountRepository.GetByIdAsync(command.AccountId);
+        var account = await accountRepository.GetByIdAsync(command.AccountId, ct);
         if (account == null)
         {
-            logger.LogWarning("Account not found: {AccountId}", command.AccountId);
+            logger.LogWarning("Account not found: {AccountId}", LogAnonymizer.HashId(command.AccountId));
             return false;
         }
 
@@ -47,10 +48,10 @@ public static class LinkProfilesToAccountCommandHandler
         {
             try
             {
-                var profile = await userProfileRepository.GetByIdAsync(profileId);
+                var profile = await userProfileRepository.GetByIdAsync(profileId, ct);
                 if (profile == null)
                 {
-                    logger.LogWarning("User profile not found: {ProfileId}", profileId);
+                    logger.LogWarning("User profile not found: {ProfileId}", LogAnonymizer.HashId(profileId));
                     continue;
                 }
 
@@ -58,13 +59,13 @@ public static class LinkProfilesToAccountCommandHandler
                 if (profile.AccountId == command.AccountId)
                 {
                     logger.LogDebug("Profile {ProfileId} is already linked to account {AccountId}",
-                        profileId, command.AccountId);
+                        LogAnonymizer.HashId(profileId), LogAnonymizer.HashId(command.AccountId));
                     continue;
                 }
 
                 // Link profile to account
                 profile.AccountId = command.AccountId;
-                await userProfileRepository.UpdateAsync(profile);
+                await userProfileRepository.UpdateAsync(profile, ct);
 
                 // Add profile ID to account's profile list if not already present
                 if (!account.UserProfileIds.Contains(profileId))
@@ -74,22 +75,22 @@ public static class LinkProfilesToAccountCommandHandler
 
                 linkedCount++;
                 logger.LogInformation("Linked profile {ProfileId} to account {AccountId}",
-                    profileId, command.AccountId);
+                    LogAnonymizer.HashId(profileId), LogAnonymizer.HashId(command.AccountId));
             }
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error linking profile {ProfileId} to account {AccountId}",
-                    profileId, command.AccountId);
+                    LogAnonymizer.HashId(profileId), LogAnonymizer.HashId(command.AccountId));
             }
         }
 
         if (linkedCount > 0)
         {
-            await accountRepository.UpdateAsync(account);
+            await accountRepository.UpdateAsync(account, ct);
             await unitOfWork.SaveChangesAsync(ct);
 
             logger.LogInformation("Successfully linked {LinkedCount} of {TotalCount} profiles to account {AccountId}",
-                linkedCount, command.UserProfileIds.Count, command.AccountId);
+                linkedCount, command.UserProfileIds.Count, LogAnonymizer.HashId(command.AccountId));
         }
 
         return linkedCount > 0;

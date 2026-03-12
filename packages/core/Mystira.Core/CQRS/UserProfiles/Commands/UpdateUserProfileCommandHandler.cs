@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
 using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.UserProfiles.Commands;
 
@@ -22,10 +25,10 @@ public static class UpdateUserProfileCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var profile = await repository.GetByIdAsync(command.ProfileId);
+        var profile = await repository.GetByIdAsync(command.ProfileId, ct);
         if (profile == null)
         {
-            logger.LogWarning("Profile not found: {ProfileId}", command.ProfileId);
+            logger.LogWarning("Profile not found: {ProfileId}", LogAnonymizer.HashId(command.ProfileId));
             return null;
         }
 
@@ -34,15 +37,20 @@ public static class UpdateUserProfileCommandHandler
         // Update profile fields
         if (request.PreferredFantasyThemes != null)
         {
-            profile.PreferredFantasyThemes = request.PreferredFantasyThemes.ToList();
+            // Validate fantasy themes
+            foreach (var t in request.PreferredFantasyThemes)
+            {
+                if (FantasyTheme.FromValue(t) == null)
+                    throw new ValidationException("preferredFantasyThemes", $"Invalid fantasy theme: {t}");
+            }
+            profile.PreferredFantasyThemes = request.PreferredFantasyThemes;
         }
 
         if (!string.IsNullOrWhiteSpace(request.AgeGroup))
         {
-            var allAgeGroupIds = AgeGroup.All.Select(a => a.Id).ToList();
-            if (!allAgeGroupIds.Contains(request.AgeGroup))
+            if (!AgeGroupConstants.GetAll().Contains(request.AgeGroup))
             {
-                throw new ArgumentException($"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", allAgeGroupIds)}");
+                throw new ValidationException("ageGroup", $"Invalid age group: {request.AgeGroup}. Must be one of: {string.Join(", ", AgeGroupConstants.GetAll())}");
             }
 
             profile.AgeGroupId = request.AgeGroup;
@@ -92,12 +100,12 @@ public static class UpdateUserProfileCommandHandler
         profile.UpdatedAt = DateTime.UtcNow;
 
         // Update in repository
-        await repository.UpdateAsync(profile);
+        await repository.UpdateAsync(profile, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);
 
-        logger.LogInformation("Updated user profile {ProfileId}", profile.Id);
+        logger.LogInformation("Updated user profile {ProfileId}", LogAnonymizer.HashId(profile.Id));
 
         return profile;
     }

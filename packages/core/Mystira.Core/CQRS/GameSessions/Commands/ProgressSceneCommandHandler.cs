@@ -1,6 +1,12 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Exceptions;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using BusinessRuleException = Mystira.Shared.Exceptions.BusinessRuleException;
+using NotFoundException = Mystira.Shared.Exceptions.NotFoundException;
+using ValidationException = Mystira.Shared.Exceptions.ValidationException;
 
 namespace Mystira.Core.CQRS.GameSessions.Commands;
 
@@ -27,15 +33,15 @@ public static class ProgressSceneCommandHandler
         // Validate request
         if (string.IsNullOrEmpty(request.SessionId))
         {
-            throw new ArgumentException("SessionId is required");
+            throw new ValidationException("sessionId", "SessionId is required");
         }
 
         if (string.IsNullOrEmpty(request.SceneId))
         {
-            throw new ArgumentException("SceneId is required");
+            throw new ValidationException("sceneId", "SceneId is required");
         }
 
-        var session = await repository.GetByIdAsync(request.SessionId);
+        var session = await repository.GetByIdAsync(request.SessionId, ct);
         if (session == null)
         {
             logger.LogWarning("Session not found: {SessionId}", request.SessionId);
@@ -45,14 +51,14 @@ public static class ProgressSceneCommandHandler
         // Verify session is in progress
         if (session.Status != SessionStatus.InProgress)
         {
-            throw new InvalidOperationException($"Cannot progress scene in session with status: {session.Status}");
+            throw new BusinessRuleException("SessionNotInProgress", $"Cannot progress scene in session with status: {session.Status}");
         }
 
         // Update current scene
         session.CurrentSceneId = request.SceneId;
 
         // Update in repository
-        await repository.UpdateAsync(session);
+        await repository.UpdateAsync(session, ct);
 
         // Persist changes
         await unitOfWork.SaveChangesAsync(ct);

@@ -24,6 +24,7 @@
 
     <!-- Build configuration -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <IsPackable>false</IsPackable>
     <IncludeSymbols>true</IncludeSymbols>

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.CQRS.Common.Responses;
 using Mystira.Core.Ports.Messaging;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Discord.Commands;
 
@@ -10,14 +11,6 @@ namespace Mystira.Core.CQRS.Discord.Commands;
 /// </summary>
 public static class SendDiscordEmbedCommandHandler
 {
-    /// <summary>
-    /// Handles the SendDiscordEmbedCommand.
-    /// </summary>
-    /// <param name="command">The command to handle.</param>
-    /// <param name="chatBotService">The chat bot service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>A command response indicating success or failure.</returns>
     public static async Task<CommandResponse> Handle(
         SendDiscordEmbedCommand command,
         IChatBotService chatBotService,
@@ -25,7 +18,7 @@ public static class SendDiscordEmbedCommandHandler
         CancellationToken ct)
     {
         if (chatBotService == null)
-            throw new ArgumentNullException(nameof(chatBotService));
+            throw new ValidationException("chatBotService", "chatBotService is required");
 
         if (!chatBotService.IsConnected)
         {

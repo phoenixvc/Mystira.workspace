@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.MediaAssets.Queries;
 
@@ -9,14 +11,6 @@ namespace Mystira.Core.CQRS.MediaAssets.Queries;
 /// </summary>
 public static class GetMediaAssetQueryHandler
 {
-    /// <summary>
-    /// Handles the GetMediaAssetQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The media asset repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The media asset if found; otherwise, null.</returns>
     public static async Task<MediaAsset?> Handle(
         GetMediaAssetQuery request,
         IMediaAssetRepository repository,
@@ -24,7 +18,7 @@ public static class GetMediaAssetQueryHandler
         CancellationToken ct)
     {
         // MediaId is an external identifier stored in the MediaAsset document; do not use the DB primary key.
-        var media = await repository.GetByMediaIdAsync(request.MediaId);
+        var media = await repository.GetByMediaIdAsync(request.MediaId, ct);
         if (media == null)
         {
             logger.LogDebug("Media asset not found by MediaId {MediaId}", request.MediaId);

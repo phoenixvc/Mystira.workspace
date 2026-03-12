@@ -1,9 +1,10 @@
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.GameSessions.Commands;
 
 /// <summary>
 /// Command to pause an active game session
 /// </summary>
-/// <param name="SessionId">The unique identifier of the game session to pause.</param>
 public record PauseGameSessionCommand(string SessionId) : ICommand<GameSession?>;

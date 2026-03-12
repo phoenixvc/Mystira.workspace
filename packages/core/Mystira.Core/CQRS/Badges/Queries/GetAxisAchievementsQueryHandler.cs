@@ -1,4 +1,7 @@
 using Mystira.Core.Ports.Data;
+using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 using Mystira.Contracts.App.Responses.Badges;
 
 namespace Mystira.Core.CQRS.Badges.Queries;
@@ -19,17 +22,21 @@ public static class GetAxisAchievementsQueryHandler
         ICompassAxisRepository axisRepository,
         CancellationToken ct)
     {
-        var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId);
-        var axisDefinitions = await axisRepository.GetAllAsync();
+        var achievements = await axisAchievementRepository.GetByAgeGroupAsync(query.AgeGroupId, ct);
+        var axes = await axisRepository.GetAllAsync();
 
-        var axisLookup = axisDefinitions
-            .SelectMany(a => new[] { (Key: a.Id, Value: a), (Key: a.Name, Value: a) })
-            .Where(x => !string.IsNullOrWhiteSpace(x.Key))
-            .ToDictionary(x => x.Key, x => x.Value, StringComparer.OrdinalIgnoreCase);
+        var axisLookup = new Dictionary<string, CompassAxisDefinition>(StringComparer.OrdinalIgnoreCase);
+        foreach (var a in axes)
+        {
+            if (!string.IsNullOrWhiteSpace(a.Id))
+                axisLookup.TryAdd(a.Id, a);
+            if (!string.IsNullOrWhiteSpace(a.Name))
+                axisLookup.TryAdd(a.Name, a);
+        }
 
         return achievements
             .OrderBy(a => a.CompassAxisId)
-            .ThenBy(a => a.CurrentValue)
+            .ThenBy(a => a.AxesDirection)
             .Select(a =>
             {
                 axisLookup.TryGetValue(a.CompassAxisId, out var axis);
@@ -37,17 +44,14 @@ public static class GetAxisAchievementsQueryHandler
                     ? axis.Name
                     : (axis?.Id ?? a.CompassAxisId);
 
-                // Determine direction based on current value
-                var direction = a.CurrentValue >= 0 ? "positive" : "negative";
-
                 return new AxisAchievementResponse
                 {
                     Id = a.Id,
-                    AgeGroupId = string.Empty, // AxisAchievement doesn't have AgeGroupId
+                    AgeGroupId = a.AgeGroupId,
                     CompassAxisId = a.CompassAxisId,
                     CompassAxisName = axisName,
-                    AxesDirection = direction,
-                    Description = $"Highest: {a.HighestValue}, Lowest: {a.LowestValue}, Current: {a.CurrentValue}"
+                    AxesDirection = a.AxesDirection,
+                    Description = a.Description ?? string.Empty
                 };
             })
             .ToList();

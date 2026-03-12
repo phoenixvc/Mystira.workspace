@@ -1,13 +1,12 @@
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Royalties.Commands;
 
 /// <summary>
 /// Command to pay royalties to an IP Asset
 /// </summary>
-/// <param name="IpAssetId">The unique identifier of the IP asset receiving royalties.</param>
-/// <param name="Amount">The amount of royalties to pay.</param>
-/// <param name="PayerReference">Optional reference information from the payer.</param>
 public record PayRoyaltyCommand(
     string IpAssetId,
     decimal Amount,

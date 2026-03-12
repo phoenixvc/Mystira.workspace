@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Accounts.Queries;
 
@@ -20,8 +22,8 @@ public static class GetAccountByEmailQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        var account = await repository.GetByEmailAsync(query.Email);
-        logger.LogDebug("Retrieved account by email {Email}", query.Email);
+        var account = await repository.GetByEmailAsync(query.Email, ct);
+        logger.LogDebug("Retrieved account by email lookup: {Found}", account != null ? "found" : "not found");
         return account;
     }
 }

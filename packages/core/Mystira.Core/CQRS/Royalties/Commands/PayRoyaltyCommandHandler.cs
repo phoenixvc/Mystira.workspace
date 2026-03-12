@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Royalties.Commands;
 
@@ -9,14 +12,6 @@ namespace Mystira.Core.CQRS.Royalties.Commands;
 /// </summary>
 public static class PayRoyaltyCommandHandler
 {
-    /// <summary>
-    /// Handles the PayRoyaltyCommand.
-    /// </summary>
-    /// <param name="request">The command to handle.</param>
-    /// <param name="storyProtocolService">The Story Protocol service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The royalty payment result.</returns>
     public static async Task<RoyaltyPaymentResult> Handle(
         PayRoyaltyCommand request,
         IStoryProtocolService storyProtocolService,
@@ -25,12 +20,12 @@ public static class PayRoyaltyCommandHandler
     {
         if (string.IsNullOrWhiteSpace(request.IpAssetId))
         {
-            throw new ArgumentException("IP Asset ID cannot be null or empty", nameof(request.IpAssetId));
+            throw new ValidationException("ipAssetId", "IP Asset ID cannot be null or empty");
         }
 
         if (request.Amount <= 0)
         {
-            throw new ArgumentException("Amount must be greater than zero", nameof(request.Amount));
+            throw new ValidationException("amount", "Amount must be greater than zero");
         }
 
         logger.LogInformation(

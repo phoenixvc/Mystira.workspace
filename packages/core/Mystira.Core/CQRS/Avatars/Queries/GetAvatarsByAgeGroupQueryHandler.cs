@@ -10,14 +10,6 @@ namespace Mystira.Core.CQRS.Avatars.Queries;
 /// </summary>
 public static class GetAvatarsByAgeGroupQueryHandler
 {
-    /// <summary>
-    /// Handles the GetAvatarsByAgeGroupQuery.
-    /// </summary>
-    /// <param name="query">The query to handle.</param>
-    /// <param name="repository">The avatar configuration file repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The avatar configuration response for the specified age group.</returns>
     public static async Task<AvatarConfigurationResponse?> Handle(
         GetAvatarsByAgeGroupQuery query,
         IAvatarConfigurationFileRepository repository,

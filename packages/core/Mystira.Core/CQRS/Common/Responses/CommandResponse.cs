@@ -1,4 +1,4 @@
-namespace Mystira.Core.CQRS.Common.Responses;
+﻿namespace Mystira.Core.CQRS.Common.Responses;
 
 /// <summary>
 /// Simple response for commands that return success status and message.

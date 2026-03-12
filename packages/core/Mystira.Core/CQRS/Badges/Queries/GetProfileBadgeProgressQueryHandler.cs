@@ -1,5 +1,6 @@
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Badges;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Badges.Queries;
 
@@ -21,29 +22,29 @@ public static class GetProfileBadgeProgressQueryHandler
         IUserProfileRepository profileRepository,
         CancellationToken ct)
     {
-        var profile = await profileRepository.GetByIdAsync(query.ProfileId);
+        var profile = await profileRepository.GetByIdAsync(query.ProfileId, ct);
         if (profile == null) return null;
 
-        var ageGroupId = profile.AgeGroup?.Value ?? "6-9";
+        var ageGroupId = profile.AgeGroupId ?? AgeGroupConstants.MiddleChildhood;
 
         // Retrieve badges for the age group. Some Cosmos providers may attempt to use
         // ORDER BY in the query which requires a composite index. To avoid runtime
         // failures when composite indexes are not yet deployed, always perform
         // ordering in-memory here.
-        var allBadges = await badgeRepository.GetByAgeGroupAsync(ageGroupId);
+        var allBadges = await badgeRepository.GetByAgeGroupAsync(ageGroupId, ct);
 
         var badgesByAxis = allBadges
-            .Where(b => !string.IsNullOrEmpty(b.CompassAxisId))
+            .Where(b => b.CompassAxisId != null)
             .GroupBy(b => b.CompassAxisId!)
             .ToDictionary(
                 g => g.Key,
                 g => g.OrderBy(b => b.TierOrder).ToList()
             );
 
-        var userBadges = (await userBadgeRepository.GetByUserProfileIdAsync(query.ProfileId)).ToList();
+        var userBadges = (await userBadgeRepository.GetByUserProfileIdAsync(query.ProfileId, ct)).ToList();
 
-        var axisDefinitions = await axisRepository.GetAllAsync();
-        var axisDictionary = axisDefinitions.ToDictionary(a => a.Id, a => a);
+        var axes = await axisRepository.GetAllAsync();
+        var axisDictionary = axes.ToDictionary(a => a.Id, a => a);
 
         var response = new BadgeProgressResponse
         {
@@ -53,7 +54,7 @@ public static class GetProfileBadgeProgressQueryHandler
 
         foreach (var (axisId, badges) in badgesByAxis.OrderBy(x => x.Key))
         {
-            var axis = axisDictionary.TryGetValue(axisId ?? string.Empty, out var a) ? a : null;
+            var axis = !string.IsNullOrEmpty(axisId) && axisDictionary.TryGetValue(axisId, out var a) ? a : null;
             var axisName = axis?.Name ?? axisId;
 
             // Derive current score for this axis from earned badges' values (max of TriggerValue/Threshold)
@@ -61,21 +62,21 @@ public static class GetProfileBadgeProgressQueryHandler
             var axisUserBadges = userBadges
                 .Where(ub => string.Equals(ub.Axis, axisId, StringComparison.OrdinalIgnoreCase)
                              || string.Equals(ub.Axis, axisName, StringComparison.OrdinalIgnoreCase))
-                .OrderByDescending(ub => Math.Max(ub.TriggerValue ?? 0, ub.Threshold ?? 0))
+                .OrderByDescending(ub => Math.Max(ub.TriggerValue ?? 0f, ub.Threshold ?? 0))
                 .ThenByDescending(ub => ub.EarnedAt)
                 .ToList();
 
             var currentScore = axisUserBadges
-                .Select(ub => Math.Max(ub.TriggerValue ?? 0, ub.Threshold ?? 0))
-                .DefaultIfEmpty(0)
+                .Select(ub => Math.Max(ub.TriggerValue ?? 0f, ub.Threshold ?? 0))
+                .DefaultIfEmpty(0f)
                 .Max();
 
             var axisTiers = new List<BadgeTierProgressResponse>();
             foreach (var badge in badges)
             {
-                var requiredScore = badge.RequiredScore ?? 0;
+                var requiredScore = (float)(badge.RequiredScore ?? 0);
                 var matchedBadge = axisUserBadges
-                    .FirstOrDefault(ub => Math.Max(ub.TriggerValue ?? 0, ub.Threshold ?? 0) >= requiredScore);
+                    .FirstOrDefault(ub => Math.Max(ub.TriggerValue ?? 0f, ub.Threshold ?? 0) >= requiredScore);
                 var isEarned = matchedBadge != null;
 
                 axisTiers.Add(new BadgeTierProgressResponse
@@ -96,9 +97,9 @@ public static class GetProfileBadgeProgressQueryHandler
 
             response.AxisProgresses.Add(new AxisProgressResponse
             {
-                CompassAxisId = axisId ?? string.Empty,
+                CompassAxisId = axisId,
                 CompassAxisName = axisName,
-                CurrentScore = (int)Math.Round((double)currentScore, MidpointRounding.AwayFromZero),
+                CurrentScore = (int)Math.Round(currentScore, MidpointRounding.AwayFromZero),
                 Tiers = axisTiers
             });
         }

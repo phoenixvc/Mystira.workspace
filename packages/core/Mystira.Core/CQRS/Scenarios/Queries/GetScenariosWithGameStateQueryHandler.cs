@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Scenarios;
 using Mystira.Domain.Enums;
+using ScenarioGameState = Mystira.Contracts.App.Responses.Scenarios.ScenarioGameState;
 
 namespace Mystira.Core.CQRS.Scenarios.Queries;
 
@@ -35,7 +36,7 @@ public static class GetScenariosWithGameStateQueryHandler
             .ToListAsync(ct);
 
         // 2. Get all game sessions for this account
-        var gameSessions = await gameSessionRepository.GetByAccountIdAsync(query.AccountId);
+        var gameSessions = await gameSessionRepository.GetByAccountIdAsync(query.AccountId, ct);
 
         // 3. Build response with game state
         var scenariosWithState = scenarios.Select(scenario =>
@@ -56,10 +57,10 @@ public static class GetScenariosWithGameStateQueryHandler
             var hasCompletedSession = sessions.Any(gs => gs.Status == SessionStatus.Completed);
 
             var gameState = hasActiveSession
-                ? Mystira.Domain.Enums.ScenarioGameState.InProgress
+                ? ScenarioGameState.InProgress
                 : hasCompletedSession
-                    ? Mystira.Domain.Enums.ScenarioGameState.Completed
-                    : Mystira.Domain.Enums.ScenarioGameState.NotStarted;
+                    ? ScenarioGameState.Completed
+                    : ScenarioGameState.NotStarted;
 
             return new ScenarioWithGameState
             {
@@ -69,15 +70,13 @@ public static class GetScenariosWithGameStateQueryHandler
                 AgeGroup = scenario.AgeGroupId,
                 Difficulty = scenario.Difficulty.ToString(),
                 SessionLength = scenario.SessionLength.ToString(),
-                CoreAxes = scenario.CoreAxes ?? new List<string>(),
+                CoreAxes = scenario.CoreAxes?.ToList() ?? new List<string>(),
                 Tags = scenario.Tags?.ToList() ?? new List<string>(),
-                Archetypes = scenario.Archetypes ?? new List<string>(),
+                Archetypes = scenario.Archetypes?.ToList() ?? new List<string>(),
                 GameState = gameState.ToString(),
                 LastPlayedAt = lastSession?.StartTime,
                 PlayCount = sessions.Count,
-                Image = scenario.Image,
-                IsFeatured = scenario.IsFeatured,
-                ThumbnailUrl = scenario.ThumbnailUrl
+                Image = scenario.Image
             };
         }).ToList();
 

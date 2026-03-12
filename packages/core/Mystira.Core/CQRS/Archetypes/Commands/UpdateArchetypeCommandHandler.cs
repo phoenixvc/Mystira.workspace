@@ -1,7 +1,10 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.CQRS.MasterData;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Services;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Archetypes.Commands;
 
@@ -10,16 +13,6 @@ namespace Mystira.Core.CQRS.Archetypes.Commands;
 /// </summary>
 public static class UpdateArchetypeCommandHandler
 {
-    /// <summary>
-    /// Handles the UpdateArchetypeCommand.
-    /// </summary>
-    /// <param name="command">The command to handle.</param>
-    /// <param name="repository">The archetype repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="cacheInvalidation">The cache invalidation service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The updated archetype definition if found; otherwise, null.</returns>
     public static async Task<ArchetypeDefinition?> Handle(
         UpdateArchetypeCommand command,
         IArchetypeRepository repository,
@@ -28,26 +21,14 @@ public static class UpdateArchetypeCommandHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Updating archetype with id: {Id}", command.Id);
-
-        var existingArchetype = await repository.GetByIdAsync(command.Id);
-        if (existingArchetype == null)
-        {
-            logger.LogWarning("Archetype with id {Id} not found", command.Id);
-            return null;
-        }
-
-        existingArchetype.Name = command.Name;
-        existingArchetype.Description = command.Description;
-        existingArchetype.UpdatedAt = DateTime.UtcNow;
-
-        await repository.UpdateAsync(existingArchetype);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:Archetypes");
-
-        logger.LogInformation("Successfully updated archetype with id: {Id}", command.Id);
-        return existingArchetype;
+        return await MasterDataCommandHelper.UpdateAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:Archetypes", "Archetype",
+            existing =>
+            {
+                existing.Name = command.Name;
+                existing.Description = command.Description;
+                existing.UpdatedAt = DateTime.UtcNow;
+            }, ct);
     }
 }

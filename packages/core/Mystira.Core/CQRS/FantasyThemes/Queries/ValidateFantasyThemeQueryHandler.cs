@@ -20,7 +20,7 @@ public static class ValidateFantasyThemeQueryHandler
         CancellationToken ct)
     {
         logger.LogInformation("Validating fantasy theme: {Name}", query.Name);
-        var isValid = await repository.ExistsByNameAsync(query.Name);
+        var isValid = await repository.ExistsByNameAsync(query.Name, ct);
         logger.LogInformation("Fantasy theme '{Name}' is {Status}", query.Name, isValid ? "valid" : "invalid");
         return isValid;
     }

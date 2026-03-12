@@ -1,10 +1,11 @@
 using Mystira.Contracts.App.Requests.Scenarios;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.Scenarios.Commands;
 
 /// <summary>
 /// Command to create a new scenario (write operation)
 /// </summary>
-/// <param name="Request">The request containing the scenario data to create.</param>
 public record CreateScenarioCommand(CreateScenarioRequest Request) : ICommand<Scenario>;

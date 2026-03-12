@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.CQRS.MasterData;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Services;
 
@@ -9,40 +10,16 @@ namespace Mystira.Core.CQRS.EchoTypes.Commands;
 /// </summary>
 public static class DeleteEchoTypeCommandHandler
 {
-    /// <summary>
-    /// Handles the DeleteEchoTypeCommand.
-    /// </summary>
-    /// <param name="command">The command to handle.</param>
-    /// <param name="repository">The echo type repository.</param>
-    /// <param name="unitOfWork">The unit of work for transaction management.</param>
-    /// <param name="cacheInvalidation">The cache invalidation service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>True if the echo type was deleted; otherwise, false.</returns>
     public static async Task<bool> Handle(
         DeleteEchoTypeCommand command,
         IEchoTypeRepository repository,
         IUnitOfWork unitOfWork,
         IQueryCacheInvalidationService cacheInvalidation,
-        ILogger<DeleteEchoTypeCommand> logger,
+        ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Deleting echo type with id: {Id}", command.Id);
-
-        var echoType = await repository.GetByIdAsync(command.Id);
-        if (echoType == null)
-        {
-            logger.LogWarning("Echo type with id {Id} not found", command.Id);
-            return false;
-        }
-
-        await repository.DeleteAsync(command.Id);
-        await unitOfWork.SaveChangesAsync(ct);
-
-        // Invalidate cache
-        cacheInvalidation.InvalidateCacheByPrefix("MasterData:EchoTypes");
-
-        logger.LogInformation("Successfully deleted echo type with id: {Id}", command.Id);
-        return true;
+        return await MasterDataCommandHelper.DeleteAsync(
+            command.Id, repository, unitOfWork, cacheInvalidation, logger,
+            "MasterData:EchoTypes", "Echo type", ct);
     }
 }

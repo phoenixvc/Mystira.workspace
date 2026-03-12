@@ -5,6 +5,5 @@ namespace Mystira.Core.CQRS.MediaAssets.Queries;
 /// Returns the file stream, content type, and filename.
 /// Not cached as file downloads are transient operations.
 /// </summary>
-/// <param name="MediaId">The unique identifier of the media file.</param>
 public record GetMediaFileQuery(string MediaId)
     : IQuery<(Stream stream, string contentType, string fileName)?>;

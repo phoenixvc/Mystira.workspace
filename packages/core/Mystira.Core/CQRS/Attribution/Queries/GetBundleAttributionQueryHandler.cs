@@ -3,6 +3,9 @@ using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 using Mystira.Contracts.App.Responses.Attribution;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Attribution.Queries;
 
@@ -11,14 +14,6 @@ namespace Mystira.Core.CQRS.Attribution.Queries;
 /// </summary>
 public static class GetBundleAttributionQueryHandler
 {
-    /// <summary>
-    /// Handles the GetBundleAttributionQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="repository">The content bundle repository.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The content attribution response if the bundle is found; otherwise, null.</returns>
     public static async Task<ContentAttributionResponse?> Handle(
         GetBundleAttributionQuery request,
         IContentBundleRepository repository,
@@ -27,10 +22,10 @@ public static class GetBundleAttributionQueryHandler
     {
         if (string.IsNullOrWhiteSpace(request.BundleId))
         {
-            throw new ArgumentException("Bundle ID cannot be null or empty", nameof(request.BundleId));
+            throw new ValidationException("bundleId", "Bundle ID cannot be null or empty");
         }
 
-        var bundle = await repository.GetByIdAsync(request.BundleId);
+        var bundle = await repository.GetByIdAsync(request.BundleId, ct);
 
         if (bundle == null)
         {

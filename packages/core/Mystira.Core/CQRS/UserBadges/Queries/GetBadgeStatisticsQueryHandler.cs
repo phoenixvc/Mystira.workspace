@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using Mystira.Core.Helpers;
 using Mystira.Core.Ports.Data;
 
 namespace Mystira.Core.CQRS.UserBadges.Queries;
@@ -20,9 +21,9 @@ public static class GetBadgeStatisticsQueryHandler
         ILogger logger,
         CancellationToken ct)
     {
-        logger.LogInformation("Getting badge statistics for user {UserProfileId}", query.UserProfileId);
+        logger.LogInformation("Getting badge statistics for user {UserProfileId}", LogAnonymizer.HashId(query.UserProfileId));
 
-        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId);
+        var badges = await repository.GetByUserProfileIdAsync(query.UserProfileId, ct);
 
         var statistics = badges
             .Where(b => !string.IsNullOrEmpty(b.Axis))

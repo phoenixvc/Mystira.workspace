@@ -19,7 +19,7 @@ public static class GetBadgeImageQueryHandler
     {
         var decodedId = Uri.UnescapeDataString(query.ImageId);
 
-        var image = await badgeImageRepository.GetByImageIdAsync(decodedId)
+        var image = await badgeImageRepository.GetByImageIdAsync(decodedId, ct)
                     ?? await badgeImageRepository.GetByIdAsync(decodedId);
 
         if (image?.ImageData is not { Length: > 0 }) return null;

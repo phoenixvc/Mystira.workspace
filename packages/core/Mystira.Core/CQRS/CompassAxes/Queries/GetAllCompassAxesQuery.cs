@@ -1,5 +1,7 @@
 using Mystira.Core.Interfaces;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
 
 namespace Mystira.Core.CQRS.CompassAxes.Queries;
 
@@ -8,13 +10,6 @@ namespace Mystira.Core.CQRS.CompassAxes.Queries;
 /// </summary>
 public record GetAllCompassAxesQuery : IQuery<List<CompassAxis>>, ICacheableQuery
 {
-    /// <summary>
-    /// Gets the cache key for storing this query result.
-    /// </summary>
     public string CacheKey => "MasterData:CompassAxes:All";
-
-    /// <summary>
-    /// Gets the cache duration in seconds.
-    /// </summary>
-    public int CacheDurationSeconds => 3600; // 1 hour - master data rarely changes
+    public int CacheDurationSeconds => CacheDefaults.MasterDataSeconds;
 }

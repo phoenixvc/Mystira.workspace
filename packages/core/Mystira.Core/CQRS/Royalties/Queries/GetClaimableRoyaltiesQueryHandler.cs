@@ -1,6 +1,9 @@
 using Microsoft.Extensions.Logging;
 using Mystira.Core.Ports;
 using Mystira.Domain.Models;
+using Mystira.Domain.Enums;
+using Mystira.Domain.ValueObjects;
+using Mystira.Shared.Exceptions;
 
 namespace Mystira.Core.CQRS.Royalties.Queries;
 
@@ -9,14 +12,6 @@ namespace Mystira.Core.CQRS.Royalties.Queries;
 /// </summary>
 public static class GetClaimableRoyaltiesQueryHandler
 {
-    /// <summary>
-    /// Handles the GetClaimableRoyaltiesQuery.
-    /// </summary>
-    /// <param name="request">The query to handle.</param>
-    /// <param name="storyProtocolService">The Story Protocol service.</param>
-    /// <param name="logger">The logger instance.</param>
-    /// <param name="ct">The cancellation token.</param>
-    /// <returns>The royalty balance information.</returns>
     public static async Task<RoyaltyBalance> Handle(
         GetClaimableRoyaltiesQuery request,
         IStoryProtocolService storyProtocolService,
@@ -25,7 +20,7 @@ public static class GetClaimableRoyaltiesQueryHandler
     {
         if (string.IsNullOrWhiteSpace(request.IpAssetId))
         {
-            throw new ArgumentException("IP Asset ID cannot be null or empty", nameof(request.IpAssetId));
+            throw new ValidationException("ipAssetId", "IP Asset ID cannot be null or empty");
         }
 
         logger.LogInformation("Getting claimable royalties for IP Asset: {IpAssetId}", request.IpAssetId);
