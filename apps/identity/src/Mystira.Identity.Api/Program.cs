@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Mystira.App.Application;
+using Mystira.Core;
 using Mystira.Core.CQRS.Auth.Commands;
 using Mystira.Core.Ports.Data;
 using Mystira.Core.Ports.Services;
@@ -108,7 +108,7 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddApplicationServices();
+builder.Services.AddCoreApplicationServices();
 
 builder.Host.UseWolverine(opts =>
 {

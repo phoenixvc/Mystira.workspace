@@ -1,7 +1,7 @@
 using Mystira.App.Api.Adapters;
 using Mystira.App.Api.Configuration;
 using Mystira.App.Api.Services;
-using Mystira.App.Application;
+using Mystira.Core;
 using Mystira.Core.Ports;
 using Mystira.Core.Ports.Media;
 using Mystira.Core.Ports.Messaging;
@@ -137,7 +137,7 @@ try
     builder.Services.AddScoped<MasterDataSeederService>();
 
     // Application layer services (use cases, validators, application services)
-    builder.Services.AddApplicationServices();
+    builder.Services.AddCoreApplicationServices();
 
     // Story Protocol / Chain service (feature flag: stub vs gRPC)
     builder.Services.AddChainServices(builder.Configuration);

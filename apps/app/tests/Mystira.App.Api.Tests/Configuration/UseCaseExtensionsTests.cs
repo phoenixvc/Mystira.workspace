@@ -1,6 +1,6 @@
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Mystira.App.Application;
+using Mystira.Core;
 using Mystira.Core.Ports;
 using Mystira.Core.UseCases.Accounts;
 using Mystira.Core.UseCases.Contributors;
@@ -14,11 +14,11 @@ namespace Mystira.App.Api.Tests.Configuration;
 public class ApplicationServicesRegistrationTests
 {
     [Fact]
-    public void AddApplicationServices_RegistersScenarioUseCases()
+    public void AddCoreApplicationServices_RegistersScenarioUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(GetScenariosUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(GetScenarioUseCase));
@@ -29,11 +29,11 @@ public class ApplicationServicesRegistrationTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersGameSessionUseCases()
+    public void AddCoreApplicationServices_RegistersGameSessionUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(ICreateGameSessionUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(MakeChoiceUseCase));
@@ -43,11 +43,11 @@ public class ApplicationServicesRegistrationTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersAccountUseCases()
+    public void AddCoreApplicationServices_RegistersAccountUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(ICreateAccountUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(GetAccountUseCase));
@@ -55,11 +55,11 @@ public class ApplicationServicesRegistrationTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersUserProfileUseCases()
+    public void AddCoreApplicationServices_RegistersUserProfileUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(CreateUserProfileUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(UpdateUserProfileUseCase));
@@ -67,11 +67,11 @@ public class ApplicationServicesRegistrationTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersMediaUseCases()
+    public void AddCoreApplicationServices_RegistersMediaUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(GetMediaUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(UploadMediaUseCase));
@@ -79,45 +79,45 @@ public class ApplicationServicesRegistrationTests
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersContributorUseCases()
+    public void AddCoreApplicationServices_RegistersContributorUseCases()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().Contain(d => d.ServiceType == typeof(RegisterScenarioIpAssetUseCase));
         services.Should().Contain(d => d.ServiceType == typeof(RegisterBundleIpAssetUseCase));
     }
 
     [Fact]
-    public void AddApplicationServices_DoesNotRegisterStoryProtocol_RegisteredByChainServices()
+    public void AddCoreApplicationServices_DoesNotRegisterStoryProtocol_RegisteredByChainServices()
     {
         // IStoryProtocolService is registered by AddChainServices() in the API host,
-        // not by AddApplicationServices() - this is intentional for feature flag support.
+        // not by AddCoreApplicationServices() - this is intentional for feature flag support.
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         services.Should().NotContain(d => d.ServiceType == typeof(IStoryProtocolService));
     }
 
     [Fact]
-    public void AddApplicationServices_RegistersUseCasesAsScopedLifetime()
+    public void AddCoreApplicationServices_RegistersUseCasesAsScopedLifetime()
     {
         var services = new ServiceCollection();
 
-        services.AddApplicationServices();
+        services.AddCoreApplicationServices();
 
         var descriptor = services.Single(d => d.ServiceType == typeof(AddCompletedScenarioUseCase));
         descriptor.Lifetime.Should().Be(ServiceLifetime.Scoped);
     }
 
     [Fact]
-    public void AddApplicationServices_ReturnsServiceCollection()
+    public void AddCoreApplicationServices_ReturnsServiceCollection()
     {
         var services = new ServiceCollection();
 
-        var result = services.AddApplicationServices();
+        var result = services.AddCoreApplicationServices();
 
         result.Should().BeSameAs(services);
     }
