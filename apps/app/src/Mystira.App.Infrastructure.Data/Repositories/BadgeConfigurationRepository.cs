@@ -14,7 +14,7 @@ public class BadgeConfigurationRepository : Repository<BadgeConfiguration>, IBad
     public async Task<IEnumerable<BadgeConfiguration>> GetByAxisAsync(string axis, CancellationToken ct = default)
     {
         return await _dbSet
-            .Where(x => x.Axis == axis)
+            .Where(x => (string)x.Axis == axis)
             .ToListAsync(ct);
     }
 }

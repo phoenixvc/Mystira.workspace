@@ -35,13 +35,13 @@ public class ApiTokenService : IApiTokenService
 
         var claims = new List<Claim>
         {
-            new("account_id", account.Id),
-            new(JwtRegisteredClaimNames.Sub, account.Id),
-            new(JwtRegisteredClaimNames.Email, account.Email),
-            new(JwtRegisteredClaimNames.UniqueName, account.DisplayName),
-            new(ClaimTypes.Name, account.DisplayName),
-            new(ClaimTypes.Email, account.Email),
-            new(ClaimTypes.Role, account.Role),
+            new("account_id", account.Id ?? string.Empty),
+            new(JwtRegisteredClaimNames.Sub, account.Id ?? string.Empty),
+            new(JwtRegisteredClaimNames.Email, account.Email ?? string.Empty),
+            new(JwtRegisteredClaimNames.UniqueName, account.DisplayName ?? string.Empty),
+            new(ClaimTypes.Name, account.DisplayName ?? string.Empty),
+            new(ClaimTypes.Email, account.Email ?? string.Empty),
+            new(ClaimTypes.Role, account.Role ?? string.Empty),
             new("auth_provider", authProvider)
         };
 

@@ -78,6 +78,20 @@ module "shared_storage" {
 }
 
 # =============================================================================
+# Data Sources for Existing Shared Resources
+# =============================================================================
+
+data "azurerm_key_vault" "shared" {
+  name                = "mys-dev-app-kv-san"
+  resource_group_name = "mys-dev-app-rg-san"
+}
+
+data "azurerm_redis_cache" "shared" {
+  name                = "mys-dev-core-cache"
+  resource_group_name = "mys-dev-core-rg-san"
+}
+
+# =============================================================================
 # App-Specific Resources (in app-rg)
 # =============================================================================
 
@@ -137,6 +151,20 @@ module "mystira_app" {
   ]
 
   # -----------------------------------------------------------------------------
+  # Key Vault Configuration - USE SHARED
+  # -----------------------------------------------------------------------------
+  use_shared_keyvault = true
+  shared_keyvault_id  = data.azurerm_key_vault.shared.id
+  shared_keyvault_uri = data.azurerm_key_vault.shared.vault_uri
+
+  # -----------------------------------------------------------------------------
+  # Redis Configuration - USE SHARED
+  # -----------------------------------------------------------------------------
+  enable_redis          = true
+  use_shared_redis      = true
+  shared_redis_hostname = data.azurerm_redis_cache.shared.hostname
+
+  # -----------------------------------------------------------------------------
   # Communication Services - USE SHARED (cross-environment)
   # -----------------------------------------------------------------------------
   enable_communication_services = false # Use shared
@@ -176,7 +204,9 @@ module "mystira_app" {
     module.shared_monitoring,
     module.shared_cosmos_db,
     module.shared_storage,
-    module.shared_comms
+    module.shared_comms,
+    data.azurerm_key_vault.shared,
+    data.azurerm_redis_cache.shared
   ]
 }
 

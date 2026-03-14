@@ -75,7 +75,7 @@ variable "workload_identity_enabled" {
 variable "enable_azure_ai" {
   description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 # Common tags for all resources

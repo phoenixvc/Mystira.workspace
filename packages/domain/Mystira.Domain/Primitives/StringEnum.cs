@@ -166,7 +166,7 @@ public abstract class StringEnum<T> : IEquatable<StringEnum<T>>, IComparable<Str
     /// <summary>
     /// Implicit conversion to string.
     /// </summary>
-    public static implicit operator string(StringEnum<T> value) => value.Value;
+    public static implicit operator string(StringEnum<T>? value) => value?.Value ?? string.Empty;
 
     /// <summary>
     /// Equality operator.

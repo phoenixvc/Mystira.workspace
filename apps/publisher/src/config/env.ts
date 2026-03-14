@@ -3,6 +3,7 @@
 interface EnvConfig {
   apiBaseUrl: string;
   adminApiBaseUrl: string;
+  publisherApiBaseUrl: string;
   grpcEndpoint: string;
   enableMockApi: boolean;
   useFakeAuth: boolean;
@@ -33,6 +34,9 @@ export const env: EnvConfig = {
   adminApiBaseUrl:
     getEnvVar("VITE_ADMIN_API_BASE_URL") ||
     `https://${getEnvPrefix()}admin.mystira.app/api`,
+  publisherApiBaseUrl:
+    getEnvVar("VITE_PUBLISHER_API_BASE_URL") ||
+    `https://${getEnvPrefix()}publisher.mystira.app/api`,
   grpcEndpoint:
     getEnvVar("VITE_GRPC_ENDPOINT") ||
     `https://${getEnvPrefix()}chain.mystira.app`,

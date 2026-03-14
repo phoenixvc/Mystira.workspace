@@ -114,8 +114,8 @@ public class ValidationExceptionTests
 
         // Assert
         exception.Errors.Should().HaveCount(1);
-        exception.Errors[0].Field.Should().Be(field);
-        exception.Errors[0].Message.Should().Be(message);
+        exception.Errors.Should().ContainKey(field);
+        exception.Errors[field].Should().Contain(message);
         exception.Details.Should().ContainKey("field");
     }
 

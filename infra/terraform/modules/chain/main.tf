@@ -137,40 +137,26 @@ resource "terraform_data" "chain_data_share" {
 
   provisioner "local-exec" {
     command     = <<-EOT
-      # Get storage account key and use data plane API
-      STORAGE_KEY=$(az storage account keys list \
-        --resource-group "${var.resource_group_name}" \
-        --account-name "${azurerm_storage_account.chain.name}" \
-        --query '[0].value' -o tsv)
+      $key = (az storage account keys list --resource-group "${var.resource_group_name}" --account-name "${azurerm_storage_account.chain.name}" --query '[0].value' -o tsv)
 
-      az storage share create \
-        --name "chain-data-${count.index}" \
-        --account-name "${azurerm_storage_account.chain.name}" \
-        --account-key "$STORAGE_KEY" \
-        --quota ${var.chain_storage_size_gb} \
-        --output none
+      az storage share create --name "chain-data-${count.index}" --account-name "${azurerm_storage_account.chain.name}" --account-key $key --quota ${var.chain_storage_size_gb} --output none 2>$null
     EOT
-    interpreter = ["/bin/bash", "-c"]
+    interpreter = ["pwsh", "-Command"]
   }
 
   provisioner "local-exec" {
     when        = destroy
     command     = <<-EOT
-      # Get storage account key for deletion
-      STORAGE_KEY=$(az storage account keys list \
-        --resource-group "${self.triggers_replace.resource_group}" \
-        --account-name "${self.triggers_replace.storage_account}" \
-        --query '[0].value' -o tsv 2>/dev/null) || true
-
-      if [ -n "$STORAGE_KEY" ]; then
-        az storage share delete \
-          --name "${self.triggers_replace.share_name}" \
-          --account-name "${self.triggers_replace.storage_account}" \
-          --account-key "$STORAGE_KEY" \
-          --output none || true
-      fi
+      try {
+        $key = (az storage account keys list --resource-group "$($self.triggers_replace.resource_group)" --account-name "$($self.triggers_replace.storage_account)" --query '[0].value' -o tsv 2>$null)
+        if ($key) {
+          az storage share delete --name "$($self.triggers_replace.share_name)" --account-name "$($self.triggers_replace.storage_account)" --account-key $key --output none 2>$null
+        }
+      } catch {
+        Write-Host "Ignoring error during destroy: $_"
+      }
     EOT
-    interpreter = ["/bin/bash", "-c"]
+    interpreter = ["pwsh", "-Command"]
   }
 
   depends_on = [time_sleep.wait_for_storage]

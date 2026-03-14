@@ -130,6 +130,7 @@ try
     builder.Services.AddPaymentServices(builder.Configuration);
 
     builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
+    builder.Services.AddMystiraEntraIdAuthentication(builder.Configuration);
 
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddScoped<Mystira.Core.Ports.Services.ICurrentUserService, CurrentUserService>();

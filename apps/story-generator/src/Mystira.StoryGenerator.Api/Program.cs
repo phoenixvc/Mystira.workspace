@@ -156,6 +156,7 @@ builder.Services.AddRateLimiter(options =>
 });
 
 builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddMystiraEntraIdAuthentication(builder.Configuration);
 
 var app = builder.Build();
 

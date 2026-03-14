@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using StackExchange.Redis;
 using Swashbuckle.AspNetCore.SwaggerGen;
@@ -18,6 +17,7 @@ using Mystira.Admin.Api.Configuration;
 using Mystira.Admin.Api.Services;
 using Mystira.Admin.Api.Services.Caching;
 using Mystira.Core.Ports.Data;
+using Mystira.Shared.Configuration;
 using Mystira.Core.Ports.Media;
 using Mystira.Core.Ports.Messaging;
 using Mystira.Core.Services;
@@ -344,195 +344,18 @@ try
     // Register Content Bundle admin service
     builder.Services.AddScoped<IContentBundleAdminService, ContentBundleAdminService>();
 
-    // Configure JWT Authentication - Load from secure configuration only
-    var jwtIssuer = builder.Configuration["JwtSettings:Issuer"];
-    var jwtAudience = builder.Configuration["JwtSettings:Audience"];
-    var jwtRsaPublicKey = builder.Configuration["JwtSettings:RsaPublicKey"];
-    var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
+    // Configure JWT Authentication using shared extension
+    builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
 
-    // Fail fast if JWT configuration is missing in non-development/testing environments
-    if (!builder.Environment.IsDevelopment() && !builder.Environment.IsEnvironment("Testing"))
-    {
-        if (string.IsNullOrWhiteSpace(jwtIssuer))
-        {
-            throw new InvalidOperationException("JWT Issuer (JwtSettings:Issuer) is not configured.");
-        }
-
-        if (string.IsNullOrWhiteSpace(jwtAudience))
-        {
-            throw new InvalidOperationException("JWT Audience (JwtSettings:Audience) is not configured.");
-        }
-
-        // Require at least one signing key method
-        if (string.IsNullOrWhiteSpace(jwtRsaPublicKey) && string.IsNullOrWhiteSpace(jwtKey))
-        {
-            throw new InvalidOperationException(
-                "JWT signing key not configured. Please provide either:\n" +
-                "- JwtSettings:RsaPublicKey for asymmetric RS256 verification (recommended), OR\n" +
-                "- JwtSettings:SecretKey for symmetric HS256 verification (legacy)\n" +
-                "Keys must be loaded from secure stores (Azure Key Vault, etc.).");
-        }
-    }
-
-    // Use defaults only in development
-    jwtIssuer ??= "mystira-admin-api";
-    jwtAudience ??= "mystira-app";
-
-    builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultScheme = "Bearer";
-            options.DefaultAuthenticateScheme = "Bearer";
-            options.DefaultChallengeScheme = "Bearer";
-        })
-        .AddJwtBearer(options =>
-        {
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudience,
-                ClockSkew = TimeSpan.FromMinutes(5),
-                RoleClaimType = "role",
-                NameClaimType = "name"
-            };
-
-            if (!string.IsNullOrWhiteSpace(jwtRsaPublicKey))
-            {
-                // Use RSA public key for asymmetric verification (recommended)
-                // Import the PEM key, export the parameters, then dispose the RSA instance.
-                // RsaSecurityKey is initialized from the key parameters (not the RSA object),
-                // so it remains valid for the lifetime of the application.
-                try
-                {
-                    using var rsa = System.Security.Cryptography.RSA.Create();
-                    rsa.ImportFromPem(jwtRsaPublicKey);
-                    var keyParameters = rsa.ExportParameters(false);
-                    validationParameters.IssuerSigningKey = new RsaSecurityKey(keyParameters);
-                }
-                catch (System.Security.Cryptography.CryptographicException ex)
-                {
-                    throw new InvalidOperationException(
-                        "Failed to load RSA public key. Ensure JwtSettings:RsaPublicKey contains a valid PEM-encoded RSA public key.", ex);
-                }
-                catch (FormatException ex)
-                {
-                    throw new InvalidOperationException(
-                        "Failed to load RSA public key. Ensure JwtSettings:RsaPublicKey contains a valid PEM-encoded RSA public key.", ex);
-                }
-                catch (ArgumentException ex)
-                {
-                    throw new InvalidOperationException(
-                        "Failed to load RSA public key. Ensure JwtSettings:RsaPublicKey contains a valid PEM-encoded RSA public key.", ex);
-                }
-            }
-            else if (!string.IsNullOrWhiteSpace(jwtKey))
-            {
-                // Fall back to symmetric key (legacy)
-                validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-                if (!builder.Environment.IsDevelopment())
-                {
-                    Log.Warning("Using symmetric HS256 JWT signing. Consider migrating to asymmetric RS256 for better security.");
-                }
-            }
-            else if (builder.Environment.IsDevelopment())
-            {
-                // In development, require explicit configuration via user secrets or environment variables
-                // This prevents accidental use of insecure defaults
-                Log.Warning("JWT key not configured for development. Set JwtSettings:SecretKey via user secrets: " +
-                            "dotnet user-secrets set 'JwtSettings:SecretKey' '<your-32+-char-secret>'");
-
-                // Use a generated key per-session for development (not persisted, requires re-login on restart)
-                var devKey = $"DevKey-{Guid.NewGuid():N}-{DateTime.UtcNow:yyyyMMdd}";
-                validationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(devKey));
-                Log.Warning("Using ephemeral development JWT key. Tokens will be invalidated on app restart.");
-            }
-
-            options.TokenValidationParameters = validationParameters;
-
-            // JWT events for security tracking
-            options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
-            {
-                OnAuthenticationFailed = context =>
-                {
-                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                    var ua = context.HttpContext.Request.Headers["User-Agent"].ToString();
-                    var path = context.HttpContext.Request.Path;
-                    logger.LogError(context.Exception, "JWT authentication failed on {Path} (UA: {UserAgent})", path, ua);
-
-                    // Track in security metrics
-                    var securityMetrics = context.HttpContext.RequestServices.GetService<ISecurityMetrics>();
-                    var clientIp = context.HttpContext.Connection.RemoteIpAddress?.ToString();
-                    var reason = context.Exception?.GetType().Name ?? "Unknown";
-                    securityMetrics?.TrackTokenValidationFailed(clientIp, reason);
-
-                    return Task.CompletedTask;
-                },
-                OnTokenValidated = context =>
-                {
-                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                    var userId = context.Principal?.Identity?.Name;
-                    logger.LogInformation("JWT token validated for user: {User}", userId);
-
-                    // Track successful authentication in security metrics
-                    var securityMetrics = context.HttpContext.RequestServices.GetService<ISecurityMetrics>();
-                    securityMetrics?.TrackAuthenticationSuccess("JWT", userId);
-
-                    return Task.CompletedTask;
-                },
-                OnChallenge = context =>
-                {
-                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
-                    logger.LogWarning("JWT challenge on {Path}: {Error} - {Description}", context.HttpContext.Request.Path, context.Error, context.ErrorDescription);
-                    return Task.CompletedTask;
-                }
-            };
-        });
-
-    // ═══════════════════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════════════════════
     // MICROSOFT ENTRA ID (AZURE AD) AUTHENTICATION
-    // ═══════════════════════════════════════════════════════════════════════════════
-    // Add Entra ID authentication if configured (alongside existing Cookie/JWT)
-    var azureAdSection = builder.Configuration.GetSection("AzureAd");
-    var entraIdConfigured = !string.IsNullOrEmpty(azureAdSection["TenantId"]) &&
-                            !string.IsNullOrEmpty(azureAdSection["ClientId"]);
+    // ═══════════════════════════════════════════════════════════════════════════════════════
+    builder.Services.AddMystiraEntraIdAuthentication(builder.Configuration);
 
-    if (entraIdConfigured)
-    {
-        builder.Services.AddAuthentication()
-            .AddMicrosoftIdentityWebApi(azureAdSection, jwtBearerScheme: "AzureAd");
-
-        Log.Information("Microsoft Entra ID authentication configured (TenantId: {TenantId})",
-            azureAdSection["TenantId"]?[..8] + "...");
-    }
-    else
-    {
-        Log.Warning("Microsoft Entra ID authentication not configured. Set AzureAd:TenantId and AzureAd:ClientId to enable.");
-    }
-
-    // ═══════════════════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════════════════════════
     // AUTHORIZATION POLICIES
-    // ═══════════════════════════════════════════════════════════════════════════════
-    builder.Services.AddAuthorization(options =>
-    {
-        // Admin-only policy: requires Admin or SuperAdmin role
-        options.AddPolicy("AdminOnly", policy =>
-            policy.RequireRole("Admin", "SuperAdmin"));
-
-        // Content moderation policy: requires Moderator, Admin, or SuperAdmin role
-        options.AddPolicy("CanModerate", policy =>
-            policy.RequireRole("Moderator", "Admin", "SuperAdmin"));
-
-        // Read-only policy: any authenticated user with a valid role
-        options.AddPolicy("ReadOnly", policy =>
-            policy.RequireRole("Viewer", "Moderator", "Admin", "SuperAdmin"));
-
-        // SuperAdmin-only policy: requires SuperAdmin role (dangerous operations)
-        options.AddPolicy("SuperAdminOnly", policy =>
-            policy.RequireRole("SuperAdmin"));
-    });
+    // ═══════════════════════════════════════════════════════════════════════════════════════
+    builder.Services.AddMystiraAuthorizationPolicies();
 
     // Register data migration options
     builder.Services.Configure<AdminDataMigrationOptions>(

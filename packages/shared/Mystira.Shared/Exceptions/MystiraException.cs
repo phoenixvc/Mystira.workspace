@@ -21,7 +21,7 @@ public class MystiraException : Exception
     /// <summary>
     /// Additional context data for the error.
     /// </summary>
-    public IDictionary<string, object>? Context { get; }
+    public IDictionary<string, object>? Details { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MystiraException"/> class.
@@ -29,19 +29,19 @@ public class MystiraException : Exception
     /// <param name="errorCode">Unique error code for lookup.</param>
     /// <param name="message">Human-readable error message.</param>
     /// <param name="statusCode">HTTP status code to return.</param>
-    /// <param name="context">Additional context data.</param>
+    /// <param name="details">Additional context data.</param>
     /// <param name="innerException">The inner exception.</param>
     public MystiraException(
         string errorCode,
         string message,
         HttpStatusCode statusCode = HttpStatusCode.InternalServerError,
-        IDictionary<string, object>? context = null,
+        IDictionary<string, object>? details = null,
         Exception? innerException = null)
         : base(message, innerException)
     {
         ErrorCode = errorCode;
         StatusCode = statusCode;
-        Context = context;
+        Details = details;
     }
 
     /// <summary>
@@ -54,7 +54,6 @@ public class MystiraException : Exception
             Message = Message,
             ErrorCode = ErrorCode,
             Category = GetType().Name.Replace("Exception", ""),
-            Details = includeDetails ? ToString() : null,
             IsRecoverable = StatusCode is not (
                 HttpStatusCode.InternalServerError or
                 HttpStatusCode.ServiceUnavailable)
@@ -104,7 +103,36 @@ public class ValidationException : MystiraException
         : this(error, new Dictionary<string, string[]> { { field, [error] } })
     {
     }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationException"/> class with a custom message only.
+    /// </summary>
+    /// <param name="message">Custom error message.</param>
+    public ValidationException(string message)
+        : base("VALIDATION_FAILED", message, HttpStatusCode.BadRequest, new Dictionary<string, object>())
+    {
+        Errors = new Dictionary<string, string[]>();
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ValidationException"/> class with multiple validation errors.
+    /// </summary>
+    /// <param name="errors">Array of validation errors.</param>
+    public ValidationException(IEnumerable<ValidationError> errors)
+        : base("VALIDATION_FAILED", DefaultMessage, HttpStatusCode.BadRequest, new Dictionary<string, object>
+        {
+            ["errors"] = errors.ToArray()
+        })
+    {
+        Errors = errors.GroupBy(e => e.Field)
+                      .ToDictionary(g => g.Key, g => g.Select(e => e.Message).ToArray());
+    }
 }
+
+/// <summary>
+/// Represents a single validation error.
+/// </summary>
+public record ValidationError(string Field, string Message);
 
 /// <summary>
 /// Exception for not found resources.
@@ -127,7 +155,7 @@ public class NotFoundException : MystiraException
     /// <param name="resourceType">The type of resource that was not found.</param>
     /// <param name="resourceId">The ID of the resource that was not found.</param>
     public NotFoundException(string resourceType, string? resourceId = null)
-        : base("NOT_FOUND",
+        : base("RESOURCE_NOT_FOUND",
             resourceId != null
                 ? $"{resourceType} with ID '{resourceId}' was not found."
                 : $"{resourceType} was not found.",
@@ -137,6 +165,23 @@ public class NotFoundException : MystiraException
                 ["resourceType"] = resourceType,
                 ["resourceId"] = resourceId ?? ""
             })
+    {
+        ResourceType = resourceType;
+        ResourceId = resourceId;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NotFoundException"/> class with a custom message.
+    /// </summary>
+    /// <param name="resourceType">The type of resource that was not found.</param>
+    /// <param name="resourceId">The ID of the resource that was not found.</param>
+    /// <param name="message">Custom error message.</param>
+    public NotFoundException(string resourceType, string? resourceId, string message)
+        : base("RESOURCE_NOT_FOUND", message, HttpStatusCode.NotFound, new Dictionary<string, object>
+        {
+            ["resourceType"] = resourceType,
+            ["resourceId"] = resourceId ?? ""
+        })
     {
         ResourceType = resourceType;
         ResourceId = resourceId;
@@ -171,17 +216,47 @@ public class ForbiddenException : MystiraException
     public string? RequiredPermission { get; }
 
     /// <summary>
+    /// The resource that access was forbidden for.
+    /// </summary>
+    public string? Resource { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ForbiddenException"/> class.
     /// </summary>
-    /// <param name="requiredPermission">The permission that was required.</param>
-    /// <param name="message">Optional custom message.</param>
-    public ForbiddenException(string? requiredPermission = null, string? message = null)
-        : base("FORBIDDEN",
-            message ?? (requiredPermission != null
-                ? $"You do not have the required permission: {requiredPermission}"
-                : "You do not have permission to perform this action."),
-            HttpStatusCode.Forbidden)
+    /// <param name="message">Custom error message.</param>
+    public ForbiddenException(string message)
+        : base("ACCESS_FORBIDDEN", message, HttpStatusCode.Forbidden)
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ForbiddenException"/> class with resource context.
+    /// </summary>
+    /// <param name="resource">The resource being accessed.</param>
+    /// <param name="message">Custom error message.</param>
+    public ForbiddenException(string resource, string message)
+        : base("ACCESS_FORBIDDEN", message, HttpStatusCode.Forbidden, new Dictionary<string, object>
+        {
+            ["resource"] = resource
+        })
+    {
+        Resource = resource;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ForbiddenException"/> class with resource and permission context.
+    /// </summary>
+    /// <param name="resource">The resource being accessed.</param>
+    /// <param name="requiredPermission">The required permission.</param>
+    /// <param name="message">Custom error message.</param>
+    public ForbiddenException(string resource, string requiredPermission, string message)
+        : base("ACCESS_FORBIDDEN", message, HttpStatusCode.Forbidden, new Dictionary<string, object>
+        {
+            ["resource"] = resource,
+            ["requiredPermission"] = requiredPermission
+        })
+    {
+        Resource = resource;
         RequiredPermission = requiredPermission;
     }
 }
@@ -192,12 +267,53 @@ public class ForbiddenException : MystiraException
 public class ConflictException : MystiraException
 {
     /// <summary>
+    /// The type of resource that caused the conflict.
+    /// </summary>
+    public string ResourceType { get; } = "Unknown";
+
+    /// <summary>
+    /// The field that caused the conflict.
+    /// </summary>
+    public string? ConflictingField { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="ConflictException"/> class.
     /// </summary>
     /// <param name="message">The conflict error message.</param>
     public ConflictException(string message)
-        : base("CONFLICT", message, HttpStatusCode.Conflict)
+        : base("RESOURCE_CONFLICT", message, HttpStatusCode.Conflict)
     {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConflictException"/> class with resource type.
+    /// </summary>
+    /// <param name="resourceType">The resource type.</param>
+    /// <param name="message">The conflict error message.</param>
+    public ConflictException(string resourceType, string message)
+        : base("RESOURCE_CONFLICT", message, HttpStatusCode.Conflict, new Dictionary<string, object>
+        {
+            ["resourceType"] = resourceType
+        })
+    {
+        ResourceType = resourceType;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ConflictException"/> class with resource type and field.
+    /// </summary>
+    /// <param name="resourceType">The resource type.</param>
+    /// <param name="conflictingField">The conflicting field.</param>
+    /// <param name="message">The conflict error message.</param>
+    public ConflictException(string resourceType, string conflictingField, string message)
+        : base("RESOURCE_CONFLICT", message, HttpStatusCode.Conflict, new Dictionary<string, object>
+        {
+            ["resourceType"] = resourceType,
+            ["conflictingField"] = conflictingField
+        })
+    {
+        ResourceType = resourceType;
+        ConflictingField = conflictingField;
     }
 }
 
@@ -233,17 +349,35 @@ public class BusinessRuleException : MystiraException
     /// <summary>
     /// The business rule that was violated.
     /// </summary>
-    public string Rule { get; }
+    public string RuleName { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BusinessRuleException"/> class.
     /// </summary>
-    /// <param name="rule">The business rule that was violated.</param>
+    /// <param name="ruleName">The business rule that was violated.</param>
     /// <param name="message">The error message.</param>
-    public BusinessRuleException(string rule, string message)
-        : base("BUSINESS_RULE_VIOLATION", message, HttpStatusCode.UnprocessableEntity)
+    public BusinessRuleException(string ruleName, string message)
+        : base("BUSINESS_RULE_VIOLATION", message, HttpStatusCode.UnprocessableEntity, new Dictionary<string, object>
+        {
+            ["ruleName"] = ruleName
+        })
     {
-        Rule = rule;
+        RuleName = ruleName;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BusinessRuleException"/> class with context.
+    /// </summary>
+    /// <param name="ruleName">The business rule that was violated.</param>
+    /// <param name="message">The error message.</param>
+    /// <param name="context">Additional context data.</param>
+    public BusinessRuleException(string ruleName, string message, IDictionary<string, object> context)
+        : base("BUSINESS_RULE_VIOLATION", message, HttpStatusCode.UnprocessableEntity, new Dictionary<string, object>(context)
+        {
+            ["ruleName"] = ruleName
+        })
+    {
+        RuleName = ruleName;
     }
 }
 

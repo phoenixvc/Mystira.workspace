@@ -120,7 +120,7 @@ public class GlobalExceptionHandler : IExceptionHandler
                 Extensions =
                 {
                     ["errorCode"] = businessEx.ErrorCode,
-                    ["rule"] = businessEx.Rule
+                    ["rule"] = businessEx.RuleName
                 }
             },
 
