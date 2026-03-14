@@ -37,8 +37,6 @@ locals {
     application_insights_connection_string          = "mock-connection-string"
     communication_service_primary_connection_string = "endpoint=https://mock.communication.azure.com/;accesskey=mock"
   }
-
-  shared_outputs = try(dependency.shared.outputs, local.shared_mock_outputs)
 }
 
 # Dependency on shared infrastructure
@@ -72,16 +70,16 @@ dependency "shared" {
 
 inputs = {
   # Inherited from shared-infra dependency
-  shared_postgresql_server_id                   = local.shared_outputs.postgresql_server_id
-  shared_postgresql_server_fqdn                 = local.shared_outputs.postgresql_server_fqdn
-  shared_redis_hostname                         = local.shared_outputs.redis_hostname
-  shared_cosmos_db_account_id                   = local.shared_outputs.cosmos_db_account_id
-  shared_cosmos_db_connection_string            = local.shared_outputs.cosmos_db_connection_string
-  shared_cosmos_db_endpoint                     = local.shared_outputs.cosmos_db_endpoint
-  shared_storage_account_id                     = local.shared_outputs.storage_account_id
-  shared_storage_connection_string              = local.shared_outputs.storage_connection_string
-  shared_storage_blob_endpoint                  = local.shared_outputs.storage_blob_endpoint
-  shared_log_analytics_workspace_id             = local.shared_outputs.log_analytics_workspace_id
-  shared_application_insights_connection_string = local.shared_outputs.application_insights_connection_string
-  shared_acs_connection_string                  = local.shared_outputs.communication_service_primary_connection_string
+  shared_postgresql_server_id                   = try(dependency.shared.outputs.postgresql_server_id, local.shared_mock_outputs.postgresql_server_id)
+  shared_postgresql_server_fqdn                 = try(dependency.shared.outputs.postgresql_server_fqdn, local.shared_mock_outputs.postgresql_server_fqdn)
+  shared_redis_hostname                         = try(dependency.shared.outputs.redis_hostname, local.shared_mock_outputs.redis_hostname)
+  shared_cosmos_db_account_id                   = try(dependency.shared.outputs.cosmos_db_account_id, local.shared_mock_outputs.cosmos_db_account_id)
+  shared_cosmos_db_connection_string            = try(dependency.shared.outputs.cosmos_db_connection_string, local.shared_mock_outputs.cosmos_db_connection_string)
+  shared_cosmos_db_endpoint                     = try(dependency.shared.outputs.cosmos_db_endpoint, local.shared_mock_outputs.cosmos_db_endpoint)
+  shared_storage_account_id                     = try(dependency.shared.outputs.storage_account_id, local.shared_mock_outputs.storage_account_id)
+  shared_storage_connection_string              = try(dependency.shared.outputs.storage_connection_string, local.shared_mock_outputs.storage_connection_string)
+  shared_storage_blob_endpoint                  = try(dependency.shared.outputs.storage_blob_endpoint, local.shared_mock_outputs.storage_blob_endpoint)
+  shared_log_analytics_workspace_id             = try(dependency.shared.outputs.log_analytics_workspace_id, local.shared_mock_outputs.log_analytics_workspace_id)
+  shared_application_insights_connection_string = try(dependency.shared.outputs.application_insights_connection_string, local.shared_mock_outputs.application_insights_connection_string)
+  shared_acs_connection_string                  = try(dependency.shared.outputs.communication_service_primary_connection_string, local.shared_mock_outputs.communication_service_primary_connection_string)
 }
