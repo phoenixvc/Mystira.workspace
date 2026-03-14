@@ -19,12 +19,11 @@ locals {
   path_parts = split("/", try(path_relative_to_include(), ""))
 
   # Determine if this is shared-infra or a product
-  is_shared = length(local.path_parts) > 0 && local.path_parts[0] == "shared-infra"
+  is_shared = length(local.path_parts) > 0 && element(local.path_parts, 0) == "shared-infra"
 
   # Extract product name (e.g., "mystira-app", "story-generator")
-  product = local.is_shared ? "shared-infra" : (
-    length(local.path_parts) >= 2 ? local.path_parts[1] : "unknown"
-  )
+  product_from_path = length(local.path_parts) >= 2 ? element(local.path_parts, 1) : "unknown"
+  product           = local.is_shared ? "shared-infra" : local.product_from_path
 
   # Extract environment (dev, staging, prod) with safe fallback
   environment = length(local.path_parts) >= 2 ? element(local.path_parts, length(local.path_parts) - 1) : "default"
@@ -40,17 +39,19 @@ locals {
 
   region_code = "san"
 
-  default_resource_group_name = local.is_shared ? "mys-${local.environment}-core-rg-${local.region_code}" : (
-    local.product == "mystira-app" ? (
-      local.environment == "prod" ? "mys-prod-mystira-rg-${local.region_code}" : "mys-${local.environment}-app-rg-${local.region_code}"
-    ) : local.product == "story-generator" ? "mys-${local.environment}-story-rg-${local.region_code}" : (
-      local.product == "admin" ? "mys-${local.environment}-admin-rg-${local.region_code}" : (
-        local.product == "publisher" ? "mys-${local.environment}-publisher-rg-${local.region_code}" : (
-          local.product == "chain" ? "mys-${local.environment}-chain-rg-${local.region_code}" : "mys-${local.environment}-rg-${local.region_code}"
-        )
-      )
-    )
+  mystira_app_rg_segment = local.environment == "prod" ? "mystira" : "app"
+  product_rg_segment = local.product == "mystira-app" ? local.mystira_app_rg_segment : lookup(
+    {
+      "story-generator" = "story"
+      "admin"           = "admin"
+      "publisher"       = "publisher"
+      "chain"           = "chain"
+    },
+    local.product,
+    "rg"
   )
+
+  default_resource_group_name = local.is_shared ? "mys-${local.environment}-core-rg-${local.region_code}" : "mys-${local.environment}-${local.product_rg_segment}-rg-${local.region_code}"
 
   # Common tags applied to all resources
   common_tags = {
@@ -96,42 +97,43 @@ remote_state {
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-terraform {
-  required_version = ">= 1.5.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
-    azapi = {
-      source  = "Azure/azapi"
-      version = "~> 2.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
-  }
-}
-
-provider "azurerm" {
-  subscription_id = "${local.azure_subscription_id}"
-
-  features {
-    key_vault {
-      purge_soft_delete_on_destroy    = false
-      recover_soft_deleted_key_vaults = true
-    }
-    resource_group {
-      prevent_deletion_if_contains_resources = true
-    }
-  }
-}
-
-provider "azapi" {}
-EOF
+  contents = join("\n", [
+    "terraform {",
+    "  required_version = \">= 1.5.0\"",
+    "",
+    "  required_providers {",
+    "    azurerm = {",
+    "      source  = \"hashicorp/azurerm\"",
+    "      version = \"~> 4.0\"",
+    "    }",
+    "    azapi = {",
+    "      source  = \"Azure/azapi\"",
+    "      version = \"~> 2.0\"",
+    "    }",
+    "    random = {",
+    "      source  = \"hashicorp/random\"",
+    "      version = \"~> 3.5\"",
+    "    }",
+    "  }",
+    "}",
+    "",
+    "provider \"azurerm\" {",
+    "  subscription_id = \"${local.azure_subscription_id}\"",
+    "",
+    "  features {",
+    "    key_vault {",
+    "      purge_soft_delete_on_destroy    = false",
+    "      recover_soft_deleted_key_vaults = true",
+    "    }",
+    "    resource_group {",
+    "      prevent_deletion_if_contains_resources = true",
+    "    }",
+    "  }",
+    "}",
+    "",
+    "provider \"azapi\" {}",
+    "",
+  ])
 }
 
 # =============================================================================
