@@ -24,6 +24,12 @@ The names imply SAN region scope and a “shared costops” foundation with app-
 - If this is greenfield, create from code first and avoid portal drift.
 - Make cost control explicit (retention, ingestion rules, environments).
 
+## Shared resource conventions
+
+If PVC CostOps will share platform resources (or wants to stay compatible with Mystira-style shared-infra), follow the shared contract and naming conventions here:
+
+- [shared-resource-adoption-conventions.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/shared-resource-adoption-conventions.md)
+
 ## Non-goals
 
 - Redesigning networking/edge (do that as a separate phase).
