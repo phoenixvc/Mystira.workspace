@@ -16,7 +16,7 @@
 locals {
   # Parse the path to extract product and environment
   # Example path: products/mystira-app/environments/dev
-  path_parts = split("/", path_relative_to_include())
+  path_parts = split("/", try(path_relative_to_include(), ""))
 
   # Determine if this is shared-infra or a product
   is_shared = length(local.path_parts) > 0 && local.path_parts[0] == "shared-infra"

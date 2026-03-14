@@ -1,4 +1,4 @@
-import { createReactEslintConfig } from "../../configs/eslint/create-react-eslint-config.mjs";
+import { createReactEslintConfig } from "../../../configs/eslint/create-react-eslint-config.mjs";
 import { fileURLToPath } from "url";
 import path from "path";
 
