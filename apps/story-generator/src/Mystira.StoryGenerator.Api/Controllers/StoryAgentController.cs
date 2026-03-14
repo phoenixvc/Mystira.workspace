@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Mystira.StoryGenerator.Application.Infrastructure.Agents;
@@ -17,6 +18,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 [ApiController]
 [Route("api/story-agent")]
 [Tags("Story Agent")]
+[Authorize]
 public class StoryAgentController : ControllerBase
 {
     private readonly IAgentOrchestrator _agentOrchestrator;

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Mystira.StoryGenerator.Contracts.Stories;
 using Mystira.StoryGenerator.Contracts.StoryConsistency;
@@ -11,6 +12,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ScenarioDominatorPathAnalysisController : ControllerBase
 {
     private readonly IScenarioDominatorPathConsistencyEvaluationService _pathConsistencyService;

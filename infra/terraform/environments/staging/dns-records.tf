@@ -60,22 +60,8 @@ variable "create_dns_records" {
 # and regenerate these import statements as needed.
 # =============================================================================
 
-import {
-  to = azurerm_dns_cname_record.staging_api
-  id = "${local.subscription_path}/resourceGroups/mys-shared-terraform-rg-san/providers/Microsoft.Network/dnsZones/mystira.app/CNAME/staging.api"
-}
-
 # Move hostname binding from module to dns-records.tf (transfers state without destroy/recreate)
-moved {
-  from = module.mystira_app.azurerm_app_service_custom_hostname_binding.api[0]
-  to   = azurerm_app_service_custom_hostname_binding.staging_api[0]
-}
 
-# Reference existing DNS Zone (created by CI/CD bootstrap in shared terraform RG)
-data "azurerm_dns_zone" "mystira" {
-  name                = "mystira.app"
-  resource_group_name = "mys-shared-terraform-rg-san"
-}
 
 # =============================================================================
 # Mystira.App SWA DNS Records (staging.mystira.app)

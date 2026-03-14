@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NJsonSchema;
 using Newtonsoft.Json.Linq;
 using Mystira.StoryGenerator.Domain.Stories;
@@ -10,6 +11,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class SchemaController : ControllerBase
 {
     private readonly ILogger<SchemaController> _logger;

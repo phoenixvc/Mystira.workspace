@@ -24,6 +24,7 @@ using OpenTelemetry.Resources;
 using Microsoft.ApplicationInsights.Extensibility;
 using Serilog;
 using Serilog.Events;
+using StackExchange.Redis;
 using Wolverine;
 
 Log.Logger = new LoggerConfiguration()
@@ -158,6 +159,18 @@ try
         options.CompactionPercentage = 0.25;
     });
     builder.Services.AddRedisCaching(builder.Configuration);
+
+    // Register Redis connection for cache invalidation handlers
+    var redisConnectionString = builder.Configuration.GetConnectionString("Redis");
+    if (!string.IsNullOrEmpty(redisConnectionString))
+    {
+        builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+        {
+            var configuration = ConfigurationOptions.Parse(redisConnectionString);
+            configuration.AbortOnConnectFail = false;
+            return ConnectionMultiplexer.Connect(configuration);
+        });
+    }
 
     // Distributed locking (requires Redis)
     builder.Services.AddMystiraDistributedLocking(builder.Configuration);

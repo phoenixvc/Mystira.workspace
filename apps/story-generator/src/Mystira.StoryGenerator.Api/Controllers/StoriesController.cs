@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Mystira.StoryGenerator.Contracts.Chat;
@@ -11,6 +12,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class StoriesController : ControllerBase
 {
     private readonly Wolverine.IMessageBus _bus;

@@ -9,7 +9,7 @@ using Wolverine.ErrorHandling;
 namespace Mystira.Shared.Extensions;
 
 /// <summary>
-/// Extension methods for configuring Wolverine messaging.
+/// Extension methods for configuring Wolverine messaging with Azure Service Bus.
 /// </summary>
 public static class MessagingExtensions
 {
@@ -17,9 +17,6 @@ public static class MessagingExtensions
     /// Adds Wolverine messaging with default configuration.
     /// Reads settings from the "Messaging" configuration section.
     /// </summary>
-    /// <param name="builder">The host application builder.</param>
-    /// <param name="configureWolverine">Optional additional Wolverine configuration.</param>
-    /// <returns>The host application builder for chaining.</returns>
     public static HostApplicationBuilder AddMystiraMessaging(
         this HostApplicationBuilder builder,
         Action<WolverineOptions>? configureWolverine = null)
@@ -42,10 +39,6 @@ public static class MessagingExtensions
     /// <summary>
     /// Adds Wolverine messaging with explicit options.
     /// </summary>
-    /// <param name="builder">The host application builder.</param>
-    /// <param name="options">Messaging options.</param>
-    /// <param name="configureWolverine">Optional additional Wolverine configuration.</param>
-    /// <returns>The host application builder for chaining.</returns>
     public static HostApplicationBuilder AddMystiraMessaging(
         this HostApplicationBuilder builder,
         MessagingOptions options,
@@ -72,9 +65,35 @@ public static class MessagingExtensions
         return builder;
     }
 
+    /// <summary>
+    /// Configures Wolverine with Azure Service Bus including topics, subscriptions, and dead-letter queues.
+    /// </summary>
+    public static WolverineOptions UseAzureServiceBusWithTopics(
+        this WolverineOptions wolverine,
+        string connectionString,
+        string serviceName)
+    {
+        wolverine.UseAzureServiceBus(connectionString)
+            .AutoProvision();
+
+        ConfigureErrorHandling(wolverine);
+
+        return wolverine;
+    }
+
+    private static void ConfigureErrorHandling(WolverineOptions wolverine)
+    {
+        wolverine.OnException<Exception>()
+            .RetryWithCooldown(
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(10),
+                TimeSpan.FromSeconds(30),
+                TimeSpan.FromSeconds(60))
+            .Then.MoveToErrorQueue();
+    }
+
     private static void ConfigureWolverineDefaults(WolverineOptions wolverine, MessagingOptions options)
     {
-        // Configure durability mode
         wolverine.Durability.Mode = options.DurabilityMode switch
         {
             Messaging.DurabilityMode.Solo => Wolverine.DurabilityMode.Solo,
@@ -84,8 +103,6 @@ public static class MessagingExtensions
             _ => Wolverine.DurabilityMode.Balanced
         };
 
-        // Configure retry policy using MaxRetries from options
-        // Generate exponential backoff delays: baseDelay, baseDelay*2, baseDelay*4, etc.
         var retryDelays = GenerateRetryDelays(options.MaxRetries, options.InitialRetryDelaySeconds);
         if (retryDelays.Length > 0)
         {
@@ -93,21 +110,17 @@ public static class MessagingExtensions
                 .RetryWithCooldown(retryDelays);
         }
 
-        // Configure Azure Service Bus if connection string is provided
         if (!string.IsNullOrEmpty(options.ServiceBusConnectionString))
         {
-            wolverine.UseAzureServiceBus(options.ServiceBusConnectionString)
-                .AutoProvision();
+            wolverine.UseAzureServiceBusWithTopics(
+                options.ServiceBusConnectionString,
+                options.ServiceName);
         }
 
-        // Apply local queue settings
         wolverine.LocalQueue("default")
             .Sequential();
     }
 
-    /// <summary>
-    /// Generates exponential backoff retry delays based on MaxRetries and InitialRetryDelaySeconds.
-    /// </summary>
     private static TimeSpan[] GenerateRetryDelays(int maxRetries, int initialDelaySeconds)
     {
         if (maxRetries <= 0)
@@ -118,8 +131,6 @@ public static class MessagingExtensions
         var delays = new TimeSpan[maxRetries];
         for (var i = 0; i < maxRetries; i++)
         {
-            // Exponential backoff: initialDelay * 2^i
-            // Cap at 60 seconds
             var delaySeconds = Math.Min(initialDelaySeconds * Math.Pow(2, i), 60);
             delays[i] = TimeSpan.FromSeconds(delaySeconds);
         }
