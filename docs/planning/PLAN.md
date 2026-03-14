@@ -1,6 +1,6 @@
 # Mystira Workspace Plan
 
-**Last Updated**: 2026-03-14
+**Last Updated**: 2026-03-15
 **Branch**: `dev`
 **Backlog**: [BACKLOG.md](../../BACKLOG.md)
 
@@ -82,6 +82,7 @@ Operational notes:
 - Terragrunt rationale + founder adoption: [terragrunt-for-founders.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/terragrunt-for-founders.md)
 - Other repo migration plan: [other-repo-migration-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/other-repo-migration-plan.md)
 - Prod safety: Terragrunt blocks prod apply/destroy unless `ALLOW_PROD_APPLY=true`
+- External infra standards to evaluate (post-stabilization): https://github.com/phoenixvc/azure-infrastructure, https://github.com/phoenixvc/phoenixvc-actions-runner
 
 ---
 
@@ -89,11 +90,22 @@ Operational notes:
 
 Mystira.Shared is an internal package (ProjectReference, not NuGet).
 
+Notes:
+
+- Baseline approach: extract from the current Mystira identity/auth implementation first, then generalize behind a stable “login contract” (faster + fewer unknowns).
+- Greenfield approach: only if you want a product-agnostic platform repo immediately; otherwise it’s slower and risks over-design.
+- Safety: keep per-product app registrations/scopes even if the login API is shared, so tokens and permissions remain product-bounded.
+- External platform candidates (post-stabilization): https://github.com/phoenixvc/ai-gateway (OpenAI-compatible gateway on Azure Container Apps), https://github.com/phoenixvc/pvc-costops-analytics (FinOps platform: ADX + Grafana + Terraform + FastAPI)
+
 | Step | What                                                                                                                                                                 | Status          |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
 | C.1  | Each service adds Wolverine handlers + internal Mystira.Shared ProjectReference (priority: App → Admin.Api → StoryGenerator → Publisher → Chain → Admin.UI → DevHub) | **IN PROGRESS** |
 | C.2  | Cross-service integration: Wolverine + Azure Service Bus pub/sub, Redis cache invalidation, domain/integration event catalog                                         | **IN PROGRESS** |
 | C.3  | Performance baselines + load testing                                                                                                                                 | **TODO**        |
+| C.4  | Shared login platform: Entra-backed login API baseline for all products                                                                                              | **PLANNED**     |
+| C.5  | Shared login UI kit: reusable auth screens/components package (optional)                                                                                             | **PLANNED**     |
+| C.6  | AI platform adoption: adopt `phoenixvc/agentkit-forge` + `ai-gateway` (https://github.com/phoenixvc/ai-gateway) after stabilization                                  | **PLANNED**     |
+| C.7  | PVC CostOps integration: integrate `pvc-costops-analytics` (https://github.com/phoenixvc/pvc-costops-analytics) after repo review                                    | **PLANNED**     |
 
 ---
 
@@ -105,6 +117,15 @@ Stream A ──► Stream C (requires consolidated packages)
 B.1 ──► B.2 ──► B.3 ──► B.4 (sequential within infra)
 C.1 ──► C.2 ──► C.3 (sequential within services)
 ```
+
+---
+
+## Milestones (next)
+
+- Adopt `phoenixvc/agentkit-forge` and `ai-gateway` once both repos are stable: https://github.com/phoenixvc/ai-gateway
+- Integrate PVC CostOps (FinOps platform) after repo review: https://github.com/phoenixvc/pvc-costops-analytics
+- Evaluate org-wide standards/tooling after stabilization: https://github.com/phoenixvc/azure-infrastructure, https://github.com/phoenixvc/phoenixvc-actions-runner
+- Optional future eval (only if it fits Mystira’s direction): https://github.com/phoenixvc/cognitive-mesh, https://github.com/JustAGhosT/codeflow-engine, https://github.com/JustAGhosT/content_creation
 
 ---
 
