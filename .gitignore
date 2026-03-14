@@ -150,6 +150,9 @@ forge-cache/
 *.tfvars
 !*.tfvars.example
 
+# Azure CLI (user-specific)
+.azure/
+
 # Docker
 docker-compose.override.yml
 

@@ -34,9 +34,23 @@ locals {
   azure_tenant_id       = get_env("ARM_TENANT_ID", "")
 
   # State storage configuration
-  state_resource_group  = "mys-terraform-state"
-  state_storage_account = "mysterraformstate"
+  state_resource_group  = "mys-shared-terraform-rg-san"
+  state_storage_account = "myssharedtfstatesan"
   state_container       = "tfstate"
+
+  region_code = "san"
+
+  default_resource_group_name = local.is_shared ? "mys-${local.environment}-core-rg-${local.region_code}" : (
+    local.product == "mystira-app" ? (
+      local.environment == "prod" ? "mys-prod-mystira-rg-${local.region_code}" : "mys-${local.environment}-app-rg-${local.region_code}"
+    ) : local.product == "story-generator" ? "mys-${local.environment}-story-rg-${local.region_code}" : (
+      local.product == "admin" ? "mys-${local.environment}-admin-rg-${local.region_code}" : (
+        local.product == "publisher" ? "mys-${local.environment}-publisher-rg-${local.region_code}" : (
+          local.product == "chain" ? "mys-${local.environment}-chain-rg-${local.region_code}" : "mys-${local.environment}-rg-${local.region_code}"
+        )
+      )
+    )
+  )
 
   # Common tags applied to all resources
   common_tags = {
@@ -134,7 +148,7 @@ inputs = {
   fallback_location = "eastus2" # For resources not available in primary region
 
   # Resource group naming
-  resource_group_name = "mys-${local.environment}-rg"
+  resource_group_name = local.default_resource_group_name
 }
 
 # =============================================================================
@@ -146,6 +160,11 @@ terraform {
   before_hook "terraform_fmt" {
     commands = ["plan", "apply"]
     execute  = ["terraform", "fmt", "-recursive", "-write=false", "-diff"]
+  }
+
+  before_hook "prod_apply_guard" {
+    commands = ["apply", "destroy"]
+    execute  = ["pwsh", "-NoProfile", "-Command", "if ('${local.environment}' -eq 'prod' -and $env:ALLOW_PROD_APPLY -ne 'true') { Write-Error 'Blocked: prod apply/destroy requires ALLOW_PROD_APPLY=true'; exit 1 }"]
   }
 
   # NOTE: terraform validate is NOT included as a before_hook because

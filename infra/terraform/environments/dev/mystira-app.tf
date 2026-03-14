@@ -82,8 +82,8 @@ module "shared_storage" {
 # =============================================================================
 
 data "azurerm_key_vault" "shared" {
-  name                = "mys-dev-app-kv-san"
-  resource_group_name = "mys-dev-app-rg-san"
+  name                = "mys-dev-core-kv-san"
+  resource_group_name = "mys-dev-core-rg-san"
 }
 
 data "azurerm_redis_cache" "shared" {
@@ -117,7 +117,7 @@ module "mystira_app" {
   # App Service Configuration (API Backend)
   # -----------------------------------------------------------------------------
   app_service_sku = "B1"
-  dotnet_version  = "9.0"
+  dotnet_version  = "10.0"
 
   # Custom domains - DISABLED in module, created separately in dns-records.tf
   # This ensures DNS records exist before custom domain bindings are created
@@ -168,6 +168,7 @@ module "mystira_app" {
   # Communication Services - USE SHARED (cross-environment)
   # -----------------------------------------------------------------------------
   enable_communication_services = false # Use shared
+  use_shared_acs                = true
   shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 

@@ -26,6 +26,7 @@ dependency "shared" {
     postgresql_server_fqdn                 = "mock.postgres.database.azure.com"
     redis_cache_id                         = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Cache/Redis/mock"
     redis_connection_string                = "mock-connection-string"
+    cosmos_db_connection_string            = "AccountEndpoint=https://mock-cosmos.documents.azure.com:443/;AccountKey=mock;"
     azure_ai_endpoint                      = "https://mock.cognitiveservices.azure.com"
     log_analytics_workspace_id             = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.OperationalInsights/workspaces/mock"
     application_insights_connection_string = "mock-connection-string"
@@ -42,6 +43,7 @@ inputs = {
   shared_postgresql_server_fqdn                 = dependency.shared.outputs.postgresql_server_fqdn
   shared_redis_cache_id                         = dependency.shared.outputs.redis_cache_id
   shared_redis_connection_string                = dependency.shared.outputs.redis_connection_string
+  shared_cosmos_db_connection_string            = dependency.shared.outputs.cosmos_db_connection_string
   shared_azure_ai_endpoint                      = dependency.shared.outputs.azure_ai_endpoint
   shared_log_analytics_workspace_id             = dependency.shared.outputs.log_analytics_workspace_id
   shared_application_insights_connection_string = dependency.shared.outputs.application_insights_connection_string

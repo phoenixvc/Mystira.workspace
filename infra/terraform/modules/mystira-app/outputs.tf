@@ -206,12 +206,12 @@ output "log_analytics_workspace_name" {
 
 output "application_insights_id" {
   description = "Application Insights ID (null if using shared)"
-  value       = var.use_shared_monitoring ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
+  value       = local.use_shared_application_insights ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
 }
 
 output "application_insights_name" {
   description = "Application Insights name (null if using shared)"
-  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].name
+  value       = local.use_shared_application_insights ? null : azurerm_application_insights.main[0].name
 }
 
 output "application_insights_connection_string" {
@@ -222,7 +222,7 @@ output "application_insights_connection_string" {
 
 output "application_insights_instrumentation_key" {
   description = "Application Insights instrumentation key (null if using shared)"
-  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].instrumentation_key
+  value       = local.use_shared_application_insights ? null : azurerm_application_insights.main[0].instrumentation_key
   sensitive   = true
 }
 

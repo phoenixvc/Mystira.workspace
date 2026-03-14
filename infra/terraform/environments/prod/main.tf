@@ -872,14 +872,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
   }
 }
 
-# DNS Configuration
-# NOTE: DNS zone is created by CI/CD bootstrap in shared terraform RG
-# Reference it via data source instead of creating a duplicate
-data "azurerm_dns_zone" "mystira" {
-  name                = "mystira.app"
-  resource_group_name = "mys-shared-terraform-rg-san"
-}
-
 output "resource_group_name" {
   value = azurerm_resource_group.main.name
 }

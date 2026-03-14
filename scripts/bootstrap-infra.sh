@@ -219,10 +219,13 @@ print_summary() {
     echo "  3. Run the Infrastructure Deploy workflow from GitHub Actions"
     echo ""
     echo "To deploy manually:"
-    echo "  cd infra/terraform/environments/dev"
-    echo "  terraform init"
-    echo "  terraform plan"
-    echo "  terraform apply"
+    echo "  cd infra/terraform/shared-infra/environments/dev"
+    echo "  terragrunt init"
+    echo "  terragrunt apply"
+    echo ""
+    echo "  cd infra/terraform/products/mystira-app/environments/dev"
+    echo "  terragrunt init"
+    echo "  terragrunt apply"
     echo ""
 }
 

@@ -33,9 +33,17 @@ variable "shared_postgresql_server_fqdn" {
   type = string
 }
 
+variable "shared_redis_hostname" {
+  type = string
+}
+
 variable "shared_cosmos_db_connection_string" {
   type      = string
   sensitive = true
+}
+
+variable "shared_cosmos_db_endpoint" {
+  type = string
 }
 
 variable "shared_storage_connection_string" {
@@ -43,11 +51,35 @@ variable "shared_storage_connection_string" {
   sensitive = true
 }
 
+variable "shared_storage_blob_endpoint" {
+  type = string
+}
+
 variable "shared_log_analytics_workspace_id" {
   type = string
 }
 
 variable "shared_application_insights_connection_string" {
+  type      = string
+  sensitive = true
+}
+
+variable "use_shared_monitoring" {
+  type    = bool
+  default = true
+}
+
+variable "enable_redis" {
+  type    = bool
+  default = true
+}
+
+variable "use_shared_redis" {
+  type    = bool
+  default = true
+}
+
+variable "shared_acs_connection_string" {
   type      = string
   sensitive = true
 }
@@ -65,12 +97,29 @@ module "mystira_app" {
   resource_group_name = var.resource_group_name
   tags                = var.tags
 
-  shared_postgresql_server_id                   = var.shared_postgresql_server_id
-  shared_postgresql_server_fqdn                 = var.shared_postgresql_server_fqdn
-  existing_cosmos_connection_string             = var.shared_cosmos_db_connection_string
-  shared_storage_connection_string              = var.shared_storage_connection_string
+  shared_postgresql_server_id   = var.shared_postgresql_server_id
+  shared_postgresql_server_fqdn = var.shared_postgresql_server_fqdn
+
+  skip_cosmos_creation              = true
+  existing_cosmos_connection_string = var.shared_cosmos_db_connection_string
+  shared_cosmos_endpoint            = var.shared_cosmos_db_endpoint
+  shared_cosmos_database_name       = "MystiraAppDb"
+
+  skip_storage_creation            = true
+  shared_storage_connection_string = var.shared_storage_connection_string
+  shared_storage_blob_endpoint     = var.shared_storage_blob_endpoint
+
+  use_shared_monitoring                         = var.use_shared_monitoring
   shared_log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
   shared_application_insights_connection_string = var.shared_application_insights_connection_string
+
+  enable_redis          = var.enable_redis
+  use_shared_redis      = var.use_shared_redis
+  shared_redis_hostname = var.shared_redis_hostname
+
+  enable_communication_services = false
+  use_shared_acs                = true
+  shared_acs_connection_string  = var.shared_acs_connection_string
 }
 
 # =============================================================================

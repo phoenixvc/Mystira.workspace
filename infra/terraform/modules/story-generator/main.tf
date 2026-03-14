@@ -28,7 +28,9 @@ terraform {
 }
 
 locals {
-  name_prefix = "mys-${var.environment}-story"
+  # Simplified name prefix (ADR-0017 / v2.2 naming standardization)
+  # Avoids duplication like "mys-dev-mystira-*"
+  name_prefix = "${var.org}-${var.environment}-story"
   region_code = var.region_code
 
   # Fallback region code for SWA (not available in all regions like South Africa North)
@@ -47,6 +49,10 @@ locals {
     ManagedBy   = "terraform"
     Project     = "Mystira"
   })
+
+  shared_cosmos_connection_string = coalesce(var.shared_cosmos_connection_string, "")
+  shared_cosmos_endpoint          = var.use_shared_cosmos ? try(regexall("AccountEndpoint=([^;]+);", local.shared_cosmos_connection_string)[0][1], "") : ""
+  shared_cosmos_api_key           = var.use_shared_cosmos ? try(regexall("AccountKey=([^;]+);", local.shared_cosmos_connection_string)[0][1], "") : ""
 }
 
 # =============================================================================
@@ -321,6 +327,70 @@ resource "azurerm_key_vault_secret" "redis_connection_string" {
   count        = var.use_shared_redis ? 0 : 1
   name         = "redis-connection-string"
   value        = azurerm_redis_cache.story_generator[0].primary_connection_string
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmos_endpoint" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "cosmos-endpoint"
+  value        = local.shared_cosmos_endpoint
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmos_api_key" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "cosmos-api-key"
+  value        = local.shared_cosmos_api_key
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmos_database_id" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "cosmos-database-id"
+  value        = var.cosmos_database_id
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmos_container_id" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "cosmos-container-id"
+  value        = var.cosmos_container_id
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmosdb_endpoint" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "CosmosDb--Endpoint"
+  value        = local.shared_cosmos_endpoint
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmosdb_api_key" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "CosmosDb--ApiKey"
+  value        = local.shared_cosmos_api_key
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmosdb_database_id" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "CosmosDb--DatabaseId"
+  value        = var.cosmos_database_id
+  key_vault_id = azurerm_key_vault.story_generator.id
+}
+
+resource "azurerm_key_vault_secret" "cosmosdb_container_id" {
+  count = var.use_shared_cosmos ? 1 : 0
+
+  name         = "CosmosDb--ContainerId"
+  value        = var.cosmos_container_id
   key_vault_id = azurerm_key_vault.story_generator.id
 }
 

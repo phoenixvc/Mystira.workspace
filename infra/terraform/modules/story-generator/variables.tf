@@ -9,6 +9,12 @@ variable "environment" {
   type        = string
 }
 
+variable "org" {
+  description = "Organization prefix (e.g., mys)"
+  type        = string
+  default     = "mys"
+}
+
 variable "location" {
   description = "Azure region for deployment"
   type        = string
@@ -54,6 +60,31 @@ variable "shared_log_analytics_workspace_id" {
   description = "ID of shared Log Analytics workspace for monitoring integration"
   type        = string
   default     = null
+}
+
+variable "use_shared_cosmos" {
+  description = "Whether to use shared Cosmos DB instead of a dedicated account"
+  type        = bool
+  default     = false
+}
+
+variable "shared_cosmos_connection_string" {
+  description = "Shared Cosmos DB connection string (AccountEndpoint=...;AccountKey=...;). Required when use_shared_cosmos = true."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "cosmos_database_id" {
+  description = "Cosmos DB database id for story session storage"
+  type        = string
+  default     = "MystiraStoryGenerator"
+}
+
+variable "cosmos_container_id" {
+  description = "Cosmos DB container id for story session storage"
+  type        = string
+  default     = "StorySessions"
 }
 
 variable "use_shared_postgresql" {

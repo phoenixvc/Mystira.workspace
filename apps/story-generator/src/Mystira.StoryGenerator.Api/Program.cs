@@ -23,6 +23,18 @@ using Mystira.Shared.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL");
+if (!string.IsNullOrWhiteSpace(keyVaultUrl) && string.IsNullOrWhiteSpace(builder.Configuration["KeyVault:Name"]))
+{
+    var keyVaultName = new Uri(keyVaultUrl).Host.Split('.')[0];
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        ["KeyVault:Name"] = keyVaultName,
+    });
+}
+
+builder.Host.AddKeyVaultConfiguration();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -32,12 +32,17 @@ dependency "shared" {
     postgresql_server_fqdn                 = "mock.postgres.database.azure.com"
     redis_cache_id                         = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Cache/Redis/mock"
     redis_connection_string                = "mock-connection-string"
+    redis_hostname                         = "mock.redis.cache.windows.net"
+    redis_ssl_port                         = 6380
     cosmos_db_account_id                   = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.DocumentDB/databaseAccounts/mock"
     cosmos_db_connection_string            = "mock-connection-string"
+    cosmos_db_endpoint                     = "https://mock-cosmos.documents.azure.com:443/"
     storage_account_id                     = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.Storage/storageAccounts/mock"
     storage_connection_string              = "mock-connection-string"
+    storage_blob_endpoint                  = "https://mockstorage.blob.core.windows.net/"
     log_analytics_workspace_id             = "/subscriptions/xxx/resourceGroups/xxx/providers/Microsoft.OperationalInsights/workspaces/mock"
     application_insights_connection_string = "mock-connection-string"
+    communication_service_primary_connection_string = "endpoint=https://mock.communication.azure.com/;accesskey=mock"
   }
   mock_outputs_allowed_terraform_commands = ["init", "validate", "plan"]
 
@@ -49,12 +54,14 @@ inputs = {
   # Inherited from shared-infra dependency
   shared_postgresql_server_id                   = dependency.shared.outputs.postgresql_server_id
   shared_postgresql_server_fqdn                 = dependency.shared.outputs.postgresql_server_fqdn
-  shared_redis_cache_id                         = dependency.shared.outputs.redis_cache_id
-  shared_redis_connection_string                = dependency.shared.outputs.redis_connection_string
+  shared_redis_hostname                         = dependency.shared.outputs.redis_hostname
   shared_cosmos_db_account_id                   = dependency.shared.outputs.cosmos_db_account_id
   shared_cosmos_db_connection_string            = dependency.shared.outputs.cosmos_db_connection_string
+  shared_cosmos_db_endpoint                     = dependency.shared.outputs.cosmos_db_endpoint
   shared_storage_account_id                     = dependency.shared.outputs.storage_account_id
   shared_storage_connection_string              = dependency.shared.outputs.storage_connection_string
+  shared_storage_blob_endpoint                  = dependency.shared.outputs.storage_blob_endpoint
   shared_log_analytics_workspace_id             = dependency.shared.outputs.log_analytics_workspace_id
   shared_application_insights_connection_string = dependency.shared.outputs.application_insights_connection_string
+  shared_acs_connection_string                  = dependency.shared.outputs.communication_service_primary_connection_string
 }

@@ -98,36 +98,46 @@ function Test-Environments {
     Write-Info "Validating environment configurations..."
 
     $environments = @("dev", "staging", "prod")
+    $products = @("mystira-app", "story-generator", "admin", "publisher", "chain")
 
     foreach ($env in $environments) {
-        $envPath = Join-Path $TerraformDir "environments\$env"
-        if (-not (Test-Path $envPath)) {
-            Write-Warning "Environment directory not found: $envPath"
-            continue
+        $targets = @()
+        $targets += Join-Path $TerraformDir "shared-infra\environments\$env"
+        foreach ($product in $products) {
+            $targets += Join-Path $TerraformDir "products\$product\environments\$env"
         }
 
-        Write-Info "Checking environment: $env"
-        $mainTf = Join-Path $envPath "main.tf"
-        if (-not (Test-Path $mainTf)) {
-            Write-Warning "main.tf not found in $env"
-            continue
-        }
+        foreach ($target in $targets) {
+            if (-not (Test-Path $target)) {
+                Write-Warning "Environment directory not found: $target"
+                continue
+            }
 
-        Push-Location $envPath
-        try {
-            terraform fmt -check *> $null
-            if ($LASTEXITCODE -eq 0) {
-                Write-Success "Environment $env syntax is valid"
+            $mainTf = Join-Path $target "main.tf"
+            if (-not (Test-Path $mainTf)) {
+                Write-Warning "main.tf not found in: $target"
+                continue
             }
-            else {
-                Write-Warning "Environment $env may have formatting issues (run terraform fmt)"
+
+            Write-Info "Validating: $target"
+            Push-Location $target
+            try {
+                terraform fmt -check *> $null
+                terraform init -backend=false *> $null
+                terraform validate *> $null
+                if ($LASTEXITCODE -eq 0) {
+                    Write-Success "Valid: $target"
+                }
+                else {
+                    Write-Error "Validation failed: $target"
+                }
             }
-        }
-        catch {
-            Write-Warning "Error checking environment $env : $_"
-        }
-        finally {
-            Pop-Location
+            catch {
+                Write-Warning "Error validating $target : $_"
+            }
+            finally {
+                Pop-Location
+            }
         }
     }
 }
@@ -143,9 +153,24 @@ function Test-RequiredFiles {
         "terraform\modules\shared\postgresql\main.tf",
         "terraform\modules\shared\redis\main.tf",
         "terraform\modules\shared\monitoring\main.tf",
-        "terraform\environments\dev\main.tf",
-        "terraform\environments\staging\main.tf",
-        "terraform\environments\prod\main.tf"
+        "terraform\shared-infra\environments\dev\main.tf",
+        "terraform\shared-infra\environments\staging\main.tf",
+        "terraform\shared-infra\environments\prod\main.tf",
+        "terraform\products\mystira-app\environments\dev\main.tf",
+        "terraform\products\mystira-app\environments\staging\main.tf",
+        "terraform\products\mystira-app\environments\prod\main.tf",
+        "terraform\products\story-generator\environments\dev\main.tf",
+        "terraform\products\story-generator\environments\staging\main.tf",
+        "terraform\products\story-generator\environments\prod\main.tf",
+        "terraform\products\admin\environments\dev\main.tf",
+        "terraform\products\admin\environments\staging\main.tf",
+        "terraform\products\admin\environments\prod\main.tf",
+        "terraform\products\publisher\environments\dev\main.tf",
+        "terraform\products\publisher\environments\staging\main.tf",
+        "terraform\products\publisher\environments\prod\main.tf",
+        "terraform\products\chain\environments\dev\main.tf",
+        "terraform\products\chain\environments\staging\main.tf",
+        "terraform\products\chain\environments\prod\main.tf"
     )
 
     $missing = $false
