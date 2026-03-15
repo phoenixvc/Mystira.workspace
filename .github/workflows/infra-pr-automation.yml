@@ -238,15 +238,26 @@ jobs:
       - name: Terragrunt Init
         id: tg-init
         if: steps.azure-login.outcome == 'success'
-        continue-on-error: true
         working-directory: ${{ matrix.project.dir }}
-        run: terragrunt init --terragrunt-non-interactive
+        run: |
+          set +e
+          terragrunt init --terragrunt-non-interactive
+          EXIT_CODE=$?
+          set -e
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "init_status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "init_status=skipped" >> "$GITHUB_OUTPUT"
+            echo "::warning::Terragrunt init failed (backend inaccessible). Skipping plan for this project."
+            exit 0
+          fi
         env:
           TERRAGRUNT_SKIP_OUTPUTS: "true"
 
       - name: Terragrunt Plan
         id: plan
-        if: steps.azure-login.outcome == 'success' && steps.tg-init.outcome == 'success'
+        if: steps.azure-login.outcome == 'success' && steps.tg-init.outputs.init_status == 'success'
         working-directory: ${{ matrix.project.dir }}
         env:
           TERRAGRUNT_SKIP_OUTPUTS: "true"
@@ -271,7 +282,7 @@ jobs:
           fi
 
       - name: Generate Plan Summary
-        if: always() && steps.tg-init.outcome == 'success'
+        if: always() && steps.tg-init.outputs.init_status == 'success'
         working-directory: ${{ matrix.project.dir }}
         run: |
           if [ -f tfplan ]; then
@@ -279,7 +290,7 @@ jobs:
           fi
 
       - name: Upload Plan Artifact
-        if: steps.plan.outputs.status == 'success' && steps.tg-init.outcome == 'success'
+        if: steps.plan.outputs.status == 'success' && steps.tg-init.outputs.init_status == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: tfplan-${{ matrix.project.name }}
@@ -300,7 +311,7 @@ jobs:
             const project = '${{ matrix.project.name }}';
             const dir = '${{ matrix.project.dir }}';
             const azureLogin = '${{ steps.azure-login.outcome }}';
-            const tgInit = '${{ steps.tg-init.outcome }}';
+            const tgInit = '${{ steps.tg-init.outputs.init_status }}';
             const status = '${{ steps.plan.outputs.status }}';
             const changes = '${{ steps.plan.outputs.changes }}';
 
@@ -321,7 +332,7 @@ jobs:
               statusText = '⚠️ **Skipped** - Azure credentials not configured';
             } else if (tgInit !== 'success') {
               statusEmoji = '⚠️';
-              statusText = '⚠️ **Skipped** - Terraform backend not provisioned yet (state storage account does not exist)';
+              statusText = '⚠️ **Skipped** - Terraform backend not accessible yet (init failed)';
             } else if (status !== 'success') {
               statusEmoji = '❌';
               statusText = '❌ **Plan failed** - see output below';
