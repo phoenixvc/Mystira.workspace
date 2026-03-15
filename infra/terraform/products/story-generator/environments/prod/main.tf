@@ -77,10 +77,30 @@ variable "shared_log_analytics_workspace_id" {
   default = null
 }
 
-variable "shared_cosmos_db_connection_string" {
+variable "shared_cosmos_connection_string" {
   type      = string
   sensitive = true
   default   = null
+
+  validation {
+    condition     = var.use_shared_cosmos == false || (var.shared_cosmos_connection_string != null && trim(var.shared_cosmos_connection_string) != "")
+    error_message = "shared_cosmos_connection_string must be set (non-empty) when use_shared_cosmos is true."
+  }
+}
+
+variable "use_shared_cosmos" {
+  type    = bool
+  default = true
+}
+
+variable "cosmos_database_id" {
+  type    = string
+  default = "MystiraStoryGenerator"
+}
+
+variable "cosmos_container_id" {
+  type    = string
+  default = "StorySessions"
 }
 
 # =============================================================================
@@ -129,10 +149,10 @@ module "story_generator" {
   shared_redis_cache_id             = var.shared_redis_cache_id
   shared_log_analytics_workspace_id = var.shared_log_analytics_workspace_id
 
-  use_shared_cosmos               = true
-  shared_cosmos_connection_string = var.shared_cosmos_db_connection_string
-  cosmos_database_id              = "MystiraStoryGenerator"
-  cosmos_container_id             = "StorySessions"
+  use_shared_cosmos               = var.use_shared_cosmos
+  shared_cosmos_connection_string = var.shared_cosmos_connection_string
+  cosmos_database_id              = var.cosmos_database_id
+  cosmos_container_id             = var.cosmos_container_id
 }
 
 # =============================================================================

@@ -29,8 +29,8 @@ The Terragrunt model that matches that is:
 
 Related:
 
-- Cost estimate and measurement approach: [infra-consolidation-cost-estimate.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/infra-consolidation-cost-estimate.md)
-- Edge/networking plan: [infra-edge-networking-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/infra-edge-networking-plan.md)
+- Cost estimate and measurement approach: [infra-consolidation-cost-estimate.md](./infra-consolidation-cost-estimate.md)
+- Edge/networking plan: [infra-edge-networking-plan.md](../planning/infra-edge-networking-plan.md)
 
 ## Cross-Environment vs Cross-Product: a founder-friendly model
 
@@ -109,7 +109,7 @@ What to do to keep an upgrade path:
 - Standardize naming (RGs, apps, KV secrets, tags) from day 1.
 - Keep a single “inventory” output from the pipeline (resource IDs, endpoints, SKUs).
 - Don’t hand-create complicated networking; defer it until there’s an IaC baseline.
-- Plan for an “import-first” adoption later (see [other-repo-migration-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/other-repo-migration-plan.md)).
+- Plan for an “import-first” adoption later (see [other-repo-migration-plan.md](../planning/other-repo-migration-plan.md)).
 
 ### Step 1: Adopt the shared-infra contract
 
@@ -152,7 +152,7 @@ The safe order is:
 
 Use the dedicated plan here:
 
-- [other-repo-migration-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/other-repo-migration-plan.md)
+- [other-repo-migration-plan.md](../planning/other-repo-migration-plan.md)
 
 ### Step 3: Only then consider environment expansion
 

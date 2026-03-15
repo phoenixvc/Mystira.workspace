@@ -9,7 +9,7 @@ export function formatTimestamp(
   switch (format) {
     case "full":
       return date.toLocaleString();
-    case "relative":
+    case "relative": {
       const seconds = Math.floor((Date.now() - timestamp) / 1000);
       if (seconds < 60) return `${seconds}s ago`;
       const minutes = Math.floor(seconds / 60);
@@ -17,6 +17,7 @@ export function formatTimestamp(
       const hours = Math.floor(minutes / 60);
       if (hours < 24) return `${hours}h ago`;
       return `${Math.floor(hours / 24)}d ago`;
+    }
     default:
       return date.toLocaleTimeString();
   }

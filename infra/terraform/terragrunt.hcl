@@ -166,7 +166,7 @@ terraform {
 
   before_hook "prod_apply_guard" {
     commands = ["apply", "destroy"]
-    execute  = ["pwsh", "-NoProfile", "-Command", "if ('${local.environment}' -eq 'prod' -and $env:ALLOW_PROD_APPLY -ne 'true') { Write-Error 'Blocked: prod apply/destroy requires ALLOW_PROD_APPLY=true'; exit 1 }"]
+    execute  = ["bash", "-lc", "if [ \"${local.environment}\" = \"prod\" ] && [ \"$${ALLOW_PROD_APPLY:-}\" != \"true\" ]; then echo 'Blocked: prod apply/destroy requires ALLOW_PROD_APPLY=true' >&2; exit 1; fi"]
   }
 
   # NOTE: terraform validate is NOT included as a before_hook because

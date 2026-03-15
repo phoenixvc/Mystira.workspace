@@ -3,9 +3,8 @@ import { LogLine } from "./LogLine";
 import { isErrorMessage, isStackTraceLine } from "./logUtils";
 
 interface LogGroupProps {
-  group: { logs: ServiceLog[] };
+  group: { logs: ServiceLog[]; lineNumber: number };
   groupIndex: number;
-  filteredLogs: ServiceLog[];
   showLineNumbers: boolean;
   wordWrap: boolean;
   timestampFormat: "time" | "full" | "relative";
@@ -14,14 +13,13 @@ interface LogGroupProps {
   currentErrorIndex: number;
   collapsedGroups: Set<number>;
   onToggleGroup: (index: number) => void;
-  onCopyLog: (log: ServiceLog) => void;
+  onCopyLog: (log: ServiceLog) => void | Promise<void>;
   logLineRefs: React.MutableRefObject<Map<number, HTMLDivElement>>;
 }
 
 export function LogGroup({
   group,
   groupIndex,
-  filteredLogs,
   showLineNumbers,
   wordWrap,
   timestampFormat,
@@ -53,7 +51,7 @@ export function LogGroup({
   return (
     <div key={groupIndex}>
       {displayLogs.map((log, logIndex) => {
-        const actualIndex = filteredLogs.indexOf(log);
+        const actualIndex = group.lineNumber - 1 + logIndex;
         // Check if this is a stack trace continuation line
         const isStackTrace = isStackTraceLine(log.message);
         // Stack trace lines should be treated as errors (red, no timestamp)

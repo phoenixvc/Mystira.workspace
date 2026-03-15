@@ -24,6 +24,16 @@ variable "tags" {
   type = map(string)
 }
 
+variable "shared_comms_rg_name" {
+  type    = string
+  default = "mys-shared-comms-rg-glob"
+}
+
+variable "shared_comms_acs_name" {
+  type    = string
+  default = "mys-shared-acs"
+}
+
 # PostgreSQL variables
 variable "postgresql_sku_name" {
   type = string
@@ -191,14 +201,9 @@ module "dns" {
 }
 
 # Cross-environment shared communications (created in dev, referenced here)
-locals {
-  shared_comms_rg_name  = "mys-shared-comms-rg-glob"
-  shared_comms_acs_name = "mys-shared-acs"
-}
-
 data "azurerm_communication_service" "shared" {
-  name                = local.shared_comms_acs_name
-  resource_group_name = local.shared_comms_rg_name
+  name                = var.shared_comms_acs_name
+  resource_group_name = var.shared_comms_rg_name
 }
 
 # =============================================================================
@@ -283,10 +288,5 @@ output "log_analytics_workspace_id" {
 
 output "application_insights_connection_string" {
   value     = module.monitoring.application_insights_connection_string
-  sensitive = true
-}
-
-output "communication_service_primary_connection_string" {
-  value     = data.azurerm_communication_service.shared.primary_connection_string
   sensitive = true
 }

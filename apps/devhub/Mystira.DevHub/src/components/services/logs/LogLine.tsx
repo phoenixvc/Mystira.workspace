@@ -38,9 +38,10 @@ export function LogLine({
   }
 
   return (
-    <div
+    <button
+      type="button"
       onClick={() => onCopy(log)}
-      className={`${textColor} ${isBuildLog ? "opacity-90" : ""} hover:bg-gray-900/50 px-1 py-0.5 rounded transition-colors cursor-pointer ${
+      className={`block w-full text-left ${textColor} ${isBuildLog ? "opacity-90" : ""} hover:bg-gray-900/50 px-1 py-0.5 rounded transition-colors cursor-pointer ${
         isHighlighted ? "ring-2 ring-red-500" : ""
       } ${wordWrap ? "break-words whitespace-pre-wrap" : ""}`}
       title={`Click to copy | Line ${index + 1} - ${isError ? "Error" : isWarning ? "Warning" : "Info"}`}
@@ -81,6 +82,6 @@ export function LogLine({
       >
         {highlightSearch(log.message, filterSearch)}
       </span>
-    </div>
+    </button>
   );
 }

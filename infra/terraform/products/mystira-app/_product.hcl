@@ -81,5 +81,4 @@ inputs = {
   shared_storage_blob_endpoint                  = try(dependency.shared.outputs.storage_blob_endpoint, local.shared_mock_outputs.storage_blob_endpoint)
   shared_log_analytics_workspace_id             = try(dependency.shared.outputs.log_analytics_workspace_id, local.shared_mock_outputs.log_analytics_workspace_id)
   shared_application_insights_connection_string = try(dependency.shared.outputs.application_insights_connection_string, local.shared_mock_outputs.application_insights_connection_string)
-  shared_acs_connection_string                  = try(dependency.shared.outputs.communication_service_primary_connection_string, local.shared_mock_outputs.communication_service_primary_connection_string)
 }

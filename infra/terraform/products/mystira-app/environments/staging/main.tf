@@ -91,10 +91,17 @@ variable "shared_application_insights_connection_string" {
   description = "Connection string for the shared Application Insights instance from shared-infra. Contains instrumentation key and ingestion endpoint for APM telemetry."
 }
 
+variable "shared_application_insights_id" {
+  type        = string
+  default     = ""
+  description = "Azure resource ID of the shared Application Insights instance from shared-infra."
+}
+
 variable "shared_acs_connection_string" {
   type        = string
   sensitive   = true
   description = "Connection string for the shared Azure Communication Services instance from shared-infra."
+  default     = ""
 }
 
 # =============================================================================
@@ -122,6 +129,7 @@ module "mystira_app" {
 
   use_shared_monitoring                         = var.use_shared_monitoring
   shared_log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
+  shared_application_insights_id                = var.shared_application_insights_id
   shared_application_insights_connection_string = var.shared_application_insights_connection_string
 
   enable_redis          = var.enable_redis
@@ -129,7 +137,7 @@ module "mystira_app" {
   shared_redis_hostname = var.shared_redis_hostname
 
   enable_communication_services = false
-  use_shared_acs                = true
+  use_shared_acs                = length(trim(var.shared_acs_connection_string)) > 0
   shared_acs_connection_string  = var.shared_acs_connection_string
 }
 

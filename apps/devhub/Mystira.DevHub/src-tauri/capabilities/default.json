@@ -8,6 +8,10 @@
     "shell:allow-open",
     "opener:allow-open-url",
     "dialog:default",
-    "fs:default"
+    "fs:default",
+    {
+      "identifier": "fs:scope",
+      "allow": ["$DOWNLOAD/**", "$DOCUMENT/**", "$HOME/**"]
+    }
   ]
 }

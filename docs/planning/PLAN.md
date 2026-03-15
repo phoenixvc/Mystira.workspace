@@ -72,15 +72,16 @@ packages/                          # 14 library packages
 | B.6  | Shared resource reuse: one-per-env Redis/Cosmos/Storage/LA where possible; products consume shared-infra outputs consistently.  | **IN PROGRESS** |
 | B.7  | Edge/networking migration: DNS, Front Door, and networking moved out of legacy environments with minimal disruption.            | **NEXT**        |
 
-Cost notes: see [infra-consolidation-cost-estimate.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/infra-consolidation-cost-estimate.md).
+Cost notes: see [infra-consolidation-cost-estimate.md](../analysis/infra-consolidation-cost-estimate.md).
 
-Non-scope plan: [infra-edge-networking-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/infra-edge-networking-plan.md).
+Non-scope plan: [infra-edge-networking-plan.md](./infra-edge-networking-plan.md).
 
 Operational notes:
 
-- Pre-seed inventory snapshot: [azure-inventory-preseed.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/azure-inventory-preseed.md)
-- Terragrunt rationale + founder adoption: [terragrunt-for-founders.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/terragrunt-for-founders.md)
-- Other repo migration plan: [other-repo-migration-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/other-repo-migration-plan.md)
+- Pre-seed inventory snapshot: [azure-inventory-preseed.md](../analysis/azure-inventory-preseed.md)
+- Terragrunt rationale + founder adoption: [terragrunt-for-founders.md](../analysis/terragrunt-for-founders.md)
+- Other repo migration plan: [other-repo-migration-plan.md](./other-repo-migration-plan.md)
+- DevHub: keep “infra validate/preview” UX aligned with Terragrunt stacks and shared-infra outputs
 - Prod safety: Terragrunt blocks prod apply/destroy unless `ALLOW_PROD_APPLY=true`
 - External infra standards to evaluate (post-stabilization): https://github.com/phoenixvc/azure-infrastructure, https://github.com/phoenixvc/phoenixvc-actions-runner
 
@@ -96,6 +97,7 @@ Notes:
 - Greenfield approach: only if you want a product-agnostic platform repo immediately; otherwise it’s slower and risks over-design.
 - Safety: keep per-product app registrations/scopes even if the login API is shared, so tokens and permissions remain product-bounded.
 - External platform candidates (post-stabilization): https://github.com/phoenixvc/ai-gateway (OpenAI-compatible gateway on Azure Container Apps), https://github.com/phoenixvc/pvc-costops-analytics (FinOps platform: ADX + Grafana + Terraform + FastAPI)
+- ai-gateway integration plan: [ai-gateway-integration-plan.md](./ai-gateway-integration-plan.md)
 
 | Step | What                                                                                                                                                                 | Status          |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
@@ -152,7 +154,7 @@ implementation procedures referenced above.
 
 Baseline commit: `4767ce579` (chore(workspace): finalize monorepo migration cleanup)
 
-See [monorepo-features-effort-summary.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/monorepo-features-effort-summary.md) for a cross-project feature summary and per-project effort estimates.
+See [monorepo-features-effort-summary.md](../analysis/monorepo-features-effort-summary.md) for a cross-project feature summary and per-project effort estimates.
 
 ### Change Summary
 

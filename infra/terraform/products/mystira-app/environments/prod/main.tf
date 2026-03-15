@@ -71,7 +71,12 @@ variable "shared_log_analytics_workspace_id" {
 variable "shared_application_insights_connection_string" {
   type      = string
   sensitive = true
-  default   = null
+  default   = ""
+}
+
+variable "shared_application_insights_id" {
+  type    = string
+  default = ""
 }
 
 variable "use_shared_monitoring" {
@@ -92,7 +97,7 @@ variable "use_shared_redis" {
 variable "shared_acs_connection_string" {
   type      = string
   sensitive = true
-  default   = null
+  default   = ""
 }
 
 # =============================================================================
@@ -123,6 +128,7 @@ module "mystira_app" {
 
   use_shared_monitoring                         = var.use_shared_monitoring
   shared_log_analytics_workspace_id             = var.shared_log_analytics_workspace_id
+  shared_application_insights_id                = var.shared_application_insights_id
   shared_application_insights_connection_string = var.shared_application_insights_connection_string
 
   enable_redis          = var.enable_redis
@@ -130,7 +136,7 @@ module "mystira_app" {
   shared_redis_hostname = var.shared_redis_hostname
 
   enable_communication_services = false
-  use_shared_acs                = true
+  use_shared_acs                = length(trim(var.shared_acs_connection_string)) > 0
   shared_acs_connection_string  = var.shared_acs_connection_string
 }
 

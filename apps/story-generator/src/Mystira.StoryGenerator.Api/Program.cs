@@ -26,7 +26,17 @@ var builder = WebApplication.CreateBuilder(args);
 var keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL");
 if (!string.IsNullOrWhiteSpace(keyVaultUrl) && string.IsNullOrWhiteSpace(builder.Configuration["KeyVault:Name"]))
 {
-    var keyVaultName = new Uri(keyVaultUrl).Host.Split('.')[0];
+    if (!Uri.TryCreate(keyVaultUrl, UriKind.Absolute, out var keyVaultUri) || string.IsNullOrWhiteSpace(keyVaultUri.Host))
+    {
+        throw new InvalidOperationException($"Invalid KEY_VAULT_URL '{keyVaultUrl}'. Provide a full Key Vault URL like 'https://<vault-name>.vault.azure.net/'.");
+    }
+
+    var keyVaultName = keyVaultUri.Host.Split('.')[0];
+    if (string.IsNullOrWhiteSpace(keyVaultName))
+    {
+        throw new InvalidOperationException($"Invalid KEY_VAULT_URL '{keyVaultUrl}'. Unable to derive Key Vault name from host '{keyVaultUri.Host}'.");
+    }
+
     builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
     {
         ["KeyVault:Name"] = keyVaultName,

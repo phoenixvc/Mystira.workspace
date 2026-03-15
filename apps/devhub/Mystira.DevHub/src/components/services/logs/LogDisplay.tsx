@@ -1,5 +1,6 @@
-import { type JSX, useRef } from "react";
+import { useRef } from "react";
 import { ServiceLog } from "../types";
+import { LogLine } from "./LogLine";
 import { isErrorMessage, isStackTraceLine } from "./logUtils";
 
 interface LogDisplayProps {
@@ -10,8 +11,8 @@ interface LogDisplayProps {
   logLineRefs: React.MutableRefObject<Map<number, HTMLDivElement>>;
   highlightErrorIndex?: number;
   onCopyLog: (log: ServiceLog) => void;
-  formatTimestamp: (timestamp: number) => string;
-  highlightSearch: (text: string, search: string) => JSX.Element;
+  wordWrap: boolean;
+  timestampFormat: "time" | "full" | "relative";
 }
 
 export function LogDisplay({
@@ -22,8 +23,8 @@ export function LogDisplay({
   logLineRefs,
   highlightErrorIndex,
   onCopyLog,
-  formatTimestamp,
-  highlightSearch,
+  wordWrap,
+  timestampFormat,
 }: LogDisplayProps) {
   const logEndRef = useRef<HTMLDivElement>(null);
 
@@ -44,11 +45,12 @@ export function LogDisplay({
 
             // Check if previous line was an error (for stack trace detection)
             const prevLog = index > 0 ? logs[index - 1] : null;
-            const prevWasError =
+            const prevWasError = !!(
               prevLog &&
               (prevLog.type === "stderr" ||
                 isErrorMessage(prevLog.message) ||
-                isStackTraceLine(prevLog.message));
+                isStackTraceLine(prevLog.message))
+            );
 
             // Stack trace lines should be treated as error lines (red, no timestamp)
             const isErrorMsg =
@@ -62,59 +64,27 @@ export function LogDisplay({
                 messageLower.includes("warn") ||
                 messageLower.includes("deprecated"));
 
-            let textColor = "text-green-400";
-            if (isErrorMsg) {
-              textColor = "text-red-400";
-            } else if (isWarning) {
-              textColor = "text-yellow-400";
-            }
-
             return (
               <div
                 key={index}
                 ref={(el) => {
                   if (el) logLineRefs.current.set(index, el);
                 }}
-                onClick={() => onCopyLog(log)}
-                className={`${textColor} ${isBuildLog ? "opacity-90" : ""} hover:bg-gray-900/50 px-1 py-0.5 rounded transition-colors cursor-pointer ${
-                  index === highlightErrorIndex ? "ring-2 ring-red-500" : ""
-                }`}
-                title={`Click to copy | Line ${index + 1} - ${isErrorMsg ? "Error" : isWarning ? "Warning" : "Info"}`}
               >
-                {showLineNumbers && (
-                  <span className="text-gray-600 dark:text-gray-500 mr-2 text-[10px]">
-                    {index + 1}
-                  </span>
-                )}
-                {/* Don't show timestamp for stack trace continuation lines */}
-                {!isStackTrace && (
-                  <span className="text-gray-500 text-[10px]">
-                    [{formatTimestamp(log.timestamp)}]
-                  </span>
-                )}
-                {isStackTrace && (
-                  <span className="text-gray-700 text-[10px] mr-1"> </span>
-                )}
-                {isBuildLog && !isStackTrace && (
-                  <span className="text-cyan-400 font-semibold ml-1 text-[10px]">
-                    [BUILD]
-                  </span>
-                )}
-                {!isStackTrace && (
-                  <span className="text-gray-500 ml-1 text-[10px]">
-                    [{log.service}]
-                  </span>
-                )}
-                {isErrorMsg && !isStackTrace && (
-                  <span className="text-red-500 ml-1 font-bold">⚠</span>
-                )}
-                {isWarning && !isErrorMsg && !isStackTrace && (
-                  <span className="text-yellow-500 ml-1">⚠</span>
-                )}
-                {/* Indent stack trace lines slightly */}
-                <span className={`ml-1 ${isStackTrace ? "ml-6" : ""}`}>
-                  {highlightSearch(log.message, filter.search)}
-                </span>
+                <LogLine
+                  log={log}
+                  index={index}
+                  showLineNumbers={showLineNumbers}
+                  wordWrap={wordWrap}
+                  timestampFormat={timestampFormat}
+                  filterSearch={filter.search}
+                  isError={isErrorMsg}
+                  isWarning={isWarning}
+                  isBuildLog={isBuildLog}
+                  isHighlighted={index === highlightErrorIndex}
+                  onCopy={onCopyLog}
+                  isStackTrace={isStackTrace}
+                />
               </div>
             );
           })}

@@ -13,7 +13,7 @@ This document provides a rough cost comparison for Mystira infrastructure before
   - Container Registry (ACR)
 - Non-scope (planned separately): DNS zone management, Front Door/WAF, networking (VNet/AKS), ingress, and cluster sizing.
 
-Non-scope plan: [infra-edge-networking-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/infra-edge-networking-plan.md).
+Non-scope plan: [infra-edge-networking-plan.md](../planning/infra-edge-networking-plan.md).
 
 ## Baseline Assumptions
 
@@ -56,7 +56,7 @@ Cross-environment shared (created once, referenced everywhere):
 
 ## Cross-Environment + Cross-Product Sharing Matrix
 
-This section answers: “Which of these should be shared across environments and across other products (Rooivalk, Chauffeur, etc)?”
+This section answers: “Which of these should be shared across environments and across other products (Rooivalk, Chauffeur, etc.)?”
 
 Guiding rule:
 
@@ -80,21 +80,21 @@ Guiding rule:
 
 As we are in pre-seed and optimizing for lowest baseline cost while still keeping an upgrade path, prefer:
 
-- Founder-oriented adoption model: [terragrunt-for-founders.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/analysis/terragrunt-for-founders.md).
-- Other repo adoption/migration plan: [other-repo-migration-plan.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/other-repo-migration-plan.md).
+- Founder-oriented adoption model: [terragrunt-for-founders.md](./terragrunt-for-founders.md).
+- Other repo adoption/migration plan: [other-repo-migration-plan.md](../planning/other-repo-migration-plan.md).
 
 - Run only one environment initially (dev-like). Treat staging/prod as “add later”.
 - Maximize “shared-infra per env” reuse (one Redis/Cosmos/Storage/Service Bus/Log Analytics).
 - Prefer SKUs and modes that scale with usage rather than fixed baseline:
   - Cosmos DB: serverless (or lowest throughput/autoscale if serverless is not acceptable).
-  - Redis: smallest tier that meets requirements; move to dedicated/per-product only when blast areradius becomes a problem.
+  - Redis: smallest tier that meets requirements; move to dedicated/per-product only when blast radius becomes a problem.
   - Log Analytics: short retention in non-prod; keep ingestion low by pruning noisy logs and sampling traces.
   - Service Bus: Standard unless you truly need Premium features (dedicated capacity, advanced isolation).
   - ACR: Basic/shared.
 
 Startup-minded tradeoffs:
 
-- Application Insights: keep per-service AI instances we dont yet need strong separation; so our infra favors a single workspace with consistent tags and alert rules.
+- Application Insights: keep per-service AI instances — we don't yet need strong separation; therefore, our infra favors a single workspace with consistent tags and alert rules.
 - Cosmos and Redis: share early, split later. Early-stage operational simplicity is worth the shared blast radius.
 - “Non-scope” items (DNS/Front Door/networking/AKS) are the most likely to force fixed monthly spend; defer until we have real traffic or clear requirements.
 

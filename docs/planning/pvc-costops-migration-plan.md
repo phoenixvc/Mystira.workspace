@@ -28,7 +28,7 @@ The names imply SAN region scope and a “shared costops” foundation with app-
 
 If PVC CostOps will share platform resources (or wants to stay compatible with Mystira-style shared-infra), follow the shared contract and naming conventions here:
 
-- [shared-resource-adoption-conventions.md](file:///c:/Users/smitj/repos/Mystira.workspace/docs/planning/shared-resource-adoption-conventions.md)
+- [shared-resource-adoption-conventions.md](./shared-resource-adoption-conventions.md)
 
 ## Non-goals
 
@@ -43,7 +43,7 @@ If PVC CostOps will share platform resources (or wants to stay compatible with M
 - One change axis at a time: state adoption first, refactors after.
 - Treat prod as sacred: gated apply (manual approvals and/or env guard).
 
-## If this is a brand new app (recommended path)
+## If this is a brand-new app (recommended path)
 
 If there is no existing production traffic and the Azure resources are either not created yet or safe to recreate, use this simplified path:
 

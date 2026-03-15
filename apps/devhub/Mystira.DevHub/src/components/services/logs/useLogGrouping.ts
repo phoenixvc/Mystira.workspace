@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ServiceLog } from "../types";
 
 interface GroupedLog {
@@ -13,6 +13,10 @@ export function useLogGrouping(
   const [collapsedGroups, setCollapsedGroups] = useState<Set<number>>(
     new Set()
   );
+
+  useEffect(() => {
+    setCollapsedGroups(() => new Set());
+  }, [collapseSimilar, filteredLogs]);
 
   const groupedLogs = useMemo(() => {
     if (!collapseSimilar) {
@@ -32,6 +36,8 @@ export function useLogGrouping(
       } else {
         const lastLog = currentGroup[currentGroup.length - 1];
         const isSimilar =
+          log.type === lastLog.type &&
+          log.source === lastLog.source &&
           log.message.substring(0, 50) === lastLog.message.substring(0, 50) &&
           Math.abs(log.timestamp - lastLog.timestamp) < 2000;
 
@@ -50,7 +56,7 @@ export function useLogGrouping(
     }
 
     return groups;
-  }, [filteredLogs, collapseSimilar, collapsedGroups]);
+  }, [filteredLogs, collapseSimilar]);
 
   const toggleGroup = (groupIndex: number) => {
     setCollapsedGroups((prev) => {

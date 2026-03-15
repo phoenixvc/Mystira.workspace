@@ -1,6 +1,6 @@
 # Azure Inventory (Pre-Seed Snapshot)
 
-This is a quick inventory of Azure resource groups and deployed services, based on the `az ... list` outputs captured in the terminal session during March 2026-03.
+This is a quick inventory of Azure resource groups and deployed services, based on the `az ... list` outputs captured in the terminal session during March 2026.
 
 ## Summary
 

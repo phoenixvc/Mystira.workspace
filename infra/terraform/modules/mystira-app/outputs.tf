@@ -205,7 +205,7 @@ output "log_analytics_workspace_name" {
 }
 
 output "application_insights_id" {
-  description = "Application Insights ID (null if using shared)"
+  description = "Application Insights ID (uses shared_application_insights_id when use_shared_application_insights is true; otherwise newly created id)"
   value       = local.use_shared_application_insights ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
 }
 

@@ -430,9 +430,12 @@ export function LogFilterBar({
               step="1000"
               value={maxLogs}
               onChange={(e) => {
+                const min = 100;
+                const max = 100000;
                 const value = parseInt(e.target.value, 10);
-                if (!isNaN(value) && value >= 100) {
-                  onMaxLogsChange(value);
+                if (!isNaN(value)) {
+                  const clampedValue = Math.min(max, Math.max(min, value));
+                  onMaxLogsChange(clampedValue);
                 }
               }}
               className="w-16 px-1 py-0.5 border border-gray-300 dark:border-gray-600 rounded text-xs bg-white dark:bg-gray-800 text-gray-900 dark:text-white"

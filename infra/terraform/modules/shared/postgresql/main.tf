@@ -157,7 +157,7 @@ locals {
 
 check "vnet_integration_requires_network_inputs" {
   assert {
-    condition     = !var.enable_vnet_integration || (var.vnet_id != null && var.subnet_id != null)
+    condition     = !var.enable_vnet_integration || (var.vnet_id != null && var.vnet_id != "" && var.subnet_id != null && var.subnet_id != "")
     error_message = "When enable_vnet_integration is true, both vnet_id and subnet_id must be set."
   }
 }
@@ -258,13 +258,13 @@ data "azurerm_client_config" "current" {}
 locals {
   # Identities that need data source lookup (no principal_id provided)
   aad_identities_needing_lookup = var.aad_auth_enabled ? {
-    for k, v in var.aad_admin_identities : k => v if v.principal_id == null
+    for k, v in var.aad_admin_identities : k => v if v.principal_id == null || trim(v.principal_id) == ""
   } : {}
 
   # All identities with resolved principal_id
   aad_admin_principal_ids = var.aad_auth_enabled ? {
     for k, v in var.aad_admin_identities : k => coalesce(
-      v.principal_id,
+      v.principal_id != null && trim(v.principal_id) != "" ? v.principal_id : null,
       try(data.azurerm_user_assigned_identity.aad_admins[k].principal_id, null)
     )
   } : {}
@@ -289,6 +289,13 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aa
   object_id           = local.aad_admin_principal_ids[each.key]
   principal_name      = each.value.principal_name
   principal_type      = each.value.principal_type
+
+  lifecycle {
+    precondition {
+      condition     = local.aad_admin_principal_ids[each.key] != null && trim(local.aad_admin_principal_ids[each.key]) != ""
+      error_message = "aad_admin_identities[\"${each.key}\"] must provide a non-empty principal_id or a principal_name that resolves to a user-assigned identity with a principal_id."
+    }
+  }
 }
 
 output "server_id" {

@@ -73,6 +73,11 @@ variable "shared_cosmos_connection_string" {
   type        = string
   sensitive   = true
   default     = null
+
+  validation {
+    condition     = var.use_shared_cosmos == false || (var.shared_cosmos_connection_string != null && trim(var.shared_cosmos_connection_string) != "")
+    error_message = "shared_cosmos_connection_string must be set (non-empty) when use_shared_cosmos is true."
+  }
 }
 
 variable "cosmos_database_id" {

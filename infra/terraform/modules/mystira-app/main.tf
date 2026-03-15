@@ -25,6 +25,21 @@ terraform {
   }
 }
 
+moved {
+  from = azurerm_key_vault_secret.shared_cosmos_connection_string
+  to   = azurerm_key_vault_secret.shared_cosmos
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_storage_connection_string
+  to   = azurerm_key_vault_secret.shared_storage
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_acs_connection_string
+  to   = azurerm_key_vault_secret.shared_acs
+}
+
 # -----------------------------------------------------------------------------
 # Data Sources
 # -----------------------------------------------------------------------------
@@ -84,7 +99,7 @@ locals {
     { name = "CompassTrackings", partition_key = "/id" },    # Axis → "id" (mapped)
   ]
 
-  use_shared_application_insights = var.use_shared_monitoring && var.shared_application_insights_id != "" && var.shared_application_insights_connection_string != ""
+  use_shared_application_insights = var.use_shared_monitoring && (var.shared_application_insights_id != "" || var.shared_application_insights_connection_string != "")
 
   # Resolved monitoring resource references (shared or created)
   log_analytics_workspace_id             = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
