@@ -12,11 +12,11 @@
       <PackageReference Include="Azure.AI.OpenAI" Version="2.1.0" />
       <PackageReference Include="Azure.AI.Projects" Version="1.1.0" />
       <PackageReference Include="Azure.Identity" Version="1.18.0" />
-      <PackageReference Include="WolverineFx" Version="5.18.0" />
+      <PackageReference Include="WolverineFx" Version="5.19.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="NJsonSchema" Version="11.5.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
     <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
