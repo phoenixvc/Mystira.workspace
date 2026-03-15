@@ -730,7 +730,21 @@ jobs:
             # Plan for specific directory
             echo "Running plan for $DIR..."
             cd "$DIR"
-            terragrunt init --terragrunt-non-interactive
+            set +e
+            INIT_OUTPUT=$(terragrunt init --terragrunt-non-interactive 2>&1)
+            INIT_EXIT=$?
+            set -e
+
+            if [ $INIT_EXIT -ne 0 ]; then
+              echo "$INIT_OUTPUT"
+              if echo "$INIT_OUTPUT" | grep -q "AuthorizationPermissionMismatch\\|Failed to get existing workspaces\\|StatusCode=403"; then
+                echo "::warning::Init skipped for $DIR (backend not accessible with current permissions)."
+                exit 0
+              fi
+              echo "::error::Init failed for $DIR"
+              exit 1
+            fi
+
             terragrunt plan --terragrunt-non-interactive
           else
             # Plan for all changed projects - detect changes inline
@@ -782,12 +796,24 @@ jobs:
 
             # Run plan for each project
             FAILED=0
+            SKIPPED=0
             for PROJECT_DIR in "${PROJECTS[@]}"; do
               echo "=========================================="
               echo "Planning: $PROJECT_DIR"
               echo "=========================================="
               cd "$GITHUB_WORKSPACE/$PROJECT_DIR"
-              if ! terragrunt init --terragrunt-non-interactive; then
+              set +e
+              INIT_OUTPUT=$(terragrunt init --terragrunt-non-interactive 2>&1)
+              INIT_EXIT=$?
+              set -e
+
+              if [ $INIT_EXIT -ne 0 ]; then
+                echo "$INIT_OUTPUT"
+                if echo "$INIT_OUTPUT" | grep -q "AuthorizationPermissionMismatch\\|Failed to get existing workspaces\\|StatusCode=403"; then
+                  echo "::warning::Init skipped for $PROJECT_DIR (backend not accessible with current permissions)."
+                  SKIPPED=1
+                  continue
+                fi
                 echo "::error::Init failed for $PROJECT_DIR"
                 FAILED=1
                 continue
@@ -801,6 +827,9 @@ jobs:
             if [ $FAILED -ne 0 ]; then
               echo "::error::One or more plans failed"
               exit 1
+            fi
+            if [ $SKIPPED -ne 0 ]; then
+              echo "::warning::One or more plans were skipped due to backend permissions."
             fi
           fi
 
