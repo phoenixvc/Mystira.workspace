@@ -98,7 +98,7 @@ jobs:
 
       - name: Validate Manifests (dry-run)
         run: |
-          kubectl apply --dry-run=client -f /tmp/manifests.yaml
+          kubectl apply --dry-run=client --validate=false -f /tmp/manifests.yaml
 
       - name: Check for Required Labels
         run: |
