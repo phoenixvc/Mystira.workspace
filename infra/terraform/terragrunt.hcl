@@ -16,15 +16,14 @@
 locals {
   # Parse the path to extract product and environment
   # Example path: products/mystira-app/environments/dev
-  path_parts = split("/", path_relative_to_include())
+  path_parts = split("/", try(path_relative_to_include(), ""))
 
   # Determine if this is shared-infra or a product
-  is_shared = length(local.path_parts) > 0 && local.path_parts[0] == "shared-infra"
+  is_shared = length(local.path_parts) > 0 && element(local.path_parts, 0) == "shared-infra"
 
   # Extract product name (e.g., "mystira-app", "story-generator")
-  product = local.is_shared ? "shared-infra" : (
-    length(local.path_parts) >= 2 ? local.path_parts[1] : "unknown"
-  )
+  product_from_path = length(local.path_parts) >= 2 ? element(local.path_parts, 1) : "unknown"
+  product           = local.is_shared ? "shared-infra" : local.product_from_path
 
   # Extract environment (dev, staging, prod) with safe fallback
   environment = length(local.path_parts) >= 2 ? element(local.path_parts, length(local.path_parts) - 1) : "default"
@@ -34,9 +33,25 @@ locals {
   azure_tenant_id       = get_env("ARM_TENANT_ID", "")
 
   # State storage configuration
-  state_resource_group  = "mys-terraform-state"
-  state_storage_account = "mysterraformstate"
+  state_resource_group  = "mys-shared-terraform-rg-san"
+  state_storage_account = "myssharedtfstatesan"
   state_container       = "tfstate"
+
+  region_code = "san"
+
+  mystira_app_rg_segment = local.environment == "prod" ? "mystira" : "app"
+  product_rg_segment = local.product == "mystira-app" ? local.mystira_app_rg_segment : lookup(
+    {
+      "story-generator" = "story"
+      "admin"           = "admin"
+      "publisher"       = "publisher"
+      "chain"           = "chain"
+    },
+    local.product,
+    "rg"
+  )
+
+  default_resource_group_name = local.is_shared ? "mys-${local.environment}-core-rg-${local.region_code}" : "mys-${local.environment}-${local.product_rg_segment}-rg-${local.region_code}"
 
   # Common tags applied to all resources
   common_tags = {
@@ -82,42 +97,43 @@ remote_state {
 generate "provider" {
   path      = "provider.tf"
   if_exists = "overwrite_terragrunt"
-  contents  = <<EOF
-terraform {
-  required_version = ">= 1.5.0"
-
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
-    azapi = {
-      source  = "Azure/azapi"
-      version = "~> 2.0"
-    }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.5"
-    }
-  }
-}
-
-provider "azurerm" {
-  subscription_id = "${local.azure_subscription_id}"
-
-  features {
-    key_vault {
-      purge_soft_delete_on_destroy    = false
-      recover_soft_deleted_key_vaults = true
-    }
-    resource_group {
-      prevent_deletion_if_contains_resources = true
-    }
-  }
-}
-
-provider "azapi" {}
-EOF
+  contents = join("\n", [
+    "terraform {",
+    "  required_version = \">= 1.5.0\"",
+    "",
+    "  required_providers {",
+    "    azurerm = {",
+    "      source  = \"hashicorp/azurerm\"",
+    "      version = \"~> 4.0\"",
+    "    }",
+    "    azapi = {",
+    "      source  = \"Azure/azapi\"",
+    "      version = \"~> 2.0\"",
+    "    }",
+    "    random = {",
+    "      source  = \"hashicorp/random\"",
+    "      version = \"~> 3.5\"",
+    "    }",
+    "  }",
+    "}",
+    "",
+    "provider \"azurerm\" {",
+    "  subscription_id = \"${local.azure_subscription_id}\"",
+    "",
+    "  features {",
+    "    key_vault {",
+    "      purge_soft_delete_on_destroy    = false",
+    "      recover_soft_deleted_key_vaults = true",
+    "    }",
+    "    resource_group {",
+    "      prevent_deletion_if_contains_resources = true",
+    "    }",
+    "  }",
+    "}",
+    "",
+    "provider \"azapi\" {}",
+    "",
+  ])
 }
 
 # =============================================================================
@@ -134,7 +150,7 @@ inputs = {
   fallback_location = "eastus2" # For resources not available in primary region
 
   # Resource group naming
-  resource_group_name = "mys-${local.environment}-rg"
+  resource_group_name = local.default_resource_group_name
 }
 
 # =============================================================================
@@ -146,6 +162,11 @@ terraform {
   before_hook "terraform_fmt" {
     commands = ["plan", "apply"]
     execute  = ["terraform", "fmt", "-recursive", "-write=false", "-diff"]
+  }
+
+  before_hook "prod_apply_guard" {
+    commands = ["apply", "destroy"]
+    execute  = ["bash", "-lc", "if [ \"${local.environment}\" = \"prod\" ] && [ \"$${ALLOW_PROD_APPLY:-}\" != \"true\" ]; then echo 'Blocked: prod apply/destroy requires ALLOW_PROD_APPLY=true' >&2; exit 1; fi"]
   }
 
   # NOTE: terraform validate is NOT included as a before_hook because

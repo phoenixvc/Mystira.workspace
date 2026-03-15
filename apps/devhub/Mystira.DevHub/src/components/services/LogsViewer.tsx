@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LogFilterBar } from "./logs/LogFilterBar";
+import { LogGroup } from "./logs/LogGroup";
 import {
   copyLogsToClipboard,
   exportLogs,
   findErrorIndices,
   formatTimestamp,
-  highlightSearch,
 } from "./logs/logUtils";
 import { useLogGrouping } from "./logs/useLogGrouping";
 import { LogEntry, LogFilter } from "./types";
@@ -322,98 +322,23 @@ export function LogsViewer({
           </div>
         ) : (
           <>
-            {groupedLogs.map((group, groupIndex) => {
-              const firstLog = group.logs[0];
-              const isBuildLog = firstLog.source === "build";
-              const messageLower = firstLog.message.toLowerCase();
-              const isWarning =
-                messageLower.includes("warning") ||
-                messageLower.includes("warn") ||
-                messageLower.includes("deprecated");
-              const isErrorMsg =
-                firstLog.type === "stderr" ||
-                messageLower.includes("error") ||
-                messageLower.includes("failed") ||
-                messageLower.includes("exception") ||
-                messageLower.includes("fatal");
-
-              let textColor = "text-green-400";
-              if (isErrorMsg) {
-                textColor = "text-red-400";
-              } else if (isWarning) {
-                textColor = "text-yellow-400";
-              }
-
-              const isGroupCollapsed = collapsedGroups.has(groupIndex);
-              const shouldShow = !isGroupCollapsed || group.logs.length === 1;
-              const displayLogs = shouldShow ? group.logs : [group.logs[0]];
-
-              return (
-                <div key={groupIndex}>
-                  {displayLogs.map((log, logIndex) => {
-                    const actualIndex = filteredLogs.indexOf(log);
-
-                    return (
-                      <div
-                        key={`${groupIndex}-${logIndex}`}
-                        ref={(el) => {
-                          if (el) logLineRefs.current.set(actualIndex, el);
-                        }}
-                        onClick={() => handleCopyLog(log)}
-                        className={`${textColor} ${isBuildLog ? "opacity-90" : ""} hover:bg-gray-900/50 px-1 py-0.5 rounded transition-colors cursor-pointer ${
-                          actualIndex === errorIndices[currentErrorIndex]
-                            ? "ring-2 ring-red-500"
-                            : ""
-                        } ${wordWrap ? "break-words whitespace-pre-wrap" : ""}`}
-                        title={`Click to copy | Line ${actualIndex + 1} - ${isErrorMsg ? "Error" : isWarning ? "Warning" : "Info"}`}
-                      >
-                        {showLineNumbers && (
-                          <span className="text-gray-600 dark:text-gray-500 mr-2 text-[10px] flex-shrink-0">
-                            {actualIndex + 1}
-                          </span>
-                        )}
-                        <span className="text-gray-500 text-[10px] flex-shrink-0">
-                          [{formatTimestampHelper(log.timestamp)}]
-                        </span>
-                        {isBuildLog && (
-                          <span className="text-cyan-400 font-semibold ml-1 text-[10px] flex-shrink-0">
-                            [BUILD]
-                          </span>
-                        )}
-                        <span className="text-gray-500 ml-1 text-[10px] flex-shrink-0">
-                          [{log.service}]
-                        </span>
-                        {isErrorMsg && (
-                          <span className="text-red-500 ml-1 font-bold flex-shrink-0">
-                            ⚠
-                          </span>
-                        )}
-                        {isWarning && !isErrorMsg && (
-                          <span className="text-yellow-500 ml-1 flex-shrink-0">
-                            ⚠
-                          </span>
-                        )}
-                        <span
-                          className={`ml-1 ${wordWrap ? "break-words" : ""}`}
-                        >
-                          {highlightSearch(log.message, filter.search)}
-                        </span>
-                      </div>
-                    );
-                  })}
-                  {group.logs.length > 1 && (
-                    <button
-                      onClick={() => toggleGroup(groupIndex)}
-                      className="text-gray-500 text-[10px] ml-4 italic hover:text-gray-400 transition-colors"
-                    >
-                      {isGroupCollapsed
-                        ? `... ${group.logs.length - 1} more similar log(s) (click to expand)`
-                        : `... ${group.logs.length} similar log(s) grouped (click to collapse)`}
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+            {groupedLogs.map((group, groupIndex) => (
+              <LogGroup
+                key={groupIndex}
+                group={group}
+                groupIndex={groupIndex}
+                showLineNumbers={showLineNumbers}
+                wordWrap={wordWrap}
+                timestampFormat={timestampFormat}
+                filterSearch={filter.search}
+                errorIndices={errorIndices}
+                currentErrorIndex={currentErrorIndex}
+                collapsedGroups={collapsedGroups}
+                onToggleGroup={toggleGroup}
+                onCopyLog={handleCopyLog}
+                logLineRefs={logLineRefs}
+              />
+            ))}
             <div ref={logEndRef} />
           </>
         )}

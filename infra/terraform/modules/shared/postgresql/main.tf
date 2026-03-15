@@ -155,8 +155,17 @@ locals {
   )
 }
 
+check "vnet_integration_requires_network_inputs" {
+  assert {
+    condition     = !var.enable_vnet_integration || (var.vnet_id != null && var.vnet_id != "" && var.subnet_id != null && var.subnet_id != "")
+    error_message = "When enable_vnet_integration is true, both vnet_id and subnet_id must be set."
+  }
+}
+
 # Private DNS Zone for PostgreSQL
 resource "azurerm_private_dns_zone" "postgres" {
+  count = var.enable_vnet_integration ? 1 : 0
+
   name                = "${local.name_prefix}.postgres.database.azure.com"
   resource_group_name = var.resource_group_name
 
@@ -169,9 +178,11 @@ resource "azurerm_private_dns_zone" "postgres" {
 
 # Private DNS Zone Virtual Network Link
 resource "azurerm_private_dns_zone_virtual_network_link" "postgres" {
+  count = var.enable_vnet_integration ? 1 : 0
+
   name                  = "${local.name_prefix}-vnet-link"
   resource_group_name   = var.resource_group_name
-  private_dns_zone_name = azurerm_private_dns_zone.postgres.name
+  private_dns_zone_name = azurerm_private_dns_zone.postgres[0].name
   virtual_network_id    = var.vnet_id
   registration_enabled  = false
 
@@ -184,13 +195,13 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   location               = var.location
   resource_group_name    = var.resource_group_name
   version                = var.postgres_version
-  delegated_subnet_id    = var.subnet_id
-  private_dns_zone_id    = azurerm_private_dns_zone.postgres.id
+  delegated_subnet_id    = var.enable_vnet_integration ? var.subnet_id : null
+  private_dns_zone_id    = var.enable_vnet_integration ? azurerm_private_dns_zone.postgres[0].id : null
   administrator_login    = var.admin_login
   administrator_password = var.admin_password != null ? var.admin_password : random_password.postgres[0].result
   zone                   = "1"
   # VNet integration requires public network access to be disabled
-  public_network_access_enabled = false
+  public_network_access_enabled = var.enable_vnet_integration ? false : true
 
   sku_name   = local.sku_name_final
   storage_mb = var.storage_mb
@@ -203,6 +214,10 @@ resource "azurerm_postgresql_flexible_server" "shared" {
   lifecycle {
     prevent_destroy = true
   }
+
+  depends_on = [
+    azurerm_private_dns_zone_virtual_network_link.postgres
+  ]
 }
 
 # Random password for PostgreSQL (if not provided)
@@ -243,13 +258,13 @@ data "azurerm_client_config" "current" {}
 locals {
   # Identities that need data source lookup (no principal_id provided)
   aad_identities_needing_lookup = var.aad_auth_enabled ? {
-    for k, v in var.aad_admin_identities : k => v if v.principal_id == null
+    for k, v in var.aad_admin_identities : k => v if v.principal_id == null || trimspace(v.principal_id) == ""
   } : {}
 
   # All identities with resolved principal_id
   aad_admin_principal_ids = var.aad_auth_enabled ? {
     for k, v in var.aad_admin_identities : k => coalesce(
-      v.principal_id,
+      v.principal_id != null && trimspace(v.principal_id) != "" ? v.principal_id : null,
       try(data.azurerm_user_assigned_identity.aad_admins[k].principal_id, null)
     )
   } : {}
@@ -274,6 +289,13 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "aa
   object_id           = local.aad_admin_principal_ids[each.key]
   principal_name      = each.value.principal_name
   principal_type      = each.value.principal_type
+
+  lifecycle {
+    precondition {
+      condition     = local.aad_admin_principal_ids[each.key] != null && trimspace(local.aad_admin_principal_ids[each.key]) != ""
+      error_message = "aad_admin_identities[\"${each.key}\"] must provide a non-empty principal_id or a principal_name that resolves to a user-assigned identity with a principal_id."
+    }
+  }
 }
 
 output "server_id" {
@@ -304,7 +326,7 @@ output "admin_password" {
 
 output "private_dns_zone_id" {
   description = "Private DNS Zone ID"
-  value       = azurerm_private_dns_zone.postgres.id
+  value       = var.enable_vnet_integration ? azurerm_private_dns_zone.postgres[0].id : null
 }
 
 output "connection_string_template" {

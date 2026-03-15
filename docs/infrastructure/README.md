@@ -27,9 +27,9 @@
 > ### Migration Steps
 >
 > 1. Clone Mystira.workspace: `git clone https://github.com/phoenixvc/Mystira.workspace`
-> 2. Navigate to: `cd infra/terraform/environments/dev`
-> 3. Run import script: `./import-mystira-app.sh`
-> 4. Verify state: `terraform plan`
+> 2. Deploy shared infra first: `cd infra/terraform/shared-infra/environments/dev && terragrunt apply`
+> 3. Deploy the product: `cd infra/terraform/products/mystira-app/environments/dev && terragrunt apply`
+> 4. For details, see `infra/terraform/TERRAGRUNT_README.md`
 > 5. Continue managing via Terraform
 >
 > ### Existing Resources

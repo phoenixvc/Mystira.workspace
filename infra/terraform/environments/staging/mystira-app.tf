@@ -35,14 +35,20 @@ data "azurerm_postgresql_flexible_server" "dev_postgres" {
 
 # Dev's Key Vault (for app secrets)
 data "azurerm_key_vault" "dev_app_kv" {
-  name                = "mys-dev-app-kv-san"
-  resource_group_name = "mys-dev-app-rg-san"
+  name                = "mys-dev-core-kv-san"
+  resource_group_name = "mys-dev-core-rg-san"
 }
 
 # Dev's Log Analytics
 data "azurerm_log_analytics_workspace" "dev_log_analytics" {
   name                = "mys-dev-core-log"
   resource_group_name = "mys-dev-core-rg-san"
+}
+
+# Shared Communication Services (cross-environment)
+data "azurerm_communication_service" "shared" {
+  name                = "mys-shared-acs"
+  resource_group_name = "mys-shared-comms-rg-glob"
 }
 
 # =============================================================================
@@ -88,7 +94,7 @@ module "mystira_app" {
   # App Service Configuration (API Backend)
   # -----------------------------------------------------------------------------
   app_service_sku = "B1"
-  dotnet_version  = "9.0"
+  dotnet_version  = "10.0"
 
   # Custom domains
   enable_api_custom_domain = false
@@ -119,7 +125,7 @@ module "mystira_app" {
   # -----------------------------------------------------------------------------
   enable_communication_services = false
   use_shared_acs                = true
-  shared_acs_connection_string  = "endpoint=https://mys-shared-acs.communication.azure.com;accesskey=REPLACE_WITH_KEY"
+  shared_acs_connection_string  = data.azurerm_communication_service.shared.primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 
   # -----------------------------------------------------------------------------

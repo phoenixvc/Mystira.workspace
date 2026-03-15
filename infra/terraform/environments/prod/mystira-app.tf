@@ -67,7 +67,7 @@ module "shared_storage" {
 # Shared Communication Services - Reference existing shared resource (created by dev)
 data "azurerm_communication_service" "shared" {
   name                = "mys-shared-acs"
-  resource_group_name = "mys-dev-comms-rg-san"
+  resource_group_name = "mys-shared-comms-rg-glob"
 }
 
 # =============================================================================
@@ -92,7 +92,7 @@ module "mystira_app" {
 
   # App Service Configuration - Production tier
   app_service_sku = "P1v3" # Premium for production
-  dotnet_version  = "9.0"
+  dotnet_version  = "10.0"
 
   # Custom domain for prod API
   enable_api_custom_domain = true

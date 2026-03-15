@@ -25,6 +25,16 @@ variable "tags" {
   type = map(string)
 }
 
+variable "shared_comms_rg_name" {
+  type    = string
+  default = "mys-shared-comms-rg-glob"
+}
+
+variable "shared_comms_acs_name" {
+  type    = string
+  default = "mys-shared-acs"
+}
+
 # PostgreSQL variables
 variable "postgresql_sku_name" {
   type = string
@@ -97,23 +107,11 @@ variable "log_retention_days" {
 }
 
 # =============================================================================
-# Data Sources
+# Resource Groups
 # =============================================================================
 
-# Used for location validation and resource group attributes
 data "azurerm_resource_group" "main" {
   name = var.resource_group_name
-}
-
-# =============================================================================
-# Validation
-# =============================================================================
-
-check "resource_group_location_matches" {
-  assert {
-    condition     = data.azurerm_resource_group.main.location == var.location
-    error_message = "Resource group location (${data.azurerm_resource_group.main.location}) does not match var.location (${var.location})."
-  }
 }
 
 # =============================================================================
@@ -136,6 +134,7 @@ module "postgresql" {
   environment                  = var.environment
   location                     = var.location
   resource_group_name          = var.resource_group_name
+  enable_vnet_integration      = false
   sku_name                     = var.postgresql_sku_name
   storage_mb                   = var.postgresql_storage_mb
   backup_retention_days        = var.postgresql_backup_retention
@@ -181,30 +180,33 @@ module "storage" {
 module "azure_ai" {
   source = "../../../modules/shared/azure-ai"
 
-  environment         = var.environment
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku_name            = var.azure_ai_sku
-  tags                = var.tags
+  environment                   = var.environment
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  sku_name                      = var.azure_ai_sku
+  public_network_access_enabled = true
+  tags                          = var.tags
 }
 
 module "servicebus" {
   source = "../../../modules/shared/servicebus"
 
-  environment         = var.environment
-  location            = var.location
-  resource_group_name = var.resource_group_name
-  sku                 = var.servicebus_sku
-  tags                = var.tags
+  environment                   = var.environment
+  location                      = var.location
+  resource_group_name           = var.resource_group_name
+  sku                           = var.servicebus_sku
+  public_network_access_enabled = true
+  tags                          = var.tags
 }
 
 module "container_registry" {
   source = "../../../modules/shared/container-registry"
 
-  resource_group_name = var.resource_group_name
-  location            = var.location
-  sku                 = var.acr_sku
-  tags                = var.tags
+  resource_group_name           = var.resource_group_name
+  location                      = var.location
+  sku                           = var.acr_sku
+  public_network_access_enabled = true
+  tags                          = var.tags
 }
 
 module "dns" {
@@ -213,6 +215,12 @@ module "dns" {
   environment         = var.environment
   resource_group_name = var.resource_group_name
   tags                = var.tags
+}
+
+# Cross-environment shared communications (created in dev, referenced here)
+data "azurerm_communication_service" "shared" {
+  name                = var.shared_comms_acs_name
+  resource_group_name = var.shared_comms_rg_name
 }
 
 # =============================================================================
@@ -236,6 +244,14 @@ output "redis_connection_string" {
   sensitive = true
 }
 
+output "redis_hostname" {
+  value = module.redis.hostname
+}
+
+output "redis_ssl_port" {
+  value = module.redis.ssl_port
+}
+
 output "cosmos_db_account_id" {
   value = module.cosmos_db.account_id
 }
@@ -245,6 +261,10 @@ output "cosmos_db_connection_string" {
   sensitive = true
 }
 
+output "cosmos_db_endpoint" {
+  value = module.cosmos_db.endpoint
+}
+
 output "storage_account_id" {
   value = module.storage.storage_account_id
 }
@@ -252,6 +272,10 @@ output "storage_account_id" {
 output "storage_connection_string" {
   value     = module.storage.primary_connection_string
   sensitive = true
+}
+
+output "storage_blob_endpoint" {
+  value = module.storage.primary_blob_endpoint
 }
 
 output "azure_ai_endpoint" {
@@ -281,5 +305,10 @@ output "log_analytics_workspace_id" {
 
 output "application_insights_connection_string" {
   value     = module.monitoring.application_insights_connection_string
+  sensitive = true
+}
+
+output "communication_service_primary_connection_string" {
+  value     = data.azurerm_communication_service.shared.primary_connection_string
   sensitive = true
 }

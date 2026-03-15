@@ -111,7 +111,7 @@ Desktop.ini
 .idea/.idea.Mystira/.idea/workspace.xml
 
 # Logs
-logs/
+**/logs/**
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -149,6 +149,9 @@ forge-cache/
 .terraform.lock.hcl
 *.tfvars
 !*.tfvars.example
+
+# Azure CLI (user-specific)
+.azure/
 
 # Docker
 docker-compose.override.yml

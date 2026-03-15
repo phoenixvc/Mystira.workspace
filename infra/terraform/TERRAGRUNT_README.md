@@ -29,7 +29,6 @@ infra/terraform/
 │   ├── admin/
 │   ├── publisher/
 │   └── chain/
-├── environments/               # (Legacy - to be migrated)
 └── modules/                    # Reusable Terraform modules
 ```
 
@@ -79,6 +78,16 @@ terragrunt apply
 ```bash
 cd infra/terraform/products/mystira-app/environments/dev
 terragrunt plan
+terragrunt apply
+```
+
+### Production Safety
+
+Prod `apply` and `destroy` are blocked by default.
+
+```bash
+export ALLOW_PROD_APPLY=true
+cd infra/terraform/shared-infra/environments/prod
 terragrunt apply
 ```
 

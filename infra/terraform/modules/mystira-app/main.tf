@@ -25,6 +25,21 @@ terraform {
   }
 }
 
+moved {
+  from = azurerm_key_vault_secret.shared_cosmos_connection_string
+  to   = azurerm_key_vault_secret.shared_cosmos
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_storage_connection_string
+  to   = azurerm_key_vault_secret.shared_storage
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_acs_connection_string
+  to   = azurerm_key_vault_secret.shared_acs
+}
+
 # -----------------------------------------------------------------------------
 # Data Sources
 # -----------------------------------------------------------------------------
@@ -36,7 +51,7 @@ data "azurerm_client_config" "current" {}
 # -----------------------------------------------------------------------------
 
 locals {
-  # Naming convention: [org]-[env]-[project]-[type]-[region]
+  # Naming convention: [org]-[env]-[type]-[region]
   region_code = lookup({
     "southafricanorth" = "san"
     "eastus2"          = "eus2"
@@ -51,13 +66,15 @@ locals {
     "northeurope"      = "neu"
   }, var.fallback_location, substr(var.fallback_location, 0, 4))
 
-  name_prefix = "${var.org}-${var.environment}-${var.project_name}"
+  # Simplified name prefix (ADR-0017 / v2.2 naming standardization)
+  # Avoids duplication like "mys-dev-mystira-*"
+  name_prefix = var.project_name == "mystira" ? "${var.org}-${var.environment}" : "${var.org}-${var.environment}-${var.project_name}"
 
   # Storage account names can't have dashes and max 24 chars
-  storage_account_name = replace("${var.org}${var.environment}${var.project_name}st${local.region_code}", "-", "")
+  storage_account_name = replace("${local.name_prefix}st${local.region_code}", "-", "")
 
   # Key Vault names max 24 chars
-  key_vault_name = "${var.org}-${var.environment}-app-kv-${local.region_code}"
+  key_vault_name = "${local.name_prefix}-app-kv-${local.region_code}"
 
   # Resolve keyvault - use shared or created
   keyvault_id  = var.use_shared_keyvault ? var.shared_keyvault_id : azurerm_key_vault.main[0].id
@@ -82,9 +99,11 @@ locals {
     { name = "CompassTrackings", partition_key = "/id" },    # Axis → "id" (mapped)
   ]
 
+  use_shared_application_insights = var.use_shared_monitoring && (var.shared_application_insights_id != "" || var.shared_application_insights_connection_string != "")
+
   # Resolved monitoring resource references (shared or created)
   log_analytics_workspace_id             = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
-  application_insights_connection_string = var.use_shared_monitoring ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
+  application_insights_connection_string = local.use_shared_application_insights ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
 }
 
 # =============================================================================
@@ -112,12 +131,12 @@ resource "azurerm_log_analytics_workspace" "main" {
 # =============================================================================
 
 resource "azurerm_application_insights" "main" {
-  count = var.use_shared_monitoring ? 0 : 1
+  count = local.use_shared_application_insights ? 0 : 1
 
   name                 = "${local.name_prefix}-ai-${local.region_code}"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  workspace_id         = azurerm_log_analytics_workspace.main[0].id
+  workspace_id         = local.log_analytics_workspace_id
   application_type     = "web"
   daily_data_cap_in_gb = var.daily_quota_gb
 
@@ -469,10 +488,6 @@ resource "azurerm_service_plan" "main" {
   sku_name            = var.app_service_sku
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # =============================================================================
@@ -547,10 +562,6 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # Store secrets in Key Vault
@@ -562,8 +573,8 @@ resource "azurerm_key_vault_secret" "cosmos_connection_string" {
   key_vault_id = local.keyvault_id
 }
 
-# Store shared Cosmos DB connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_cosmos_connection_string" {
+# Store shared Cosmos DB connection string
+resource "azurerm_key_vault_secret" "shared_cosmos" {
   count = var.skip_cosmos_creation ? 1 : 0
 
   name         = "cosmos-connection-string"
@@ -579,8 +590,8 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
   key_vault_id = local.keyvault_id
 }
 
-# Store shared Storage connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_storage_connection_string" {
+# Store shared Storage connection string
+resource "azurerm_key_vault_secret" "shared_storage" {
   count = var.skip_storage_creation ? 1 : 0
 
   name         = "storage-connection-string"
@@ -628,8 +639,8 @@ resource "azurerm_key_vault_secret" "acs_connection_string" {
   key_vault_id = local.keyvault_id
 }
 
-# Store shared ACS connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_acs_connection_string" {
+# Store shared ACS connection string
+resource "azurerm_key_vault_secret" "shared_acs" {
   count = var.use_shared_acs ? 1 : 0
 
   name         = "acs-connection-string"
@@ -652,10 +663,6 @@ resource "azurerm_static_web_app" "main" {
   sku_size            = var.static_web_app_sku
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # Custom domain for Static Web App
@@ -688,10 +695,6 @@ resource "azurerm_communication_service" "main" {
   data_location       = "Africa" # Data residency
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_email_communication_service" "main" {
