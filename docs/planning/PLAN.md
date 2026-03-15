@@ -98,6 +98,7 @@ Notes:
 - Safety: keep per-product app registrations/scopes even if the login API is shared, so tokens and permissions remain product-bounded.
 - External platform candidates (post-stabilization): https://github.com/phoenixvc/ai-gateway (OpenAI-compatible gateway on Azure Container Apps), https://github.com/phoenixvc/pvc-costops-analytics (FinOps platform: ADX + Grafana + Terraform + FastAPI)
 - ai-gateway integration plan: [ai-gateway-integration-plan.md](./ai-gateway-integration-plan.md)
+- ai-gateway request attribution plan: [ai-gateway-request-to-token-attribution.md](./ai-gateway-request-to-token-attribution.md)
 
 | Step | What                                                                                                                                                                 | Status          |
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
@@ -108,6 +109,7 @@ Notes:
 | C.5  | Shared login UI kit: reusable auth screens/components package (optional)                                                                                             | **PLANNED**     |
 | C.6  | AI platform adoption: adopt `phoenixvc/agentkit-forge` + `ai-gateway` (https://github.com/phoenixvc/ai-gateway) after stabilization                                  | **PLANNED**     |
 | C.7  | PVC CostOps integration: integrate `pvc-costops-analytics` (https://github.com/phoenixvc/pvc-costops-analytics) after repo review                                    | **PLANNED**     |
+| C.8  | ai-gateway: request-to-token attribution (OTEL token telemetry + correlation metadata)                                                                               | **PLANNED**     |
 
 ---
 
