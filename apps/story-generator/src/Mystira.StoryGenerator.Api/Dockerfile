@@ -2,7 +2,7 @@
 # Build context: monorepo root (Mystira.workspace/)
 
 # Build stage
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:e362a8dbcd691522456da26a5198b8f3ca1d7641c95624fadc5e3e82678bd08a AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:478b9038d187e5b5c29bfa8173ded5d29e864b5ad06102a12106380ee01e2e49 AS build
 WORKDIR /src
 
 # Copy solution and global.json for SDK version pinning
@@ -35,7 +35,7 @@ WORKDIR "/src/apps/story-generator/src/Mystira.StoryGenerator.Api"
 RUN dotnet publish -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:aec87aa74ddf129da573fa69f42f229a23c953a1c6fdecedea1aa6b1fe147d76 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:10.0@sha256:a04d1c1d2d26119049494057d80ea6cda25bbd8aef7c444a1fc1ef874fd3955b AS final
 WORKDIR /app
 
 # Create non-root user for security
