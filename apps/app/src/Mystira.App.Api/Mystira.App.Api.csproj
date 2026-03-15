@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="Grpc.AspNetCore" Version="2.76.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.4" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.5" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Cosmos" Version="10.0.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
@@ -34,7 +34,7 @@
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="10.0.3" />
     <!-- StackExchange.Redis for cache invalidation handlers -->
-    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <PackageReference Include="StackExchange.Redis" Version="2.12.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,8 +44,8 @@
     <ProjectReference Include="../../../../packages/contracts/dotnet/Mystira.Contracts/Mystira.Contracts.csproj" />
     <ProjectReference Include="../../../../packages/shared/Mystira.Shared/Mystira.Shared.csproj" />
     <!-- Wolverine HTTP integration for API endpoints -->
-    <PackageReference Include="WolverineFx" Version="5.18.0" />
-    <PackageReference Include="WolverineFx.Http" Version="5.18.0" />
+    <PackageReference Include="WolverineFx" Version="5.19.1" />
+    <PackageReference Include="WolverineFx.Http" Version="5.19.1" />
     <ProjectReference Include="..\Mystira.App.Application\Mystira.App.Application.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Discord\Mystira.App.Infrastructure.Discord.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Payments\Mystira.App.Infrastructure.Payments.csproj" />
