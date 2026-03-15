@@ -75,7 +75,7 @@ variable "shared_cosmos_connection_string" {
   default     = null
 
   validation {
-    condition     = var.shared_cosmos_connection_string == null || trimspace(var.shared_cosmos_connection_string) != ""
+    condition     = var.shared_cosmos_connection_string == null || trimspace(coalesce(var.shared_cosmos_connection_string, "")) != ""
     error_message = "shared_cosmos_connection_string must be null or non-empty."
   }
 }

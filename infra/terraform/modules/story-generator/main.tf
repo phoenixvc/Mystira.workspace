@@ -76,7 +76,7 @@ check "prevent_destroy_alignment" {
 
 check "shared_cosmos_requires_connection_string" {
   assert {
-    condition     = var.use_shared_cosmos == false || (var.shared_cosmos_connection_string != null && trimspace(var.shared_cosmos_connection_string) != "")
+    condition     = var.use_shared_cosmos == false || trimspace(coalesce(var.shared_cosmos_connection_string, "")) != ""
     error_message = "shared_cosmos_connection_string must be set (non-empty) when use_shared_cosmos is true."
   }
 }
