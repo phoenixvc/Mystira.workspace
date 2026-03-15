@@ -125,7 +125,7 @@ module "mystira_app" {
   shared_redis_hostname = var.shared_redis_hostname
 
   enable_communication_services = false
-  use_shared_acs                = length(trim(var.shared_acs_connection_string)) > 0
+  use_shared_acs                = length(trimspace(var.shared_acs_connection_string)) > 0
   shared_acs_connection_string  = var.shared_acs_connection_string
 }
 
