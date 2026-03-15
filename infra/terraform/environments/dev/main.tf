@@ -1214,10 +1214,6 @@ output "github_oidc_credential_count" {
 # =============================================================================
 
 # DNS Zone data source - shared DNS zone created by CI/CD bootstrap
-data "azurerm_dns_zone" "mystira" {
-  name                = "mystira.app"
-  resource_group_name = "mys-shared-terraform-rg-san"
-}
 
 output "dns_name_servers" {
   description = "Name servers for DNS zone - configure these in your domain registrar"

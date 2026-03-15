@@ -19,12 +19,37 @@ using Mystira.StoryGenerator.Llm.Services.ConsistencyEvaluators;
 using Mystira.StoryGenerator.Llm.Services.LLM;
 using Mystira.StoryGenerator.Llm.Services.StoryInstructionsRag;
 using Mystira.StoryGenerator.Llm.Services.StoryIntentClassification;
+using Mystira.Shared.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyVaultUrl = Environment.GetEnvironmentVariable("KEY_VAULT_URL");
+if (!string.IsNullOrWhiteSpace(keyVaultUrl) && string.IsNullOrWhiteSpace(builder.Configuration["KeyVault:Name"]))
+{
+    if (!Uri.TryCreate(keyVaultUrl, UriKind.Absolute, out var keyVaultUri) || string.IsNullOrWhiteSpace(keyVaultUri.Host))
+    {
+        throw new InvalidOperationException($"Invalid KEY_VAULT_URL '{keyVaultUrl}'. Provide a full Key Vault URL like 'https://<vault-name>.vault.azure.net/'.");
+    }
+
+    var keyVaultName = keyVaultUri.Host.Split('.')[0];
+    if (string.IsNullOrWhiteSpace(keyVaultName))
+    {
+        throw new InvalidOperationException($"Invalid KEY_VAULT_URL '{keyVaultUrl}'. Unable to derive Key Vault name from host '{keyVaultUri.Host}'.");
+    }
+
+    builder.Configuration.AddInMemoryCollection(new Dictionary<string, string?>
+    {
+        ["KeyVault:Name"] = keyVaultName,
+    });
+}
+
+builder.Host.AddKeyVaultConfiguration();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<Mystira.Core.Ports.Services.ICurrentUserService, CurrentUserService>();
 
 builder.Host.UseWolverine(opts =>
 {
@@ -152,69 +177,8 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Add JWT authentication
-var jwtIssuer = builder.Configuration["JwtSettings:Issuer"] ?? "mystira-identity-api";
-var jwtAudience = builder.Configuration["JwtSettings:Audience"] ?? "mystira-platform";
-var jwtRsaPublicKey = builder.Configuration["JwtSettings:RsaPublicKey"];
-var jwtKey = builder.Configuration["JwtSettings:SecretKey"];
-
-if (string.IsNullOrWhiteSpace(jwtRsaPublicKey) && string.IsNullOrWhiteSpace(jwtKey))
-{
-    if (builder.Environment.IsDevelopment())
-    {
-        // Use stable dev secret instead of generating new GUID each startup
-        var devSecret = Environment.GetEnvironmentVariable("DEV_JWT_SECRET") ?? "StoryGenDevKey-StableSecretForDevelopment-2024";
-        jwtKey = devSecret;
-        builder.Configuration["JwtSettings:SecretKey"] = jwtKey;
-
-        // Configure logging for development warning
-        builder.Logging.AddConsole();
-        builder.Logging.AddDebug();
-    }
-    else
-    {
-        // Configure logging for production
-        builder.Logging.AddConsole();
-        builder.Logging.AddDebug();
-
-        throw new InvalidOperationException("JWT signing key not configured. Set JwtSettings:RsaPublicKey or JwtSettings:SecretKey.");
-    }
-}
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    var tokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = jwtIssuer,
-        ValidAudience = jwtAudience,
-        ClockSkew = TimeSpan.FromMinutes(5)
-    };
-
-    if (!string.IsNullOrWhiteSpace(jwtRsaPublicKey))
-    {
-        using var rsa = System.Security.Cryptography.RSA.Create();
-        rsa.ImportFromPem(jwtRsaPublicKey);
-        var rsaParams = rsa.ExportParameters(false);
-        tokenValidationParameters.IssuerSigningKey = new RsaSecurityKey(rsaParams);
-    }
-    else if (!string.IsNullOrWhiteSpace(jwtKey))
-    {
-        tokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
-    }
-
-    options.TokenValidationParameters = tokenValidationParameters;
-});
-
-builder.Services.AddAuthorization();
+builder.Services.AddMystiraAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddMystiraEntraIdAuthentication(builder.Configuration);
 
 var app = builder.Build();
 

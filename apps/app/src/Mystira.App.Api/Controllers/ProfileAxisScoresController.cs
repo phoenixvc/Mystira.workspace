@@ -39,8 +39,8 @@ public class ProfileAxisScoresController : ControllerBase
         var scores = await _scoreRepository.GetByProfileIdAsync(profileId);
         var items = scores.Select(s => new AxisScoreItem
         {
-            ScenarioId = s.ScenarioId,
-            GameSessionId = s.GameSessionId,
+            ScenarioId = s.ScenarioId ?? string.Empty,
+            GameSessionId = s.GameSessionId ?? string.Empty,
             CreatedAt = s.CreatedAt,
             AxisScores = s.AxisScores.ToDictionary(kv => kv.Key, kv => (float)kv.Value, StringComparer.OrdinalIgnoreCase)
         }).ToList();

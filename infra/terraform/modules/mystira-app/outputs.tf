@@ -177,17 +177,17 @@ output "storage_tiering_enabled" {
 
 output "key_vault_id" {
   description = "Key Vault ID"
-  value       = azurerm_key_vault.main.id
+  value       = local.keyvault_id
 }
 
 output "key_vault_name" {
   description = "Key Vault name"
-  value       = azurerm_key_vault.main.name
+  value       = var.use_shared_keyvault ? "shared" : azurerm_key_vault.main[0].name
 }
 
 output "key_vault_uri" {
   description = "Key Vault URI"
-  value       = azurerm_key_vault.main.vault_uri
+  value       = local.keyvault_uri
 }
 
 # -----------------------------------------------------------------------------
@@ -205,13 +205,13 @@ output "log_analytics_workspace_name" {
 }
 
 output "application_insights_id" {
-  description = "Application Insights ID (null if using shared)"
-  value       = var.use_shared_monitoring ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
+  description = "Application Insights ID (uses shared_application_insights_id when use_shared_application_insights is true; otherwise newly created id)"
+  value       = local.use_shared_application_insights ? var.shared_application_insights_id : azurerm_application_insights.main[0].id
 }
 
 output "application_insights_name" {
   description = "Application Insights name (null if using shared)"
-  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].name
+  value       = local.use_shared_application_insights ? null : azurerm_application_insights.main[0].name
 }
 
 output "application_insights_connection_string" {
@@ -222,7 +222,7 @@ output "application_insights_connection_string" {
 
 output "application_insights_instrumentation_key" {
   description = "Application Insights instrumentation key (null if using shared)"
-  value       = var.use_shared_monitoring ? null : azurerm_application_insights.main[0].instrumentation_key
+  value       = local.use_shared_application_insights ? null : azurerm_application_insights.main[0].instrumentation_key
   sensitive   = true
 }
 
@@ -294,27 +294,27 @@ output "data_migration_phase" {
 
 output "redis_cache_id" {
   description = "Redis Cache ID"
-  value       = var.enable_redis ? azurerm_redis_cache.main[0].id : null
+  value       = var.enable_redis ? (var.use_shared_redis ? null : azurerm_redis_cache.main[0].id) : null
 }
 
 output "redis_cache_name" {
   description = "Redis Cache name"
-  value       = var.enable_redis ? azurerm_redis_cache.main[0].name : null
+  value       = var.enable_redis ? (var.use_shared_redis ? "shared" : azurerm_redis_cache.main[0].name) : null
 }
 
 output "redis_cache_hostname" {
   description = "Redis Cache hostname"
-  value       = var.enable_redis ? azurerm_redis_cache.main[0].hostname : null
+  value       = var.enable_redis ? (var.use_shared_redis ? var.shared_redis_hostname : azurerm_redis_cache.main[0].hostname) : null
 }
 
 output "redis_cache_port" {
   description = "Redis Cache SSL port"
-  value       = var.enable_redis ? azurerm_redis_cache.main[0].ssl_port : null
+  value       = var.enable_redis ? (var.use_shared_redis ? 6380 : azurerm_redis_cache.main[0].ssl_port) : null
 }
 
 output "redis_cache_connection_string" {
   description = "Redis Cache connection string"
-  value       = var.enable_redis ? azurerm_redis_cache.main[0].primary_connection_string : null
+  value       = var.enable_redis ? (var.use_shared_redis ? "redis://${var.shared_redis_hostname}:6380" : azurerm_redis_cache.main[0].primary_connection_string) : null
   sensitive   = true
 }
 

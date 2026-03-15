@@ -103,13 +103,13 @@ variable "app_service_sku" {
 }
 
 variable "dotnet_version" {
-  description = ".NET version for App Service (AzureRM 4.x supports: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0)"
+  description = ".NET version for App Service (AzureRM 4.x supports: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0)"
   type        = string
   default     = "9.0"
 
   validation {
-    condition     = contains(["3.1", "5.0", "6.0", "7.0", "8.0", "9.0"], var.dotnet_version)
-    error_message = "dotnet_version must be one of: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0"
+    condition     = contains(["3.1", "5.0", "6.0", "7.0", "8.0", "9.0", "10.0"], var.dotnet_version)
+    error_message = "dotnet_version must be one of: 3.1, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0"
   }
 }
 
@@ -348,6 +348,26 @@ variable "key_vault_sku" {
   default     = "standard"
 }
 
+variable "use_shared_keyvault" {
+  description = "Use shared Key Vault instead of creating a new one"
+  type        = bool
+  default     = false
+}
+
+variable "shared_keyvault_id" {
+  description = "ID of shared Key Vault (required if use_shared_keyvault = true)"
+  type        = string
+  default     = ""
+  nullable    = true
+}
+
+variable "shared_keyvault_uri" {
+  description = "URI of shared Key Vault (required if use_shared_keyvault = true)"
+  type        = string
+  default     = ""
+  nullable    = true
+}
+
 # -----------------------------------------------------------------------------
 # JWT/Auth Settings (stored in Key Vault)
 # -----------------------------------------------------------------------------
@@ -457,6 +477,19 @@ variable "enable_redis" {
   description = "Enable Redis cache for session and data caching"
   type        = bool
   default     = false
+}
+
+variable "use_shared_redis" {
+  description = "Use shared Redis instead of creating a new one"
+  type        = bool
+  default     = false
+}
+
+variable "shared_redis_hostname" {
+  description = "Hostname of shared Redis (required if use_shared_redis = true)"
+  type        = string
+  default     = ""
+  nullable    = true
 }
 
 variable "redis_sku" {

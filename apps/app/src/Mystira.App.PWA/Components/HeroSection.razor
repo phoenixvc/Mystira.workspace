@@ -1,97 +1,84 @@
-@* Hero Section Component *@
+@* Hero Section — two-column layout with portal visual and interactive story demo *@
+@using Microsoft.JSInterop
 @inject IJSRuntime JSRuntime
 @implements IAsyncDisposable
 
-<div class="row" style="margin-top: 0;">
-    <div class="col-12 text-center mb-5 hero-section" style="position: relative; margin-top: 0;">
-        <!-- Particle Background Canvas -->
-        <canvas id="particle-canvas" class="particle-canvas" aria-hidden="true"
-                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: auto;"></canvas>
+<section class="hero-section" aria-label="Mystira hero">
+    <!-- Animated background -->
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-bg-gradient"></div>
+        <div class="hero-bg-accent-1"></div>
+        <div class="hero-bg-accent-2"></div>
+        <div class="hero-bg-stars"></div>
+        <div class="hero-bg-fade-bottom"></div>
+    </div>
 
-        <!-- Golden Light Tubes - animated SVG vines around logo -->
-        <div class="golden-lights" aria-hidden="true">
-            <svg class="golden-light-svg" viewBox="0 0 600 500" preserveAspectRatio="xMidYMid meet">
-                <defs>
-                    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feColorMatrix in="blur" type="matrix"
-                            values="0.5 0 0 0 0.3
-                                    0 0.2 0 0 0.1
-                                    0 0 0.8 0 0.4
-                                    0 0 0 0.6 0" result="glow" />
-                        <feMerge>
-                            <feMergeNode in="glow" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
-                    <linearGradient id="tubeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" stop-color="#A78BFA" stop-opacity="0.8" />
-                        <stop offset="50%" stop-color="#7C3AED" stop-opacity="0.6" />
-                        <stop offset="100%" stop-color="#5B21B6" stop-opacity="0.4" />
-                    </linearGradient>
-                    <linearGradient id="tubeGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
-                        <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.7" />
-                        <stop offset="50%" stop-color="#8B5CF6" stop-opacity="0.5" />
-                        <stop offset="100%" stop-color="#7C3AED" stop-opacity="0.3" />
-                    </linearGradient>
-                </defs>
-                <!-- Tube Group 1: Upper-right vine -->
-                <g class="light-tube-group light-tube-group-1">
-                    <path class="light-tube light-tube-1" d="M 300 250 C 360 200, 420 160, 500 120" stroke="url(#tubeGrad1)" stroke-width="3" fill="none" />
-                    <path class="light-tube-1-glow" d="M 300 250 C 360 200, 420 160, 500 120" stroke="url(#tubeGrad1)" stroke-width="6" fill="none" opacity="0.2" filter="url(#glow)" />
-                </g>
-                <!-- Tube Group 2: Lower-right vine -->
-                <g class="light-tube-group light-tube-group-2">
-                    <path class="light-tube light-tube-2" d="M 300 250 C 380 290, 440 340, 520 380" stroke="url(#tubeGrad2)" stroke-width="3" fill="none" />
-                    <path class="light-tube-2-glow" d="M 300 250 C 380 290, 440 340, 520 380" stroke="url(#tubeGrad2)" stroke-width="6" fill="none" opacity="0.2" filter="url(#glow)" />
-                </g>
-                <!-- Tube Group 3: Upper-left vine -->
-                <g class="light-tube-group light-tube-group-3">
-                    <path class="light-tube light-tube-3" d="M 300 250 C 240 190, 170 150, 80 110" stroke="url(#tubeGrad2)" stroke-width="3" fill="none" />
-                    <path class="light-tube-3-glow" d="M 300 250 C 240 190, 170 150, 80 110" stroke="url(#tubeGrad2)" stroke-width="6" fill="none" opacity="0.2" filter="url(#glow)" />
-                </g>
-                <!-- Tube Group 4: Lower-left vine -->
-                <g class="light-tube-group light-tube-group-4">
-                    <path class="light-tube light-tube-4" d="M 300 250 C 220 300, 160 360, 80 400" stroke="url(#tubeGrad1)" stroke-width="3" fill="none" />
-                    <path class="light-tube-4-glow" d="M 300 250 C 220 300, 160 360, 80 400" stroke="url(#tubeGrad1)" stroke-width="6" fill="none" opacity="0.2" filter="url(#glow)" />
-                </g>
-            </svg>
-        </div>
+    <div class="hero-container">
+        <div class="hero-grid">
+            <!-- Left column: copy, CTAs, trust pills, interactive demo -->
+            <div class="hero-text-col">
+                <HeroBadgePill Text="NEW CHOICE-DRIVEN ADVENTURES" />
 
-        <div class="hero-content" style="position: relative; z-index: 1;">
-            
-            <div class="hero-pill mb-4" aria-hidden="true">
-                <i class="fas fa-sparkles me-2"></i> ANCIENT SECRETS AWAIT
+                <h1 class="hero-headline">
+                    Step Into Worlds Where Your
+                    <span class="hero-headline-gradient">Choices Matter</span>
+                </h1>
+
+                <p class="hero-subtext">
+                    Mystira brings interactive adventures to life. Every decision
+                    shapes the story, revealing new paths, new lessons, and new
+                    worlds to explore.
+                </p>
+
+                <div class="hero-cta-group">
+                    @if (ShowCallToActions)
+                    {
+                        <button type="button" class="hero-btn-primary" @onclick="OnBeginAdventure">
+                            Start Adventure
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                                <polyline points="12 5 19 12 12 19"/>
+                            </svg>
+                        </button>
+                        <a href="/adventures" class="hero-btn-secondary">Explore Worlds</a>
+                    }
+                </div>
+
+                <HeroTrustPills />
+
+                @if (ShowDescription)
+                {
+                    <div class="hero-story-demo-wrapper">
+                        <InteractiveStoryDemo />
+                    </div>
+                }
             </div>
 
-            <h1 class="hero-headline mb-4">
-                Step Into the <br/>
-                <span class="highlight">Immersive Portal</span>
-            </h1>
-            
-            <p class="hero-subtext mb-5">
-                Experience a world where every choice carves a glowing path<br class="d-none d-md-block" />
-                through the stars. Your moral compass is the only guide in this<br class="d-none d-md-block" />
-                ancient, misty realm.
-            </p>
+            <!-- Right column: portal visual with ornate frame -->
+            <div class="hero-visual-col">
+                <!-- Particle canvas — localized to artifact area -->
+                <canvas id="particle-canvas" class="hero-particle-canvas" aria-hidden="true"></canvas>
 
-            <div class="hero-cta-buttons d-flex gap-4 justify-content-center flex-wrap mb-5">
-                <button class="btn btn-primary-custom btn-lg px-5 py-3" @onclick="OnWatchDemo">
-                    Begin Your Journey
-                </button>
-                <a href="/lore" class="btn btn-secondary-custom btn-lg px-5 py-3">
-                    Explore The Lore
-                </a>
-            </div>
+                <HeroPortalVisual
+                    ShowIntroVideo="@_showIntroVideo"
+                    OnIntroComplete="HandleIntroComplete" />
 
-            <div class="scroll-indicator mt-5">
-                <span class="scroll-text mb-2 d-block">SCROLL TO DISCOVER</span>
-                <i class="fas fa-chevron-down scroll-arrow"></i>
+                @if (!_showIntroVideo && _introSeen)
+                {
+                    <button type="button" class="hero-replay-btn" @onclick="ReplayIntro" title="Replay intro animation">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <polyline points="1 4 1 10 7 10"/>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+                        </svg>
+                        <span>Replay</span>
+                    </button>
+                }
             </div>
-            
         </div>
     </div>
-</div>
+</section>
 
 @code {
     [Parameter]
@@ -101,9 +88,14 @@
     public bool ShowCallToActions { get; set; } = false;
 
     [Parameter]
-    public EventCallback OnWatchDemoClick { get; set; }
+    public EventCallback OnBeginAdventureClick { get; set; }
 
     private bool _particlesInitialized = false;
+    // Default false to prevent flash for return visitors. The static logo renders
+    // first; we only switch to the video after confirming localStorage doesn't
+    // already have the "intro seen" flag.
+    private bool _showIntroVideo = false;
+    private bool _introSeen = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -113,19 +105,54 @@
             try
             {
                 await JSRuntime.InvokeVoidAsync("MystiraParticles.init", "particle-canvas");
+
+                // Check localStorage to decide whether to show the intro video.
+                // Runs after first render so the static logo is the default state,
+                // avoiding a flash for return visitors.
+                var seen = await JSRuntime.InvokeAsync<string?>("localStorage.getItem", "mystira-hero-intro-seen");
+                if (string.IsNullOrEmpty(seen))
+                {
+                    // First visit — show the intro video
+                    _showIntroVideo = true;
+                }
+                else
+                {
+                    // Return visit — keep static logo, enable replay button
+                    _introSeen = true;
+                }
+                StateHasChanged();
             }
-            catch (Exception)
+            catch (JSException)
             {
-                // Silently fail if JS interop is not available (e.g., during prerendering)
+                // Silently fail if JS interop is not available
             }
         }
     }
 
-    private async Task OnWatchDemo()
+    private async Task HandleIntroComplete()
     {
-        if (OnWatchDemoClick.HasDelegate)
+        _showIntroVideo = false;
+        _introSeen = true;
+        try
         {
-            await OnWatchDemoClick.InvokeAsync();
+            await JSRuntime.InvokeVoidAsync("localStorage.setItem", "mystira-hero-intro-seen", "1");
+        }
+        catch (JSException)
+        {
+            // no-op: ignore JS interop/localStorage failures
+        }
+    }
+
+    private void ReplayIntro()
+    {
+        _showIntroVideo = true;
+    }
+
+    private async Task OnBeginAdventure()
+    {
+        if (OnBeginAdventureClick.HasDelegate)
+        {
+            await OnBeginAdventureClick.InvokeAsync();
         }
     }
 
@@ -135,9 +162,9 @@
         {
             await JSRuntime.InvokeVoidAsync("MystiraParticles.destroy");
         }
-        catch (Exception)
+        catch (JSException)
         {
-            // Silently fail if JS interop is not available
+            // Silently fail
         }
     }
 }

@@ -75,7 +75,7 @@ variable "workload_identity_enabled" {
 variable "enable_azure_ai" {
   description = "Enable Azure AI Foundry infrastructure (can be disabled to speed up initial deployment)"
   type        = bool
-  default     = true
+  default     = false
 }
 
 # Common tags for all resources
@@ -221,7 +221,7 @@ module "chain" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
-  chain_node_count                  = 2
+  chain_node_count                  = 1
   chain_storage_size_gb             = 100
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
@@ -778,8 +778,8 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   default_node_pool {
     name           = "default"
-    node_count     = 3
-    vm_size        = "Standard_D2s_v3"
+    node_count     = 1
+    vm_size        = "Standard_B2s"
     vnet_subnet_id = azurerm_subnet.aks.id
   }
 

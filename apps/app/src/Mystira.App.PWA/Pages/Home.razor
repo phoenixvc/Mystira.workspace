@@ -22,49 +22,54 @@
     <!-- Feature Cards Section (shown when not authenticated) -->
     @if (!isAuthenticated)
     {
-        <div class="row g-4 mb-5">
-            <div class="col-md-4">
-                <div class="card feature-card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-3">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-compass fa-3x text-primary-custom"></i>
-                            </div>
-                            <h5 class="card-title mb-3">Interactive Adventures</h5>
-                            <p class="card-text text-muted">
-                                Dive into guided quests that adapt to every group, helping facilitators lead unforgettable storytelling sessions with ease.
-                            </p>
+        <div class="feature-cards-section">
+            <div class="row g-4 mb-5">
+                <div class="col-md-4">
+                    <div class="feature-card-v2">
+                        <div class="feature-card-icon feature-card-icon--choices">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+                            </svg>
                         </div>
+                        <h5 class="feature-card-title">Choices shape outcomes</h5>
+                        <p class="feature-card-body">
+                            Mystira adventures branch in response to player decisions,
+                            giving every path a sense of agency.
+                        </p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card feature-card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-3">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-users fa-3x text-success"></i>
-                            </div>
-                            <h5 class="card-title mb-3">Built for Teamwork</h5>
-                            <p class="card-text text-muted">
-                                Foster empathy, cooperation, and problem-solving with collaborative prompts that keep every child engaged.
-                            </p>
+                <div class="col-md-4">
+                    <div class="feature-card-v2">
+                        <div class="feature-card-icon feature-card-icon--magic">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
                         </div>
+                        <h5 class="feature-card-title">Magical, readable UI</h5>
+                        <p class="feature-card-body">
+                            A premium visual system that feels imaginative without
+                            sacrificing clarity, hierarchy, or accessibility.
+                        </p>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card feature-card h-100 border-0 shadow-sm">
-                    <div class="card-body p-4">
-                        <div class="text-center mb-3">
-                            <div class="feature-icon mb-3">
-                                <i class="fas fa-book-open fa-3x text-info"></i>
-                            </div>
-                            <h5 class="card-title mb-3">Guided Storytelling</h5>
-                            <p class="card-text text-muted">
-                                Use curated visuals, music, and facilitator tips to spark imagination anywhere—from living rooms to after-school clubs.
-                            </p>
+                <div class="col-md-4">
+                    <div class="feature-card-v2">
+                        <div class="feature-card-icon feature-card-icon--growth">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                                <path d="M2 17l10 5 10-5"/>
+                                <path d="M2 12l10 5 10-5"/>
+                            </svg>
                         </div>
+                        <h5 class="feature-card-title">Built for product growth</h5>
+                        <p class="feature-card-body">
+                            The hero layout scales into featured adventures, onboarding,
+                            pricing, and deeper narrative explanation sections.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -73,20 +78,7 @@
 
     @* Adventures section composed as a standalone component *@
     <AdventuresSection />
-
-    <style>
-        .dice-roller-container {
-            max-width: 300px; /* Adjust this value to control the width */
-            margin: 0 auto; /* This centers the container horizontally */
-            padding: 15px;
-            /* Using a solid fallback to avoid unresolved custom prop errors */
-            background-color: #ffffff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-    </style>
-
-</div> @* close container-fluid *@
+</div>
 
 @code {
     private bool isAuthenticated = false;

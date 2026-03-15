@@ -1,0 +1,99 @@
+@* Interactive branching story preview — a mini Mystira experience embedded in the hero *@
+
+<div class="story-demo">
+    <div class="story-demo-header">
+        <div>
+            <div class="story-demo-title">Try a story choice</div>
+            <div class="story-demo-subtitle">A mini preview of Mystira branching adventures</div>
+        </div>
+        <button type="button" class="story-demo-reset" @onclick="Reset">Reset</button>
+    </div>
+
+    <div class="story-demo-card @(_transitioning ? "story-exit" : "story-enter")" @key="_currentNodeId">
+        <div class="story-demo-node-title">@CurrentNode.Title</div>
+        <p class="story-demo-node-body">@CurrentNode.Body</p>
+        <div class="story-demo-options">
+            @foreach (var option in CurrentNode.Options)
+            {
+                var isCtaNode = _currentNodeId == "cta";
+                <button type="button"
+                        class="story-option-btn @(isCtaNode ? "story-option-primary" : "")"
+                        @onclick="() => ChooseOption(option.Next)">
+                    @option.Label
+                    @if (isCtaNode)
+                    {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                            <polyline points="12 5 19 12 12 19"/>
+                        </svg>
+                    }
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private record StoryOption(string Label, string Next);
+    private record StoryNode(string Title, string Body, StoryOption[] Options);
+
+    private static readonly Dictionary<string, StoryNode> _storyGraph = new()
+    {
+        ["start"] = new(
+            "A glowing portal appears in the forest.",
+            "A soft hum fills the air. The path ahead begins to shimmer.",
+            new[] {
+                new StoryOption("Enter the portal", "portal"),
+                new StoryOption("Walk away", "forest")
+            }),
+        ["portal"] = new(
+            "You step into a mysterious world.",
+            "In the distance, a dragon circles above crystal towers.",
+            new[] {
+                new StoryOption("Approach the dragon", "dragon"),
+                new StoryOption("Hide behind the rocks", "cta")
+            }),
+        ["forest"] = new(
+            "You follow a moonlit trail.",
+            "A friendly fox emerges from the trees and waits for your choice.",
+            new[] {
+                new StoryOption("Follow the fox", "fox"),
+                new StoryOption("Return to the portal", "portal")
+            }),
+        ["dragon"] = new(
+            "The dragon notices you.",
+            "Its eyes glow with curiosity. A new path opens before you.",
+            new[] { new StoryOption("Continue the adventure", "cta") }),
+        ["fox"] = new(
+            "The fox leads you to a hidden gate.",
+            "Symbols flicker across the stone, hinting at another ending.",
+            new[] { new StoryOption("Continue the adventure", "cta") }),
+        ["cta"] = new(
+            "Your choices shaped the path.",
+            "Mystira adventures branch, evolve, and reward curiosity.",
+            new[] { new StoryOption("Start full adventure", "start") })
+    };
+
+    private string _currentNodeId = "start";
+    private bool _transitioning = false;
+    private StoryNode CurrentNode => _storyGraph[_currentNodeId];
+
+    private async Task ChooseOption(string nextNodeId)
+    {
+        _transitioning = true;
+        StateHasChanged();
+        // 150ms matches the CSS transition duration on .story-demo-card (opacity 0.2s ease).
+        // Slightly shorter than the CSS duration so the new content renders mid-fade.
+        await Task.Delay(150);
+        _currentNodeId = nextNodeId;
+        _transitioning = false;
+        StateHasChanged();
+    }
+
+    private void Reset()
+    {
+        _currentNodeId = "start";
+        _transitioning = false;
+    }
+}

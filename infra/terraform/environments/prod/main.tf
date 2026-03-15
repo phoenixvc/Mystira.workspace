@@ -236,7 +236,7 @@ module "chain" {
   location                          = var.location
   region_code                       = "san"
   resource_group_name               = azurerm_resource_group.chain.name
-  chain_node_count                  = 3
+  chain_node_count                  = 1
   chain_storage_size_gb             = 500
   shared_log_analytics_workspace_id = module.shared_monitoring.log_analytics_workspace_id
 
@@ -796,13 +796,10 @@ resource "azurerm_kubernetes_cluster" "main" {
 
   default_node_pool {
     name                 = "system"
-    node_count           = 3
-    vm_size              = "Standard_D4s_v3"
+    node_count           = 1
+    vm_size              = "Standard_B2s"
     vnet_subnet_id       = azurerm_subnet.aks.id
-    auto_scaling_enabled = true
-    min_count            = 3
-    max_count            = 10
-    zones                = ["1", "2", "3"]
+    auto_scaling_enabled = false
   }
 
   identity {
@@ -837,13 +834,10 @@ resource "azurerm_kubernetes_cluster" "main" {
 resource "azurerm_kubernetes_cluster_node_pool" "chain" {
   name                  = "chain"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = "Standard_D4s_v3"
-  node_count            = 3
+  vm_size               = "Standard_B2s"
+  node_count            = 1
   vnet_subnet_id        = azurerm_subnet.aks.id
-  auto_scaling_enabled  = true
-  min_count             = 3
-  max_count             = 6
-  zones                 = ["1", "2", "3"]
+  auto_scaling_enabled  = false
 
   node_labels = {
     "workload" = "chain"
@@ -863,13 +857,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "chain" {
 resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
   name                  = "publisher"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.main.id
-  vm_size               = "Standard_D2s_v3"
-  node_count            = 3
+  vm_size               = "Standard_B2s"
+  node_count            = 1
   vnet_subnet_id        = azurerm_subnet.aks.id
-  auto_scaling_enabled  = true
-  min_count             = 3
-  max_count             = 10
-  zones                 = ["1", "2", "3"]
+  auto_scaling_enabled  = false
 
   node_labels = {
     "workload" = "publisher"
@@ -879,14 +870,6 @@ resource "azurerm_kubernetes_cluster_node_pool" "publisher" {
     Environment = "prod"
     Workload    = "publisher"
   }
-}
-
-# DNS Configuration
-# NOTE: DNS zone is created by CI/CD bootstrap in shared terraform RG
-# Reference it via data source instead of creating a duplicate
-data "azurerm_dns_zone" "mystira" {
-  name                = "mystira.app"
-  resource_group_name = "mys-shared-terraform-rg-san"
 }
 
 output "resource_group_name" {

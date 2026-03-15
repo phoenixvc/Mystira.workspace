@@ -33,6 +33,8 @@
     <!-- Application Insights for monitoring and telemetry -->
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="10.0.3" />
+    <!-- StackExchange.Redis for cache invalidation handlers -->
+    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
   </ItemGroup>
 
   <ItemGroup>
@@ -48,6 +50,8 @@
     <ProjectReference Include="..\Mystira.App.Infrastructure.Discord\Mystira.App.Infrastructure.Discord.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Payments\Mystira.App.Infrastructure.Payments.csproj" />
     <ProjectReference Include="..\Mystira.App.Infrastructure.Chain\Mystira.App.Infrastructure.Chain.csproj" />
+    <!-- Shared Messaging with cache invalidation handlers -->
+    <ProjectReference Include="../../../../packages/shared-messaging/Mystira.Shared.Messaging/Mystira.Shared.Messaging.csproj" />
   </ItemGroup>
 
   <ItemGroup>

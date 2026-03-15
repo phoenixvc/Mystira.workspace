@@ -25,6 +25,21 @@ terraform {
   }
 }
 
+moved {
+  from = azurerm_key_vault_secret.shared_cosmos_connection_string
+  to   = azurerm_key_vault_secret.shared_cosmos
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_storage_connection_string
+  to   = azurerm_key_vault_secret.shared_storage
+}
+
+moved {
+  from = azurerm_key_vault_secret.shared_acs_connection_string
+  to   = azurerm_key_vault_secret.shared_acs
+}
+
 # -----------------------------------------------------------------------------
 # Data Sources
 # -----------------------------------------------------------------------------
@@ -36,7 +51,7 @@ data "azurerm_client_config" "current" {}
 # -----------------------------------------------------------------------------
 
 locals {
-  # Naming convention: [org]-[env]-[project]-[type]-[region]
+  # Naming convention: [org]-[env]-[type]-[region]
   region_code = lookup({
     "southafricanorth" = "san"
     "eastus2"          = "eus2"
@@ -51,13 +66,19 @@ locals {
     "northeurope"      = "neu"
   }, var.fallback_location, substr(var.fallback_location, 0, 4))
 
-  name_prefix = "${var.org}-${var.environment}-${var.project_name}"
+  # Simplified name prefix (ADR-0017 / v2.2 naming standardization)
+  # Avoids duplication like "mys-dev-mystira-*"
+  name_prefix = var.project_name == "mystira" ? "${var.org}-${var.environment}" : "${var.org}-${var.environment}-${var.project_name}"
 
   # Storage account names can't have dashes and max 24 chars
-  storage_account_name = replace("${var.org}${var.environment}${var.project_name}st${local.region_code}", "-", "")
+  storage_account_name = replace("${local.name_prefix}st${local.region_code}", "-", "")
 
   # Key Vault names max 24 chars
-  key_vault_name = "${var.org}-${var.environment}-app-kv-${local.region_code}"
+  key_vault_name = "${local.name_prefix}-app-kv-${local.region_code}"
+
+  # Resolve keyvault - use shared or created
+  keyvault_id  = var.use_shared_keyvault ? var.shared_keyvault_id : azurerm_key_vault.main[0].id
+  keyvault_uri = var.use_shared_keyvault ? var.shared_keyvault_uri : azurerm_key_vault.main[0].vault_uri
 
   common_tags = merge(var.tags, {
     Environment = var.environment
@@ -78,9 +99,11 @@ locals {
     { name = "CompassTrackings", partition_key = "/id" },    # Axis → "id" (mapped)
   ]
 
+  use_shared_application_insights = var.use_shared_monitoring && (var.shared_application_insights_id != "" || var.shared_application_insights_connection_string != "")
+
   # Resolved monitoring resource references (shared or created)
   log_analytics_workspace_id             = var.use_shared_monitoring ? var.shared_log_analytics_workspace_id : azurerm_log_analytics_workspace.main[0].id
-  application_insights_connection_string = var.use_shared_monitoring ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
+  application_insights_connection_string = local.use_shared_application_insights ? var.shared_application_insights_connection_string : azurerm_application_insights.main[0].connection_string
 }
 
 # =============================================================================
@@ -108,12 +131,12 @@ resource "azurerm_log_analytics_workspace" "main" {
 # =============================================================================
 
 resource "azurerm_application_insights" "main" {
-  count = var.use_shared_monitoring ? 0 : 1
+  count = local.use_shared_application_insights ? 0 : 1
 
   name                 = "${local.name_prefix}-ai-${local.region_code}"
   location             = var.location
   resource_group_name  = var.resource_group_name
-  workspace_id         = azurerm_log_analytics_workspace.main[0].id
+  workspace_id         = local.log_analytics_workspace_id
   application_type     = "web"
   daily_data_cap_in_gb = var.daily_quota_gb
 
@@ -129,6 +152,8 @@ resource "azurerm_application_insights" "main" {
 # =============================================================================
 
 resource "azurerm_key_vault" "main" {
+  count = var.use_shared_keyvault ? 0 : 1
+
   name                        = local.key_vault_name
   location                    = var.location
   resource_group_name         = var.resource_group_name
@@ -151,13 +176,15 @@ resource "azurerm_key_vault" "main" {
   tags = local.common_tags
 
   lifecycle {
-    prevent_destroy = true
+    ignore_changes = [tags]
   }
 }
 
 # Key Vault access policy for App Service managed identity
 resource "azurerm_key_vault_access_policy" "app_service" {
-  key_vault_id = azurerm_key_vault.main.id
+  count = var.use_shared_keyvault ? 0 : 1
+
+  key_vault_id = var.use_shared_keyvault ? var.shared_keyvault_id : azurerm_key_vault.main[0].id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_linux_web_app.api.identity[0].principal_id
 
@@ -461,10 +488,6 @@ resource "azurerm_service_plan" "main" {
   sku_name            = var.app_service_sku
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # =============================================================================
@@ -507,8 +530,8 @@ resource "azurerm_linux_web_app" "api" {
     "XDT_MicrosoftApplicationInsights_Mode"      = "recommended"
 
     # Connection Strings (matching Bicep naming) - Always use Key Vault references
-    "ConnectionStrings__CosmosDb"     = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/cosmos-connection-string/)"
-    "ConnectionStrings__AzureStorage" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/storage-connection-string/)"
+    "ConnectionStrings__CosmosDb"     = "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/cosmos-connection-string/)"
+    "ConnectionStrings__AzureStorage" = "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/storage-connection-string/)"
 
     # Azure Resource Settings (matching Bicep naming)
     "Azure__CosmosDb__DatabaseName"     = var.skip_cosmos_creation ? var.shared_cosmos_database_name : "MystiraAppDb"
@@ -518,20 +541,20 @@ resource "azurerm_linux_web_app" "api" {
     "CorsSettings__AllowedOrigins" = join(",", var.cors_allowed_origins)
 
     # JWT Settings (Key Vault references)
-    "JwtSettings__Issuer"        = var.jwt_issuer != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-issuer/)" : "MystiraAPI"
-    "JwtSettings__Audience"      = var.jwt_audience != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-audience/)" : "MystiraPWA"
-    "JwtSettings__RsaPrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-private-key/)" : ""
-    "JwtSettings__RsaPublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/jwt-rsa-public-key/)" : ""
+    "JwtSettings__Issuer"        = var.jwt_issuer != "" ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/jwt-issuer/)" : "MystiraAPI"
+    "JwtSettings__Audience"      = var.jwt_audience != "" ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/jwt-audience/)" : "MystiraPWA"
+    "JwtSettings__RsaPrivateKey" = var.jwt_private_key != "" ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/jwt-rsa-private-key/)" : ""
+    "JwtSettings__RsaPublicKey"  = var.jwt_public_key != "" ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/jwt-rsa-public-key/)" : ""
 
     # Azure Communication Services - use Key Vault ref if either created or shared ACS is configured
-    "AzureCommunicationServices__ConnectionString" = (var.enable_communication_services || var.use_shared_acs) ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/acs-connection-string/)" : ""
+    "AzureCommunicationServices__ConnectionString" = (var.enable_communication_services || var.use_shared_acs) ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/acs-connection-string/)" : ""
     "AzureCommunicationServices__SenderEmail"      = var.sender_email
 
     # PostgreSQL (for hybrid data strategy)
-    "ConnectionStrings__PostgreSQL" = var.enable_postgresql ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/postgresql-connection-string/)" : ""
+    "ConnectionStrings__PostgreSQL" = var.enable_postgresql ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/postgresql-connection-string/)" : ""
 
     # Redis Cache
-    "ConnectionStrings__Redis" = var.enable_redis ? "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault.main.vault_uri}secrets/redis-connection-string/)" : ""
+    "ConnectionStrings__Redis" = var.enable_redis ? "@Microsoft.KeyVault(SecretUri=${local.keyvault_uri}secrets/redis-connection-string/)" : ""
 
     # Data Migration Settings
     "DataMigration__Phase"   = tostring(var.data_migration_phase)
@@ -539,10 +562,6 @@ resource "azurerm_linux_web_app" "api" {
   }
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # Store secrets in Key Vault
@@ -551,16 +570,16 @@ resource "azurerm_key_vault_secret" "cosmos_connection_string" {
 
   name         = "cosmos-connection-string"
   value        = azurerm_cosmosdb_account.main[0].primary_sql_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
-# Store shared Cosmos DB connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_cosmos_connection_string" {
+# Store shared Cosmos DB connection string
+resource "azurerm_key_vault_secret" "shared_cosmos" {
   count = var.skip_cosmos_creation ? 1 : 0
 
   name         = "cosmos-connection-string"
   value        = var.existing_cosmos_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "storage_connection_string" {
@@ -568,16 +587,16 @@ resource "azurerm_key_vault_secret" "storage_connection_string" {
 
   name         = "storage-connection-string"
   value        = azurerm_storage_account.main[0].primary_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
-# Store shared Storage connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_storage_connection_string" {
+# Store shared Storage connection string
+resource "azurerm_key_vault_secret" "shared_storage" {
   count = var.skip_storage_creation ? 1 : 0
 
   name         = "storage-connection-string"
   value        = var.shared_storage_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "jwt_rsa_private_key" {
@@ -585,7 +604,7 @@ resource "azurerm_key_vault_secret" "jwt_rsa_private_key" {
 
   name         = "jwt-rsa-private-key"
   value        = var.jwt_private_key
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "jwt_rsa_public_key" {
@@ -593,7 +612,7 @@ resource "azurerm_key_vault_secret" "jwt_rsa_public_key" {
 
   name         = "jwt-rsa-public-key"
   value        = var.jwt_public_key
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "jwt_issuer" {
@@ -601,7 +620,7 @@ resource "azurerm_key_vault_secret" "jwt_issuer" {
 
   name         = "jwt-issuer"
   value        = var.jwt_issuer
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "jwt_audience" {
@@ -609,7 +628,7 @@ resource "azurerm_key_vault_secret" "jwt_audience" {
 
   name         = "jwt-audience"
   value        = var.jwt_audience
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 resource "azurerm_key_vault_secret" "acs_connection_string" {
@@ -617,16 +636,16 @@ resource "azurerm_key_vault_secret" "acs_connection_string" {
 
   name         = "acs-connection-string"
   value        = azurerm_communication_service.main[0].primary_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
-# Store shared ACS connection string when using shared resources
-resource "azurerm_key_vault_secret" "shared_acs_connection_string" {
+# Store shared ACS connection string
+resource "azurerm_key_vault_secret" "shared_acs" {
   count = var.use_shared_acs ? 1 : 0
 
   name         = "acs-connection-string"
   value        = var.shared_acs_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 # =============================================================================
@@ -644,10 +663,6 @@ resource "azurerm_static_web_app" "main" {
   sku_size            = var.static_web_app_sku
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 # Custom domain for Static Web App
@@ -680,10 +695,6 @@ resource "azurerm_communication_service" "main" {
   data_location       = "Africa" # Data residency
 
   tags = local.common_tags
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "azurerm_email_communication_service" "main" {
@@ -785,7 +796,7 @@ resource "azurerm_key_vault_secret" "postgresql_connection_string" {
 
   name         = "postgresql-connection-string"
   value        = "Host=${var.shared_postgresql_server_fqdn};Port=5432;Username=${var.shared_postgresql_admin_login};Password=${var.shared_postgresql_admin_password};Database=${var.postgresql_database_name};SSL Mode=Require;Trust Server Certificate=True"
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = local.keyvault_id
 }
 
 # =============================================================================
@@ -793,7 +804,7 @@ resource "azurerm_key_vault_secret" "postgresql_connection_string" {
 # =============================================================================
 
 resource "azurerm_redis_cache" "main" {
-  count = var.enable_redis ? 1 : 0
+  count = var.enable_redis && !var.use_shared_redis ? 1 : 0
 
   name                 = "${local.name_prefix}-redis-${local.region_code}"
   location             = var.location
@@ -820,6 +831,6 @@ resource "azurerm_key_vault_secret" "redis_connection_string" {
   count = var.enable_redis ? 1 : 0
 
   name         = "redis-connection-string"
-  value        = azurerm_redis_cache.main[0].primary_connection_string
-  key_vault_id = azurerm_key_vault.main.id
+  value        = var.use_shared_redis ? "redis://${var.shared_redis_hostname}:6380" : azurerm_redis_cache.main[0].primary_connection_string
+  key_vault_id = local.keyvault_id
 }

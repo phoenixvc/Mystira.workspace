@@ -78,6 +78,20 @@ module "shared_storage" {
 }
 
 # =============================================================================
+# Data Sources for Existing Shared Resources
+# =============================================================================
+
+data "azurerm_key_vault" "shared" {
+  name                = "mys-dev-core-kv-san"
+  resource_group_name = "mys-dev-core-rg-san"
+}
+
+data "azurerm_redis_cache" "shared" {
+  name                = "mys-dev-core-cache"
+  resource_group_name = "mys-dev-core-rg-san"
+}
+
+# =============================================================================
 # App-Specific Resources (in app-rg)
 # =============================================================================
 
@@ -103,7 +117,7 @@ module "mystira_app" {
   # App Service Configuration (API Backend)
   # -----------------------------------------------------------------------------
   app_service_sku = "B1"
-  dotnet_version  = "9.0"
+  dotnet_version  = "10.0"
 
   # Custom domains - DISABLED in module, created separately in dns-records.tf
   # This ensures DNS records exist before custom domain bindings are created
@@ -137,9 +151,24 @@ module "mystira_app" {
   ]
 
   # -----------------------------------------------------------------------------
+  # Key Vault Configuration - USE SHARED
+  # -----------------------------------------------------------------------------
+  use_shared_keyvault = true
+  shared_keyvault_id  = data.azurerm_key_vault.shared.id
+  shared_keyvault_uri = data.azurerm_key_vault.shared.vault_uri
+
+  # -----------------------------------------------------------------------------
+  # Redis Configuration - USE SHARED
+  # -----------------------------------------------------------------------------
+  enable_redis          = true
+  use_shared_redis      = true
+  shared_redis_hostname = data.azurerm_redis_cache.shared.hostname
+
+  # -----------------------------------------------------------------------------
   # Communication Services - USE SHARED (cross-environment)
   # -----------------------------------------------------------------------------
   enable_communication_services = false # Use shared
+  use_shared_acs                = true
   shared_acs_connection_string  = module.shared_comms.communication_service_primary_connection_string
   sender_email                  = "DoNotReply@mystira.app"
 
@@ -176,7 +205,9 @@ module "mystira_app" {
     module.shared_monitoring,
     module.shared_cosmos_db,
     module.shared_storage,
-    module.shared_comms
+    module.shared_comms,
+    data.azurerm_key_vault.shared,
+    data.azurerm_redis_cache.shared
   ]
 }
 

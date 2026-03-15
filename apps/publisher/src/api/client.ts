@@ -10,8 +10,8 @@ import { authApi } from "./auth";
 import { logger } from "@/utils/logger";
 import { API_TIMEOUT } from "@/constants";
 
-// API base URL from environment config
-const API_BASE_URL = env.apiBaseUrl;
+// Publisher API base URL from environment config
+const API_BASE_URL = env.publisherApiBaseUrl;
 
 // Admin API URL - for admin-specific endpoints
 export const ADMIN_API_BASE_URL = env.adminApiBaseUrl;

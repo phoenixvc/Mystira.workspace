@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel.DataAnnotations;
 using Mystira.StoryGenerator.Domain.Services;
@@ -10,6 +11,7 @@ namespace Mystira.StoryGenerator.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class ChatController : ControllerBase
 {
     private readonly IChatOrchestrationService _chatOrchestrationService;
